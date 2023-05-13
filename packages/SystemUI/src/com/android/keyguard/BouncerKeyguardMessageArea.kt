@@ -22,8 +22,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.res.ColorStateList
-import android.content.res.TypedArray
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import com.android.app.animation.Interpolators
@@ -41,12 +39,28 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
     protected open val SHOW_DURATION_MILLIS = 150L
     protected open val HIDE_DURATION_MILLIS = 200L
 
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        mDefaultColorState = getColorInStyle()
+    }
+
+    private fun getColorInStyle(): ColorStateList? {
+        val styledAttributes =
+            context.obtainStyledAttributes(styleResId, intArrayOf(android.R.attr.textColor))
+        var colorStateList: ColorStateList? = null
+        if (styledAttributes != null) {
+            colorStateList = styledAttributes.getColorStateList(0)
+        }
+        styledAttributes.recycle()
+        return colorStateList
+    }
+
     override fun updateTextColor() {
         var colorState = mDefaultColorState
         mNextMessageColorState?.defaultColor?.let { color ->
             if (color != DEFAULT_COLOR) {
                 colorState = mNextMessageColorState
-                mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR)
+                mNextMessageColorState = mDefaultColorState ?: ColorStateList.valueOf(DEFAULT_COLOR)
             }
         }
         setTextColor(colorState)
@@ -57,15 +71,12 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun onThemeChanged() {
-        val array: TypedArray = mContext.obtainStyledAttributes(intArrayOf(TITLE))
-        val newTextColors: ColorStateList = ColorStateList.valueOf(array.getColor(0, Color.RED))
-        array.recycle()
-        mDefaultColorState = newTextColors
+        mDefaultColorState = getColorInStyle() ?: Utils.getColorAttr(context, TITLE)
         super.onThemeChanged()
     }
 
     override fun reloadColor() {
-        mDefaultColorState = Utils.getColorAttr(context, TITLE)
+        mDefaultColorState = getColorInStyle() ?: Utils.getColorAttr(context, TITLE)
         super.reloadColor()
     }
 

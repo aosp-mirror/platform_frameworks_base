@@ -42,6 +42,7 @@ import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
+import static android.view.autofill.AutofillManager.COMMIT_REASON_SESSION_DESTROYED;
 import static android.view.autofill.AutofillManager.COMMIT_REASON_UNKNOWN;
 import static android.view.autofill.AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM;
 import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
@@ -85,7 +86,6 @@ import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_O
 import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_REQUIRED_ID_CHANGE;
 import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_TRIGGER_ID_SET;
 import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_UNKNOWN;
-import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_SESSION_DESTROYED;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 
@@ -2730,6 +2730,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this,
                 Event.NO_SAVE_UI_REASON_NONE,
                 COMMIT_REASON_UNKNOWN));
+        logAllEvents(COMMIT_REASON_UNKNOWN);
     }
 
     /**
@@ -2743,6 +2744,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @AutofillCommitReason int commitReason) {
         mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this,
                 saveDialogNotShowReason, commitReason));
+        logAllEvents(commitReason);
     }
 
     private void handleLogContextCommitted(@NoSaveReason int saveDialogNotShowReason,
@@ -2974,6 +2976,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                 manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
                 mComponentName, mCompatMode, saveDialogNotShowReason);
+        logAllEvents(commitReason);
     }
 
     /**
@@ -5679,6 +5682,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
+    @GuardedBy("mLock")
+    private void logAllEvents(@AutofillCommitReason int val) {
+        mSessionCommittedEventLogger.maybeSetCommitReason(val);
+        mSessionCommittedEventLogger.maybeSetRequestCount(mRequestCount);
+        mSessionCommittedEventLogger.maybeSetSessionDurationMillis(
+            SystemClock.elapsedRealtime() - mStartTime);
+        mFillRequestEventLogger.logAndEndEvent();
+        mFillResponseEventLogger.logAndEndEvent();
+        mPresentationStatsEventLogger.logAndEndEvent();
+        mSaveEventLogger.logAndEndEvent();
+        mSessionCommittedEventLogger.logAndEndEvent();
+    }
+
     /**
      * Destroy this session and perform any clean up work.
      *
@@ -5693,15 +5709,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     RemoteFillService destroyLocked() {
         // Log unlogged events.
-        mSessionCommittedEventLogger.maybeSetCommitReason(COMMIT_REASON_SESSION_DESTROYED);
-        mSessionCommittedEventLogger.maybeSetRequestCount(mRequestCount);
-        mSessionCommittedEventLogger.maybeSetSessionDurationMillis(
-            SystemClock.elapsedRealtime() - mStartTime);
-        mSessionCommittedEventLogger.logAndEndEvent();
-        mPresentationStatsEventLogger.logAndEndEvent();
-        mSaveEventLogger.logAndEndEvent();
-        mFillResponseEventLogger.logAndEndEvent();
-        mFillRequestEventLogger.logAndEndEvent();
+        logAllEvents(COMMIT_REASON_SESSION_DESTROYED);
 
         if (mDestroyed) {
             return null;
