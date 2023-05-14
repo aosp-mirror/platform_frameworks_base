@@ -1353,7 +1353,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB టెథెరింగ్ ఆన్ చేయబడింది"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ద్వారా MIDI ఆన్ చేయబడింది"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ఉపకరణం కనెక్ట్ చేయబడింది"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"మరిన్ని ఆప్షన్ల కోసం నొక్కండి."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"కనెక్ట్ చేయబడిన పరికరాన్ని ఛార్జ్ చేస్తోంది. మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"అనలాగ్ ఆడియో ఉపకరణం కనుగొనబడింది"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"జోడించిన పరికరం ఈ ఫోన్‌కు అనుకూలంగా లేదు. మరింత తెలుసుకోవడానికి నొక్కండి."</string>

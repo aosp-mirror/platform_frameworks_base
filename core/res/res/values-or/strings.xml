@@ -260,7 +260,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ସାଇଲେଣ୍ଟ ମୋଡ୍"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ସାଉଣ୍ଡ ଅଫ୍ ଅଛି"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ସାଉଣ୍ଡ ଚାଲୁ ଅଛି"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ଏରୋପ୍ଲେନ ମୋଡ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ଏୟାରପ୍ଲେନ ମୋଡ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"ଏୟାରପ୍ଲେନ୍ ମୋଡ୍ ଚାଲୁ ଅଛି"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍ ଅଫ୍ ଅଛି"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"ସେଟିଂସ୍"</string>
@@ -626,7 +626,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ଫେସ ଅନଲକ"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ଫେସ୍ ଅନଲକ୍ ସହ ସମସ୍ୟା"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ଆପଣଙ୍କ ଫେସ୍ ମଡେଲକୁ ଡିଲିଟ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ, ତା\'ପରେ ପୁଣି ଆପଣଙ୍କ ଫେସ୍ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ଫେସ୍ ଅନଲକ୍ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"ଫେସ ଅନଲକ ସେଟ ଅପ କରନ୍ତୁ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ଫୋନକୁ ଦେଖି ଏହାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ଫେସ ଅନଲକ ବ୍ୟବହାର କରିବା ପାଇଁ, ସେଟିଂସ ଏବଂ ଗୋପନୀୟତାରେ "<b>"କ୍ୟାମେରା ଆକ୍ସେସ"</b>"କୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ଅନଲକ୍ କରିବା ପାଇଁ ଆହୁରି ଅଧିକ ଉପାୟ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
@@ -931,7 +931,7 @@
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"ଆପଣଙ୍କ SIM କାର୍ଡକୁ ସ୍ଥାୟୀ ରୂପେ ଅକ୍ଷମ କରିଦିଆଯାଇଛି।\n ଅନ୍ୟ SIM କାର୍ଡ ପାଇଁ ଆପଣଙ୍କ ୱାୟରଲେସ ସେବା ପ୍ରଦାନକାରୀଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"ପୂର୍ବବର୍ତ୍ତୀ ଟ୍ରାକ୍‌"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"ପରବର୍ତ୍ତୀ ଟ୍ରାକ୍‌"</string>
-    <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ପଜ୍‍ କରନ୍ତୁ"</string>
+    <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ବିରତ କରନ୍ତୁ"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"ପ୍ଲେ କରନ୍ତୁ"</string>
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ପଛକୁ ନିଅନ୍ତୁ"</string>
@@ -1358,7 +1358,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ଆନାଲଗ୍‍ ଅଡିଓ ଆକ୍ସେସରୀ ଚିହ୍ନଟ ହେଲା"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ଏହି ଫୋନ୍‌ରେ କନେକ୍ଟ ଥିବା ଡିଭାଇସ୍‍ କମ୍ପାଟିବଲ୍‍ ନୁହେଁ। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ।"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB ଡିବଗିଂ କନେକ୍ଟ କରାଯାଇଛି"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ଡିବଗିଂକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ଡିବଗିଂକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ଡିବଗିଙ୍ଗକୁ ଅକ୍ଷମ କରିବା ପାଇଁ ଚୟନ କରନ୍ତୁ।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ୱାୟାରଲେସ୍ ଡିବଗିଂ ସଂଯୋଗ କରାଯାଇଛି"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ୱାୟାରଲେସ୍ ଡିବଗିଂକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
@@ -1477,7 +1477,7 @@
     <string name="input_method_binding_label" msgid="1166731601721983656">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"ସିଙ୍କ୍"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"ଆକ୍ସେସିବିଲିଟୀ"</string>
-    <string name="wallpaper_binding_label" msgid="1197440498000786738">"ୱାଲପେପର୍"</string>
+    <string name="wallpaper_binding_label" msgid="1197440498000786738">"ୱାଲପେପର"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"ୱାଲପେପର୍‍ ପରିବର୍ତ୍ତନ କରନ୍ତୁ।"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"ବିଜ୍ଞପ୍ତି ଶ୍ରୋତା"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR ଲିସନର୍"</string>
@@ -1606,7 +1606,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ଟାବଲେଟ୍‌"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ଫୋନ"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ଡକ୍‌ ସ୍ପିକର୍‌"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ଡକ ସ୍ପିକର"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ହେଡଫୋନ୍‍"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
