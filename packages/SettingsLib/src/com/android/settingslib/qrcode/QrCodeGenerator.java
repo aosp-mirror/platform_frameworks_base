@@ -40,6 +40,19 @@ public final class QrCodeGenerator {
      */
     public static Bitmap encodeQrCode(String contents, int size)
             throws WriterException, IllegalArgumentException {
+        return encodeQrCode(contents, size, /*invert=*/false);
+    }
+
+    /**
+     * Generates a barcode image with {@code contents}.
+     *
+     * @param contents The contents to encode in the barcode
+     * @param size     The preferred image size in pixels
+     * @param invert   Whether to invert the black/white pixels (e.g. for dark mode)
+     * @return Barcode bitmap
+     */
+    public static Bitmap encodeQrCode(String contents, int size, boolean invert)
+            throws WriterException, IllegalArgumentException {
         final Map<EncodeHintType, Object> hints = new HashMap<>();
         if (!isIso88591(contents)) {
             hints.put(EncodeHintType.CHARACTER_SET, StandardCharsets.UTF_8.name());
@@ -48,9 +61,11 @@ public final class QrCodeGenerator {
         final BitMatrix qrBits = new MultiFormatWriter().encode(contents, BarcodeFormat.QR_CODE,
                 size, size, hints);
         final Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565);
+        int setColor = invert ? Color.WHITE : Color.BLACK;
+        int unsetColor = invert ? Color.BLACK : Color.WHITE;
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                bitmap.setPixel(x, y, qrBits.get(x, y) ? Color.BLACK : Color.WHITE);
+                bitmap.setPixel(x, y, qrBits.get(x, y) ? setColor : unsetColor);
             }
         }
         return bitmap;
