@@ -478,37 +478,24 @@ public class HearingAidDeviceManagerTest {
     }
 
     @Test
-    public void onProfileConnectionStateChanged_connected_callSetStrategies() {
+    public void onActiveDeviceChanged_connected_callSetStrategies() {
         when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(
                 mHearingDeviceAttribute);
+        when(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(true);
 
-        mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice1,
-                BluetoothProfile.STATE_CONNECTED);
+        mHearingAidDeviceManager.onActiveDeviceChanged(mCachedDevice1);
 
         verify(mHelper, atLeastOnce()).setPreferredDeviceRoutingStrategies(
                 eq(List.of(mAudioStrategy)), any(AudioDeviceAttributes.class), anyInt());
     }
 
     @Test
-    public void onProfileConnectionStateChanged_disconnected_callSetStrategiesWithAutoValue() {
+    public void onActiveDeviceChanged_disconnected_callSetStrategiesWithAutoValue() {
         when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(
                 mHearingDeviceAttribute);
+        when(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(false);
 
-        mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice1,
-                BluetoothProfile.STATE_DISCONNECTED);
-
-        verify(mHelper, atLeastOnce()).setPreferredDeviceRoutingStrategies(
-                eq(List.of(mAudioStrategy)), /* hearingDevice= */ isNull(),
-                eq(HearingAidAudioRoutingConstants.RoutingValue.AUTO));
-    }
-    @Test
-    public void onProfileConnectionStateChanged_unpairing_callSetStrategiesWithAutoValue() {
-        when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(
-                mHearingDeviceAttribute);
-
-        when(mCachedDevice1.getUnpairing()).thenReturn(true);
-        mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice1,
-                BluetoothProfile.STATE_DISCONNECTED);
+        mHearingAidDeviceManager.onActiveDeviceChanged(mCachedDevice1);
 
         verify(mHelper, atLeastOnce()).setPreferredDeviceRoutingStrategies(
                 eq(List.of(mAudioStrategy)), /* hearingDevice= */ isNull(),

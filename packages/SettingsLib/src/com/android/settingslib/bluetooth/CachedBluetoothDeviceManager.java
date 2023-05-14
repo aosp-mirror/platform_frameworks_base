@@ -325,6 +325,13 @@ public class CachedBluetoothDeviceManager {
         return false;
     }
 
+    /** Handles when the device been set as active/inactive. */
+    public synchronized void onActiveDeviceChanged(CachedBluetoothDevice cachedBluetoothDevice) {
+        if (cachedBluetoothDevice.isHearingAidDevice()) {
+            mHearingAidDeviceManager.onActiveDeviceChanged(cachedBluetoothDevice);
+        }
+    }
+
     public synchronized void onDeviceUnpaired(CachedBluetoothDevice device) {
         device.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
         CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(device);

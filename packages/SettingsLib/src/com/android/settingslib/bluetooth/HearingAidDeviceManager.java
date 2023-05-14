@@ -224,15 +224,9 @@ public class HearingAidDeviceManager {
                         // It is necessary to do remove and add for updating the mapping on
                         // preference and device
                         mBtManager.getEventManager().dispatchDeviceAdded(mainDevice);
-                        // Only need to set first device of a set. AudioDeviceInfo for
-                        // GET_DEVICES_OUTPUTS will not change device.
-                        setAudioRoutingConfig(cachedDevice);
                     }
                     return true;
                 }
-                // Only need to set first device of a set. AudioDeviceInfo for GET_DEVICES_OUTPUTS
-                // will not change device.
-                setAudioRoutingConfig(cachedDevice);
                 break;
             case BluetoothProfile.STATE_DISCONNECTED:
                 mainDevice = findMainDevice(cachedDevice);
@@ -258,11 +252,18 @@ public class HearingAidDeviceManager {
 
                     return true;
                 }
-                // Only need to clear when last device of a set get disconnected
-                clearAudioRoutingConfig();
                 break;
         }
         return false;
+    }
+
+    void onActiveDeviceChanged(CachedBluetoothDevice device) {
+        if (device.isActiveDevice(BluetoothProfile.HEARING_AID) || device.isActiveDevice(
+                BluetoothProfile.LE_AUDIO)) {
+            setAudioRoutingConfig(device);
+        } else {
+            clearAudioRoutingConfig();
+        }
     }
 
     private void setAudioRoutingConfig(CachedBluetoothDevice device) {
