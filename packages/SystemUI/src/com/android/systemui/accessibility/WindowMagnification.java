@@ -19,6 +19,7 @@ package com.android.systemui.accessibility;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 
+import static com.android.systemui.accessibility.AccessibilityLogger.MagnificationSettingsEvent;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_MAGNIFICATION_OVERLAP;
 
 import android.annotation.MainThread;
@@ -66,6 +67,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
     private final CommandQueue mCommandQueue;
     private final OverviewProxyService mOverviewProxyService;
     private final DisplayTracker mDisplayTracker;
+    private final AccessibilityLogger mA11yLogger;
 
     private WindowMagnificationConnectionImpl mWindowMagnificationConnectionImpl;
     private SysUiState mSysUiState;
@@ -151,7 +153,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
             SysUiState sysUiState, OverviewProxyService overviewProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
-            DisplayManager displayManager) {
+            DisplayManager displayManager, AccessibilityLogger a11yLogger) {
         mContext = context;
         mHandler = mainHandler;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
@@ -160,6 +162,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         mSysUiState = sysUiState;
         mOverviewProxyService = overviewProxyService;
         mDisplayTracker = displayTracker;
+        mA11yLogger = a11yLogger;
         mMagnificationControllerSupplier = new ControllerSupplier(context,
                 mHandler, mWindowMagnifierCallback,
                 displayManager, sysUiState, secureSettings);
@@ -343,6 +346,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         @Override
         public void onSetMagnifierSize(int displayId, int index) {
             mHandler.post(() -> onSetMagnifierSizeInternal(displayId, index));
+            mA11yLogger.log(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_WINDOW_SIZE_SELECTED);
         }
 
         @Override
@@ -353,6 +357,9 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         @Override
         public void onEditMagnifierSizeMode(int displayId, boolean enable) {
             mHandler.post(() -> onEditMagnifierSizeModeInternal(displayId, enable));
+            mA11yLogger.log(enable
+                    ? MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_SIZE_EDITING_ACTIVATED
+                    : MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_SIZE_EDITING_DEACTIVATED);
         }
 
         @Override
@@ -370,6 +377,9 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         @Override
         public void onSettingsPanelVisibilityChanged(int displayId, boolean shown) {
             mHandler.post(() -> onSettingsPanelVisibilityChangedInternal(displayId, shown));
+            mA11yLogger.log(shown
+                    ? MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED
+                    : MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_CLOSED);
         }
     };
 
