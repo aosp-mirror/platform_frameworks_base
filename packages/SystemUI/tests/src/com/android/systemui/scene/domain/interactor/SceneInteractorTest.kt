@@ -21,8 +21,7 @@ package com.android.systemui.scene.domain.interactor
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.data.repository.fakeSceneContainerRepository
-import com.android.systemui.scene.data.repository.fakeSceneKeys
+import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
@@ -36,14 +35,12 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class SceneInteractorTest : SysuiTestCase() {
 
-    private val underTest =
-        SceneInteractor(
-            repository = fakeSceneContainerRepository(),
-        )
+    private val utils = SceneTestUtils(this)
+    private val underTest = utils.sceneInteractor()
 
     @Test
     fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys("container1")).isEqualTo(fakeSceneKeys())
+        assertThat(underTest.allSceneKeys("container1")).isEqualTo(utils.fakeSceneKeys())
     }
 
     @Test
