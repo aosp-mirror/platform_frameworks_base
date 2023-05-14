@@ -132,7 +132,7 @@ data class EdgePanelParams(private var resources: Resources) {
 
         entryWidthInterpolator = PathInterpolator(.19f, 1.27f, .71f, .86f)
         entryWidthTowardsEdgeInterpolator = PathInterpolator(1f, -3f, 1f, 1.2f)
-        activeWidthInterpolator = PathInterpolator(.56f, -0.39f, .18f, 1.46f)
+        activeWidthInterpolator = PathInterpolator(.7f, -0.24f, .48f, 1.21f)
         arrowAngleInterpolator = entryWidthInterpolator
         horizontalTranslationInterpolator = PathInterpolator(0.2f, 1.0f, 1.0f, 1.0f)
         verticalTranslationInterpolator = PathInterpolator(.5f, 1.15f, .41f, .94f)
