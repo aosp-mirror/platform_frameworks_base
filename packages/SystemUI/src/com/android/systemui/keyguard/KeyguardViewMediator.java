@@ -3009,19 +3009,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mSurfaceBehindRemoteAnimationRequested = false;
         mSurfaceBehindRemoteAnimationRunning = false;
         mKeyguardStateController.notifyKeyguardGoingAway(false);
-        finishExitRemoteAnimation();
-    }
-
-    void finishExitRemoteAnimation() {
-        if (mKeyguardUnlockAnimationControllerLazy.get().isAnyKeyguyardAnimatorPlaying()
-                || mKeyguardStateController.isDismissingFromSwipe()) {
-            // If the animation is ongoing, or we are not done with the swipe gesture,
-            // it's too early to terminate the animation
-            Log.d(TAG, "finishAnimation not executing now because "
-                    + "not all animations have finished");
-            return;
-        }
-        Log.d(TAG, "finishAnimation executing");
 
         if (mSurfaceBehindRemoteAnimationFinishedCallback != null) {
             try {
