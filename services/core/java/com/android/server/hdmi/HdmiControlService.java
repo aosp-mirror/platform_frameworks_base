@@ -4341,12 +4341,9 @@ public class HdmiControlService extends SystemService {
         switch (systemAudioDeviceInfo.getDeviceFeatures().getSetAudioVolumeLevelSupport()) {
             case DeviceFeatures.FEATURE_SUPPORTED:
                 if (currentVolumeBehavior != AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE) {
-                    // If we're currently using adjust-only absolute volume behavior, switch to
-                    // full volume behavior until we successfully adopt absolute volume behavior
-                    switchToFullVolumeBehavior();
                     // Start an action that will call enableAbsoluteVolumeBehavior
                     // once the System Audio device sends <Report Audio Status>
-                    localCecDevice.addAvbAudioStatusAction(
+                    localCecDevice.startNewAvbAudioStatusAction(
                             systemAudioDeviceInfo.getLogicalAddress());
                 }
                 return;
@@ -4358,10 +4355,13 @@ public class HdmiControlService extends SystemService {
                             != AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY) {
                         // If we're currently using absolute volume behavior, switch to full volume
                         // behavior until we successfully adopt adjust-only absolute volume behavior
-                        switchToFullVolumeBehavior();
+                        if (currentVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE) {
+                            getAudioManager().setDeviceVolumeBehavior(getAvbAudioOutputDevice(),
+                                    AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+                        }
                         // Start an action that will call enableAbsoluteVolumeBehavior
                         // once the System Audio device sends <Report Audio Status>
-                        localCecDevice.addAvbAudioStatusAction(
+                        localCecDevice.startNewAvbAudioStatusAction(
                                 systemAudioDeviceInfo.getLogicalAddress());
                     }
                 } else {
@@ -4369,7 +4369,9 @@ public class HdmiControlService extends SystemService {
                 }
                 return;
             case DeviceFeatures.FEATURE_SUPPORT_UNKNOWN:
-                switchToFullVolumeBehavior();
+                if (currentVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE) {
+                    switchToFullVolumeBehavior();
+                }
                 localCecDevice.querySetAudioVolumeLevelSupport(
                         systemAudioDeviceInfo.getLogicalAddress());
         }
