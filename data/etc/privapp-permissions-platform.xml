@@ -525,6 +525,8 @@ applications that come with the platform
         <permission name="android.permission.USE_ATTESTATION_VERIFICATION_SERVICE" />
         <!-- Permission required for GTS test - GtsCredentialsTestCases -->
         <permission name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"/>
+        <!-- Permission required for CTS test IntentRedirectionTest -->
+        <permission name="android.permission.QUERY_CLONED_APPS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
