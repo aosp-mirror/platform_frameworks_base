@@ -5337,51 +5337,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return null;
     }
 
-    /**
-     * Returns the {@link WindowProcessController} for the app process for the given uid and pid.
-     *
-     * If no such {@link WindowProcessController} is found, it does not belong to an app, or the
-     * pid does not match the uid {@code null} is returned.
-     */
-    @Nullable WindowProcessController getProcessController(int pid, int uid) {
-        return UserHandle.isApp(uid) ? getProcessControllerInternal(pid, uid) : null;
-    }
-
-    /**
-     * Returns the {@link WindowProcessController} for the given uid and pid.
-     *
-     * If no such {@link WindowProcessController} is found or the pid does not match the uid
-     * {@code null} is returned.
-     */
-    private @Nullable WindowProcessController getProcessControllerInternal(int pid, int uid) {
+    WindowProcessController getProcessController(int pid, int uid) {
         final WindowProcessController proc = mProcessMap.getProcess(pid);
-        if (proc == null) {
-            return null;
-        }
-        if (proc.mUid == uid) {
+        if (proc == null) return null;
+        if (UserHandle.isApp(uid) && proc.mUid == uid) {
             return proc;
         }
-        return null;
-    }
-
-    /**
-     * Returns the package name if (and only if) the package name can be uniquely determined.
-     * Otherwise returns {@code null}.
-     *
-     * The provided pid must match the provided uid, otherwise this also returns null.
-     */
-    @Nullable String getPackageNameIfUnique(int uid, int pid) {
-        WindowProcessController processController = getProcessControllerInternal(pid, uid);
-        if (processController == null) {
-            Slog.w(TAG, "callingPackage for (uid=" + uid + ", pid=" + pid + ") has no WPC");
-            return null;
-        }
-        List<String> realCallingPackages = processController.getPackageList();
-        if (realCallingPackages.size() == 1) {
-            return realCallingPackages.get(0);
-        }
-        Slog.w(TAG, "callingPackage for (uid=" + uid + ", pid=" + pid + ") is ambiguous: "
-                + realCallingPackages);
         return null;
     }
 
