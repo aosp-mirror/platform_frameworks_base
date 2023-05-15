@@ -1908,21 +1908,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 }
             }
 
-            // Report brightness to brightnesstracker:
-            // If brightness is not temporary (ie the slider has been released)
-            // AND if we are not in idle screen brightness mode.
-            if (!brightnessIsTemporary
-                    && (mAutomaticBrightnessController != null
-                    && !mAutomaticBrightnessController.isInIdleMode())) {
-                if (userInitiatedChange && (mAutomaticBrightnessController == null
-                        || !mAutomaticBrightnessController.hasValidAmbientLux())) {
-                    // If we don't have a valid lux reading we can't report a valid
-                    // slider event so notify as if the system changed the brightness.
-                    userInitiatedChange = false;
-                }
-                notifyBrightnessTrackerChanged(brightnessState, userInitiatedChange,
-                        wasShortTermModelActive);
-            }
+            notifyBrightnessTrackerChanged(brightnessState, userInitiatedChange,
+                    wasShortTermModelActive, autoBrightnessEnabled, brightnessIsTemporary);
 
             // We save the brightness info *after* the brightness setting has been changed and
             // adjustments made so that the brightness info reflects the latest value.
@@ -2758,22 +2745,43 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void notifyBrightnessTrackerChanged(float brightness, boolean userInitiated,
-            boolean wasShortTermModelActive) {
+            boolean wasShortTermModelActive, boolean autobrightnessEnabled,
+            boolean brightnessIsTemporary) {
         final float brightnessInNits = convertToAdjustedNits(brightness);
-        if (mUseAutoBrightness && brightnessInNits >= 0.0f
-                && mAutomaticBrightnessController != null && mBrightnessTracker != null) {
-            // We only want to track changes on devices that can actually map the display backlight
-            // values into a physical brightness unit since the value provided by the API is in
-            // nits and not using the arbitrary backlight units.
-            final float powerFactor = mPowerRequest.lowPowerMode
-                    ? mPowerRequest.screenLowPowerBrightnessFactor
-                    : 1.0f;
-            mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated,
-                    powerFactor, wasShortTermModelActive,
-                    mAutomaticBrightnessController.isDefaultConfig(), mUniqueDisplayId,
-                    mAutomaticBrightnessController.getLastSensorValues(),
-                    mAutomaticBrightnessController.getLastSensorTimestamps());
+
+        // Don't report brightness to brightnessTracker:
+        // If brightness is temporary (ie the slider has not been released)
+        // or if we are in idle screen brightness mode.
+        // or display is not on
+        // or we shouldn't be using autobrightness
+        // or the nits is invalid.
+        if (brightnessIsTemporary
+                || mAutomaticBrightnessController == null
+                || mAutomaticBrightnessController.isInIdleMode()
+                || !autobrightnessEnabled
+                || mBrightnessTracker == null
+                || !mUseAutoBrightness
+                || brightnessInNits < 0.0f) {
+            return;
         }
+
+        if (userInitiated && !mAutomaticBrightnessController.hasValidAmbientLux()) {
+            // If we don't have a valid lux reading we can't report a valid
+            // slider event so notify as if the system changed the brightness.
+            userInitiated = false;
+        }
+
+        // We only want to track changes on devices that can actually map the display backlight
+        // values into a physical brightness unit since the value provided by the API is in
+        // nits and not using the arbitrary backlight units.
+        final float powerFactor = mPowerRequest.lowPowerMode
+                ? mPowerRequest.screenLowPowerBrightnessFactor
+                : 1.0f;
+        mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated,
+                powerFactor, wasShortTermModelActive,
+                mAutomaticBrightnessController.isDefaultConfig(), mUniqueDisplayId,
+                mAutomaticBrightnessController.getLastSensorValues(),
+                mAutomaticBrightnessController.getLastSensorTimestamps());
     }
 
     private float convertToNits(float brightness) {
