@@ -39,7 +39,8 @@
         android:ellipsize="marquee"
         android:visibility="gone"
         android:gravity="center"
-        androidprv:allCaps="@bool/kg_use_all_caps" />
+        androidprv:allCaps="@bool/kg_use_all_caps"
+        androidprv:debugLocation="Emergency" />
 
     <com.android.keyguard.EmergencyButton
         android:id="@+id/emergency_call_button"
