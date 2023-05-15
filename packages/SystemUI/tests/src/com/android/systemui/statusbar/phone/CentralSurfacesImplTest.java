@@ -335,6 +335,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     private final InitController mInitController = new InitController();
     private final DumpManager mDumpManager = new DumpManager();
+    private final ScreenLifecycle mScreenLifecycle = new ScreenLifecycle(mDumpManager);
 
     @Before
     public void setup() throws Exception {
@@ -487,7 +488,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mUserSwitcherController,
                 mBatteryController,
                 mColorExtractor,
-                new ScreenLifecycle(mDumpManager),
+                mScreenLifecycle,
                 mWakefulnessLifecycle,
                 mStatusBarStateController,
                 Optional.of(mBubbles),
@@ -554,6 +555,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 return mViewRootImpl;
             }
         };
+        mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();
         when(mViewRootImpl.getOnBackInvokedDispatcher())
                 .thenReturn(mOnBackInvokedDispatcher);
@@ -1250,6 +1252,32 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         setDeviceState(FOLD_STATE_UNFOLDED);
 
         verify(mStatusBarStateController, never()).setLeaveOpenOnKeyguardHide(true);
+    }
+
+    @Test
+    public void deviceStateChange_unfolded_shadeExpanding_onKeyguard_closesQS() {
+        setFoldedStates(FOLD_STATE_FOLDED);
+        setGoToSleepStates(FOLD_STATE_FOLDED);
+        mCentralSurfaces.setBarStateForTest(KEYGUARD);
+        when(mNotificationPanelViewController.isExpandingOrCollapsing()).thenReturn(true);
+
+        setDeviceState(FOLD_STATE_UNFOLDED);
+        mScreenLifecycle.dispatchScreenTurnedOff();
+
+        verify(mQuickSettingsController).closeQs();
+    }
+
+    @Test
+    public void deviceStateChange_unfolded_shadeExpanded_onKeyguard_closesQS() {
+        setFoldedStates(FOLD_STATE_FOLDED);
+        setGoToSleepStates(FOLD_STATE_FOLDED);
+        mCentralSurfaces.setBarStateForTest(KEYGUARD);
+        when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(true);
+
+        setDeviceState(FOLD_STATE_UNFOLDED);
+        mScreenLifecycle.dispatchScreenTurnedOff();
+
+        verify(mQuickSettingsController).closeQs();
     }
 
     @Test
