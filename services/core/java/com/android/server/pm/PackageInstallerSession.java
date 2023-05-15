@@ -66,6 +66,7 @@ import android.app.NotificationManager;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
@@ -332,6 +333,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final long DEFAULT_APP_METADATA_BYTE_SIZE_LIMIT = 32000;
 
     private static final int APP_METADATA_FILE_ACCESS_MODE = 0640;
+
+    /**
+     * Throws IllegalArgumentException if the {@link IntentSender} from an immutable
+     * {@link android.app.PendingIntent} when caller has a target SDK of API
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private static final long THROW_EXCEPTION_COMMIT_WITH_IMMUTABLE_PENDING_INTENT = 240618202L;
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
@@ -1864,6 +1874,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void commit(@NonNull IntentSender statusReceiver, boolean forTransfer) {
         assertNotChild("commit");
+        boolean throwsExceptionCommitImmutableCheck = CompatChanges.isChangeEnabled(
+                THROW_EXCEPTION_COMMIT_WITH_IMMUTABLE_PENDING_INTENT, Binder.getCallingUid());
+        if (throwsExceptionCommitImmutableCheck && statusReceiver.isImmutable()) {
+            throw new IllegalArgumentException(
+                "The commit() status receiver should come from a mutable PendingIntent");
+        }
 
         if (!markAsSealed(statusReceiver, forTransfer)) {
             return;

@@ -1062,6 +1062,9 @@ public class PackageInstaller {
      * @param timeoutMillis The maximum time to wait, in milliseconds until the
      *                      constraints are satisfied. The caller will be notified via
      *                      {@code statusReceiver} if timeout happens before commit.
+     * @throws IllegalArgumentException if the {@code statusReceiver} from an immutable
+     *             {@link android.app.PendingIntent} when caller has a target SDK of API
+     *             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
      */
     public void commitSessionAfterInstallConstraintsAreMet(int sessionId,
             @NonNull IntentSender statusReceiver, @NonNull InstallConstraints constraints,
@@ -1736,6 +1739,9 @@ public class PackageInstaller {
          *
          * @throws SecurityException if streams opened through
          *             {@link #openWrite(String, long, long)} are still open.
+         * @throws IllegalArgumentException if the {@code statusReceiver} from an immutable
+         *             {@link android.app.PendingIntent} when caller has a target SDK of API
+         *             version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
          *
          * @see android.app.admin.DevicePolicyManager
          * @see #requestUserPreapproval
@@ -1764,6 +1770,9 @@ public class PackageInstaller {
          * @param statusReceiver Called when the state of the session changes. Intents
          *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
          *                       individual status codes on how to handle them.
+         * @throws IllegalArgumentException if the {@code statusReceiver} from an immutable
+         *             {@link android.app.PendingIntent} when caller has a target SDK of API
+         *             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
          *
          * @hide
          */

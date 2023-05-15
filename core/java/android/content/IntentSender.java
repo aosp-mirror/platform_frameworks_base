@@ -417,4 +417,12 @@ public class IntentSender implements Parcelable {
 
         return mCachedInfo;
     }
+
+    /**
+     * Check if the PendingIntent is marked with {@link android.app.PendingIntent#FLAG_IMMUTABLE}.
+     * @hide
+     */
+    public boolean isImmutable() {
+        return getCachedInfo().isImmutable();
+    }
 }
