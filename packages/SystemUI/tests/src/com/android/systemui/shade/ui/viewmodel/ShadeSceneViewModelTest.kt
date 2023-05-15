@@ -18,15 +18,11 @@ package com.android.systemui.shade.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.repository.AuthenticationRepositoryImpl
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.bouncer.data.repo.BouncerRepository
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.domain.interactor.LockScreenSceneInteractor
-import com.android.systemui.scene.data.repository.fakeSceneContainerRepository
-import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.SceneTestUtils.Companion.CONTAINER_1
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
@@ -44,14 +40,11 @@ import org.junit.runners.JUnit4
 class ShadeSceneViewModelTest : SysuiTestCase() {
 
     private val testScope = TestScope()
-    private val sceneInteractor =
-        SceneInteractor(
-            repository = fakeSceneContainerRepository(),
-        )
-    private val mAuthenticationInteractor =
-        AuthenticationInteractor(
-            applicationScope = testScope.backgroundScope,
-            repository = AuthenticationRepositoryImpl(),
+    private val utils = SceneTestUtils(this, testScope)
+    private val sceneInteractor = utils.sceneInteractor()
+    private val authenticationInteractor =
+        utils.authenticationInteractor(
+            repository = utils.authenticationRepository(),
         )
 
     private val underTest =
@@ -60,36 +53,26 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             lockScreenSceneInteractorFactory =
                 object : LockScreenSceneInteractor.Factory {
                     override fun create(containerName: String): LockScreenSceneInteractor {
-                        return LockScreenSceneInteractor(
-                            applicationScope = testScope.backgroundScope,
-                            authenticationInteractor = mAuthenticationInteractor,
-                            bouncerInteractorFactory =
-                                object : BouncerInteractor.Factory {
-                                    override fun create(containerName: String): BouncerInteractor {
-                                        return BouncerInteractor(
-                                            applicationScope = testScope.backgroundScope,
-                                            applicationContext = context,
-                                            repository = BouncerRepository(),
-                                            authenticationInteractor = mAuthenticationInteractor,
-                                            sceneInteractor = sceneInteractor,
-                                            containerName = containerName,
-                                        )
-                                    }
-                                },
+                        return utils.lockScreenSceneInteractor(
+                            authenticationInteractor = authenticationInteractor,
                             sceneInteractor = sceneInteractor,
-                            containerName = CONTAINER_NAME,
+                            bouncerInteractor =
+                                utils.bouncerInteractor(
+                                    authenticationInteractor = authenticationInteractor,
+                                    sceneInteractor = sceneInteractor,
+                                ),
                         )
                     }
                 },
-            containerName = CONTAINER_NAME
+            containerName = SceneTestUtils.CONTAINER_1
         )
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockScreen() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            mAuthenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
-            mAuthenticationInteractor.lockDevice()
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.lockDevice()
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.LockScreen)
         }
@@ -98,8 +81,8 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_deviceUnlocked_gone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            mAuthenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
-            mAuthenticationInteractor.unlockDevice()
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.unlockDevice()
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
         }
@@ -107,9 +90,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
-            mAuthenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
-            mAuthenticationInteractor.unlockDevice()
+            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.unlockDevice()
             runCurrent()
 
             underTest.onContentClicked()
@@ -120,17 +103,13 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
-            mAuthenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
-            mAuthenticationInteractor.lockDevice()
+            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.lockDevice()
             runCurrent()
 
             underTest.onContentClicked()
 
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
-
-    companion object {
-        private const val CONTAINER_NAME = "container1"
-    }
 }

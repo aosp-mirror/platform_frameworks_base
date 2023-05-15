@@ -19,9 +19,9 @@ package com.android.systemui.authentication.domain.interactor
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
-import com.android.systemui.authentication.data.repository.AuthenticationRepositoryImpl
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -37,10 +37,10 @@ import org.junit.runners.JUnit4
 class AuthenticationInteractorTest : SysuiTestCase() {
 
     private val testScope = TestScope()
-    private val repository: AuthenticationRepository = AuthenticationRepositoryImpl()
+    private val utils = SceneTestUtils(this, testScope)
+    private val repository: AuthenticationRepository = utils.authenticationRepository()
     private val underTest =
-        AuthenticationInteractor(
-            applicationScope = testScope.backgroundScope,
+        utils.authenticationInteractor(
             repository = repository,
         )
 
