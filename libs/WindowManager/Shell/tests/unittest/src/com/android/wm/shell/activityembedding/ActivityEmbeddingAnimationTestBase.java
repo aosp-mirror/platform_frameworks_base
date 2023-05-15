@@ -47,6 +47,7 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
 
     @Mock
     ShellInit mShellInit;
+
     @Mock
     Transitions mTransitions;
     @Mock
