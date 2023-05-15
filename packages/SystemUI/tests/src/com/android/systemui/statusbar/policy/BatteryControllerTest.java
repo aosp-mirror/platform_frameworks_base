@@ -226,31 +226,33 @@ public class BatteryControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void batteryStateChanged_healthNotOverheated_outputsFalse() {
+    public void batteryStateChanged_chargingStatusNotLongLife_outputsFalse() {
         Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
-        intent.putExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_GOOD);
+        intent.putExtra(BatteryManager.EXTRA_CHARGING_STATUS,
+                BatteryManager.CHARGING_POLICY_DEFAULT);
 
         mBatteryController.onReceive(getContext(), intent);
 
-        Assert.assertFalse(mBatteryController.isOverheated());
+        Assert.assertFalse(mBatteryController.isBatteryDefender());
     }
 
     @Test
-    public void batteryStateChanged_healthOverheated_outputsTrue() {
+    public void batteryStateChanged_chargingStatusLongLife_outputsTrue() {
         Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
-        intent.putExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_OVERHEAT);
+        intent.putExtra(BatteryManager.EXTRA_CHARGING_STATUS,
+                BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE);
 
         mBatteryController.onReceive(getContext(), intent);
 
-        Assert.assertTrue(mBatteryController.isOverheated());
+        Assert.assertTrue(mBatteryController.isBatteryDefender());
     }
 
     @Test
-    public void batteryStateChanged_noHealthGiven_outputsFalse() {
+    public void batteryStateChanged_noChargingStatusGiven_outputsFalse() {
         Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
 
         mBatteryController.onReceive(getContext(), intent);
 
-        Assert.assertFalse(mBatteryController.isOverheated());
+        Assert.assertFalse(mBatteryController.isBatteryDefender());
     }
 }
