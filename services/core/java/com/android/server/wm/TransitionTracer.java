@@ -29,7 +29,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
-import android.window.TransitionInfo;
 
 import com.android.internal.util.TraceBuffer;
 import com.android.server.wm.Transition.ChangeInfo;
@@ -69,26 +68,29 @@ public class TransitionTracer {
      *
      * @param transition The transition that has been sent to Shell.
      * @param targets Information about the target windows of the transition.
-     * @param info The TransitionInfo send over to Shell to execute the transition.
      */
-    public void logSentTransition(Transition transition, ArrayList<ChangeInfo> targets,
-            TransitionInfo info) {
-        final ProtoOutputStream outputStream = new ProtoOutputStream();
-        final long protoToken = outputStream
-                .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
-        outputStream.write(com.android.server.wm.shell.Transition.ID, transition.getSyncId());
-        outputStream.write(com.android.server.wm.shell.Transition.CREATE_TIME_NS,
-                transition.mLogger.mCreateTimeNs);
-        outputStream.write(com.android.server.wm.shell.Transition.SEND_TIME_NS,
-                transition.mLogger.mSendTimeNs);
-        outputStream.write(com.android.server.wm.shell.Transition.START_TRANSACTION_ID,
-                transition.getStartTransaction().getId());
-        outputStream.write(com.android.server.wm.shell.Transition.FINISH_TRANSACTION_ID,
-                transition.getFinishTransaction().getId());
-        dumpTransitionTargetsToProto(outputStream, transition, targets);
-        outputStream.end(protoToken);
+    public void logSentTransition(Transition transition, ArrayList<ChangeInfo> targets) {
+        try {
+            final ProtoOutputStream outputStream = new ProtoOutputStream();
+            final long protoToken = outputStream
+                    .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
+            outputStream.write(com.android.server.wm.shell.Transition.ID, transition.getSyncId());
+            outputStream.write(com.android.server.wm.shell.Transition.CREATE_TIME_NS,
+                    transition.mLogger.mCreateTimeNs);
+            outputStream.write(com.android.server.wm.shell.Transition.SEND_TIME_NS,
+                    transition.mLogger.mSendTimeNs);
+            outputStream.write(com.android.server.wm.shell.Transition.START_TRANSACTION_ID,
+                    transition.getStartTransaction().getId());
+            outputStream.write(com.android.server.wm.shell.Transition.FINISH_TRANSACTION_ID,
+                    transition.getFinishTransaction().getId());
+            dumpTransitionTargetsToProto(outputStream, transition, targets);
+            outputStream.end(protoToken);
 
-        mTraceBuffer.add(outputStream);
+            mTraceBuffer.add(outputStream);
+        } catch (Exception e) {
+            // Don't let any errors in the tracing cause the transition to fail
+            Log.e(LOG_TAG, "Unexpected exception thrown while logging transitions", e);
+        }
     }
 
     /**
@@ -98,15 +100,20 @@ public class TransitionTracer {
      * @param transition The transition that has finished.
      */
     public void logFinishedTransition(Transition transition) {
-        final ProtoOutputStream outputStream = new ProtoOutputStream();
-        final long protoToken = outputStream
-                .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
-        outputStream.write(com.android.server.wm.shell.Transition.ID, transition.getSyncId());
-        outputStream.write(com.android.server.wm.shell.Transition.FINISH_TIME_NS,
-                transition.mLogger.mFinishTimeNs);
-        outputStream.end(protoToken);
+        try {
+            final ProtoOutputStream outputStream = new ProtoOutputStream();
+            final long protoToken = outputStream
+                    .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
+            outputStream.write(com.android.server.wm.shell.Transition.ID, transition.getSyncId());
+            outputStream.write(com.android.server.wm.shell.Transition.FINISH_TIME_NS,
+                    transition.mLogger.mFinishTimeNs);
+            outputStream.end(protoToken);
 
-        mTraceBuffer.add(outputStream);
+            mTraceBuffer.add(outputStream);
+        } catch (Exception e) {
+            // Don't let any errors in the tracing cause the transition to fail
+            Log.e(LOG_TAG, "Unexpected exception thrown while logging transitions", e);
+        }
     }
 
     /**
@@ -116,15 +123,20 @@ public class TransitionTracer {
      * @param transition The transition that has been aborted
      */
     public void logAbortedTransition(Transition transition) {
-        final ProtoOutputStream outputStream = new ProtoOutputStream();
-        final long protoToken = outputStream
-                .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
-        outputStream.write(com.android.server.wm.shell.Transition.ID, transition.getSyncId());
-        outputStream.write(com.android.server.wm.shell.Transition.ABORT_TIME_NS,
-                transition.mLogger.mAbortTimeNs);
-        outputStream.end(protoToken);
+        try {
+            final ProtoOutputStream outputStream = new ProtoOutputStream();
+            final long protoToken = outputStream
+                    .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
+            outputStream.write(com.android.server.wm.shell.Transition.ID, transition.getSyncId());
+            outputStream.write(com.android.server.wm.shell.Transition.ABORT_TIME_NS,
+                    transition.mLogger.mAbortTimeNs);
+            outputStream.end(protoToken);
 
-        mTraceBuffer.add(outputStream);
+            mTraceBuffer.add(outputStream);
+        } catch (Exception e) {
+            // Don't let any errors in the tracing cause the transition to fail
+            Log.e(LOG_TAG, "Unexpected exception thrown while logging transitions", e);
+        }
     }
 
     private void dumpTransitionTargetsToProto(ProtoOutputStream outputStream,
