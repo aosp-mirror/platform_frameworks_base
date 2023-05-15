@@ -164,6 +164,11 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
+    public boolean isExpandingOrCollapsing() {
+        return mNotificationPanelViewController.isExpandingOrCollapsing();
+    }
+
+    @Override
     public void postOnShadeExpanded(Runnable executable) {
         mNotificationPanelViewController.addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
