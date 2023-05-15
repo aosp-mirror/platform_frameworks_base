@@ -43,6 +43,11 @@ public class SplitScreenConstants {
      */
     public static final int SPLIT_POSITION_BOTTOM_OR_RIGHT = 1;
 
+    /**
+     * Duration used for every split fade-in or fade-out.
+     */
+    public static final int FADE_DURATION = 133;
+
     @IntDef(prefix = {"SPLIT_POSITION_"}, value = {
             SPLIT_POSITION_UNDEFINED,
             SPLIT_POSITION_TOP_OR_LEFT,
