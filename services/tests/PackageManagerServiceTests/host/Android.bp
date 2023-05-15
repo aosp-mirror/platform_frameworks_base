@@ -39,7 +39,7 @@ java_test_host {
         "PackageManagerServiceHostTestsIntentVerifyUtils",
         "block_device_writer_jar",
     ],
-    test_suites: ["general-tests"],
+    test_suites: ["device-tests"],
     data: [
         ":PackageManagerTestApex",
         ":PackageManagerTestApexApp",
