@@ -118,6 +118,13 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
         return true;
     }
 
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        mAnimationRunner.cancelAnimationFromMerge();
+    }
+
     private boolean handleNonEmbeddedChanges(List<TransitionInfo.Change> changes) {
         final Rect nonClosingEmbeddedArea = new Rect();
         for (int i = changes.size() - 1; i >= 0; i--) {
