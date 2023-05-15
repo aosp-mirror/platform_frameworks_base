@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PackageTagsList;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
@@ -68,6 +69,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static final String ACTIVITY_RECOGNITION_TAGS =
             "android:activity_recognition_allow_listed_tags";
     private static final String ACTIVITY_RECOGNITION_TAGS_SEPARATOR = ";";
+    private static final boolean SYSPROP_HOTWORD_DETECTION_SERVICE_REQUIRED =
+            SystemProperties.getBoolean("ro.hotword.detection_service_required", false);
 
     @NonNull
     private final Object mLock = new Object();
@@ -201,8 +204,11 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
     private static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
         // The HotwordDetectionService APIs aren't ready yet for Auto or TV.
-        return !(pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
-                || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK));
+        if (pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            return false;
+        }
+        return SYSPROP_HOTWORD_DETECTION_SERVICE_REQUIRED;
     }
 
     @Override
