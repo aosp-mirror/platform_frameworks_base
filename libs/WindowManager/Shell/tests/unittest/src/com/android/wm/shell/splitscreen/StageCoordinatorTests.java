@@ -158,7 +158,6 @@ public class StageCoordinatorTests extends ShellTestCase {
         verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
                 eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
         verify(mMainStage).reparentTopTask(eq(wct));
-        verify(mSplitLayout).resetDividerPosition();
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
     }
