@@ -548,7 +548,7 @@ public class StackScrollAlgorithm {
         ExpandableViewState viewState = view.getViewState();
         viewState.location = ExpandableViewState.LOCATION_UNKNOWN;
 
-        final float expansionFraction = getExpansionFractionWithoutShelf(
+        float expansionFraction = getExpansionFractionWithoutShelf(
                 algorithmState, ambientState);
 
         // Add gap between sections.
@@ -618,6 +618,11 @@ public class StackScrollAlgorithm {
                             - mPaddingBetweenElements;
                     updateViewWithShelf(view, viewState, shelfStart);
                 }
+            }
+            // Avoid pulsing notification flicker during AOD to LS
+            // A pulsing notification is already expanded, no need to expand it again with animation
+            if (ambientState.isPulsingRow(view)) {
+                expansionFraction = 1.0f;
             }
             // Clip height of view right before shelf.
             viewState.height = (int) (getMaxAllowedChildHeight(view) * expansionFraction);
@@ -700,9 +705,11 @@ public class StackScrollAlgorithm {
                 && !(child instanceof FooterView);
     }
 
-    private void updatePulsingStates(StackScrollAlgorithmState algorithmState,
+    @VisibleForTesting
+    void updatePulsingStates(StackScrollAlgorithmState algorithmState,
                                      AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
+        ExpandableNotificationRow pulsingRow = null;
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
             if (!(child instanceof ExpandableNotificationRow)) {
@@ -714,6 +721,19 @@ public class StackScrollAlgorithm {
             }
             ExpandableViewState viewState = row.getViewState();
             viewState.hidden = false;
+            pulsingRow = row;
+        }
+
+        // Set AmbientState#pulsingRow to the current pulsing row when on AOD.
+        // Set AmbientState#pulsingRow=null when on lockscreen, since AmbientState#pulsingRow
+        // is only used for skipping the unfurl animation for (the notification that was already
+        // showing at full height on AOD) during the AOD=>lockscreen transition, where
+        // dozeAmount=[1f, 0f). We also need to reset the pulsingRow once it is no longer used
+        // because it will interfere with future unfurling animations - for example, during the
+        // LS=>AOD animation, the pulsingRow may stay at full height when it should squish with the
+        // rest of the stack.
+        if (ambientState.getDozeAmount() == 0.0f || ambientState.getDozeAmount() == 1.0f) {
+            ambientState.setPulsingRow(pulsingRow);
         }
     }
 
