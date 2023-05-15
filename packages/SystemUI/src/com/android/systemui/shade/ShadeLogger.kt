@@ -253,6 +253,31 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logFlingExpands(
+            vel: Float,
+            vectorVel: Float,
+            interactionType: Int,
+            minVelocityPxPerSecond: Float,
+            expansionOverHalf: Boolean,
+            allowExpandForSmallExpansion: Boolean
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                int1 = interactionType
+                long1 = vel.toLong()
+                long2 = vectorVel.toLong()
+                double1 = minVelocityPxPerSecond.toDouble()
+                bool1 = expansionOverHalf
+                bool2 = allowExpandForSmallExpansion
+            },
+            { "NPVC flingExpands called with vel: $long1, vectorVel: $long2, " +
+                    "interactionType: $int1, minVelocityPxPerSecond: $double1 " +
+                    "expansionOverHalf: $bool1, allowExpandForSmallExpansion: $bool2" }
+        )
+    }
+
     fun flingQs(flingType: Int, isClick: Boolean) {
         buffer.log(
             TAG,
