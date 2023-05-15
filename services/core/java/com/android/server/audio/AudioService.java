@@ -6422,6 +6422,26 @@ public class AudioService extends IAudioService.Stub
         mDeviceBroker.setBluetoothScoOn(on, eventSource);
     }
 
+    /** @see AudioManager#setA2dpSuspended(boolean) */
+    @android.annotation.EnforcePermission(android.Manifest.permission.BLUETOOTH_STACK)
+    public void setA2dpSuspended(boolean enable) {
+        super.setA2dpSuspended_enforcePermission();
+        final String eventSource = new StringBuilder("setA2dpSuspended(").append(enable)
+                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
+                .append(Binder.getCallingPid()).toString();
+        mDeviceBroker.setA2dpSuspended(enable, false /*internal*/, eventSource);
+    }
+
+    /** @see AudioManager#setA2dpSuspended(boolean) */
+    @android.annotation.EnforcePermission(android.Manifest.permission.BLUETOOTH_STACK)
+    public void setLeAudioSuspended(boolean enable) {
+        super.setLeAudioSuspended_enforcePermission();
+        final String eventSource = new StringBuilder("setLeAudioSuspended(").append(enable)
+                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
+                .append(Binder.getCallingPid()).toString();
+        mDeviceBroker.setLeAudioSuspended(enable, false /*internal*/, eventSource);
+    }
+
     /** @see AudioManager#isBluetoothScoOn()
      * Note that it doesn't report internal state, but state seen by apps (which may have
      * called setBluetoothScoOn() */
