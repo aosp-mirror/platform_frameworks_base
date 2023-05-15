@@ -33,7 +33,7 @@ interface AuthenticationRepository {
      * A device that is not yet unlocked requires unlocking by completing an authentication
      * challenge according to the current authentication method.
      *
-     * Note that this state has no real bearing on whether the lock screen is showing or dismissed.
+     * Note that this state has no real bearing on whether the lockscreen is showing or dismissed.
      */
     val isUnlocked: StateFlow<Boolean>
 

@@ -63,7 +63,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     @Test
     fun sceneTransition() = runTest {
         val currentScene by collectLastValue(underTest.currentScene)
-        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.LockScreen))
+        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
         underTest.setCurrentScene(SceneModel(SceneKey.Shade))
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
