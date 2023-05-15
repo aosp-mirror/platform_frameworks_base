@@ -99,7 +99,10 @@ static jintArray nativeGetSupportedHdrOutputTypes(JNIEnv* env, jclass clazz) {
     // Extract unique HDR output types.
     std::set<int> hdrOutputTypes;
     for (const auto& hdrConversionCapability : hdrConversionCapabilities) {
-        hdrOutputTypes.insert(hdrConversionCapability.outputType);
+        // Filter out the value for SDR which is 0.
+        if (hdrConversionCapability.outputType > 0) {
+            hdrOutputTypes.insert(hdrConversionCapability.outputType);
+        }
     }
     jintArray array = env->NewIntArray(hdrOutputTypes.size());
     if (array == nullptr) {
