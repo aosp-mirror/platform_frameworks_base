@@ -23,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -108,6 +109,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         when(mCarrierTextControllerBuilder.setShowAirplaneMode(anyBoolean()))
                 .thenReturn(mCarrierTextControllerBuilder);
         when(mCarrierTextControllerBuilder.setShowMissingSim(anyBoolean()))
+                .thenReturn(mCarrierTextControllerBuilder);
+        when(mCarrierTextControllerBuilder.setDebugLocationString(anyString()))
                 .thenReturn(mCarrierTextControllerBuilder);
         when(mCarrierTextControllerBuilder.build()).thenReturn(mCarrierTextManager);
 
