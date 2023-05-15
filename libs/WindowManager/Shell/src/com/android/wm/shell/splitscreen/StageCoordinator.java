@@ -2061,18 +2061,16 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Reset this flag every time onLayoutSizeChanged.
         mShowDecorImmediately = false;
 
-        if (!ENABLE_SHELL_TRANSITIONS) {
-            // Only need screenshot for legacy case because shell transition should screenshot
-            // itself during transition.
-            final SurfaceControl.Transaction startT = mTransactionPool.acquire();
-            mMainStage.screenshotIfNeeded(startT);
-            mSideStage.screenshotIfNeeded(startT);
-            mTransactionPool.release(startT);
-        }
-
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         boolean sizeChanged = updateWindowBounds(layout, wct);
-        if (!sizeChanged) return;
+        if (!sizeChanged) {
+            // We still need to resize on decor for ensure all current status clear.
+            final SurfaceControl.Transaction t = mTransactionPool.acquire();
+            mMainStage.onResized(t);
+            mSideStage.onResized(t);
+            mTransactionPool.release(t);
+            return;
+        }
 
         sendOnBoundsChanged();
         if (ENABLE_SHELL_TRANSITIONS) {
@@ -2080,6 +2078,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitTransitions.startResizeTransition(wct, this, (finishWct, t) ->
                     mSplitLayout.setDividerInteractive(true, false, "onSplitResizeFinish"));
         } else {
+            // Only need screenshot for legacy case because shell transition should screenshot
+            // itself during transition.
+            final SurfaceControl.Transaction startT = mTransactionPool.acquire();
+            mMainStage.screenshotIfNeeded(startT);
+            mSideStage.screenshotIfNeeded(startT);
+            mTransactionPool.release(startT);
+
             mSyncQueue.queue(wct);
             mSyncQueue.runInSync(t -> {
                 updateSurfaceBounds(layout, t, false /* applyResizingOffset */);
