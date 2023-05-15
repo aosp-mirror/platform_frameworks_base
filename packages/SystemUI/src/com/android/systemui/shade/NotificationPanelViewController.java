@@ -2917,6 +2917,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 && mBarState == StatusBarState.SHADE;
     }
 
+    private boolean isPanelVisibleBecauseScrimIsAnimatingOff() {
+        return mUnlockedScreenOffAnimationController.isAnimationPlaying();
+    }
+
     @Override
     public boolean shouldHideStatusBarIconsWhenExpanded() {
         if (mIsLaunchAnimationRunning) {
@@ -3976,6 +3980,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 || isPanelVisibleBecauseOfHeadsUp()
                 || mTracking
                 || mHeightAnimator != null
+                || isPanelVisibleBecauseScrimIsAnimatingOff()
                 && !mIsSpringBackAnimation;
     }
 
