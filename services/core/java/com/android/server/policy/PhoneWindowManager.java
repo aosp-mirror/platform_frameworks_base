@@ -266,7 +266,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Whether to allow devices placed in vr headset viewers to have an alternative Home intent.
     static final boolean ENABLE_VR_HEADSET_HOME_CAPTURE = true;
 
+    // --------- Key behavior definitions below. ---------
+    // NOTE: When updating the valid range of any of these behaviors, and if that behavior has a
+    // Settings key associated to it for dynamic update, update its valid Settings value range in
+    // android.provider.settings.validators.GlobalSettingsValidators.
+
     // must match: config_shortPressOnPowerBehavior in config.xml
+    // The config value can be overridden using Settings.Global.POWER_BUTTON_SHORT_PRESS
     static final int SHORT_PRESS_POWER_NOTHING = 0;
     static final int SHORT_PRESS_POWER_GO_TO_SLEEP = 1;
     static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP = 2;
@@ -277,6 +283,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_POWER_DREAM_OR_SLEEP = 7;
 
     // must match: config_LongPressOnPowerBehavior in config.xml
+    // The config value can be overridden using Settings.Global.POWER_BUTTON_LONG_PRESS
     static final int LONG_PRESS_POWER_NOTHING = 0;
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
@@ -285,6 +292,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_ASSISTANT = 5; // Settings.Secure.ASSISTANT
 
     // must match: config_veryLongPresOnPowerBehavior in config.xml
+    // The config value can be overridden using Settings.Global.POWER_BUTTON_VERY_LONG_PRESS
     static final int VERY_LONG_PRESS_POWER_NOTHING = 0;
     static final int VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
 
@@ -294,6 +302,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS = 2;
 
     // must match: config_doublePressOnPowerBehavior in config.xml
+    // The config value can be overridden using Settings.Global.POWER_BUTTON_DOUBLE_PRESS and/or
+    // Settings.Global.POWER_BUTTON_TRIPLE_PRESS
     static final int MULTI_PRESS_POWER_NOTHING = 0;
     static final int MULTI_PRESS_POWER_THEATER_MODE = 1;
     static final int MULTI_PRESS_POWER_BRIGHTNESS_BOOST = 2;
@@ -324,18 +334,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int PENDING_KEY_NULL = -1;
 
     // Must match: config_shortPressOnStemPrimaryBehavior in config.xml
+    // The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_SHORT_PRESS
     static final int SHORT_PRESS_PRIMARY_NOTHING = 0;
     static final int SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS = 1;
 
     // Must match: config_longPressOnStemPrimaryBehavior in config.xml
+    // The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_LONG_PRESS
     static final int LONG_PRESS_PRIMARY_NOTHING = 0;
     static final int LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT = 1;
 
     // Must match: config_doublePressOnStemPrimaryBehavior in config.xml
+    //The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS
     static final int DOUBLE_PRESS_PRIMARY_NOTHING = 0;
     static final int DOUBLE_PRESS_PRIMARY_SWITCH_RECENT_APP = 1;
 
     // Must match: config_triplePressOnStemPrimaryBehavior in config.xml
+    // The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_TRIPLE_PRESS
     static final int TRIPLE_PRESS_PRIMARY_NOTHING = 0;
     static final int TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY = 1;
 
@@ -804,6 +818,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.POWER_BUTTON_SHORT_PRESS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.POWER_BUTTON_DOUBLE_PRESS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.POWER_BUTTON_TRIPLE_PRESS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POWER_BUTTON_LONG_PRESS), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
@@ -811,6 +834,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POWER_BUTTON_VERY_LONG_PRESS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.STEM_PRIMARY_BUTTON_SHORT_PRESS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.STEM_PRIMARY_BUTTON_TRIPLE_PRESS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.STEM_PRIMARY_BUTTON_LONG_PRESS), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.KEY_CHORD_POWER_VOLUME_UP), false, this,
@@ -2194,33 +2229,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mLongPressOnBackBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnBackBehavior);
 
-        mShortPressOnPowerBehavior = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_shortPressOnPowerBehavior);
         mLongPressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnPowerBehavior);
         mLongPressOnPowerAssistantTimeoutMs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnPowerDurationMs);
         mVeryLongPressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_veryLongPressOnPowerBehavior);
-        mDoublePressOnPowerBehavior = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_doublePressOnPowerBehavior);
         mPowerDoublePressTargetActivity = ComponentName.unflattenFromString(
             mContext.getResources().getString(
                 com.android.internal.R.string.config_doublePressOnPowerTargetActivity));
-        mTriplePressOnPowerBehavior = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_triplePressOnPowerBehavior);
         mShortPressOnSleepBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shortPressOnSleepBehavior);
         mAllowStartActivityForLongPressOnPowerDuringSetup = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowStartActivityForLongPressOnPowerInSetup);
-        mShortPressOnStemPrimaryBehavior = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_shortPressOnStemPrimaryBehavior);
-        mLongPressOnStemPrimaryBehavior = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_longPressOnStemPrimaryBehavior);
-        mDoublePressOnStemPrimaryBehavior = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_doublePressOnStemPrimaryBehavior);
-        mTriplePressOnStemPrimaryBehavior = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_triplePressOnStemPrimaryBehavior);
 
         mHapticTextHandleEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
@@ -2682,6 +2703,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateRotation = true;
             }
 
+            mShortPressOnPowerBehavior = Settings.Global.getInt(resolver,
+                    Settings.Global.POWER_BUTTON_SHORT_PRESS,
+                    mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_shortPressOnPowerBehavior));
+            mDoublePressOnPowerBehavior = Settings.Global.getInt(resolver,
+                    Settings.Global.POWER_BUTTON_DOUBLE_PRESS,
+                    mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_doublePressOnPowerBehavior));
+            mTriplePressOnPowerBehavior = Settings.Global.getInt(resolver,
+                    Settings.Global.POWER_BUTTON_TRIPLE_PRESS,
+                    mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_triplePressOnPowerBehavior));
+
             final int longPressOnPowerBehavior = Settings.Global.getInt(resolver,
                     Settings.Global.POWER_BUTTON_LONG_PRESS,
                     mContext.getResources().getInteger(
@@ -2706,6 +2740,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
                     mContext.getResources().getInteger(
                             com.android.internal.R.integer.config_keyChordPowerVolumeUp));
+
+            mShortPressOnStemPrimaryBehavior = Settings.Global.getInt(resolver,
+                    Settings.Global.STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                    mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_shortPressOnStemPrimaryBehavior));
+            mDoublePressOnStemPrimaryBehavior = Settings.Global.getInt(resolver,
+                    Settings.Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS,
+                    mContext.getResources().getInteger(
+                            com.android.internal.R.integer
+                                    .config_doublePressOnStemPrimaryBehavior));
+            mTriplePressOnStemPrimaryBehavior = Settings.Global.getInt(resolver,
+                    Settings.Global.STEM_PRIMARY_BUTTON_TRIPLE_PRESS,
+                    mContext.getResources().getInteger(
+                            com.android.internal.R.integer
+                                    .config_triplePressOnStemPrimaryBehavior));
+            mLongPressOnStemPrimaryBehavior = Settings.Global.getInt(resolver,
+                    Settings.Global.STEM_PRIMARY_BUTTON_LONG_PRESS,
+                    mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_longPressOnStemPrimaryBehavior));
 
             mStylusButtonsEnabled = Settings.Secure.getIntForUser(resolver,
                     Secure.STYLUS_BUTTONS_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
