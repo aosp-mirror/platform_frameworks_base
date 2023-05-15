@@ -516,8 +516,14 @@ class TransitionController {
      * playing, but can be "opened-up" for certain transition operations like calculating layers
      * for finishTransaction.
      */
-    boolean canAssignLayers() {
-        return mBuildingFinishLayers || !isPlaying();
+    boolean canAssignLayers(@NonNull WindowContainer wc) {
+        // Don't build window state into finish transaction in case another window is added or
+        // removed during transition playing.
+        if (mBuildingFinishLayers) {
+            return wc.asWindowState() == null;
+        }
+        // Always allow WindowState to assign layers since it won't affect transition.
+        return wc.asWindowState() != null || !isPlaying();
     }
 
     @WindowConfiguration.WindowingMode
