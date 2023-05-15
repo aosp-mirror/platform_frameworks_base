@@ -88,7 +88,7 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Ketuk dua kali di luar aplikasi untuk mengubah posisinya"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Oke"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Luaskan untuk melihat informasi selengkapnya."</string>
-    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Mulai ulang untuk tampilan yang lebih baik?"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Mulai ulang untuk melihat tampilan yang lebih baik?"</string>
     <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Anda dapat memulai ulang aplikasi agar terlihat lebih baik di layar, tetapi Anda mungkin kehilangan progres atau perubahan yang belum disimpan"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Batal"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Mulai ulang"</string>

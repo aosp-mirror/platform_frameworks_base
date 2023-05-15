@@ -177,6 +177,13 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     /**
+     * Call to remove the task from window manager. This task will not appear in recents.
+     */
+    public void removeTask() {
+        mTaskViewTaskController.removeTask();
+    }
+
+    /**
      * Release this container if it is initialized.
      */
     public void release() {

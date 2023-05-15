@@ -25,6 +25,7 @@ import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
+import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -51,9 +52,9 @@ public class DragPositioningCallbackUtility {
     }
 
     /**
-     * Based on type of drag and delta provided, calculate the new bounds to display for this task.
+     * Based on type of resize and delta provided, calculate the new bounds to display for this
+     * task.
      * @param ctrlType type of drag being performed
-     * @param hasMoved whether the current drag has moved on a prior input event
      * @param repositionTaskBounds the bounds the task is being repositioned to
      * @param taskBoundsAtDragStart the bounds of the task on the first drag input event
      * @param stableBounds bounds that represent the resize limit of this task
@@ -62,16 +63,19 @@ public class DragPositioningCallbackUtility {
      * @param windowDecoration window decoration of the task being dragged
      * @return whether this method changed repositionTaskBounds
      */
-    static boolean changeBounds(int ctrlType, boolean hasMoved,
-            Rect repositionTaskBounds, Rect taskBoundsAtDragStart, Rect stableBounds,
-            PointF delta, DisplayController displayController, WindowDecoration windowDecoration) {
-        // |mRepositionTaskBounds| is the bounds last reported if |mHasMoved| is true. If it's not
-        // true, we can compare it against |mTaskBoundsAtDragStart|.
-        final int oldLeft = hasMoved ? repositionTaskBounds.left : taskBoundsAtDragStart.left;
-        final int oldTop = hasMoved ? repositionTaskBounds.top : taskBoundsAtDragStart.top;
-        final int oldRight = hasMoved ? repositionTaskBounds.right : taskBoundsAtDragStart.right;
-        final int oldBottom =
-                hasMoved ? repositionTaskBounds.bottom : taskBoundsAtDragStart.bottom;
+    static boolean changeBounds(int ctrlType, Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
+            Rect stableBounds, PointF delta, DisplayController displayController,
+            WindowDecoration windowDecoration) {
+        // If task is being dragged rather than resized, return since this method only handles
+        // with resizing
+        if (ctrlType == CTRL_TYPE_UNDEFINED) {
+            return false;
+        }
+
+        final int oldLeft = repositionTaskBounds.left;
+        final int oldTop = repositionTaskBounds.top;
+        final int oldRight = repositionTaskBounds.right;
+        final int oldBottom = repositionTaskBounds.bottom;
 
 
         repositionTaskBounds.set(taskBoundsAtDragStart);
@@ -101,10 +105,6 @@ public class DragPositioningCallbackUtility {
             repositionTaskBounds.bottom = (candidateBottom < stableBounds.bottom)
                     ? candidateBottom : oldBottom;
         }
-        if (ctrlType == CTRL_TYPE_UNDEFINED) {
-            repositionTaskBounds.offset((int) delta.x, (int) delta.y);
-        }
-
         // If width or height are negative or less than the minimum width or height, revert the
         // respective bounds to use previous bound dimensions.
         if (repositionTaskBounds.width() < getMinWidth(displayController, windowDecoration)) {
@@ -126,8 +126,26 @@ public class DragPositioningCallbackUtility {
     }
 
     /**
+     * Set bounds using a {@link SurfaceControl.Transaction}.
+     */
+    static void setPositionOnDrag(WindowDecoration decoration, Rect repositionTaskBounds,
+            Rect taskBoundsAtDragStart, PointF repositionStartPoint, SurfaceControl.Transaction t,
+            float x, float y) {
+        updateTaskBounds(repositionTaskBounds, taskBoundsAtDragStart, repositionStartPoint, x, y);
+        t.setPosition(decoration.mTaskSurface, repositionTaskBounds.left,
+                repositionTaskBounds.top);
+    }
+
+    static void updateTaskBounds(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
+            PointF repositionStartPoint, float x, float y) {
+        final float deltaX = x - repositionStartPoint.x;
+        final float deltaY = y - repositionStartPoint.y;
+        repositionTaskBounds.set(taskBoundsAtDragStart);
+        repositionTaskBounds.offset((int) deltaX, (int) deltaY);
+    }
+
+    /**
      * Apply a bounds change to a task.
-     * @param wct provided {@link WindowContainerTransaction} that may contain other changes
      * @param windowDecoration decor of task we are changing bounds for
      * @param taskBounds new bounds of this task
      * @param taskOrganizer applies the provided WindowContainerTransaction

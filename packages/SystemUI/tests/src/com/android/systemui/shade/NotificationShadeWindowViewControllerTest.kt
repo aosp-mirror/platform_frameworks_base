@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -71,6 +72,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import java.util.Optional
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -101,6 +103,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
+    @Mock
+    private lateinit var unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
     lateinit var primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel
@@ -129,6 +133,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
         featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.DUAL_SHADE, false)
+        featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
 
         val inputProxy = MultiShadeInputProxy()
         testScope = TestScope()
@@ -158,6 +163,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 lockIconViewController,
                 centralSurfaces,
                 notificationShadeWindowController,
+                unfoldTransitionProgressProvider,
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,

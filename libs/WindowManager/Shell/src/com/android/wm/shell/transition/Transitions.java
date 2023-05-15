@@ -19,8 +19,6 @@ package com.android.wm.shell.transition;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -503,7 +501,9 @@ public class Transitions implements RemoteCallable<Transitions>,
      */
     private static void setupAnimHierarchy(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
-        boolean isOpening = isOpeningType(info.getType());
+        final int type = info.getType();
+        final boolean isOpening = isOpeningType(type);
+        final boolean isClosing = isClosingType(type);
         for (int i = 0; i < info.getRootCount(); ++i) {
             t.show(info.getRoot(i).getLeash());
         }
@@ -556,7 +556,13 @@ public class Transitions implements RemoteCallable<Transitions>,
                     layer = zSplitLine + numChanges - i;
                 }
             } else { // CHANGE or other
-                layer = zSplitLine + numChanges - i;
+                if (isClosing) {
+                    // Put below CLOSE mode.
+                    layer = zSplitLine - i;
+                } else {
+                    // Put above CLOSE mode.
+                    layer = zSplitLine + numChanges - i;
+                }
             }
             t.setLayer(leash, layer);
         }
@@ -851,14 +857,13 @@ public class Transitions implements RemoteCallable<Transitions>,
                     active.mStartT, active.mFinishT, (wct, cb) -> onFinish(active, wct, cb));
             if (consumed) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by firstHandler");
+                mTracer.logDispatched(active.mInfo.getDebugId(), active.mHandler);
                 return;
             }
         }
         // Otherwise give every other handler a chance
         active.mHandler = dispatchTransition(active.mToken, active.mInfo, active.mStartT,
                 active.mFinishT, (wct, cb) -> onFinish(active, wct, cb), active.mHandler);
-
-        mTracer.logDispatched(active.mInfo.getDebugId(), active.mHandler);
     }
 
     /**
@@ -877,6 +882,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             if (consumed) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by %s",
                         mHandlers.get(i));
+                mTracer.logDispatched(info.getDebugId(), mHandlers.get(i));
                 return mHandlers.get(i);
             }
         }

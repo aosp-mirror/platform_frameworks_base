@@ -54,6 +54,7 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
 import com.android.systemui.multishade.domain.interactor.MultiShadeMotionEventInteractor;
 import com.android.systemui.multishade.ui.view.MultiShadeView;
+import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationInsetsController;
@@ -68,9 +69,11 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -114,7 +117,7 @@ public class NotificationShadeWindowViewController {
 
     private boolean mIsTrackingBarGesture = false;
     private boolean mIsOcclusionTransitionRunning = false;
-
+    private DisableSubpixelTextTransitionListener mDisableSubpixelTextTransitionListener;
     private final Consumer<TransitionStep> mLockscreenToDreamingTransition =
             (TransitionStep step) -> {
                 mIsOcclusionTransitionRunning =
@@ -139,6 +142,7 @@ public class NotificationShadeWindowViewController {
             LockIconViewController lockIconViewController,
             CentralSurfaces centralSurfaces,
             NotificationShadeWindowController controller,
+            Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
@@ -174,6 +178,7 @@ public class NotificationShadeWindowViewController {
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
+        mDisableSubpixelTextTransitionListener = new DisableSubpixelTextTransitionListener(mView);
         KeyguardBouncerViewBinder.bind(
                 mView.findViewById(R.id.keyguard_bouncer_container),
                 keyguardBouncerViewModel,
@@ -184,6 +189,11 @@ public class NotificationShadeWindowViewController {
                 mLockscreenToDreamingTransition);
 
         mClock = clock;
+        if (featureFlags.isEnabled(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION)) {
+            unfoldTransitionProgressProvider.ifPresent(
+                    progressProvider -> progressProvider.addCallback(
+                            mDisableSubpixelTextTransitionListener));
+        }
         if (ComposeFacade.INSTANCE.isComposeAvailable()
                 && featureFlags.isEnabled(Flags.DUAL_SHADE)) {
             mMultiShadeMotionEventInteractor = multiShadeMotionEventInteractorProvider.get();

@@ -99,39 +99,34 @@ public class AutofillFeatureFlags {
             "autofill_dialog_hints";
 
     // START CREDENTIAL MANAGER FLAGS //
-
     /**
-     * Indicates whether credential manager tagged views should be ignored from autofill structures.
-     * This flag is further gated by {@link #DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED}
+     * (deprecated) Indicates whether credential manager tagged views should be ignored from
+     * autofill structures.This flag is further gated by
+     * {@link #DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED}
+     *
+     * TODO(b/280661772): Remove this flag once API change is allowed
      */
     public static final String DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_IGNORE_VIEWS =
             "autofill_credential_manager_ignore_views";
 
     /**
-     * Indicates CredentialManager feature enabled or not.
+     * (deprecated) Indicates CredentialManager feature enabled or not.
      * This is the overall feature flag. Individual behavior of credential manager may be controlled
      * via a different flag, but gated by this flag.
+     *
+     * TODO(b/280661772): Remove this flag once API change is allowed
      */
     public static final String DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED =
             "autofill_credential_manager_enabled";
 
     /**
-     * Indicates whether credential manager tagged views should suppress fill dialog.
+     * Indicates whether credential manager tagged views should suppress fill and save dialog.
      * This flag is further gated by {@link #DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED}
      *
      * @hide
      */
-    public static final String DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_SUPPRESS_FILL_DIALOG =
-            "autofill_credential_manager_suppress_fill_dialog";
-
-    /**
-     * Indicates whether credential manager tagged views should suppress save dialog.
-     * This flag is further gated by {@link #DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED}
-     *
-     * @hide
-     */
-    public static final String DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_SUPPRESS_SAVE_DIALOG =
-            "autofill_credential_manager_suppress_save_dialog";
+    public static final String DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_SUPPRESS_FILL_AND_SAVE_DIALOG =
+            "autofill_credential_manager_suppress_fill_and_save_dialog";
     // END CREDENTIAL MANAGER FLAGS //
 
     // START AUTOFILL FOR ALL APPS FLAGS //
@@ -270,11 +265,7 @@ public class AutofillFeatureFlags {
 
 
     // CREDENTIAL MANAGER DEFAULTS
-    // Credential manager is enabled by default so as to allow testing by app developers
-    private static final boolean DEFAULT_CREDENTIAL_MANAGER_ENABLED = true;
-    private static final boolean DEFAULT_CREDENTIAL_MANAGER_IGNORE_VIEWS = true;
-    private static final boolean DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_FILL_DIALOG = false;
-    private static final boolean DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_SAVE_DIALOG = false;
+    private static final boolean DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_FILL_AND_SAVE_DIALOG = true;
     // END CREDENTIAL MANAGER DEFAULTS
 
 
@@ -317,43 +308,19 @@ public class AutofillFeatureFlags {
                 (str) -> !TextUtils.isEmpty(str));
     }
 
-    /**
-     * Whether the Credential Manager feature is enabled or not
-     *
-     * @hide
-     */
-    public static boolean isCredentialManagerEnabled() {
-        return DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_AUTOFILL,
-                DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED,
-                DEFAULT_CREDENTIAL_MANAGER_ENABLED);
-    }
-
-    /**
-     * Whether credential manager tagged views should be ignored for autofill structure.
-     *
-     * @hide
-     */
-    public static boolean shouldIgnoreCredentialViews() {
-        return isCredentialManagerEnabled()
-                && DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_AUTOFILL,
-                DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_IGNORE_VIEWS,
-                DEFAULT_CREDENTIAL_MANAGER_IGNORE_VIEWS);
-    }
-
+    /* starts credman flag getter function */
     /**
      * Whether credential manager tagged views should not trigger fill dialog requests.
      *
      * @hide
      */
-    public static boolean isFillDialogDisabledForCredentialManager() {
-        return isCredentialManagerEnabled()
-                && DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_AUTOFILL,
-                DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_SUPPRESS_FILL_DIALOG,
-                DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_FILL_DIALOG);
+    public static boolean isFillAndSaveDialogDisabledForCredentialManager() {
+        return DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
+                    DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_SUPPRESS_FILL_AND_SAVE_DIALOG,
+                    DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_FILL_AND_SAVE_DIALOG);
     }
+    /* ends credman flag getter function */
 
     /**
      * Whether triggering fill request on unimportant view is enabled.

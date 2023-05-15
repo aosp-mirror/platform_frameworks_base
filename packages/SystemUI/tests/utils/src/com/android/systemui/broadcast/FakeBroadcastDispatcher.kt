@@ -27,6 +27,7 @@ import com.android.systemui.SysuiTestableContext
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
+import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 
@@ -37,7 +38,8 @@ class FakeBroadcastDispatcher(
     broadcastRunningExecutor: Executor,
     dumpManager: DumpManager,
     logger: BroadcastDispatcherLogger,
-    userTracker: UserTracker
+    userTracker: UserTracker,
+    private val shouldFailOnLeakedReceiver: Boolean
 ) :
     BroadcastDispatcher(
         context,
@@ -85,6 +87,9 @@ class FakeBroadcastDispatcher(
     fun cleanUpReceivers(testName: String) {
         registeredReceivers.forEach {
             Log.i(testName, "Receiver not unregistered from dispatcher: $it")
+            if (shouldFailOnLeakedReceiver) {
+                throw IllegalStateException("Receiver not unregistered from dispatcher: $it")
+            }
         }
         registeredReceivers.clear()
     }

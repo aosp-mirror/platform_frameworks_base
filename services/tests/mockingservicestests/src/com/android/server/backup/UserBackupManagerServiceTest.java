@@ -31,6 +31,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManagerMonitor;
@@ -246,7 +247,8 @@ public class UserBackupManagerServiceTest {
         mService.reportDelayedRestoreResult(TEST_PACKAGE, results);
 
         verify(() -> BackupManagerMonitorUtils.sendAgentLoggingResults(
-                eq(mBackupManagerMonitor), eq(packageInfo), eq(results)));
+                eq(mBackupManagerMonitor), eq(packageInfo), eq(results), eq(
+                        BackupAnnotations.OperationType.RESTORE)));
     }
 
     private static PackageInfo getPackageInfo(String packageName) {

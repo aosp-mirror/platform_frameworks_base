@@ -115,7 +115,8 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Zvok visoke kakovosti: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Zvok visoke kakovosti"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni pripomočki"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
+    <skip />
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Povezava s slušnimi pripomočki je vzpostavljena"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Povezano s profilom LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Povezan s profilom za predstavnostni zvok"</string>
@@ -269,8 +270,8 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Omrežja"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogoči podrobno zapisovanje dnevnika za Wi-Fi"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Omejevanje iskanja omrežij Wi-Fi"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Dodeljevanje nestalnega naključnega naslova MAC za Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Omeji iskanje omrežij Wi-Fi"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Dodeli nestalni naključni naslov MAC za Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Prenos podatkov v mobilnem omrežju je vedno aktiven"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Strojno pospeševanje za internetno povezavo prek mobilnega telefona"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži naprave Bluetooth brez imen"</string>

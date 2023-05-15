@@ -16,6 +16,8 @@
 
 package com.android.server.devicepolicy;
 
+import static com.android.server.devicepolicy.DevicePolicyEngine.DEVICE_LOCK_CONTROLLER_ROLE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.AccountTypePolicyKey;
@@ -40,6 +42,7 @@ import android.os.UserManager;
 import com.android.internal.util.function.QuadFunction;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.utils.Slogf;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -51,6 +54,9 @@ import java.util.Map;
 import java.util.Set;
 
 final class PolicyDefinition<V> {
+
+    static final String TAG = "PolicyDefinition";
+
     private static final int POLICY_FLAG_NONE = 0;
 
     // Only use this flag if a policy can not be applied locally.
@@ -131,9 +137,7 @@ final class PolicyDefinition<V> {
     static PolicyDefinition<LockTaskPolicy> LOCK_TASK = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.LOCK_TASK_POLICY),
             new TopPriority<>(List.of(
-                    // TODO(b/258166155): add correct device lock role name
-                    EnforcingAdmin.getRoleAuthorityOf(
-                            "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER"),
+                    EnforcingAdmin.getRoleAuthorityOf(DEVICE_LOCK_CONTROLLER_ROLE),
                     EnforcingAdmin.DPC_AUTHORITY)),
             POLICY_FLAG_LOCAL_ONLY_POLICY,
             (LockTaskPolicy value, Context context, Integer userId, PolicyKey policyKey) ->
@@ -157,9 +161,7 @@ final class PolicyDefinition<V> {
                     new IntentFilterPolicyKey(
                             DevicePolicyIdentifiers.PERSISTENT_PREFERRED_ACTIVITY_POLICY),
             new TopPriority<>(List.of(
-                    // TODO(b/258166155): add correct device lock role name
-                    EnforcingAdmin.getRoleAuthorityOf(
-                            "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER"),
+                    EnforcingAdmin.getRoleAuthorityOf(DEVICE_LOCK_CONTROLLER_ROLE),
                     EnforcingAdmin.DPC_AUTHORITY)),
             POLICY_FLAG_LOCAL_ONLY_POLICY,
             PolicyEnforcerCallbacks::addPersistentPreferredActivity,
@@ -265,7 +267,7 @@ final class PolicyDefinition<V> {
                     //  never used, but might need some refactoring to not always assume a non-null
                     //  mechanism.
                     TRUE_MORE_RESTRICTIVE,
-                    POLICY_FLAG_LOCAL_ONLY_POLICY,
+                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
                     PolicyEnforcerCallbacks::setApplicationHidden,
                     new BooleanPolicySerializer());
 
@@ -290,7 +292,7 @@ final class PolicyDefinition<V> {
                     new AccountTypePolicyKey(
                             DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY),
                     TRUE_MORE_RESTRICTIVE,
-                    POLICY_FLAG_LOCAL_ONLY_POLICY,
+                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
                     // Nothing is enforced, we just need to store it
                     (Boolean value, Context context, Integer userId, PolicyKey policyKey) -> true,
                     new BooleanPolicySerializer());
@@ -311,9 +313,25 @@ final class PolicyDefinition<V> {
     static PolicyDefinition<Set<String>> PERMITTED_INPUT_METHODS = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY),
             new MostRecent<>(),
-            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
             (Set<String> value, Context context, Integer userId, PolicyKey policyKey) -> true,
             new StringSetPolicySerializer());
+
+
+    static PolicyDefinition<Boolean> SCREEN_CAPTURE_DISABLED = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY),
+            TRUE_MORE_RESTRICTIVE,
+            POLICY_FLAG_INHERITABLE,
+            PolicyEnforcerCallbacks::setScreenCaptureDisabled,
+            new BooleanPolicySerializer());
+
+    static PolicyDefinition<Boolean> PERSONAL_APPS_SUSPENDED = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY),
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
+            PolicyEnforcerCallbacks::setPersonalAppsSuspended,
+            new BooleanPolicySerializer());
+
 
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
@@ -342,6 +360,10 @@ final class PolicyDefinition<V> {
                 GENERIC_ACCOUNT_MANAGEMENT_DISABLED);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY,
                 PERMITTED_INPUT_METHODS);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY,
+                SCREEN_CAPTURE_DISABLED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY,
+                PERSONAL_APPS_SUSPENDED);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
@@ -527,7 +549,7 @@ final class PolicyDefinition<V> {
             String restriction, int flags) {
         String identifier = DevicePolicyIdentifiers.getIdentifierForUserRestriction(restriction);
         UserRestrictionPolicyKey key = new UserRestrictionPolicyKey(identifier, restriction);
-        flags |= POLICY_FLAG_USER_RESTRICTION_POLICY;
+        flags |= (POLICY_FLAG_USER_RESTRICTION_POLICY | POLICY_FLAG_INHERITABLE);
         PolicyDefinition<Boolean> definition = new PolicyDefinition<>(
                 key,
                 TRUE_MORE_RESTRICTIVE,
@@ -578,22 +600,40 @@ final class PolicyDefinition<V> {
         mPolicyKey.saveToXml(serializer);
     }
 
+    @Nullable
     static <V> PolicyDefinition<V> readFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         // TODO: can we avoid casting?
         PolicyKey policyKey = readPolicyKeyFromXml(parser);
+        if (policyKey == null) {
+            Slogf.wtf(TAG, "Error parsing PolicyDefinition, PolicyKey is null.");
+            return null;
+        }
         PolicyDefinition<V> genericPolicyDefinition =
                 (PolicyDefinition<V>) POLICY_DEFINITIONS.get(policyKey.getIdentifier());
+        if (genericPolicyDefinition == null) {
+            Slogf.wtf(TAG, "Unknown generic policy key: " + policyKey);
+            return null;
+        }
         return genericPolicyDefinition.createPolicyDefinition(policyKey);
     }
 
+    @Nullable
     static <V> PolicyKey readPolicyKeyFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         // TODO: can we avoid casting?
         PolicyKey policyKey = PolicyKey.readGenericPolicyKeyFromXml(parser);
+        if (policyKey == null) {
+            Slogf.wtf(TAG, "Error parsing PolicyKey, GenericPolicyKey is null");
+            return null;
+        }
         PolicyDefinition<PolicyValue<V>> genericPolicyDefinition =
                 (PolicyDefinition<PolicyValue<V>>) POLICY_DEFINITIONS.get(
                         policyKey.getIdentifier());
+        if (genericPolicyDefinition == null) {
+            Slogf.wtf(TAG, "Error parsing PolicyKey, Unknown generic policy key: " + policyKey);
+            return null;
+        }
         return genericPolicyDefinition.mPolicyKey.readFromXml(parser);
     }
 

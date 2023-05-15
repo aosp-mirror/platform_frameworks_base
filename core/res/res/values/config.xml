@@ -774,11 +774,6 @@
          we rely on gravity to determine the effective orientation. -->
     <bool name="config_deskDockEnablesAccelerometer">true</bool>
 
-    <!-- Control whether nosensor and locked orientation requests are respected from the app when
-         config_deskDockEnablesAccelerometer is set to false.
-         TODO(b/274763533): Consider making true by default and removing this. -->
-    <bool name="config_deskRespectsNoSensorAndLockedWithoutAccelerometer">false</bool>
-
     <!-- Car dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a car dock.
@@ -799,10 +794,10 @@
 
     <!--  Control whether to launch Car dock home app when user presses home button or when
           car dock intent is fired.
-          In mobile device, usually separate home app is expected in car mode, and this should be
-          enabled. But in environments like real car, default home app may be enough, and in that
-          case, this can be disabled (set to false). -->
-    <bool name="config_enableCarDockHomeLaunch">true</bool>
+          For devices where a separate home app is expected in car mode this should be enabled.
+          But in environments like real car, default home app may be enough, and in that case
+          this can be disabled (set to false). Defaults to false on mobile devices. -->
+    <bool name="config_enableCarDockHomeLaunch">false</bool>
 
     <!-- Control whether to force apps to give up control over the display of system bars at all
          times regardless of System Ui Flags.
@@ -1397,9 +1392,6 @@
     <!-- Number of notifications to keep in the notification service historical archive -->
     <integer name="config_notificationServiceArchiveSize">100</integer>
 
-    <!-- List of packages that will be able to use full screen intent in notifications by default -->
-    <string-array name="config_useFullScreenIntentPackages" translatable="false" />
-
     <!-- Allow the menu hard key to be disabled in LockScreen on some devices -->
     <bool name="config_disableMenuKeyInLockScreen">false</bool>
 
@@ -1824,6 +1816,16 @@
     <!-- Component name of the default wallpaper. This will be ImageWallpaper if not
          specified -->
     <string name="default_wallpaper_component" translatable="false">@null</string>
+
+    <!-- CMF colors to default wallpaper component map, the component with color matching the device
+         color will be the cmf default wallpapers. The default wallpaper will be default wallpaper
+         component if not specified.
+
+         E.g. for SLV color, and com.android.example/com.android.example.SlVDefaultWallpaper
+         <item>SLV,com.android.example/com.android.example.SlVDefaultWallpaper</item> -->
+    <string-array name="cmf_default_wallpaper_component" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
 
     <!-- By default a product has no distinct default lock wallpaper -->
     <item name="default_lock_wallpaper" type="drawable">@null</item>
@@ -2955,8 +2957,13 @@
     <!-- Whether safe headphone volume is enabled or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
 
-    <!-- Whether safe headphone sound dosage warning is enabled or not (country specific). -->
-    <bool name="config_safe_sound_dosage_enabled">true</bool>
+    <!-- Whether safe headphone sound dosage warning is enabled or not
+         (country specific). This value should only be overlaid to true
+         when a vendor supports offload and has the HAL sound dose
+         interfaces implemented. Otherwise, this can lead to a compliance
+         issue with the safe hearing standards EN50332-3 and IEC62368-1.
+    -->
+    <bool name="config_safe_sound_dosage_enabled">false</bool>
 
     <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
     <bool name="config_safe_media_disable_on_volume_up">true</bool>
@@ -4483,17 +4490,27 @@
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
 
-    <!-- The component name, flattened to a string, for the system's credential manager
-      provider service. This service allows credential retrieval and storage od credentials.
+    <!-- The component name(s), flattened to a string, for the system's credential manager
+      provider services. These services allow retrieving and storing credentials.
 
-     This service must be trusted, as it can be activated without explicit consent of the user.
+     These services must be trusted, as they can be activated without explicit consent of the user.
      If no service with the specified name exists on the device, there will be no user configurable
      provider to service credential manager requests. However, credential manager system
      services that do not require user consent, will still work.
 
      See android.credentials.CredentialManager
     -->
-    <string-array name="config_defaultCredentialProviderService" translatable="false">
+    <string-array name="config_enabledCredentialProviderService" translatable="false">
+    </string-array>
+
+    <!-- The component name(s), flattened to a string, for the system's primary credential manager
+      provider services. These service will be used by default for storing credentials.
+
+     These services must be trusted, as they can be activated without explicit consent of the user.
+
+     See android.credentials.CredentialManager
+    -->
+    <string-array name="config_primaryCredentialProviderService" translatable="false">
     </string-array>
 
     <!-- The package name for the system's smartspace service.
@@ -6430,4 +6447,8 @@
     <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
     <!-- Whether to request the approval before commit sessions. -->
     <bool name="config_isPreApprovalRequestAvailable">true</bool>
+
+    <!-- Whether the AOSP support for app cloning building blocks is to be enabled for the
+         device. -->
+    <bool name="config_enableAppCloningBuildingBlocks">true</bool>
 </resources>

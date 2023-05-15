@@ -43,6 +43,8 @@ public class TrustManager {
     private static final int MSG_TRUST_CHANGED = 1;
     private static final int MSG_TRUST_MANAGED_CHANGED = 2;
     private static final int MSG_TRUST_ERROR = 3;
+    private static final int MSG_ENABLED_TRUST_AGENTS_CHANGED = 4;
+    private static final int MSG_IS_ACTIVE_UNLOCK_RUNNING = 5;
 
     private static final String TAG = "TrustManager";
     private static final String DATA_FLAGS = "initiatedByUser";
@@ -165,6 +167,17 @@ public class TrustManager {
     }
 
     /**
+     * Returns whether active unlock can be used to unlock the device for user {@code userId}.
+     */
+    public boolean isActiveUnlockRunning(int userId) {
+        try {
+            return mService.isActiveUnlockRunning(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Registers a listener for trust events.
      *
      * Requires the {@link android.Manifest.permission#TRUST_LISTENER} permission.
@@ -187,6 +200,13 @@ public class TrustManager {
                 }
 
                 @Override
+                public void onEnabledTrustAgentsChanged(int userId) {
+                    final Message m = mHandler.obtainMessage(MSG_ENABLED_TRUST_AGENTS_CHANGED,
+                            userId, 0, trustListener);
+                    m.sendToTarget();
+                }
+
+                @Override
                 public void onTrustManagedChanged(boolean managed, int userId) {
                     mHandler.obtainMessage(MSG_TRUST_MANAGED_CHANGED, (managed ? 1 : 0), userId,
                             trustListener).sendToTarget();
@@ -197,6 +217,12 @@ public class TrustManager {
                     Message m = mHandler.obtainMessage(MSG_TRUST_ERROR, trustListener);
                     m.getData().putCharSequence(DATA_MESSAGE, message);
                     m.sendToTarget();
+                }
+
+                @Override
+                public void onIsActiveUnlockRunningChanged(boolean isRunning, int userId) {
+                    mHandler.obtainMessage(MSG_IS_ACTIVE_UNLOCK_RUNNING,
+                            (isRunning ? 1 : 0), userId, trustListener).sendToTarget();
                 }
             };
             mService.registerTrustListener(iTrustListener);
@@ -283,6 +309,14 @@ public class TrustManager {
                 case MSG_TRUST_ERROR:
                     final CharSequence message = msg.peekData().getCharSequence(DATA_MESSAGE);
                     ((TrustListener) msg.obj).onTrustError(message);
+                    break;
+                case MSG_ENABLED_TRUST_AGENTS_CHANGED:
+                    ((TrustListener) msg.obj).onEnabledTrustAgentsChanged(msg.arg1);
+                    break;
+                case MSG_IS_ACTIVE_UNLOCK_RUNNING:
+                    ((TrustListener) msg.obj)
+                            .onIsActiveUnlockRunningChanged(msg.arg1 != 0, msg.arg2);
+                    break;
             }
         }
     };
@@ -316,5 +350,17 @@ public class TrustManager {
          * @param message A message that should be displayed on the UI.
          */
         void onTrustError(CharSequence message);
+
+        /**
+         * Reports that the enabled trust agents for the specified user has changed.
+         */
+        void onEnabledTrustAgentsChanged(int userId);
+
+        /**
+         * Reports changes on if the device can be unlocked with active unlock.
+         * @param isRunning If true, the device can be unlocked with active unlock.
+         * @param userId The user, for which the state changed.
+        */
+        void onIsActiveUnlockRunningChanged(boolean isRunning, int userId);
     }
 }

@@ -161,7 +161,7 @@ public class LocaleConfig implements Parcelable {
      * <p><b>Note:</b> The creation of this LocaleConfig does not automatically mean it will
      * become the override config for an application. Any LocaleConfig desired to be the override
      * must be passed into the {@link LocaleManager#setOverrideLocaleConfig(LocaleConfig)},
-     * otherwise it will not persist or affect the system’s understanding of app-supported
+     * otherwise it will not persist or affect the system&#39;s understanding of app-supported
      * resources.
      *
      * @param locales the desired locales for a specified application

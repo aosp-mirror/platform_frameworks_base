@@ -647,7 +647,9 @@ public final class DisplayInfo implements Parcelable {
         if (refreshRateOverride > 0) {
             return refreshRateOverride;
         }
-
+        if (supportedModes.length == 0) {
+            return 0;
+        }
         return getMode().getRefreshRate();
     }
 
@@ -665,7 +667,9 @@ public final class DisplayInfo implements Parcelable {
                 return supportedModes[i];
             }
         }
-        throw new IllegalStateException("Unable to locate mode " + id);
+        throw new IllegalStateException(
+                "Unable to locate mode id=" + id + ",supportedModes=" + Arrays.toString(
+                        supportedModes));
     }
 
     /**

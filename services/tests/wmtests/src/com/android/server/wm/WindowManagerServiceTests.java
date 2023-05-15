@@ -67,7 +67,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.VirtualDisplay;
@@ -515,12 +514,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testSetInTouchMode_instrumentedProcessGetPermissionToSwitchTouchMode() {
-        // Disable global touch mode (config_perDisplayFocusEnabled set to true)
-        Resources mockResources = mock(Resources.class);
-        spyOn(mContext);
-        when(mContext.getResources()).thenReturn(mockResources);
-        doReturn(true).when(mockResources).getBoolean(
-                com.android.internal.R.bool.config_perDisplayFocusEnabled);
+        // Enable global touch mode
+        mWm.mPerDisplayFocusEnabled = true;
 
         // Get current touch mode state and setup WMS to run setInTouchMode
         boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
@@ -539,12 +534,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testSetInTouchMode_nonInstrumentedProcessDontGetPermissionToSwitchTouchMode() {
-        // Disable global touch mode (config_perDisplayFocusEnabled set to true)
-        Resources mockResources = mock(Resources.class);
-        spyOn(mContext);
-        when(mContext.getResources()).thenReturn(mockResources);
-        doReturn(true).when(mockResources).getBoolean(
-                com.android.internal.R.bool.config_perDisplayFocusEnabled);
+        // Enable global touch mode
+        mWm.mPerDisplayFocusEnabled = true;
 
         // Get current touch mode state and setup WMS to run setInTouchMode
         boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
@@ -563,6 +554,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testSetInTouchMode_multiDisplay_globalTouchModeUpdate() {
+        // Disable global touch mode
+        mWm.mPerDisplayFocusEnabled = false;
+
         // Create one extra display
         final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
         final VirtualDisplay virtualDisplayOwnTouchMode =
@@ -570,16 +564,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int numberOfDisplays = mWm.mRoot.mChildren.size();
         assertThat(numberOfDisplays).isAtLeast(3);
         final int numberOfGlobalTouchModeDisplays = (int) mWm.mRoot.mChildren.stream()
-                        .filter(d -> (d.getDisplay().getFlags() & FLAG_OWN_FOCUS) == 0)
-                        .count();
+                .filter(d -> (d.getDisplay().getFlags() & FLAG_OWN_FOCUS) == 0)
+                .count();
         assertThat(numberOfGlobalTouchModeDisplays).isAtLeast(2);
-
-        // Enable global touch mode (config_perDisplayFocusEnabled set to false)
-        Resources mockResources = mock(Resources.class);
-        spyOn(mContext);
-        when(mContext.getResources()).thenReturn(mockResources);
-        doReturn(false).when(mockResources).getBoolean(
-                com.android.internal.R.bool.config_perDisplayFocusEnabled);
 
         // Get current touch mode state and setup WMS to run setInTouchMode
         boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
@@ -598,17 +585,13 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testSetInTouchMode_multiDisplay_perDisplayFocus_singleDisplayTouchModeUpdate() {
+        // Enable global touch mode
+        mWm.mPerDisplayFocusEnabled = true;
+
         // Create one extra display
         final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
         final int numberOfDisplays = mWm.mRoot.mChildren.size();
         assertThat(numberOfDisplays).isAtLeast(2);
-
-        // Disable global touch mode (config_perDisplayFocusEnabled set to true)
-        Resources mockResources = mock(Resources.class);
-        spyOn(mContext);
-        when(mContext.getResources()).thenReturn(mockResources);
-        doReturn(true).when(mockResources).getBoolean(
-                com.android.internal.R.bool.config_perDisplayFocusEnabled);
 
         // Get current touch mode state and setup WMS to run setInTouchMode
         boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
@@ -628,17 +611,13 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testSetInTouchMode_multiDisplay_ownTouchMode_singleDisplayTouchModeUpdate() {
+        // Disable global touch mode
+        mWm.mPerDisplayFocusEnabled = false;
+
         // Create one extra display
         final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ true);
         final int numberOfDisplays = mWm.mRoot.mChildren.size();
         assertThat(numberOfDisplays).isAtLeast(2);
-
-        // Enable global touch mode (config_perDisplayFocusEnabled set to false)
-        Resources mockResources = mock(Resources.class);
-        spyOn(mContext);
-        when(mContext.getResources()).thenReturn(mockResources);
-        doReturn(false).when(mockResources).getBoolean(
-                com.android.internal.R.bool.config_perDisplayFocusEnabled);
 
         // Get current touch mode state and setup WMS to run setInTouchMode
         boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
@@ -667,18 +646,13 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     private void testSetInTouchModeOnAllDisplays(boolean perDisplayFocusEnabled) {
+        // Set global touch mode with the value passed as argument.
+        mWm.mPerDisplayFocusEnabled = perDisplayFocusEnabled;
+
         // Create a couple of extra displays.
         // setInTouchModeOnAllDisplays should ignore the ownFocus setting.
         final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
         final VirtualDisplay virtualDisplayOwnFocus = createVirtualDisplay(/* ownFocus= */ true);
-
-        // Enable or disable global touch mode (config_perDisplayFocusEnabled setting).
-        // setInTouchModeOnAllDisplays should ignore this value.
-        Resources mockResources = mock(Resources.class);
-        spyOn(mContext);
-        when(mContext.getResources()).thenReturn(mockResources);
-        doReturn(perDisplayFocusEnabled).when(mockResources).getBoolean(
-                com.android.internal.R.bool.config_perDisplayFocusEnabled);
 
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();

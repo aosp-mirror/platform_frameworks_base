@@ -50,7 +50,6 @@ class KeyguardBouncerRepositoryTest : SysuiTestCase() {
         val testCoroutineScope = TestCoroutineScope()
         underTest =
             KeyguardBouncerRepositoryImpl(
-                viewMediatorCallback,
                 systemClock,
                 testCoroutineScope,
                 bouncerLogger,

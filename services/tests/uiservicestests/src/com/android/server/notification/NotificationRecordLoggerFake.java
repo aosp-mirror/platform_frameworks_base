@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import android.annotation.DurationMillisLong;
+
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
@@ -38,6 +40,7 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
         public int position = INVALID, buzzBeepBlink = INVALID;
         public boolean wasLogged;
         public InstanceId groupInstanceId;
+        @Nullable @DurationMillisLong public Long postDurationMillisLogged;
 
         CallRecord(NotificationRecord r, NotificationRecord old, int position,
                 int buzzBeepBlink, InstanceId groupId) {
@@ -111,6 +114,7 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
         }
         mPendingLogs.remove(nr);
         callRecord.wasLogged = true;
+        callRecord.postDurationMillisLogged = nr.post_duration_millis;
     }
 
     @Override

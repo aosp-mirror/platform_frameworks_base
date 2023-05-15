@@ -2349,7 +2349,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.removeImmediately();
 
         if (isImeOverlayLayeringTarget()) {
-            mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(),
+            mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(), mAttrs.type,
                     false /* visible */, true /* removed */);
         }
         final DisplayContent dc = getDisplayContent();
@@ -5632,6 +5632,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         SurfaceControl viewSurface = getClientViewRootSurface();
         if (viewSurface == null) return;
         t.unsetBuffer(viewSurface);
+    }
+
+    @Override
+    protected boolean shouldUpdateSyncOnReparent() {
+        // Keep the sync state in case the client is drawing for the latest conifguration or the
+        // configuration is not changed after reparenting. This avoids a redundant redraw request.
+        return mSyncState != SYNC_STATE_NONE && !mLastConfigReportedToClient;
     }
 
     @Override

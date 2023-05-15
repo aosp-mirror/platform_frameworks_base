@@ -25,8 +25,6 @@ import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.SparseArray;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.annotations.GuardedBy;
 
 import com.google.common.collect.ImmutableMap;
@@ -51,15 +49,17 @@ public final class FakeLatencyTracker extends LatencyTracker {
     private final List<String> mPerfettoTraceNamesTriggered;
     private final AtomicReference<SparseArray<ActionProperties>> mLastPropertiesUpdate =
             new AtomicReference<>();
-    @Nullable
-    @GuardedBy("mLock")
-    private Callable<Boolean> mShouldClosePropertiesUpdatedCallable = null;
+    private final AtomicReference<Callable<Boolean>> mShouldClosePropertiesUpdatedCallable =
+            new AtomicReference<>();
     private final ConditionVariable mDeviceConfigPropertiesUpdated = new ConditionVariable();
 
     public static FakeLatencyTracker create() throws Exception {
         Log.i(TAG, "create");
         disableForAllActions();
+        Log.i(TAG, "done disabling all actions");
         FakeLatencyTracker fakeLatencyTracker = new FakeLatencyTracker();
+        Log.i(TAG, "done creating tracker object");
+        fakeLatencyTracker.startListeningForLatencyTrackerConfigChanges();
         // always return the fake in the disabled state and let the client control the desired state
         fakeLatencyTracker.waitForGlobalEnabledState(false);
         fakeLatencyTracker.waitForAllPropertiesEnableState(false);
@@ -131,27 +131,25 @@ public final class FakeLatencyTracker extends LatencyTracker {
     @Override
     public void onDeviceConfigPropertiesUpdated(SparseArray<ActionProperties> actionProperties) {
         Log.d(TAG, "onDeviceConfigPropertiesUpdated: " + actionProperties);
+
         mLastPropertiesUpdate.set(actionProperties);
-        synchronized (mLock) {
-            if (mShouldClosePropertiesUpdatedCallable != null) {
-                try {
-                    boolean shouldClosePropertiesUpdated =
-                            mShouldClosePropertiesUpdatedCallable.call();
-                    Log.i(TAG, "shouldClosePropertiesUpdatedCallable callable result="
-                            + shouldClosePropertiesUpdated);
-                    if (shouldClosePropertiesUpdated) {
-                        Log.i(TAG, "shouldClosePropertiesUpdatedCallable=true, opening condition");
-                        mShouldClosePropertiesUpdatedCallable = null;
-                        mDeviceConfigPropertiesUpdated.open();
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "exception when calling callable", e);
-                    throw new RuntimeException(e);
+        Callable<Boolean> shouldClosePropertiesUpdated =
+                mShouldClosePropertiesUpdatedCallable.get();
+        if (shouldClosePropertiesUpdated != null) {
+            try {
+                boolean result = shouldClosePropertiesUpdated.call();
+                Log.i(TAG, "shouldClosePropertiesUpdatedCallable callable result=" + result);
+                if (result) {
+                    mShouldClosePropertiesUpdatedCallable.set(null);
+                    mDeviceConfigPropertiesUpdated.open();
                 }
-            } else {
-                Log.i(TAG, "no conditional callable set, opening condition");
-                mDeviceConfigPropertiesUpdated.open();
+            } catch (Exception e) {
+                Log.e(TAG, "exception when calling callable", e);
+                throw new RuntimeException(e);
             }
+        } else {
+            Log.i(TAG, "no conditional callable set, opening condition");
+            mDeviceConfigPropertiesUpdated.open();
         }
     }
 
@@ -175,107 +173,82 @@ public final class FakeLatencyTracker extends LatencyTracker {
 
     public void waitForAllPropertiesEnableState(boolean enabledState) throws Exception {
         Log.i(TAG, "waitForAllPropertiesEnableState: enabledState=" + enabledState);
-        synchronized (mLock) {
-            Log.i(TAG, "closing condition");
-            mDeviceConfigPropertiesUpdated.close();
-            // Update the callable to only close the properties updated condition when all the
-            // desired properties have been updated. The DeviceConfig callbacks may happen multiple
-            // times so testing the resulting updates is required.
-            mShouldClosePropertiesUpdatedCallable = () -> {
-                Log.i(TAG, "verifying if last properties update has all properties enable="
-                        + enabledState);
-                SparseArray<ActionProperties> newProperties = mLastPropertiesUpdate.get();
-                if (newProperties != null) {
-                    for (int i = 0; i < newProperties.size(); i++) {
-                        if (newProperties.get(i).isEnabled() != enabledState) {
-                            return false;
-                        }
+        // Update the callable to only close the properties updated condition when all the
+        // desired properties have been updated. The DeviceConfig callbacks may happen multiple
+        // times so testing the resulting updates is required.
+        waitForPropertiesCondition(() -> {
+            Log.i(TAG, "verifying if last properties update has all properties enable="
+                    + enabledState);
+            SparseArray<ActionProperties> newProperties = mLastPropertiesUpdate.get();
+            if (newProperties != null) {
+                for (int i = 0; i < newProperties.size(); i++) {
+                    if (newProperties.get(i).isEnabled() != enabledState) {
+                        return false;
                     }
                 }
-                return true;
-            };
-            if (mShouldClosePropertiesUpdatedCallable.call()) {
-                return;
             }
-        }
-        Log.i(TAG, "waiting for condition");
-        mDeviceConfigPropertiesUpdated.block();
+            return true;
+        });
     }
 
     public void waitForMatchingActionProperties(ActionProperties actionProperties)
             throws Exception {
         Log.i(TAG, "waitForMatchingActionProperties: actionProperties=" + actionProperties);
-        synchronized (mLock) {
-            Log.i(TAG, "closing condition");
-            mDeviceConfigPropertiesUpdated.close();
-            // Update the callable to only close the properties updated condition when all the
-            // desired properties have been updated. The DeviceConfig callbacks may happen multiple
-            // times so testing the resulting updates is required.
-            mShouldClosePropertiesUpdatedCallable = () -> {
-                Log.i(TAG, "verifying if last properties update contains matching property ="
-                        + actionProperties);
-                SparseArray<ActionProperties> newProperties = mLastPropertiesUpdate.get();
-                if (newProperties != null) {
-                    if (newProperties.size() > 0) {
-                        return newProperties.get(actionProperties.getAction()).equals(
-                                actionProperties);
-                    }
+        // Update the callable to only close the properties updated condition when all the
+        // desired properties have been updated. The DeviceConfig callbacks may happen multiple
+        // times so testing the resulting updates is required.
+        waitForPropertiesCondition(() -> {
+            Log.i(TAG, "verifying if last properties update contains matching property ="
+                    + actionProperties);
+            SparseArray<ActionProperties> newProperties = mLastPropertiesUpdate.get();
+            if (newProperties != null) {
+                if (newProperties.size() > 0) {
+                    return newProperties.get(actionProperties.getAction()).equals(
+                            actionProperties);
                 }
-                return false;
-            };
-            if (mShouldClosePropertiesUpdatedCallable.call()) {
-                return;
             }
-        }
-        Log.i(TAG, "waiting for condition");
-        mDeviceConfigPropertiesUpdated.block();
+            return false;
+        });
     }
 
     public void waitForActionEnabledState(int action, boolean enabledState) throws Exception {
         Log.i(TAG, "waitForActionEnabledState:"
                 + " action=" + action + ", enabledState=" + enabledState);
-        synchronized (mLock) {
-            Log.i(TAG, "closing condition");
-            mDeviceConfigPropertiesUpdated.close();
-            // Update the callable to only close the properties updated condition when all the
-            // desired properties have been updated. The DeviceConfig callbacks may happen multiple
-            // times so testing the resulting updates is required.
-            mShouldClosePropertiesUpdatedCallable = () -> {
-                Log.i(TAG, "verifying if last properties update contains action=" + action
-                        + ", enabledState=" + enabledState);
-                SparseArray<ActionProperties> newProperties = mLastPropertiesUpdate.get();
-                if (newProperties != null) {
-                    if (newProperties.size() > 0) {
-                        return newProperties.get(action).isEnabled() == enabledState;
-                    }
+        // Update the callable to only close the properties updated condition when all the
+        // desired properties have been updated. The DeviceConfig callbacks may happen multiple
+        // times so testing the resulting updates is required.
+        waitForPropertiesCondition(() -> {
+            Log.i(TAG, "verifying if last properties update contains action=" + action
+                    + ", enabledState=" + enabledState);
+            SparseArray<ActionProperties> newProperties = mLastPropertiesUpdate.get();
+            if (newProperties != null) {
+                if (newProperties.size() > 0) {
+                    return newProperties.get(action).isEnabled() == enabledState;
                 }
-                return false;
-            };
-            if (mShouldClosePropertiesUpdatedCallable.call()) {
-                return;
             }
-        }
-        Log.i(TAG, "waiting for condition");
-        mDeviceConfigPropertiesUpdated.block();
+            return false;
+        });
     }
 
     public void waitForGlobalEnabledState(boolean enabledState) throws Exception {
         Log.i(TAG, "waitForGlobalEnabledState: enabledState=" + enabledState);
-        synchronized (mLock) {
-            Log.i(TAG, "closing condition");
-            mDeviceConfigPropertiesUpdated.close();
-            // Update the callable to only close the properties updated condition when all the
-            // desired properties have been updated. The DeviceConfig callbacks may happen multiple
-            // times so testing the resulting updates is required.
-            mShouldClosePropertiesUpdatedCallable = () -> {
-                //noinspection deprecation
-                return isEnabled() == enabledState;
-            };
-            if (mShouldClosePropertiesUpdatedCallable.call()) {
-                return;
-            }
+        // Update the callable to only close the properties updated condition when all the
+        // desired properties have been updated. The DeviceConfig callbacks may happen multiple
+        // times so testing the resulting updates is required.
+        waitForPropertiesCondition(() -> {
+            //noinspection deprecation
+            return isEnabled() == enabledState;
+        });
+    }
+
+    public void waitForPropertiesCondition(Callable<Boolean> shouldClosePropertiesUpdatedCallable)
+            throws Exception {
+        mShouldClosePropertiesUpdatedCallable.set(shouldClosePropertiesUpdatedCallable);
+        mDeviceConfigPropertiesUpdated.close();
+        if (!shouldClosePropertiesUpdatedCallable.call()) {
+            Log.i(TAG, "waiting for mDeviceConfigPropertiesUpdated condition");
+            mDeviceConfigPropertiesUpdated.block();
         }
-        Log.i(TAG, "waiting for condition");
-        mDeviceConfigPropertiesUpdated.block();
+        Log.i(TAG, "waitForPropertiesCondition: returning");
     }
 }

@@ -20,10 +20,13 @@
 #include <private/performance_hint_private.h>
 #include <utils/Log.h>
 
+#include <chrono>
 #include <vector>
 
 #include "../Properties.h"
 #include "thread/CommonPool.h"
+
+using namespace std::chrono_literals;
 
 namespace android {
 namespace uirenderer {
@@ -96,10 +99,25 @@ HintSessionWrapper::~HintSessionWrapper() {
 }
 
 bool HintSessionWrapper::init() {
-    // If it already exists, broke last time we tried this, shouldn't be running, or
+    if (mHintSession != nullptr) return true;
+
+    // If we're waiting for the session
+    if (mHintSessionFuture.valid()) {
+        // If the session is here
+        if (mHintSessionFuture.wait_for(0s) == std::future_status::ready) {
+            mHintSession = mHintSessionFuture.get();
+            if (mHintSession != nullptr) {
+                mSessionValid = true;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // If it broke last time we tried this, shouldn't be running, or
     // has bad argument values, don't even bother
-    if (mHintSession != nullptr || !mSessionValid || !Properties::useHintManager ||
-        !Properties::isDrawingEnabled() || mUiThreadId < 0 || mRenderThreadId < 0) {
+    if (!mSessionValid || !Properties::useHintManager || !Properties::isDrawingEnabled() ||
+        mUiThreadId < 0 || mRenderThreadId < 0) {
         return false;
     }
 
@@ -118,15 +136,14 @@ bool HintSessionWrapper::init() {
     // Use a placeholder target value to initialize,
     // this will always be replaced elsewhere before it gets used
     int64_t defaultTargetDurationNanos = 16666667;
-    mHintSession =
-            gAPH_createSessionFn(manager, tids.data(), tids.size(), defaultTargetDurationNanos);
-
-    mSessionValid = !!mHintSession;
-    return mSessionValid;
+    mHintSessionFuture = CommonPool::async([=, tids = std::move(tids)] {
+        return gAPH_createSessionFn(manager, tids.data(), tids.size(), defaultTargetDurationNanos);
+    });
+    return false;
 }
 
 void HintSessionWrapper::updateTargetWorkDuration(long targetWorkDurationNanos) {
-    if (mHintSession == nullptr) return;
+    if (!init()) return;
     targetWorkDurationNanos = targetWorkDurationNanos * Properties::targetCpuTimePercentage / 100;
     if (targetWorkDurationNanos != mLastTargetWorkDuration &&
         targetWorkDurationNanos > kSanityCheckLowerBound &&
@@ -138,7 +155,7 @@ void HintSessionWrapper::updateTargetWorkDuration(long targetWorkDurationNanos) 
 }
 
 void HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
-    if (mHintSession == nullptr) return;
+    if (!init()) return;
     if (actualDurationNanos > kSanityCheckLowerBound &&
         actualDurationNanos < kSanityCheckUpperBound) {
         gAPH_reportActualWorkDurationFn(mHintSession, actualDurationNanos);
@@ -146,7 +163,7 @@ void HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
 }
 
 void HintSessionWrapper::sendLoadResetHint() {
-    if (mHintSession == nullptr) return;
+    if (!init()) return;
     nsecs_t now = systemTime();
     if (now - mLastFrameNotification > kResetHintTimeout) {
         gAPH_sendHintFn(mHintSession, static_cast<int>(SessionHint::CPU_LOAD_RESET));
@@ -155,7 +172,7 @@ void HintSessionWrapper::sendLoadResetHint() {
 }
 
 void HintSessionWrapper::sendLoadIncreaseHint() {
-    if (mHintSession == nullptr) return;
+    if (!init()) return;
     gAPH_sendHintFn(mHintSession, static_cast<int>(SessionHint::CPU_LOAD_UP));
 }
 

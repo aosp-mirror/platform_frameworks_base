@@ -61,6 +61,10 @@ constructor(
             model::messagePrinter,
         )
     }
+
+    fun logVcnSubscriptionId(subId: Int) {
+        buffer.log(TAG, LogLevel.DEBUG, { int1 = subId }, { "vcnSubId changed: $int1" })
+    }
 }
 
 private const val TAG = "ConnectivityInputLogger"

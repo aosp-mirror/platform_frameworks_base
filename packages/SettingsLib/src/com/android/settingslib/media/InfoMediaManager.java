@@ -542,13 +542,6 @@ public class InfoMediaManager extends MediaManager {
                 //TODO(b/148765806): use correct device type once api is ready.
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
                         mPackageName, mPreferenceItemMap.get(route.getId()));
-                if (!TextUtils.isEmpty(mPackageName)
-                        && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
-                    mediaDevice.setState(STATE_SELECTED);
-                    if (mCurrentConnectedDevice == null) {
-                        mCurrentConnectedDevice = mediaDevice;
-                    }
-                }
                 break;
             case TYPE_BUILTIN_SPEAKER:
             case TYPE_USB_DEVICE:
@@ -581,7 +574,13 @@ public class InfoMediaManager extends MediaManager {
                 break;
 
         }
-
+        if (mediaDevice != null && !TextUtils.isEmpty(mPackageName)
+                && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
+            mediaDevice.setState(STATE_SELECTED);
+            if (mCurrentConnectedDevice == null) {
+                mCurrentConnectedDevice = mediaDevice;
+            }
+        }
         if (mediaDevice != null) {
             mMediaDevices.add(mediaDevice);
         }

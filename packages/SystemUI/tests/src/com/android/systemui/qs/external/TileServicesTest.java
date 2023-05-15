@@ -48,6 +48,9 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -118,7 +121,8 @@ public class TileServicesTest extends SysuiTestCase {
 
         mTileService = new TestTileServices(mQSHost, provider, mBroadcastDispatcher,
                 mUserTracker, mKeyguardStateController, mCommandQueue, mStatusBarIconController,
-                mPanelInteractor, mCustomTileAddedRepository);
+                mPanelInteractor, mCustomTileAddedRepository,
+                new FakeExecutor(new FakeSystemClock()));
     }
 
     @After
@@ -297,10 +301,10 @@ public class TileServicesTest extends SysuiTestCase {
                 BroadcastDispatcher broadcastDispatcher, UserTracker userTracker,
                 KeyguardStateController keyguardStateController, CommandQueue commandQueue,
                 StatusBarIconController statusBarIconController, PanelInteractor panelInteractor,
-                CustomTileAddedRepository customTileAddedRepository) {
+                CustomTileAddedRepository customTileAddedRepository, DelayableExecutor executor) {
             super(host, handlerProvider, broadcastDispatcher, userTracker, keyguardStateController,
                     commandQueue, statusBarIconController, panelInteractor,
-                    customTileAddedRepository);
+                    customTileAddedRepository, executor);
         }
 
         @Override

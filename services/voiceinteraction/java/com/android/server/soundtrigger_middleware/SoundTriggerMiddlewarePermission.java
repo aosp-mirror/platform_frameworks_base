@@ -85,11 +85,11 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
     @Override
     public @NonNull
     ISoundTriggerModule attach(int handle,
-            @NonNull ISoundTriggerCallback callback) {
+            @NonNull ISoundTriggerCallback callback, boolean isTrusted) {
         Identity identity = getIdentity();
         enforcePermissionsForPreflight(identity);
-        ModuleWrapper wrapper = new ModuleWrapper(identity, callback);
-        return wrapper.attach(mDelegate.attach(handle, wrapper.getCallbackWrapper()));
+        ModuleWrapper wrapper = new ModuleWrapper(identity, callback, isTrusted);
+        return wrapper.attach(mDelegate.attach(handle, wrapper.getCallbackWrapper(), isTrusted));
     }
 
     // Override toString() in order to have the delegate's ID in it.
@@ -204,11 +204,14 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         private ISoundTriggerModule mDelegate;
         private final @NonNull Identity mOriginatorIdentity;
         private final @NonNull CallbackWrapper mCallbackWrapper;
+        private final boolean mIsTrusted;
 
         ModuleWrapper(@NonNull Identity originatorIdentity,
-                @NonNull ISoundTriggerCallback callback) {
+                @NonNull ISoundTriggerCallback callback,
+                boolean isTrusted) {
             mOriginatorIdentity = originatorIdentity;
             mCallbackWrapper = new CallbackWrapper(callback);
+            mIsTrusted = isTrusted;
         }
 
         ModuleWrapper attach(@NonNull ISoundTriggerModule delegate) {
@@ -241,10 +244,10 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         }
 
         @Override
-        public void startRecognition(int modelHandle, @NonNull RecognitionConfig config)
+        public IBinder startRecognition(int modelHandle, @NonNull RecognitionConfig config)
                 throws RemoteException {
             enforcePermissions();
-            mDelegate.startRecognition(modelHandle, config);
+            return mDelegate.startRecognition(modelHandle, config);
         }
 
         @Override
@@ -347,7 +350,11 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             }
 
             private void enforcePermissions(String reason) {
-                enforcePermissionsForDataDelivery(mOriginatorIdentity, reason);
+                if (mIsTrusted) {
+                    enforcePermissionsForPreflight(mOriginatorIdentity);
+                } else {
+                    enforcePermissionsForDataDelivery(mOriginatorIdentity, reason);
+                }
             }
         }
     }

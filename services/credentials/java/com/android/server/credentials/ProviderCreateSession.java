@@ -167,7 +167,7 @@ public final class ProviderCreateSession extends ProviderSession<
             mProviderSessionMetric.collectCandidateFrameworkException(mProviderException.getType());
         }
         mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
-        updateStatusAndInvokeCallback(toStatus(errorCode),
+        updateStatusAndInvokeCallback(Status.CANCELED,
                 /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
@@ -193,11 +193,11 @@ public final class ProviderCreateSession extends ProviderSession<
         mProviderResponseDataHandler.addResponseContent(response.getCreateEntries(),
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
             updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         }
@@ -248,7 +248,8 @@ public final class ProviderCreateSession extends ProviderSession<
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mRemoteCredentialService.onBeginCreateCredential(mProviderRequest, this);
+            mRemoteCredentialService.setCallback(this);
+            mRemoteCredentialService.onBeginCreateCredential(mProviderRequest);
         }
     }
 

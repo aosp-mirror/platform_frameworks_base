@@ -179,6 +179,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/overlay_dismiss_button_margin"
-            android:src="@drawable/overlay_cancel"/>
+            android:background="@drawable/circular_background"
+            android:backgroundTint="?androidprv:attr/materialColorPrimaryFixedDim"
+            android:tint="?androidprv:attr/materialColorOnPrimaryFixed"
+            android:padding="4dp"
+            android:src="@drawable/ic_close"/>
     </FrameLayout>
 </com.android.systemui.clipboardoverlay.ClipboardOverlayView>

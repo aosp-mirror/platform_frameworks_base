@@ -78,6 +78,7 @@ import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -88,6 +89,7 @@ import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import junit.framework.Assert;
 
+import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockSettings;
@@ -118,6 +120,7 @@ class TestPhoneWindowManager {
     @Mock private PowerManager mPowerManager;
     @Mock private WindowManagerPolicy.WindowManagerFuncs mWindowManagerFuncsImpl;
     @Mock private InputMethodManagerInternal mInputMethodManagerInternal;
+    @Mock private UserManagerInternal mUserManagerInternal;
     @Mock private AudioManagerInternal mAudioManagerInternal;
     @Mock private SearchManager mSearchManager;
 
@@ -186,6 +189,8 @@ class TestPhoneWindowManager {
                 () -> LocalServices.getService(eq(DisplayManagerInternal.class)));
         doReturn(mGestureLauncherService).when(
                 () -> LocalServices.getService(eq(GestureLauncherService.class)));
+        doReturn(mUserManagerInternal).when(
+                () -> LocalServices.getService(eq(UserManagerInternal.class)));
         doReturn(null).when(() -> LocalServices.getService(eq(VrManagerInternal.class)));
         doReturn(null).when(() -> LocalServices.getService(eq(AutofillManagerInternal.class)));
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
@@ -333,6 +338,20 @@ class TestPhoneWindowManager {
     void overrideIncallPowerBehavior(int behavior) {
         mPhoneWindowManager.mIncallPowerBehavior = behavior;
         setPhoneCallIsInProgress();
+    }
+
+    void prepareBrightnessDecrease(float currentBrightness) {
+        doReturn(0.0f).when(mPowerManager)
+                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+        doReturn(1.0f).when(mPowerManager)
+                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+        doReturn(currentBrightness).when(mDisplayManager)
+                .getBrightness(0);
+    }
+
+    void verifyNewBrightness(float newBrightness) {
+        verify(mDisplayManager).setBrightness(Mockito.eq(0),
+                AdditionalMatchers.eq(newBrightness, 0.001f));
     }
 
     void setPhoneCallIsInProgress() {

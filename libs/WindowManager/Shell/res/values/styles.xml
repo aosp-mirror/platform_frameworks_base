@@ -160,7 +160,7 @@
         <item name="android:lineSpacingExtra">-1sp</item>
         <item name="android:textSize">12sp</item>
         <item name="android:textAlignment">center</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
         <item name="android:textAppearance">
             @*android:style/TextAppearance.DeviceDefault.Body2
         </item>

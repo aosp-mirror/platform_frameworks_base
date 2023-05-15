@@ -431,6 +431,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                                 "  adding opening taskId=%d", taskInfo.taskId);
                         mOpeningTasks.add(new TaskState(change, target.leash));
                     }
+                } else if (TransitionUtil.isDividerBar(change)) {
+                    final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
+                            info.getChanges().size() - i, info, t, mLeashMap);
+                    // Add this as a app and we will separate them on launcher side by window type.
+                    apps.add(target);
                 }
             }
             t.apply();

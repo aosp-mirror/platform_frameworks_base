@@ -1608,6 +1608,10 @@ public final class TvInteractiveAppManager {
                 mService.notifyAdBufferConsumed(mToken, buffer, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
+            } finally {
+                if (buffer != null) {
+                    buffer.getSharedMemory().close();
+                }
             }
         }
 

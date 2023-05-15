@@ -283,6 +283,7 @@ import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
 import android.view.TaskTransitionSpec;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.WindowContentFrameStats;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
@@ -1811,7 +1812,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (imMayMove) {
                 displayContent.computeImeTarget(true /* updateImeTarget */);
                 if (win.isImeOverlayLayeringTarget()) {
-                    dispatchImeTargetOverlayVisibilityChanged(client.asBinder(),
+                    dispatchImeTargetOverlayVisibilityChanged(client.asBinder(), win.mAttrs.type,
                             win.isVisibleRequestedOrAdding(), false /* removed */);
                 }
             }
@@ -2521,7 +2522,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final boolean winVisibleChanged = win.isVisible() != wasVisible;
             if (win.isImeOverlayLayeringTarget() && winVisibleChanged) {
-                dispatchImeTargetOverlayVisibilityChanged(client.asBinder(),
+                dispatchImeTargetOverlayVisibilityChanged(client.asBinder(), win.mAttrs.type,
                         win.isVisible(), false /* removed */);
             }
             // Notify listeners about IME input target window visibility change.
@@ -2675,7 +2676,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void finishDrawingWindow(Session session, IWindow client,
             @Nullable SurfaceControl.Transaction postDrawTransaction, int seqId) {
         if (postDrawTransaction != null) {
-            postDrawTransaction.sanitize();
+            postDrawTransaction.sanitize(Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         final long origId = Binder.clearCallingIdentity();
@@ -3355,15 +3356,17 @@ public class WindowManagerService extends IWindowManager.Stub
         });
     }
 
-    void dispatchImeTargetOverlayVisibilityChanged(@NonNull IBinder token, boolean visible,
+    void dispatchImeTargetOverlayVisibilityChanged(@NonNull IBinder token,
+            @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
             boolean removed) {
         if (mImeTargetChangeListener != null) {
             if (DEBUG_INPUT_METHOD) {
                 Slog.d(TAG, "onImeTargetOverlayVisibilityChanged, win=" + mWindowMap.get(token)
-                        + "visible=" + visible + ", removed=" + removed);
+                        + ", type=" + ViewDebug.intToString(WindowManager.LayoutParams.class,
+                        "type", windowType) + "visible=" + visible + ", removed=" + removed);
             }
             mH.post(() -> mImeTargetChangeListener.onImeTargetOverlayVisibilityChanged(token,
-                    visible, removed));
+                    windowType, visible, removed));
         }
     }
 
@@ -3613,6 +3616,19 @@ public class WindowManagerService extends IWindowManager.Stub
     /* Called by WindowState */
     boolean isUserVisible(@UserIdInt int userId) {
         return mUmInternal.isUserVisible(userId);
+    }
+
+    @UserIdInt int getUserAssignedToDisplay(int displayId) {
+        return mUmInternal.getUserAssignedToDisplay(displayId);
+    }
+
+    boolean shouldPlacePrimaryHomeOnDisplay(int displayId) {
+        int userId = mUmInternal.getUserAssignedToDisplay(displayId);
+        return shouldPlacePrimaryHomeOnDisplay(displayId, userId);
+    }
+
+    boolean shouldPlacePrimaryHomeOnDisplay(int displayId, int userId) {
+        return mUmInternal.getMainDisplayAssignedToUser(userId) == displayId;
     }
 
     public void enableScreenAfterBoot() {
@@ -3909,15 +3925,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Returns the touch mode state for the display id passed as argument.
+     *
+     * This method will return the default touch mode state (represented by
+     * {@code com.android.internal.R.bool.config_defaultInTouchMode}) if the display passed as
+     * argument is no longer registered in {@RootWindowContainer}).
      */
     @Override  // Binder call
     public boolean isInTouchMode(int displayId) {
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent == null) {
-                throw new IllegalStateException("Failed to retrieve the touch mode state for"
-                        + "display {" + displayId + "}: display is not registered in "
-                        + "WindowRootContainer");
+                return mContext.getResources().getBoolean(R.bool.config_defaultInTouchMode);
             }
             return displayContent.isInTouchMode();
         }

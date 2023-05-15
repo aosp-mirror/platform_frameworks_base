@@ -26,7 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"האפליקציה הותקנה."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"האם ברצונך להתקין אפליקציה זו?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"האם ברצונך לעדכן אפליקציה זו?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"לקבל את העדכון לאפליקציה הזו מ-<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nהאפליקציה הזו בדרך כלל מקבלת עדכונים מ-<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. אם בחרת לעדכן ממקור אחר, יכול להיות שבעתיד יתקבלו עדכונים ממקורות אחרים בטלפון. תכונות האפליקציה יכולות להשתנות."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"לקבל את העדכון לאפליקציה הזו מ-<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nהאפליקציה הזו בדרך כלל מקבלת עדכונים מ: <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. אם בחרת לעדכן ממקור אחר, יכול להיות שבעתיד יתקבלו עדכונים ממקורות אחרים בטלפון. תכונות האפליקציה יכולות להשתנות."</string>
     <string name="install_failed" msgid="5777824004474125469">"האפליקציה לא הותקנה."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"החבילה נחסמה להתקנה."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"האפליקציה לא הותקנה כי החבילה מתנגשת עם חבילה קיימת."</string>

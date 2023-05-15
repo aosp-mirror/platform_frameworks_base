@@ -116,6 +116,7 @@ private:
                                            WindowInfo* outWindowInfo);
     static bool UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo);
     void releaseBuffers();
+    void invalidateBuffers();
 
     // TODO: This number comes from ui/BufferQueueDefs. We're not pulling the
     // header in so that we don't need to depend on libui, but we should share

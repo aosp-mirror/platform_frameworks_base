@@ -154,12 +154,16 @@ public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollecto
     }
 
     /**
-     * Get the locales that system activates.
-     * @return A set which includes all the locales that system activates.
+     * Get a list of system locale that removes all extensions except for the numbering system.
      */
     @VisibleForTesting
-    public List<LocaleStore.LocaleInfo> getSystemCurrentLocale() {
-        return LocaleStore.getSystemCurrentLocaleInfo();
+    public List<LocaleStore.LocaleInfo> getSystemCurrentLocales() {
+        List<LocaleStore.LocaleInfo> sysLocales = LocaleStore.getSystemCurrentLocales();
+        return sysLocales.stream().filter(
+                // For the locale to be added into the suggestion area, its country could not be
+                // empty.
+                info -> info.getLocale().getCountry().length() > 0).collect(
+                Collectors.toList());
     }
 
     @Override
@@ -220,12 +224,15 @@ public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollecto
 
         // Add current system language into suggestion list
         if (!isForCountryMode) {
-            boolean isCurrentLocale, isInAppOrIme;
-            for (LocaleStore.LocaleInfo localeInfo : getSystemCurrentLocale()) {
+            boolean isCurrentLocale, existsInApp, existsInIme;
+            for (LocaleStore.LocaleInfo localeInfo : getSystemCurrentLocales()) {
                 isCurrentLocale = mAppCurrentLocale != null
                         && localeInfo.getLocale().equals(mAppCurrentLocale.getLocale());
-                isInAppOrIme = existsInAppOrIme(localeInfo.getLocale());
-                if (!isCurrentLocale && !isInAppOrIme) {
+                // Add the system suggestion flag if the localeInfo exists in mAllAppActiveLocales
+                // and mImeLocales.
+                existsInApp = addSystemSuggestionFlag(localeInfo, mAllAppActiveLocales);
+                existsInIme = addSystemSuggestionFlag(localeInfo, mImeLocales);
+                if (!isCurrentLocale && !existsInApp && !existsInIme) {
                     appLocaleList.add(localeInfo);
                 }
             }
@@ -248,6 +255,8 @@ public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollecto
                 // Filter out the locale with the same language and country
                 // like zh-TW vs zh-Hant-TW.
                 localeSet = filterSameLanguageAndCountry(localeSet, suggestedSet);
+                // Add IME suggestion flag if the locale is supported by IME.
+                localeSet = addImeSuggestionFlag(localeSet);
             }
             appLocaleList.addAll(localeSet);
             suggestedSet.addAll(localeSet);
@@ -284,6 +293,31 @@ public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollecto
                 Collectors.toSet());
     }
 
+    private boolean addSystemSuggestionFlag(LocaleStore.LocaleInfo localeInfo,
+            Set<LocaleStore.LocaleInfo> appLocaleSet) {
+        for (LocaleStore.LocaleInfo info : appLocaleSet) {
+            if (info.getLocale().equals(localeInfo.getLocale())) {
+                info.extendSuggestionOfType(
+                        LocaleStore.LocaleInfo.SUGGESTION_TYPE_SYSTEM_AVAILABLE_LANGUAGE);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Set<LocaleStore.LocaleInfo> addImeSuggestionFlag(
+            Set<LocaleStore.LocaleInfo> localeSet) {
+        for (LocaleStore.LocaleInfo localeInfo : localeSet) {
+            for (LocaleStore.LocaleInfo imeLocale : mImeLocales) {
+                if (imeLocale.getLocale().equals(localeInfo.getLocale())) {
+                    localeInfo.extendSuggestionOfType(
+                            LocaleStore.LocaleInfo.SUGGESTION_TYPE_IME_LANGUAGE);
+                }
+            }
+        }
+        return localeSet;
+    }
+
     private Set<LocaleStore.LocaleInfo> filterSameLanguageAndCountry(
             Set<LocaleStore.LocaleInfo> newLocaleList,
             Set<LocaleStore.LocaleInfo> existingLocaleList) {
@@ -304,17 +338,6 @@ public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollecto
             }
         }
         return result;
-    }
-
-    private boolean existsInAppOrIme(Locale locale) {
-        boolean existInApp = mAllAppActiveLocales.stream().anyMatch(
-                localeInfo -> localeInfo.getLocale().equals(locale));
-        if (existInApp) {
-            return true;
-        } else {
-            return mImeLocales.stream().anyMatch(
-                    localeInfo -> localeInfo.getLocale().equals(locale));
-        }
     }
 
     private Set<LocaleStore.LocaleInfo> filterSupportedLocales(

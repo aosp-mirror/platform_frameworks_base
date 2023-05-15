@@ -29,14 +29,12 @@ import com.android.settingslib.spa.framework.compose.LocalNavController
 import com.android.settingslib.spa.framework.compose.NavControllerWrapper
 
 @Composable
-internal fun SettingsPage.PageWithEvent() {
-    if (!isEnabled()) return
+internal fun SettingsPage.PageLogger() {
     val navController = LocalNavController.current
     LifecycleEffect(
         onStart = { logPageEvent(LogEvent.PAGE_ENTER, navController) },
         onStop = { logPageEvent(LogEvent.PAGE_LEAVE, navController) },
     )
-    UiLayout()
 }
 
 private fun SettingsPage.logPageEvent(event: LogEvent, navController: NavControllerWrapper) {

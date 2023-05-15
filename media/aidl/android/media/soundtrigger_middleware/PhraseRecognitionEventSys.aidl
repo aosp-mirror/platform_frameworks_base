@@ -21,6 +21,7 @@ import android.media.soundtrigger.PhraseRecognitionEvent;
  * Wrapper to android.media.soundtrigger.RecognitionEvent providing additional fields used by the
  * framework.
  */
+@JavaDerive(equals = true, toString = true)
 parcelable PhraseRecognitionEventSys {
 
     PhraseRecognitionEvent phraseRecognitionEvent;
@@ -33,4 +34,9 @@ parcelable PhraseRecognitionEventSys {
      */
     // @ElapsedRealtimeLong
     long halEventReceivedMillis = -1;
+    /**
+     * Token relating this event to a particular recognition session, returned by
+     * {@link ISoundTriggerModule.startRecognition(int, RecognitionConfig}
+     */
+    IBinder token;
 }

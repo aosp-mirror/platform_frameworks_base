@@ -4614,6 +4614,13 @@ class Task extends TaskFragment {
                             topActivity.reparent(lastParentBeforePip,
                                     lastParentBeforePip.getChildCount() /* top */,
                                     "movePinnedActivityToOriginalTask");
+                            final DisplayContent dc = topActivity.getDisplayContent();
+                            if (dc != null && dc.isFixedRotationLaunchingApp(topActivity)) {
+                                // Expanding pip into new rotation, so create a rotation leash
+                                // until the display is rotated.
+                                topActivity.getOrCreateFixedRotationLeash(
+                                        topActivity.getSyncTransaction());
+                            }
                             lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
                         }
                     }
@@ -5163,6 +5170,12 @@ class Task extends TaskFragment {
             // task.
             r.setVisibility(true);
             ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+            // If launching behind, the app will start regardless of what's above it, so mark it
+            // as unknown even before prior `pause`. This also prevents a race between set-ready
+            // and activityPause. Launch-behind is basically only used for dream now.
+            if (!r.isVisibleRequested()) {
+                r.notifyUnknownVisibilityLaunchedForKeyguardTransition();
+            }
             // Go ahead to execute app transition for this activity since the app transition
             // will not be triggered through the resume channel.
             mDisplayContent.executeAppTransition();

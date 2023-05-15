@@ -24,8 +24,10 @@ import java.util.List;
  * {@hide}
  */
 oneway interface ITrustListener {
+    void onEnabledTrustAgentsChanged(int userId);
     void onTrustChanged(boolean enabled, boolean newlyUnlocked, int userId, int flags,
         in List<String> trustGrantedMessages);
     void onTrustManagedChanged(boolean managed, int userId);
     void onTrustError(in CharSequence message);
+    void onIsActiveUnlockRunningChanged(boolean isRunning, int userId);
 }

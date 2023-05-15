@@ -245,6 +245,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
     @VisibleForTesting
     var surfaceTransactionApplier: SyncRtSurfaceTransactionApplier? = null
     private var surfaceBehindRemoteAnimationTargets: Array<RemoteAnimationTarget>? = null
+    private var wallpaperTargets: Array<RemoteAnimationTarget>? = null
     private var surfaceBehindRemoteAnimationStartTime: Long = 0
 
     /**
@@ -257,8 +258,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     private var surfaceBehindAlpha = 1f
 
+    private var wallpaperAlpha = 1f
+
     @VisibleForTesting
     var surfaceBehindAlphaAnimator = ValueAnimator.ofFloat(0f, 1f)
+
+    var wallpaperAlphaAnimator = ValueAnimator.ofFloat(0f, 1f)
 
     /**
      * Matrix applied to [surfaceBehindRemoteAnimationTarget], which is the surface of the
@@ -335,6 +340,27 @@ class KeyguardUnlockAnimationController @Inject constructor(
             })
         }
 
+        with(wallpaperAlphaAnimator) {
+            duration = LAUNCHER_ICONS_ANIMATION_DURATION_MS
+            interpolator = Interpolators.ALPHA_OUT
+            addUpdateListener { valueAnimator: ValueAnimator ->
+                wallpaperAlpha = valueAnimator.animatedValue as Float
+                setWallpaperAppearAmount(wallpaperAlpha)
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    Log.d(TAG, "wallpaperAlphaAnimator#onAnimationEnd, animation ended ")
+                    if (wallpaperAlpha == 1f) {
+                        wallpaperTargets = null
+                        keyguardViewMediator.get().finishExitRemoteAnimation()
+                    } else {
+                        Log.d(TAG, "wallpaperAlphaAnimator#onAnimationEnd, " +
+                                "animation was cancelled: skipping finishAnimation()")
+                    }
+                }
+            })
+        }
+
         with(surfaceBehindEntryAnimator) {
             duration = UNLOCK_ANIMATION_DURATION_MS
             startDelay = UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS
@@ -359,6 +385,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         roundedCornerRadius =
             context.resources.getDimensionPixelSize(R.dimen.rounded_corner_radius).toFloat()
+    }
+
+    fun isAnyKeyguyardAnimatorPlaying(): Boolean {
+        return surfaceBehindAlphaAnimator.isStarted ||
+                wallpaperAlphaAnimator.isStarted || surfaceBehindEntryAnimator.isStarted
     }
 
     /**
@@ -492,6 +523,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     fun notifyStartSurfaceBehindRemoteAnimation(
         targets: Array<RemoteAnimationTarget>,
+        wallpapers: Array<RemoteAnimationTarget>,
         startTime: Long,
         requestedShowSurfaceBehindKeyguard: Boolean
     ) {
@@ -501,7 +533,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         surfaceBehindRemoteAnimationTargets = targets
+        wallpaperTargets = wallpapers
         surfaceBehindRemoteAnimationStartTime = startTime
+
+        fadeInWallpaper()
 
         // If we specifically requested that the surface behind be made visible (vs. it being made
         // visible because we're unlocking), then we're in the middle of a swipe-to-unlock touch
@@ -839,6 +874,38 @@ class KeyguardUnlockAnimationController @Inject constructor(
     }
 
     /**
+     * Modify the opacity of a wallpaper window.
+     */
+    fun setWallpaperAppearAmount(amount: Float) {
+        wallpaperTargets?.forEach { wallpaper ->
+            val animationAlpha = when {
+                // If the screen has turned back off, the unlock animation is going to be cancelled,
+                // so set the surface alpha to 0f so it's no longer visible.
+                !powerManager.isInteractive -> 0f
+                else -> amount
+            }
+
+            // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is
+            // unable to draw
+            val sc: SurfaceControl? = wallpaper.leash
+            if (keyguardViewController.viewRootImpl.view?.visibility != View.VISIBLE &&
+                    sc?.isValid == true) {
+                with(SurfaceControl.Transaction()) {
+                    setAlpha(sc, animationAlpha)
+                    apply()
+                }
+            } else {
+                applyParamsToSurface(
+                        SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
+                                wallpaper.leash)
+                                .withAlpha(animationAlpha)
+                                .build()
+                )
+            }
+        }
+    }
+
+    /**
      * Called by [KeyguardViewMediator] to let us know that the remote animation has finished, and
      * we should clean up all of our state.
      *
@@ -901,6 +968,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
         Log.d(TAG, "fadeInSurfaceBehind")
         surfaceBehindAlphaAnimator.cancel()
         surfaceBehindAlphaAnimator.start()
+    }
+
+    private fun fadeInWallpaper() {
+        Log.d(TAG, "fadeInWallpaper")
+        wallpaperAlphaAnimator.cancel()
+        wallpaperAlphaAnimator.start()
     }
 
     private fun fadeOutSurfaceBehind() {

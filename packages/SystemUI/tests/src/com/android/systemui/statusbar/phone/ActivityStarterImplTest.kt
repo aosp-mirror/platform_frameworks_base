@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.phone
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.RemoteException
+import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -102,6 +103,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
                 activityIntentHelper,
                 mainExecutor,
             )
+        whenever(userTracker.userHandle).thenReturn(UserHandle.OWNER)
     }
 
     @Test
@@ -150,11 +152,28 @@ class ActivityStarterImplTest : SysuiTestCase() {
 
     @Test
     fun postStartActivityDismissingKeyguard_intent_postsOnMain() {
+        whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
         val intent = mock(Intent::class.java)
 
         underTest.postStartActivityDismissingKeyguard(intent, 0)
 
         assertThat(mainExecutor.numPending()).isEqualTo(1)
+        mainExecutor.runAllReady()
+
+        verify(deviceProvisionedController).isDeviceProvisioned
+        verify(shadeController).runPostCollapseRunnables()
+    }
+
+    @Test
+    fun postStartActivityDismissingKeyguard_intent_notDeviceProvisioned_doesNotProceed() {
+        whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(false)
+        val intent = mock(Intent::class.java)
+
+        underTest.postStartActivityDismissingKeyguard(intent, 0)
+        mainExecutor.runAllReady()
+
+        verify(deviceProvisionedController).isDeviceProvisioned
+        verify(shadeController, never()).runPostCollapseRunnables()
     }
 
     @Test

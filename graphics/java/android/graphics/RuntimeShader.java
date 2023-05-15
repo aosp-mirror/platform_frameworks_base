@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
 import android.annotation.NonNull;
+import android.util.ArrayMap;
 import android.view.Window;
 
 import libcore.util.NativeAllocationRegistry;
@@ -256,6 +257,12 @@ public class RuntimeShader extends Shader {
     private long mNativeInstanceRuntimeShaderBuilder;
 
     /**
+     * For tracking GC usage. Keep a java-side reference for reachable objects to
+     * enable better heap tracking & tooling support
+     */
+    private ArrayMap<String, Shader> mShaderUniforms = new ArrayMap<>();
+
+    /**
      * Creates a new RuntimeShader.
      *
      * @param shader The text of AGSL shader program to run.
@@ -490,6 +497,7 @@ public class RuntimeShader extends Shader {
         if (shader == null) {
             throw new NullPointerException("The shader parameter must not be null");
         }
+        mShaderUniforms.put(shaderName, shader);
         nativeUpdateShader(
                     mNativeInstanceRuntimeShaderBuilder, shaderName, shader.getNativeInstance());
         discardNativeInstance();
@@ -511,6 +519,7 @@ public class RuntimeShader extends Shader {
             throw new NullPointerException("The shader parameter must not be null");
         }
 
+        mShaderUniforms.put(shaderName, shader);
         nativeUpdateShader(mNativeInstanceRuntimeShaderBuilder, shaderName,
                 shader.getNativeInstanceWithDirectSampling());
         discardNativeInstance();

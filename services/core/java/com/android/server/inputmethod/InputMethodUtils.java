@@ -194,8 +194,8 @@ final class InputMethodUtils {
             int uid, String packageName) {
         // PackageManagerInternal#getPackageUid() doesn't check MATCH_INSTANT/MATCH_APEX as of
         // writing. So setting 0 should be fine.
-        return packageManagerInternal.getPackageUid(packageName, 0 /* flags */,
-                UserHandle.getUserId(uid)) == uid;
+        return packageManagerInternal.isSameApp(packageName, /* flags= */ 0, uid,
+            UserHandle.getUserId(uid));
     }
 
     /**

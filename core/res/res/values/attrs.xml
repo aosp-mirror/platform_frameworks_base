@@ -2791,7 +2791,7 @@
             <flag name="noExcludeDescendants" value="0x8" />
         </attr>
 
-        <!-- Boolean that hints the Android System that the view is credntial and associated with
+        <!-- Boolean that hints the Android System that the view is credential and associated with
              CredentialManager -->
         <attr name="isCredential" format="boolean" />
 

@@ -273,7 +273,7 @@ constructor(
         val finger =
             LayoutInflater.from(context)
                 .inflate(
-                    R.layout.udfps_keyguard_view_internal,
+                    R.layout.udfps_keyguard_preview,
                     parentView,
                     false,
                 ) as View

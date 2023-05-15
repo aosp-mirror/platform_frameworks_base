@@ -17,9 +17,10 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_EMPTY;
 
-import android.annotation.IntDef;
 import android.app.IApplicationThread;
+import android.app.ProcessMemoryState.HostingComponentType;
 import android.content.pm.ApplicationInfo;
 import android.os.Debug;
 import android.os.SystemClock;
@@ -42,88 +43,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * Profiling info of the process, such as PSS, cpu, etc.
  */
 final class ProcessProfileRecord {
-    // Keep below types in sync with the HostingComponentType in the atoms.proto.
-    /**
-     * The type of the component this process is hosting;
-     * this means not hosting any components (cached).
-     */
-    static final int HOSTING_COMPONENT_TYPE_EMPTY = 0x0;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's a system process.
-     */
-    static final int HOSTING_COMPONENT_TYPE_SYSTEM = 0x00000001;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's a persistent process.
-     */
-    static final int HOSTING_COMPONENT_TYPE_PERSISTENT = 0x00000002;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a backup/restore agent.
-     */
-    static final int HOSTING_COMPONENT_TYPE_BACKUP = 0x00000004;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting an instrumentation.
-     */
-    static final int HOSTING_COMPONENT_TYPE_INSTRUMENTATION = 0x00000008;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting an activity.
-     */
-    static final int HOSTING_COMPONENT_TYPE_ACTIVITY = 0x00000010;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a broadcast receiver.
-     */
-    static final int HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER = 0x00000020;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a content provider.
-     */
-    static final int HOSTING_COMPONENT_TYPE_PROVIDER = 0x00000040;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a started service.
-     */
-    static final int HOSTING_COMPONENT_TYPE_STARTED_SERVICE = 0x00000080;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a foreground service.
-     */
-    static final int HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE = 0x00000100;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's being bound via a service binding.
-     */
-    static final int HOSTING_COMPONENT_TYPE_BOUND_SERVICE = 0x00000200;
-
-    @IntDef(flag = true, prefix = { "HOSTING_COMPONENT_TYPE_" }, value = {
-            HOSTING_COMPONENT_TYPE_EMPTY,
-            HOSTING_COMPONENT_TYPE_SYSTEM,
-            HOSTING_COMPONENT_TYPE_PERSISTENT,
-            HOSTING_COMPONENT_TYPE_BACKUP,
-            HOSTING_COMPONENT_TYPE_INSTRUMENTATION,
-            HOSTING_COMPONENT_TYPE_ACTIVITY,
-            HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER,
-            HOSTING_COMPONENT_TYPE_PROVIDER,
-            HOSTING_COMPONENT_TYPE_STARTED_SERVICE,
-            HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE,
-            HOSTING_COMPONENT_TYPE_BOUND_SERVICE,
-    })
-    @interface HostingComponentType {}
-
     final ProcessRecord mApp;
 
     private final ActivityManagerService mService;

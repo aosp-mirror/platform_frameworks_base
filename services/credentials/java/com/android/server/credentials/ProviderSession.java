@@ -71,7 +71,7 @@ public abstract class ProviderSession<T, R>
     @NonNull
     protected Boolean mProviderResponseSet = false;
     @NonNull
-    protected final ProviderSessionMetric mProviderSessionMetric = new ProviderSessionMetric();
+    protected final ProviderSessionMetric mProviderSessionMetric;
     @NonNull
     private int mProviderSessionUid;
 
@@ -110,9 +110,14 @@ public abstract class ProviderSession<T, R>
      * and is ready to return the final credential back to the user.
      */
     public static boolean isCompletionStatus(Status status) {
-        return status == Status.CREDENTIAL_RECEIVED_FROM_INTENT
-                || status == Status.CREDENTIAL_RECEIVED_FROM_SELECTION
-                || status == Status.COMPLETE;
+        return status == Status.COMPLETE || status == Status.EMPTY_RESPONSE;
+    }
+
+    /**
+     * Gives access to the objects metric collectors.
+     */
+    public ProviderSessionMetric getProviderSessionMetric() {
+        return this.mProviderSessionMetric;
     }
 
     /**
@@ -149,28 +154,21 @@ public abstract class ProviderSession<T, R>
         mComponentName = componentName;
         mRemoteCredentialService = remoteCredentialService;
         mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
+        mProviderSessionMetric = new ProviderSessionMetric(
+                ((RequestSession) mCallbacks).mRequestSessionMetric.getSessionIdTrackTwo());
     }
 
-    /** Provider status at various states of the request session. */
-    // TODO: Review status values, and adjust where needed
+    /** Provider status at various states of the provider session. */
     enum Status {
         NOT_STARTED,
         PENDING,
-        REQUIRES_AUTHENTICATION,
         CREDENTIALS_RECEIVED,
         SERVICE_DEAD,
-        CREDENTIAL_RECEIVED_FROM_INTENT,
-        PENDING_INTENT_INVOKED,
-        CREDENTIAL_RECEIVED_FROM_SELECTION,
-        SAVE_ENTRIES_RECEIVED, CANCELED,
-        NO_CREDENTIALS, EMPTY_RESPONSE, NO_CREDENTIALS_FROM_AUTH_ENTRY, COMPLETE
-    }
-
-    /** Converts exception to a provider session status. */
-    @NonNull
-    public static Status toStatus(int errorCode) {
-        // TODO : Add more mappings as more flows are supported
-        return Status.CANCELED;
+        SAVE_ENTRIES_RECEIVED,
+        CANCELED,
+        EMPTY_RESPONSE,
+        NO_CREDENTIALS_FROM_AUTH_ENTRY,
+        COMPLETE
     }
 
     protected static String generateUniqueId() {
@@ -216,11 +214,13 @@ public abstract class ProviderSession<T, R>
     protected void updateStatusAndInvokeCallback(@NonNull Status status,
             CredentialsSource source) {
         setStatus(status);
+        boolean isPrimary = mProviderInfo != null && mProviderInfo.isPrimary();
         mProviderSessionMetric.collectCandidateMetricUpdate(isTerminatingStatus(status),
-                isCompletionStatus(status), mProviderSessionUid);
+                isCompletionStatus(status), mProviderSessionUid,
+                /*isAuthEntry*/source == CredentialsSource.AUTH_ENTRY,
+                /*isPrimary*/isPrimary);
         mCallbacks.onProviderStatusChanged(status, mComponentName, source);
     }
-
     /** Common method that transfers metrics from the init phase to candidates */
     protected void startCandidateMetrics() {
         mProviderSessionMetric.collectCandidateMetricSetupViaInitialMetric(

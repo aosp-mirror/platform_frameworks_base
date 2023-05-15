@@ -55,8 +55,7 @@ import java.util.OptionalInt;
 final class HandwritingModeController {
 
     public static final String TAG = HandwritingModeController.class.getSimpleName();
-    // TODO(b/210039666): flip the flag.
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
     // Use getHandwritingBufferSize() and not this value directly.
     private static final int EVENT_BUFFER_SIZE = 100;
     // A longer event buffer used for handwriting delegation

@@ -97,10 +97,13 @@ public class DeviceSelectActionFromPlaybackTest {
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
                         Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
-                        new FakeAudioDeviceVolumeManagerWrapper()) {
+                        audioFramework.getAudioManager(),
+                        audioFramework.getAudioDeviceVolumeManager()) {
                     @Override
                     boolean isCecControlEnabled() {
                         return true;

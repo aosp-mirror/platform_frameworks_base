@@ -20,6 +20,7 @@ import static com.android.internal.util.LatencyTracker.ACTION_SHOW_VOICE_INTERAC
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 
@@ -37,7 +38,6 @@ import android.os.BatteryStatsInternal;
 import android.os.Process;
 import android.os.RemoteException;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.FakeLatencyTracker;
@@ -91,18 +91,17 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testSetUpAndTearDown() {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testOnPhraseRecognitionStartsLatencyTrackerWithSuccessfulPhraseIdTrigger()
             throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
                 ISoundTriggerCallback.class);
-        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback);
-        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture());
+        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback, false);
+        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture(),
+                anyBoolean());
 
         triggerPhraseRecognitionEvent(soundTriggerCallbackCaptor.getValue(),
                 RecognitionStatus.SUCCESS, 100 /* keyphraseId */);
@@ -112,12 +111,12 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testOnPhraseRecognitionRestartsActiveSession() throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
                 ISoundTriggerCallback.class);
-        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback);
-        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture());
+        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback, false);
+        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture(),
+                anyBoolean());
 
         triggerPhraseRecognitionEvent(soundTriggerCallbackCaptor.getValue(),
                 RecognitionStatus.SUCCESS, 100 /* keyphraseId */);
@@ -132,13 +131,13 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testOnPhraseRecognitionNeverStartsLatencyTrackerWithNonSuccessEvent()
             throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
                 ISoundTriggerCallback.class);
-        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback);
-        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture());
+        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback, false);
+        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture(),
+                anyBoolean());
 
         triggerPhraseRecognitionEvent(soundTriggerCallbackCaptor.getValue(),
                 RecognitionStatus.ABORTED, 100 /* keyphraseId */);
@@ -149,13 +148,13 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testOnPhraseRecognitionNeverStartsLatencyTrackerWithNoKeyphraseId()
             throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
                 ISoundTriggerCallback.class);
-        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback);
-        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture());
+        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback, false);
+        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture(),
+                anyBoolean());
 
         triggerPhraseRecognitionEvent(soundTriggerCallbackCaptor.getValue(),
                 RecognitionStatus.SUCCESS);

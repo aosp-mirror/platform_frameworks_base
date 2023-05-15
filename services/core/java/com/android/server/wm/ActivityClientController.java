@@ -1159,9 +1159,10 @@ class ActivityClientController extends IActivityClientController.Stub {
             }
             return;
         }
+        transition.collect(topFocusedRootTask);
+        executeMultiWindowFullscreenRequest(fullscreenRequest, topFocusedRootTask);
         r.mTransitionController.requestStartTransition(transition, topFocusedRootTask,
                 null /* remoteTransition */, null /* displayChange */);
-        executeMultiWindowFullscreenRequest(fullscreenRequest, topFocusedRootTask);
         transition.setReady(topFocusedRootTask, true);
     }
 

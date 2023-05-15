@@ -22,6 +22,7 @@ import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
 import static android.view.Surface.ROTATION_0;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
@@ -63,6 +64,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -388,6 +390,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
     @SetupWindows(addWindows = { W_ACTIVITY, W_NAVIGATION_BAR })
     @Test
     public void testCanSystemBarsBeShownByUser() {
+        Assume.assumeFalse(CLIENT_TRANSIENT);
         ((TestWindowManagerPolicy) mWm.mPolicy).mIsUserSetupComplete = true;
         mAppWindow.mAttrs.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
         mAppWindow.setRequestedVisibleTypes(0, navigationBars());
@@ -409,6 +412,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
     @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
     @Test
     public void testTransientBarsSuppressedOnDreams() {
+        Assume.assumeFalse(CLIENT_TRANSIENT);
         final WindowState win = createDreamWindow();
 
         ((TestWindowManagerPolicy) mWm.mPolicy).mIsUserSetupComplete = true;

@@ -18,7 +18,9 @@ package com.android.test.silkfx.app
 
 import android.content.Intent
 import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.Bundle
+import android.os.Parcelable
 import com.android.test.silkfx.R
 import com.android.test.silkfx.hdr.GainmapImage
 
@@ -29,14 +31,21 @@ class HdrImageViewer : BaseDemoActivity() {
         setContentView(R.layout.hdr_image_viewer)
 
         val intent = this.intent ?: return finish()
-        if (Intent.ACTION_VIEW != intent.action) {
-            finish()
-            return
+        when (intent.action) {
+            Intent.ACTION_VIEW -> {
+                val data = intent.data ?: return finish()
+                val source = ImageDecoder.createSource(contentResolver, data)
+                findViewById<GainmapImage>(R.id.gainmap_image)!!.setImageSource(source)
+            }
+            Intent.ACTION_SEND -> {
+                val uri = (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)
+                    ?: return finish()
+                val source = ImageDecoder.createSource(contentResolver, uri)
+                findViewById<GainmapImage>(R.id.gainmap_image)!!.setImageSource(source)
+            }
+            else -> {
+                finish()
+            }
         }
-
-        val data = intent.data ?: return finish()
-
-        val source = ImageDecoder.createSource(contentResolver, data)
-        findViewById<GainmapImage>(R.id.gainmap_image)!!.setImageSource(source)
     }
 }

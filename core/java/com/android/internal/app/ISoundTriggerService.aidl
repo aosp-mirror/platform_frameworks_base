@@ -79,4 +79,10 @@ interface ISoundTriggerService {
      * Attach an HAL injection interface.
      */
      void attachInjection(ISoundTriggerInjection injection);
+
+    /**
+     * Test API to override the phone call state.
+     */
+     void setInPhoneCallState(boolean isInPhoneCall);
+
 }

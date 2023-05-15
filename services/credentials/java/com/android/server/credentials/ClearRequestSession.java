@@ -19,6 +19,7 @@ package com.android.server.credentials;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.ClearCredentialStateException;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.IClearCredentialStateCallback;
@@ -92,9 +93,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     public void onFinalResponseReceived(
             ComponentName componentName,
             Void response) {
-        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
-                mProviders.get(componentName.flattenToString()).mProviderSessionMetric
-                        .getCandidatePhasePerProviderMetric());
+        mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
+                isPrimaryProviderViaProviderInfo(componentName));
         respondToClientWithResponseAndFinish(null);
     }
 
@@ -141,8 +141,9 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
                 return;
             }
         }
-        // TODO: Replace with properly defined error type
-        respondToClientWithErrorAndFinish("UNKNOWN", "All providers failed");
+        String exception = ClearCredentialStateException.TYPE_UNKNOWN;
+        mRequestSessionMetric.collectFrameworkException(exception);
+        respondToClientWithErrorAndFinish(exception, "All providers failed");
     }
 
     @Override

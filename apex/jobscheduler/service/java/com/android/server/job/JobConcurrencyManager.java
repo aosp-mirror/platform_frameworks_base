@@ -62,6 +62,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.StatLogger;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
@@ -470,6 +471,13 @@ class JobConcurrencyManager {
 
     private final Consumer<PackageStats> mPackageStatsStagingCountClearer =
             PackageStats::resetStagedCount;
+
+    private static final Histogram sConcurrencyHistogramLogger = new Histogram(
+            "job_scheduler.value_hist_job_concurrency",
+            // Create a histogram that expects values in the range [0, 99].
+            // Include more buckets than MAX_CONCURRENCY_LIMIT to account for/identify the cases
+            // where we may create additional slots for TOP-started EJs and UIJs
+            new Histogram.UniformOptions(100, 0, 99));
 
     private final StatLogger mStatLogger = new StatLogger(new String[]{
             "assignJobsToContexts",
@@ -1433,6 +1441,7 @@ class JobConcurrencyManager {
         mService.mJobPackageTracker.noteConcurrency(mRunningJobs.size(),
                 // TODO: log per type instead of only TOP
                 mWorkCountTracker.getRunningJobCount(WORK_TYPE_TOP));
+        sConcurrencyHistogramLogger.logSample(mActiveServices.size());
     }
 
     @GuardedBy("mLock")

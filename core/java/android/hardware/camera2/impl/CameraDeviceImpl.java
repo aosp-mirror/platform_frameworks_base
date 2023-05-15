@@ -1908,18 +1908,21 @@ public class CameraDeviceImpl extends CameraDevice
                 Log.v(TAG, String.format("got error frame %d", frameNumber));
             }
 
-            // Update FrameNumberTracker for every frame during HFR mode.
-            if (mBatchOutputMap.containsKey(requestId)) {
-                for (int i = 0; i < mBatchOutputMap.get(requestId); i++) {
-                    mFrameNumberTracker.updateTracker(frameNumber - (subsequenceId - i),
+            // Do not update frame number tracker for physical camera result error.
+            if (errorPhysicalCameraId == null) {
+                // Update FrameNumberTracker for every frame during HFR mode.
+                if (mBatchOutputMap.containsKey(requestId)) {
+                    for (int i = 0; i < mBatchOutputMap.get(requestId); i++) {
+                        mFrameNumberTracker.updateTracker(frameNumber - (subsequenceId - i),
+                                /*error*/true, request.getRequestType());
+                    }
+                } else {
+                    mFrameNumberTracker.updateTracker(frameNumber,
                             /*error*/true, request.getRequestType());
                 }
-            } else {
-                mFrameNumberTracker.updateTracker(frameNumber,
-                        /*error*/true, request.getRequestType());
-            }
 
-            checkAndFireSequenceComplete();
+                checkAndFireSequenceComplete();
+            }
 
             // Dispatch the failure callback
             final long ident = Binder.clearCallingIdentity();
@@ -2235,6 +2238,12 @@ public class CameraDeviceImpl extends CameraDevice
                 } else {
                     List<CaptureResult> partialResults =
                             mFrameNumberTracker.popPartialResults(frameNumber);
+                    if (mBatchOutputMap.containsKey(requestId)) {
+                        int requestCount = mBatchOutputMap.get(requestId);
+                        for (int i = 1; i < requestCount; i++) {
+                            mFrameNumberTracker.popPartialResults(frameNumber - (requestCount - i));
+                        }
+                    }
 
                     final long sensorTimestamp =
                             result.get(CaptureResult.SENSOR_TIMESTAMP);
@@ -2514,14 +2523,19 @@ public class CameraDeviceImpl extends CameraDevice
     @Override
     public void createExtensionSession(ExtensionSessionConfiguration extensionConfiguration)
             throws CameraAccessException {
+        HashMap<String, CameraCharacteristics> characteristicsMap = new HashMap<>(
+                mPhysicalIdsToChars);
+        characteristicsMap.put(mCameraId, mCharacteristics);
         try {
             if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported()) {
                 mCurrentAdvancedExtensionSession =
                         CameraAdvancedExtensionSessionImpl.createCameraAdvancedExtensionSession(
-                                this, mContext, extensionConfiguration, mNextSessionId++);
+                                this, characteristicsMap, mContext, extensionConfiguration,
+                                mNextSessionId++);
             } else {
                 mCurrentExtensionSession = CameraExtensionSessionImpl.createCameraExtensionSession(
-                        this, mContext, extensionConfiguration, mNextSessionId++);
+                        this, characteristicsMap, mContext, extensionConfiguration,
+                        mNextSessionId++);
             }
         } catch (RemoteException e) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);

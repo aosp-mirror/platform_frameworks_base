@@ -149,22 +149,22 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
 
     @Override
     public @NonNull
-    ISoundTriggerModule attach(int handle, ISoundTriggerCallback callback) {
+    ISoundTriggerModule attach(int handle, ISoundTriggerCallback callback, boolean isTrusted) {
         try {
             var originatorIdentity = IdentityContext.getNonNull();
             String packageIdentification = originatorIdentity.packageName
-                    + mSessionCount.getAndIncrement();
+                    + mSessionCount.getAndIncrement() + (isTrusted ? "trusted" : "");
             ModuleLogging result = new ModuleLogging();
             var eventLogger = new EventLogger(SESSION_MAX_EVENT_SIZE,
                 "Session logger for: " + packageIdentification);
 
             var callbackWrapper = new CallbackLogging(callback, eventLogger, originatorIdentity);
 
-            result.attach(mDelegate.attach(handle, callbackWrapper), eventLogger);
+            result.attach(mDelegate.attach(handle, callbackWrapper, isTrusted), eventLogger);
 
             mServiceEventLogger.enqueue(ServiceEvent.createForReturn(
                         ServiceEvent.Type.ATTACH,
-                        packageIdentification, result, handle, callback)
+                        packageIdentification, result, handle, callback, isTrusted)
                     .printLog(ALOGI, TAG));
 
             mSessionEventLoggers.add(eventLogger);
@@ -241,13 +241,14 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         }
 
         @Override
-        public void startRecognition(int modelHandle, RecognitionConfig config)
+        public IBinder startRecognition(int modelHandle, RecognitionConfig config)
                 throws RemoteException {
             try {
-                mDelegate.startRecognition(modelHandle, config);
-                mEventLogger.enqueue(SessionEvent.createForVoid(
-                            START_RECOGNITION, modelHandle, config)
+                var result = mDelegate.startRecognition(modelHandle, config);
+                mEventLogger.enqueue(SessionEvent.createForReturn(
+                            START_RECOGNITION, result, modelHandle, config)
                         .printLog(ALOGI, TAG));
+                return result;
             } catch (Exception e) {
                 mEventLogger.enqueue(SessionEvent.createForException(
                             START_RECOGNITION, e, modelHandle, config)

@@ -41,8 +41,9 @@ public class CallMetadataSyncDataTest {
         call.setId(id);
         call.setCallerId(callerId);
         call.setAppIcon(appIcon);
-        call.setAppName(appName);
-        call.setAppIdentifier(appIdentifier);
+        final CallMetadataSyncData.CallFacilitator callFacilitator =
+                new CallMetadataSyncData.CallFacilitator(appName, appIdentifier);
+        call.setFacilitator(callFacilitator);
         call.setStatus(status);
         call.addControl(control1);
         call.addControl(control2);
@@ -56,8 +57,8 @@ public class CallMetadataSyncDataTest {
         assertThat(reconstructedCall.getId()).isEqualTo(id);
         assertThat(reconstructedCall.getCallerId()).isEqualTo(callerId);
         assertThat(reconstructedCall.getAppIcon()).isEqualTo(appIcon);
-        assertThat(reconstructedCall.getAppName()).isEqualTo(appName);
-        assertThat(reconstructedCall.getAppIdentifier()).isEqualTo(appIdentifier);
+        assertThat(reconstructedCall.getFacilitator().getName()).isEqualTo(appName);
+        assertThat(reconstructedCall.getFacilitator().getIdentifier()).isEqualTo(appIdentifier);
         assertThat(reconstructedCall.getStatus()).isEqualTo(status);
         assertThat(reconstructedCall.getControls()).containsExactly(control1, control2);
     }

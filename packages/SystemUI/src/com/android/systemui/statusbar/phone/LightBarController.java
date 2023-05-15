@@ -103,6 +103,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private boolean mQsCustomizing;
     private boolean mQsExpanded;
+    private boolean mBouncerVisible;
     private boolean mGlobalActionsVisible;
 
     private boolean mDirectReplying;
@@ -188,9 +189,10 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                 final boolean ignoreScrimForce = mDirectReplying && mNavbarColorManagedByIme;
                 final boolean darkForScrim = mForceDarkForScrim && !ignoreScrimForce;
                 final boolean lightForScrim = mForceLightForScrim && !ignoreScrimForce;
-                final boolean darkForQs = mQsCustomizing || mQsExpanded || mGlobalActionsVisible;
+                final boolean darkForQs = (mQsCustomizing || mQsExpanded) && !mBouncerVisible;
+                final boolean darkForTop = darkForQs || mGlobalActionsVisible;
                 mNavigationLight =
-                        ((mHasLightNavigationBar && !darkForScrim) || lightForScrim) && !darkForQs;
+                        ((mHasLightNavigationBar && !darkForScrim) || lightForScrim) && !darkForTop;
                 mLastNavigationBarAppearanceChangedLog = "onNavigationBarAppearanceChanged()"
                         + " appearance=" + appearance
                         + " nbModeChanged=" + nbModeChanged
@@ -201,6 +203,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                         + " darkForScrim=" + darkForScrim
                         + " lightForScrim=" + lightForScrim
                         + " darkForQs=" + darkForQs
+                        + " darkForTop=" + darkForTop
                         + " mNavigationLight=" + mNavigationLight
                         + " last=" + last
                         + " timestamp=" + new Date();
@@ -298,15 +301,20 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     public void setScrimState(ScrimState scrimState, float scrimBehindAlpha,
             GradientColors scrimInFrontColor) {
         if (mUseNewLightBarLogic) {
+            boolean bouncerVisibleLast = mBouncerVisible;
             boolean forceDarkForScrimLast = mForceDarkForScrim;
             boolean forceLightForScrimLast = mForceLightForScrim;
-            final boolean forceForScrim =
-                    scrimBehindAlpha >= NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD;
+            mBouncerVisible =
+                    scrimState == ScrimState.BOUNCER || scrimState == ScrimState.BOUNCER_SCRIMMED;
+            final boolean forceForScrim = mBouncerVisible
+                    || scrimBehindAlpha >= NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD;
             final boolean scrimColorIsLight = scrimInFrontColor.supportsDarkText();
 
             mForceDarkForScrim = forceForScrim && !scrimColorIsLight;
             mForceLightForScrim = forceForScrim && scrimColorIsLight;
-            if (mHasLightNavigationBar) {
+            if (mBouncerVisible != bouncerVisibleLast) {
+                reevaluate();
+            } else if (mHasLightNavigationBar) {
                 if (mForceDarkForScrim != forceDarkForScrimLast) reevaluate();
             } else {
                 if (mForceLightForScrim != forceLightForScrimLast) reevaluate();
@@ -318,6 +326,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                     + " forceForScrim=" + forceForScrim
                     + " scrimColorIsLight=" + scrimColorIsLight
                     + " mHasLightNavigationBar=" + mHasLightNavigationBar
+                    + " mBouncerVisible=" + mBouncerVisible
                     + " mForceDarkForScrim=" + mForceDarkForScrim
                     + " mForceLightForScrim=" + mForceLightForScrim
                     + " timestamp=" + new Date();
@@ -428,6 +437,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         pw.println();
         pw.print(" mQsCustomizing="); pw.println(mQsCustomizing);
         pw.print(" mQsExpanded="); pw.println(mQsExpanded);
+        pw.print(" mBouncerVisible="); pw.println(mBouncerVisible);
         pw.print(" mGlobalActionsVisible="); pw.println(mGlobalActionsVisible);
         pw.print(" mDirectReplying="); pw.println(mDirectReplying);
         pw.print(" mNavbarColorManagedByIme="); pw.println(mNavbarColorManagedByIme);

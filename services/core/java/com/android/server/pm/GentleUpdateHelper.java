@@ -39,6 +39,7 @@ import android.os.SystemProperties;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayDeque;
@@ -110,6 +111,25 @@ public class GentleUpdateHelper {
         public long getRemainingTimeMillis() {
             long timeout = mFinishTime - SystemClock.elapsedRealtime();
             return Math.max(timeout, 0);
+        }
+
+        void dump(IndentingPrintWriter pw) {
+            pw.printPair("packageNames", packageNames);
+            pw.println();
+            pw.printPair("finishTime", mFinishTime);
+            pw.println();
+            pw.printPair("constraints notInCallRequired", constraints.isNotInCallRequired());
+            pw.println();
+            pw.printPair("constraints deviceIdleRequired", constraints.isDeviceIdleRequired());
+            pw.println();
+            pw.printPair("constraints appNotForegroundRequired",
+                    constraints.isAppNotForegroundRequired());
+            pw.println();
+            pw.printPair("constraints appNotInteractingRequired",
+                    constraints.isAppNotInteractingRequired());
+            pw.println();
+            pw.printPair("constraints appNotTopVisibleRequired",
+                    constraints.isAppNotTopVisibleRequired());
         }
     }
 
@@ -286,6 +306,26 @@ public class GentleUpdateHelper {
             var packageName = pm.getNameForUid(uid);
             mHandler.post(() -> onUidImportance(packageName, importance));
         } catch (RemoteException ignore) {
+        }
+    }
+
+    void dump(IndentingPrintWriter pw) {
+        pw.println("Gentle update with constraints info:");
+        pw.increaseIndent();
+        pw.printPair("hasPendingIdleJob", mHasPendingIdleJob);
+        pw.println();
+        pw.printPair("Num of PendingIdleFutures", mPendingIdleFutures.size());
+        pw.println();
+        ArrayDeque<PendingInstallConstraintsCheck> pendingChecks = mPendingChecks.clone();
+        int size = pendingChecks.size();
+        pw.printPair("Num of PendingChecks", size);
+        pw.println();
+        pw.increaseIndent();
+        for (int i = 0; i < size; i++) {
+            pw.print(i); pw.print(":");
+            PendingInstallConstraintsCheck pendingInstallConstraintsCheck = pendingChecks.remove();
+            pendingInstallConstraintsCheck.dump(pw);
+            pw.println();
         }
     }
 }

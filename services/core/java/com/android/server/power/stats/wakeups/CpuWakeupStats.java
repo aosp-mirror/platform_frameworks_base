@@ -403,10 +403,12 @@ public class CpuWakeupStats {
      * This class stores recent unattributed activity history per subsystem.
      * The activity is stored as a mapping of subsystem to timestamp to uid to procstate.
      */
-    private static final class WakingActivityHistory {
+    @VisibleForTesting
+    static final class WakingActivityHistory {
         private static final long WAKING_ACTIVITY_RETENTION_MS = TimeUnit.MINUTES.toMillis(10);
 
-        private SparseArray<TimeSparseArray<SparseIntArray>> mWakingActivity =
+        @VisibleForTesting
+        final SparseArray<TimeSparseArray<SparseIntArray>> mWakingActivity =
                 new SparseArray<>();
 
         void recordActivity(int subsystem, long elapsedRealtime, SparseIntArray uidProcStates) {
@@ -430,7 +432,6 @@ public class CpuWakeupStats {
                         uidsToBlame.put(uid, uidProcStates.valueAt(i));
                     }
                 }
-                wakingActivity.put(elapsedRealtime, uidsToBlame);
             }
             // Limit activity history per subsystem to the last WAKING_ACTIVITY_RETENTION_MS.
             // Note that the last activity is always present, even if it occurred before

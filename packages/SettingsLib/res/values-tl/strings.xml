@@ -115,7 +115,8 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Mga Hearing Aid"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
+    <skip />
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Nakakonekta sa Mga Hearing Aid"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Nakakonekta sa LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Konektado sa media audio"</string>
@@ -380,7 +381,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"Rendering ng Profile HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"I-enable ang GPU debug layer"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Payagang i-load ang GPU debug layer sa debug app"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Enable verbose vendor logging"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"I-enable ang verbose vendor logging"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Magsama sa mga ulat ng bug ng mga karagdagang log ng vendor na partikular sa device, na posibleng may pribadong impormasyon, gumamit ng mas maraming baterya, at/o gumamit ng mas malaking storage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Scale ng window animation"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Scale ng transition animation"</string>

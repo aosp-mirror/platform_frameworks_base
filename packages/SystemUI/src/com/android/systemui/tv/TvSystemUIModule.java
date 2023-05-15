@@ -23,8 +23,6 @@ import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 import android.os.Handler;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.dagger.ReferenceSystemUIModule;
@@ -75,12 +73,12 @@ import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
 import com.android.systemui.volume.dagger.VolumeModule;
 
-import javax.inject.Named;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+
+import javax.inject.Named;
 
 /**
  * A TV specific version of {@link ReferenceSystemUIModule}.
@@ -105,9 +103,8 @@ public abstract class TvSystemUIModule {
     @SysUISingleton
     @Provides
     @Named(LEAK_REPORT_EMAIL_NAME)
-    @Nullable
     static String provideLeakReportEmail() {
-        return null;
+        return "";
     }
 
     @Binds

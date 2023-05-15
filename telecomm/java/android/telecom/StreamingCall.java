@@ -55,6 +55,12 @@ public final class StreamingCall implements Parcelable {
     public static final int STATE_DISCONNECTED = 3;
 
     /**
+     * The ID associated with this call.  This is the same value as {@link CallControl#getCallId()}.
+     * @hide
+     */
+    public static final String EXTRA_CALL_ID = "android.telecom.extra.CALL_ID";
+
+    /**
      * @hide
      */
     private StreamingCall(@NonNull Parcel in) {

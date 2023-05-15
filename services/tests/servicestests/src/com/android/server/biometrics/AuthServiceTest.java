@@ -367,7 +367,7 @@ public class AuthServiceTest {
 
         waitForIdle();
         verify(mBiometricService).registerEnabledOnKeyguardCallback(
-                eq(callback), eq(UserHandle.getCallingUserId()));
+                eq(callback));
     }
 
     private static void setInternalAndTestBiometricPermissions(

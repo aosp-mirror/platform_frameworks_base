@@ -121,6 +121,12 @@ public final class FillRequest implements Parcelable {
      */
     public static final @RequestFlags int FLAG_PCC_DETECTION = 0x200;
 
+    /**
+     * Indicate whether the screen has credman field
+     * @hide
+     */
+    public static final @RequestFlags int FLAG_SCREEN_HAS_CREDMAN_FIELD = 0x400;
+
     /** @hide */
     public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
 
@@ -234,7 +240,8 @@ public final class FillRequest implements Parcelable {
         FLAG_SUPPORTS_FILL_DIALOG,
         FLAG_IME_SHOWING,
         FLAG_RESET_FILL_DIALOG_STATE,
-        FLAG_PCC_DETECTION
+        FLAG_PCC_DETECTION,
+        FLAG_SCREEN_HAS_CREDMAN_FIELD
     })
     @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
@@ -266,6 +273,8 @@ public final class FillRequest implements Parcelable {
                     return "FLAG_RESET_FILL_DIALOG_STATE";
             case FLAG_PCC_DETECTION:
                     return "FLAG_PCC_DETECTION";
+            case FLAG_SCREEN_HAS_CREDMAN_FIELD:
+                    return "FLAG_SCREEN_HAS_CREDMAN_FIELD";
             default: return Integer.toHexString(value);
         }
     }
@@ -282,10 +291,15 @@ public final class FillRequest implements Parcelable {
      *   include contexts from requests whose {@link SaveInfo} had the
      *   {@link SaveInfo#FLAG_DELAY_SAVE} flag.
      * @param hints
-     *   Autofill Provider should return data for the autofill hints requested here,
+     *   Sends a list of datatypes for the Autofill Provider.
+     *
+     *   If this is populated, Autofill Provider should return data
+     *   for the autofill hints requested here,
      *   even though the Autofill Provider may not have detected these types.
      *   The hints would be part of HintConstants:
      *   https://developer.android.com/reference/androidx/autofill/HintConstants
+     *
+     *   This is populated if the platform's field detection is enabled.
      * @param clientState
      *   Gets the latest client state bundle set by the service in a
      *   {@link FillResponse.Builder#setClientState(Bundle) fill response}.
@@ -353,7 +367,8 @@ public final class FillRequest implements Parcelable {
                         | FLAG_SUPPORTS_FILL_DIALOG
                         | FLAG_IME_SHOWING
                         | FLAG_RESET_FILL_DIALOG_STATE
-                        | FLAG_PCC_DETECTION);
+                        | FLAG_PCC_DETECTION
+                        | FLAG_SCREEN_HAS_CREDMAN_FIELD);
         this.mInlineSuggestionsRequest = inlineSuggestionsRequest;
         this.mDelayedFillIntentSender = delayedFillIntentSender;
 
@@ -381,10 +396,15 @@ public final class FillRequest implements Parcelable {
     }
 
     /**
-     * Autofill Provider should return data for the autofill hints requested here,
+     * Sends a list of datatypes for the Autofill Provider.
+     *
+     * If this is populated, Autofill Provider should return data
+     * for the autofill hints requested here,
      * even though the Autofill Provider may not have detected these types.
      * The hints would be part of HintConstants:
      * https://developer.android.com/reference/androidx/autofill/HintConstants
+     *
+     * This is populated if the platform's field detection is enabled.
      */
     @DataClass.Generated.Member
     public @NonNull List<String> getHints() {
@@ -534,7 +554,8 @@ public final class FillRequest implements Parcelable {
                         | FLAG_SUPPORTS_FILL_DIALOG
                         | FLAG_IME_SHOWING
                         | FLAG_RESET_FILL_DIALOG_STATE
-                        | FLAG_PCC_DETECTION);
+                        | FLAG_PCC_DETECTION
+                        | FLAG_SCREEN_HAS_CREDMAN_FIELD);
         this.mInlineSuggestionsRequest = inlineSuggestionsRequest;
         this.mDelayedFillIntentSender = delayedFillIntentSender;
 
@@ -556,10 +577,10 @@ public final class FillRequest implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1675711417112L,
+            time = 1682097266850L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/autofill/FillRequest.java",
-            inputSignatures = "public static final @android.service.autofill.FillRequest.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PASSWORD_INPUT_TYPE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_VIEW_NOT_FOCUSED\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_SUPPORTS_FILL_DIALOG\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_IME_SHOWING\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_RESET_FILL_DIALOG_STATE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PCC_DETECTION\npublic static final  int INVALID_REQUEST_ID\nprivate final  int mId\nprivate final @android.annotation.NonNull java.util.List<android.service.autofill.FillContext> mFillContexts\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mHints\nprivate final @android.annotation.Nullable android.os.Bundle mClientState\nprivate final @android.service.autofill.FillRequest.RequestFlags int mFlags\nprivate final @android.annotation.Nullable android.view.inputmethod.InlineSuggestionsRequest mInlineSuggestionsRequest\nprivate final @android.annotation.Nullable android.content.IntentSender mDelayedFillIntentSender\nprivate  void onConstructed()\nclass FillRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstructor=true, genHiddenConstDefs=true)")
+            inputSignatures = "public static final @android.service.autofill.FillRequest.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PASSWORD_INPUT_TYPE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_VIEW_NOT_FOCUSED\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_SUPPORTS_FILL_DIALOG\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_IME_SHOWING\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_RESET_FILL_DIALOG_STATE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PCC_DETECTION\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_SCREEN_HAS_CREDMAN_FIELD\npublic static final  int INVALID_REQUEST_ID\nprivate final  int mId\nprivate final @android.annotation.NonNull java.util.List<android.service.autofill.FillContext> mFillContexts\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mHints\nprivate final @android.annotation.Nullable android.os.Bundle mClientState\nprivate final @android.service.autofill.FillRequest.RequestFlags int mFlags\nprivate final @android.annotation.Nullable android.view.inputmethod.InlineSuggestionsRequest mInlineSuggestionsRequest\nprivate final @android.annotation.Nullable android.content.IntentSender mDelayedFillIntentSender\nprivate  void onConstructed()\nclass FillRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstructor=true, genHiddenConstDefs=true)")
     @Deprecated
     private void __metadata() {}
 

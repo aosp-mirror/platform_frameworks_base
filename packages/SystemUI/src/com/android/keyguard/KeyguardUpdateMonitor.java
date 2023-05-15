@@ -570,6 +570,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+    @Override
+    public void onIsActiveUnlockRunningChanged(boolean isRunning, int userId) {
+    }
+
     /**
      * Whether the trust granted call with its passed flags should dismiss keyguard.
      * It's assumed that the trust was granted for the current user.
@@ -585,6 +589,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @Override
     public void onTrustError(CharSequence message) {
         dispatchErrorMessage(message);
+    }
+
+    @Override
+    public void onEnabledTrustAgentsChanged(int userId) {
+        Assert.isMainThread();
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onEnabledTrustAgentsChanged(userId);
+            }
+        }
     }
 
     private void handleSimSubscriptionInfoChanged() {

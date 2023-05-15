@@ -21,6 +21,7 @@ import static android.service.notification.NotificationListenerService.REASON_CA
 import static android.service.notification.NotificationListenerService.REASON_CLEAR_DATA;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -499,6 +500,7 @@ interface NotificationRecordLogger {
         final boolean is_foreground_service;
         final long timeout_millis;
         final boolean is_non_dismissible;
+        @DurationMillisLong long post_duration_millis; // Not final; calculated at the end.
 
         NotificationReported(NotificationRecordPair p,
                 NotificationReportedEvent eventType, int position, int buzzBeepBlink,

@@ -22,7 +22,6 @@ import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
-import android.app.UidObserver;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -54,6 +53,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.StatLogger;
+import com.android.modules.expresslog.Counter;
 import com.android.server.AppStateTrackerProto.ExemptedPackage;
 import com.android.server.AppStateTrackerProto.RunAnyInBackgroundRestrictedPackages;
 import com.android.server.usage.AppStandbyInternal;
@@ -78,6 +78,9 @@ import java.util.Set;
  */
 public class AppStateTrackerImpl implements AppStateTracker {
     private static final boolean DEBUG = false;
+
+    private static final String APP_RESTRICTION_COUNTER_METRIC_ID =
+            "battery.value_app_background_restricted";
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -747,6 +750,9 @@ public class AppStateTrackerImpl implements AppStateTracker {
                         uid, packageName) != AppOpsManager.MODE_ALLOWED;
             } catch (RemoteException e) {
                 // Shouldn't happen
+            }
+            if (restricted) {
+                Counter.logIncrementWithUid(APP_RESTRICTION_COUNTER_METRIC_ID, uid);
             }
             synchronized (mLock) {
                 if (updateForcedAppStandbyUidPackageLocked(uid, packageName, restricted)) {

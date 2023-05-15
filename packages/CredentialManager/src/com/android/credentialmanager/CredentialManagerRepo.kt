@@ -38,6 +38,7 @@ import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.findAutoSelectEntry
 import com.android.credentialmanager.common.ProviderActivityState
+import com.android.credentialmanager.createflow.isFlowAutoSelectable
 
 /**
  * Client for interacting with Credential Manager. Also holds data inputs from it.
@@ -49,11 +50,11 @@ class CredentialManagerRepo(
     private val context: Context,
     intent: Intent,
     userConfigRepo: UserConfigRepo,
+    isNewActivity: Boolean,
 ) {
     val requestInfo: RequestInfo?
     private val providerEnabledList: List<ProviderData>
     private val providerDisabledList: List<DisabledProviderData>?
-    // TODO: require non-null.
     val resultReceiver: ResultReceiver?
 
     var initialUiState: UiState
@@ -112,20 +113,30 @@ class CredentialManagerRepo(
                 val providerDisableListUiState = getCreateProviderDisableListInitialUiState()
                 val requestDisplayInfoUiState =
                     getCreateRequestDisplayInfoInitialUiState(originName)!!
+                val createCredentialUiState = CreateFlowUtils.toCreateCredentialUiState(
+                    enabledProviders = providerEnableListUiState,
+                    disabledProviders = providerDisableListUiState,
+                    defaultProviderIdPreferredByApp =
+                    requestDisplayInfoUiState.appPreferredDefaultProviderId,
+                    defaultProviderIdsSetByUser =
+                    requestDisplayInfoUiState.userSetDefaultProviderIds,
+                    requestDisplayInfo = requestDisplayInfoUiState,
+                    isOnPasskeyIntroStateAlready = false,
+                    isPasskeyFirstUse = isPasskeyFirstUse,
+                )!!
+                val isFlowAutoSelectable = isFlowAutoSelectable(createCredentialUiState)
                 UiState(
-                    createCredentialUiState = CreateFlowUtils.toCreateCredentialUiState(
-                        enabledProviders = providerEnableListUiState,
-                        disabledProviders = providerDisableListUiState,
-                        defaultProviderIdPreferredByApp =
-                        requestDisplayInfoUiState.appPreferredDefaultProviderId,
-                        defaultProviderIdsSetByUser =
-                        requestDisplayInfoUiState.userSetDefaultProviderIds,
-                        requestDisplayInfo = requestDisplayInfoUiState,
-                        isOnPasskeyIntroStateAlready = false,
-                        isPasskeyFirstUse = isPasskeyFirstUse,
-                    )!!,
+                    createCredentialUiState = createCredentialUiState,
                     getCredentialUiState = null,
-                    cancelRequestState = cancelUiRequestState
+                    cancelRequestState = cancelUiRequestState,
+                    isInitialRender = isNewActivity,
+                    isAutoSelectFlow = isFlowAutoSelectable,
+                    providerActivityState =
+                    if (isFlowAutoSelectable) ProviderActivityState.READY_TO_LAUNCH
+                    else ProviderActivityState.NOT_APPLICABLE,
+                    selectedEntry =
+                    if (isFlowAutoSelectable) createCredentialUiState.activeEntry?.activeEntryInfo
+                    else null,
                 )
             }
             RequestInfo.TYPE_GET -> {
@@ -140,7 +151,8 @@ class CredentialManagerRepo(
                     if (autoSelectEntry == null) ProviderActivityState.NOT_APPLICABLE
                     else ProviderActivityState.READY_TO_LAUNCH,
                     isAutoSelectFlow = autoSelectEntry != null,
-                    cancelRequestState = cancelUiRequestState
+                    cancelRequestState = cancelUiRequestState,
+                    isInitialRender = isNewActivity,
                 )
             }
             else -> {
@@ -149,6 +161,7 @@ class CredentialManagerRepo(
                         createCredentialUiState = null,
                         getCredentialUiState = null,
                         cancelRequestState = cancelUiRequestState,
+                        isInitialRender = isNewActivity,
                     )
                 } else {
                     throw IllegalStateException("Unrecognized request type: ${requestInfo?.type}")
@@ -168,7 +181,7 @@ class CredentialManagerRepo(
 
     // The dialog is canceled because we launched into settings.
     fun onSettingLaunchCancel() {
-        onCancel(BaseDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION)
+        onCancel(BaseDialogResult.RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS)
     }
 
     fun onParsingFailureCancel() {

@@ -780,7 +780,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
     private boolean shouldTryToDismissKeyguard() {
         return mOverlay != null
-                && mOverlay.getAnimationViewController() instanceof UdfpsKeyguardViewController
+                && mOverlay.getAnimationViewController()
+                instanceof UdfpsKeyguardViewControllerLegacy
                 && mKeyguardStateController.canDismissLockScreen()
                 && !mAttemptedToDismissKeyguard;
     }

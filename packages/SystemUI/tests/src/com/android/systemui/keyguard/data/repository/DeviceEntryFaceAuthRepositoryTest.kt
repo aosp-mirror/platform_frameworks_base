@@ -530,7 +530,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 keyguardRepository.setWakefulnessModel(
                     WakefulnessModel(
                         state = WakefulnessState.STARTING_TO_SLEEP,
-                        isWakingUpOrAwake = false,
                         lastWakeReason = WakeSleepReason.OTHER,
                         lastSleepReason = WakeSleepReason.OTHER,
                     )
@@ -545,7 +544,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 keyguardRepository.setWakefulnessModel(
                     WakefulnessModel(
                         state = WakefulnessState.ASLEEP,
-                        isWakingUpOrAwake = false,
                         lastWakeReason = WakeSleepReason.OTHER,
                         lastSleepReason = WakeSleepReason.OTHER,
                     )
@@ -682,7 +680,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             keyguardRepository.setWakefulnessModel(
                 WakefulnessModel(
                     WakefulnessState.STARTING_TO_SLEEP,
-                    isWakingUpOrAwake = false,
                     lastWakeReason = WakeSleepReason.POWER_BUTTON,
                     lastSleepReason = WakeSleepReason.POWER_BUTTON
                 )
@@ -708,7 +705,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             keyguardRepository.setWakefulnessModel(
                 WakefulnessModel(
                     WakefulnessState.ASLEEP,
-                    isWakingUpOrAwake = false,
                     lastWakeReason = WakeSleepReason.POWER_BUTTON,
                     lastSleepReason = WakeSleepReason.POWER_BUTTON
                 )
@@ -765,7 +761,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 keyguardRepository.setWakefulnessModel(
                     WakefulnessModel(
                         state = WakefulnessState.STARTING_TO_SLEEP,
-                        isWakingUpOrAwake = false,
                         lastWakeReason = WakeSleepReason.OTHER,
                         lastSleepReason = WakeSleepReason.OTHER,
                     )
@@ -1006,7 +1001,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         keyguardRepository.setWakefulnessModel(
             WakefulnessModel(
                 WakefulnessState.STARTING_TO_WAKE,
-                true,
                 WakeSleepReason.OTHER,
                 WakeSleepReason.OTHER
             )

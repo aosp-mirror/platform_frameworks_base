@@ -78,9 +78,15 @@ class AppListRepositoryTest {
         whenever(context.packageManager).thenReturn(packageManager)
         whenever(context.userManager).thenReturn(userManager)
         whenever(packageManager.getInstalledModules(anyInt())).thenReturn(emptyList())
+        whenever(packageManager.getHomeActivities(any())).thenAnswer {
+            @Suppress("UNCHECKED_CAST")
+            val resolveInfos = it.arguments[0] as MutableList<ResolveInfo>
+            resolveInfos += resolveInfoOf(packageName = HOME_APP.packageName)
+            null
+        }
         whenever(
             packageManager.queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), anyInt())
-        ).thenReturn(emptyList())
+        ).thenReturn(listOf(resolveInfoOf(packageName = IN_LAUNCHER_APP.packageName)))
         whenever(userManager.getUserInfo(ADMIN_USER_ID)).thenReturn(UserInfo().apply {
             flags = UserInfo.FLAG_ADMIN
         })
@@ -290,35 +296,16 @@ class AppListRepositoryTest {
 
     @Test
     fun showSystemPredicate_isHome() = runTest {
-        val app = HOME_APP
-
-        whenever(packageManager.getHomeActivities(any())).thenAnswer {
-            @Suppress("UNCHECKED_CAST")
-            val resolveInfos = it.arguments[0] as MutableList<ResolveInfo>
-            resolveInfos.add(resolveInfoOf(packageName = app.packageName))
-            null
-        }
-
         val showSystemPredicate = getShowSystemPredicate(showSystem = false)
 
-        assertThat(showSystemPredicate(app)).isTrue()
+        assertThat(showSystemPredicate(HOME_APP)).isTrue()
     }
 
     @Test
     fun showSystemPredicate_appInLauncher() = runTest {
-        val app = IN_LAUNCHER_APP
-
-        whenever(
-            packageManager.queryIntentActivitiesAsUser(
-                any(),
-                any<ResolveInfoFlags>(),
-                eq(ADMIN_USER_ID)
-            )
-        ).thenReturn(listOf(resolveInfoOf(packageName = app.packageName)))
-
         val showSystemPredicate = getShowSystemPredicate(showSystem = false)
 
-        assertThat(showSystemPredicate(app)).isTrue()
+        assertThat(showSystemPredicate(IN_LAUNCHER_APP)).isTrue()
     }
 
     @Test
@@ -333,10 +320,9 @@ class AppListRepositoryTest {
         val systemPackageNames = AppListRepositoryUtil.getSystemPackageNames(
             context = context,
             userId = ADMIN_USER_ID,
-            showInstantApps = false,
         )
 
-        assertThat(systemPackageNames).containsExactly("system.app", "home.app", "app.in.launcher")
+        assertThat(systemPackageNames).containsExactly(SYSTEM_APP.packageName)
     }
 
     private suspend fun getShowSystemPredicate(showSystem: Boolean) =

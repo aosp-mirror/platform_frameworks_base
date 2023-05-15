@@ -19,7 +19,7 @@ package com.android.internal.app;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_WORK;
-import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_IN_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_WORK;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -227,8 +227,8 @@ public class IntentForwarderActivity extends Activity  {
 
     private String getOpenInWorkMessage(CharSequence targetLabel) {
         return getSystemService(DevicePolicyManager.class).getResources().getString(
-                MINIRESOLVER_OPEN_IN_WORK,
-                () -> getString(R.string.miniresolver_open_in_work, targetLabel),
+                MINIRESOLVER_OPEN_WORK,
+                () -> getString(R.string.miniresolver_open_work, targetLabel),
                 targetLabel);
     }
 

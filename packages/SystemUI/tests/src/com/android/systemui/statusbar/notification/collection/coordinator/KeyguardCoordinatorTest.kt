@@ -327,7 +327,7 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
     fun unseenNotificationIsMarkedAsSeenWhenKeyguardGoesAway() {
         // GIVEN: Keyguard is showing, not dozing, unseen notification is present
         keyguardRepository.setKeyguardShowing(true)
-        keyguardRepository.setDozing(false)
+        keyguardRepository.setIsDozing(false)
         runKeyguardCoordinatorTest {
             val fakeEntry = NotificationEntryBuilder().build()
             collectionListener.onEntryAdded(fakeEntry)

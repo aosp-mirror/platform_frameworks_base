@@ -256,7 +256,7 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
         public void recognitionCallback(int model, RecognitionEventSys event) {
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
-                if (state == null || state == ModelState.INACTIVE) {
+                if (state == null) {
                     Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
                     reboot();
                     return;
@@ -282,7 +282,7 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
         public void phraseRecognitionCallback(int model, PhraseRecognitionEventSys event) {
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
-                if (state == null || state == ModelState.INACTIVE) {
+                if (state == null) {
                     Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
                     reboot();
                     return;

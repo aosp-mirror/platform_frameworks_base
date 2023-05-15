@@ -16,52 +16,85 @@
 
 package com.android.server.companion.datatransfer.contextsync;
 
-import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import android.media.AudioManager;
 import android.platform.test.annotations.Presubmit;
-import android.telecom.PhoneAccount;
+import android.telecom.TelecomManager;
 import android.testing.AndroidTestingRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @Presubmit
 @RunWith(AndroidTestingRunner.class)
 public class CallMetadataSyncConnectionServiceTest {
 
     private CallMetadataSyncConnectionService mSyncConnectionService;
+    @Mock
+    private TelecomManager mMockTelecomManager;
+    @Mock
+    private AudioManager mMockAudioManager;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        doNothing().when(mMockTelecomManager).registerPhoneAccount(any());
+        doNothing().when(mMockTelecomManager).unregisterPhoneAccount(any());
         mSyncConnectionService = new CallMetadataSyncConnectionService() {
             @Override
             public String getPackageName() {
                 return "android";
             }
         };
+        mSyncConnectionService.mTelecomManager = mMockTelecomManager;
+        mSyncConnectionService.mAudioManager = mMockAudioManager;
     }
 
     @Test
-    public void createPhoneAccount_success() {
-        final PhoneAccount phoneAccount = mSyncConnectionService.createPhoneAccount(
-                new CallMetadataSyncConnectionService.PhoneAccountHandleIdentifier(/*
-                associationId= */
-                        0, "com.google.test"), "Test App");
-        assertWithMessage("Could not create phone account").that(phoneAccount).isNotNull();
+    public void processContextSyncMessage_empty() {
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        mSyncConnectionService.mCrossDeviceSyncControllerCallback.processContextSyncMessage(
+                /* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
     }
 
     @Test
-    public void createPhoneAccount_alreadyExists_doesNotCreateAnother() {
-        final PhoneAccount phoneAccount = mSyncConnectionService.createPhoneAccount(
-                new CallMetadataSyncConnectionService.PhoneAccountHandleIdentifier(/*
-                associationId= */
-                        0, "com.google.test"), "Test App");
-        final PhoneAccount phoneAccount2 = mSyncConnectionService.createPhoneAccount(
-                new CallMetadataSyncConnectionService.PhoneAccountHandleIdentifier(/*
-                associationId= */
-                        0, "com.google.test"), "Test App #2");
-        assertWithMessage("Could not create phone account").that(phoneAccount).isNotNull();
-        assertWithMessage("Unexpectedly created second phone account").that(phoneAccount2).isNull();
+    public void processContextSyncMessage_newCall() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        mSyncConnectionService.mCrossDeviceSyncControllerCallback.processContextSyncMessage(
+                /* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, times(1)).addNewIncomingCall(any(), any());
+    }
+
+    @Test
+    public void processContextSyncMessage_existingCall() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        mSyncConnectionService.mActiveConnections.put(
+                new CallMetadataSyncConnectionService.CallMetadataSyncConnectionIdentifier(
+                        /* asscociationId= */ 0, "123abc"),
+                new CallMetadataSyncConnectionService.CallMetadataSyncConnection(
+                        mMockTelecomManager, mMockAudioManager, 0, call,
+                        new CallMetadataSyncConnectionService.CallMetadataSyncConnectionCallback() {
+                            @Override
+                            void sendCallAction(int associationId, String callId, int action) {}
+                        }));
+        mSyncConnectionService.mCrossDeviceSyncControllerCallback.processContextSyncMessage(
+                /* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
     }
 }

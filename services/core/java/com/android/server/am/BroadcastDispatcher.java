@@ -582,6 +582,38 @@ public class BroadcastDispatcher {
         }
     }
 
+    private static boolean isDispatchedInDeferrals(@NonNull ArrayList<Deferrals> list,
+            @NonNull Intent intent) {
+        for (int i = 0; i < list.size(); i++) {
+            if (!isDispatched(list.get(i).broadcasts, intent)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isDispatched(@NonNull ArrayList<BroadcastRecord> list,
+            @NonNull Intent intent) {
+        for (int i = 0; i < list.size(); i++) {
+            if (intent.filterEquals(list.get(i).intent)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isDispatched(@NonNull Intent intent) {
+        synchronized (mLock) {
+            if ((mCurrentBroadcast != null) && intent.filterEquals(mCurrentBroadcast.intent)) {
+                return false;
+            }
+            return isDispatched(mOrderedBroadcasts, intent)
+                    && isDispatched(mAlarmQueue, intent)
+                    && isDispatchedInDeferrals(mDeferredBroadcasts, intent)
+                    && isDispatchedInDeferrals(mAlarmDeferrals, intent);
+        }
+    }
+
     private static int pendingInDeferralsList(ArrayList<Deferrals> list) {
         int pending = 0;
         final int numEntries = list.size();

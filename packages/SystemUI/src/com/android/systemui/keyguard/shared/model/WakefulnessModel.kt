@@ -20,26 +20,31 @@ import com.android.systemui.keyguard.WakefulnessLifecycle
 /** Model device wakefulness states. */
 data class WakefulnessModel(
     val state: WakefulnessState,
-    val isWakingUpOrAwake: Boolean,
     val lastWakeReason: WakeSleepReason,
     val lastSleepReason: WakeSleepReason,
 ) {
+    fun isStartingToWake() = state == WakefulnessState.STARTING_TO_WAKE
+
+    fun isStartingToSleep() = state == WakefulnessState.STARTING_TO_SLEEP
+
+    fun isStartingToSleepOrAsleep() = isStartingToSleep() || state == WakefulnessState.ASLEEP
+
+    fun isStartingToSleepFromPowerButton() =
+        isStartingToSleep() && lastWakeReason == WakeSleepReason.POWER_BUTTON
+
+    fun isWakingFromPowerButton() =
+        isStartingToWake() && lastWakeReason == WakeSleepReason.POWER_BUTTON
+
+    fun isTransitioningFromPowerButton() =
+        isStartingToSleepFromPowerButton() || isWakingFromPowerButton()
+
+    fun isAwakeFromTap() =
+        state == WakefulnessState.STARTING_TO_WAKE && lastWakeReason == WakeSleepReason.TAP
+
     companion object {
-        fun isSleepingOrStartingToSleep(model: WakefulnessModel): Boolean {
-            return model.state == WakefulnessState.ASLEEP ||
-                model.state == WakefulnessState.STARTING_TO_SLEEP
-        }
-
-        fun isWakingOrStartingToWake(model: WakefulnessModel): Boolean {
-            return model.state == WakefulnessState.AWAKE ||
-                model.state == WakefulnessState.STARTING_TO_WAKE
-        }
-
         fun fromWakefulnessLifecycle(wakefulnessLifecycle: WakefulnessLifecycle): WakefulnessModel {
             return WakefulnessModel(
                 WakefulnessState.fromWakefulnessLifecycleInt(wakefulnessLifecycle.wakefulness),
-                wakefulnessLifecycle.wakefulness == WakefulnessLifecycle.WAKEFULNESS_WAKING ||
-                    wakefulnessLifecycle.wakefulness == WakefulnessLifecycle.WAKEFULNESS_AWAKE,
                 WakeSleepReason.fromPowerManagerWakeReason(wakefulnessLifecycle.lastWakeReason),
                 WakeSleepReason.fromPowerManagerSleepReason(wakefulnessLifecycle.lastSleepReason),
             )

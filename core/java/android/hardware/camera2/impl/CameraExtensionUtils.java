@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.hardware.HardwareBuffer;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -34,6 +35,7 @@ import android.view.Surface;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -168,5 +170,14 @@ public final class CameraExtensionUtils {
         }
 
         return null;
+    }
+
+    public static Map<String, CameraMetadataNative> getCharacteristicsMapNative(
+            Map<String, CameraCharacteristics> charsMap) {
+        HashMap<String, CameraMetadataNative> ret = new HashMap<>();
+        for (Map.Entry<String, CameraCharacteristics> entry : charsMap.entrySet()) {
+            ret.put(entry.getKey(), entry.getValue().getNativeMetadata());
+        }
+        return ret;
     }
 }

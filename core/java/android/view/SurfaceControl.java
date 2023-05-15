@@ -280,7 +280,7 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetLayerId(long nativeObject);
     private static native void nativeAddTransactionCommittedListener(long nativeObject,
             TransactionCommittedListener listener);
-    private static native void nativeSanitize(long transactionObject);
+    private static native void nativeSanitize(long transactionObject, int pid, int uid);
     private static native void nativeSetDestinationFrame(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
     private static native void nativeSetDefaultApplyToken(IBinder token);
@@ -3960,8 +3960,8 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
-        public void sanitize() {
-            nativeSanitize(mNativeObject);
+        public void sanitize(int pid, int uid) {
+            nativeSanitize(mNativeObject, pid, uid);
         }
 
         /**

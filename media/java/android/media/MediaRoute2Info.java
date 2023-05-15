@@ -126,6 +126,12 @@ public final class MediaRoute2Info implements Parcelable {
                 TYPE_REMOTE_TV,
                 TYPE_REMOTE_SPEAKER,
                 TYPE_REMOTE_AUDIO_VIDEO_RECEIVER,
+                TYPE_REMOTE_TABLET,
+                TYPE_REMOTE_TABLET_DOCKED,
+                TYPE_REMOTE_COMPUTER,
+                TYPE_REMOTE_GAME_CONSOLE,
+                TYPE_REMOTE_CAR,
+                TYPE_REMOTE_SMARTWATCH,
                 TYPE_GROUP
             })
     @Retention(RetentionPolicy.SOURCE)
@@ -245,6 +251,72 @@ public final class MediaRoute2Info implements Parcelable {
      * @see #getType
      */
     public static final int TYPE_REMOTE_AUDIO_VIDEO_RECEIVER = 1003;
+
+    /**
+     * Indicates the route is a remote tablet.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_TABLET = 1004;
+
+    /**
+     * Indicates the route is a remote docked tablet.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_TABLET_DOCKED = 1005;
+
+    /**
+     * Indicates the route is a remote computer.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_COMPUTER = 1006;
+
+    /**
+     * Indicates the route is a remote gaming console.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_GAME_CONSOLE = 1007;
+
+    /**
+     * Indicates the route is a remote car.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_CAR = 1008;
+
+    /**
+     * Indicates the route is a remote smartwatch.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_SMARTWATCH = 1009;
 
     /**
      * Indicates the route is a group of devices.
@@ -450,6 +522,14 @@ public final class MediaRoute2Info implements Parcelable {
         return mFeatures;
     }
 
+    // TODO (b/278728942): Add the following once the symbols are published in the SDK. Until then,
+    //     adding them would cause the generated link to be broken.
+    //     @see #TYPE_REMOTE_TABLET
+    //     @see #TYPE_REMOTE_TABLET_DOCKED
+    //     @see #TYPE_REMOTE_COMPUTER
+    //     @see #TYPE_REMOTE_GAME_CONSOLE
+    //     @see #TYPE_REMOTE_CAR
+    //     @see #TYPE_REMOTE_SMARTWATCH
     /**
      * Returns the type of this route.
      *
@@ -838,6 +918,18 @@ public final class MediaRoute2Info implements Parcelable {
                 return "REMOTE_SPEAKER";
             case TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:
                 return "REMOTE_AUDIO_VIDEO_RECEIVER";
+            case TYPE_REMOTE_TABLET:
+                return "REMOTE_TABLET";
+            case TYPE_REMOTE_TABLET_DOCKED:
+                return "REMOTE_TABLET_DOCKED";
+            case TYPE_REMOTE_COMPUTER:
+                return "REMOTE_COMPUTER";
+            case TYPE_REMOTE_GAME_CONSOLE:
+                return "REMOTE_GAME_CONSOLE";
+            case TYPE_REMOTE_CAR:
+                return "REMOTE_CAR";
+            case TYPE_REMOTE_SMARTWATCH:
+                return "REMOTE_SMARTWATCH";
             case TYPE_GROUP:
                 return "GROUP";
             case TYPE_UNKNOWN:

@@ -741,10 +741,10 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         mTitleView.setText(mPromptInfo.getTitle());
 
-        //setSelected could make marguee work
+        // setSelected could make marquee work
         mTitleView.setSelected(true);
         mSubtitleView.setSelected(true);
-        //make description view become scrollable
+        // make description view become scrollable
         mDescriptionView.setMovementMethod(new ScrollingMovementMethod());
 
         if (isDeviceCredentialAllowed()) {

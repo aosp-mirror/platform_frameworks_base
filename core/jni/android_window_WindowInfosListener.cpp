@@ -21,6 +21,7 @@
 #include <android_runtime/Log.h>
 #include <gui/DisplayInfo.h>
 #include <gui/SurfaceComposerClient.h>
+#include <gui/WindowInfosUpdate.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalFrame.h>
 #include <utils/Log.h>
@@ -91,8 +92,7 @@ struct WindowInfosListener : public gui::WindowInfosListener {
     WindowInfosListener(JNIEnv* env, jobject listener)
           : mListener(env->NewWeakGlobalRef(listener)) {}
 
-    void onWindowInfosChanged(const std::vector<WindowInfo>& windowInfos,
-                              const std::vector<DisplayInfo>& displayInfos) override {
+    void onWindowInfosChanged(const gui::WindowInfosUpdate& update) override {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         LOG_ALWAYS_FATAL_IF(env == nullptr, "Unable to retrieve JNIEnv in onWindowInfoChanged.");
 
@@ -103,8 +103,10 @@ struct WindowInfosListener : public gui::WindowInfosListener {
             return;
         }
 
-        ScopedLocalRef<jobjectArray> jWindowHandlesArray(env, fromWindowInfos(env, windowInfos));
-        ScopedLocalRef<jobjectArray> jDisplayInfoArray(env, fromDisplayInfos(env, displayInfos));
+        ScopedLocalRef<jobjectArray> jWindowHandlesArray(env,
+                                                         fromWindowInfos(env, update.windowInfos));
+        ScopedLocalRef<jobjectArray> jDisplayInfoArray(env,
+                                                       fromDisplayInfos(env, update.displayInfos));
 
         env->CallVoidMethod(listener, gListenerClassInfo.onWindowInfosChanged,
                             jWindowHandlesArray.get(), jDisplayInfoArray.get());

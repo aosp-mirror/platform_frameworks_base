@@ -96,10 +96,7 @@ class AppListViewModelTest {
             showSystemFlow: Flow<Boolean>,
         ): Flow<(app: ApplicationInfo) -> Boolean> = flowOf { true }
 
-        override fun getSystemPackageNamesBlocking(
-            userId: Int,
-            showInstantApps: Boolean,
-        ): Set<String> = emptySet()
+        override fun getSystemPackageNamesBlocking(userId: Int): Set<String> = emptySet()
     }
 
     private object FakeAppRepository : AppRepository {

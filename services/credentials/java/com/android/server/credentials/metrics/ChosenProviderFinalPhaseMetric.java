@@ -32,8 +32,12 @@ import java.util.Map;
  */
 public class ChosenProviderFinalPhaseMetric {
     private static final String TAG = "ChosenFinalPhaseMetric";
-    // The session id associated with this API call, used to unite split emits
-    private int mSessionId = -1;
+    // The session id associated with this API call, used to unite split emits, for the flow
+    // where we know the calling app
+    private final int mSessionIdCaller;
+    // The session id associated with this API call, used to unite split emits, for the flow
+    // where we know the provider apps
+    private final int mSessionIdProvider;
     // Reveals if the UI was returned, false by default
     private boolean mUiReturned = false;
     private int mChosenUid = -1;
@@ -66,13 +70,19 @@ public class ChosenProviderFinalPhaseMetric {
     private int mChosenProviderStatus = -1;
     // Indicates if an exception was thrown by this provider, false by default
     private boolean mHasException = false;
+    // Indicates a framework only exception that occurs in the final phase of the flow
+    private String mFrameworkException = "";
 
     // Stores the response credential information, as well as the response entry information which
     // by default, contains empty info
     private ResponseCollective mResponseCollective = new ResponseCollective(Map.of(), Map.of());
+    // Indicates if this chosen provider was the primary provider, false by default
+    private boolean mIsPrimary = false;
 
 
-    public ChosenProviderFinalPhaseMetric() {
+    public ChosenProviderFinalPhaseMetric(int sessionIdCaller, int sessionIdProvider) {
+        mSessionIdCaller = sessionIdCaller;
+        mSessionIdProvider = sessionIdProvider;
     }
 
     /* ------------------- UID ------------------- */
@@ -235,12 +245,8 @@ public class ChosenProviderFinalPhaseMetric {
 
     /* ----------- Session ID -------------- */
 
-    public void setSessionId(int sessionId) {
-        mSessionId = sessionId;
-    }
-
-    public int getSessionId() {
-        return mSessionId;
+    public int getSessionIdProvider() {
+        return mSessionIdProvider;
     }
 
     /* ----------- UI Returned Successfully -------------- */
@@ -271,5 +277,29 @@ public class ChosenProviderFinalPhaseMetric {
 
     public ResponseCollective getResponseCollective() {
         return mResponseCollective;
+    }
+
+    /* -------------- Framework Exception ---------------- */
+
+    public void setFrameworkException(String frameworkException) {
+        mFrameworkException = frameworkException;
+    }
+
+    public String getFrameworkException() {
+        return mFrameworkException;
+    }
+
+    /* -------------- Session ID for Track One (Known Calling App) ---------------- */
+
+    public int getSessionIdCaller() {
+        return mSessionIdCaller;
+    }
+
+    public void setPrimary(boolean primary) {
+        mIsPrimary = primary;
+    }
+
+    public boolean isPrimary() {
+        return mIsPrimary;
     }
 }

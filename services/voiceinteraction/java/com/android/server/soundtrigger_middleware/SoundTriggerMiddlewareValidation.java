@@ -191,7 +191,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
     @Override
     public @NonNull ISoundTriggerModule attach(int handle,
-            @NonNull ISoundTriggerCallback callback) {
+            @NonNull ISoundTriggerCallback callback, boolean isTrusted) {
         // Input validation.
         Objects.requireNonNull(callback);
         Objects.requireNonNull(callback.asBinder());
@@ -209,7 +209,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             // From here on, every exception isn't client's fault.
             try {
                 Session session = new Session(handle, callback);
-                session.attach(mDelegate.attach(handle, session.getCallbackWrapper()));
+                session.attach(mDelegate.attach(handle, session.getCallbackWrapper(), isTrusted));
                 return session;
             } catch (Exception e) {
                 throw handleException(e);
@@ -264,13 +264,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             LOADED,
             /** Model is loaded, recognition is active. */
             ACTIVE,
-            /**
-             * Model is active as far as the client is concerned, but loaded as far as the
-             * layers are concerned. This condition occurs when a recognition event that indicates
-             * the recognition for this model arrived from the underlying layer, but had not been
-             * delivered to the caller (most commonly, for permission reasons).
-             */
-            INTERCEPTED,
             /**
              * Model has been preemptively unloaded by the HAL.
              */
@@ -434,7 +427,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         }
 
         @Override
-        public void startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
+        public IBinder startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
             // Input validation.
             ValidationUtil.validateRecognitionConfig(config);
 
@@ -458,9 +451,10 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
                 // From here on, every exception isn't client's fault.
                 try {
-                    mDelegate.startRecognition(modelHandle, config);
+                    var result = mDelegate.startRecognition(modelHandle, config);
                     modelState.config = config;
                     modelState.activityState = ModelState.Activity.ACTIVE;
+                    return result;
                 } catch (Exception e) {
                     throw handleException(e);
                 }
@@ -482,18 +476,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     throw new IllegalStateException("Invalid handle: " + modelHandle);
                 }
                 // stopRecognition is idempotent - no need to check model state.
-
-                // From here on, every exception isn't client's fault.
-                try {
-                    // If the activity state is INTERCEPTED, we skip delegating the command, but
-                    // still consider the call valid.
-                    if (modelState.activityState == ModelState.Activity.INTERCEPTED) {
-                        modelState.activityState = ModelState.Activity.LOADED;
-                        return;
-                    }
-                } catch (Exception e) {
-                    throw handleException(e);
-                }
             }
 
             // Calling the delegate's stop must be done without the lock.
@@ -513,27 +495,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 // After the call, the state is LOADED, unless it has been first preempted.
                 if (modelState.activityState != ModelState.Activity.PREEMPTED) {
                     modelState.activityState = ModelState.Activity.LOADED;
-                }
-            }
-        }
-
-        private void restartIfIntercepted(int modelHandle) {
-            synchronized (SoundTriggerMiddlewareValidation.this) {
-                // State validation.
-                if (mState == ModuleStatus.DETACHED) {
-                    return;
-                }
-                ModelState modelState = mLoadedModels.get(modelHandle);
-                if (modelState == null
-                        || modelState.activityState != ModelState.Activity.INTERCEPTED) {
-                    return;
-                }
-                try {
-                    mDelegate.startRecognition(modelHandle, modelState.config);
-                    modelState.activityState = ModelState.Activity.ACTIVE;
-                    Log.i(TAG, "Restarted intercepted model " + modelHandle);
-                } catch (Exception e) {
-                    Log.i(TAG, "Failed to restart intercepted model " + modelHandle, e);
                 }
             }
         }
@@ -741,18 +702,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     mCallback.onRecognition(modelHandle, event, captureSession);
                 } catch (Exception e) {
                     Log.w(TAG, "Client callback exception.", e);
-                    synchronized (SoundTriggerMiddlewareValidation.this) {
-                        ModelState modelState = mLoadedModels.get(modelHandle);
-                        if (event.recognitionEvent.status != RecognitionStatus.FORCED) {
-                            modelState.activityState = ModelState.Activity.INTERCEPTED;
-                            // If we failed to deliver an actual event to the client, they would
-                            // never know to restart it whenever circumstances change. Thus, we
-                            // restart it here. We do this from a separate thread to avoid any
-                            // race conditions.
-                            new Thread(() -> restartIfIntercepted(modelHandle)).start();
-                        }
-                    }
-                }
+               }
             }
 
             @Override
@@ -770,18 +720,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     mCallback.onPhraseRecognition(modelHandle, event, captureSession);
                 } catch (Exception e) {
                     Log.w(TAG, "Client callback exception.", e);
-                    synchronized (SoundTriggerMiddlewareValidation.this) {
-                        ModelState modelState = mLoadedModels.get(modelHandle);
-                        if (!event.phraseRecognitionEvent.common.recognitionStillActive) {
-                            modelState.activityState = ModelState.Activity.INTERCEPTED;
-                            // If we failed to deliver an actual event to the client, they would
-                            // never know to restart it whenever circumstances change. Thus, we
-                            // restart it here. We do this from a separate thread to avoid any
-                            // race conditions.
-                            new Thread(() -> restartIfIntercepted(modelHandle)).start();
-                        }
-                    }
-                }
+               }
             }
 
             @Override

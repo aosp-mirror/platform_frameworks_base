@@ -16,8 +16,8 @@
 
 package com.android.systemui.log
 
+import android.icu.text.SimpleDateFormat
 import java.io.PrintWriter
-import java.text.SimpleDateFormat
 import java.util.Locale
 
 /**

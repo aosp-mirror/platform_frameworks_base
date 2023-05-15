@@ -28,7 +28,6 @@ import android.os.Trace;
 import android.util.Log;
 
 import com.android.internal.util.TraceBuffer;
-import com.android.wm.shell.nano.HandlerMapping;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 
 import com.google.protobuf.nano.MessageNano;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Helper class to collect and dump transition traces.
@@ -241,6 +241,10 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
                     new com.android.wm.shell.nano.WmShellTransitionTraceProto();
             proto.magicNumber = MAGIC_NUMBER_VALUE;
             writeHandlerMappingToProto(proto);
+            long timeOffsetNs =
+                    TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis())
+                            - SystemClock.elapsedRealtimeNanos();
+            proto.realToElapsedTimeOffsetNanos = timeOffsetNs;
             int pid = android.os.Process.myPid();
             LogAndPrintln.i(pw, "Writing file to " + file.getAbsolutePath()
                     + " from process " + pid);

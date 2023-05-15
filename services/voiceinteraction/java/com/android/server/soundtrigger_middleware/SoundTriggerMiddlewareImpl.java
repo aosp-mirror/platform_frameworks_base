@@ -116,7 +116,8 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareIntern
 
     @Override
     public @NonNull
-    ISoundTriggerModule attach(int handle, @NonNull ISoundTriggerCallback callback) {
+    ISoundTriggerModule attach(int handle, @NonNull ISoundTriggerCallback callback,
+            boolean isTrusted) {
         return mModules[handle].attach(callback);
     }
 }

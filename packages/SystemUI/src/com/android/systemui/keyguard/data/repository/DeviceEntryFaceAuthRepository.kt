@@ -45,7 +45,6 @@ import com.android.systemui.keyguard.shared.model.FailedAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.table.TableLogBuffer
@@ -239,9 +238,7 @@ constructor(
         // Clear auth status when keyguard is going away or when the user is switching or device
         // starts going to sleep.
         merge(
-                keyguardRepository.wakefulness.map {
-                    WakefulnessModel.isSleepingOrStartingToSleep(it)
-                },
+                keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() },
                 keyguardRepository.isKeyguardGoingAway,
                 userRepository.userSwitchingInProgress
             )
@@ -315,9 +312,7 @@ constructor(
                     tableLogBuffer
                 ),
                 logAndObserve(
-                    keyguardRepository.wakefulness
-                        .map { WakefulnessModel.isSleepingOrStartingToSleep(it) }
-                        .isFalse(),
+                    keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() }.isFalse(),
                     "deviceNotSleepingOrNotStartingToSleep",
                     tableLogBuffer
                 ),

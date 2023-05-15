@@ -60,6 +60,7 @@ import android.view.accessibility.MagnificationAnimationCallback;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityTraceManager;
@@ -160,7 +161,8 @@ public class FullScreenMagnificationControllerTest {
                         new Object(),
                         mRequestObserver,
                         mScaleProvider,
-                        () -> mMockThumbnail);
+                        () -> mMockThumbnail,
+                        ConcurrentUtils.DIRECT_EXECUTOR);
     }
 
     @After

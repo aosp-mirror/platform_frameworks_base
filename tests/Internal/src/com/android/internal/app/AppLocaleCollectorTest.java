@@ -19,10 +19,13 @@ package com.android.internal.app;
 import static com.android.internal.app.AppLocaleStore.AppLocaleResult.LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_LOCAL_CONFIG;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+
+import android.os.LocaleList;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -62,6 +65,9 @@ public class AppLocaleCollectorTest {
     private static final int CURRENT = LocaleInfo.SUGGESTION_TYPE_CURRENT;
     private static final int SYSTEM = LocaleInfo.SUGGESTION_TYPE_SYSTEM_LANGUAGE;
     private static final int OTHERAPP = LocaleInfo.SUGGESTION_TYPE_OTHER_APP_LANGUAGE;
+    private static final int IME = LocaleInfo.SUGGESTION_TYPE_IME_LANGUAGE;
+    private static final int SYSTEM_AVAILABLE =
+            LocaleInfo.SUGGESTION_TYPE_SYSTEM_AVAILABLE_LANGUAGE;
 
     @Before
     public void setUp() throws Exception {
@@ -78,6 +84,21 @@ public class AppLocaleCollectorTest {
     }
 
     @Test
+    public void testGetSystemCurrentLocales() {
+        LocaleList.setDefault(
+                LocaleList.forLanguageTags("en-US-u-mu-fahrenhe,ar-JO-u-mu-fahrenhe-nu-latn"));
+
+        List<LocaleStore.LocaleInfo> list =
+                mAppLocaleCollector.getSystemCurrentLocales();
+
+        LocaleList expected = LocaleList.forLanguageTags("en-US,ar-JO-u-nu-latn");
+        assertEquals(list.size(), expected.size());
+        for (LocaleStore.LocaleInfo info : list) {
+            assertTrue(expected.indexOf(info.getLocale()) != -1);
+        }
+    }
+
+    @Test
     public void testGetSupportedLocaleList() {
         doReturn(mAppCurrentLocale).when(mAppLocaleCollector).getAppCurrentLocale();
         doReturn(mResult).when(mAppLocaleCollector).getAppSupportedLocales();
@@ -85,7 +106,8 @@ public class AppLocaleCollectorTest {
         doReturn(mImeLocales).when(mAppLocaleCollector).getActiveImeLocales();
         doReturn(mSystemSupportedLocales).when(mAppLocaleCollector).getSystemSupportedLocale(
                 anyObject(), eq(null), eq(true));
-        doReturn(mSystemCurrentLocales).when(mAppLocaleCollector).getSystemCurrentLocale();
+        doReturn(mSystemCurrentLocales).when(
+                mAppLocaleCollector).getSystemCurrentLocales();
 
         Set<LocaleInfo> result = mAppLocaleCollector.getSupportedLocaleList(null, true, false);
 
@@ -106,8 +128,10 @@ public class AppLocaleCollectorTest {
         map.put("ko", NONE); // The locale App and system support.
         map.put("en-AU", OTHERAPP); // The locale other App activates and current App supports.
         map.put("en-CA", OTHERAPP); // The locale other App activates and current App supports.
-        map.put("ja-JP", OTHERAPP); // The locale other App activates and current App supports.
-        map.put("zh-Hant-TW", SIM);  // The locale system activates.
+        map.put("en-IN", IME); // The locale IME supports.
+        map.put("ja-JP",
+                OTHERAPP | SYSTEM_AVAILABLE | IME); // The locale exists in OTHERAPP, SYSTEM and IME
+        map.put("zh-Hant-TW", SYSTEM_AVAILABLE);  // The locale system activates.
         map.put(createLocaleInfo("", SYSTEM).getId(), SYSTEM); // System language title
         return map;
     }
@@ -124,9 +148,10 @@ public class AppLocaleCollectorTest {
     }
 
     private List<LocaleInfo> initSystemCurrentLocales() {
-        return List.of(createLocaleInfo("zh-Hant-TW", SIM),
+        return List.of(createLocaleInfo("zh-Hant-TW", SYSTEM_AVAILABLE),
+                createLocaleInfo("ja-JP", SYSTEM_AVAILABLE),
                 // will be filtered because current App activates this locale.
-                createLocaleInfo("en-US", SIM));
+                createLocaleInfo("en-US", SYSTEM_AVAILABLE));
     }
 
     private Set<LocaleInfo> initAllAppActivatedLocales() {
@@ -141,9 +166,11 @@ public class AppLocaleCollectorTest {
     private Set<LocaleInfo> initImeLocales() {
         return Set.of(
                 // will be filtered because system activates zh-Hant-TW.
-                createLocaleInfo("zh-TW", OTHERAPP),
+                createLocaleInfo("zh-TW", IME),
                 // will be filtered because current App's activats this locale.
-                createLocaleInfo("en-US", OTHERAPP));
+                createLocaleInfo("en-US", IME),
+                createLocaleInfo("ja-JP", IME),
+                createLocaleInfo("en-IN", IME));
     }
 
     private HashSet<Locale> initAppSupportedLocale() {

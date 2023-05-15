@@ -136,6 +136,7 @@ import static com.android.server.utils.PriorityDump.PRIORITY_ARG_NORMAL;
 
 import android.Manifest;
 import android.Manifest.permission;
+import android.annotation.DurationMillisLong;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -7872,11 +7873,11 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     if (notification.getSmallIcon() != null) {
-                        mTracker.setReport(
+                        NotificationRecordLogger.NotificationReported maybeReport =
                                 mNotificationRecordLogger.prepareToLogNotificationPosted(r, old,
                                         position, buzzBeepBlinkLoggingCode,
-                                        getGroupInstanceId(r.getSbn().getGroupKey())));
-                        notifyListenersPostedAndLogLocked(r, old, mTracker);
+                                        getGroupInstanceId(r.getSbn().getGroupKey()));
+                        notifyListenersPostedAndLogLocked(r, old, mTracker, maybeReport);
                         posted = true;
 
                         StatusBarNotification oldSbn = (old != null) ? old.getSbn() : null;
@@ -10860,16 +10861,17 @@ public class NotificationManagerService extends SystemService {
      */
     @GuardedBy("mNotificationLock")
     private void notifyListenersPostedAndLogLocked(NotificationRecord r, NotificationRecord old,
-            @NonNull PostNotificationTracker tracker) {
+            @NonNull PostNotificationTracker tracker,
+            @Nullable NotificationRecordLogger.NotificationReported report) {
         List<Runnable> listenerCalls = mListeners.prepareNotifyPostedLocked(r, old, true);
         mHandler.post(() -> {
             for (Runnable listenerCall : listenerCalls) {
                 listenerCall.run();
             }
 
-            tracker.finish();
-            NotificationRecordLogger.NotificationReported report = tracker.getReport();
+            long postDurationMillis = tracker.finish();
             if (report != null) {
+                report.post_duration_millis = postDurationMillis;
                 mNotificationRecordLogger.logNotificationPosted(report);
             }
         });
@@ -12161,14 +12163,6 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        void setReport(@Nullable NotificationRecordLogger.NotificationReported report) {
-            mReport = report;
-        }
-
-        NotificationRecordLogger.NotificationReported getReport() {
-            return mReport;
-        }
-
         @ElapsedRealtimeLong
         long getStartTime() {
             return mStartTime;
@@ -12179,6 +12173,11 @@ public class NotificationManagerService extends SystemService {
             return mOngoing;
         }
 
+        /**
+         * Cancels the tracker (TODO(b/275044361): releasing the acquired WakeLock). Either
+         * {@link #finish} or {@link #cancel} (exclusively) should be called on this object before
+         * it's discarded.
+         */
         void cancel() {
             if (!isOngoing()) {
                 Log.wtfStack(TAG, "cancel() called on already-finished tracker");
@@ -12195,20 +12194,27 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        void finish() {
+        /**
+         * Finishes the tracker (TODO(b/275044361): releasing the acquired WakeLock) and returns the
+         * time elapsed since the operation started, in milliseconds. Either {@link #finish} or
+         * {@link #cancel} (exclusively) should be called on this object before it's discarded.
+         */
+        @DurationMillisLong
+        long finish() {
+            long elapsedTime = SystemClock.elapsedRealtime() - mStartTime;
             if (!isOngoing()) {
                 Log.wtfStack(TAG, "finish() called on already-finished tracker");
-                return;
+                return elapsedTime;
             }
             mOngoing = false;
 
             // TODO(b/275044361): Release wakelock.
 
-            long elapsedTime = SystemClock.elapsedRealtime() - mStartTime;
             if (DBG) {
                 Slog.d(TAG,
                         TextUtils.formatSimple("PostNotification: Finished in %d ms", elapsedTime));
             }
+            return elapsedTime;
         }
     }
 }

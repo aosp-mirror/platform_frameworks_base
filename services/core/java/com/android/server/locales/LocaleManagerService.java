@@ -103,8 +103,8 @@ public class LocaleManagerService extends SystemService {
     private final PackageMonitor mPackageMonitor;
 
     private final Object mWriteLock = new Object();
-    // TODO(b/262713398): Set to false when stable
-    public static final boolean DEBUG = true;
+
+    public static final boolean DEBUG = false;
 
     public LocaleManagerService(Context context) {
         super(context);
@@ -565,7 +565,6 @@ public class LocaleManagerService extends SystemService {
      */
     public void setOverrideLocaleConfig(@NonNull String appPackageName, @UserIdInt int userId,
             @Nullable LocaleConfig localeConfig) throws IllegalArgumentException {
-        // TODO(b/262713398): Remove when stable
         if (!SystemProperties.getBoolean(PROP_DYNAMIC_LOCALES_CHANGE, true)) {
             return;
         }
@@ -747,7 +746,6 @@ public class LocaleManagerService extends SystemService {
     @Nullable
     public LocaleConfig getOverrideLocaleConfig(@NonNull String appPackageName,
             @UserIdInt int userId) {
-        // TODO(b/262713398): Remove when stable
         if (!SystemProperties.getBoolean(PROP_DYNAMIC_LOCALES_CHANGE, true)) {
             return null;
         }
@@ -850,7 +848,6 @@ public class LocaleManagerService extends SystemService {
 
     @NonNull
     private File getXmlFileNameForUser(@NonNull String appPackageName, @UserIdInt int userId) {
-        // TODO(b/262752965): use per-package data directory
         final File dir = new File(Environment.getDataSystemCeDirectory(userId), LOCALE_CONFIGS);
         return new File(dir, appPackageName + SUFFIX_FILE_NAME);
     }

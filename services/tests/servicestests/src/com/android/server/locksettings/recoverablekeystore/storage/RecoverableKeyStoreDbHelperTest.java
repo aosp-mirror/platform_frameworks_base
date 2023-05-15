@@ -104,7 +104,7 @@ public class RecoverableKeyStoreDbHelperTest {
     @Before
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getTargetContext();
-        mDatabaseHelper = new RecoverableKeyStoreDbHelper(context, 7);
+        mDatabaseHelper = new RecoverableKeyStoreDbHelper(context);
         mDatabase = SQLiteDatabase.create(null);
     }
 

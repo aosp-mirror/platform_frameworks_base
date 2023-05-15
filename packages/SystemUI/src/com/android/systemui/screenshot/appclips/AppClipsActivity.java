@@ -53,7 +53,6 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.CropView;
-import com.android.systemui.screenshot.MagnifierView;
 import com.android.systemui.settings.UserTracker;
 
 import javax.inject.Inject;
@@ -93,7 +92,6 @@ public class AppClipsActivity extends ComponentActivity {
     private View mRoot;
     private ImageView mPreview;
     private CropView mCropView;
-    private MagnifierView mMagnifierView;
     private Button mSave;
     private Button mCancel;
     private AppClipsViewModel mViewModel;
@@ -156,9 +154,8 @@ public class AppClipsActivity extends ComponentActivity {
         mSave.setOnClickListener(this::onClick);
         mCancel.setOnClickListener(this::onClick);
 
-        mMagnifierView = mLayout.findViewById(R.id.magnifier);
+
         mCropView = mLayout.findViewById(R.id.crop_view);
-        mCropView.setCropInteractionListener(mMagnifierView);
 
         mPreview = mLayout.findViewById(R.id.preview);
         mPreview.addOnLayoutChangeListener(
@@ -217,8 +214,6 @@ public class AppClipsActivity extends ComponentActivity {
         BitmapDrawable drawable = new BitmapDrawable(getResources(), screenshot);
         mPreview.setImageDrawable(drawable);
         mPreview.setAlpha(1f);
-
-        mMagnifierView.setDrawable(drawable, screenshot.getWidth(), screenshot.getHeight());
 
         // Screenshot is now available so set content view.
         setContentView(mLayout);

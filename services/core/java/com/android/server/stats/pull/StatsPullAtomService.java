@@ -18,6 +18,7 @@ package com.android.server.stats.pull;
 
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
+import static android.app.AppProtoEnums.HOSTING_COMPONENT_TYPE_EMPTY;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
@@ -2350,7 +2351,8 @@ public class StatsPullAtomService extends SystemService {
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
                     snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
                     gpuMemPerPid.get(managedProcess.pid), managedProcess.hasForegroundServices,
-                    snapshot.rssShmemKilobytes));
+                    snapshot.rssShmemKilobytes, managedProcess.mHostingComponentTypes,
+                    managedProcess.mHistoricalHostingComponentTypes));
         }
         // Complement the data with native system processes. Given these measurements can be taken
         // in response to LMKs happening, we want to first collect the managed app stats (to
@@ -2370,7 +2372,10 @@ public class StatsPullAtomService extends SystemService {
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
                     snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
                     gpuMemPerPid.get(pid), false /* has_foreground_services */,
-                    snapshot.rssShmemKilobytes));
+                    snapshot.rssShmemKilobytes,
+                    // Native processes don't really have a hosting component type.
+                    HOSTING_COMPONENT_TYPE_EMPTY,
+                    HOSTING_COMPONENT_TYPE_EMPTY));
         }
         return StatsManager.PULL_SUCCESS;
     }

@@ -27,7 +27,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.doze.DozeHost
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
@@ -69,7 +68,6 @@ import org.mockito.MockitoAnnotations
 class KeyguardRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarStateController: StatusBarStateController
-    @Mock private lateinit var dozeHost: DozeHost
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
@@ -91,7 +89,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         underTest =
             KeyguardRepositoryImpl(
                 statusBarStateController,
-                dozeHost,
                 wakefulnessLifecycle,
                 biometricUnlockController,
                 keyguardStateController,
@@ -262,42 +259,21 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Test
     fun isDozing() =
         testScope.runTest {
-            var latest: Boolean? = null
-            val job = underTest.isDozing.onEach { latest = it }.launchIn(this)
+            underTest.setIsDozing(true)
+            assertThat(underTest.isDozing.value).isEqualTo(true)
 
-            runCurrent()
-            val captor = argumentCaptor<DozeHost.Callback>()
-            verify(dozeHost).addCallback(captor.capture())
-
-            captor.value.onDozingChanged(true)
-            runCurrent()
-            assertThat(latest).isTrue()
-
-            captor.value.onDozingChanged(false)
-            runCurrent()
-            assertThat(latest).isFalse()
-
-            job.cancel()
-            runCurrent()
-            verify(dozeHost).removeCallback(captor.value)
+            underTest.setIsDozing(false)
+            assertThat(underTest.isDozing.value).isEqualTo(false)
         }
 
     @Test
     fun isDozing_startsWithCorrectInitialValueForIsDozing() =
         testScope.runTest {
-            var latest: Boolean? = null
+            assertThat(underTest.lastDozeTapToWakePosition.value).isEqualTo(null)
 
-            whenever(statusBarStateController.isDozing).thenReturn(true)
-            var job = underTest.isDozing.onEach { latest = it }.launchIn(this)
-            runCurrent()
-            assertThat(latest).isTrue()
-            job.cancel()
-
-            whenever(statusBarStateController.isDozing).thenReturn(false)
-            job = underTest.isDozing.onEach { latest = it }.launchIn(this)
-            runCurrent()
-            assertThat(latest).isFalse()
-            job.cancel()
+            val expectedPoint = Point(100, 200)
+            underTest.setLastDozeTapToWakePosition(expectedPoint)
+            assertThat(underTest.lastDozeTapToWakePosition.value).isEqualTo(expectedPoint)
         }
 
     @Test

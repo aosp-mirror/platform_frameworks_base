@@ -31,6 +31,7 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.util.CloseGuard;
+import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -48,6 +49,8 @@ import java.util.concurrent.Executor;
  * The reverse communication is done via the {@link TaskViewBase} interface.
  */
 public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
+
+    private static final String TAG = TaskViewTaskController.class.getSimpleName();
 
     private final CloseGuard mGuard = new CloseGuard();
 
@@ -102,7 +105,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     }
 
     /** Until all users are converted, we may have mixed-use (eg. Car). */
-    private boolean isUsingShellTransitions() {
+    public boolean isUsingShellTransitions() {
         return mTaskViewTransitions != null && mTaskViewTransitions.isEnabled();
     }
 
@@ -401,6 +404,20 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         mSyncQueue.queue(wct);
     }
 
+    /**
+     * Call to remove the task from window manager. This task will not appear in recents.
+     */
+    void removeTask() {
+        if (mTaskToken == null) {
+            // Call to remove task before we have one, do nothing
+            Slog.w(TAG, "Trying to remove a task that was never added? (no taskToken)");
+            return;
+        }
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.removeTask(mTaskToken);
+        mTaskViewTransitions.closeTaskView(wct, this);
+    }
+
     /** Should be called when the client surface is destroyed. */
     public void surfaceDestroyed() {
         mSurfaceCreated = false;
@@ -444,7 +461,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             return;
         }
 
-        finishTransaction.reparent(mTaskLeash, null).apply();
+        finishTransaction.reparent(mTaskLeash, null);
 
         if (mListener != null) {
             final int taskId = mTaskInfo.taskId;
@@ -481,16 +498,17 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         if (mSurfaceCreated) {
             // Surface is ready, so just reparent the task to this surface control
             startTransaction.reparent(mTaskLeash, mSurfaceControl)
-                    .show(mTaskLeash)
-                    .apply();
+                    .show(mTaskLeash);
             // Also reparent on finishTransaction since the finishTransaction will reparent back
             // to its "original" parent by default.
+            Rect boundsOnScreen = mTaskViewBase.getCurrentBoundsOnScreen();
             finishTransaction.reparent(mTaskLeash, mSurfaceControl)
                     .setPosition(mTaskLeash, 0, 0)
-                    .apply();
-            mTaskViewTransitions.updateBoundsState(this, mTaskViewBase.getCurrentBoundsOnScreen());
+                    // TODO: maybe once b/280900002 is fixed this will be unnecessary
+                    .setWindowCrop(mTaskLeash, boundsOnScreen.width(), boundsOnScreen.height());
+            mTaskViewTransitions.updateBoundsState(this, boundsOnScreen);
             mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
-            wct.setBounds(mTaskToken, mTaskViewBase.getCurrentBoundsOnScreen());
+            wct.setBounds(mTaskToken, boundsOnScreen);
         } else {
             // The surface has already been destroyed before the task has appeared,
             // so go ahead and hide the task entirely

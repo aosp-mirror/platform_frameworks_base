@@ -440,4 +440,18 @@ public class InputConnectionWrapper implements InputConnection {
     public TextSnapshot takeSnapshot() {
         return mTarget.takeSnapshot();
     }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public boolean replaceText(
+            @IntRange(from = 0) int start,
+            @IntRange(from = 0) int end,
+            @NonNull CharSequence text,
+            int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return mTarget.replaceText(start, end, text, newCursorPosition, textAttribute);
+    }
 }

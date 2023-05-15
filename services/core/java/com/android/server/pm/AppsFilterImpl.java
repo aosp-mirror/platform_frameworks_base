@@ -256,6 +256,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         private final PackageManagerInternal mPmInternal;
         private volatile boolean mFeatureEnabled =
                 PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT;
+        @GuardedBy("mDisabledPackages")
         private final ArraySet<String> mDisabledPackages = new ArraySet<>();
 
         @Nullable
@@ -272,7 +273,9 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
             mInjector = null;
             mPmInternal = null;
             mFeatureEnabled = orig.mFeatureEnabled;
-            mDisabledPackages.addAll(orig.mDisabledPackages);
+            synchronized (orig.mDisabledPackages) {
+                mDisabledPackages.addAll(orig.mDisabledPackages);
+            }
             mLoggingEnabled = orig.mLoggingEnabled;
         }
 
@@ -319,7 +322,9 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "packageIsEnabled");
             }
             try {
-                return !mDisabledPackages.contains(pkg.getPackageName());
+                synchronized (mDisabledPackages) {
+                    return !mDisabledPackages.contains(pkg.getPackageName());
+                }
             } finally {
                 if (DEBUG_TRACING) {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -376,10 +381,12 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
             final boolean enabled = mInjector.getCompatibility().isChangeEnabledInternalNoLogging(
                     PackageManager.FILTER_APPLICATION_QUERY,
                     AndroidPackageUtils.generateAppInfoWithoutState(pkg));
-            if (enabled) {
-                mDisabledPackages.remove(pkg.getPackageName());
-            } else {
-                mDisabledPackages.add(pkg.getPackageName());
+            synchronized (mDisabledPackages) {
+                if (enabled) {
+                    mDisabledPackages.remove(pkg.getPackageName());
+                } else {
+                    mDisabledPackages.add(pkg.getPackageName());
+                }
             }
             if (mAppsFilter != null) {
                 mAppsFilter.onChanged();
@@ -393,7 +400,9 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                     || setting.getPkg().isDebuggable());
             enableLogging(setting.getAppId(), enableLogging);
             if (removed) {
-                mDisabledPackages.remove(setting.getPackageName());
+                synchronized (mDisabledPackages) {
+                    mDisabledPackages.remove(setting.getPackageName());
+                }
                 if (mAppsFilter != null) {
                     mAppsFilter.onChanged();
                 }

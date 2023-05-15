@@ -48,6 +48,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
@@ -55,12 +56,14 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricAuthenticator;
+import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -75,6 +78,7 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.security.KeyStore;
 import android.view.Display;
@@ -152,6 +156,8 @@ public class BiometricServiceTest {
     private ISessionListener mSessionListener;
     @Mock
     private AuthSessionCoordinator mAuthSessionCoordinator;
+    @Mock
+    private UserManager mUserManager;
 
     BiometricContextProvider mBiometricContextProvider;
 
@@ -177,6 +183,7 @@ public class BiometricServiceTest {
         when(mInjector.getTrustManager()).thenReturn(mTrustManager);
         when(mInjector.getDevicePolicyManager(any())).thenReturn(mDevicePolicyManager);
         when(mInjector.getRequestGenerator()).thenReturn(() -> TEST_REQUEST_ID);
+        when(mInjector.getUserManager(any())).thenReturn(mUserManager);
 
         when(mResources.getString(R.string.biometric_error_hw_unavailable))
                 .thenReturn(ERROR_HW_UNAVAILABLE);
@@ -1595,6 +1602,33 @@ public class BiometricServiceTest {
         assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mAuthSession.getState());
         verify(mReceiver2, never()).onError(anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testRegisterEnabledOnKeyguardCallback() throws RemoteException {
+        final UserInfo userInfo1 = new UserInfo(0 /* userId */, "user1" /* name */, 0 /* flags */);
+        final UserInfo userInfo2 = new UserInfo(10 /* userId */, "user2" /* name */, 0 /* flags */);
+        final List<UserInfo> aliveUsers = List.of(userInfo1, userInfo2);
+        final IBiometricEnabledOnKeyguardCallback callback =
+                mock(IBiometricEnabledOnKeyguardCallback.class);
+
+        mBiometricService = new BiometricService(mContext, mInjector);
+
+        when(mUserManager.getAliveUsers()).thenReturn(aliveUsers);
+        when(mBiometricService.mSettingObserver.getEnabledOnKeyguard(userInfo1.id))
+                .thenReturn(true);
+        when(mBiometricService.mSettingObserver.getEnabledOnKeyguard(userInfo2.id))
+                .thenReturn(false);
+        when(callback.asBinder()).thenReturn(mock(IBinder.class));
+
+        mBiometricService.mImpl.registerEnabledOnKeyguardCallback(callback);
+
+        waitForIdle();
+
+        verify(callback).asBinder();
+        verify(callback).onChanged(true, userInfo1.id);
+        verify(callback).onChanged(false, userInfo2.id);
+        verifyNoMoreInteractions(callback);
     }
 
     // Helper methods

@@ -27,6 +27,7 @@ import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_PCC_DETECTION;
 import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
+import static android.service.autofill.FillRequest.FLAG_SCREEN_HAS_CREDMAN_FIELD;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
@@ -592,6 +593,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         /** Whether the fill dialog UI is disabled. */
         private boolean mFillDialogDisabled;
+
+        /** Whether current screen has credman field. */
+        private boolean mScreenHasCredmanField;
     }
 
     /**
@@ -1577,6 +1581,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // TODO(b/266379948): Ideally wait for PCC request to finish for a while more
         // (say 100ms) before proceeding further on.
 
+        processResponseLockedForPcc(response, response.getClientState(), requestFlags);
+    }
+
+
+    @GuardedBy("mLock")
+    private void processResponseLockedForPcc(@NonNull FillResponse response,
+            @Nullable Bundle newClientState, int flags) {
         if (DBG) {
             Slog.d(TAG, "DBG: Initial response: " + response);
         }
@@ -1584,12 +1595,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             response = getEffectiveFillResponse(response);
             if (isEmptyResponse(response)) {
                 // Treat it as a null response.
-                processNullResponseLocked(requestId, requestFlags);
+                processNullResponseLocked(
+                        response != null ? response.getRequestId() : 0,
+                        flags);
+                return;
             }
             if (DBG) {
                 Slog.d(TAG, "DBG: Processed response: " + response);
             }
-            processResponseLocked(response, null, requestFlags);
+            processResponseLocked(response, newClientState, flags);
         }
     }
 
@@ -1712,6 +1726,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
             }
+            if (ids.isEmpty()) return saveInfo;
             AutofillId[] autofillIds = new AutofillId[ids.size()];
             ids.toArray(autofillIds);
             return SaveInfo.copy(saveInfo, autofillIds);
@@ -2486,7 +2501,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sDebug) Slog.d(TAG,  "Updating client state from auth dataset");
                     mClientState = newClientState;
                 }
-                final Dataset dataset = (Dataset) result;
+                Dataset dataset = (Dataset) result;
+                FillResponse temp = new FillResponse.Builder().addDataset(dataset).build();
+                temp = getEffectiveFillResponse(temp);
+                dataset = temp.getDatasets().get(0);
                 final Dataset oldDataset = authenticatedResponse.getDatasets().get(datasetIdx);
                 if (!isAuthResultDatasetEphemeral(oldDataset, data)) {
                     authenticatedResponse.getDatasets().set(datasetIdx, dataset);
@@ -3086,6 +3104,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mSessionState = STATE_FINISHED;
         final FillResponse response = getLastResponseLocked("showSaveLocked(%s)");
         final SaveInfo saveInfo = response == null ? null : response.getSaveInfo();
+
+        /*
+         * Don't show save if the session has credman field
+         *
+         * TODO: add a new enum NO_SAVE_UI_CREDMAN
+         */
+        if (mSessionFlags.mScreenHasCredmanField) {
+            if (sVerbose) {
+                Slog.v(TAG, "Call to Session#showSaveLocked() rejected - "
+                        + "there is credman field in screen");
+            }
+            return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
+                    Event.NO_SAVE_UI_REASON_NONE);
+        }
 
         /*
          * The Save dialog is only shown if all conditions below are met:
@@ -3817,6 +3849,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
+        if ((flags & FLAG_SCREEN_HAS_CREDMAN_FIELD) != 0) {
+            mSessionFlags.mScreenHasCredmanField = true;
+        }
+
         switch(action) {
             case ACTION_START_SESSION:
                 // View is triggering autofill.
@@ -4293,7 +4329,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private boolean isFillDialogUiEnabled() {
         synchronized (mLock) {
-            return !mSessionFlags.mFillDialogDisabled;
+            return !mSessionFlags.mFillDialogDisabled && !mSessionFlags.mScreenHasCredmanField;
         }
     }
 
@@ -4326,6 +4362,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if ((flags & FillRequest.FLAG_IME_SHOWING) != 0) {
             // IME is showing, fallback to normal suggestions UI
             if (sDebug) Log.w(TAG, "requestShowFillDialog: IME is showing");
+            return false;
+        }
+
+        if (mInlineSessionController.isImeShowing()) {
+            // IME is showing, fallback to normal suggestions UI
+            // Note: only work when inline suggestions supported
             return false;
         }
 
@@ -4643,10 +4685,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         setViewStatesLocked(oldResponse, ViewState.STATE_INITIAL, true);
         // Move over the id
         newResponse.setRequestId(oldResponse.getRequestId());
-        // Replace the old response
-        mResponses.put(newResponse.getRequestId(), newResponse);
         // Now process the new response
-        processResponseLocked(newResponse, newClientState, 0);
+        processResponseLockedForPcc(newResponse, newClientState, 0);
     }
 
     @GuardedBy("mLock")

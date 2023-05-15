@@ -49,6 +49,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         ICreateCredentialCallback, CreateCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<CreateCredentialResponse> {
     private static final String TAG = "CreateRequestSession";
+    private final Set<String> mPrimaryProviders;
 
     CreateRequestSession(@NonNull Context context, RequestSession.SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,
@@ -56,6 +57,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             ICreateCredentialCallback callback,
             CallingAppInfo callingAppInfo,
             Set<ComponentName> enabledProviders,
+            Set<String> primaryProviders,
             CancellationSignal cancellationSignal,
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
@@ -63,6 +65,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                 callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
         mRequestSessionMetric.collectCreateFlowInitialMetricInfo(
                 /*origin=*/request.getOrigin() != null);
+        mPrimaryProviders = primaryProviders;
     }
 
     /**
@@ -99,8 +102,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                             mClientAppInfo.getPackageName(),
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                     Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
-                            // TODO(b/279480457): populate
-                            /*defaultProviderId=*/new ArrayList<>()),
+                            /*defaultProviderId=*/new ArrayList<String>(mPrimaryProviders)),
                     providerDataList);
             mClientCallback.onPendingIntent(mPendingIntent);
         } catch (RemoteException e) {
@@ -129,9 +131,8 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             @Nullable CreateCredentialResponse response) {
         Slog.i(TAG, "Final credential received from: " + componentName.flattenToString());
         mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
-        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(mProviders.get(
-                componentName.flattenToString()).mProviderSessionMetric
-                .getCandidatePhasePerProviderMetric());
+        mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
+                isPrimaryProviderViaProviderInfo(componentName));
         if (response != null) {
             mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
@@ -139,7 +140,9 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         } else {
             mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_FAILURE.getMetricCode());
-            respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
+            String exception = CreateCredentialException.TYPE_NO_CREATE_OPTIONS;
+            mRequestSessionMetric.collectFrameworkException(exception);
+            respondToClientWithErrorAndFinish(exception,
                     "Invalid response");
         }
     }
@@ -152,18 +155,21 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     @Override
     public void onUiCancellation(boolean isUserCancellation) {
-        if (isUserCancellation) {
-            respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_USER_CANCELED,
-                    "User cancelled the selector");
-        } else {
-            respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_INTERRUPTED,
-                    "The UI was interrupted - please try again.");
+        String exception = CreateCredentialException.TYPE_USER_CANCELED;
+        String message = "User cancelled the selector";
+        if (!isUserCancellation) {
+            exception = CreateCredentialException.TYPE_INTERRUPTED;
+            message = "The UI was interrupted - please try again.";
         }
+        mRequestSessionMetric.collectFrameworkException(exception);
+        respondToClientWithErrorAndFinish(exception, message);
     }
 
     @Override
     public void onUiSelectorInvocationFailure() {
-        respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
+        String exception = CreateCredentialException.TYPE_NO_CREATE_OPTIONS;
+        mRequestSessionMetric.collectFrameworkException(exception);
+        respondToClientWithErrorAndFinish(exception,
                 "No create options available.");
     }
 
@@ -179,7 +185,9 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                 Slog.i(TAG, "Provider status changed - ui invocation is needed");
                 getProviderDataAndInitiateUi();
             } else {
-                respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
+                String exception = CreateCredentialException.TYPE_NO_CREATE_OPTIONS;
+                mRequestSessionMetric.collectFrameworkException(exception);
+                respondToClientWithErrorAndFinish(exception,
                         "No create options available.");
             }
         }

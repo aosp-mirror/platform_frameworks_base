@@ -220,7 +220,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             mProviderSessionMetric.collectCandidateFrameworkException(mProviderException.getType());
         }
         mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
-        updateStatusAndInvokeCallback(toStatus(errorCode),
+        updateStatusAndInvokeCallback(Status.CANCELED,
                 /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
@@ -269,6 +269,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             case AUTHENTICATION_ACTION_ENTRY_KEY:
                 Action authenticationEntry = mProviderResponseDataHandler
                         .getAuthenticationAction(entryKey);
+                mProviderSessionMetric.createAuthenticationBrowsingMetric();
                 if (authenticationEntry == null) {
                     Slog.i(TAG, "Unexpected authenticationEntry key");
                     invokeCallbackOnInternalInvalidState();
@@ -309,7 +310,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mRemoteCredentialService.onBeginGetCredential(mProviderRequest, this);
+            mRemoteCredentialService.setCallback(this);
+            mRemoteCredentialService.onBeginGetCredential(mProviderRequest);
         }
     }
 
@@ -422,6 +424,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 providerPendingIntentResponse);
         if (exception != null) {
             // TODO (b/271135048), for AuthenticationEntry callback selection, set error
+            mProviderSessionMetric.collectAuthenticationExceptionStatus(/*hasException*/true);
             invokeCallbackWithError(exception.getType(),
                     exception.getMessage());
             // Additional content received is in the form of an exception which ends the flow.
@@ -432,6 +435,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         BeginGetCredentialResponse response = PendingIntentResultHandler
                 .extractResponseContent(providerPendingIntentResponse
                         .getResultData());
+        mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/true);
         if (response != null && !mProviderResponseDataHandler.isEmptyResponse(response)) {
             addToInitialRemoteResponse(response, /*isInitialResponse=*/ false);
             // Additional content received is in the form of new response content.
@@ -469,12 +473,12 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         addToInitialRemoteResponse(response, /*isInitialResponse=*/true);
         // Log the data.
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
             return;
         }
-        mProviderSessionMetric.collectCandidateEntryMetrics(response);
+        mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
         updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
                 /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }

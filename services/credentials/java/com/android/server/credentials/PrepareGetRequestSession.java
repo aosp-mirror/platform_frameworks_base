@@ -189,7 +189,9 @@ public class PrepareGetRequestSession extends GetRequestSession {
         if (!providerDataList.isEmpty()) {
             return mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
-                            mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
+                            mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
+                            PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
+                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
                     providerDataList);
         } else {
             return null;

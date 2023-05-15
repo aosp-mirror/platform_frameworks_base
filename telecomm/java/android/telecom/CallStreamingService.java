@@ -73,22 +73,26 @@ public abstract class CallStreamingService extends Service {
         @Override
         public void handleMessage(Message msg) {
             if (mStreamingCallAdapter == null && msg.what != MSG_SET_STREAMING_CALL_ADAPTER) {
+                Log.i(this, "handleMessage: null adapter!");
                 return;
             }
 
             switch (msg.what) {
                 case MSG_SET_STREAMING_CALL_ADAPTER:
                     if (msg.obj != null) {
+                        Log.i(this, "MSG_SET_STREAMING_CALL_ADAPTER");
                         mStreamingCallAdapter = new StreamingCallAdapter(
                                 (IStreamingCallAdapter) msg.obj);
                     }
                     break;
                 case MSG_CALL_STREAMING_STARTED:
+                    Log.i(this, "MSG_CALL_STREAMING_STARTED");
                     mCall = (StreamingCall) msg.obj;
                     mCall.setAdapter(mStreamingCallAdapter);
                     CallStreamingService.this.onCallStreamingStarted(mCall);
                     break;
                 case MSG_CALL_STREAMING_STOPPED:
+                    Log.i(this, "MSG_CALL_STREAMING_STOPPED");
                     mCall = null;
                     mStreamingCallAdapter = null;
                     CallStreamingService.this.onCallStreamingStopped();
@@ -109,6 +113,7 @@ public abstract class CallStreamingService extends Service {
     @Nullable
     @Override
     public IBinder onBind(@NonNull Intent intent) {
+        Log.i(this, "onBind");
         return new CallStreamingServiceBinder();
     }
 
@@ -117,12 +122,14 @@ public abstract class CallStreamingService extends Service {
         @Override
         public void setStreamingCallAdapter(IStreamingCallAdapter streamingCallAdapter)
                 throws RemoteException {
-            mHandler.obtainMessage(MSG_SET_STREAMING_CALL_ADAPTER, mStreamingCallAdapter)
+            Log.i(this, "setCallStreamingAdapter");
+            mHandler.obtainMessage(MSG_SET_STREAMING_CALL_ADAPTER, streamingCallAdapter)
                     .sendToTarget();
         }
 
         @Override
         public void onCallStreamingStarted(StreamingCall call) throws RemoteException {
+            Log.i(this, "onCallStreamingStarted");
             mHandler.obtainMessage(MSG_CALL_STREAMING_STARTED, call).sendToTarget();
         }
 

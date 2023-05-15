@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
@@ -50,6 +51,7 @@ import com.android.credentialmanager.R
 import com.android.credentialmanager.common.BaseEntry
 import com.android.credentialmanager.common.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
+import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.ActionEntry
 import com.android.credentialmanager.common.ui.ConfirmButton
@@ -121,9 +123,10 @@ fun GetCredentialScreen(
                                 providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
                                 onEntrySelected = viewModel::getFlowOnEntrySelected,
                                 onBackButtonClicked =
-                                viewModel::getFlowOnBackToPrimarySelectionScreen,
+                                if (getCredentialUiState.isNoAccount)
+                                    viewModel::getFlowOnBackToHybridSnackBarScreen
+                                else viewModel::getFlowOnBackToPrimarySelectionScreen,
                                 onCancel = viewModel::onUserCancel,
-                                isNoAccount = getCredentialUiState.isNoAccount,
                                 onLog = { viewModel.logUiEvent(it) },
                             )
                             viewModel.uiMetrics.log(GetCredentialEvent
@@ -131,6 +134,13 @@ fun GetCredentialScreen(
                         }
                     }
                     ProviderActivityState.READY_TO_LAUNCH -> {
+                        // This is a native bug from ModalBottomSheet. For now, use the temporary
+                        // solution of not having an empty state.
+                        if (viewModel.uiState.isAutoSelectFlow) {
+                            Divider(
+                                thickness = Dp.Hairline, color = ModalBottomSheetDefaults.scrimColor
+                            )
+                        }
                         // Launch only once per providerActivityState change so that the provider
                         // UI will not be accidentally launched twice.
                         LaunchedEffect(viewModel.uiState.providerActivityState) {
@@ -140,6 +150,11 @@ fun GetCredentialScreen(
                                 .CREDMAN_GET_CRED_PROVIDER_ACTIVITY_READY_TO_LAUNCH)
                     }
                     ProviderActivityState.PENDING -> {
+                        if (viewModel.uiState.isAutoSelectFlow) {
+                            Divider(
+                                thickness = Dp.Hairline, color = ModalBottomSheetDefaults.scrimColor
+                            )
+                        }
                         // Hide our content when the provider activity is active.
                         viewModel.uiMetrics.log(GetCredentialEvent
                                 .CREDMAN_GET_CRED_PROVIDER_ACTIVITY_PENDING)
@@ -147,6 +162,9 @@ fun GetCredentialScreen(
                 }
             },
             onDismiss = viewModel::onUserCancel,
+            isInitialRender = viewModel.uiState.isInitialRender,
+            isAutoSelectFlow = viewModel.uiState.isAutoSelectFlow,
+            onInitialRenderComplete = viewModel::onInitialRenderComplete,
         )
     }
 }
@@ -215,12 +233,28 @@ fun PrimarySelectionCard(
                 HeadlineText(
                     text = stringResource(
                         if (hasSingleEntry) {
-                            if (sortedUserNameToCredentialEntryList.firstOrNull()
-                                    ?.sortedCredentialEntryList?.first()?.credentialType
-                                == CredentialType.PASSKEY
-                            ) R.string.get_dialog_title_use_passkey_for
+                            val singleEntryType = sortedUserNameToCredentialEntryList.firstOrNull()
+                                ?.sortedCredentialEntryList?.firstOrNull()?.credentialType
+                            if (singleEntryType == CredentialType.PASSKEY)
+                                R.string.get_dialog_title_use_passkey_for
+                            else if (singleEntryType == CredentialType.PASSWORD)
+                                R.string.get_dialog_title_use_password_for
+                            else if (authenticationEntryList.isNotEmpty())
+                                R.string.get_dialog_title_unlock_options_for
                             else R.string.get_dialog_title_use_sign_in_for
-                        } else R.string.get_dialog_title_choose_sign_in_for,
+                        } else {
+                            if (authenticationEntryList.isNotEmpty() ||
+                                sortedUserNameToCredentialEntryList.any { perNameEntryList ->
+                                    perNameEntryList.sortedCredentialEntryList.any { entry ->
+                                        entry.credentialType != CredentialType.PASSWORD &&
+                                            entry.credentialType != CredentialType.PASSKEY
+                                    }
+                                }
+                            )
+                                R.string.get_dialog_title_choose_sign_in_for
+                            else
+                                R.string.get_dialog_title_choose_saved_sign_in_for
+                        },
                         requestDisplayInfo.appName
                     ),
                 )
@@ -327,7 +361,6 @@ fun AllSignInOptionCard(
     onEntrySelected: (BaseEntry) -> Unit,
     onBackButtonClicked: () -> Unit,
     onCancel: () -> Unit,
-    isNoAccount: Boolean,
     onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     val sortedUserNameToCredentialEntryList =
@@ -336,7 +369,7 @@ fun AllSignInOptionCard(
     SheetContainerCard(topAppBar = {
         MoreOptionTopAppBar(
             text = stringResource(R.string.get_dialog_title_sign_in_options),
-            onNavigationIconClicked = if (isNoAccount) onCancel else onBackButtonClicked,
+            onNavigationIconClicked = onBackButtonClicked,
             bottomPadding = 0.dp,
         )
     }) {
@@ -542,7 +575,12 @@ fun AuthenticationEntryRow(
     enforceOneLine: Boolean = false,
 ) {
     Entry(
-        onClick = { onEntrySelected(authenticationEntryInfo) },
+        onClick = if (authenticationEntryInfo.isUnlockedAndEmpty) {
+            {}
+        } // No-op
+        else {
+            { onEntrySelected(authenticationEntryInfo) }
+        },
         iconImageBitmap = authenticationEntryInfo.icon.toBitmap().asImageBitmap(),
         entryHeadlineText = authenticationEntryInfo.title,
         entrySecondLineText = stringResource(

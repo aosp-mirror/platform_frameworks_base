@@ -28,7 +28,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -37,6 +36,7 @@ import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.app.TaskInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
@@ -362,14 +362,14 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         mWindowManager.updateVisibility(/* canShow= */ false);
 
         verify(mWindowManager, never()).createLayout(anyBoolean());
-        verify(mLayout, atLeastOnce()).setVisibility(View.GONE);
+        verify(mLayout).setVisibility(View.GONE);
 
         // Show button.
         doReturn(View.GONE).when(mLayout).getVisibility();
         mWindowManager.updateVisibility(/* canShow= */ true);
 
         verify(mWindowManager, never()).createLayout(anyBoolean());
-        verify(mLayout, atLeastOnce()).setVisibility(View.VISIBLE);
+        verify(mLayout).setVisibility(View.VISIBLE);
     }
 
     @Test
@@ -455,12 +455,21 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         verify(mLayout).setCameraCompatHintVisibility(/* show= */ true);
     }
 
+    @Test
+    public void testWhenDockedStateHasChanged_needsToBeRecreated() {
+        ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();
+        newTaskInfo.configuration.uiMode |= Configuration.UI_MODE_TYPE_DESK;
+
+        Assert.assertTrue(mWindowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
+    }
+
     private static TaskInfo createTaskInfo(boolean hasSizeCompat,
             @TaskInfo.CameraCompatControlState int cameraCompatControlState) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
         taskInfo.topActivityInSizeCompat = hasSizeCompat;
         taskInfo.cameraCompatControlState = cameraCompatControlState;
+        taskInfo.configuration.uiMode &= ~Configuration.UI_MODE_TYPE_DESK;
         return taskInfo;
     }
 }

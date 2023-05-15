@@ -1353,6 +1353,12 @@ public abstract class BackupAgent extends ContextWrapper {
         }
 
         @Override
+        public void getOperationType(
+                AndroidFuture<Integer> in) {
+            in.complete(mLogger == null ? OperationType.UNKNOWN : mLogger.getOperationType());
+        }
+
+        @Override
         public void clearBackupRestoreEventLogger() {
             final long ident = Binder.clearCallingIdentity();
             try {

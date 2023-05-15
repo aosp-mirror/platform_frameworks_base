@@ -500,10 +500,11 @@ public class AppProfiler {
                 mLatestFrozenTimestamp = 0L;
                 mTotalFrozenDurations = 0L;
                 mNumOfFrozenApps = 0;
+                final int lruSize = mService.mProcessList.getLruSizeLOSP();
                 if (mCachedAppFrozenDurations == null
-                        || mCachedAppFrozenDurations.length < mCachedAppHighWatermark) {
+                        || mCachedAppFrozenDurations.length < lruSize) {
                     mCachedAppFrozenDurations = new long[Math.max(
-                            mCachedAppHighWatermark, mService.mConstants.CUR_MAX_CACHED_PROCESSES)];
+                            lruSize, mService.mConstants.CUR_MAX_CACHED_PROCESSES)];
                 }
                 mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
                     if (app.mOptRecord.isFrozen()) {

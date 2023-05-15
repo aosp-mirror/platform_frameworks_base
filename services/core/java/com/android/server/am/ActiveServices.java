@@ -2326,7 +2326,7 @@ public final class ActiveServices {
                             && (r.getConnections().size() > 0)
                             && (r.mDebugWhileInUseReasonInBindService
                             != r.mDebugWhileInUseReasonInStartForeground)) {
-                        Slog.wtf(TAG, "FGS while-in-use changed (b/276963716): old="
+                        logWhileInUseChangeWtf("FGS while-in-use changed (b/276963716): old="
                                 + reasonCodeToString(r.mDebugWhileInUseReasonInBindService)
                                 + " new="
                                 + reasonCodeToString(r.mDebugWhileInUseReasonInStartForeground)
@@ -2587,6 +2587,13 @@ public final class ActiveServices {
                 updateNumForegroundServicesLocked();
             }
         }
+    }
+
+    /**
+     * It just does a wtf, but extracted to a method, so we can do a signature search on pitot.
+     */
+    private void logWhileInUseChangeWtf(String message) {
+        Slog.wtf(TAG, message);
     }
 
     private boolean withinFgsDeferRateLimit(ServiceRecord sr, final long now) {

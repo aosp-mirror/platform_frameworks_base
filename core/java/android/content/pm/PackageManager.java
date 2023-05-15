@@ -764,6 +764,7 @@ public abstract class PackageManager {
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
             MATCH_SYSTEM_ONLY,
             MATCH_FACTORY_ONLY,
+            MATCH_ANY_USER,
             MATCH_DEBUG_TRIAGED_MISSING,
             MATCH_INSTANT,
             MATCH_APEX,

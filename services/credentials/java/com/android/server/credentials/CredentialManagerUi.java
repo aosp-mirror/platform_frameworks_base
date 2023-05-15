@@ -33,9 +33,11 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.service.credentials.CredentialProviderInfoFactory;
+import android.util.Log;
 import android.util.Slog;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -47,7 +49,7 @@ public class CredentialManagerUi {
     private final CredentialManagerUiCallback mCallbacks;
     @NonNull
     private final Context mContext;
-    // TODO : Use for starting the activity for this user
+
     private final int mUserId;
 
     private UiStatus mStatus;
@@ -70,6 +72,8 @@ public class CredentialManagerUi {
     };
 
     private void handleUiResult(int resultCode, Bundle resultData) {
+        Log.i("reemademo", "handleUiResult with resultCOde: " + resultCode);
+
         switch (resultCode) {
             case UserSelectionDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION:
                 mStatus = UiStatus.IN_PROGRESS;
@@ -82,10 +86,14 @@ public class CredentialManagerUi {
                 }
                 break;
             case UserSelectionDialogResult.RESULT_CODE_DIALOG_USER_CANCELED:
+                Log.i("reemademo", "RESULT_CODE_DIALOG_USER_CANCELED");
+
                 mStatus = UiStatus.TERMINATED;
                 mCallbacks.onUiCancellation(/* isUserCancellation= */ true);
                 break;
             case UserSelectionDialogResult.RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS:
+                Log.i("reemademo", "RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS");
+
                 mStatus = UiStatus.TERMINATED;
                 mCallbacks.onUiCancellation(/* isUserCancellation= */ false);
                 break;
@@ -94,7 +102,7 @@ public class CredentialManagerUi {
                 mCallbacks.onUiSelectorInvocationFailure();
                 break;
             default:
-                Slog.i(TAG, "Unknown error code returned from the UI");
+                Log.i("reemademo", "Unknown error code returned from the UI");
                 mStatus = UiStatus.IN_PROGRESS;
                 mCallbacks.onUiSelectorInvocationFailure();
                 break;
@@ -154,7 +162,9 @@ public class CredentialManagerUi {
                         mContext,
                         mUserId,
                         CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY,
-                        mEnabledProviders);
+                        mEnabledProviders,
+                        // Don't need primary providers here.
+                        new HashSet<String>());
 
         List<DisabledProviderData> disabledProviderDataList = allProviders.stream()
                 .filter(provider -> !provider.isEnabled())

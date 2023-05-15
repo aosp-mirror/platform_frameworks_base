@@ -31,18 +31,23 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 
+import dagger.Lazy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import dagger.Lazy;
+import java.util.Random;
+
 
 @SmallTest
 @TestableLooper.RunWithLooper
@@ -169,4 +174,19 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
         verify(callback).onKeyguardDismissAmountChanged();
     }
 
+    @Test
+    public void testOnEnabledTrustAgentsChangedCallback() {
+        final Random random = new Random();
+        final ArgumentCaptor<KeyguardUpdateMonitorCallback> updateCallbackCaptor =
+                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
+
+        verify(mKeyguardUpdateMonitor).registerCallback(updateCallbackCaptor.capture());
+        final KeyguardStateController.Callback stateCallback =
+                mock(KeyguardStateController.Callback.class);
+        mKeyguardStateController.addCallback(stateCallback);
+
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        updateCallbackCaptor.getValue().onEnabledTrustAgentsChanged(random.nextInt());
+        verify(stateCallback).onUnlockedChanged();
+    }
 }

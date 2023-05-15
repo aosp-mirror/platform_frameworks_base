@@ -27,6 +27,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVI
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.internal.inputmethod.InputMethodDebug.softInputModeToString;
 import static com.android.internal.inputmethod.SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS;
@@ -195,19 +196,25 @@ public final class ImeVisibilityStateComputer {
         mWindowManagerInternal.setInputMethodTargetChangeListener(new ImeTargetChangeListener() {
             @Override
             public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken,
-                    boolean visible, boolean removed) {
-                mCurVisibleImeLayeringOverlay = (visible && !removed) ? overlayWindowToken : null;
+                    @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
+                    boolean removed) {
+                mCurVisibleImeLayeringOverlay =
+                        // Ignoring the starting window since it's ok to cover the IME target
+                        // window in temporary without affecting the IME visibility.
+                        (visible && !removed && windowType != TYPE_APPLICATION_STARTING)
+                                ? overlayWindowToken : null;
             }
 
             @Override
             public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
                     boolean visibleRequested, boolean removed) {
-                mCurVisibleImeInputTarget = (visibleRequested && !removed) ? imeInputTarget : null;
-                if (mCurVisibleImeInputTarget == null && mCurVisibleImeLayeringOverlay != null) {
+                if (mCurVisibleImeInputTarget == imeInputTarget && (!visibleRequested || removed)
+                        && mCurVisibleImeLayeringOverlay != null) {
                     mService.onApplyImeVisibilityFromComputer(imeInputTarget,
                             new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT,
                                     SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE));
                 }
+                mCurVisibleImeInputTarget = (visibleRequested && !removed) ? imeInputTarget : null;
             }
         });
     }

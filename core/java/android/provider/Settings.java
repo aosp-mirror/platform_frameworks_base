@@ -3036,9 +3036,7 @@ public final class Settings {
 
         public void destroy() {
             try {
-                // If this process is the system server process, mArray is the same object as
-                // the memory int array kept inside SettingsProvider, so skipping the close()
-                if (!Settings.isInSystemServer() && !mArray.isClosed()) {
+                if (!mArray.isClosed()) {
                     mArray.close();
                 }
             } catch (IOException e) {
@@ -3218,8 +3216,9 @@ public final class Settings {
         @UnsupportedAppUsage
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
             final boolean isSelf = (userHandle == UserHandle.myUserId());
+            final boolean useCache = isSelf && !isInSystemServer();
             boolean needsGenerationTracker = false;
-            if (isSelf) {
+            if (useCache) {
                 synchronized (NameValueCache.this) {
                     final GenerationTracker generationTracker = mGenerationTrackers.get(name);
                     if (generationTracker != null) {
@@ -3365,9 +3364,12 @@ public final class Settings {
                                 }
                             }
                         } else {
-                            if (LOCAL_LOGV) Log.i(TAG, "call-query of user " + userHandle
-                                    + " by " + UserHandle.myUserId()
-                                    + " so not updating cache");
+                            if (DEBUG || LOCAL_LOGV) {
+                                Log.i(TAG, "call-query of user " + userHandle
+                                        + " by " + UserHandle.myUserId()
+                                        + (isInSystemServer() ? " in system_server" : "")
+                                        + " so not updating cache");
+                            }
                         }
                         return value;
                     }
@@ -5451,6 +5453,14 @@ public final class Settings {
         public static final String SHOW_TOUCHES = "show_touches";
 
         /**
+         * Show key presses and other events dispatched to focused windows on the screen.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String SHOW_KEY_PRESSES = "show_key_presses";
+
+        /**
          * Log raw orientation data from
          * {@link com.android.server.policy.WindowOrientationListener} for use with the
          * orientationplot.py tool.
@@ -5840,6 +5850,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(NOTIFICATION_LIGHT_PULSE);
             PRIVATE_SETTINGS.add(POINTER_LOCATION);
             PRIVATE_SETTINGS.add(SHOW_TOUCHES);
+            PRIVATE_SETTINGS.add(SHOW_KEY_PRESSES);
             PRIVATE_SETTINGS.add(WINDOW_ORIENTATION_LISTENER_LOG);
             PRIVATE_SETTINGS.add(POWER_SOUNDS_ENABLED);
             PRIVATE_SETTINGS.add(DOCK_SOUNDS_ENABLED);
@@ -11826,6 +11837,7 @@ public final class Settings {
          *
          * {@hide}
          */
+        @Readable
         public static final String SATELLITE_MODE_RADIOS = "satellite_mode_radios";
 
         /**
@@ -11839,6 +11851,7 @@ public final class Settings {
          *
          * {@hide}
          */
+        @Readable
         public static final String SATELLITE_MODE_ENABLED = "satellite_mode_enabled";
 
         /**
@@ -12144,6 +12157,14 @@ public final class Settings {
          */
         @Readable
         public static final String ADB_WIFI_ENABLED = "adb_wifi_enabled";
+
+        /**
+         * Whether existing ADB sessions over both USB and Wifi should be terminated when the user
+         * revokes debugging authorizations.
+         * @hide
+         */
+        public static final String ADB_DISCONNECT_SESSIONS_ON_REVOKE =
+                "adb_disconnect_sessions_on_revoke";
 
         /**
          * Whether Views are allowed to save their attribute data.

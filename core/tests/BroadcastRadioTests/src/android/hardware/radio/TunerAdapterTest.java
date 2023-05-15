@@ -750,6 +750,15 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void onTuneFailed_withCanceledResult() throws Exception {
+        mTunerCallback.onTuneFailed(RadioTuner.TUNER_RESULT_CANCELED, FM_SELECTOR);
+
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onTuneFailed(
+                RadioTuner.TUNER_RESULT_CANCELED, FM_SELECTOR);
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onError(RadioTuner.ERROR_CANCELLED);
+    }
+
+    @Test
     public void onProgramListChanged_forTunerCallbackAdapter() throws Exception {
         mTunerCallback.onProgramListChanged();
 

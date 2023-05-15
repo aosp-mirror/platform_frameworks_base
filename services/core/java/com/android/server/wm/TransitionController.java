@@ -941,7 +941,6 @@ class TransitionController {
         }
         mPlayingTransitions.add(transition);
         updateRunningRemoteAnimation(transition, true /* isPlaying */);
-        mTransitionTracer.logState(transition);
         // Sync engine should become idle after this, so the idle listener will check the queue.
     }
 
@@ -1122,7 +1121,6 @@ class TransitionController {
                 mLatestOnTopTasksReported.clear();
             }
         }
-        mTransitionTracer.logState(transition);
         // This is called during Transition.abort whose codepath will eventually check the queue
         // via sync-engine idle.
     }
@@ -1416,12 +1414,11 @@ class TransitionController {
         long mReadyTimeNs;
         long mSendTimeNs;
         long mFinishTimeNs;
+        long mAbortTimeNs;
         TransitionRequestInfo mRequest;
         WindowContainerTransaction mStartWCT;
         int mSyncId;
         TransitionInfo mInfo;
-        ProtoOutputStream mProtoOutputStream = new ProtoOutputStream();
-        long mProtoToken;
 
         private String buildOnSendLog() {
             StringBuilder sb = new StringBuilder("Sent Transition #").append(mSyncId)

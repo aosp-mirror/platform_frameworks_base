@@ -54,6 +54,7 @@ import android.view.ViewConfiguration;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ConcurrentUtils;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
@@ -170,8 +171,8 @@ public class FullScreenMagnificationGestureHandlerTest {
                 new Object(),
                 mMagnificationInfoChangedCallback,
                 new MagnificationScaleProvider(mContext),
-                () -> null
-        ) {
+                () -> null,
+                ConcurrentUtils.DIRECT_EXECUTOR) {
             @Override
             public boolean magnificationRegionContains(int displayId, float x, float y) {
                 return true;

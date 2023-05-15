@@ -207,6 +207,8 @@ public class InputMethodManagerServiceTestBase {
         when(mMockActivityManagerInternal.isSystemReady()).thenReturn(true);
         when(mMockPackageManagerInternal.getPackageUid(anyString(), anyLong(), anyInt()))
                 .thenReturn(Binder.getCallingUid());
+        when(mMockPackageManagerInternal.isSameApp(anyString(), anyLong(), anyInt(), anyInt()))
+            .thenReturn(true);
         when(mMockWindowManagerInternal.onToggleImeRequested(anyBoolean(), any(), any(), anyInt()))
                 .thenReturn(TEST_IME_TARGET_INFO);
         when(mMockInputMethodClient.asBinder()).thenReturn(mMockInputMethodBinder);

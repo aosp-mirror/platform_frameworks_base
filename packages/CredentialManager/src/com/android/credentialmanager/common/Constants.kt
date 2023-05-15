@@ -19,5 +19,7 @@ package com.android.credentialmanager.common
 class Constants {
     companion object Constants {
         const val LOG_TAG = "CredentialSelector"
+        const val BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS =
+            "androidx.credentials.BUNDLE_KEY_IS_AUTO_SELECT_ALLOWED"
     }
 }

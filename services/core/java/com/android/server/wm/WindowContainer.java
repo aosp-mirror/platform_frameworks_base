@@ -1416,6 +1416,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void onAppTransitionDone() {
+        if (mSurfaceFreezer.hasLeash()) {
+            mSurfaceFreezer.unfreeze(getSyncTransaction());
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onAppTransitionDone();
@@ -3592,11 +3595,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 && !mTransitionController.useShellTransitionsRotation()) {
             if (deltaRotation != Surface.ROTATION_0) {
                 updateSurfaceRotation(t, deltaRotation, null /* positionLeash */);
-                t.setFixedTransformHint(mSurfaceControl,
+                getPendingTransaction().setFixedTransformHint(mSurfaceControl,
                         getWindowConfiguration().getDisplayRotation());
             } else if (deltaRotation != mLastDeltaRotation) {
                 t.setMatrix(mSurfaceControl, 1, 0, 0, 1);
-                t.unsetFixedTransformHint(mSurfaceControl);
+                getPendingTransaction().unsetFixedTransformHint(mSurfaceControl);
             }
         }
         mLastDeltaRotation = deltaRotation;
@@ -3990,6 +3993,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             // Otherwise this is the "root" of a synced subtree, so continue on to preparation.
         }
+        if (oldParent != null && newParent != null && !shouldUpdateSyncOnReparent()) {
+            return;
+        }
 
         // This container's situation has changed so we need to restart its sync.
         // We cannot reset the sync without a chance of a deadlock since it will request a new
@@ -4002,6 +4008,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
         }
         prepareSync();
+    }
+
+    /** Returns {@code true} if {@link #mSyncState} needs to be updated when reparenting. */
+    protected boolean shouldUpdateSyncOnReparent() {
+        return true;
     }
 
     void registerWindowContainerListener(WindowContainerListener listener) {

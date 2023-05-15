@@ -4745,17 +4745,19 @@ public class BatteryStatsImpl extends BatteryStats {
                 requestWakelockCpuUpdate();
             }
 
-            getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs)
-                    .noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
+            Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
+            uidStats.noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
+
+            int procState = uidStats.mProcessState;
 
             if (wc != null) {
                 FrameworkStatsLog.write(FrameworkStatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(),
                         wc.getTags(), getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE, procState);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
                         mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE, procState);
             }
         }
     }
@@ -4796,16 +4798,18 @@ public class BatteryStatsImpl extends BatteryStats {
                 requestWakelockCpuUpdate();
             }
 
-            getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs)
-                    .noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
+            Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
+            uidStats.noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
+
+            int procState = uidStats.mProcessState;
             if (wc != null) {
                 FrameworkStatsLog.write(FrameworkStatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(),
                         wc.getTags(), getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE, procState);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
                         mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE, procState);
             }
 
             if (mappedUid != uid) {

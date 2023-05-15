@@ -24,13 +24,13 @@ import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.window.TransitionInfo.FLAG_FIRST_CUSTOM;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -76,7 +76,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
                 .addChange(TRANSIT_CLOSE, 0 /* flags */,
                         createTaskInfo(2 /* taskId */, ACTIVITY_TYPE_STANDARD))
                 .addChange(TRANSIT_OPEN, FLAG_IS_WALLPAPER, null /* taskInfo */)
-                .addChange(TRANSIT_CHANGE, FLAG_FIRST_CUSTOM, null /* taskInfo */)
+                .addChange(TRANSIT_CHANGE, FLAG_IS_DIVIDER_BAR, null /* taskInfo */)
                 .build();
         // Check apps extraction
         RemoteAnimationTarget[] wrapped = RemoteAnimationTargetCompat.wrapApps(combined,
@@ -107,7 +107,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
         RemoteAnimationTarget[] nonApps = RemoteAnimationTargetCompat.wrapNonApps(combined,
                 false /* wallpapers */, mock(SurfaceControl.Transaction.class), null /* leashes */);
         assertEquals(1, nonApps.length);
-        assertTrue(nonApps[0].prefixOrderIndex < closeLayer);
+        assertTrue(nonApps[0].prefixOrderIndex == Integer.MAX_VALUE);
         assertEquals(MODE_CHANGING, nonApps[0].mode);
     }
 

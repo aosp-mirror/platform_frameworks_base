@@ -194,18 +194,19 @@ public class LocaleManager {
      * <p><b>Note:</b> Only the app itself with the same user can override its own LocaleConfig.
      *
      * <p><b>Note:</b> This function takes in a {@link LocaleConfig} which is intended to
-     * override the original config in the application’s resources. This LocaleConfig will become
-     * the override config, and stored in a system file for future access.
+     * override the original config in the application&#39;s resources. This LocaleConfig will
+     * become the override config, and stored in a system file for future access.
      *
      * <p><b>Note:</b> Using this function, applications can update their list of supported
-     * locales while running, without an update of the application’s software.
+     * locales while running, without an update of the application&#39;s software. For more
+     * information, see the <a
+     * href="https://developer.android.com/about/versions/14/features#app-languages">section on
+     * dynamic updates for an app's localeConfig</a>.
      *
      * <p>Applications can remove the override LocaleConfig with a {@code null} object.
      *
      * @param localeConfig the desired {@link LocaleConfig} for the calling app.
      */
-     // Add following to last Note: when guide is written:
-     // For more information, see TODO(b/261528306): add link to guide.
     @UserHandleAware
     public void setOverrideLocaleConfig(@Nullable LocaleConfig localeConfig) {
         try {

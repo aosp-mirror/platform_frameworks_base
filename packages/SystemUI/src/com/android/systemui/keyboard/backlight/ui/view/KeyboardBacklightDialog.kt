@@ -87,7 +87,7 @@ class KeyboardBacklightDialog(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setUpWindowProperties(this)
-        setWindowTitle()
+        setWindowPosition()
         updateResources()
         rootView = buildRootView()
         setContentView(rootView)
@@ -233,24 +233,29 @@ class KeyboardBacklightDialog(
         }
     }
 
-    private fun setWindowTitle() {
-        val attrs = window.attributes
-        attrs.title = "KeyboardBacklightDialog"
-        attrs?.y = dialogBottomMargin
-        window.attributes = attrs
+    private fun setWindowPosition() {
+        window?.apply {
+            setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+            this.attributes =
+                WindowManager.LayoutParams().apply {
+                    copyFrom(attributes)
+                    y = dialogBottomMargin
+                }
+        }
     }
 
     private fun setUpWindowProperties(dialog: Dialog) {
-        val window = dialog.window
-        window.requestFeature(Window.FEATURE_NO_TITLE) // otherwise fails while creating actionBar
-        window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
-        window.addFlags(
-            WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM or
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-        )
-        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        window.setBackgroundDrawableResource(android.R.color.transparent)
-        window.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+        dialog.window?.apply {
+            requestFeature(Window.FEATURE_NO_TITLE) // otherwise fails while creating actionBar
+            setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
+            addFlags(
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM or
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+            )
+            clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            setBackgroundDrawableResource(android.R.color.transparent)
+            attributes.title = "KeyboardBacklightDialog"
+        }
         setCanceledOnTouchOutside(true)
     }
 

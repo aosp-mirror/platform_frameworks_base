@@ -30,9 +30,6 @@ import java.util.Objects;
  */
 public class BubbleInfo implements Parcelable {
 
-    // TODO(b/269672147): needs a title string for a11y & that comes from notification
-    // TODO(b/269671451): needs whether the bubble is an 'important person' or not
-
     private String mKey; // Same key as the Notification
     private int mFlags;  // Flags from BubbleMetadata
     @Nullable
@@ -46,24 +43,32 @@ public class BubbleInfo implements Parcelable {
      */
     @Nullable
     private Icon mIcon;
+    @Nullable
+    private String mTitle;
+    private boolean mIsImportantConversation;
 
     public BubbleInfo(String key, int flags, @Nullable String shortcutId, @Nullable Icon icon,
-            int userId, String packageName) {
+            int userId, String packageName, @Nullable String title,
+            boolean isImportantConversation) {
         mKey = key;
         mFlags = flags;
         mShortcutId = shortcutId;
         mIcon = icon;
         mUserId = userId;
         mPackageName = packageName;
+        mTitle = title;
+        mIsImportantConversation = isImportantConversation;
     }
 
-    public BubbleInfo(Parcel source) {
+    private BubbleInfo(Parcel source) {
         mKey = source.readString();
         mFlags = source.readInt();
         mShortcutId = source.readString();
         mIcon = source.readTypedObject(Icon.CREATOR);
         mUserId = source.readInt();
         mPackageName = source.readString();
+        mTitle = source.readString();
+        mIsImportantConversation = source.readBoolean();
     }
 
     public String getKey() {
@@ -90,6 +95,15 @@ public class BubbleInfo implements Parcelable {
 
     public String getPackageName() {
         return mPackageName;
+    }
+
+    @Nullable
+    public String getTitle() {
+        return mTitle;
+    }
+
+    public boolean isImportantConversation() {
+        return mIsImportantConversation;
     }
 
     /**
@@ -141,11 +155,13 @@ public class BubbleInfo implements Parcelable {
         parcel.writeTypedObject(mIcon, flags);
         parcel.writeInt(mUserId);
         parcel.writeString(mPackageName);
+        parcel.writeString(mTitle);
+        parcel.writeBoolean(mIsImportantConversation);
     }
 
     @NonNull
     public static final Creator<BubbleInfo> CREATOR =
-            new Creator<BubbleInfo>() {
+            new Creator<>() {
                 public BubbleInfo createFromParcel(Parcel source) {
                     return new BubbleInfo(source);
                 }

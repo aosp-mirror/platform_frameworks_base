@@ -68,6 +68,7 @@ message SystemSettingsProto {
         // orientationplot.py tool.
         // 0 = no, 1 = yes
         optional SettingProto window_orientation_listener_log = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto show_key_presses = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional DevOptions developer_options = 7;
 

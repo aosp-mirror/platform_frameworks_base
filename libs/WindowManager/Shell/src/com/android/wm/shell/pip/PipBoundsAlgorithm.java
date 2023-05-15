@@ -180,6 +180,35 @@ public class PipBoundsAlgorithm {
         return null;
     }
 
+
+    /**
+     * Returns the source hint rect if it is valid (if provided and is contained by the current
+     * task bounds, while not smaller than the destination bounds).
+     */
+    @Nullable
+    public static Rect getValidSourceHintRect(PictureInPictureParams params, Rect sourceBounds,
+            Rect destinationBounds) {
+        Rect sourceRectHint = getValidSourceHintRect(params, sourceBounds);
+        if (!isSourceRectHintValidForEnterPip(sourceRectHint, destinationBounds)) {
+            sourceRectHint = null;
+        }
+        return sourceRectHint;
+    }
+
+    /**
+     * This is a situation in which the source rect hint on at least one axis is smaller
+     * than the destination bounds, which represents a problem because we would have to scale
+     * up that axis to fit the bounds. So instead, just fallback to the non-source hint
+     * animation in this case.
+     *
+     * @return {@code false} if the given source is too small to use for the entering animation.
+     */
+    static boolean isSourceRectHintValidForEnterPip(Rect sourceRectHint, Rect destinationBounds) {
+        return sourceRectHint != null
+                && sourceRectHint.width() > destinationBounds.width()
+                && sourceRectHint.height() > destinationBounds.height();
+    }
+
     public float getDefaultAspectRatio() {
         return mDefaultAspectRatio;
     }

@@ -270,6 +270,10 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         boolean mayHaveDifferentNumberingSystem = locale.hasNumberingSystems();
 
         if (isSystemLocale
+                // The suggeseted locale would contain the country code except an edge case for
+                // SUGGESTION_TYPE_CURRENT where the application itself set the preferred locale.
+                // In this case, onLocaleSelected() will still set the app locale.
+                || locale.isSuggested()
                 || (isRegionLocale && !mayHaveDifferentNumberingSystem)
                 || mIsNumberingSystem) {
             if (mListener != null) {

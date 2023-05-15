@@ -112,7 +112,7 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
                 ComplicationLayoutParams.POSITION_TOP,
                 ComplicationLayoutParams.DIRECTION_DOWN,
                 3);
-        assertThat(params.getMargin(10) == 10).isTrue();
+        assertThat(params.getDirectionalSpacing(10) == 10).isTrue();
     }
 
     /**
@@ -127,7 +127,7 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
                 ComplicationLayoutParams.DIRECTION_DOWN,
                 3,
                 10);
-        assertThat(params.getMargin(5) == 10).isTrue();
+        assertThat(params.getDirectionalSpacing(5) == 10).isTrue();
     }
 
     /**
@@ -148,7 +148,7 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
         assertThat(copy.getDirection() == params.getDirection()).isTrue();
         assertThat(copy.getPosition() == params.getPosition()).isTrue();
         assertThat(copy.getWeight() == params.getWeight()).isTrue();
-        assertThat(copy.getMargin(0) == params.getMargin(1)).isTrue();
+        assertThat(copy.getDirectionalSpacing(0) == params.getDirectionalSpacing(1)).isTrue();
         assertThat(copy.getConstraint() == params.getConstraint()).isTrue();
         assertThat(copy.height == params.height).isTrue();
         assertThat(copy.width == params.width).isTrue();
@@ -171,7 +171,7 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
         assertThat(copy.getDirection() == params.getDirection()).isTrue();
         assertThat(copy.getPosition() == params.getPosition()).isTrue();
         assertThat(copy.getWeight() == params.getWeight()).isTrue();
-        assertThat(copy.getMargin(1) == params.getMargin(1)).isTrue();
+        assertThat(copy.getDirectionalSpacing(1) == params.getDirectionalSpacing(1)).isTrue();
         assertThat(copy.height == params.height).isTrue();
         assertThat(copy.width == params.width).isTrue();
     }

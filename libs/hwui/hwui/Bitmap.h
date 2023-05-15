@@ -221,6 +221,7 @@ private:
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
         struct {
             AHardwareBuffer* buffer;
+            uint64_t size;
         } hardware;
 #endif
     } mPixelStorage;

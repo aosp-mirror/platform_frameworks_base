@@ -393,9 +393,9 @@ public final class BroadcastQueueModernImplTest {
                 List.of(makeMockRegisteredReceiver()), false);
         enqueueOrReplaceBroadcast(queue, airplaneRecord, 0);
 
-        queue.setProcessAndUidCached(null, false);
+        queue.setProcessAndUidState(null, false, false);
         final long notCachedRunnableAt = queue.getRunnableAt();
-        queue.setProcessAndUidCached(null, true);
+        queue.setProcessAndUidState(null, false, true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertFalse(queue.isRunnable());
@@ -420,9 +420,9 @@ public final class BroadcastQueueModernImplTest {
                 List.of(makeMockRegisteredReceiver()), false);
         enqueueOrReplaceBroadcast(queue, airplaneRecord, 0);
 
-        queue.setProcessAndUidCached(null, false);
+        queue.setProcessAndUidState(null, false, false);
         final long notCachedRunnableAt = queue.getRunnableAt();
-        queue.setProcessAndUidCached(null, true);
+        queue.setProcessAndUidState(null, false, true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertTrue(queue.isRunnable());
@@ -452,13 +452,13 @@ public final class BroadcastQueueModernImplTest {
         // verify that:
         // (a) the queue is immediately runnable by existence of a fg-priority broadcast
         // (b) the next one up is the fg-priority broadcast despite its later enqueue time
-        queue.setProcessAndUidCached(null, false);
+        queue.setProcessAndUidState(null, false, false);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
         assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
         assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
 
-        queue.setProcessAndUidCached(null, true);
+        queue.setProcessAndUidState(null, false, true);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
         assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
@@ -515,6 +515,28 @@ public final class BroadcastQueueModernImplTest {
         assertEquals(BroadcastProcessQueue.REASON_MAX_PENDING, queue.getRunnableAtReason());
     }
 
+    @Test
+    public void testRunnableAt_uidForeground() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants, PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver()));
+        enqueueOrReplaceBroadcast(queue, timeTickRecord, 0);
+
+        assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+
+        queue.setProcessAndUidState(mProcess, true, false);
+        assertThat(queue.getRunnableAt()).isLessThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_FOREGROUND, queue.getRunnableAtReason());
+
+        queue.setProcessAndUidState(mProcess, false, false);
+        assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+    }
+
     /**
      * Verify that a cached process that would normally be delayed becomes
      * immediately runnable when the given broadcast is enqueued.
@@ -522,7 +544,7 @@ public final class BroadcastQueueModernImplTest {
     private void doRunnableAt_Cached(BroadcastRecord testRecord, int testRunnableAtReason) {
         final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
-        queue.setProcessAndUidCached(null, true);
+        queue.setProcessAndUidState(null, false, true);
 
         final BroadcastRecord lazyRecord = makeBroadcastRecord(
                 new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED),
@@ -769,7 +791,7 @@ public final class BroadcastQueueModernImplTest {
 
         BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
-        queue.setPrioritizeEarliest(true);
+        queue.addPrioritizeEarliestRequest();
         long timeCounter = 100;
 
         enqueueOrReplaceBroadcast(queue,
@@ -814,6 +836,28 @@ public final class BroadcastQueueModernImplTest {
         queue.makeActiveNextPending();
         assertEquals(AppWidgetManager.ACTION_APPWIDGET_UPDATE,
                 queue.getActive().intent.getAction());
+
+
+        queue.removePrioritizeEarliestRequest();
+
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_BOOT_COMPLETED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)),
+                0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, timeCounter++);
+
+        // Once the request to prioritize earliest is removed, we should expect broadcasts
+        // to be dispatched in the order of foreground, normal and then offload.
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIMEZONE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_BOOT_COMPLETED, queue.getActive().intent.getAction());
     }
 
     /**

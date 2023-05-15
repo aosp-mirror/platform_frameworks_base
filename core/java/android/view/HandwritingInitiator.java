@@ -85,7 +85,21 @@ public class HandwritingInitiator {
      * to {@link #findBestCandidateView(float, float)}.
      */
     @Nullable
-    private View mCachedHoverTarget = null;
+    private WeakReference<View> mCachedHoverTarget = null;
+
+    /**
+     * Whether to show the hover icon for the current connected view.
+     * Hover icon should be hidden for the current connected view after handwriting is initiated
+     * for it until one of the following events happens:
+     * a) user performs a click or long click. In other words, if it receives a series of motion
+     * events that don't trigger handwriting, show hover icon again.
+     * b) the stylus hovers on another editor that supports handwriting (or a handwriting delegate).
+     * c) the current connected editor lost focus.
+     *
+     * If the stylus is hovering on an unconnected editor that supports handwriting, we always show
+     * the hover icon.
+     */
+    private boolean mShowHoverIconForConnectedView = true;
 
     @VisibleForTesting
     public HandwritingInitiator(@NonNull ViewConfiguration viewConfiguration,
@@ -142,6 +156,12 @@ public class HandwritingInitiator {
                 // check whether the stylus we are tracking goes up.
                 if (mState != null) {
                     mState.mShouldInitHandwriting = false;
+                    if (!mState.mHasInitiatedHandwriting
+                            && !mState.mHasPreparedHandwritingDelegation) {
+                        // The user just did a click, long click or another stylus gesture,
+                        // show hover icon again for the connected view.
+                        mShowHoverIconForConnectedView = true;
+                    }
                 }
                 return false;
             case MotionEvent.ACTION_MOVE:
@@ -214,7 +234,11 @@ public class HandwritingInitiator {
      */
     public void onDelegateViewFocused(@NonNull View view) {
         if (view == getConnectedView()) {
-            tryAcceptStylusHandwritingDelegation(view);
+            if (tryAcceptStylusHandwritingDelegation(view)) {
+                // A handwriting delegate view is accepted and handwriting starts; hide the
+                // hover icon.
+                mShowHoverIconForConnectedView = false;
+            }
         }
     }
 
@@ -237,7 +261,12 @@ public class HandwritingInitiator {
         } else {
             mConnectedView = new WeakReference<>(view);
             mConnectionCount = 1;
+            // A new view just gain focus. By default, we should show hover icon for it.
+            mShowHoverIconForConnectedView = true;
             if (view.isHandwritingDelegate() && tryAcceptStylusHandwritingDelegation(view)) {
+                // A handwriting delegate view is accepted and handwriting starts; hide the
+                // hover icon.
+                mShowHoverIconForConnectedView = false;
                 return;
             }
             if (mState != null && mState.mShouldInitHandwriting) {
@@ -306,6 +335,7 @@ public class HandwritingInitiator {
         mImm.startStylusHandwriting(view);
         mState.mHasInitiatedHandwriting = true;
         mState.mShouldInitHandwriting = false;
+        mShowHoverIconForConnectedView = false;
         if (view instanceof TextView) {
             ((TextView) view).hideHint();
         }
@@ -361,15 +391,35 @@ public class HandwritingInitiator {
      * handwrite-able area.
      */
     public PointerIcon onResolvePointerIcon(Context context, MotionEvent event) {
-        if (shouldShowHandwritingPointerIcon(event)) {
+        final View hoverView = findHoverView(event);
+        if (hoverView == null) {
+            return null;
+        }
+
+        if (mShowHoverIconForConnectedView) {
+            return PointerIcon.getSystemIcon(context, PointerIcon.TYPE_HANDWRITING);
+        }
+
+        if (hoverView != getConnectedView()) {
+            // The stylus is hovering on another view that supports handwriting. We should show
+            // hover icon. Also reset the mShowHoverIconForConnectedView so that hover
+            // icon is displayed again next time when the stylus hovers on connected view.
+            mShowHoverIconForConnectedView = true;
             return PointerIcon.getSystemIcon(context, PointerIcon.TYPE_HANDWRITING);
         }
         return null;
     }
 
-    private boolean shouldShowHandwritingPointerIcon(MotionEvent event) {
+    private View getCachedHoverTarget() {
+        if (mCachedHoverTarget == null) {
+            return null;
+        }
+        return mCachedHoverTarget.get();
+    }
+
+    private View findHoverView(MotionEvent event) {
         if (!event.isStylusPointer() || !event.isHoverEvent()) {
-            return false;
+            return null;
         }
 
         if (event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
@@ -377,24 +427,25 @@ public class HandwritingInitiator {
             final float hoverX = event.getX(event.getActionIndex());
             final float hoverY = event.getY(event.getActionIndex());
 
-            if (mCachedHoverTarget != null) {
-                final Rect handwritingArea = getViewHandwritingArea(mCachedHoverTarget);
-                if (isInHandwritingArea(handwritingArea, hoverX, hoverY, mCachedHoverTarget)
-                        && shouldTriggerStylusHandwritingForView(mCachedHoverTarget)) {
-                    return true;
+            final View cachedHoverTarget = getCachedHoverTarget();
+            if (cachedHoverTarget != null) {
+                final Rect handwritingArea = getViewHandwritingArea(cachedHoverTarget);
+                if (isInHandwritingArea(handwritingArea, hoverX, hoverY, cachedHoverTarget)
+                        && shouldTriggerStylusHandwritingForView(cachedHoverTarget)) {
+                    return cachedHoverTarget;
                 }
             }
 
             final View candidateView = findBestCandidateView(hoverX, hoverY);
 
             if (candidateView != null) {
-                mCachedHoverTarget = candidateView;
-                return true;
+                mCachedHoverTarget = new WeakReference<>(candidateView);
+                return candidateView;
             }
         }
 
         mCachedHoverTarget = null;
-        return false;
+        return null;
     }
 
     private static void requestFocusWithoutReveal(View view) {

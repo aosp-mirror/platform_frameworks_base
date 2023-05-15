@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"Skilríkjastjórnun"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Hætta við"</string>
     <string name="string_continue" msgid="1346732695941131882">"Áfram"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"Fleiri valkostir"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Vista á annan hátt"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Nánar"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Sýna aðgangsorð"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Fela aðgangsorð"</string>
@@ -33,10 +49,13 @@
     <string name="sign_ins" msgid="4710739369149469208">"innskráningar"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"innskráningarupplýsingar"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Vista <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> í"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Viltu búa til aðgangslykil í öðru tæki?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Búa til aðgangslykil í öðru tæki?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Vista aðgangsorð í öðru tæki?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Vista innskráningu í öðru tæki?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Nota <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> fyrir allar innskráningar?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Þessi aðgangsorðastjórnun fyrir <xliff:g id="USERNAME">%1$s</xliff:g> vistar aðgangsorð og aðgangslykla til að auðvelda þér að skrá þig inn"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Stilla sem sjálfgefið"</string>
+    <string name="settings" msgid="6536394145760913145">"Stillingar"</string>
     <string name="use_once" msgid="9027366575315399714">"Nota einu sinni"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> aðgangsorð • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> aðgangslyklar"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> aðgangsorð"</string>
@@ -50,8 +69,13 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"Loka"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Hunsa"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Nota vistaðan aðgangslykil fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Nota vistaða innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Veldu vistaða innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Nota vistaða aðgangsorðið þitt fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Nota innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Opna fyrir innskráningarvalkosti fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Veldu vistaðan aðgangslykil fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Veldu vistað aðgangsorð fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Veldu vistaða innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Veldu innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Velja valkost fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Nota þessar upplýsingar í <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Skrá inn með öðrum hætti"</string>

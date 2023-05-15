@@ -382,7 +382,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                     && currentActivePosition < mAdapter.getItemCount()) {
                 mAdapter.notifyItemChanged(currentActivePosition);
             } else {
-                mAdapter.notifyDataSetChanged();
+                mAdapter.updateItems();
             }
         } else {
             mMediaOutputController.setRefreshing(false);

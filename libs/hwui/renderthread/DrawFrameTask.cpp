@@ -98,12 +98,14 @@ void DrawFrameTask::run() {
     IRenderPipeline* pipeline = mContext->getRenderPipeline();
     bool canUnblockUiThread;
     bool canDrawThisFrame;
+    bool solelyTextureViewUpdates;
     {
         TreeInfo info(TreeInfo::MODE_FULL, *mContext);
         info.forceDrawFrame = mForceDrawFrame;
         mForceDrawFrame = false;
         canUnblockUiThread = syncFrameState(info);
         canDrawThisFrame = info.out.canDrawThisFrame;
+        solelyTextureViewUpdates = info.out.solelyTextureViewUpdates;
 
         if (mFrameCommitCallback) {
             mContext->addFrameCommitListener(std::move(mFrameCommitCallback));
@@ -136,7 +138,7 @@ void DrawFrameTask::run() {
     }
 
     if (CC_LIKELY(canDrawThisFrame)) {
-        context->draw();
+        context->draw(solelyTextureViewUpdates);
     } else {
         // Do a flush in case syncFrameState performed any texture uploads. Since we skipped
         // the draw() call, those uploads (or deletes) will end up sitting in the queue.
@@ -179,6 +181,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
             mLayers[i]->apply();
         }
     }
+
     mLayers.clear();
     mContext->setContentDrawBounds(mContentDrawBounds);
     mContext->prepareTree(info, mFrameInfo, mSyncQueued, mTargetNode);

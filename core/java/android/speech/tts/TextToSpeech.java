@@ -15,12 +15,17 @@
  */
 package android.speech.tts;
 
+import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RawRes;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.companion.virtual.VirtualDevice;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -791,7 +796,46 @@ public class TextToSpeech {
 
         mIsSystem = isSystem;
 
+        addDeviceSpecificSessionIdToParams(mContext, mParams);
         initTts();
+    }
+
+    /**
+     * Add {@link VirtualDevice} specific playback audio session associated with context to
+     * parameters {@link Bundle} if applicable.
+     *
+     * @param context - {@link Context} context instance to extract the device specific audio
+     *      session id from.
+     * @param params - {@link Bundle} to add the device specific audio session id to.
+     */
+    private static void addDeviceSpecificSessionIdToParams(
+            @NonNull Context context, @NonNull Bundle params) {
+        int audioSessionId = getDeviceSpecificPlaybackSessionId(context);
+        if (audioSessionId != AUDIO_SESSION_ID_GENERATE) {
+            params.putInt(Engine.KEY_PARAM_SESSION_ID, audioSessionId);
+        }
+    }
+
+    /**
+     * Helper method to fetch {@link VirtualDevice} specific playback audio session id for given
+     * {@link Context} instance.
+     *
+     * @param context - {@link Context} to fetch the audio sesion id for.
+     * @return audio session id corresponding to {@link VirtualDevice} in case the context is
+     *      associated with {@link VirtualDevice} configured with specific audio session id,
+     *      {@link AudioManager#AUDIO_SESSION_ID_GENERATE} otherwise.
+     * @see android.companion.virtual.VirtualDeviceManager#getAudioPlaybackSessionId(int)
+     */
+    private static int getDeviceSpecificPlaybackSessionId(@NonNull Context context) {
+        int deviceId = context.getDeviceId();
+        if (deviceId == DEVICE_ID_DEFAULT) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+        VirtualDeviceManager vdm = context.getSystemService(VirtualDeviceManager.class);
+        if (vdm == null) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+        return vdm.getAudioPlaybackSessionId(deviceId);
     }
 
     private <R> R runActionNoReconnect(Action<R> action, R errorResult, String method,

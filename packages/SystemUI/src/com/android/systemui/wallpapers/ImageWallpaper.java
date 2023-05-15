@@ -173,7 +173,7 @@ public class ImageWallpaper extends WallpaperService {
                     .isLockscreenLiveWallpaperEnabled();
             mSurfaceHolder = surfaceHolder;
             Rect dimensions = mIsLockscreenLiveWallpaperEnabled
-                    ? mWallpaperManager.peekBitmapDimensions(getSourceFlag())
+                    ? mWallpaperManager.peekBitmapDimensions(getSourceFlag(), true)
                     : mWallpaperManager.peekBitmapDimensions();
             int width = Math.max(MIN_SURFACE_WIDTH, dimensions.width());
             int height = Math.max(MIN_SURFACE_HEIGHT, dimensions.height());
@@ -325,7 +325,7 @@ public class ImageWallpaper extends WallpaperService {
             try {
                 bitmap = mIsLockscreenLiveWallpaperEnabled
                         ? mWallpaperManager.getBitmapAsUser(
-                                mUserTracker.getUserId(), false, getSourceFlag())
+                                mUserTracker.getUserId(), false, getSourceFlag(), true)
                         : mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
                 if (bitmap != null
                         && bitmap.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
@@ -347,7 +347,7 @@ public class ImageWallpaper extends WallpaperService {
                 try {
                     bitmap = mIsLockscreenLiveWallpaperEnabled
                             ? mWallpaperManager.getBitmapAsUser(
-                                    mUserTracker.getUserId(), false, getSourceFlag())
+                                    mUserTracker.getUserId(), false, getSourceFlag(), true)
                             : mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
                 } catch (RuntimeException | OutOfMemoryError e) {
                     Log.w(TAG, "Unable to load default wallpaper!", e);

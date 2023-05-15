@@ -17,7 +17,6 @@
 package com.android.credentialmanager
 
 import android.app.slice.Slice
-import android.app.slice.SliceItem
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
@@ -63,7 +62,6 @@ import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
 import java.time.Instant
 
-// TODO: remove all !! checks
 fun getAppLabel(
     pm: PackageManager,
     appPackageName: String
@@ -89,7 +87,7 @@ private fun getServiceLabelAndIcon(
     val component = ComponentName.unflattenFromString(providerFlattenedComponentName)
     if (component == null) {
         // Test data has only package name not component name.
-        // TODO: remove once test data is removed
+        // For test data usage only.
         try {
             val pkgInfo = pm.getPackageInfo(
                 providerFlattenedComponentName,
@@ -201,7 +199,8 @@ class GetFlowUtils {
                     ComponentName::class.java
                 )
             val preferTopBrandingContent: TopBrandingContent? =
-                if (preferUiBrandingComponentName == null) null
+                if (!requestInfo.hasPermissionToOverrideDefault() ||
+                    preferUiBrandingComponentName == null) null
                 else {
                     val (displayName, icon) = getServiceLabelAndIcon(
                         context.packageManager, preferUiBrandingComponentName.flattenToString())
@@ -213,7 +212,7 @@ class GetFlowUtils {
                     }
                 }
             return com.android.credentialmanager.getflow.RequestDisplayInfo(
-                appName = originName
+                appName = originName?.ifEmpty { null }
                     ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                     ?: return null,
                 preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials,
@@ -286,7 +285,8 @@ class GetFlowUtils {
                             pendingIntent = credentialEntry.pendingIntent,
                             fillInIntent = it.frameworkExtrasIntent,
                             credentialType = CredentialType.UNKNOWN,
-                            credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
+                            credentialTypeDisplayName =
+                            credentialEntry.typeDisplayName?.toString().orEmpty(),
                             userName = credentialEntry.title.toString(),
                             displayName = credentialEntry.subtitle?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
@@ -302,7 +302,6 @@ class GetFlowUtils {
                     )
                 }
             }
-            // TODO: handle empty list due to parsing error.
             return result
         }
 
@@ -334,12 +333,8 @@ class GetFlowUtils {
                 val structuredAuthEntry =
                     AuthenticationAction.fromSlice(entry.slice) ?: return@forEach
 
-                // TODO: replace with official jetpack code.
-                val titleItem: SliceItem? = entry.slice.items.firstOrNull {
-                    it.hasHint(
-                        "androidx.credentials.provider.authenticationAction.SLICE_HINT_TITLE")
-                }
-                val title: String = titleItem?.text?.toString() ?: providerDisplayName
+                val title: String =
+                    structuredAuthEntry.title.toString().ifEmpty { providerDisplayName }
 
                 result.add(AuthenticationEntryInfo(
                     providerId = providerId,
@@ -395,7 +390,6 @@ class GetFlowUtils {
                     subTitle = actionEntryUi.subtitle?.toString(),
                 ))
             }
-            // TODO: handle empty list
             return result
         }
     }
@@ -461,7 +455,7 @@ class CreateFlowUtils {
             if (requestInfo == null) {
                 return null
             }
-            val appLabel = originName
+            val appLabel = originName?.ifEmpty { null }
                 ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                 ?: return null
             val createCredentialRequest = requestInfo.createCredentialRequest ?: return null
@@ -486,6 +480,10 @@ class CreateFlowUtils {
                     createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                     appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                     userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
+                    // The jetpack library requires a fix to parse this value correctly for
+                    // the password type. For now, directly parse it ourselves.
+                    isAutoSelectRequest = createCredentialRequest.credentialData.getBoolean(
+                        Constants.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS, false),
                 )
                 is CreatePublicKeyCredentialRequest -> {
                     newRequestDisplayInfoFromPasskeyJson(
@@ -496,6 +494,10 @@ class CreateFlowUtils {
                         createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                         appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                         userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
+                        // The jetpack library requires a fix to parse this value correctly for
+                        // the passkey type. For now, directly parse it ourselves.
+                        isAutoSelectRequest = createCredentialRequest.credentialData.getBoolean(
+                            Constants.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS, false),
                     )
                 }
                 is CreateCustomCredentialRequest -> {
@@ -514,6 +516,7 @@ class CreateFlowUtils {
                         createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                         appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                         userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
+                        isAutoSelectRequest = createCredentialRequestJetpack.isAutoSelectAllowed,
                     )
                 }
                 else -> null
@@ -601,7 +604,7 @@ class CreateFlowUtils {
             )
         }
 
-        private fun toCreateScreenState(
+        fun toCreateScreenState(
             createOptionSize: Int,
             isOnPasskeyIntroStateAlready: Boolean,
             requestDisplayInfo: RequestDisplayInfo,
@@ -660,8 +663,14 @@ class CreateFlowUtils {
                     passwordCount = createEntry.getPasswordCredentialCount(),
                     passkeyCount = createEntry.getPublicKeyCredentialCount(),
                     totalCredentialCount = createEntry.getTotalCredentialCount(),
-                    lastUsedTime = createEntry.lastUsedTime,
-                    footerDescription = createEntry.description?.toString()
+                    lastUsedTime = createEntry.lastUsedTime ?: Instant.MIN,
+                    footerDescription = createEntry.description?.toString(),
+                    // TODO(b/281065680): replace with official library constant once available
+                    allowAutoSelect =
+                    it.slice.items.firstOrNull {
+                        it.hasHint("androidx.credentials.provider.createEntry.SLICE_HINT_AUTO_" +
+                            "SELECT_ALLOWED")
+                    }?.text == "true",
                 ))
             }
             return result.sortedWith(
@@ -693,6 +702,7 @@ class CreateFlowUtils {
             preferImmediatelyAvailableCredentials: Boolean,
             appPreferredDefaultProviderId: String?,
             userSetDefaultProviderIds: Set<String>,
+            isAutoSelectRequest: Boolean
         ): RequestDisplayInfo? {
             val json = JSONObject(requestJson)
             var passkeyUsername = ""
@@ -715,6 +725,7 @@ class CreateFlowUtils {
                 preferImmediatelyAvailableCredentials,
                 appPreferredDefaultProviderId,
                 userSetDefaultProviderIds,
+                isAutoSelectRequest,
             )
         }
     }
