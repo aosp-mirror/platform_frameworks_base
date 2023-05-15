@@ -185,37 +185,41 @@ public class ApkLiteParseUtils {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parseApkLite");
         try {
             for (File file : files) {
-                if (isApkFile(file)) {
-                    final ParseResult<ApkLite> result = parseApkLite(input, file, flags);
-                    if (result.isError()) {
-                        return input.error(result);
-                    }
+                if (!isApkFile(file)) {
+                    continue;
+                }
 
-                    final ApkLite lite = result.getResult();
-                    // Assert that all package names and version codes are
-                    // consistent with the first one we encounter.
-                    if (packageName == null) {
-                        packageName = lite.getPackageName();
-                        versionCode = lite.getVersionCode();
-                    } else {
-                        if (!packageName.equals(lite.getPackageName())) {
-                            return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                                    "Inconsistent package " + lite.getPackageName() + " in " + file
-                                            + "; expected " + packageName);
-                        }
-                        if (versionCode != lite.getVersionCode()) {
-                            return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                                    "Inconsistent version " + lite.getVersionCode() + " in " + file
-                                            + "; expected " + versionCode);
-                        }
-                    }
+                final ParseResult<ApkLite> result = parseApkLite(input, file, flags);
+                if (result.isError()) {
+                    return input.error(result);
+                }
 
-                    // Assert that each split is defined only oncuses-static-libe
-                    if (apks.put(lite.getSplitName(), lite) != null) {
+                final ApkLite lite = result.getResult();
+                // Assert that all package names and version codes are
+                // consistent with the first one we encounter.
+                if (packageName == null) {
+                    packageName = lite.getPackageName();
+                    versionCode = lite.getVersionCode();
+                } else {
+                    if (!packageName.equals(lite.getPackageName())) {
                         return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                                "Split name " + lite.getSplitName()
-                                        + " defined more than once; most recent was " + file);
+                                "Inconsistent package " + lite.getPackageName() + " in " + file
+                                        + "; expected " + packageName);
                     }
+                    if (versionCode != lite.getVersionCode()) {
+                        return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
+                                "Inconsistent version " + lite.getVersionCode() + " in " + file
+                                        + "; expected " + versionCode);
+                    }
+                }
+
+                // Assert that each split is defined only once
+                ApkLite prev = apks.put(lite.getSplitName(), lite);
+                if (prev != null) {
+                    return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
+                            "Split name " + lite.getSplitName()
+                                    + " defined more than once; most recent was " + file
+                                    + ", previous was " + prev.getPath());
                 }
             }
             baseApk = apks.remove(null);
