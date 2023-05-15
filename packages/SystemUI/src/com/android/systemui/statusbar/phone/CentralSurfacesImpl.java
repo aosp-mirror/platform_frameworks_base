@@ -1224,6 +1224,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // By default turning off the screen also closes the shade.
         // We want to make sure that the shade status is kept after folding/unfolding.
         boolean isShadeOpen = mShadeController.isShadeFullyOpen();
+        boolean isShadeExpandingOrCollapsing = mShadeController.isExpandingOrCollapsing();
         boolean leaveOpen = isShadeOpen && !willGoToSleep && mState == SHADE;
         if (DEBUG) {
             Log.d(TAG, String.format(
@@ -1231,14 +1232,15 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                             + "isFolded=%s, "
                             + "willGoToSleep=%s, "
                             + "isShadeOpen=%s, "
+                            + "isShadeExpandingOrCollapsing=%s, "
                             + "leaveOpen=%s",
-                    isFolded, willGoToSleep, isShadeOpen, leaveOpen));
+                    isFolded, willGoToSleep, isShadeOpen, isShadeExpandingOrCollapsing, leaveOpen));
         }
         if (leaveOpen) {
             // below makes shade stay open when going from folded to unfolded
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
-        if (mState != SHADE && isShadeOpen) {
+        if (mState != SHADE && (isShadeOpen || isShadeExpandingOrCollapsing)) {
             // When device state changes on KEYGUARD/SHADE_LOCKED we don't want to keep the state of
             // the shade and instead we open clean state of keyguard with shade closed.
             // Normally some parts of QS state (like expanded/collapsed) are persisted and

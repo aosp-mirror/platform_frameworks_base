@@ -902,6 +902,13 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void isExpandingOrCollapsing_returnsTrue_whenQsLockscreenDragInProgress() {
+        when(mQsController.getLockscreenShadeDragProgress()).thenReturn(0.5f);
+        assertThat(mNotificationPanelViewController.isExpandingOrCollapsing()).isTrue();
+    }
+
+
+    @Test
     public void getMaxPanelTransitionDistance_inSplitShade_withHeadsUp_returnsBiggerValue() {
         enableSplitShade(true);
         mNotificationPanelViewController.expandToQs();

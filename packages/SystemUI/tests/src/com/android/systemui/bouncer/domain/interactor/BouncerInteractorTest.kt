@@ -19,13 +19,9 @@ package com.android.systemui.bouncer.domain.interactor
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.repository.AuthenticationRepositoryImpl
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.bouncer.data.repo.BouncerRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.data.repository.fakeSceneContainerRepository
-import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
@@ -44,23 +40,16 @@ import org.junit.runners.JUnit4
 class BouncerInteractorTest : SysuiTestCase() {
 
     private val testScope = TestScope()
+    private val utils = SceneTestUtils(this, testScope)
     private val authenticationInteractor =
-        AuthenticationInteractor(
-            applicationScope = testScope.backgroundScope,
-            repository = AuthenticationRepositoryImpl(),
+        utils.authenticationInteractor(
+            repository = utils.authenticationRepository(),
         )
-    private val sceneInteractor =
-        SceneInteractor(
-            repository = fakeSceneContainerRepository(),
-        )
+    private val sceneInteractor = utils.sceneInteractor()
     private val underTest =
-        BouncerInteractor(
-            applicationScope = testScope.backgroundScope,
-            applicationContext = context,
-            repository = BouncerRepository(),
+        utils.bouncerInteractor(
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
-            containerName = "container1",
         )
 
     @Before

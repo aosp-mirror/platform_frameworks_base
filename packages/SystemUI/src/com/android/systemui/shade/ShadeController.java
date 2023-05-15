@@ -78,6 +78,11 @@ public interface ShadeController {
     boolean isShadeFullyOpen();
 
     /**
+     * Returns whether shade or QS are currently opening or collapsing.
+     */
+    boolean isExpandingOrCollapsing();
+
+    /**
      * Add a runnable for NotificationPanelView to post when the panel is expanded.
      *
      * @param action the action to post

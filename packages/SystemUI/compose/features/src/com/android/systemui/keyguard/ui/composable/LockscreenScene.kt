@@ -33,7 +33,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.ui.viewmodel.LockScreenSceneViewModel
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -48,13 +48,13 @@ import kotlinx.coroutines.flow.stateIn
 
 /** The lock screen scene shows when the device is locked. */
 @SysUISingleton
-class LockScreenScene
+class LockscreenScene
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val viewModel: LockScreenSceneViewModel,
+    private val viewModel: LockscreenSceneViewModel,
 ) : ComposableScene {
-    override val key = SceneKey.LockScreen
+    override val key = SceneKey.Lockscreen
 
     override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
         viewModel.upDestinationSceneKey
@@ -69,7 +69,7 @@ constructor(
     override fun Content(
         modifier: Modifier,
     ) {
-        LockScreenScene(
+        LockscreenScene(
             viewModel = viewModel,
             modifier = modifier,
         )
@@ -86,8 +86,8 @@ constructor(
 }
 
 @Composable
-private fun LockScreenScene(
-    viewModel: LockScreenSceneViewModel,
+private fun LockscreenScene(
+    viewModel: LockscreenSceneViewModel,
     modifier: Modifier = Modifier,
 ) {
     // TODO(b/280879610): implement the real UI.
@@ -99,7 +99,7 @@ private fun LockScreenScene(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.Center)
         ) {
-            Text("Lock screen", style = MaterialTheme.typography.headlineMedium)
+            Text("Lockscreen", style = MaterialTheme.typography.headlineMedium)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
