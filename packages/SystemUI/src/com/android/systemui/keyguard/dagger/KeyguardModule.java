@@ -88,6 +88,7 @@ import java.util.concurrent.Executor;
             KeyguardRepositoryModule.class,
             KeyguardFaceAuthModule.class,
             StartKeyguardTransitionModule.class,
+            ResourceTrimmerModule.class,
         })
 public class KeyguardModule {
     /**
