@@ -28,6 +28,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_ICON;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_RECENTS;
@@ -258,8 +259,16 @@ public class InteractionJankMonitor {
     public static final int CUJ_IME_INSETS_ANIMATION = 69;
     public static final int CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION = 70;
     public static final int CUJ_LAUNCHER_OPEN_SEARCH_RESULT = 71;
+    // 72 - 77 are reserved for b/281564325.
 
-    private static final int LAST_CUJ = CUJ_LAUNCHER_OPEN_SEARCH_RESULT;
+    /**
+     * In some cases when we do not have any end-target, we play a simple slide-down animation.
+     * eg: Open an app from Overview/Task switcher such that there is no home-screen icon.
+     * eg: Exit the app using back gesture.
+     */
+    public static final int CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK = 78;
+
+    private static final int LAST_CUJ = CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK;
     private static final int NO_STATSD_LOGGING = -1;
 
     // Used to convert CujType to InteractionType enum value for statsd logging.
@@ -340,6 +349,14 @@ public class InteractionJankMonitor {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_IME_INSETS_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_ANIMATION;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_CLOCK_MOVE_ANIMATION;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_OPEN_SEARCH_RESULT] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_SEARCH_RESULT;
+        // 72 - 77 are reserved for b/281564325.
+        CUJ_TO_STATSD_INTERACTION_TYPE[72] = NO_STATSD_LOGGING;
+        CUJ_TO_STATSD_INTERACTION_TYPE[73] = NO_STATSD_LOGGING;
+        CUJ_TO_STATSD_INTERACTION_TYPE[74] = NO_STATSD_LOGGING;
+        CUJ_TO_STATSD_INTERACTION_TYPE[75] = NO_STATSD_LOGGING;
+        CUJ_TO_STATSD_INTERACTION_TYPE[76] = NO_STATSD_LOGGING;
+        CUJ_TO_STATSD_INTERACTION_TYPE[77] = NO_STATSD_LOGGING;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK;
     }
 
     private static class InstanceHolder {
@@ -439,6 +456,7 @@ public class InteractionJankMonitor {
             CUJ_IME_INSETS_ANIMATION,
             CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION,
             CUJ_LAUNCHER_OPEN_SEARCH_RESULT,
+            CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -1050,6 +1068,8 @@ public class InteractionJankMonitor {
                 return "LOCKSCREEN_CLOCK_MOVE_ANIMATION";
             case CUJ_LAUNCHER_OPEN_SEARCH_RESULT:
                 return "LAUNCHER_OPEN_SEARCH_RESULT";
+            case CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK:
+                return "LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK";
         }
         return "UNKNOWN";
     }
