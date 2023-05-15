@@ -147,6 +147,10 @@ class FakeKeyguardRepository : KeyguardRepository {
         _isAodAvailable.value = isAodAvailable
     }
 
+    fun setDreaming(isDreaming: Boolean) {
+        _isDreaming.value = isDreaming
+    }
+
     fun setDreamingWithOverlay(isDreaming: Boolean) {
         _isDreamingWithOverlay.value = isDreaming
     }
