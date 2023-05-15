@@ -324,7 +324,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Id of the View currently being displayed.
      */
     @GuardedBy("mLock")
-    @Nullable private AutofillId mCurrentViewId;
+    @Nullable AutofillId mCurrentViewId;
 
     @GuardedBy("mLock")
     private IAutoFillManagerClient mClient;
@@ -372,7 +372,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private Bundle mClientState;
 
     @GuardedBy("mLock")
-    private boolean mDestroyed;
+    boolean mDestroyed;
 
     /**
      * Helper used to handle state of Save UI when it must be hiding to show a custom description
@@ -451,7 +451,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private ArrayList<AutofillId> mAugmentedAutofillableIds;
 
     @NonNull
-    private final AutofillInlineSessionController mInlineSessionController;
+    final AutofillInlineSessionController mInlineSessionController;
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -1274,18 +1274,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         viewState, /* isInlineRequest= */ true);
             }
             if (inlineSuggestionsRequestConsumer != null) {
-                final AutofillId focusedId = mCurrentViewId;
                 final int requestIdCopy = requestId;
+                final AutofillId focusedId = mCurrentViewId;
+
+                WeakReference sessionWeakReference = new WeakReference<Session>(this);
+                InlineSuggestionRendorInfoCallbackOnResultListener
+                        inlineSuggestionRendorInfoCallbackOnResultListener =
+                                new InlineSuggestionRendorInfoCallbackOnResultListener(
+                                        sessionWeakReference,
+                                        requestIdCopy,
+                                        inlineSuggestionsRequestConsumer,
+                                        focusedId);
+                RemoteCallback inlineSuggestionRendorInfoCallback = new RemoteCallback(
+                        inlineSuggestionRendorInfoCallbackOnResultListener, mHandler);
+
                 remoteRenderService.getInlineSuggestionsRendererInfo(
-                        new RemoteCallback((extras) -> {
-                            synchronized (mLock) {
-                                mInlineSessionController.onCreateInlineSuggestionsRequestLocked(
-                                        focusedId, inlineSuggestionsRequestCacheDecorator(
-                                                inlineSuggestionsRequestConsumer, requestIdCopy),
-                                        extras);
-                            }
-                        }, mHandler)
-                );
+                        inlineSuggestionRendorInfoCallback);
                 viewState.setState(ViewState.STATE_PENDING_CREATE_INLINE_REQUEST);
             }
         } else if (mSessionFlags.mClientSuggestionsEnabled) {
@@ -5426,7 +5430,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     @NonNull
-    private Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestCacheDecorator(
+    Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestCacheDecorator(
             @NonNull Consumer<InlineSuggestionsRequest> consumer, int requestId) {
         return inlineSuggestionsRequest -> {
             consumer.accept(inlineSuggestionsRequest);
