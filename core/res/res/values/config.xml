@@ -6456,4 +6456,9 @@
     <!-- Whether the AOSP support for app cloning building blocks is to be enabled for the
          device. -->
     <bool name="config_enableAppCloningBuildingBlocks">true</bool>
+
+    <!-- Enables or disables support for repair mode. The feature creates a secure
+         environment to protect the user's privacy when the device is being repaired.
+         Off by default, since OEMs may have had a similar feature on their devices. -->
+    <bool name="config_repairModeSupported">false</bool>
 </resources>
