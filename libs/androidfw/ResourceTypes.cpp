@@ -1769,13 +1769,21 @@ ResXMLTree::~ResXMLTree()
 
 status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
 {
+    const ResChunk_header* chunk = nullptr;
+    const ResChunk_header* lastChunk = nullptr;
+
     uninit();
     mEventCode = START_DOCUMENT;
 
     if (!data || !size) {
         return (mError=BAD_TYPE);
     }
-
+    if (size < sizeof(ResXMLTree_header)) {
+        ALOGW("Bad XML block: total size %d is less than the header size %d\n",
+              int(size), int(sizeof(ResXMLTree_header)));
+        mError = BAD_TYPE;
+        goto done;
+    }
     if (copyData) {
         mOwnedData = malloc(size);
         if (mOwnedData == NULL) {
@@ -1792,9 +1800,15 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
              (int)dtohs(mHeader->header.headerSize),
              (int)dtohl(mHeader->header.size), (int)size);
         mError = BAD_TYPE;
-        restart();
-        return mError;
+        goto done;
     }
+    if (dtohs(mHeader->header.type) != RES_XML_TYPE) {
+        ALOGW("Bad XML block: expected root block type %d, got %d\n",
+            int(RES_XML_TYPE), int(dtohs(mHeader->header.type)));
+        mError = BAD_TYPE;
+        goto done;
+    }
+
     mDataEnd = ((const uint8_t*)mHeader) + mSize;
 
     mStrings.uninit();
@@ -1804,9 +1818,8 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
 
     // First look for a couple interesting chunks: the string block
     // and first XML node.
-    const ResChunk_header* chunk =
-        (const ResChunk_header*)(((const uint8_t*)mHeader) + dtohs(mHeader->header.headerSize));
-    const ResChunk_header* lastChunk = chunk;
+    chunk = (const ResChunk_header*)(((const uint8_t*)mHeader) + dtohs(mHeader->header.headerSize));
+    lastChunk = chunk;
     while (((const uint8_t*)chunk) < (mDataEnd-sizeof(ResChunk_header)) &&
            ((const uint8_t*)chunk) < (mDataEnd-dtohl(chunk->size))) {
         status_t err = validate_chunk(chunk, sizeof(ResChunk_header), mDataEnd, "XML");
@@ -1860,7 +1873,11 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
     mError = mStrings.getError();
 
 done:
-    restart();
+    if (mError) {
+        uninit();
+    } else {
+        restart();
+    }
     return mError;
 }
 
