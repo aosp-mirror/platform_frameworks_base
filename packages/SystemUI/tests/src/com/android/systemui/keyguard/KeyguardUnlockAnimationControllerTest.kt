@@ -114,7 +114,6 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     @After
     fun tearDown() {
         keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(true)
-        keyguardUnlockAnimationController.wallpaperAlphaAnimator.cancel()
     }
 
     /**
