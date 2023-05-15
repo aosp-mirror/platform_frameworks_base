@@ -3447,7 +3447,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runWaitForBroadcastIdle(PrintWriter pw) throws RemoteException {
         pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
-        mInternal.waitForBroadcastIdle(pw);
+        boolean flushBroadcastLoopers = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--flush-broadcast-loopers")) {
+                flushBroadcastLoopers = true;
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        mInternal.waitForBroadcastIdle(pw, flushBroadcastLoopers);
         return 0;
     }
 

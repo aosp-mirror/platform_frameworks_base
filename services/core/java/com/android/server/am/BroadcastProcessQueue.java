@@ -1098,8 +1098,11 @@ class BroadcastProcessQueue {
                 mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
                 mRunnableAtReason = REASON_INSTRUMENTED;
             } else if (mUidForeground) {
-                mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
+                mRunnableAt = runnableAt + constants.DELAY_FOREGROUND_PROC_MILLIS;
                 mRunnableAtReason = REASON_FOREGROUND;
+            } else if (mProcessPersistent) {
+                mRunnableAt = runnableAt + constants.DELAY_PERSISTENT_PROC_MILLIS;
+                mRunnableAtReason = REASON_PERSISTENT;
             } else if (mCountOrdered > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_ORDERED;
@@ -1112,9 +1115,6 @@ class BroadcastProcessQueue {
             } else if (mCountManifest > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_MANIFEST;
-            } else if (mProcessPersistent) {
-                mRunnableAt = runnableAt;
-                mRunnableAtReason = REASON_PERSISTENT;
             } else if (mUidCached) {
                 if (r.deferUntilActive) {
                     // All enqueued broadcasts are deferrable, defer
