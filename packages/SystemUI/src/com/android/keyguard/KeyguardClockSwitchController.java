@@ -179,20 +179,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /**
-     * Set alpha directly to mView will clip clock, so we set alpha to clock face instead
-     */
-    public void setAlpha(float alpha) {
-        ClockController clock = getClock();
-        if (clock != null) {
-            clock.getLargeClock().getView().setAlpha(alpha);
-            clock.getSmallClock().getView().setAlpha(alpha);
-        }
-        if (mStatusArea != null) {
-            mStatusArea.setAlpha(alpha);
-        }
-    }
-
-    /**
      * Attach the controller to the view it relates to.
      */
     @Override
