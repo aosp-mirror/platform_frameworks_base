@@ -2317,6 +2317,7 @@ public class AppOpsManager {
             OP_ACCESS_NOTIFICATIONS,
             OP_SYSTEM_ALERT_WINDOW,
             OP_WRITE_SETTINGS,
+            OP_GET_USAGE_STATS,
             OP_REQUEST_INSTALL_PACKAGES,
             OP_START_FOREGROUND,
             OP_SMS_FINANCIAL_TRANSACTIONS,
