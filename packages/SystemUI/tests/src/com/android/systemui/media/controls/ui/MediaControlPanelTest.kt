@@ -2376,35 +2376,27 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun onButtonClick_turbulenceNoiseFlagEnabled_createsRipplesFinishedListener() {
-        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
-        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
-
-        player.attachPlayer(viewHolder)
-
-        assertThat(player.mRipplesFinishedListener).isNotNull()
-    }
-
-    @Test
-    fun onButtonClick_turbulenceNoiseFlagDisabled_doesNotCreateRipplesFinishedListener() {
-        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
-        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, false)
-
-        player.attachPlayer(viewHolder)
-
-        assertThat(player.mRipplesFinishedListener).isNull()
-    }
-
-    @Test
     fun playTurbulenceNoise_finishesAfterDuration() {
         fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
         fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
 
+        val semanticActions =
+            MediaButton(
+                playOrPause =
+                    MediaAction(
+                        icon = null,
+                        action = {},
+                        contentDescription = "play",
+                        background = null
+                    )
+            )
+        val data = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.actionPlayPause.callOnClick()
 
         mainExecutor.execute {
-            player.mRipplesFinishedListener.onRipplesFinish()
-
             assertThat(turbulenceNoiseView.visibility).isEqualTo(View.VISIBLE)
 
             clock.advanceTime(
