@@ -599,7 +599,6 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
      */
     public void startAppearAnimation(SecurityMode securityMode) {
         setTranslationY(0f);
-        setAlpha(1f);
         updateChildren(0 /* translationY */, 1f /* alpha */);
         mViewMode.startAppearAnimation(securityMode);
     }
