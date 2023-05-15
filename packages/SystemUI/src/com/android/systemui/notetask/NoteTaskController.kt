@@ -38,22 +38,22 @@ import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
-import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.bubbles.Bubble
-import com.android.wm.shell.bubbles.Bubbles
 import com.android.wm.shell.bubbles.Bubbles.BubbleExpandListener
-import java.util.Optional
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * Entry point for creating and managing note.
@@ -71,7 +71,7 @@ constructor(
     private val shortcutManager: ShortcutManager,
     private val resolver: NoteTaskInfoResolver,
     private val eventLogger: NoteTaskEventLogger,
-    private val optionalBubbles: Optional<Bubbles>,
+    private val noteTaskBubblesController: NoteTaskBubblesController,
     private val userManager: UserManager,
     private val keyguardManager: KeyguardManager,
     private val activityManager: ActivityManager,
@@ -79,6 +79,7 @@ constructor(
     private val devicePolicyManager: DevicePolicyManager,
     private val userTracker: UserTracker,
     private val secureSettings: SecureSettings,
+    @Application private val applicationScope: CoroutineScope
 ) {
 
     @VisibleForTesting val infoReference = AtomicReference<NoteTaskInfo?>()
@@ -101,18 +102,6 @@ constructor(
             debugLog { "onBubbleExpandChanged - collapsing: $info" }
             eventLogger.logNoteTaskClosed(info)
         }
-    }
-
-    /** Starts [LaunchNoteTaskProxyActivity] on the given [user]. */
-    fun startNoteTaskProxyActivityForUser(user: UserHandle) {
-        context.startActivityAsUser(
-            Intent().apply {
-                component =
-                    ComponentName(context, LaunchNoteTaskManagedProfileProxyActivity::class.java)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            },
-            user
-        )
     }
 
     /** Starts the notes role setting. */
@@ -178,7 +167,19 @@ constructor(
     ) {
         if (!isEnabled) return
 
-        val bubbles = optionalBubbles.getOrNull() ?: return
+        applicationScope.launch { awaitShowNoteTaskAsUser(entryPoint, user) }
+    }
+
+    private suspend fun awaitShowNoteTaskAsUser(
+        entryPoint: NoteTaskEntryPoint,
+        user: UserHandle,
+    ) {
+        if (!isEnabled) return
+
+        if (!noteTaskBubblesController.areBubblesAvailable()) {
+            debugLog { "Bubbles not available in the system user SysUI instance" }
+            return
+        }
 
         // TODO(b/249954038): We should handle direct boot (isUserUnlocked). For now, we do nothing.
         if (!userManager.isUserUnlocked) return
@@ -213,7 +214,7 @@ constructor(
                     val intent = createNoteTaskIntent(info)
                     val icon =
                         Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
-                    bubbles.showOrHideAppBubble(intent, user, icon)
+                    noteTaskBubblesController.showOrHideAppBubble(intent, user, icon)
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     debugLog { "onShowNoteTask - opened as app bubble: $info" }
                 }
