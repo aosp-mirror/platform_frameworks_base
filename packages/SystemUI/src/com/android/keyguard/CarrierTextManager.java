@@ -651,6 +651,7 @@ public class CarrierTextManager {
         private final CarrierTextManagerLogger mLogger;
         private boolean mShowAirplaneMode;
         private boolean mShowMissingSim;
+        private String mDebugLocation;
 
         @Inject
         public Builder(
@@ -689,14 +690,25 @@ public class CarrierTextManager {
             return this;
         }
 
+        /**
+         * To help disambiguate logs, set a location to be used in the LogBuffer calls, e.g.:
+         * "keyguard" or "keyguard emergency status bar"
+         */
+        public Builder setDebugLocationString(String debugLocationString) {
+            mDebugLocation = debugLocationString;
+            return this;
+        }
+
         /** Create a CarrierTextManager. */
         public CarrierTextManager build() {
+            mLogger.setLocation(mDebugLocation);
             return new CarrierTextManager(
                     mContext, mSeparator, mShowAirplaneMode, mShowMissingSim, mWifiRepository,
                     mTelephonyManager, mTelephonyListenerManager, mWakefulnessLifecycle,
                     mMainExecutor, mBgExecutor, mKeyguardUpdateMonitor, mLogger);
         }
     }
+
     /**
      * Data structure for passing information to CarrierTextController subscribers
      */
