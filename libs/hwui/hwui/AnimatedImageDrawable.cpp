@@ -111,7 +111,7 @@ AnimatedImageDrawable::Snapshot AnimatedImageDrawable::decodeNextFrame() {
     {
         std::unique_lock lock{mImageLock};
         snap.mDurationMS = adjustFrameDuration(mSkAnimatedImage->decodeNextFrame());
-        snap.mPic.reset(mSkAnimatedImage->newPictureSnapshot());
+        snap.mPic = mSkAnimatedImage->makePictureSnapshot();
     }
 
     return snap;
@@ -123,7 +123,7 @@ AnimatedImageDrawable::Snapshot AnimatedImageDrawable::reset() {
     {
         std::unique_lock lock{mImageLock};
         mSkAnimatedImage->reset();
-        snap.mPic.reset(mSkAnimatedImage->newPictureSnapshot());
+        snap.mPic = mSkAnimatedImage->makePictureSnapshot();
         snap.mDurationMS = currentFrameDuration();
     }
 
