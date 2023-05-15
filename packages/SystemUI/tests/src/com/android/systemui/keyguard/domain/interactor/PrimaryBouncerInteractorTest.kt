@@ -159,6 +159,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setPrimaryShow(false)
         verify(mPrimaryBouncerCallbackInteractor).dispatchVisibilityChanged(View.INVISIBLE)
         verify(repository).setPrimaryStartDisappearAnimation(null)
+        verify(repository).setPanelExpansion(EXPANSION_HIDDEN)
     }
 
     @Test
