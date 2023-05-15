@@ -212,14 +212,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @GuardedBy("mLock")
     private boolean mFoldedDeviceState;
 
-    private final CameraManager.DeviceStateListener mFoldStateListener =
-            new CameraManager.DeviceStateListener() {
-                @Override
-                public final void onDeviceStateChanged(boolean folded) {
-                    synchronized (mLock) {
-                        mFoldedDeviceState = folded;
-                    }
-                }};
+    private CameraManager.DeviceStateListener mFoldStateListener;
 
     private static final String TAG = "CameraCharacteristics";
 
@@ -245,7 +238,18 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * Return the device state listener for this Camera characteristics instance
      */
-    CameraManager.DeviceStateListener getDeviceStateListener() { return mFoldStateListener; }
+    CameraManager.DeviceStateListener getDeviceStateListener() {
+        if (mFoldStateListener == null) {
+            mFoldStateListener = new CameraManager.DeviceStateListener() {
+                        @Override
+                        public final void onDeviceStateChanged(boolean folded) {
+                            synchronized (mLock) {
+                                mFoldedDeviceState = folded;
+                            }
+                        }};
+        }
+        return mFoldStateListener;
+    }
 
     /**
      * Overrides the property value
