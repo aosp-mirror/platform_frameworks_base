@@ -1015,6 +1015,16 @@ public class PipTransition extends PipTransitionController {
         mPipOrganizer.onExitPipFinished(prevPipTaskChange.getTaskInfo());
     }
 
+    @Override
+    public boolean syncPipSurfaceState(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction) {
+        final TransitionInfo.Change pipChange = findCurrentPipTaskChange(info);
+        if (pipChange == null) return false;
+        updatePipForUnhandledTransition(pipChange, startTransaction, finishTransaction);
+        return true;
+    }
+
     private void updatePipForUnhandledTransition(@NonNull TransitionInfo.Change pipChange,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction) {
@@ -1025,10 +1035,12 @@ public class PipTransition extends PipTransitionController {
         final boolean isInPip = mPipTransitionState.isInPip();
         mSurfaceTransactionHelper
                 .crop(startTransaction, leash, destBounds)
-                .round(startTransaction, leash, isInPip);
+                .round(startTransaction, leash, isInPip)
+                .shadow(startTransaction, leash, isInPip);
         mSurfaceTransactionHelper
                 .crop(finishTransaction, leash, destBounds)
-                .round(finishTransaction, leash, isInPip);
+                .round(finishTransaction, leash, isInPip)
+                .shadow(finishTransaction, leash, isInPip);
     }
 
     /** Hides and shows the existing PIP during fixed rotation transition of other activities. */
