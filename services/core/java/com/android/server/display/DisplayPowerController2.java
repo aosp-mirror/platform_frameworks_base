@@ -1454,7 +1454,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // Skip the animation when the screen is off or suspended.
         boolean brightnessAdjusted = false;
         final boolean brightnessIsTemporary =
-                (mBrightnessReason.getReason() == BrightnessReason.REASON_TEMPORARY)
+                (mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_TEMPORARY)
                         || mAutomaticBrightnessStrategy
                         .isTemporaryAutoBrightnessAdjustmentApplied();
         if (!mPendingScreenOff) {
@@ -2159,11 +2159,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }, mClock.uptimeMillis());
     }
 
-    private float getAutoBrightnessAdjustmentSetting() {
-        final float adj = Settings.System.getFloatForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f, UserHandle.USER_CURRENT);
-        return Float.isNaN(adj) ? 0.0f : clampAutoBrightnessAdjustment(adj);
-    }
 
     @Override
     public float getScreenBrightnessSetting() {
@@ -2436,9 +2431,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
     }
 
-    private static float clampAutoBrightnessAdjustment(float value) {
-        return MathUtils.constrain(value, -1.0f, 1.0f);
-    }
 
     private void noteScreenState(int screenState) {
         // Log screen state change with display id
