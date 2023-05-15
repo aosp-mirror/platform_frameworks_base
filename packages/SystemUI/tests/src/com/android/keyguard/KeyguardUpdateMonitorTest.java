@@ -3088,7 +3088,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     private Intent getBatteryIntent() {
         return new Intent(Intent.ACTION_BATTERY_CHANGED).putExtra(
-                BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_OVERHEAT);
+                BatteryManager.EXTRA_CHARGING_STATUS,
+                BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE);
     }
 
     private class TestableKeyguardUpdateMonitor extends KeyguardUpdateMonitor {
