@@ -1391,6 +1391,7 @@
   <java-symbol type="drawable" name="ic_corp_user_badge" />
   <java-symbol type="drawable" name="ic_corp_badge_no_background" />
   <java-symbol type="drawable" name="ic_corp_statusbar_icon" />
+  <java-symbol type="drawable" name="stat_sys_managed_profile_status" />
   <java-symbol type="drawable" name="ic_test_badge_experiment" />
   <java-symbol type="drawable" name="ic_test_badge_no_background" />
   <java-symbol type="drawable" name="ic_test_icon_badge_experiment" />

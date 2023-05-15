@@ -116,6 +116,9 @@ public final class UserTypeDetails {
     /** Resource ID of the badge without a background. Should be set if mIconBadge is set. */
     private @DrawableRes final int mBadgeNoBackground;
 
+    /** Resource ID of the status bar icon. */
+    private @DrawableRes final int mStatusBarIcon;
+
     /**
      * Resource ID ({@link StringRes}) of the of the labels to describe badged apps; should be the
      * same format as com.android.internal.R.color.profile_badge_1. These are used for accessibility
@@ -160,6 +163,7 @@ public final class UserTypeDetails {
             @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags, int label,
             int maxAllowedPerParent,
             int iconBadge, int badgePlain, int badgeNoBackground,
+            int statusBarIcon,
             @Nullable int[] badgeLabels, @Nullable int[] badgeColors,
             @Nullable int[] darkThemeBadgeColors,
             @Nullable Bundle defaultRestrictions,
@@ -181,6 +185,7 @@ public final class UserTypeDetails {
         this.mIconBadge = iconBadge;
         this.mBadgePlain = badgePlain;
         this.mBadgeNoBackground = badgeNoBackground;
+        this.mStatusBarIcon = statusBarIcon;
         this.mLabel = label;
         this.mBadgeLabels = badgeLabels;
         this.mBadgeColors = badgeColors;
@@ -252,6 +257,11 @@ public final class UserTypeDetails {
     /** Resource ID of the badge without a background. */
     public @DrawableRes int getBadgeNoBackground() {
         return mBadgeNoBackground;
+    }
+
+    /** Resource ID of the status bar icon. */
+    public @DrawableRes int getStatusBarIcon() {
+        return mStatusBarIcon;
     }
 
     /**
@@ -375,6 +385,7 @@ public final class UserTypeDetails {
         pw.print(prefix); pw.print("mIconBadge: "); pw.println(mIconBadge);
         pw.print(prefix); pw.print("mBadgePlain: "); pw.println(mBadgePlain);
         pw.print(prefix); pw.print("mBadgeNoBackground: "); pw.println(mBadgeNoBackground);
+        pw.print(prefix); pw.print("mStatusBarIcon: "); pw.println(mStatusBarIcon);
         pw.print(prefix); pw.print("mBadgeLabels.length: ");
         pw.println(mBadgeLabels != null ? mBadgeLabels.length : "0(null)");
         pw.print(prefix); pw.print("mBadgeColors.length: ");
@@ -404,6 +415,7 @@ public final class UserTypeDetails {
         private @DrawableRes int mIconBadge = Resources.ID_NULL;
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
+        private @DrawableRes int mStatusBarIcon = Resources.ID_NULL;
         // Default UserProperties cannot be null but for efficiency we don't initialize it now.
         // If it isn't set explicitly, {@link UserProperties.Builder#build()} will be used.
         private @Nullable UserProperties mDefaultUserProperties = null;
@@ -468,6 +480,11 @@ public final class UserTypeDetails {
 
         public Builder setBadgeNoBackground(@DrawableRes int badgeNoBackground) {
             mBadgeNoBackground = badgeNoBackground;
+            return this;
+        }
+
+        public Builder setStatusBarIcon(@DrawableRes int statusBarIcon) {
+            mStatusBarIcon = statusBarIcon;
             return this;
         }
 
@@ -550,6 +567,7 @@ public final class UserTypeDetails {
                     mIconBadge,
                     mBadgePlain,
                     mBadgeNoBackground,
+                    mStatusBarIcon,
                     mBadgeLabels,
                     mBadgeColors,
                     mDarkThemeBadgeColors == null ? mBadgeColors : mDarkThemeBadgeColors,

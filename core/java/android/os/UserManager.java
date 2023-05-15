@@ -5351,6 +5351,21 @@ public class UserManager {
     }
 
     /**
+     * Returns the Resource ID of the user's status bar icon.
+     *
+     * @return the Resource ID of the user's status bar icon if it has one; otherwise
+     *         {@link Resources#ID_NULL}.
+     * @hide
+     */
+    public @DrawableRes int getUserStatusBarIconResId(@UserIdInt int userId) {
+        try {
+            return mService.getUserStatusBarIconResId(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * If the target user is a profile of the calling user or the caller
      * is itself a profile, then this returns a badged copy of the given
      * icon to be able to distinguish it from the original icon. For badging an

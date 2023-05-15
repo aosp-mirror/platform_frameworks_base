@@ -128,6 +128,7 @@ public final class UserTypeFactory {
                 .setBadgePlain(com.android.internal.R.drawable.ic_clone_badge)
                 // Clone doesn't use BadgeNoBackground, so just set to BadgePlain as a placeholder.
                 .setBadgeNoBackground(com.android.internal.R.drawable.ic_clone_badge)
+                .setStatusBarIcon(Resources.ID_NULL)
                 .setBadgeLabels(
                         com.android.internal.R.string.clone_profile_label_badge)
                 .setBadgeColors(
@@ -167,6 +168,7 @@ public final class UserTypeFactory {
                 .setIconBadge(com.android.internal.R.drawable.ic_corp_icon_badge_case)
                 .setBadgePlain(com.android.internal.R.drawable.ic_corp_badge_case)
                 .setBadgeNoBackground(com.android.internal.R.drawable.ic_corp_badge_no_background)
+                .setStatusBarIcon(com.android.internal.R.drawable.stat_sys_managed_profile_status)
                 .setBadgeLabels(
                         com.android.internal.R.string.managed_profile_label_badge,
                         com.android.internal.R.string.managed_profile_label_badge_2,
@@ -205,6 +207,7 @@ public final class UserTypeFactory {
                 .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
                 .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
                 .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)
+                .setStatusBarIcon(com.android.internal.R.drawable.ic_test_badge_experiment)
                 .setBadgeLabels(
                         com.android.internal.R.string.managed_profile_label_badge,
                         com.android.internal.R.string.managed_profile_label_badge_2,
@@ -426,6 +429,7 @@ public final class UserTypeFactory {
                     setResAttribute(parser, "icon-badge", builder::setIconBadge);
                     setResAttribute(parser, "badge-plain", builder::setBadgePlain);
                     setResAttribute(parser, "badge-no-background", builder::setBadgeNoBackground);
+                    setResAttribute(parser, "status-bar-icon", builder::setStatusBarIcon);
                 }
 
                 setIntAttribute(parser, "enabled", builder::setEnabled);
