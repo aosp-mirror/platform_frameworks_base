@@ -1859,7 +1859,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
             try {
                 mCb.unlinkToDeath(this, 0);
             } catch (NoSuchElementException e) {
-                Log.w(TAG, "CommunicationRouteClient could not not unregistered to binder");
+                Log.w(TAG, "CommunicationRouteClient could not unlink to " + mCb + " binder death");
             }
         }
 
