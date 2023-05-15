@@ -248,10 +248,7 @@ class BLASTSyncEngine {
                     Slog.e(TAG, "WM sent Transaction to organized, but never received" +
                            " commit callback. Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                    synchronized (mWm.mGlobalLock) {
-                        onCommitted(merged.mNativeObject != 0
-                                ? merged : mWm.mTransactionFactory.get());
-                    }
+                    onCommitted(merged);
                 }
             };
             CommitCallback callback = new CommitCallback();
