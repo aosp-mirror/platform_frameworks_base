@@ -1643,6 +1643,19 @@
     <dimen name="dream_overlay_bottom_affordance_height">64dp</dimen>
     <dimen name="dream_overlay_bottom_affordance_width">64dp</dimen>
     <dimen name="dream_overlay_bottom_affordance_radius">32dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_key_text_shadow_dx">0.5dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_key_text_shadow_dy">0.5dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_key_text_shadow_radius">1dp</dimen>
+    <item name="dream_overlay_bottom_affordance_key_shadow_alpha" format="float" type="dimen">
+        0.35
+    </item>
+    <dimen name="dream_overlay_bottom_affordance_ambient_text_shadow_dx">0.5dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_ambient_text_shadow_dy">0.5dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_ambient_text_shadow_radius">2dp</dimen>
+    <item name="dream_overlay_bottom_affordance_ambient_shadow_alpha" format="float" type="dimen">
+        0.4
+    </item>
+    <dimen name="dream_overlay_bottom_affordance_inset">1dp</dimen>
     <dimen name="dream_overlay_bottom_affordance_padding">14dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_text_size">86dp</dimen>
     <dimen name="dream_overlay_complication_clock_subtitle_text_size">24sp</dimen>
