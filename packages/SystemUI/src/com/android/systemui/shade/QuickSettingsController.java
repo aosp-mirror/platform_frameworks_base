@@ -1903,6 +1903,7 @@ public class QuickSettingsController {
                 if (mSplitShadeEnabled) { // TODO:(b/269742565) remove below log
                     Log.wtfStack(TAG, "FLING_COLLAPSE called in split shade");
                 }
+                setExpandImmediate(false);
                 target = getMinExpansionHeight();
                 break;
             case FLING_HIDE:
