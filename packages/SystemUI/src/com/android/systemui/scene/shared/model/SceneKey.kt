@@ -32,8 +32,8 @@ sealed class SceneKey(
      */
     object Gone : SceneKey("gone")
 
-    /** The lock screen is the scene that shows when the device is locked. */
-    object LockScreen : SceneKey("lockscreen")
+    /** The lockscreen is the scene that shows when the device is locked. */
+    object Lockscreen : SceneKey("lockscreen")
 
     /**
      * The shade is the scene whose primary purpose is to show a scrollable list of notifications.
