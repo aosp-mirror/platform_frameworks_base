@@ -1052,21 +1052,14 @@ public final class ViewNode extends AssistStructure.ViewNode {
         }
 
         void writeToParcel(Parcel out, boolean simple) {
-            CharSequence text = TextUtils.trimToParcelableSize(mText);
-            TextUtils.writeToParcel(text, out, 0);
+            TextUtils.writeToParcel(mText, out, 0);
             out.writeFloat(mTextSize);
             out.writeInt(mTextStyle);
             out.writeInt(mTextColor);
             if (!simple) {
-                int selectionStart = text != null
-                        ? Math.min(mTextSelectionStart, text.length())
-                        : mTextSelectionStart;
-                int selectionEnd = text != null
-                        ? Math.min(mTextSelectionEnd, text.length())
-                        : mTextSelectionEnd;
                 out.writeInt(mTextBackgroundColor);
-                out.writeInt(selectionStart);
-                out.writeInt(selectionEnd);
+                out.writeInt(mTextSelectionStart);
+                out.writeInt(mTextSelectionEnd);
                 out.writeIntArray(mLineCharOffsets);
                 out.writeIntArray(mLineBaselines);
                 out.writeString(mHint);
