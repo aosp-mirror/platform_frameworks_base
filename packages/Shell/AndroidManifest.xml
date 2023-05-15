@@ -842,6 +842,8 @@
 
     <!-- Permission required for GTS test - GtsCredentialsTestCases -->
     <uses-permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR" />
+    <!-- Permission required for CTS test IntentRedirectionTest -->
+    <uses-permission android:name="android.permission.QUERY_CLONED_APPS" />
 
     <application
         android:label="@string/app_label"
