@@ -17,6 +17,7 @@
 package com.android.server.security.rkp;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -42,7 +43,6 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
 
@@ -119,6 +119,7 @@ public class RemoteProvisioningShellCommandTest {
         assertThat(res.getErr()).isEmpty();
         assertThat(res.getCode()).isEqualTo(0);
         assertThat(res.getOut()).isEmpty();
+        assertThat(res.getOut().lines()).isEmpty();
     }
 
     @Test
@@ -128,7 +129,7 @@ public class RemoteProvisioningShellCommandTest {
         CommandResult res = exec(cmd, new String[] {"list"});
         assertThat(res.getErr()).isEmpty();
         assertThat(res.getCode()).isEqualTo(0);
-        assertThat(Arrays.asList(res.getOut().split("\n"))).containsExactly("default");
+        assertThat(res.getOut().lines()).containsExactly("default");
     }
 
     @Test
@@ -140,7 +141,7 @@ public class RemoteProvisioningShellCommandTest {
         CommandResult res = exec(cmd, new String[] {"list"});
         assertThat(res.getErr()).isEmpty();
         assertThat(res.getCode()).isEqualTo(0);
-        assertThat(Arrays.asList(res.getOut().split("\n"))).containsExactly("default", "strongbox");
+        assertThat(res.getOut().lines()).containsExactly("default", "strongbox");
     }
 
     @Test
