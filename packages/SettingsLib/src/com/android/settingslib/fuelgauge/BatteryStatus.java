@@ -16,12 +16,11 @@
 
 package com.android.settingslib.fuelgauge;
 
-import static android.os.BatteryManager.BATTERY_HEALTH_OVERHEAT;
-import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
 import static android.os.BatteryManager.BATTERY_STATUS_FULL;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
-import static android.os.BatteryManager.EXTRA_HEALTH;
-import static android.os.BatteryManager.EXTRA_LEVEL;
+import static android.os.BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+import static android.os.BatteryManager.CHARGING_POLICY_DEFAULT;
+import static android.os.BatteryManager.EXTRA_CHARGING_STATUS;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
@@ -51,7 +50,7 @@ public class BatteryStatus {
     public final int status;
     public final int level;
     public final int plugged;
-    public final int health;
+    public final int chargingStatus;
     public final int maxChargingWattage;
     public final boolean present;
     public final Optional<Boolean> incompatibleCharger;
@@ -62,12 +61,12 @@ public class BatteryStatus {
                 ? null : new BatteryStatus(batteryChangedIntent, incompatibleCharger);
     }
 
-    public BatteryStatus(int status, int level, int plugged, int health,
+    public BatteryStatus(int status, int level, int plugged, int chargingStatus,
             int maxChargingWattage, boolean present) {
         this.status = status;
         this.level = level;
         this.plugged = plugged;
-        this.health = health;
+        this.chargingStatus = chargingStatus;
         this.maxChargingWattage = maxChargingWattage;
         this.present = present;
         this.incompatibleCharger = Optional.empty();
@@ -86,7 +85,8 @@ public class BatteryStatus {
         status = batteryChangedIntent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
         plugged = batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0);
         level = getBatteryLevel(batteryChangedIntent);
-        health = batteryChangedIntent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
+        chargingStatus = batteryChangedIntent.getIntExtra(EXTRA_CHARGING_STATUS,
+                CHARGING_POLICY_DEFAULT);
         present = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
         this.incompatibleCharger = incompatibleCharger;
 
@@ -143,9 +143,9 @@ public class BatteryStatus {
         return level < LOW_BATTERY_THRESHOLD;
     }
 
-    /** Whether battery is overheated. */
-    public boolean isOverheated() {
-        return health == BATTERY_HEALTH_OVERHEAT;
+    /** Whether battery defender is enabled. */
+    public boolean isBatteryDefender() {
+        return chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
     }
 
     /** Return current chargin speed is fast, slow or normal. */
@@ -163,7 +163,8 @@ public class BatteryStatus {
     @Override
     public String toString() {
         return "BatteryStatus{status=" + status + ",level=" + level + ",plugged=" + plugged
-                + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage + "}";
+                + ",chargingStatus=" + chargingStatus + ",maxChargingWattage=" + maxChargingWattage
+                + "}";
     }
 
     /**
