@@ -62,7 +62,7 @@ constructor(
     override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
-                    UserAction.Back to SceneModel(SceneKey.LockScreen),
+                    UserAction.Back to SceneModel(SceneKey.Lockscreen),
                 )
             )
             .asStateFlow()

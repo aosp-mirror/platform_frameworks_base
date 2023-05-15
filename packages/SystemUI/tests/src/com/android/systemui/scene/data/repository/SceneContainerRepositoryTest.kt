@@ -45,7 +45,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
                 listOf(
                     SceneKey.QuickSettings,
                     SceneKey.Shade,
-                    SceneKey.LockScreen,
+                    SceneKey.Lockscreen,
                     SceneKey.Bouncer,
                     SceneKey.Gone,
                 )
@@ -62,7 +62,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
     fun currentScene() = runTest {
         val underTest = utils.fakeSceneContainerRepository()
         val currentScene by collectLastValue(underTest.currentScene("container1"))
-        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.LockScreen))
+        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
         underTest.setCurrentScene("container1", SceneModel(SceneKey.Shade))
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
@@ -88,7 +88,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
                     utils.fakeSceneContainerConfig("container1"),
                     utils.fakeSceneContainerConfig(
                         "container2",
-                        listOf(SceneKey.QuickSettings, SceneKey.LockScreen)
+                        listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
                     ),
                 )
             )
