@@ -348,22 +348,21 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
      * use caller's BAL permission.
      */
     public static BackgroundStartPrivileges getBackgroundStartPrivilegesAllowedByCaller(
-            @Nullable ActivityOptions activityOptions, int callingUid,
-            @Nullable String callingPackage) {
+            @Nullable ActivityOptions activityOptions, int callingUid) {
         if (activityOptions == null) {
             // since the ActivityOptions were not created by the app itself, determine the default
             // for the app
-            return getDefaultBackgroundStartPrivileges(callingUid, callingPackage);
+            return getDefaultBackgroundStartPrivileges(callingUid);
         }
         return getBackgroundStartPrivilegesAllowedByCaller(activityOptions.toBundle(),
-                callingUid, callingPackage);
+                callingUid);
     }
 
     private static BackgroundStartPrivileges getBackgroundStartPrivilegesAllowedByCaller(
-            @Nullable Bundle options, int callingUid, @Nullable String callingPackage) {
+            @Nullable Bundle options, int callingUid) {
         if (options == null || !options.containsKey(
                         ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED)) {
-            return getDefaultBackgroundStartPrivileges(callingUid, callingPackage);
+            return getDefaultBackgroundStartPrivileges(callingUid);
         }
         return options.getBoolean(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED)
                 ? BackgroundStartPrivileges.ALLOW_BAL
@@ -382,10 +381,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                     android.Manifest.permission.LOG_COMPAT_CHANGE
             })
     public static BackgroundStartPrivileges getDefaultBackgroundStartPrivileges(
-            int callingUid, @Nullable String callingPackage) {
-        boolean isChangeEnabledForApp = callingPackage != null ? CompatChanges.isChangeEnabled(
-                DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingPackage,
-                UserHandle.getUserHandleForUid(callingUid)) : CompatChanges.isChangeEnabled(
+            int callingUid) {
+        boolean isChangeEnabledForApp = CompatChanges.isChangeEnabled(
                 DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingUid);
         if (isChangeEnabledForApp) {
             return BackgroundStartPrivileges.ALLOW_FGS;
@@ -641,7 +638,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         // temporarily allow receivers and services to open activities from background if the
         // PendingIntent.send() caller was foreground at the time of sendInner() call
         if (uid != callingUid && controller.mAtmInternal.isUidForeground(callingUid)) {
-            return getBackgroundStartPrivilegesAllowedByCaller(options, callingUid, null);
+            return getBackgroundStartPrivilegesAllowedByCaller(options, callingUid);
         }
         return BackgroundStartPrivileges.NONE;
     }
