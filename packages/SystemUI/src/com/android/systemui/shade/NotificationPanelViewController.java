@@ -3498,7 +3498,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
      *                         gesture), we always play haptic.
      */
     private void maybeVibrateOnOpening(boolean openingWithTouch) {
-        if (mVibrateOnOpening) {
+        if (mVibrateOnOpening && mBarState != KEYGUARD && mBarState != SHADE_LOCKED) {
             if (!openingWithTouch || !mHasVibratedOnOpen) {
                 mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
                 mHasVibratedOnOpen = true;
@@ -4939,7 +4939,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                         mShadeLog.logHasVibrated(mHasVibratedOnOpen, mExpandedFraction);
                     }
                     addMovement(event);
-                    if (!isFullyCollapsed() && !isOnKeyguard()) {
+                    if (!isFullyCollapsed()) {
                         maybeVibrateOnOpening(true /* openingWithTouch */);
                     }
                     float h = y - mInitialExpandY;
