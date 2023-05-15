@@ -23,6 +23,7 @@ import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVIT
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -2377,6 +2378,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             + " so make sure split-screen state is cleaned-up. "
                             + "mainStageCount=%d sideStageCount=%d", mMainStage.getChildCount(),
                     mSideStage.getChildCount());
+            if (triggerTask != null) {
+                mRecentTasks.ifPresent(
+                        recentTasks -> recentTasks.removeSplitPair(triggerTask.taskId));
+            }
             prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, outWCT);
         }
     }
@@ -2757,7 +2762,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     for (TransitionInfo.Change change : info.getChanges()) {
                         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
                         if (taskInfo != null
-                                && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+                                && taskInfo.getWindowingMode() != WINDOWING_MODE_MULTI_WINDOW) {
                             recentTasks.removeSplitPair(taskInfo.taskId);
                         }
                     }
