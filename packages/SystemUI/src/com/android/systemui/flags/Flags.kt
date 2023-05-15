@@ -607,8 +607,6 @@ object Flags {
         unreleasedFlag(1401, "quick_tap_flow_framework", teamfood = false)
 
     // 1500 - chooser aka sharesheet
-    // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
