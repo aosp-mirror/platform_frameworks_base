@@ -18901,12 +18901,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void waitForBroadcastIdle() {
-        waitForBroadcastIdle(LOG_WRITER_INFO);
+        waitForBroadcastIdle(LOG_WRITER_INFO, false);
     }
 
-    public void waitForBroadcastIdle(@NonNull PrintWriter pw) {
+    void waitForBroadcastIdle(@NonNull PrintWriter pw, boolean flushBroadcastLoopers) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastIdle()");
-        BroadcastLoopers.waitForIdle(pw);
+        if (flushBroadcastLoopers) {
+            BroadcastLoopers.waitForIdle(pw);
+        }
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForIdle(pw);
         }
@@ -18919,7 +18921,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         waitForBroadcastBarrier(LOG_WRITER_INFO, false, false);
     }
 
-    public void waitForBroadcastBarrier(@NonNull PrintWriter pw,
+    void waitForBroadcastBarrier(@NonNull PrintWriter pw,
             boolean flushBroadcastLoopers, boolean flushApplicationThreads) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
         if (flushBroadcastLoopers) {
@@ -18937,7 +18939,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Wait for all pending {@link IApplicationThread} events to be processed in
      * all currently running apps.
      */
-    public void waitForApplicationBarrier(@NonNull PrintWriter pw) {
+    void waitForApplicationBarrier(@NonNull PrintWriter pw) {
         final CountDownLatch finishedLatch = new CountDownLatch(1);
         final AtomicInteger pingCount = new AtomicInteger(0);
         final AtomicInteger pongCount = new AtomicInteger(0);
