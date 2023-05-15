@@ -33,9 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
-/**
- * Tests for {@link ListGridLayout}.
- */
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class ShutdownUiTest extends SysuiTestCase {
