@@ -22,7 +22,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.domain.interactor.LockScreenSceneInteractor
+import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.SceneTestUtils.Companion.CONTAINER_1
 import com.android.systemui.scene.shared.model.SceneKey
@@ -39,7 +39,7 @@ import org.junit.runners.JUnit4
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
-class LockScreenSceneViewModelTest : SysuiTestCase() {
+class LockscreenSceneViewModelTest : SysuiTestCase() {
 
     private val testScope = TestScope()
     private val utils = SceneTestUtils(this, testScope)
@@ -50,11 +50,11 @@ class LockScreenSceneViewModelTest : SysuiTestCase() {
         )
 
     private val underTest =
-        LockScreenSceneViewModel(
+        LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
             interactorFactory =
-                object : LockScreenSceneInteractor.Factory {
-                    override fun create(containerName: String): LockScreenSceneInteractor {
+                object : LockscreenSceneInteractor.Factory {
+                    override fun create(containerName: String): LockscreenSceneInteractor {
                         return utils.lockScreenSceneInteractor(
                             authenticationInteractor = authenticationInteractor,
                             sceneInteractor = sceneInteractor,
