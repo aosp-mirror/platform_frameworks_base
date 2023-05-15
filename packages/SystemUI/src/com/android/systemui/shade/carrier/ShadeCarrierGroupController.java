@@ -141,6 +141,7 @@ public class ShadeCarrierGroupController {
         mCarrierTextManager = carrierTextManagerBuilder
                 .setShowAirplaneMode(false)
                 .setShowMissingSim(false)
+                .setDebugLocationString("Shade")
                 .build();
         mCarrierConfigTracker = carrierConfigTracker;
         mSlotIndexResolver = slotIndexResolver;
