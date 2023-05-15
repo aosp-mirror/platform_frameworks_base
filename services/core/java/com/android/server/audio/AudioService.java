@@ -11050,6 +11050,11 @@ public class AudioService extends IAudioService.Stub
         dumpAccessibilityServiceUids(pw);
         dumpAssistantServicesUids(pw);
 
+        pw.print("  supportsBluetoothVariableLatency=");
+        pw.println(AudioSystem.supportsBluetoothVariableLatency());
+        pw.print("  isBluetoothVariableLatencyEnabled=");
+        pw.println(AudioSystem.isBluetoothVariableLatencyEnabled());
+
         dumpAudioPolicies(pw);
         mDynPolicyLogger.dump(pw);
         mPlaybackMonitor.dump(pw);
