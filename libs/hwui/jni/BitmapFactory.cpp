@@ -194,7 +194,11 @@ static bool decodeGainmap(std::unique_ptr<SkStream> gainmapStream, const SkGainm
         ALOGE("Can not create a codec for Gainmap.");
         return false;
     }
-    SkColorType decodeColorType = codec->computeOutputColorType(kN32_SkColorType);
+    SkColorType decodeColorType = kN32_SkColorType;
+    if (codec->getInfo().colorType() == kGray_8_SkColorType) {
+        decodeColorType = kGray_8_SkColorType;
+    }
+    decodeColorType = codec->computeOutputColorType(decodeColorType);
     sk_sp<SkColorSpace> decodeColorSpace = codec->computeOutputColorSpace(decodeColorType, nullptr);
 
     SkISize size = codec->getSampledDimensions(sampleSize);
@@ -217,7 +221,11 @@ static bool decodeGainmap(std::unique_ptr<SkStream> gainmapStream, const SkGainm
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(), decodeColorType,
                                                      alphaType, decodeColorSpace);
 
-    const SkImageInfo& bitmapInfo = decodeInfo;
+    SkImageInfo bitmapInfo = decodeInfo;
+    if (decodeColorType == kGray_8_SkColorType) {
+        // We treat gray8 as alpha8 in Bitmap's API surface
+        bitmapInfo = bitmapInfo.makeColorType(kAlpha_8_SkColorType);
+    }
     SkBitmap decodeBitmap;
     sk_sp<Bitmap> nativeBitmap = nullptr;
 
