@@ -46,7 +46,7 @@ class SceneInteractorTest : SysuiTestCase() {
     @Test
     fun sceneTransitions() = runTest {
         val currentScene by collectLastValue(underTest.currentScene("container1"))
-        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.LockScreen))
+        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
         underTest.setCurrentScene("container1", SceneModel(SceneKey.Shade))
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))

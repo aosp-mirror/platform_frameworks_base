@@ -36,8 +36,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** Hosts business and application state accessing logic for the lock screen scene. */
-class LockScreenSceneInteractor
+/** Hosts business and application state accessing logic for the lockscreen scene. */
+class LockscreenSceneInteractor
 @AssistedInject
 constructor(
     @Application applicationScope: CoroutineScope,
@@ -59,7 +59,7 @@ constructor(
                 initialValue = !authenticationInteractor.isUnlocked.value,
             )
 
-    /** Whether it's currently possible to swipe up to dismiss the lock screen. */
+    /** Whether it's currently possible to swipe up to dismiss the lockscreen. */
     val isSwipeToDismissEnabled: StateFlow<Boolean> =
         combine(
                 authenticationInteractor.isUnlocked,
@@ -81,9 +81,9 @@ constructor(
             )
 
     init {
-        // LOCKING SHOWS LOCK SCREEN.
+        // LOCKING SHOWS Lockscreen.
         //
-        // Move to the lock screen scene if the device becomes locked while in any scene.
+        // Move to the lockscreen scene if the device becomes locked while in any scene.
         applicationScope.launch {
             authenticationInteractor.isUnlocked
                 .map { !it }
@@ -92,7 +92,7 @@ constructor(
                     if (isLocked) {
                         sceneInteractor.setCurrentScene(
                             containerName = containerName,
-                            scene = SceneModel(SceneKey.LockScreen),
+                            scene = SceneModel(SceneKey.Lockscreen),
                         )
                     }
                 }
@@ -101,7 +101,7 @@ constructor(
         // BYPASS UNLOCK.
         //
         // Moves to the gone scene if bypass is enabled and the device becomes unlocked while in the
-        // lock screen scene.
+        // lockscreen scene.
         applicationScope.launch {
             combine(
                     authenticationInteractor.isBypassEnabled,
@@ -110,7 +110,7 @@ constructor(
                     ::Triple,
                 )
                 .collect { (isBypassEnabled, isUnlocked, currentScene) ->
-                    if (isBypassEnabled && isUnlocked && currentScene.key == SceneKey.LockScreen) {
+                    if (isBypassEnabled && isUnlocked && currentScene.key == SceneKey.Lockscreen) {
                         sceneInteractor.setCurrentScene(
                             containerName = containerName,
                             scene = SceneModel(SceneKey.Gone),
@@ -119,9 +119,9 @@ constructor(
                 }
         }
 
-        // SWIPE TO DISMISS LOCK SCREEN.
+        // SWIPE TO DISMISS Lockscreen.
         //
-        // If switched from the lock screen to the gone scene and the auth method was a swipe,
+        // If switched from the lockscreen to the gone scene and the auth method was a swipe,
         // unlocks the device.
         applicationScope.launch {
             combine(
@@ -133,7 +133,7 @@ constructor(
                     val (previousScene, currentScene) = scenes
                     if (
                         authMethod is AuthenticationMethodModel.Swipe &&
-                            previousScene.key == SceneKey.LockScreen &&
+                            previousScene.key == SceneKey.Lockscreen &&
                             currentScene.key == SceneKey.Gone
                     ) {
                         authenticationInteractor.unlockDevice()
@@ -141,9 +141,9 @@ constructor(
                 }
         }
 
-        // DISMISS LOCK SCREEN IF AUTH METHOD IS REMOVED.
+        // DISMISS Lockscreen IF AUTH METHOD IS REMOVED.
         //
-        // If the auth method becomes None while on the lock screen scene, dismisses the lock
+        // If the auth method becomes None while on the lockscreen scene, dismisses the lock
         // screen.
         applicationScope.launch {
             combine(
@@ -153,7 +153,7 @@ constructor(
                 )
                 .collect { (authMethod, scene) ->
                     if (
-                        scene.key == SceneKey.LockScreen &&
+                        scene.key == SceneKey.Lockscreen &&
                             authMethod == AuthenticationMethodModel.None
                     ) {
                         sceneInteractor.setCurrentScene(
@@ -165,8 +165,8 @@ constructor(
         }
     }
 
-    /** Attempts to dismiss the lock screen. This will cause the bouncer to show, if needed. */
-    fun dismissLockScreen() {
+    /** Attempts to dismiss the lockscreen. This will cause the bouncer to show, if needed. */
+    fun dismissLockscreen() {
         bouncerInteractor.showOrUnlockDevice(containerName = containerName)
     }
 
@@ -181,6 +181,6 @@ constructor(
     interface Factory {
         fun create(
             containerName: String,
-        ): LockScreenSceneInteractor
+        ): LockscreenSceneInteractor
     }
 }
