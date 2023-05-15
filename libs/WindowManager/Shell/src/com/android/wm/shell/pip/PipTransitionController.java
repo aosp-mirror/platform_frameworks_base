@@ -240,6 +240,18 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             @NonNull final Transitions.TransitionFinishCallback finishCallback) {
     }
 
+    /**
+     * Applies the proper surface states (rounded corners/shadows) to pip surfaces in `info`.
+     * This is intended to be used when PiP is part of another animation but isn't, itself,
+     * animating (eg. unlocking).
+     * @return `true` if there was a pip in `info`.
+     */
+    public boolean syncPipSurfaceState(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction) {
+        return false;
+    }
+
     /** End the currently-playing PiP animation. */
     public void end() {
     }
