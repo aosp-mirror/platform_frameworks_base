@@ -323,6 +323,61 @@ public class BrightnessTrackerTest {
     }
 
     @Test
+    public void testMultipleBrightnessEvents() {
+        final float brightnessOne = 0.2f;
+        final float brightnessTwo = 0.4f;
+        final float brightnessThree = 0.6f;
+        final float brightnessFour = 0.3f;
+        final String displayId = "1234";
+        final float[] luxValues = new float[]{1.0f};
+
+        startTracker(mTracker);
+        final long sensorTime = TimeUnit.NANOSECONDS.toMillis(mInjector.elapsedRealtimeNanos());
+        final long sensorTime2 = sensorTime + TimeUnit.SECONDS.toMillis(20);
+        final long sensorTime3 = sensorTime2 + TimeUnit.SECONDS.toMillis(30);
+        final long sensorTime4 = sensorTime3 + TimeUnit.SECONDS.toMillis(40);
+        final long originalTime = mInjector.currentTimeMillis();
+
+        mInjector.incrementTime(TimeUnit.SECONDS.toMillis(2));
+        notifyBrightnessChanged(mTracker, brightnessOne, displayId, luxValues,
+                new long[] {sensorTime});
+
+        mInjector.incrementTime(TimeUnit.SECONDS.toMillis(20));
+        notifyBrightnessChanged(mTracker, brightnessTwo, displayId, luxValues,
+                new long[] {sensorTime2});
+
+        mInjector.incrementTime(TimeUnit.SECONDS.toMillis(30));
+        notifyBrightnessChanged(mTracker, brightnessThree, displayId, luxValues,
+                new long[] {sensorTime3});
+
+        mInjector.incrementTime(TimeUnit.SECONDS.toMillis(40));
+        notifyBrightnessChanged(mTracker, brightnessFour, displayId, luxValues,
+                new long[] {sensorTime4});
+        mTracker.stop();
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
+        assertEquals(4, events.size());
+        BrightnessChangeEvent eventOne = events.get(0);
+        assertEquals(brightnessOne, eventOne.brightness, FLOAT_DELTA);
+        assertEquals(originalTime,
+                eventOne.luxTimestamps[0]);
+
+        BrightnessChangeEvent eventTwo = events.get(1);
+        assertEquals(brightnessTwo, eventTwo.brightness, FLOAT_DELTA);
+        assertEquals(originalTime + TimeUnit.SECONDS.toMillis(20),
+                eventTwo.luxTimestamps[0]);
+
+        BrightnessChangeEvent eventThree = events.get(2);
+        assertEquals(brightnessThree, eventThree.brightness, FLOAT_DELTA);
+        assertEquals(originalTime + TimeUnit.SECONDS.toMillis(50),
+                eventThree.luxTimestamps[0]);
+
+        BrightnessChangeEvent eventFour = events.get(3);
+        assertEquals(brightnessFour, eventFour.brightness, FLOAT_DELTA);
+        assertEquals(originalTime + TimeUnit.SECONDS.toMillis(90),
+                eventFour.luxTimestamps[0]);
+    }
+
+    @Test
     public void testBrightnessFullPopulatedEvent() {
         final int initialBrightness = 230;
         final int brightness = 130;
