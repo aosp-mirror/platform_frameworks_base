@@ -79,7 +79,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private final Runnable mWindowInsetChangeRunnable;
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
 
-    private final LayoutParams mParams;
+    @VisibleForTesting
+    final LayoutParams mParams;
     @VisibleForTesting
     final Rect mDraggableWindowBounds = new Rect();
     private boolean mIsVisible = false;
@@ -521,7 +522,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             // CONFIG_FONT_SCALE: font size change
             // CONFIG_LOCALE: language change
             // CONFIG_DENSITY: display size change
-
             mParams.accessibilityTitle = getAccessibilityWindowTitle(mContext);
 
             boolean showSettingPanelAfterConfigChange = mIsVisible;
@@ -533,16 +533,13 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             return;
         }
 
-        if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
-            final Rect previousDraggableBounds = new Rect(mDraggableWindowBounds);
+        if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0
+                || (configDiff & ActivityInfo.CONFIG_SCREEN_SIZE) != 0) {
             mDraggableWindowBounds.set(getDraggableWindowBounds());
-            // Keep the Y position with the same height ratio before the window bounds and
-            // draggable bounds are changed.
-            final float windowHeightFraction = (float) (mParams.y - previousDraggableBounds.top)
-                    / previousDraggableBounds.height();
-            mParams.y = (int) (windowHeightFraction * mDraggableWindowBounds.height())
-                    + mDraggableWindowBounds.top;
-            return;
+            // reset the panel position to the right-bottom corner
+            mParams.x = mDraggableWindowBounds.right;
+            mParams.y = mDraggableWindowBounds.bottom;
+            updateButtonViewLayoutIfNeeded();
         }
     }
 
@@ -554,7 +551,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mDraggableWindowBounds.set(newBounds);
     }
 
-    private void updateButtonViewLayoutIfNeeded() {
+    @VisibleForTesting
+    void updateButtonViewLayoutIfNeeded() {
         if (mIsVisible) {
             mParams.x = MathUtils.constrain(mParams.x, mDraggableWindowBounds.left,
                     mDraggableWindowBounds.right);

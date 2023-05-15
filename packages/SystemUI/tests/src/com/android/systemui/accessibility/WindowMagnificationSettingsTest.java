@@ -37,6 +37,7 @@ import android.annotation.IdRes;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
@@ -49,6 +50,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -65,7 +67,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     private static final int MAGNIFICATION_SIZE_SMALL = 1;
@@ -272,6 +274,39 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         // we need to get the view again.
         magnifierMediumButton = getInternalView(R.id.magnifier_medium_button);
         assertThat(magnifierMediumButton.isSelected()).isTrue();
+    }
+
+    @Test
+    public void onScreenSizeChanged_resetPositionToRightBottomCorner() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
+
+        // move the panel to the center of draggable window bounds
+        mWindowMagnificationSettings.mParams.x =
+                mWindowMagnificationSettings.mDraggableWindowBounds.centerX();
+        mWindowMagnificationSettings.mParams.y =
+                mWindowMagnificationSettings.mDraggableWindowBounds.centerY();
+        mWindowMagnificationSettings.updateButtonViewLayoutIfNeeded();
+
+        final Rect testWindowBounds = new Rect(
+                mWindowManager.getCurrentWindowMetrics().getBounds());
+        testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
+                testWindowBounds.right + 200, testWindowBounds.bottom + 50);
+        mWindowManager.setWindowBounds(testWindowBounds);
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mWindowMagnificationSettings.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
+        });
+
+        // the panel position should be reset to the bottom-right corner
+        assertEquals(
+                mWindowMagnificationSettings.mParams.x,
+                mWindowMagnificationSettings.mDraggableWindowBounds.right);
+        assertEquals(
+                mWindowMagnificationSettings.mParams.y,
+                mWindowMagnificationSettings.mDraggableWindowBounds.bottom);
     }
 
     @Test
