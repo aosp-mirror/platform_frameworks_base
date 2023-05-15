@@ -98,7 +98,7 @@ public class ShutdownUi {
         window.setBackgroundDrawable(background);
         window.setWindowAnimations(com.android.systemui.R.style.Animation_ShutdownUi);
 
-        d.setContentView(R.layout.shutdown_dialog);
+        d.setContentView(getShutdownDialogContent());
         d.setCancelable(false);
 
         int color;
@@ -127,6 +127,10 @@ public class ShutdownUi {
         }
 
         d.show();
+    }
+
+    public int getShutdownDialogContent() {
+        return R.layout.shutdown_dialog;
     }
 
     @StringRes
