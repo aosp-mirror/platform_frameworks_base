@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter
 import android.app.ActivityTaskManager
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -459,7 +460,12 @@ private fun LottieAnimationView.addOverlayDynamicColor(
             addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
                 PorterDuffColorFilter(chevronFill, PorterDuff.Mode.SRC_ATOP)
             }
-        } else if (isDarkMode(context)) {
+        } else {
+            if (!isDarkMode(context)) {
+                addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
+                    PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
+                }
+            }
             for (key in listOf(".blue600", ".blue400")) {
                 addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
                     PorterDuffColorFilter(
