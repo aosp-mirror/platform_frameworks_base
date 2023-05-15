@@ -323,7 +323,6 @@ class BackPanelController internal constructor(
                         if (isFlungAwayFromEdge(endX = event.x) ||
                             previousXTranslation > params.staticTriggerThreshold
                         ) {
-                            updateArrowState(GestureState.ACTIVE)
                             updateArrowState(GestureState.FLUNG)
                         } else {
                             updateArrowState(GestureState.CANCELLED)
@@ -331,8 +330,11 @@ class BackPanelController internal constructor(
                     }
                     GestureState.INACTIVE -> {
                         if (isFlungAwayFromEdge(endX = event.x)) {
+                            // This is called outside of updateArrowState so that
+                            // BackAnimationController can immediately evaluate state
+                            // instead of after the flung delay
+                            backCallback.setTriggerBack(true)
                             mainHandler.postDelayed(MIN_DURATION_INACTIVE_BEFORE_FLUNG_ANIMATION) {
-                                updateArrowState(GestureState.ACTIVE)
                                 updateArrowState(GestureState.FLUNG)
                             }
                         } else {
