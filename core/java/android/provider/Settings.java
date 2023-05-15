@@ -11676,6 +11676,15 @@ public final class Settings {
         public static final String LOCK_SCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
 
         /**
+         * Whether the feature that the device will fire a haptic when users scroll and hit
+         * the edge of the screen is enabled.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_EDGE_HAPTIC_ENABLED =
+                "accessibility_display_magnification_edge_haptic_enabled";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
