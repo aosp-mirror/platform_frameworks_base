@@ -61,6 +61,9 @@ class ActivityEmbeddingAnimationRunner {
     @VisibleForTesting
     final ActivityEmbeddingAnimationSpec mAnimationSpec;
 
+    @Nullable
+    private Animator mActiveAnimator;
+
     ActivityEmbeddingAnimationRunner(@NonNull Context context,
             @NonNull ActivityEmbeddingController controller) {
         mController = controller;
@@ -75,8 +78,10 @@ class ActivityEmbeddingAnimationRunner {
         // applied to make sure the surface is ready.
         final List<Consumer<SurfaceControl.Transaction>> postStartTransactionCallbacks =
                 new ArrayList<>();
-        final Animator animator = createAnimator(info, startTransaction, finishTransaction,
+        final Animator animator = createAnimator(info, startTransaction,
+                finishTransaction,
                 () -> mController.onAnimationFinished(transition), postStartTransactionCallbacks);
+        mActiveAnimator = animator;
 
         // Start the animation.
         if (!postStartTransactionCallbacks.isEmpty()) {
@@ -96,6 +101,17 @@ class ActivityEmbeddingAnimationRunner {
             startTransaction.apply();
             animator.start();
         }
+    }
+
+    void cancelAnimationFromMerge() {
+        if (mActiveAnimator == null) {
+            Log.e(TAG,
+                    "No active ActivityEmbedding animator running but mergeAnimation is "
+                            + "trying to cancel one."
+            );
+            return;
+        }
+        mActiveAnimator.end();
     }
 
     /**
@@ -153,6 +169,7 @@ class ActivityEmbeddingAnimationRunner {
                     adapter.onAnimationEnd(t);
                 }
                 t.apply();
+                mActiveAnimator = null;
                 animationFinishCallback.run();
             }
 
