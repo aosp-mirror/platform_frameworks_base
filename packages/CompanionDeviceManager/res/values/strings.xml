@@ -28,13 +28,13 @@
     <string name="profile_name_watch">watch</string>
 
     <!-- Title of the device selection dialog. -->
-    <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
+    <string name="chooser_title_non_profile">Choose a device to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt;</string>
 
-    <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_watch">This app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to sync info, like the name of someone calling, interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions.</string>
+    <!-- Tile of the multiple devices' dialog. -->
+    <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to set up</string>
 
-    <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile for singleDevice(type) [CHAR LIMIT=NONE] -->
-    <string name="summary_watch_single_device">This app will be allowed to sync info, like the name of someone calling, and access these permissions on your <xliff:g id="device_type" example="phone">%1$s</xliff:g></string>
+    <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile [CHAR LIMIT=NONE] -->
+    <string name="summary_watch">This app will be allowed to sync info, like the name of someone calling, and access these permissions on your <xliff:g id="device_name" example="phone">%1$s</xliff:g></string>
 
     <!-- ================= DEVICE_PROFILE_GLASSES ================= -->
 
@@ -42,13 +42,10 @@
     <string name="confirmation_title_glasses">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to manage &lt;strong&gt;<xliff:g id="device_name" example="Glasses">%2$s</xliff:g>&lt;/strong&gt;?</string>
 
     <!-- The name of the "glasses" device type [CHAR LIMIT=30] -->
-    <string name="profile_name_glasses">glasses</string>
+    <string name="profile_name_glasses">device</string>
 
-    <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_glasses_multi_device">This app is needed to manage <xliff:g id="device_name" example="My Glasses">%1$s</xliff:g>. <xliff:g id="app_name" example="Glasses">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Microphone and Nearby devices permissions.</string>
-
-    <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile for singleDevice(type) [CHAR LIMIT=NONE] -->
-    <string name="summary_glasses_single_device">This app will be allowed to access these permissions on your <xliff:g id="device_type" example="phone">%1$s</xliff:g></string>
+    <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile [CHAR LIMIT=NONE] -->
+    <string name="summary_glasses">This app will be allowed to access these permissions on your <xliff:g id="device_name" example="phone">%1$s</xliff:g></string>
 
     <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
 
@@ -97,9 +94,6 @@
     <string name="profile_name_generic">device</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of unspecified profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_generic_single_device">This app will be able to sync info, like the name of someone calling, between your phone and <xliff:g id="device_name" example="My Watch">%1$s</xliff:g></string>
-
-    <!-- Description of the privileges the application will get if associated with the companion device of unspecified profile (type) [CHAR LIMIT=NONE] -->
     <string name="summary_generic">This app will be able to sync info, like the name of someone calling, between your phone and the chosen device</string>
 
     <!-- ================= Buttons ================= -->
@@ -109,6 +103,9 @@
 
     <!-- Negative button for the device-app association consent dialog [CHAR LIMIT=30] -->
     <string name="consent_no">Don\u2019t allow</string>
+
+    <!-- Cancel button for the device chooser dialog [CHAR LIMIT=30] -->
+    <string name="consent_cancel">Cancel</string>
 
     <!-- Back button for the helper consent dialog [CHAR LIMIT=30] -->
     <string name="consent_back">Back</string>
