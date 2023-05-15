@@ -23,7 +23,7 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.bouncer.data.repo.BouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
-import com.android.systemui.keyguard.domain.interactor.LockScreenSceneInteractor
+import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.data.model.SceneContainerConfig
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -58,7 +58,7 @@ class SceneTestUtils(
         return listOf(
             SceneKey.QuickSettings,
             SceneKey.Shade,
-            SceneKey.LockScreen,
+            SceneKey.Lockscreen,
             SceneKey.Bouncer,
             SceneKey.Gone,
         )
@@ -71,7 +71,7 @@ class SceneTestUtils(
         return SceneContainerConfig(
             name = name,
             sceneKeys = sceneKeys,
-            initialSceneKey = SceneKey.LockScreen,
+            initialSceneKey = SceneKey.Lockscreen,
         )
     }
 
@@ -139,8 +139,8 @@ class SceneTestUtils(
         authenticationInteractor: AuthenticationInteractor,
         sceneInteractor: SceneInteractor,
         bouncerInteractor: BouncerInteractor,
-    ): LockScreenSceneInteractor {
-        return LockScreenSceneInteractor(
+    ): LockscreenSceneInteractor {
+        return LockscreenSceneInteractor(
             applicationScope = applicationScope(),
             authenticationInteractor = authenticationInteractor,
             bouncerInteractorFactory =
