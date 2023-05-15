@@ -182,7 +182,7 @@ public class SplitTransitionTests extends ShellTestCase {
         IBinder transition = mSplitScreenTransitions.startEnterTransition(
                 TRANSIT_OPEN, new WindowContainerTransaction(),
                 new RemoteTransition(testRemote, "Test"), mStageCoordinator, null, null,
-                TRANSIT_SPLIT_SCREEN_PAIR_OPEN);
+                TRANSIT_SPLIT_SCREEN_PAIR_OPEN, false);
         mMainStage.onTaskAppeared(mMainChild, createMockSurface());
         mSideStage.onTaskAppeared(mSideChild, createMockSurface());
         boolean accepted = mStageCoordinator.startAnimation(transition, info,
@@ -408,7 +408,7 @@ public class SplitTransitionTests extends ShellTestCase {
         IBinder enterTransit = mSplitScreenTransitions.startEnterTransition(
                 TRANSIT_OPEN, new WindowContainerTransaction(),
                 new RemoteTransition(new TestRemoteTransition(), "Test"),
-                mStageCoordinator, null, null, TRANSIT_SPLIT_SCREEN_PAIR_OPEN);
+                mStageCoordinator, null, null, TRANSIT_SPLIT_SCREEN_PAIR_OPEN, false);
         mMainStage.onTaskAppeared(mMainChild, createMockSurface());
         mSideStage.onTaskAppeared(mSideChild, createMockSurface());
         mStageCoordinator.startAnimation(enterTransit, enterInfo,
