@@ -3091,6 +3091,10 @@ public final class ProcessList {
         if (isSdkSandbox) {
             uid = sdkSandboxUid;
         }
+        if (Process.isSdkSandboxUid(uid) && (!isSdkSandbox || sdkSandboxClientAppPackage == null)) {
+            Slog.e(TAG, "Abort creating new sandbox process as required parameters are missing.");
+            return null;
+        }
         if (isolated) {
             if (isolatedUid == 0) {
                 IsolatedUidRange uidRange = getOrCreateIsolatedUidRangeLocked(info, hostingRecord);
