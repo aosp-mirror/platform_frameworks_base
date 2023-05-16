@@ -674,7 +674,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     public void startAppearAnimation() {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            setAlpha(1f);
             mView.startAppearAnimation(mCurrentSecurityMode);
             getCurrentSecurityController(controller -> controller.startAppearAnimation());
         }
@@ -1112,7 +1111,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      */
     public void setExpansion(float fraction) {
         float scaledFraction = BouncerPanelExpansionCalculator.showBouncerProgress(fraction);
-        mView.setAlpha(MathUtils.constrain(1 - scaledFraction, 0f, 1f));
+        setAlpha(MathUtils.constrain(1 - scaledFraction, 0f, 1f));
         mView.setTranslationY(scaledFraction * mTranslationY);
     }
 }

@@ -1470,6 +1470,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
                 if (ar == null || ar.getTask() == null
                         || ar.getTask().isVisibleRequested()) continue;
+                final ChangeInfo change = mChanges.get(ar);
+                // Intentionally skip record snapshot for changes originated from PiP.
+                if (change != null && change.mWindowingMode == WINDOWING_MODE_PINNED) continue;
                 mController.mSnapshotController.mTaskSnapshotController.recordSnapshot(
                         ar.getTask(), false /* allowSnapshotHome */);
             }
@@ -1530,7 +1533,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         mController.mLoggerHandler.post(mLogger::logOnSend);
         if (mLogger.mInfo != null) {
-            mController.mTransitionTracer.logSentTransition(this, mTargets, info);
+            mController.mTransitionTracer.logSentTransition(this, mTargets);
         }
     }
 

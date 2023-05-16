@@ -93,6 +93,12 @@ public class AmbientState implements Dumpable {
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
 
+    /**
+     * The ExpandableNotificationRow that is pulsing, or the one that was pulsing
+     * when the device started to transition from AOD to LockScreen.
+     */
+    private ExpandableNotificationRow mPulsingRow;
+
     /** Fraction of lockscreen to shade animation (on lockscreen swipe down). */
     private float mFractionToShade;
 
@@ -562,6 +568,19 @@ public class AmbientState implements Dumpable {
 
     public boolean isPulsing(NotificationEntry entry) {
         return mPulsing && entry.isAlerting();
+    }
+
+    public void setPulsingRow(ExpandableNotificationRow row) {
+        mPulsingRow = row;
+    }
+
+    /**
+     * @param row The row to check
+     * @return true if row is the pulsing row when the device started to transition from AOD to lock
+     * screen
+     */
+    public boolean isPulsingRow(ExpandableView row) {
+        return mPulsingRow == row;
     }
 
     public boolean isPanelTracking() {

@@ -3987,6 +3987,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (mFallbackWallpaper != null) {
                 dumpWallpaper(mFallbackWallpaper, pw);
             }
+            pw.print("mIsLockscreenLiveWallpaperEnabled=");
+            pw.println(mIsLockscreenLiveWallpaperEnabled);
         }
     }
 }

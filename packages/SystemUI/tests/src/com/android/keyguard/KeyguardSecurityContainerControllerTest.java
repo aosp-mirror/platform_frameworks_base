@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_DEFAULT;
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_ONE_HANDED;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -689,6 +690,14 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     public void testSideFpsControllerHide() {
         mKeyguardSecurityContainerController.updateSideFpsVisibility(/* isVisible= */ false);
         verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
+    }
+
+    @Test
+    public void setExpansion_setsAlpha() {
+        mKeyguardSecurityContainerController.setExpansion(EXPANSION_VISIBLE);
+
+        verify(mView).setAlpha(1f);
+        verify(mView).setTranslationY(0f);
     }
 
     private KeyguardSecurityContainer.SwipeListener getRegisteredSwipeListener() {

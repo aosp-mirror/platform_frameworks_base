@@ -17,7 +17,7 @@
 package com.android.systemui.shade.ui.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.domain.interactor.LockScreenSceneInteractor
+import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -33,11 +33,11 @@ class ShadeSceneViewModel
 @AssistedInject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    lockScreenSceneInteractorFactory: LockScreenSceneInteractor.Factory,
+    lockscreenSceneInteractorFactory: LockscreenSceneInteractor.Factory,
     @Assisted private val containerName: String,
 ) {
-    private val lockScreenInteractor: LockScreenSceneInteractor =
-        lockScreenSceneInteractorFactory.create(containerName)
+    private val lockScreenInteractor: LockscreenSceneInteractor =
+        lockscreenSceneInteractorFactory.create(containerName)
 
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: StateFlow<SceneKey> =
@@ -54,13 +54,13 @@ constructor(
 
     /** Notifies that some content in the shade was clicked. */
     fun onContentClicked() {
-        lockScreenInteractor.dismissLockScreen()
+        lockScreenInteractor.dismissLockscreen()
     }
 
     private fun upDestinationSceneKey(
         isLocked: Boolean,
     ): SceneKey {
-        return if (isLocked) SceneKey.LockScreen else SceneKey.Gone
+        return if (isLocked) SceneKey.Lockscreen else SceneKey.Gone
     }
 
     @AssistedFactory

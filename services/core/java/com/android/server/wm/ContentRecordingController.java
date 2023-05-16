@@ -98,6 +98,13 @@ final class ContentRecordingController {
                     mSession == null ? null : mSession.getVirtualDisplayId());
             incomingDisplayContent = wmService.mRoot.getDisplayContentOrCreate(
                     incomingSession.getVirtualDisplayId());
+            if (incomingDisplayContent == null) {
+                ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Incoming session on display %d can't be set since it "
+                                + "is already null; the corresponding VirtualDisplay must have "
+                                + "already been removed.", incomingSession.getVirtualDisplayId());
+                return;
+            }
             incomingDisplayContent.setContentRecordingSession(incomingSession);
             // TODO(b/270118861): When user grants consent to re-use, explicitly ask ContentRecorder
             //  to update, since no config/display change arrives. Mark recording as black.
