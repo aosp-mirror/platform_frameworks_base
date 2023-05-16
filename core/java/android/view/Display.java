@@ -1638,7 +1638,7 @@ public final class Display {
      * bounds of the window.
      * <p></p>
      * Handling multi-window mode correctly is necessary since applications are not always
-     * fullscreen. A user on a large screen device, such as a tablet or Chrome OS devices, is more
+     * fullscreen. A user on a large screen device, such as a tablet or ChromeOS devices, is more
      * likely to use multi-window modes.
      * <p></p>
      * For example, consider a device with a display partitioned into two halves. The user may have
@@ -1708,7 +1708,7 @@ public final class Display {
      * bounds of the window.
      * <p></p>
      * Handling multi-window mode correctly is necessary since applications are not always
-     * fullscreen. A user on a large screen device, such as a tablet or Chrome OS devices, is more
+     * fullscreen. A user on a large screen device, such as a tablet or ChromeOS devices, is more
      * likely to use multi-window modes.
      * <p></p>
      * For example, consider a device with a display partitioned into two halves. The user may have

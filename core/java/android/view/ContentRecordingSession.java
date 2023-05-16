@@ -87,7 +87,7 @@ public final class ContentRecordingSession implements Parcelable {
      *
      * <p>Only set on the server side to sanitize any input from the client process.
      */
-    private boolean mWaitingToRecord = false;
+    private boolean mWaitingForConsent = false;
 
     /**
      * Default instance, with recording the display.
@@ -181,7 +181,7 @@ public final class ContentRecordingSession implements Parcelable {
             @RecordContent int contentToRecord,
             int displayToRecord,
             @Nullable IBinder tokenToRecord,
-            boolean waitingToRecord) {
+            boolean waitingForConsent) {
         this.mVirtualDisplayId = virtualDisplayId;
         this.mContentToRecord = contentToRecord;
 
@@ -195,7 +195,7 @@ public final class ContentRecordingSession implements Parcelable {
 
         this.mDisplayToRecord = displayToRecord;
         this.mTokenToRecord = tokenToRecord;
-        this.mWaitingToRecord = waitingToRecord;
+        this.mWaitingForConsent = waitingForConsent;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -246,8 +246,8 @@ public final class ContentRecordingSession implements Parcelable {
      * <p>Only set on the server side to sanitize any input from the client process.
      */
     @DataClass.Generated.Member
-    public boolean isWaitingToRecord() {
-        return mWaitingToRecord;
+    public boolean isWaitingForConsent() {
+        return mWaitingForConsent;
     }
 
     /**
@@ -309,8 +309,8 @@ public final class ContentRecordingSession implements Parcelable {
      * <p>Only set on the server side to sanitize any input from the client process.
      */
     @DataClass.Generated.Member
-    public @NonNull ContentRecordingSession setWaitingToRecord( boolean value) {
-        mWaitingToRecord = value;
+    public @NonNull ContentRecordingSession setWaitingForConsent( boolean value) {
+        mWaitingForConsent = value;
         return this;
     }
 
@@ -325,7 +325,7 @@ public final class ContentRecordingSession implements Parcelable {
                 "contentToRecord = " + recordContentToString(mContentToRecord) + ", " +
                 "displayToRecord = " + mDisplayToRecord + ", " +
                 "tokenToRecord = " + mTokenToRecord + ", " +
-                "waitingToRecord = " + mWaitingToRecord +
+                "waitingForConsent = " + mWaitingForConsent +
         " }";
     }
 
@@ -346,7 +346,7 @@ public final class ContentRecordingSession implements Parcelable {
                 && mContentToRecord == that.mContentToRecord
                 && mDisplayToRecord == that.mDisplayToRecord
                 && java.util.Objects.equals(mTokenToRecord, that.mTokenToRecord)
-                && mWaitingToRecord == that.mWaitingToRecord;
+                && mWaitingForConsent == that.mWaitingForConsent;
     }
 
     @Override
@@ -360,7 +360,7 @@ public final class ContentRecordingSession implements Parcelable {
         _hash = 31 * _hash + mContentToRecord;
         _hash = 31 * _hash + mDisplayToRecord;
         _hash = 31 * _hash + java.util.Objects.hashCode(mTokenToRecord);
-        _hash = 31 * _hash + Boolean.hashCode(mWaitingToRecord);
+        _hash = 31 * _hash + Boolean.hashCode(mWaitingForConsent);
         return _hash;
     }
 
@@ -371,7 +371,7 @@ public final class ContentRecordingSession implements Parcelable {
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         byte flg = 0;
-        if (mWaitingToRecord) flg |= 0x10;
+        if (mWaitingForConsent) flg |= 0x10;
         if (mTokenToRecord != null) flg |= 0x8;
         dest.writeByte(flg);
         dest.writeInt(mVirtualDisplayId);
@@ -392,7 +392,7 @@ public final class ContentRecordingSession implements Parcelable {
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         byte flg = in.readByte();
-        boolean waitingToRecord = (flg & 0x10) != 0;
+        boolean waitingForConsent = (flg & 0x10) != 0;
         int virtualDisplayId = in.readInt();
         int contentToRecord = in.readInt();
         int displayToRecord = in.readInt();
@@ -411,7 +411,7 @@ public final class ContentRecordingSession implements Parcelable {
 
         this.mDisplayToRecord = displayToRecord;
         this.mTokenToRecord = tokenToRecord;
-        this.mWaitingToRecord = waitingToRecord;
+        this.mWaitingForConsent = waitingForConsent;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -441,7 +441,7 @@ public final class ContentRecordingSession implements Parcelable {
         private @RecordContent int mContentToRecord;
         private int mDisplayToRecord;
         private @Nullable IBinder mTokenToRecord;
-        private boolean mWaitingToRecord;
+        private boolean mWaitingForConsent;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -506,10 +506,10 @@ public final class ContentRecordingSession implements Parcelable {
          * <p>Only set on the server side to sanitize any input from the client process.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setWaitingToRecord(boolean value) {
+        public @NonNull Builder setWaitingForConsent(boolean value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x10;
-            mWaitingToRecord = value;
+            mWaitingForConsent = value;
             return this;
         }
 
@@ -531,14 +531,14 @@ public final class ContentRecordingSession implements Parcelable {
                 mTokenToRecord = null;
             }
             if ((mBuilderFieldsSet & 0x10) == 0) {
-                mWaitingToRecord = false;
+                mWaitingForConsent = false;
             }
             ContentRecordingSession o = new ContentRecordingSession(
                     mVirtualDisplayId,
                     mContentToRecord,
                     mDisplayToRecord,
                     mTokenToRecord,
-                    mWaitingToRecord);
+                    mWaitingForConsent);
             return o;
         }
 
@@ -551,10 +551,10 @@ public final class ContentRecordingSession implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1679855157534L,
+            time = 1683628463074L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/ContentRecordingSession.java",
-            inputSignatures = "public static final  int RECORD_CONTENT_DISPLAY\npublic static final  int RECORD_CONTENT_TASK\nprivate  int mVirtualDisplayId\nprivate @android.view.ContentRecordingSession.RecordContent int mContentToRecord\nprivate  int mDisplayToRecord\nprivate @android.annotation.Nullable android.os.IBinder mTokenToRecord\nprivate  boolean mWaitingToRecord\npublic static  android.view.ContentRecordingSession createDisplaySession(int)\npublic static  android.view.ContentRecordingSession createTaskSession(android.os.IBinder)\npublic static  boolean isValid(android.view.ContentRecordingSession)\npublic static  boolean isProjectionOnSameDisplay(android.view.ContentRecordingSession,android.view.ContentRecordingSession)\nclass ContentRecordingSession extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genToString=true, genSetters=true, genEqualsHashCode=true)")
+            inputSignatures = "public static final  int RECORD_CONTENT_DISPLAY\npublic static final  int RECORD_CONTENT_TASK\nprivate  int mVirtualDisplayId\nprivate @android.view.ContentRecordingSession.RecordContent int mContentToRecord\nprivate  int mDisplayToRecord\nprivate @android.annotation.Nullable android.os.IBinder mTokenToRecord\nprivate  boolean mWaitingForConsent\npublic static  android.view.ContentRecordingSession createDisplaySession(int)\npublic static  android.view.ContentRecordingSession createTaskSession(android.os.IBinder)\npublic static  boolean isValid(android.view.ContentRecordingSession)\npublic static  boolean isProjectionOnSameDisplay(android.view.ContentRecordingSession,android.view.ContentRecordingSession)\nclass ContentRecordingSession extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genToString=true, genSetters=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

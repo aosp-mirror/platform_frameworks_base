@@ -301,9 +301,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
 
         @Override
-        public void setSwipeThresholds(float progressThreshold) {
+        public void setSwipeThresholds(
+                float linearDistance,
+                float maxDistance,
+                float nonLinearFactor) {
             mShellExecutor.execute(() -> BackAnimationController.this.setSwipeThresholds(
-                    progressThreshold));
+                    linearDistance, maxDistance, nonLinearFactor));
         }
 
         @Override
@@ -509,7 +512,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 // Constraints - absolute values
                 float minVelocity = mFlingAnimationUtils.getMinVelocityPxPerSecond();
                 float maxVelocity = mFlingAnimationUtils.getHighVelocityPxPerSecond();
-                float maxX = mTouchTracker.getMaxX(); // px
+                float maxX = mTouchTracker.getMaxDistance(); // px
                 float maxFlingDistance = maxX * MAX_FLING_PROGRESS; // px
 
                 // Current state
@@ -605,8 +608,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mTouchTracker.setTriggerBack(triggerBack);
     }
 
-    private void setSwipeThresholds(float progressThreshold) {
-        mTouchTracker.setProgressThreshold(progressThreshold);
+    private void setSwipeThresholds(
+            float linearDistance,
+            float maxDistance,
+            float nonLinearFactor) {
+        mTouchTracker.setProgressThresholds(linearDistance, maxDistance, nonLinearFactor);
     }
 
     private void invokeOrCancelBack() {

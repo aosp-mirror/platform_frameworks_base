@@ -23,6 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.shade.domain.model.ShadeModel
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,6 +38,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -56,6 +58,9 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         underTest = ShadeRepositoryImpl(shadeExpansionStateManager)
+        `when`(shadeExpansionStateManager.addExpansionListener(any())).thenReturn(
+            ShadeExpansionChangeEvent(0f, false, false, 0f)
+        )
     }
 
     @Test
