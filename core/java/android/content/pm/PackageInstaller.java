@@ -616,6 +616,7 @@ public class PackageInstaller {
     /** {@hide} */
     public PackageInstaller(IPackageInstaller installer,
             String installerPackageName, String installerAttributionTag, int userId) {
+        Objects.requireNonNull(installer, "installer cannot be null");
         mInstaller = installer;
         mInstallerPackageName = installerPackageName;
         mAttributionTag = installerAttributionTag;
