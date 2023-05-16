@@ -39,8 +39,8 @@ import android.text.TextUtils;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.modules.utils.testing.TestableDeviceConfig;
-import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.appop.AppOpsService;
@@ -93,7 +93,7 @@ public final class CachedAppOptimizerTest {
 
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
-            .dynamiclyConfigureSessionBuilder(
+            .configureSessionBuilder(
                     sessionBuilder -> mDeviceConfig.setUpMockedClasses(sessionBuilder))
             .build();
 
