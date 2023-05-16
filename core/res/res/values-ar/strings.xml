@@ -629,11 +629,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"خطأ في المصادقة"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"استخدام قفل الشاشة"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"أدخِل قفل الشاشة للمتابعة"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على المستشعر"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على أداة الاستشعار"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"يتعذّر التعرّف على بصمة الإصبع. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"يُرجى تنظيف مستشعر بصمات الإصبع ثم إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"تنظيف المستشعر ثم إعادة المحاولة"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على المستشعر"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على أداة الاستشعار"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"تم تحريك الإصبع ببطء شديد. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"يمكنك تجربة بصمة إصبع أخرى."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"الصورة ساطعة للغاية."</string>
@@ -681,17 +681,17 @@
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"لا يمكن استخدام مستشعر بصمات الإصبع"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"يُرجى التواصل مع مقدِّم خدمات إصلاح."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"يتعذّر إنشاء نموذج الوجه. يُرجى إعادة المحاولة."</string>
-    <string name="face_acquired_too_bright" msgid="8070756048978079164">"ساطع للغاية. تجربة مستوى سطوع أقلّ."</string>
+    <string name="face_acquired_too_bright" msgid="8070756048978079164">"ساطع للغاية. يُرجى تجربة مستوى سطوع أقلّ"</string>
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"الإضاءة غير كافية"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"يُرجى إبعاد الهاتف عنك."</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"يُرجى تقريب الهاتف منك."</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"يُرجى تقريب الهاتف منك"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"يُرجى رفع الهاتف للأعلى"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"يُرجى خفض الهاتف للأسفل"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"يُرجى تحريك الهاتف جهة اليسار."</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"يُرجى تحريك الهاتف لجهة اليسار"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"يُرجى تحريك الهاتف لجهة اليمين"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"يُرجى النظر إلى جهازك مباشرة أكثر."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"ارفع هاتفك إلى مستوى العينَين لأنّه تتعذّر رؤية وجهك"</string>
-    <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حركة أكثر من اللازم يُرجى حمل بدون حركة."</string>
+    <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حركة أكثر من اللازم. يُرجى حمل الهاتف بثبات."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"يُرجى إعادة تسجيل وجهك."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"يتعذّر التعرّف على الوجه. يُرجى إعادة المحاولة."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"غيِّر موضع رأسك قليلاً."</string>
@@ -1686,10 +1686,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"إزالة"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"تحذير:\nلقد تجاوزت مقدار الإشارات الصوتية العالية التي يمكن للشخص الاستماع إليها بأمان خلال أسبوع باستخدام سماعات الرأس.\n\nتجاوز هذا الحدّ سيضر بسمعك بشكل دائم."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"تحذير:\nلقد تجاوزت بمقدار 5 مرات الإشارات الصوتية العالية التي يمكن للشخص الاستماع إليها بأمان خلال أسبوع باستخدام سماعات الرأس.\n\nتم خفض مستوى الصوت لحماية سمعك."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"يمكن أن يؤدي التعرض لفترات طويلة للمستوى الذي تسمع به الوسائط إلى حدوث ضرر في السمع.\n\nقد يؤدي استمرار التشغيل بهذا المستوى لفترات طويلة إلى حدوث ضرر في السمع."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"تحذير:\nأنت تستمع حاليًا إلى محتوى صاخب يتم تشغيله بمستوى صوت غير آمن.\n\nسيؤدي الاستمرار في الاستماع إلى هذا الصوت الصاخب إلى حدوث ضرر في سمعك بشكل دائم."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"هل تريد مواصلة الاستماع بصوت عالٍ؟\n\nكان مستوى صوت سمّاعة الرأس مرتفعًا لمدة أطول مما يُنصَح به، وقد يضر هذا بسمعك."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"تم رصد صوت مرتفع.\n\nكان مستوى صوت سمّاعة الرأس مرتفعًا لمدة أطول مما يُنصَح به، وقد يضر هذا بسمعك."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"هل تريد استخدام اختصار \"سهولة الاستخدام\"؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"عند تفعيل الاختصار، يؤدي الضغط على زرّي التحكّم في مستوى الصوت معًا لمدة 3 ثوانٍ إلى تفعيل إحدى ميزات إمكانية الوصول."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"هل تريد تفعيل الاختصار لميزات إمكانية الوصول؟"</string>
@@ -2168,14 +2166,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"إلغاء الإيقاف المؤقت"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ما مِن تطبيقات عمل."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ما مِن تطبيقات شخصية."</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"هل تريد فتح تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في الملف الشخصي للعمل؟"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"هل تريد فتح المحتوى في تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في الملف الشخصي؟"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"هل تريد فتح المحتوى في تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في الملف الشخصي للعمل؟"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"هل تريد الاتصال من تطبيق العمل؟"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"هل تريد الانتقال إلى تطبيق العمل؟"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"تسمح لك مؤسستك بإجراء المكالمات من تطبيقات العمل فقط."</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"تسمح لك مؤسستك بإرسال الرسائل من تطبيقات العمل فقط."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استخدام المتصفّح الشخصي"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استخدام متصفّح العمل"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"الاتصال"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"انتقال"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏رقم التعريف الشخصي لإلغاء قفل شبكة شريحة SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"‏رقم التعريف الشخصي لإلغاء قفل المجموعة الفرعية لشبكة شريحة SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"‏رقم التعريف الشخصي لإلغاء قفل شريحة SIM للشركات"</string>

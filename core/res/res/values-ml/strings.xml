@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"നീക്കംചെയ്യുക"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"മുന്നറിയിപ്പ്,\nഒരാൾക്ക് ഒരാഴ്ച ഹെഡ്ഫോണുകളിലൂടെ സുരക്ഷിതമായി കേൾക്കാനാകുന്ന ഉച്ചത്തിലുള്ള ശബ്ദ സിഗ്നലുകളുടെ അളവ് നിങ്ങൾ മറികടന്നിരിക്കുന്നു.\n\nഈ പരിധിക്ക് മുകളിൽ പോകുന്നത് നിങ്ങളുടെ കേൾവിശക്തിയെ ശാശ്വതമായി തകരാറിലാക്കും."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"മുന്നറിയിപ്പ്,\nഒരാൾക്ക് ഒരാഴ്ചയിൽ ഹെഡ്ഫോണുകളിലൂടെ സുരക്ഷിതമായി കേൾക്കാനാകുന്ന ഉച്ചത്തിലുള്ള ശബ്ദ സിഗ്നലുകളുടെ അളവിന്റെ 5 മടങ്ങ് നിങ്ങൾ മറികടന്നിരിക്കുന്നു.\n\nനിങ്ങളുടെ കേൾവിശക്തി സംരക്ഷിക്കുന്നതിനായി വോളിയം കുറച്ചു."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"നിങ്ങൾ ഇപ്പോൾ മീഡിയ കേൾക്കുന്ന ലെവൽ ദീർഘകാലം ഉപയോഗിച്ചാൽ അത് കേൾവി തകരാറിലേക്ക് നയിച്ചേക്കാം.\n\nഈ ലെവലിൽ തുടർന്നും ദീർഘകാലം പ്ലേ ചെയ്യുന്നത് നിങ്ങളുടെ കേൾവിശക്തി തകരാറിലാക്കിയേക്കാം."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"മുന്നറിയിപ്പ്,\nസുരക്ഷിതമല്ലാത്ത ലെവലിൽ പ്ലേ ചെയ്യുന്ന ഉച്ചത്തിലുള്ള ഉള്ളടക്കമാണ് നിങ്ങൾ നിലവിൽ കേൾക്കുന്നത്.\n\nഇത്ര ഉച്ചത്തിൽ കേൾക്കുന്നത് തുടർന്നാൽ നിങ്ങളുടെ കേൾവിശക്തി ശാശ്വതമായി തകരാറിലാകും."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ഉയർന്ന വോളിയത്തിൽ കേൾക്കുന്നത് തുടരണോ?\n\nഹെഡ്‌ഫോണിന്റെ വോളിയം, നിർദ്ദേശിച്ചിരിക്കുന്നതിനേക്കാൾ കൂടുതൽ സമയം ഉയർന്ന നിലയിലായിരുന്നു, ഇത് നിങ്ങളുടെ കേൾവിക്ക് തകരാറുണ്ടാക്കും"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ഉച്ചത്തിലുള്ള വോളിയം തിരിച്ചറിഞ്ഞു\n\nഹെഡ്‌ഫോണിന്റെ വോളിയം, നിർദ്ദേശിച്ചിരിക്കുന്നതിനേക്കാൾ ഉയർന്ന നിലയിലായിരുന്നു, ഇത് നിങ്ങളുടെ കേൾവിക്ക് തകരാറുണ്ടാക്കും"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ഉപയോഗസഹായി കുറുക്കുവഴി ഉപയോഗിക്കണോ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"കുറുക്കുവഴി ഓണായിരിക്കുമ്പോൾ, രണ്ട് വോളിയം ബട്ടണുകളും 3 സെക്കൻഡ് നേരത്തേക്ക് അമർത്തുന്നത് ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കും."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ഉപയോഗസഹായി ഫീച്ചറുകൾക്കുള്ള കുറുക്കുവഴി ഓണാക്കണോ?"</string>
@@ -2164,14 +2162,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"താൽക്കാലികമായി നിർത്തിയത് മാറ്റുക"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ഔദ്യോഗിക ആപ്പുകൾ ഇല്ല"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"വ്യക്തിപര ആപ്പുകൾ ഇല്ല"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"ഔദ്യോഗിക <xliff:g id="APP">%s</xliff:g> തുറക്കണോ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"സ്വകാര്യ <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"ഔദ്യോഗിക <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"വ്യക്തിപരമായ ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ഔദ്യോഗിക ബ്രൗസർ ഉപയോഗിക്കുക"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"സിം നെറ്റ്‌വർക്ക് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"സിം നെറ്റ്‌വർക്ക് സബ്സെറ്റ് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"സിം കോർപ്പറേറ്റ് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>

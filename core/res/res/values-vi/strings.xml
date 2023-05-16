@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Không thể tạo mẫu khuôn mặt của bạn. Hãy thử lại."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Đã phát hiện thấy kính râm. Toàn bộ khuôn mặt của bạn phải được trông thấy rõ ràng."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Phát hiện khuôn mặt bị che. Bạn phải cho thấy toàn bộ khuôn mặt."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Khuôn mặt bị che. Bạn phải cho thấy toàn bộ khuôn mặt."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Không thể xác minh khuôn mặt. Phần cứng không có sẵn."</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Xóa"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bạn tăng âm lượng lên quá mức khuyên dùng?\n\nViệc nghe ở mức âm lượng cao trong thời gian dài có thể gây tổn thương thính giác của bạn."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Cảnh báo,\nBạn đã vượt quá số lần nghe tín hiệu âm thanh lớn mà một người có thể nghe an toàn qua tai nghe trong một tuần.\n\nNếu vượt quá giới hạn này, thính lực của bạn sẽ bị tổn thương vĩnh viễn."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Cảnh báo,\nBạn đã vượt quá 5 lần nghe tín hiệu âm thanh lớn mà một người có thể nghe an toàn qua tai nghe trong một tuần.\n\nÂm lượng đã được giảm xuống để bảo vệ thính lực của bạn."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Mức âm lượng bạn đang nghe nội dung nghe nhìn có thể gây tổn thương thính lực khi duy trì trong thời gian dài.\n\nNếu bạn tiếp tục phát ở mức âm lượng này trong thời gian dài, thì thính lực của bạn có thể bị tổn thương."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Cảnh báo,\nBạn đang nghe nội dung ở mức âm lượng không an toàn.\n\nNếu bạn tiếp tục nghe ở mức âm lượng lớn như vậy, thì thính lực của bạn sẽ bị tổn thương vĩnh viễn."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Tiếp tục nghe ở mức âm lượng cao?\n\nBạn đã dùng tai nghe ở mức âm lượng cao lâu hơn khoảng thời gian khuyến nghị, điều này có thể gây tổn hại đến thính giác của bạn"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Đã phát hiện âm thanh lớn\n\nBạn đã dùng tai nghe ở mức âm lượng cao hơn khuyến nghị, điều này có thể gây tổn hại đến thính giác của bạn"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Sử dụng phím tắt Hỗ trợ tiếp cận?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Khi phím tắt này đang bật, thao tác nhấn cả hai nút âm lượng trong 3 giây sẽ mở tính năng hỗ trợ tiếp cận."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Bật phím tắt cho các tính năng hỗ trợ tiếp cận?"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Bỏ tạm dừng"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Không có ứng dụng công việc"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Không có ứng dụng cá nhân"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Mở <xliff:g id="APP">%s</xliff:g> công việc?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Mở trong <xliff:g id="APP">%s</xliff:g> cá nhân?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Mở trong <xliff:g id="APP">%s</xliff:g> công việc?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Gọi bằng ứng dụng công việc?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Chuyển sang ứng dụng công việc?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Tổ chức của bạn chỉ cho phép bạn gọi điện bằng ứng dụng công việc"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Tổ chức của bạn chỉ cho phép bạn gửi tin nhắn bằng ứng dụng công việc"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Dùng trình duyệt cá nhân"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Dùng trình duyệt công việc"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Gọi"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Chuyển"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Mã PIN mở khóa mạng SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Mã PIN mở khóa tập con của mạng SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Mã PIN mở khóa SIM corporate"</string>
@@ -2333,7 +2334,7 @@
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Đã định cấu hình <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Đã thiết lập bố cục bàn phím thành <xliff:g id="LAYOUT_1">%s</xliff:g>. Hãy nhấn để thay đổi."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Đã thiết lập bố cục bàn phím thành <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Hãy nhấn để thay đổi."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Đã thiết lập bố cục bàn phím thành <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Hãy nhấn để thay đổi."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Đã đặt bố cục là <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Nhấn để đổi."</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Đã thiết lập bố cục bàn phím thành <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Hãy nhấn để thay đổi."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Đã định cấu hình bàn phím vật lý"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Nhấn để xem bàn phím"</string>
