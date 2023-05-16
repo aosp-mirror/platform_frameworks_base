@@ -28,6 +28,7 @@ import static com.android.systemui.shade.NotificationPanelViewController.FLING_H
 import static com.android.systemui.shade.NotificationPanelViewController.QS_PARALLAX_AMOUNT;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.util.DumpUtilsKt.asIndenting;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -37,6 +38,7 @@ import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.MotionEvent;
@@ -50,6 +52,8 @@ import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -59,9 +63,11 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
@@ -97,13 +103,15 @@ import com.android.systemui.util.LargeScreenUtils;
 
 import dagger.Lazy;
 
+import java.io.PrintWriter;
+
 import javax.inject.Inject;
 
 /** Handles QuickSettings touch handling, expansion and animation state
  * TODO (b/264460656) make this dumpable
  */
 @CentralSurfacesComponent.CentralSurfacesScope
-public class QuickSettingsController {
+public class QuickSettingsController implements Dumpable {
     public static final String TAG = "QuickSettingsController";
 
     private QS mQs;
@@ -328,6 +336,7 @@ public class QuickSettingsController {
             FeatureFlags featureFlags,
             InteractionJankMonitor interactionJankMonitor,
             ShadeLogger shadeLog,
+            DumpManager dumpManager,
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             ShadeRepository shadeRepository,
             CastController castController
@@ -377,6 +386,7 @@ public class QuickSettingsController {
         mShadeRepository = shadeRepository;
 
         mLockscreenShadeTransitionController.addCallback(new LockscreenShadeTransitionCallback());
+        dumpManager.registerDumpable(this);
     }
 
     @VisibleForTesting
@@ -2013,6 +2023,143 @@ public class QuickSettingsController {
         float displayDensity = mPanelViewControllerLazy.get().getDisplayDensity();
         mLockscreenGestureLogger.write(gesture,
                 (int) ((y - getInitialTouchY()) / displayDensity), (int) (vel / displayDensity));
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println(TAG + ":");
+        IndentingPrintWriter ipw = asIndenting(pw);
+        ipw.increaseIndent();
+        ipw.print("mIsFullWidth=");
+        ipw.println(mIsFullWidth);
+        ipw.print("mTouchSlop=");
+        ipw.println(mTouchSlop);
+        ipw.print("mSlopMultiplier=");
+        ipw.println(mSlopMultiplier);
+        ipw.print("mBarState=");
+        ipw.println(mBarState);
+        ipw.print("mStatusBarMinHeight=");
+        ipw.println(mStatusBarMinHeight);
+        ipw.print("mScrimEnabled=");
+        ipw.println(mScrimEnabled);
+        ipw.print("mScrimCornerRadius=");
+        ipw.println(mScrimCornerRadius);
+        ipw.print("mScreenCornerRadius=");
+        ipw.println(mScreenCornerRadius);
+        ipw.print("mUseLargeScreenShadeHeader=");
+        ipw.println(mUseLargeScreenShadeHeader);
+        ipw.print("mLargeScreenShadeHeaderHeight=");
+        ipw.println(mLargeScreenShadeHeaderHeight);
+        ipw.print("mDisplayRightInset=");
+        ipw.println(mDisplayRightInset);
+        ipw.print("mDisplayLeftInset=");
+        ipw.println(mDisplayLeftInset);
+        ipw.print("mSplitShadeEnabled=");
+        ipw.println(mSplitShadeEnabled);
+        ipw.print("mLockscreenNotificationPadding=");
+        ipw.println(mLockscreenNotificationPadding);
+        ipw.print("mSplitShadeNotificationsScrimMarginBottom=");
+        ipw.println(mSplitShadeNotificationsScrimMarginBottom);
+        ipw.print("mDozing=");
+        ipw.println(mDozing);
+        ipw.print("mEnableClipping=");
+        ipw.println(mEnableClipping);
+        ipw.print("mFalsingThreshold=");
+        ipw.println(mFalsingThreshold);
+        ipw.print("mTransitionToFullShadePosition=");
+        ipw.println(mTransitionToFullShadePosition);
+        ipw.print("mCollapsedOnDown=");
+        ipw.println(mCollapsedOnDown);
+        ipw.print("mShadeExpandedHeight=");
+        ipw.println(mShadeExpandedHeight);
+        ipw.print("mLastShadeFlingWasExpanding=");
+        ipw.println(mLastShadeFlingWasExpanding);
+        ipw.print("mInitialHeightOnTouch=");
+        ipw.println(mInitialHeightOnTouch);
+        ipw.print("mInitialTouchX=");
+        ipw.println(mInitialTouchX);
+        ipw.print("mInitialTouchY=");
+        ipw.println(mInitialTouchY);
+        ipw.print("mTouchAboveFalsingThreshold=");
+        ipw.println(mTouchAboveFalsingThreshold);
+        ipw.print("mTracking=");
+        ipw.println(mTracking);
+        ipw.print("mTrackingPointer=");
+        ipw.println(mTrackingPointer);
+        ipw.print("mExpanded=");
+        ipw.println(mExpanded);
+        ipw.print("mFullyExpanded=");
+        ipw.println(mFullyExpanded);
+        ipw.print("mExpandImmediate=");
+        ipw.println(mExpandImmediate);
+        ipw.print("mExpandedWhenExpandingStarted=");
+        ipw.println(mExpandedWhenExpandingStarted);
+        ipw.print("mAnimatingHiddenFromCollapsed=");
+        ipw.println(mAnimatingHiddenFromCollapsed);
+        ipw.print("mVisible=");
+        ipw.println(mVisible);
+        ipw.print("mExpansionHeight=");
+        ipw.println(mExpansionHeight);
+        ipw.print("mMinExpansionHeight=");
+        ipw.println(mMinExpansionHeight);
+        ipw.print("mMaxExpansionHeight=");
+        ipw.println(mMaxExpansionHeight);
+        ipw.print("mShadeExpandedFraction=");
+        ipw.println(mShadeExpandedFraction);
+        ipw.print("mPeekHeight=");
+        ipw.println(mPeekHeight);
+        ipw.print("mLastOverscroll=");
+        ipw.println(mLastOverscroll);
+        ipw.print("mExpansionFromOverscroll=");
+        ipw.println(mExpansionFromOverscroll);
+        ipw.print("mExpansionEnabledPolicy=");
+        ipw.println(mExpansionEnabledPolicy);
+        ipw.print("mExpansionEnabledAmbient=");
+        ipw.println(mExpansionEnabledAmbient);
+        ipw.print("mQuickQsHeaderHeight=");
+        ipw.println(mQuickQsHeaderHeight);
+        ipw.print("mTwoFingerExpandPossible=");
+        ipw.println(mTwoFingerExpandPossible);
+        ipw.print("mConflictingExpansionGesture=");
+        ipw.println(mConflictingExpansionGesture);
+        ipw.print("mAnimatorExpand=");
+        ipw.println(mAnimatorExpand);
+        ipw.print("mCachedGestureInsets=");
+        ipw.println(mCachedGestureInsets);
+        ipw.print("mTransitioningToFullShadeProgress=");
+        ipw.println(mTransitioningToFullShadeProgress);
+        ipw.print("mDistanceForFullShadeTransition=");
+        ipw.println(mDistanceForFullShadeTransition);
+        ipw.print("mStackScrollerOverscrolling=");
+        ipw.println(mStackScrollerOverscrolling);
+        ipw.print("mAnimating=");
+        ipw.println(mAnimating);
+        ipw.print("mIsTranslationResettingAnimator=");
+        ipw.println(mIsTranslationResettingAnimator);
+        ipw.print("mIsPulseExpansionResettingAnimator=");
+        ipw.println(mIsPulseExpansionResettingAnimator);
+        ipw.print("mTranslationForFullShadeTransition=");
+        ipw.println(mTranslationForFullShadeTransition);
+        ipw.print("mAnimateNextNotificationBounds=");
+        ipw.println(mAnimateNextNotificationBounds);
+        ipw.print("mNotificationBoundsAnimationDelay=");
+        ipw.println(mNotificationBoundsAnimationDelay);
+        ipw.print("mNotificationBoundsAnimationDuration=");
+        ipw.println(mNotificationBoundsAnimationDuration);
+        ipw.print("mLastClippingTopBound=");
+        ipw.println(mLastClippingTopBound);
+        ipw.print("mLastNotificationsTopPadding=");
+        ipw.println(mLastNotificationsTopPadding);
+        ipw.print("mLastNotificationsClippingTopBound=");
+        ipw.println(mLastNotificationsClippingTopBound);
+        ipw.print("mLastNotificationsClippingTopBoundNssl=");
+        ipw.println(mLastNotificationsClippingTopBoundNssl);
+        ipw.print("mInterceptRegion=");
+        ipw.println(mInterceptRegion);
+        ipw.print("mClippingAnimationEndBounds=");
+        ipw.println(mClippingAnimationEndBounds);
+        ipw.print("mLastClipBounds=");
+        ipw.println(mLastClipBounds);
     }
 
     /** */
