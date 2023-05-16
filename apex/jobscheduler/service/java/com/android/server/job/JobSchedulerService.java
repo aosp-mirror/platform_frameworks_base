@@ -2600,34 +2600,43 @@ public class JobSchedulerService extends com.android.server.SystemService
         } else {
             numSystemStops++;
         }
-        final int backoffAttempts = Math.max(1,
-                numFailures + numSystemStops / mConstants.SYSTEM_STOP_TO_FAILURE_RATIO);
-        long delayMillis;
+        final int backoffAttempts =
+                numFailures + numSystemStops / mConstants.SYSTEM_STOP_TO_FAILURE_RATIO;
+        final long earliestRuntimeMs;
 
-        switch (job.getBackoffPolicy()) {
-            case JobInfo.BACKOFF_POLICY_LINEAR: {
-                long backoff = initialBackoffMillis;
-                if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME_MS) {
-                    backoff = mConstants.MIN_LINEAR_BACKOFF_TIME_MS;
+        if (backoffAttempts == 0) {
+            earliestRuntimeMs = JobStatus.NO_EARLIEST_RUNTIME;
+        } else {
+            long delayMillis;
+            switch (job.getBackoffPolicy()) {
+                case JobInfo.BACKOFF_POLICY_LINEAR: {
+                    long backoff = initialBackoffMillis;
+                    if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME_MS) {
+                        backoff = mConstants.MIN_LINEAR_BACKOFF_TIME_MS;
+                    }
+                    delayMillis = backoff * backoffAttempts;
                 }
-                delayMillis = backoff * backoffAttempts;
-            } break;
-            default:
-                if (DEBUG) {
-                    Slog.v(TAG, "Unrecognised back-off policy, defaulting to exponential.");
+                break;
+                default:
+                    if (DEBUG) {
+                        Slog.v(TAG, "Unrecognised back-off policy, defaulting to exponential.");
+                    }
+                    // Intentional fallthrough.
+                case JobInfo.BACKOFF_POLICY_EXPONENTIAL: {
+                    long backoff = initialBackoffMillis;
+                    if (backoff < mConstants.MIN_EXP_BACKOFF_TIME_MS) {
+                        backoff = mConstants.MIN_EXP_BACKOFF_TIME_MS;
+                    }
+                    delayMillis = (long) Math.scalb(backoff, backoffAttempts - 1);
                 }
-            case JobInfo.BACKOFF_POLICY_EXPONENTIAL: {
-                long backoff = initialBackoffMillis;
-                if (backoff < mConstants.MIN_EXP_BACKOFF_TIME_MS) {
-                    backoff = mConstants.MIN_EXP_BACKOFF_TIME_MS;
-                }
-                delayMillis = (long) Math.scalb(backoff, backoffAttempts - 1);
-            } break;
+                break;
+            }
+            delayMillis =
+                    Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
+            earliestRuntimeMs = elapsedNowMillis + delayMillis;
         }
-        delayMillis =
-                Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
         JobStatus newJob = new JobStatus(failureToReschedule,
-                elapsedNowMillis + delayMillis,
+                earliestRuntimeMs,
                 JobStatus.NO_LATEST_RUNTIME, numFailures, numSystemStops,
                 failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis(),
                 failureToReschedule.getCumulativeExecutionTimeMs());
