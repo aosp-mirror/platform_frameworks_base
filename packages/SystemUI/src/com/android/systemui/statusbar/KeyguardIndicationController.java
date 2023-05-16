@@ -94,6 +94,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.log.LogLevel;
 import com.android.systemui.plugins.FalsingManager;
@@ -147,6 +148,7 @@ public class KeyguardIndicationController {
     private final AuthController mAuthController;
     private final KeyguardLogger mKeyguardLogger;
     private final UserTracker mUserTracker;
+    private final BouncerMessageInteractor mBouncerMessageInteractor;
     private ViewGroup mIndicationArea;
     private KeyguardIndicationTextView mTopIndicationView;
     private KeyguardIndicationTextView mLockScreenIndicationView;
@@ -253,7 +255,8 @@ public class KeyguardIndicationController {
             KeyguardLogger keyguardLogger,
             AlternateBouncerInteractor alternateBouncerInteractor,
             AlarmManager alarmManager,
-            UserTracker userTracker
+            UserTracker userTracker,
+            BouncerMessageInteractor bouncerMessageInteractor
     ) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -278,7 +281,7 @@ public class KeyguardIndicationController {
         mScreenLifecycle.addObserver(mScreenObserver);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUserTracker = userTracker;
-
+        mBouncerMessageInteractor = bouncerMessageInteractor;
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
         int[] msgIds = context.getResources().getIntArray(
@@ -1151,6 +1154,11 @@ public class KeyguardIndicationController {
                         msgId,
                         helpString);
             } else if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
+                if (biometricSourceType == FINGERPRINT && !fpAuthFailed) {
+                    mBouncerMessageInteractor.setFingerprintAcquisitionMessage(helpString);
+                } else if (faceAuthSoftError) {
+                    mBouncerMessageInteractor.setFaceAcquisitionMessage(helpString);
+                }
                 mStatusBarKeyguardViewManager.setKeyguardMessage(helpString,
                         mInitialTextColorState);
             } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
@@ -1206,6 +1214,8 @@ public class KeyguardIndicationController {
             if (biometricSourceType == FACE) {
                 mFaceAcquiredMessageDeferral.reset();
             }
+            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
+            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         @Override
@@ -1226,6 +1236,8 @@ public class KeyguardIndicationController {
             } else if (biometricSourceType == FINGERPRINT) {
                 onFingerprintAuthError(msgId, errString);
             }
+            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
+            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         private void onFaceAuthError(int msgId, String errString) {
@@ -1310,6 +1322,8 @@ public class KeyguardIndicationController {
                     showActionToUnlock();
                 }
             }
+            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
+            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         @Override

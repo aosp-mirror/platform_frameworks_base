@@ -87,6 +87,11 @@ public interface KeyguardSecurityCallback {
     default void onUserInput() {
     }
 
+    /**
+     * Invoked when the auth input is disabled for specified number of seconds.
+     * @param seconds Number of seconds for which the auth input is disabled.
+     */
+    default void onAttemptLockoutStart(long seconds) {}
 
     /**
      * Dismisses keyguard and go to unlocked state.
