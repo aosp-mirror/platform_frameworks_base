@@ -41,7 +41,7 @@ import android.util.SparseArray;
 import androidx.test.annotation.UiThreadTest;
 
 import com.android.internal.widget.LockSettingsInternal;
-import com.android.server.ExtendedMockitoRule;
+import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.am.UserState;
 import com.android.server.pm.UserManagerService.UserData;
