@@ -3,8 +3,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"ଇନପୁଟ୍‌ ଡିଭାଇସ୍"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android କୀ’ବୋର୍ଡ"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ଇଂରାଜୀ (ୟୁକେ)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ଇଂରାଜୀ (ୟୁଏସ୍‍)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ଇଂରାଜୀ (ଯୁକ୍ତରାଜ୍ୟ)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ଇଂରାଜୀ (ଯୁକ୍ତରାଷ୍ଟ୍ର)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ଇଂରାଜୀ (ୟୁଏସ୍‍), ଇଣ୍ଟରନେସନାଲ୍‍ ଷ୍ଟାଇଲ୍‍"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"ଇଂରାଜୀ (ୟୁଏସ୍‍), କୋଲେମକ୍‍ ଷ୍ଟାଇଲ୍‍"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"ଇଂରାଜୀ (ୟୁଏସ୍‍), ଡଭୋରାକ୍‌ ଷ୍ଟାଇଲ୍‍"</string>
@@ -21,14 +21,14 @@
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"ବୁଲଗାରିଆନ୍‍"</string>
     <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"ବୁଲଗେରିଆନ୍, ଫୋନେଟିକ୍"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"ଇଟାଲିୟାନ୍‌"</string>
-    <string name="keyboard_layout_danish" msgid="8036432066627127851">"ଡାନିଶ୍‍"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"ଡେନିସ"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"ନରୱେଜିଆନ୍"</string>
     <string name="keyboard_layout_swedish" msgid="732959109088479351">"ସ୍ଵେଡିଶ୍‌"</string>
-    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"ଫିନ୍ନିଶ୍‍"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"ଫିନ୍ନିସ"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"କ୍ରୋଆଶିଆନ୍"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"ଚେକ୍"</string>
     <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"ଚେକ୍ QWERTY ଷ୍ଟାଇଲ୍"</string>
-    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"ଇଷ୍ଟୋନିଆନ୍"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"ଏଷ୍ଟୋନିଆନ"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ହଙ୍ଗେରିଆନ୍"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"ଆଇସଲାଣ୍ଡିକ୍"</string>
     <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"ବ୍ରାଜିଲିୟାନ୍"</string>
@@ -38,14 +38,14 @@
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"ତୁର୍କିସ୍"</string>
     <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"ତୁର୍କିଶ୍ F"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"ୟୁକ୍ରାନିଆନ୍"</string>
-    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"ଆରବିକ୍‍"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"ଆରବିକ"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"ଗ୍ରୀକ୍"</string>
     <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"ହିବ୍ର୍ୟୁ"</string>
     <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"ଲିଥୁଆନିଆନ୍"</string>
     <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"ସ୍ପାନିଶ୍‍ (ଲାଟିନ୍‌)"</string>
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"ଲାଟିଭିଆନ୍‍"</string>
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"ପାର୍ସିଆନ୍‌"</string>
-    <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"ଆଜେର୍‌ବୈଜାନି"</string>
+    <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"ଆଜରବୈଜାନି"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"ପଲିଶ୍"</string>
     <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"ବେଲାରୁସିଆନ୍"</string>
     <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"ମଙ୍ଗୋଲିଆନ୍"</string>
