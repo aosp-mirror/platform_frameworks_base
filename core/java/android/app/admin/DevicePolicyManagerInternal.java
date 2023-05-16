@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.os.UserManager.EnforcingUser;
 
 import java.util.List;
 import java.util.Set;
@@ -326,4 +327,10 @@ public abstract class DevicePolicyManagerInternal {
      */
     public abstract List<Bundle> getApplicationRestrictionsPerAdminForUser(
             String packageName, @UserIdInt int userId);
+
+    /**
+     *  Returns a list of users who set a user restriction on a given user.
+     */
+    public abstract List<EnforcingUser> getUserRestrictionSources(String restriction,
+                @UserIdInt int userId);
 }
