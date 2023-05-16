@@ -18,14 +18,24 @@ class KeyguardClockFrame(
     }
 
     protected override fun dispatchDraw(canvas: Canvas) {
-        val restoreTo = saveCanvasAlpha(this, canvas, drawAlpha)
-        super.dispatchDraw(canvas)
-        canvas.restoreToCount(restoreTo)
+        saveCanvasAlpha(this, canvas, drawAlpha) { super.dispatchDraw(it) }
     }
 
     companion object {
         @JvmStatic
-        fun saveCanvasAlpha(view: View, canvas: Canvas, alpha: Int): Int {
+        fun saveCanvasAlpha(view: View, canvas: Canvas, alpha: Int, drawFunc: (Canvas) -> Unit) {
+            if (alpha <= 0) {
+                // Zero Alpha -> skip drawing phase
+                return
+            }
+
+            if (alpha >= 255) {
+                // Max alpha -> no need for layer
+                drawFunc(canvas)
+                return
+            }
+
+            // Find x & y of view on screen
             var (x, y) =
                 run {
                     val locationOnScreen = IntArray(2)
@@ -33,7 +43,10 @@ class KeyguardClockFrame(
                     Pair(locationOnScreen[0].toFloat(), locationOnScreen[1].toFloat())
                 }
 
-            return canvas.saveLayerAlpha(-1f * x, -1f * y, x + view.width, y + view.height, alpha)
+            val restoreTo =
+                canvas.saveLayerAlpha(-1f * x, -1f * y, x + view.width, y + view.height, alpha)
+            drawFunc(canvas)
+            canvas.restoreToCount(restoreTo)
         }
     }
 }
