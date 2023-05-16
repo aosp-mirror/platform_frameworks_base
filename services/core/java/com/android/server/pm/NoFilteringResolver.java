@@ -60,15 +60,9 @@ public class NoFilteringResolver extends CrossProfileResolver {
     public static boolean isIntentRedirectionAllowed(Context context,
             AppCloningDeviceConfigHelper appCloningDeviceConfigHelper, boolean resolveForStart,
             long flags) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            return  context.getResources().getBoolean(R.bool.config_enableAppCloningBuildingBlocks)
-                    && appCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks()
+        return isAppCloningBuildingBlocksEnabled(context, appCloningDeviceConfigHelper)
                     && (resolveForStart || (((flags & PackageManager.MATCH_CLONE_PROFILE) != 0)
                     && hasPermission(context, Manifest.permission.QUERY_CLONED_APPS)));
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
     }
 
     public NoFilteringResolver(ComponentResolverApi componentResolver,
@@ -145,5 +139,19 @@ public class NoFilteringResolver extends CrossProfileResolver {
     private static boolean hasPermission(Context context, String permission) {
         return context.checkCallingOrSelfPermission(permission)
                 == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Checks if the AppCloningBuildingBlocks flag is enabled.
+     */
+    private static boolean isAppCloningBuildingBlocksEnabled(Context context,
+            AppCloningDeviceConfigHelper appCloningDeviceConfigHelper) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return context.getResources().getBoolean(R.bool.config_enableAppCloningBuildingBlocks)
+                    && appCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 }

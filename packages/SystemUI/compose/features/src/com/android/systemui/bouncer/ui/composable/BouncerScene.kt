@@ -16,18 +16,30 @@
 
 package com.android.systemui.bouncer.ui.composable
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -50,31 +62,74 @@ constructor(
     override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
-                    UserAction.Back to SceneModel(SceneKey.LockScreen),
+                    UserAction.Back to SceneModel(SceneKey.Lockscreen),
                 )
             )
             .asStateFlow()
 
-    @Composable
-    override fun Content(
-        modifier: Modifier,
-    ) {
-        // TODO(b/280877228): implement the real UI.
+    @Composable override fun Content(modifier: Modifier) = BouncerScene(viewModel, modifier)
+}
 
-        Box(modifier = modifier) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.align(Alignment.Center)
-            ) {
-                Text("Bouncer", style = MaterialTheme.typography.headlineLarge)
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Button(onClick = { viewModel.onAuthenticateButtonClicked() }) {
-                        Text("Authenticate")
-                    }
-                }
+@Composable
+private fun BouncerScene(
+    viewModel: BouncerViewModel,
+    modifier: Modifier = Modifier,
+) {
+    val message: String by viewModel.message.collectAsState()
+    val authMethodViewModel: AuthMethodBouncerViewModel? by viewModel.authMethod.collectAsState()
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(60.dp),
+        modifier =
+            modifier.background(MaterialTheme.colorScheme.surface).fillMaxSize().padding(32.dp)
+    ) {
+        Crossfade(
+            targetState = message,
+            label = "Bouncer message",
+        ) {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+
+        Box(Modifier.weight(1f)) {
+            when (val nonNullViewModel = authMethodViewModel) {
+                is PinBouncerViewModel ->
+                    PinBouncer(
+                        viewModel = nonNullViewModel,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                is PasswordBouncerViewModel ->
+                    PasswordBouncer(
+                        viewModel = nonNullViewModel,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                is PatternBouncerViewModel ->
+                    PatternBouncer(
+                        viewModel = nonNullViewModel,
+                        modifier =
+                            Modifier.aspectRatio(1f, matchHeightConstraintsFirst = false)
+                                .align(Alignment.BottomCenter),
+                    )
+                else -> Unit
             }
+        }
+
+        Button(
+            onClick = viewModel::onEmergencyServicesButtonClicked,
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                ),
+        ) {
+            Text(
+                text = stringResource(com.android.internal.R.string.lockscreen_emergency_call),
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 }

@@ -20,7 +20,7 @@ import com.android.systemui.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.domain.interactor.LockScreenSceneInteractor
+import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -31,17 +31,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-/** Models UI state and handles user input for the lock screen scene. */
-class LockScreenSceneViewModel
+/** Models UI state and handles user input for the lockscreen scene. */
+class LockscreenSceneViewModel
 @AssistedInject
 constructor(
     @Application applicationScope: CoroutineScope,
-    interactorFactory: LockScreenSceneInteractor.Factory,
+    interactorFactory: LockscreenSceneInteractor.Factory,
     @Assisted containerName: String,
 ) {
-    private val interactor: LockScreenSceneInteractor = interactorFactory.create(containerName)
+    private val interactor: LockscreenSceneInteractor = interactorFactory.create(containerName)
 
-    /** The icon for the "lock" button on the lock screen. */
+    /** The icon for the "lock" button on the lockscreen. */
     val lockButtonIcon: StateFlow<Icon> =
         interactor.isDeviceLocked
             .map { isLocked -> lockIcon(isLocked = isLocked) }
@@ -63,12 +63,12 @@ constructor(
 
     /** Notifies that the lock button on the lock screen was clicked. */
     fun onLockButtonClicked() {
-        interactor.dismissLockScreen()
+        interactor.dismissLockscreen()
     }
 
     /** Notifies that some content on the lock screen was clicked. */
     fun onContentClicked() {
-        interactor.dismissLockScreen()
+        interactor.dismissLockscreen()
     }
 
     private fun upDestinationSceneKey(
@@ -103,6 +103,6 @@ constructor(
     interface Factory {
         fun create(
             containerName: String,
-        ): LockScreenSceneViewModel
+        ): LockscreenSceneViewModel
     }
 }

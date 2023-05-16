@@ -73,7 +73,7 @@ constructor(
                             is AuthenticationMethodModel.Swipe ->
                                 sceneInteractor.setCurrentScene(
                                     containerName,
-                                    SceneModel(SceneKey.LockScreen),
+                                    SceneModel(SceneKey.Lockscreen),
                                 )
                             else -> Unit
                         }

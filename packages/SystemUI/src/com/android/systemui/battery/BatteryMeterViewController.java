@@ -91,8 +91,8 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 }
 
                 @Override
-                public void onIsOverheatedChanged(boolean isOverheated) {
-                    mView.onIsOverheatedChanged(isOverheated);
+                public void onIsBatteryDefenderChanged(boolean isBatteryDefender) {
+                    mView.onIsBatteryDefenderChanged(isBatteryDefender);
                 }
             };
 
