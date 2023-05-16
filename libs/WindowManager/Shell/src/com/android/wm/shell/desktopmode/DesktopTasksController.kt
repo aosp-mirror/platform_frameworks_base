@@ -131,6 +131,18 @@ class DesktopTasksController(
         desktopModeTaskRepository.setStashed(displayId, true)
     }
 
+    /**
+     * Clear the stashed state for the given display
+     */
+    fun hideStashedDesktopApps(displayId: Int) {
+        KtProtoLog.v(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTasksController: hideStashedApps displayId=%d",
+                displayId
+        )
+        desktopModeTaskRepository.setStashed(displayId, false)
+    }
+
     /** Get number of tasks that are marked as visible */
     fun getVisibleTaskCount(displayId: Int): Int {
         return desktopModeTaskRepository.getVisibleTaskCount(displayId)
@@ -751,6 +763,13 @@ class DesktopTasksController(
                     controller,
                     "stashDesktopApps"
             ) { c -> c.stashDesktopApps(displayId) }
+        }
+
+        override fun hideStashedDesktopApps(displayId: Int) {
+            ExecutorUtils.executeRemoteCallWithTaskPermission(
+                    controller,
+                    "hideStashedDesktopApps"
+            ) { c -> c.hideStashedDesktopApps(displayId) }
         }
 
         override fun getVisibleTaskCount(displayId: Int): Int {
