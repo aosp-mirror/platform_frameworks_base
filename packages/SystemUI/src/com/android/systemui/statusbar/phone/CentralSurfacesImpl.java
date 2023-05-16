@@ -187,6 +187,7 @@ import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
+import com.android.systemui.shade.ShadeExpansionListener;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.shade.ShadeSurface;
@@ -913,7 +914,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mScreenOffAnimationController = screenOffAnimationController;
 
-        mShadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
+        ShadeExpansionListener shadeExpansionListener = this::onPanelExpansionChanged;
+        ShadeExpansionChangeEvent currentState =
+                mShadeExpansionStateManager.addExpansionListener(shadeExpansionListener);
+        shadeExpansionListener.onPanelExpansionChanged(currentState);
+
         mShadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
@@ -1266,7 +1271,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
             mNotificationIconAreaController.setupShelf(mNotificationShelfController);
         }
-        mShadeExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
+        ShadeExpansionChangeEvent currentState =
+                mShadeExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
+        mWakeUpCoordinator.onPanelExpansionChanged(currentState);
 
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);

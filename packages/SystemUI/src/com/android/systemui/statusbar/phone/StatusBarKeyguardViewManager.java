@@ -386,7 +386,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mExpansionCallback);
         mShadeViewController = shadeViewController;
         if (shadeExpansionStateManager != null) {
-            shadeExpansionStateManager.addExpansionListener(this);
+            ShadeExpansionChangeEvent currentState =
+                    shadeExpansionStateManager.addExpansionListener(this);
+            onPanelExpansionChanged(currentState);
         }
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
