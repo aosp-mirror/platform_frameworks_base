@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility;
 
+import static android.content.pm.PackageManager.FEATURE_WINDOW_MAGNIFICATION;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
@@ -96,6 +97,7 @@ import com.android.systemui.utils.os.FakeHandler;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -147,8 +149,15 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     private View.OnTouchListener mTouchListener;
     private MotionEventHelper mMotionEventHelper = new MotionEventHelper();
 
+    /**
+     *  return whether window magnification is supported for current test context.
+     */
+    private boolean isWindowModeSupported() {
+        return getContext().getPackageManager().hasSystemFeature(FEATURE_WINDOW_MAGNIFICATION);
+    }
+
     @Before
-    public void setUp() throws RemoteException {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mContext = Mockito.spy(getContext());
         mHandler = new FakeHandler(TestableLooper.get(this).getLooper());
@@ -202,6 +211,9 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
             return null;
         }).when(mSpyView).setOnTouchListener(
                 any(View.OnTouchListener.class));
+
+        // skip test if window magnification is not supported to prevent fail results. (b/279820875)
+        Assume.assumeTrue(isWindowModeSupported());
     }
 
     @After
