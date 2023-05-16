@@ -605,6 +605,22 @@ final class DevicePolicyEngine {
     }
 
     /**
+     * Retrieves the values set for the provided {@code policyDefinition} by each admin.
+     */
+    @NonNull
+    <V> LinkedHashMap<EnforcingAdmin, PolicyValue<V>> getGlobalPoliciesSetByAdmins(
+            @NonNull PolicyDefinition<V> policyDefinition) {
+        Objects.requireNonNull(policyDefinition);
+
+        synchronized (mLock) {
+            if (!hasGlobalPolicyLocked(policyDefinition)) {
+                return new LinkedHashMap<>();
+            }
+            return getGlobalPolicyStateLocked(policyDefinition).getPoliciesSetByAdmins();
+        }
+    }
+
+    /**
      * Returns the policies set by the given admin that share the same
      * {@link PolicyKey#getIdentifier()} as the provided {@code policyDefinition}.
      *
