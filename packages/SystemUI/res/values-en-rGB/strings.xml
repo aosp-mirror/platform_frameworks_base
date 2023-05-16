@@ -748,7 +748,7 @@
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"your operator"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Switch back to <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobile data won\'t automatically switch based on availability"</string>
-    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"No thanks"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"No, thanks"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Yes, switch"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Because an app is obscuring a permission request, Settings can’t verify your response."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Allow <xliff:g id="APP_0">%1$s</xliff:g> to show <xliff:g id="APP_2">%2$s</xliff:g> slices?"</string>
