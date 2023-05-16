@@ -17991,6 +17991,15 @@ public final class Settings {
                 "review_permissions_notification_state";
 
         /**
+         * Whether repair mode is active on the device.
+         * <p>
+         * Set to 1 for true and 0 for false.
+         *
+         * @hide
+         */
+        public static final String REPAIR_MODE_ACTIVE = "repair_mode_active";
+
+        /**
          * Settings migrated from Wear OS settings provider.
          * @hide
          */
