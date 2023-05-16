@@ -108,7 +108,9 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     }
 
     override fun onViewAttached() {
-        shadeExpansionStateManager.addExpansionListener(shadeExpansionListener)
+        val currentState =
+            shadeExpansionStateManager.addExpansionListener(shadeExpansionListener)
+        shadeExpansionListener.onPanelExpansionChanged(currentState)
         dialogManager.registerListener(dialogListener)
         dumpManager.registerDumpable(dumpTag, this)
     }
