@@ -516,13 +516,6 @@ object Flags {
     val ENABLE_PIP_APP_ICON_OVERLAY =
         sysPropBooleanFlag(1115, "persist.wm.debug.enable_pip_app_icon_overlay", default = true)
 
-    // TODO(b/272110828): Tracking bug
-    @Keep
-    @JvmField
-    val ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP =
-        sysPropBooleanFlag(
-            1116, "persist.wm.debug.enable_move_floating_window_in_tabletop", default = true)
-
     // TODO(b/273443374): Tracking Bug
     @Keep
     @JvmField val LOCKSCREEN_LIVE_WALLPAPER =
