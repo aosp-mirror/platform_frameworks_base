@@ -175,7 +175,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // while-in-use permissions in FGS started from background might be restricted.
     boolean mAllowWhileInUsePermissionInFgs;
     @PowerExemptionManager.ReasonCode
-    int mAllowWhileInUsePermissionInFgsReason;
+    int mAllowWhileInUsePermissionInFgsReason = REASON_DENIED;
 
     // Integer version of mAllowWhileInUsePermissionInFgs that we keep track to compare
     // the old and new logics.
