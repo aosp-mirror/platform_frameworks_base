@@ -1560,7 +1560,7 @@ public final class DisplayManagerService extends SystemService {
                 // VirtualDisplay has been successfully constructed.
                 session.setVirtualDisplayId(displayId);
                 // Don't start mirroring until user re-grants consent.
-                session.setWaitingToRecord(waitForPermissionConsent);
+                session.setWaitingForConsent(waitForPermissionConsent);
 
                 // We set the content recording session here on the server side instead of using
                 // a second AIDL call in MediaProjection. By ensuring that a virtual display has

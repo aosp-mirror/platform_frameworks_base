@@ -1675,6 +1675,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/am\/ActivityManagerService.java"
     },
+    "-584061725": {
+      "message": "Content Recording: Accept session updating same display %d with granted consent, with an existing session %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecordingController.java"
+    },
     "-583031528": {
       "message": "%s",
       "level": "INFO",
@@ -2166,6 +2172,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
+    "-125383273": {
+      "message": "Content Recording: waiting to record, so do nothing",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
     "-124316973": {
       "message": "Translucent=%s Floating=%s ShowWallpaper=%s Disable=%s",
