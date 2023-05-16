@@ -17,12 +17,14 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.view.accessibility.AccessibilityManager
 import androidx.annotation.VisibleForTesting
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -55,6 +57,7 @@ import kotlinx.coroutines.launch
 class KeyguardLongPressInteractor
 @Inject
 constructor(
+    @Application private val appContext: Context,
     @Application private val scope: CoroutineScope,
     transitionInteractor: KeyguardTransitionInteractor,
     repository: KeyguardRepository,
@@ -169,7 +172,8 @@ constructor(
 
     private fun isFeatureEnabled(): Boolean {
         return featureFlags.isEnabled(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED) &&
-            featureFlags.isEnabled(Flags.REVAMPED_WALLPAPER_UI)
+            featureFlags.isEnabled(Flags.REVAMPED_WALLPAPER_UI) &&
+            appContext.resources.getBoolean(R.bool.long_press_keyguard_customize_lockscreen_enabled)
     }
 
     /** Updates application state to ask to show the menu. */
