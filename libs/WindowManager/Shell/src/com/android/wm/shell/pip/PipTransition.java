@@ -26,6 +26,7 @@ import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 
@@ -92,6 +93,8 @@ public class PipTransition extends PipTransitionController {
     private final Rect mExitDestinationBounds = new Rect();
     @Nullable
     private IBinder mExitTransition;
+    @Nullable
+    private IBinder mMoveToBackTransition;
     private IBinder mRequestedEnterTransition;
     private WindowContainerToken mRequestedEnterTask;
     /** The Task window that is currently in PIP windowing mode. */
@@ -171,9 +174,10 @@ public class PipTransition extends PipTransitionController {
 
         // Exiting PIP.
         final int type = info.getType();
-        if (transition.equals(mExitTransition)) {
+        if (transition.equals(mExitTransition) || transition.equals(mMoveToBackTransition)) {
             mExitDestinationBounds.setEmpty();
             mExitTransition = null;
+            mMoveToBackTransition = null;
             mHasFadeOut = false;
             if (mFinishCallback != null) {
                 callFinishCallback(null /* wct */);
@@ -201,6 +205,8 @@ public class PipTransition extends PipTransitionController {
                     startExitToSplitAnimation(info, startTransaction, finishTransaction,
                             finishCallback, pipTaskInfo);
                     break;
+                case TRANSIT_TO_BACK:
+                    // pass through here is intended
                 case TRANSIT_REMOVE_PIP:
                     removePipImmediately(info, startTransaction, finishTransaction, finishCallback,
                             pipTaskInfo);
@@ -273,6 +279,15 @@ public class PipTransition extends PipTransitionController {
             WindowContainerTransaction wct = new WindowContainerTransaction();
             augmentRequest(transition, request, wct);
             return wct;
+        } else if (request.getType() == TRANSIT_TO_BACK && request.getTriggerTask() != null
+                && request.getTriggerTask().getWindowingMode() == WINDOWING_MODE_PINNED) {
+            // if we receive a TRANSIT_TO_BACK type of request while in PiP
+            mMoveToBackTransition = transition;
+            // update the transition state to avoid {@link PipTaskOrganizer#onTaskVanished()} calls
+            mPipTransitionState.setTransitionState(PipTransitionState.EXITING_PIP);
+
+            // return an empty WindowContainerTransaction so that we don't check other handlers
+            return new WindowContainerTransaction();
         } else {
             return null;
         }
