@@ -2021,7 +2021,7 @@ public class LauncherAppsService extends SystemService {
                         }
                         // Each launcher has a different set of pinned shortcuts, so we need to do a
                         // query in here.
-                        // (As of now, only one launcher has the permission at a time, so it's bit
+                        // (As of now, only one launcher has the permission at a time, so it's a bit
                         // moot, but we may change the permission model eventually.)
                         final List<ShortcutInfo> list =
                                 mShortcutServiceInternal.getShortcuts(launcherUserId,
