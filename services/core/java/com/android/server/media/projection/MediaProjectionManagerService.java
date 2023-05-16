@@ -406,7 +406,7 @@ public final class MediaProjectionManagerService extends SystemService
                 return;
             }
             if (mProjectionGrant.mSession == null
-                    || !mProjectionGrant.mSession.isWaitingToRecord()) {
+                    || !mProjectionGrant.mSession.isWaitingForConsent()) {
                 Slog.w(TAG, "Reusing token: Ignore consent result " + consentResult
                         + " if not waiting for the result.");
                 return;
@@ -445,7 +445,7 @@ public final class MediaProjectionManagerService extends SystemService
      */
     private void setReviewedConsentSessionLocked(@Nullable ContentRecordingSession session) {
         if (session != null) {
-            session.setWaitingToRecord(false);
+            session.setWaitingForConsent(false);
             session.setVirtualDisplayId(mProjectionGrant.mVirtualDisplayId);
         }
 
@@ -490,7 +490,7 @@ public final class MediaProjectionManagerService extends SystemService
             // Supposedly the package has re-used the user's consent; confirm the provided details
             // against the current projection token before re-using the current projection.
             if (mProjectionGrant == null || mProjectionGrant.mSession == null
-                    || !mProjectionGrant.mSession.isWaitingToRecord()) {
+                    || !mProjectionGrant.mSession.isWaitingForConsent()) {
                 Slog.e(TAG, "Reusing token: Not possible to reuse the current projection "
                         + "instance");
                 return null;
