@@ -675,7 +675,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"使用人脸解锁或屏幕锁定凭据验证身份，才能继续操作"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"出了点问题。请重试。"</string>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"出了点问题，请重试。"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"面孔图标"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"读取同步设置"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"允许该应用读取某个帐号的同步设置。例如，此权限可确定“联系人”应用是否与某个帐号同步。"</string>
