@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"i-disable"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Tunog at pag-vibrate"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Mga Setting"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Hininaan sa mas ligtas na volume"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Naging malakas ang volume nang mas matagal sa inirerekomenda"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Ibinaba sa mas ligtas na level ang volume"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Naging malakas ang volume ng headphones nang mas matagal sa inirerekomenda"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Lampas na sa ligtas na limitasyon para sa linggong ito ang volume ng headphone"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Magpatuloy sa pakikinig"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Hinaan"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Naka-pin ang app"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Overview upang mag-unpin."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Home upang mag-unpin."</string>
@@ -1139,10 +1142,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Ikonekta sa charger ang iyong stylus"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Paubos na ang baterya ng stylus"</string>
     <string name="video_camera" msgid="7654002575156149298">"Video camera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Hindi puwedeng tumawag mula sa profile na ito"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Pinapayagan ka ng iyong patakaran sa trabaho na tumawag lang mula sa profile sa trabaho"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Hindi puwedeng tumawag mula sa personal na app"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Pinapayagan ka lang ng iyong organisasyon na tumawag mula sa mga app para sa trabaho"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Lumipat sa profile sa trabaho"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Isara"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Mag-install ng phone app para sa trabaho"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Kanselahin"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"I-customize ang lock screen"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"I-unlock para i-customize ang lock screen"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Hindi available ang Wi-Fi"</string>

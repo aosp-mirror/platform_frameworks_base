@@ -460,7 +460,7 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"此裝置已安裝憑證授權單位。你的安全網絡流量可能會受監控或修改。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"你的管理員已開啟網絡記錄功能，以監控你裝置上的流量。"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"你的管理員已開啟網絡記錄功能，可監控你工作設定檔 (而非個人設定檔) 的流量。"</string>
-    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"此裝置已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網。你的 VPN 供應商可以看到你的網絡活動，包括電郵和瀏覽資料。"</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"此裝置目前透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網。你的 VPN 供應商可以看到你的網絡活動，包括電郵和瀏覽資料。"</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"此裝置已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網。IT 管理員可以看到你的網絡活動，包括電郵和瀏覽資料。"</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"此裝置已透過「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」和「<xliff:g id="VPN_APP_1">%2$s</xliff:g>」連接至互聯網。IT 管理員可以看到你的網絡活動，包括電郵和瀏覽資料。"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"你的工作應用程式已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網。IT 管理員和 VPN 供應商可以看到你在工作應用程式的網絡活動，包括電郵和瀏覽資料。"</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
     <string name="sound_settings" msgid="8874581353127418308">"音效和震動"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"設定"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"已調低至較安全的音量"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"使用高音量已超過建議的時間"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"音量已降至較安全的水平"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"以高音量使用耳機的時間已超過建議範圍"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"耳機音量已超過本週安全限制"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"繼續聆聽"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"降低音量"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"已固定應用程式"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"應用程式將會固定在螢幕上顯示，直至你取消固定為止。按住「返回」和「概覽」按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"應用程式將會固定在螢幕上顯示，直至你取消固定為止。按住「返回」按鈕和主按鈕即可取消固定。"</string>
@@ -985,10 +988,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"喇叭和螢幕"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"建議的裝置"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"停止共享工作階段以移動媒體至其他裝置"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"停止"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播運作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"廣播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"附近有兼容藍牙裝置的人可收聽你正在廣播的媒體內容"</string>
@@ -1141,10 +1142,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"將觸控筆連接充電器"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"觸控筆電量不足"</string>
     <string name="video_camera" msgid="7654002575156149298">"攝影機"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"無法透過此設定檔撥打電話"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"你的公司政策只允許透過工作設定檔撥打電話"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"無法透過個人應用程式打電話"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"你的機構只允許你透過工作應用程式打電話"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"切換至工作設定檔"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"關閉"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"安裝工作電話應用程式"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"取消"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"自訂上鎖畫面"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"解鎖後即可自訂上鎖畫面"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"無法連線至 Wi-Fi"</string>
