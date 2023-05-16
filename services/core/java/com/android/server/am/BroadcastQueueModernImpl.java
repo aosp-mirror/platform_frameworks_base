@@ -62,6 +62,7 @@ import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerExemptionManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -878,12 +879,20 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mLocalHandler.sendMessageDelayed(
                     Message.obtain(mLocalHandler, MSG_BG_ACTIVITY_START_TIMEOUT, args), timeout);
         }
-
         if (r.options != null && r.options.getTemporaryAppAllowlistDuration() > 0) {
-            mService.tempAllowlistUidLocked(queue.uid,
-                    r.options.getTemporaryAppAllowlistDuration(),
-                    r.options.getTemporaryAppAllowlistReasonCode(), r.toShortString(),
-                    r.options.getTemporaryAppAllowlistType(), r.callingUid);
+            if (r.options.getTemporaryAppAllowlistType()
+                    == PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_APP_FREEZING_DELAYED) {
+                // Only delay freezer, don't add to any temp allowlist
+                // TODO: Add a unit test
+                mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
+                        CachedAppOptimizer.UNFREEZE_REASON_START_RECEIVER,
+                        r.options.getTemporaryAppAllowlistDuration());
+            } else {
+                mService.tempAllowlistUidLocked(queue.uid,
+                        r.options.getTemporaryAppAllowlistDuration(),
+                        r.options.getTemporaryAppAllowlistReasonCode(), r.toShortString(),
+                        r.options.getTemporaryAppAllowlistType(), r.callingUid);
+            }
         }
 
         if (DEBUG_BROADCAST) logv("Scheduling " + r + " to warm " + app);
