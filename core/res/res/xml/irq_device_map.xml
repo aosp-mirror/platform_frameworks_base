@@ -28,6 +28,8 @@
             - Wifi: Use this to denote network traffic that uses the wifi transport.
             - Sound_trigger: Use this to denote sound phrase detection, like the ones supported by
         SoundTriggerManager.
+            - Sensor: Use this to denote wakeups due to sensor events.
+            - Cellular_data: Use this to denote network traffic on the cellular transport.
 
         The overlay should use tags <device> and <subsystem> to describe this mapping in the
         following way:
