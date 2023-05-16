@@ -27,10 +27,8 @@ import android.util.Slog;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
-/**
- * Uses the OEM lock HAL.
- */
-class VendorLock extends OemLock {
+/** Uses the OEM lock HAL. */
+class VendorLockHidl extends OemLock {
     private static final String TAG = "OemLock";
 
     private Context mContext;
@@ -40,29 +38,30 @@ class VendorLock extends OemLock {
         try {
             return IOemLock.getService(/* retry */ true);
         } catch (NoSuchElementException e) {
-            Slog.i(TAG, "OemLock HAL not present on device");
+            Slog.i(TAG, "OemLock Hidl HAL not present on device");
             return null;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    VendorLock(Context context, IOemLock oemLock) {
+    VendorLockHidl(Context context) {
         mContext = context;
-        mOemLock = oemLock;
+        mOemLock = getOemLockHalService();
     }
 
     @Override
     @Nullable
     String getLockName() {
-        final Integer[] requestStatus = new Integer[1];
         final String[] lockName = new String[1];
+        final Integer[] requestStatus = new Integer[1];
 
         try {
-            mOemLock.getName((status, name) -> {
-                requestStatus[0] = status;
-                lockName[0] = name;
-            });
+            mOemLock.getName(
+                    (status, name) -> {
+                        requestStatus[0] = status;
+                        lockName[0] = name;
+                    });
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get name from HAL", e);
             throw e.rethrowFromSystemServer();
@@ -113,14 +112,14 @@ class VendorLock extends OemLock {
 
     @Override
     boolean isOemUnlockAllowedByCarrier() {
-        final Integer[] requestStatus = new Integer[1];
         final Boolean[] allowedByCarrier = new Boolean[1];
-
+        final Integer[] requestStatus = new Integer[1];
         try {
-            mOemLock.isOemUnlockAllowedByCarrier((status, allowed) -> {
-                requestStatus[0] = status;
-                allowedByCarrier[0] = allowed;
-            });
+            mOemLock.isOemUnlockAllowedByCarrier(
+                    (status, allowed) -> {
+                        requestStatus[0] = status;
+                        allowedByCarrier[0] = allowed;
+                    });
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get carrier state from HAL");
             throw e.rethrowFromSystemServer();
@@ -161,14 +160,15 @@ class VendorLock extends OemLock {
 
     @Override
     boolean isOemUnlockAllowedByDevice() {
-        final Integer[] requestStatus = new Integer[1];
         final Boolean[] allowedByDevice = new Boolean[1];
 
+        final Integer[] requestStatus = new Integer[1];
         try {
-            mOemLock.isOemUnlockAllowedByDevice((status, allowed) -> {
-                requestStatus[0] = status;
-                allowedByDevice[0] = allowed;
-            });
+            mOemLock.isOemUnlockAllowedByDevice(
+                    (status, allowed) -> {
+                        requestStatus[0] = status;
+                        allowedByDevice[0] = allowed;
+                    });
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get devie state from HAL");
             throw e.rethrowFromSystemServer();
