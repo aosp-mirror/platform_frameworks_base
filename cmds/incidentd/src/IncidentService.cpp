@@ -513,6 +513,9 @@ status_t IncidentService::onTransact(uint32_t code, const Parcel& data, Parcel* 
             sp<IShellCallback> shellCallback = IShellCallback::asInterface(data.readStrongBinder());
             sp<IResultReceiver> resultReceiver =
                     IResultReceiver::asInterface(data.readStrongBinder());
+            if (resultReceiver == nullptr) {
+                return BAD_VALUE;
+            }
 
             FILE* fin = fdopen(in, "r");
             FILE* fout = fdopen(out, "w");
