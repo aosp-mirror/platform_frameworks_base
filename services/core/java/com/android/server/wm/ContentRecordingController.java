@@ -56,8 +56,8 @@ final class ContentRecordingController {
      * Updates the current recording session.
      * <p>Handles the following scenarios:
      * <ul>
-     *         <li>Invalid scenarios: The incoming session is malformed, or the incoming session is
-     *         identical to the current session</li>
+     *         <li>Invalid scenarios: The incoming session is malformed.</li>
+     *         <li>Ignored scenario: the incoming session is identical to the current session.</li>
      *         <li>Start Scenario: Starting a new session. Recording begins immediately.</li>
      *         <li>Takeover Scenario: Occurs during a Start Scenario, if a pre-existing session was
      *         in-progress. For example, recording on VirtualDisplay "app_foo" was ongoing. A
@@ -66,6 +66,8 @@ final class ContentRecordingController {
      *         begin.</li>
      *         <li>Stopping scenario: The incoming session is null and there is currently an ongoing
      *         session. The controller stops recording.</li>
+     *         <li>Updating scenario: There is an update for the same display, where recording
+     *         was previously not taking place but is now permitted to go ahead.</li>
      * </ul>
      *
      * @param incomingSession The incoming recording session (either an update to a current session
@@ -78,20 +80,28 @@ final class ContentRecordingController {
         if (incomingSession != null && !ContentRecordingSession.isValid(incomingSession)) {
             return;
         }
-        // Invalid scenario: ignore identical incoming session.
+        final boolean hasSessionUpdatedWithConsent =
+                mSession != null && incomingSession != null && mSession.isWaitingForConsent()
+                        && !incomingSession.isWaitingForConsent();
         if (ContentRecordingSession.isProjectionOnSameDisplay(mSession, incomingSession)) {
-            // TODO(242833866): if incoming session is no longer waiting to record, allow
-            //  the update through.
-
-            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Content Recording: Ignoring session on same display %d, with an existing "
-                            + "session %s",
-                    incomingSession.getVirtualDisplayId(), mSession.getVirtualDisplayId());
-            return;
+            if (hasSessionUpdatedWithConsent) {
+                // Updating scenario: accept an incoming session updating the current display.
+                ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Accept session updating same display %d with granted "
+                                + "consent, with an existing session %s",
+                        incomingSession.getVirtualDisplayId(), mSession.getVirtualDisplayId());
+            } else {
+                // Ignored scenario: ignore identical incoming session.
+                ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Ignoring session on same display %d, with an existing "
+                                + "session %s",
+                        incomingSession.getVirtualDisplayId(), mSession.getVirtualDisplayId());
+                return;
+            }
         }
         DisplayContent incomingDisplayContent = null;
-        // Start scenario: recording begins immediately.
         if (incomingSession != null) {
+            // Start scenario: recording begins immediately.
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                     "Content Recording: Handle incoming session on display %d, with a "
                             + "pre-existing session %s", incomingSession.getVirtualDisplayId(),
@@ -106,11 +116,14 @@ final class ContentRecordingController {
                 return;
             }
             incomingDisplayContent.setContentRecordingSession(incomingSession);
-            // TODO(b/270118861): When user grants consent to re-use, explicitly ask ContentRecorder
-            //  to update, since no config/display change arrives. Mark recording as black.
+            // Updating scenario: Explicitly ask ContentRecorder to update, since no config or
+            // display change will trigger an update from the DisplayContent.
+            if (hasSessionUpdatedWithConsent) {
+                incomingDisplayContent.updateRecording();
+            }
         }
         // Takeover and stopping scenario: stop recording on the pre-existing session.
-        if (mSession != null) {
+        if (mSession != null && !hasSessionUpdatedWithConsent) {
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                     "Content Recording: Pause the recording session on display %s",
                     mDisplayContent.getDisplayId());
