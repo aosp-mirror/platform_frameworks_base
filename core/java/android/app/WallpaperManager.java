@@ -1680,14 +1680,14 @@ public class WallpaperManager {
      * @hide
      */
     public void addOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback,
-            List<RectF> regions) throws IllegalArgumentException {
+            List<RectF> regions, int which) throws IllegalArgumentException {
         for (RectF region : regions) {
             if (!LOCAL_COLOR_BOUNDS.contains(region)) {
                 throw new IllegalArgumentException("Regions must be within bounds "
                         + LOCAL_COLOR_BOUNDS);
             }
         }
-        sGlobals.addOnColorsChangedListener(callback, regions, FLAG_SYSTEM,
+        sGlobals.addOnColorsChangedListener(callback, regions, which,
                                                  mContext.getUserId(), mContext.getDisplayId());
     }
 
