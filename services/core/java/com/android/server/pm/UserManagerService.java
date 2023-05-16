@@ -2883,9 +2883,8 @@ public class UserManagerService extends IUserManager.Stub {
                     UserHandle.USER_NULL, UserManager.RESTRICTION_SOURCE_SYSTEM));
         }
 
-        synchronized (mRestrictionsLock) {
-            result.addAll(mDevicePolicyUserRestrictions.getEnforcingUsers(restrictionKey, userId));
-        }
+        result.addAll(getDevicePolicyManagerInternal()
+                .getUserRestrictionSources(restrictionKey, userId));
         return result;
     }
 
