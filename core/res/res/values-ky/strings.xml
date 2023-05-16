@@ -678,7 +678,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Тейлөө кызматына кайрылыңыз."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Жүзүңүздүн үлгүсү түзүлгөн жок. Кайталаңыз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Өтө жарык. Жарыктыкты азайтып көрүңүз."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Жарык жетишсиз"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Жарыгыраак жерге туруңуз"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Телефонду алыстатыңыз"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонду жакындатыңыз"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонду өйдө жылдырыңыз"</string>
@@ -714,7 +714,7 @@
     <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Өтө көп жолу аракет кылдыңыз. \"Жүзүнөн таанып ачуу\" жеткиликсиз."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Өтө көп жолу аракет кылдыңыз. Эрканды кулпулоо функциясын колдонуңуз."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Жүз ырасталбай жатат. Кайталап көрүңүз."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Жүзүнөн таанып ачуу функциясын жөндөй элексиз"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Жүзүнөн таанып ачуу функциясын кое элексиз"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"Жүзүнөн таанып ачуу функциясы бул түзмөктө иштебейт"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Сенсор убактылуу өчүрүлгөн."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Жүз <xliff:g id="FACEID">%d</xliff:g>"</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Өчүрүү"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Эскертүү,\nБир аптанын ичинде ден соолукка зыян келтирбестен гарнитура аркылуу уга турган катуу үн сигналдарынын чегинен аштыңыз.\n\nБул чектен ашуу угууңуздун биротоло бузулушуна алып келет."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Эскертүү,\nБир аптанын ичинде ден соолукка зыян келтирбестен гарнитура аркылуу уга турган катуу үн сигналдарынын чегинен 5 жолу аштыңыз.\n\nУгууңузду коргоо үчүн медианын үнү кичирейтилди."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Медианы узак убакыт ушундай катуулукта уга берсеңиз, угууңуз начарлашы мүмкүн.\n\nУшундай катуулукта өтө көп уксаңыз, угууңуз бузулат."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Эскертүү,\nУчурдагы медианын үнүн өтө катуу кылып угуп жатасыз.\n\nМындай катуулукта уга берсеңиз, угууңуз биротоло бузулат."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Үнүн катуу кылып уга бересизби?\n\nГарнитуранын үнүн катуу чыгарып, сунушталган убакыттан узагыраак угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Үнүн катуу кылып угуп жатасыз\n\nГарнитуранын үнүн катуу чыгарып, сунушталган убакыттан узагыраак угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ыкчам иштетесизби?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең 3 секунддай коё бербей басып туруңуз."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Атайын мүмкүнчүлүктөрдүн ыкчам баскычын иштетесизби?"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Иштетүү"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Жумуш колдонмолору жок"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Жеке колдонмолор жок"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Жумуш үчүн <xliff:g id="APP">%s</xliff:g> колдонмосун ачасызбы?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Жеке <xliff:g id="APP">%s</xliff:g> колдонмосунда ачасызбы?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Жумуш <xliff:g id="APP">%s</xliff:g> колдонмосунда ачасызбы?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Жумуш колдонмосунан чаласызбы?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Жумуш колдонмосуна которуласызбы?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Уюмуңуз жумуш колдонмолорунан гана чалууга уруксат берет"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Уюмуңуз билдирүүлөрдү жумуш колдонмолорунан гана жөнөтүүгө уруксат берет"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Жеке серепчини колдонуу"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Жумуш серепчисин колдонуу"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Чалуу"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Которулуу"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM карта тармагынын кулпусун ачуучу PIN код"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM кичи тармагынын кулпусун ачуучу PIN код"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM картанын корпоративдик кулпусун ачуучу PIN код"</string>
@@ -2331,10 +2332,10 @@
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Параметрлерге өтүү"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Өчүрүү"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> конфигурацияланды"</string>
-    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Баскычтоп калыбы төмөнкүгө коюлду: <xliff:g id="LAYOUT_1">%s</xliff:g>. Өзгөртүү үчүн басыңыз."</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Баскычтоп калыбы төмөнкүгө коюлду: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Өзгөртүү үчүн басыңыз."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Баскычтоп калыбы төмөнкүгө коюлду: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Өзгөртүү үчүн басыңыз."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Баскычтоп калыбы төмөнкүгө коюлду: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Өзгөртүү үчүн басыңыз."</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Баскычтопко төмөнкү калып коюлду: <xliff:g id="LAYOUT_1">%s</xliff:g>. Өзгөртүү үчүн басыңыз."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Баскычтопко төмөнкү калып коюлду: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Өзгөртүү үчүн басыңыз."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Баскычтопко төмөнкү калып коюлду: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Өзгөртүү үчүн басыңыз."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Баскычтопко төмөнкү калып коюлду: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Өзгөртүү үчүн басыңыз."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физикалык баскычтоптор конфигурацияланды"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Баскычтопторду көрүү үчүн басыңыз"</string>
 </resources>

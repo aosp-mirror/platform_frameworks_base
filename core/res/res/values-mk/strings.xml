@@ -686,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Поместете го телефонот налево"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Поместете го телефонот надесно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Погледнете подиректно во уредот."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не ви се гледа ликот. Држете го телефонот во висина на очите."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не се гледа ликот. Држете го телефонот во висина на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Премногу движење. Држете го телефонот стабилно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторно регистрирајте го лицето."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Не се препознава ликот. Обидете се пак."</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Отстрани"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да го зголемиме звукот над препорачаното ниво?\n\nСлушањето звуци со голема јачина подолги периоди може да ви го оштети сетилото за слух."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Опомена,\nго надминавте ограничувањето за гласни звучни сигнали кои може безбедно да се слушаат во една седмица на слушалки.\n\nАко го надминете ограничувањево, може да го оштетите слухот."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Опомена,\nго надминавте ограничувањето од 5 гласни звучни сигнали кои може безбедно да се слушаат во една седмица на слушалки.\n\nГласноста е намалена за да ви се заштити слухот."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Гласноста со која слушате аудиовизуелни содржини може да предизвика оштетување на слухот ако трае подолг временски период.\n\nАко продолжите да слушате со оваа гласност подолг временски период, може да го оштетите слухот."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Опомена,\nтековно слушате гласни содржини што се репродуцираат со небезбедна гласност.\n\nАко продолжите да слушате волку гласно, може трајно да го оштетите слухот."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Сакате да продолжите да слушате со висока јачина на звукот?\n\nЈачината на звукот на слушалките беше висока подолго од препорачаното, што може да доведе до оштетување на слухот"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Откриен е гласен звук\n\nЈачината на звукот на слушалките беше повисока од препорачаната, што може да доведе до оштетување на слухот"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Да се користи кратенка за „Пристапност“?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција за пристапност."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Да се вклучи кратенка за функциите за пристапност?"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Прекини ја паузата"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Нема работни апликации"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Нема лични апликации"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Да се отвори работната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Да се отвори во личната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Да се отвори во работната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Да се повика од работна апликација?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Да се префрли на работна апликација?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Вашата организацијата ви дозволува да упатувате повици само од работни апликации"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Вашата организацијата ви дозволува да испраќате пораки само од работни апликации"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Користи личен прелистувач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Користи работен прелистувач"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Повикај"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Префрли"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN за отклучување на мрежата на SIM-картичката"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN за отклучување на подмножество на мрежата на SIM-картичката"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN за отклучување на корпоративната SIM-картичка"</string>
