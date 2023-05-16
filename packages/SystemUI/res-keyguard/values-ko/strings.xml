@@ -90,5 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"기본"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"버블"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"아날로그"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"기기를 잠금 해제하여 계속"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"계속하려면 기기 잠금 해제"</string>
 </resources>
