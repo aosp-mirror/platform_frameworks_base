@@ -740,8 +740,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         // Since the same CharSequence instance may be reused in the TextView, we need to make
         // a copy of its content so that its value will not be changed by subsequent updates
         // in the TextView.
-        final CharSequence eventText =
-                TextUtils.trimToParcelableSize(stringOrSpannedStringWithoutNoCopySpans(text));
+        final CharSequence eventText = stringOrSpannedStringWithoutNoCopySpans(text);
 
         final int composingStart;
         final int composingEnd;
