@@ -170,7 +170,7 @@
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"តម្រូវឱ្យ​កែលម្អ​សុវត្ថិភាព និងប្រតិបត្តិការ"</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"រៀបចំការដោះសោដោយប្រើស្នាមម្រាមដៃម្ដងទៀត"</string>
     <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"ការដោះសោ​ដោយប្រើ​ស្នាមម្រាមដៃ"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"រៀបចំការដោះសោ​ដោយប្រើ​ស្នាមម្រាមដៃ"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"រៀបចំការដោះសោ​ដោយស្កេន​ស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"ដើម្បីរៀបចំការដោះសោដោយប្រើស្នាមម្រាមដៃម្ដងទៀត គំរូ និងរូបភាពស្នាមម្រាមដៃបច្ចុប្បន្នរបស់អ្នកនឹងត្រូវបានលុប។\n\nបន្ទាប់ពីលុបគំរូនិងរូបភាពស្នាមម្រាមដៃទាំងនោះ អ្នកនឹងត្រូវរៀបចំការដោះសោដោយប្រើស្នាមម្រាមដៃម្ដងទៀត ដើម្បីដោះសោទូរសព្ទរបស់អ្នក ឬផ្ទៀងផ្ទាត់ថាជាអ្នក។"</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"ដើម្បីរៀបចំការដោះសោដោយប្រើស្នាមម្រាមដៃម្ដងទៀត គំរូ និងរូបភាពស្នាមម្រាមដៃបច្ចុប្បន្នរបស់អ្នកនឹងត្រូវបានលុប។\n\nបន្ទាប់ពីលុបគំរូនិងរូបភាពស្នាមម្រាមដៃទាំងនោះ អ្នកនឹងត្រូវរៀបចំការដោះសោដោយប្រើស្នាមម្រាមដៃម្ដងទៀត ដើម្បីដោះសោទូរសព្ទរបស់អ្នក ឬផ្ទៀងផ្ទាត់ថាជាអ្នក។"</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"មិនអាចរៀបចំការដោះសោដោយប្រើស្នាមម្រាមដៃបានទេ។ សូមចូលទៅកាន់​ការកំណត់​ ដើម្បីព្យាយាមម្ដងទៀត។"</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"បិទ"</string>
     <string name="sound_settings" msgid="8874581353127418308">"សំឡេង និងការញ័រ"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ការកំណត់"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"បានបន្ថយទៅកម្រិតសំឡេង​ដែលកាន់តែមានសុវត្ថិភាព"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"កម្រិតសំឡេងខ្ពស់​ក្នុងរយៈពេលយូរជាងកម្រិត​ដែលបានណែនាំ"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"បានបន្ថយកម្រិតសំឡេងមកកម្រិតដែលកាន់តែមានសុវត្ថិភាព"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"កម្រិតសំឡេងកាសមានកម្រិតខ្ពស់យូរជាងរយៈពេលដែលបានណែនាំ"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"កម្រិតសំឡេងកាសបានលើសដែនកំណត់សុវត្ថិភាពសម្រាប់សប្ដាហ៍នេះ"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"បន្តស្ដាប់"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"បន្ថយ​កម្រិតសំឡេង"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"កម្មវិធី​ត្រូវបានខ្ទាស់"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​សង្កត់​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុចប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
@@ -940,6 +943,8 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ការកំណត់"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ច្រៀងដោយ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> កំពុងចាក់ពី <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> នៃ <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
+    <skip />
     <string name="controls_media_button_play" msgid="2705068099607410633">"ចាក់"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ផ្អាក"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ចម្រៀងមុន"</string>
@@ -1139,10 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ភ្ជាប់ប៊ិករបស់អ្នកជាមួយឆ្នាំងសាក"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ថ្មប៊ិកនៅសល់តិច"</string>
     <string name="video_camera" msgid="7654002575156149298">"កាមេរ៉ា​វីដេអូ"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"មិនអាចហៅទូរសព្ទពីកម្រងព័ត៌មាននេះបានទេ"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"គោលការណ៍ការងាររបស់អ្នកអនុញ្ញាតឱ្យអ្នកធ្វើការហៅទូរសព្ទបានតែពីកម្រងព័ត៌មានការងារប៉ុណ្ណោះ"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"មិនអាច​ហៅទូរសព្ទ​ពីកម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"ស្ថាប័ន​របស់អ្នក​អនុញ្ញាត​ឱ្យអ្នកធ្វើការហៅទូរសព្ទ​ពីកម្មវិធីការងារ​តែប៉ុណ្ណោះ"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ប្ដូរ​ទៅ​កម្រង​ព័ត៌មាន​ការងារ"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"បិទ"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"ដំឡើងកម្មវិធីទូរសព្ទសម្រាប់ការងារ"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"បោះបង់"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"ប្ដូរអេក្រង់ចាក់សោ​តាមបំណង"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ដោះសោ ដើម្បីប្ដូរអេក្រង់ចាក់សោតាមបំណង"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"មិនមាន Wi-Fi ទេ"</string>
