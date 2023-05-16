@@ -486,9 +486,15 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Represents the event of a change to a visually distinct section of the user interface.
+     * <p>
      * These events should only be dispatched from {@link android.view.View}s that have
      * accessibility pane titles, and replaces {@link #TYPE_WINDOW_CONTENT_CHANGED} for those
      * sources. Details about the change are available from {@link #getContentChangeTypes()}.
+     * <p>
+     * Do not use this to get an accessibility service to make non-pane announcements. Instead,
+     * follow the practices described in {@link View#announceForAccessibility(CharSequence)}.
+     * <b>Note:</b> this does not suggest calling announceForAccessibility(), but using the
+     * suggestions listed in its documentation.
      */
     public static final int TYPE_WINDOW_STATE_CHANGED = 1 << 5;
 
