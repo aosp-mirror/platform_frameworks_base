@@ -410,6 +410,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManager.EnforcingUser;
 import android.os.UserManager.UserRestrictionSource;
 import android.os.storage.StorageManager;
 import android.permission.AdminPermissionControlParams;
@@ -16345,6 +16346,39 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 return List.of(bundle);
             });
+        }
+
+        public List<EnforcingUser> getUserRestrictionSources(String restriction,
+                @UserIdInt int userId) {
+            PolicyDefinition<Boolean> policy =
+                    PolicyDefinition.getPolicyDefinitionForUserRestriction(restriction);
+
+            Set<EnforcingAdmin> localAdmins =
+                    mDevicePolicyEngine.getLocalPoliciesSetByAdmins(policy, userId).keySet();
+
+            Set<EnforcingAdmin> globalAdmins =
+                    mDevicePolicyEngine.getGlobalPoliciesSetByAdmins(policy).keySet();
+
+            List<EnforcingUser> enforcingUsers = new ArrayList();
+            enforcingUsers.addAll(getEnforcingUsers(localAdmins));
+            enforcingUsers.addAll(getEnforcingUsers(globalAdmins));
+            return enforcingUsers;
+        }
+
+        private List<EnforcingUser> getEnforcingUsers(Set<EnforcingAdmin> admins) {
+            List<EnforcingUser> enforcingUsers = new ArrayList();
+            ComponentName deviceOwner = mOwners.getDeviceOwnerComponent();
+            for (EnforcingAdmin admin : admins) {
+                if (deviceOwner != null
+                        && deviceOwner.getPackageName().equals(admin.getPackageName())) {
+                    enforcingUsers.add(new EnforcingUser(admin.getUserId(),
+                            UserManager.RESTRICTION_SOURCE_DEVICE_OWNER));
+                } else {
+                    enforcingUsers.add(new EnforcingUser(admin.getUserId(),
+                            UserManager.RESTRICTION_SOURCE_PROFILE_OWNER));
+                }
+            }
+            return enforcingUsers;
         }
     }
 
