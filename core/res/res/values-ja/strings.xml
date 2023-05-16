@@ -327,7 +327,7 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ボディセンサー"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"バイタルサインに関するセンサーデータへのアクセス"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"通知"</string>
-    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"通知の表示"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"通知を表示"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"タッチガイドの有効化"</string>
@@ -445,7 +445,7 @@
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスが ON になっている必要があります。この場合、バッテリー使用量が増えることがあります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"フォアグラウンドでのみおおよその位置情報にアクセス"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"このアプリは、使用中に、位置情報サービスからデバイスのおおよその位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。"</string>
-    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドで位置情報にアクセスする"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"このアプリは、使用中でない場合でも、常に位置情報にアクセスできます。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
@@ -558,7 +558,7 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"キーロックとキーロックに関連付けられたパスワードのセキュリティを無効にすることをアプリに許可します。たとえば、かかってきた電話を受ける際にキーロックを無効にし、通話が終了したらキーロックを再度有効にする場合などに使用します。"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"画面ロックの複雑さのリクエスト"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"このアプリに画面ロックの複雑さレベル（高、中、低、なし）を認識することを許可します。複雑さレベルは、画面ロックの文字数の範囲やタイプを示すものです。アプリから一定レベルまで画面ロックを更新するよう推奨されることもありますが、ユーザーは無視したり別の操作を行ったりできます。画面ロックは平文で保存されないため、アプリが正確なパスワードを知ることはありません。"</string>
-    <string name="permlab_postNotification" msgid="4875401198597803658">"通知の表示"</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"通知を表示"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"通知の表示をアプリに許可"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"生体認証ハードウェアの使用"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"生体認証ハードウェアを認証に使用することをアプリに許可します"</string>

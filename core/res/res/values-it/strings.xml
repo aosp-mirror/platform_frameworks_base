@@ -649,7 +649,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta il telefono verso sinistra"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta il telefono verso destra"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Guarda più direttamente verso il dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Impossibile vedere il volto. Tieni il telefono all\'altezza degli occhi."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Impossibile vedere il volto. Tieni il telefono all\'altezza degli occhi"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Troppo movimento. Tieni fermo il telefono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ripeti l\'acquisizione del volto."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossibile riconoscere il volto. Riprova."</string>
@@ -657,7 +657,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Guarda dritto nel telefono"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Guarda dritto nel telefono"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Guarda dritto nel telefono"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Rimuovi tutto ciò che ti nasconde il viso."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Rimuovi tutto ciò che ti nasconde il viso"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Pulisci la parte superiore dello schermo, inclusa la barra nera"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -665,7 +665,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossibile creare il modello del volto. Riprova."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Sono stati rilevati occhiali scuri. Il tuo volto deve essere visibile per intero."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Rilevata mascherina. Il volto deve essere visibile per intero."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Il tuo volto è coperto. Deve essere visibile per intero."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. verificare volto. Hardware non disponibile."</string>

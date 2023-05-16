@@ -656,7 +656,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"तपाईंको अनुहार लुकाउने सबै कुरा हटाउनुहोस्।"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"आफ्नो अनुहार छोप्ने सबै कुरा हटाउनुहोस्।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"कालो रङको पट्टीलगायत आफ्नो स्क्रिनको माथिल्लो भाग सफा गर्नुहोस्"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />

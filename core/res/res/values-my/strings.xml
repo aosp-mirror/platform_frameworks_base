@@ -1365,7 +1365,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်။ နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"အန်နာလော့ အသံကိရိယာကို တွေ့ထားပါသည်"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"တပ်ဆင်ထားသော ကိရိယာကို ဤဖုန်းနှင့် တွဲသုံး၍မရပါ။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB အမှားရှာပြင်ခြင်း ချိတ်ဆက်ထားသည်"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB အမှားရှာပြင်ခြင်း ချိတ်ထားသည်"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB အမှားရှာပြင်ခြင်းကို ပိတ်ရန် တို့ပါ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ဖြင့် အမှားရှာပြင်ခြင်းကို ပိတ်ရန် ရွေးပါ။"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ချိတ်ဆက်ပြီးပြီ"</string>
