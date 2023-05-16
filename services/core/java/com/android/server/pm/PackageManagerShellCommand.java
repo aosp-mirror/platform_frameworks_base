@@ -354,6 +354,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetSilentUpdatesPolicy();
                 case "get-app-metadata":
                     return runGetAppMetadata();
+                case "clear-package-preferred-activities":
+                    return runClearPackagePreferredActivities();
                 default: {
                     if (ART_SERVICE_COMMANDS.contains(cmd)) {
                         if (DexOptHelper.useArtService()) {
@@ -4100,6 +4102,22 @@ class PackageManagerShellCommand extends ShellCommand {
         return userId == UserHandle.USER_CURRENT ? ActivityManager.getCurrentUser() : userId;
     }
 
+    private int runClearPackagePreferredActivities() {
+        final PrintWriter pw = getErrPrintWriter();
+        final String packageName = getNextArg();
+        if (packageName == null) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+        try {
+            mContext.getPackageManager().clearPackagePreferredActivities(packageName);
+            return 0;
+        } catch (Exception e) {
+            pw.println(e.toString());
+            return 1;
+        }
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -4426,6 +4444,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --throttle-time: update the silent updates throttle time in seconds.");
         pw.println("      --reset: restore the installer and throttle time to the default, and");
         pw.println("        clear tracks of silent updates in the system.");
+        pw.println("");
+        pw.println("  clear-package-preferred-activities <PACKAGE>");
+        pw.println("    Remove the preferred activity mappings for the given package.");
         pw.println("");
         if (DexOptHelper.useArtService()) {
             printArtServiceHelp();
