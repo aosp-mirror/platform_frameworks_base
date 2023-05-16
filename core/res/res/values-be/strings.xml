@@ -1684,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Выдалiць"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Павялiчыць гук вышэй рэкамендаванага ўзроўню?\n\nДоўгае праслухоўванне музыкi на вялiкай гучнасцi можа пашкодзiць ваш слых."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Папярэджанне.\nВы перавысілі колькасць моцных гукаў, якая лічыцца бяспечнай для слухання праз навушнікі на працягу тыдня.\n\nПеравышэнне гэтага значэння можа незваротна пашкодзіць ваш слых."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Папярэджанне.\nВы ў 5 разоў перавысілі колькасць гукаў, якая лічыцца бяспечнай для слухання праз навушнікі на працягу тыдня.\n\nКаб зберагчы ваш слых, гучнасць паменшана."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Выбраны вамі ўзровень гучнасці можа быць шкодным для слыху пры працяглым слуханні мультымедыя.\n\nДоўгае праслухванне на такім узроўні гучнасці можа пашкодзіць ваш слых."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Папярэджанне.\nЗмесціва, якое вы слухаеце, прайграецца на небяспечным узроўні гучнасці.\n\nПрацяг праслухвання на такой гучнасцi незваротна пашкодзiць ваш слых."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Працягнуць праслухоўваць на вялікай гучнасці?\n\nГучнасць у навушніках была вялікай даўжэй, чым рэкамендавана, гэта можа пашкодзіць ваш слых"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Выяўлены моцны гук\n\nГучнасць у навушніках была большай, чым рэкамендавана, гэта можа пашкодзіць ваш слых"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Выкарыстоўваць камбінацыю хуткага доступу для спецыяльных магчымасцей?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Калі хуткі доступ уключаны, вы можаце націснуць абедзве кнопкі гучнасці і ўтрымліваць іх 3 секунды, каб запусціць функцыю спецыяльных магчымасцей."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Уключыць хуткі доступ да спецыяльных магчымасцей?"</string>
@@ -2166,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Уключыць"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Няма працоўных праграм"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Няма асабістых праграм"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Адкрыць працоўную праграму <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Адкрыць у асабістым профілі <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Адкрыць у працоўным профілі <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Зрабіць выклік з працоўнай праграмы?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Пераключыцца на працоўную праграму?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Ваша арганізацыя дазваляе рабіць выклікі толькі з працоўных праграм"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Ваша арганізацыя дазваляе адпраўляць паведамленні толькі з працоўных праграм"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Скарыстаць асабісты браўзер"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Скарыстаць працоўны браўзер"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Выклікаць"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Пераключальнік"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код разблакіроўкі сеткі для SIM-карты"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-код разблакіроўкі падмноства сеткі для SIM-карты"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-код разблакіроўкі карпаратыўнай SIM-карты"</string>
