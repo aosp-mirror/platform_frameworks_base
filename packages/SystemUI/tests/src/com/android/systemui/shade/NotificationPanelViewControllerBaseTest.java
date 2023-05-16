@@ -679,6 +679,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFeatureFlags,
                 mInteractionJankMonitor,
                 mShadeLog,
+                mDumpManager,
                 mKeyguardFaceAuthInteractor,
                 mShadeRepository,
                 mCastController
