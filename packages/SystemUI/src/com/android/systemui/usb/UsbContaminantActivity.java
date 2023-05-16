@@ -75,7 +75,12 @@ public class UsbContaminantActivity extends Activity implements View.OnClickList
             mLearnMore.setVisibility(View.VISIBLE);
         }
 
-        mEnableUsb.setOnClickListener(this);
+        if (!mUsbPort.supportsEnableContaminantPresenceDetection()) {
+            mEnableUsb.setVisibility(View.GONE);
+        } else {
+            mEnableUsb.setOnClickListener(this);
+        }
+
         mGotIt.setOnClickListener(this);
         mLearnMore.setOnClickListener(this);
     }
