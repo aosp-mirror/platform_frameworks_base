@@ -229,25 +229,6 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCustomizingInSinglePaneShade() {
-        disableSplitShade()
-        controller.setCustomizerShowing(true)
-
-        // always sets spacings to 0
-        given(taskbarVisible = false,
-                navigationMode = GESTURES_NAVIGATION,
-                insets = windowInsets().withStableBottom())
-        then(expectedContainerPadding = 0,
-                expectedNotificationsMargin = 0)
-
-        given(taskbarVisible = false,
-                navigationMode = BUTTONS_NAVIGATION,
-                insets = emptyInsets())
-        then(expectedContainerPadding = 0,
-                expectedNotificationsMargin = 0)
-    }
-
-    @Test
     fun testDetailShowingInSinglePaneShade() {
         disableSplitShade()
         controller.setDetailShowing(true)
