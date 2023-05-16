@@ -68,15 +68,15 @@ class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
         var inputTopBound: Int
         var headerRightBound = right
         var headerTopBounds = top
+        var headerBottomBounds = bottom
         val subTitleBottom: Int = if (subtitleView.isGone) titleView.bottom else subtitleView.bottom
         val descBottom = if (descriptionView.isGone) subTitleBottom else descriptionView.bottom
         if (resources.configuration.orientation == ORIENTATION_LANDSCAPE) {
             inputTopBound = (bottom - credentialInput.height) / 2
             inputLeftBound = (right - left) / 2
             headerRightBound = inputLeftBound
-            headerTopBounds -= iconView.bottom.coerceAtMost(bottomInset)
-
-            if (descriptionView.bottom > bottomInset) {
+            if (descriptionView.bottom > headerBottomBounds) {
+                headerTopBounds -= iconView.bottom.coerceAtMost(bottomInset)
                 credentialHeader.layout(left, headerTopBounds, headerRightBound, bottom)
             }
         } else {
