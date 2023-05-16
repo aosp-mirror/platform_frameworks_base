@@ -30,15 +30,15 @@ import javax.inject.Inject;
 @SysUISingleton
 public class KeyguardLifecyclesDispatcher {
 
-    static final int SCREEN_TURNING_ON = 0;
-    static final int SCREEN_TURNED_ON = 1;
-    static final int SCREEN_TURNING_OFF = 2;
-    static final int SCREEN_TURNED_OFF = 3;
+    public static final int SCREEN_TURNING_ON = 0;
+    public static final int SCREEN_TURNED_ON = 1;
+    public static final int SCREEN_TURNING_OFF = 2;
+    public static final int SCREEN_TURNED_OFF = 3;
 
-    static final int STARTED_WAKING_UP = 4;
-    static final int FINISHED_WAKING_UP = 5;
-    static final int STARTED_GOING_TO_SLEEP = 6;
-    static final int FINISHED_GOING_TO_SLEEP = 7;
+    public static final int STARTED_WAKING_UP = 4;
+    public static final int FINISHED_WAKING_UP = 5;
+    public static final int STARTED_GOING_TO_SLEEP = 6;
+    public static final int FINISHED_GOING_TO_SLEEP = 7;
     private static final String TAG = "KeyguardLifecyclesDispatcher";
 
     private final ScreenLifecycle mScreenLifecycle;
@@ -51,7 +51,7 @@ public class KeyguardLifecyclesDispatcher {
         mWakefulnessLifecycle = wakefulnessLifecycle;
     }
 
-    void dispatch(int what) {
+    protected void dispatch(int what) {
         mHandler.obtainMessage(what).sendToTarget();
     }
 
@@ -60,7 +60,7 @@ public class KeyguardLifecyclesDispatcher {
      * @param pmReason Reason this message was triggered - this should be a value from either
      * {@link PowerManager.WakeReason} or {@link PowerManager.GoToSleepReason}.
      */
-    void dispatch(int what, int pmReason) {
+    protected void dispatch(int what, int pmReason) {
         final Message message = mHandler.obtainMessage(what);
         message.arg1 = pmReason;
         message.sendToTarget();
@@ -70,7 +70,7 @@ public class KeyguardLifecyclesDispatcher {
      * @param what Message to send.
      * @param object Object to send with the message
      */
-    void dispatch(int what, Object object) {
+    protected void dispatch(int what, Object object) {
         mHandler.obtainMessage(what, object).sendToTarget();
     }
 
