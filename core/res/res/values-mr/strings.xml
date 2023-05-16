@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"नोंदणीकृत एड्स आणि मार्ग गंतव्यस्थान सारखी प्राधान्यकृत एनएफसी पेमेंट सेवेची माहिती मिळवण्यासाठी अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"फील्ड जवळील कम्युनिकेशन नियंत्रित करा"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"फील्ड जवळील कम्युनिकेशन (NFC) टॅग, कार्डे आणि वाचक यांच्यासह संवाद करण्यासाठी ॲपला अनुमती देते."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"सुरक्षित घटक यावरील व्यवहार इव्हेंट"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"अ‍ॅपला सुरक्षित घटक यावर होत असलेल्या व्यवहारांविषयी माहिती मिळवू देते."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"तुमचे स्क्रीन लॉक अक्षम करा"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"कीलॉक आणि कोणतीही संबद्ध पासवर्ड सुरक्षितता अक्षम करण्यासाठी अ‍ॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"स्क्रीन लॉक क्लिष्टतेची विनंती करा"</string>
@@ -1063,7 +1061,7 @@
     <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST कृती फक्त /सिस्टीम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी सपोर्ट आहे."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करा"</string>
-    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पेज हे म्हणते:"</string>
+    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पेज पुढील गोष्टी दर्शवते:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"नेव्हिगेशनची पुष्टी करा"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पेज सोडा"</string>
@@ -1233,7 +1231,7 @@
     <string name="force_close" msgid="9035203496368973803">"ठीक"</string>
     <string name="report" msgid="2149194372340349521">"अहवाल द्या"</string>
     <string name="wait" msgid="7765985809494033348">"प्रतीक्षा करा"</string>
-    <string name="webpage_unresponsive" msgid="7850879412195273433">"पेज प्रतिसाद न देणारे झाले आहे.\n\nतुम्ही हे बंद करू इच्छिता?"</string>
+    <string name="webpage_unresponsive" msgid="7850879412195273433">"पेज प्रतिसाद देत नाही.\n\nतुम्ही ते बंद करू इच्छिता का?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"अ‍ॅप पुनर्निर्देशित केला"</string>
     <string name="launch_warning_replace" msgid="3073392976283203402">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता चालत आहे."</string>
     <string name="launch_warning_original" msgid="3332206576800169626">"<xliff:g id="APP_NAME">%1$s</xliff:g> मूळतः लाँच केले."</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"काढा"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"चेतावणी,\nव्यक्तीची सुरक्षितरीत्या हेडफोनवर मोठ्या आवाजातील सिग्नल ऐकण्याची एका आठवड्याची मर्यादा तुम्ही ओलांडली आहे.\n\nही मर्यादा ओलांडणे तुमच्या श्रवणशक्तीचे कायमचे नुकसान करू करेल."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"चेतावणी,\nव्यक्तीची सुरक्षितरीत्या हेडफोनवर मोठ्या आवाजातील सिग्नल ऐकण्याची एका आठवड्याची मर्यादा तुम्ही पाचपट ओलांडली आहे.\n\nतुमच्या श्रवणशक्तीच्या संरक्षणासाठी व्हॉल्यूम कमी केला गेला आहे."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"तुम्ही ज्या पातळीवर मीडिया ऐकत आहात, असे जास्त कालावधीसाठी सुरू राहिल्याचा परिणाम म्हणून तुमच्या श्रवणशक्तीचे कायमचे नुकसान होऊ शकते.\n\nया पातळीवर जास्त कालावधीसाठी प्ले करणे पुढे सुरू ठेवल्यामुळे तुमच्या श्रवणशक्तीचे नुकसान होऊ शकते."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"चेतावणी,\nतुम्ही सध्या असुरक्षित पातळीवर प्ले होणारा मोठ्या आवाजातील आशय ऐकत आहात.\n\nएवढ्या मोठ्याने ऐकणे पुढे सुरू ठेवणे तुमच्या श्रवणशक्तीचे कायमचे नुकसान करेल."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"उच्च व्हॉल्यूममध्ये ऐकत राहायचे आहे का?\n\n हेडफोनचा व्हॉल्यूम हा शिफारस केलेल्या वेळेपेक्षा जास्त वेळ उच्च आहे, जो तुमच्या ऐकण्याच्या क्षमतेवर विपरीत परिणाम करू शकतो"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"मोठा आवाज डिटेक्ट झाला आहे\n\nहेडफोनचा व्हॉल्यूम हा शिफारस केलेल्या व्हॉल्यूमपेक्षा उच्च आहे, जो तुमच्या ऐकण्याच्या क्षमतेवर विपरीत परिणाम करू शकतो"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"प्रवेशयोग्यता शॉर्टकट वापरायचा?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी प्रेस करून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"अ‍ॅक्सेसिबिलिटी वैशिष्ट्यांसाठी शॉर्टकट सुरू करायचा आहे का?"</string>
@@ -2168,14 +2164,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"पुन्हा सुरू करा"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"कोणतीही कार्य ॲप्स सपोर्ट करत नाहीत"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"कोणतीही वैयक्तिक ॲप्स सपोर्ट करत नाहीत"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"ऑफिसची प्रोफाइल <xliff:g id="APP">%s</xliff:g> उघडायची आहे का?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"वैयक्तिक प्रोफाइल <xliff:g id="APP">%s</xliff:g> मध्ये उघडायची आहे का?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"ऑफिसची प्रोफाइल <xliff:g id="APP">%s</xliff:g> मध्ये उघडायची आहे का?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"वैयक्तिक ब्राउझर वापरा"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउझर वापरा"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क अनलॉक पिन"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM नेटवर्क सबसेट अनलॉक पिन"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM कॉर्पोरेट अनलॉक पिन"</string>

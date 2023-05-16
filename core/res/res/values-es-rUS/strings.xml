@@ -591,10 +591,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que la app reciba información del servicio de pago NFC preferido, como el servicio de asistencia registrado y el destino de la ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar la Transmisión de datos en proximidad"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite que la aplicación se comunique con lectores, tarjetas y etiquetas de Comunicación de campo cercano (NFC)."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Evento de transacción de Elemento seguro"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Permite que la app reciba información sobre transacciones que ocurren en un Elemento seguro."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desactivar el bloqueo de pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que la aplicación desactive el bloqueo del teclado y cualquier protección con contraseña asociada. Por ejemplo, el dispositivo puede desactivar el bloqueo del teclado cuando recibe una llamada telefónica y volver a activarlo cuando finaliza la llamada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"solicitar complejidad del bloqueo de pantalla"</string>
@@ -640,7 +638,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Demasiada luz"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Se detectó una presión del botón de encendido"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prueba ajustarla"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Cambia un poco la posición del dedo cada vez"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Cambia ligeramente la posición del dedo cada vez"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"No se reconoció la huella dactilar"</string>
@@ -707,7 +705,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"No se puede crear modelo de rostro. Vuelve a intentarlo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Se detectaron lentes oscuros. Tu rostro debe verse completamente."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Llevas mascarilla. Tu rostro debe verse completamente."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Llevas mascarilla. Se debe ver todo tu rostro."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No se verificó el rostro. Hardware no disponible."</string>
@@ -1687,10 +1685,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eliminar"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar a un alto volumen durante largos períodos puede dañar tu audición."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Advertencia:\nSuperaste la cantidad de señales sonoras fuertes que se pueden escuchar con auriculares de forma segura a lo largo de una semana.\n\nExceder ese límite dañará tu audición de forma permanente."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Advertencia:\nSuperaste 5 veces la cantidad de señales sonoras fuertes que se pueden escuchar con auriculares de forma segura a lo largo de una semana.\n\nSe bajó el volumen para proteger tu audición."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"El volumen al que estás escuchando contenido multimedia puede provocar daños auditivos si se mantiene durante períodos prolongados.\n\nSeguir reproduciendo audio a este volumen durante largos períodos podría dañar tu audición."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Advertencia:\nEstás escuchando contenido a un volumen peligrosamente alto.\n\nSeguir reproduciendo audio a este volumen dañará tu audición de forma permanente."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"¿Quieres seguir escuchando a un volumen alto?\n\nEl volumen de los auriculares se mantuvo elevado por más tiempo del recomendado, lo que te podría dañar la audición"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Se detectaron sonidos fuertes\n\nEl volumen de los auriculares se mantuvo más alto de lo recomendado, lo que te podría dañar la audición"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"¿Usar acceso directo de accesibilidad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Cuando la combinación de teclas está activada, puedes presionar los botones de volumen durante 3 segundos para iniciar una función de accesibilidad."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"¿Quieres activar la combinación de teclas para las funciones de accesibilidad?"</string>
@@ -2169,14 +2165,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reanudar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"El contenido no es compatible con apps de trabajo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"El contenido no es compatible con apps personales"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"¿Quieres abrir <xliff:g id="APP">%s</xliff:g> de trabajo?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"¿Quieres abrir <xliff:g id="APP">%s</xliff:g> en tu perfil personal?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"¿Quieres abrir <xliff:g id="APP">%s</xliff:g> en tu perfil de trabajo?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"¿Quieres llamar desde la app de trabajo?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"¿Quieres cambiar a una app de trabajo?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Tu organización solo te permite realizar llamadas desde apps de trabajo"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Tu organización solo te permite enviar mensajes desde apps de trabajo"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar un navegador personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar un navegador de trabajo"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Llamar"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Cambiar"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueo del dispositivo para la red de tarjeta SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN de desbloqueo del dispositivo para el subconjunto de redes de tarjeta SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN de desbloqueo corporativo del dispositivo para tarjeta SIM"</string>

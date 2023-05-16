@@ -591,10 +591,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Dozvoljava aplikaciji da preuzima informacije o željenoj NFC usluzi za plaćanje, poput registrovanih identifikatora aplikacija i odredišta preusmeravanja."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrola komunikacije u užem polju (Near Field Communication)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Dozvoljava aplikaciji da komunicira sa oznakama, karticama i čitačima komunikacije kratkog dometa (NFC)."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Transakcija u okviru bezbednosnog elementa"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Omogućava aplikaciji da dobija informacije o transkacijama koje se izvršavaju u okviru bezbednosnog elementa."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"onemogućavanje zaključavanja ekrana"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Dozvoljava aplikaciji da onemogući zaključavanje tastature i sve povezane bezbednosne mere sa lozinkama. Na primer, telefon onemogućava zaključavanje tastature pri prijemu dolaznog telefonskog poziva, a zatim ga ponovo omogućava po završetku poziva."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"traženje složenosti zaključavanja ekrana"</string>
@@ -1687,10 +1685,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ukloni"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Želite da pojačate zvuk iznad preporučenog nivoa?\n\nSlušanje glasne muzike duže vreme može da vam ošteti sluh."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Upozorenje,\npremašili ste broj glasnih zvučnih signala koje je bezbedno slušati preko slušalica tokom nedelju dana.\n\nPrekoračenjem tog ograničenja trajno ćete oštetiti sluh."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Upozorenje,\nPet puta ste premašili broj glasnih zvučnih signala koje je bezbedno slušati preko slušalica tokom nedelju dana.\n\nJačina zvuka treba da se smanji da biste zaštitili sluh."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Nivo na kom slušate medijski sadržaj može da dovede do oštećenja sluha ako to traje tokom dužeg perioda.\n\nAko nastavite da slušate tako glasno tokom dužeg perioda, može da dođe do oštećenja sluha."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Upozorenje,\ntrenutno slušate glasan sadržaj na nebezbednom nivou.\n\nAko nastavite da slušate tako glasno, trajno ćete oštetiti sluh."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Želite da nastavite da slušate glasnu muziku?\n\nJačina zvuka u slušalicama je bila visoka duže nego što se preporučuje, što može da ošteti sluh"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Prepoznat je glasan zvuk\n\nJačina zvuka u slušalicama je bila veća nego što se preporučuje, što može da ošteti sluh"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite li da koristite prečicu za pristupačnost?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kada je prečica uključena, pritisnite oba dugmeta za jačinu zvuka da biste pokrenuli funkciju pristupačnosti."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Želite da uključite prečicu za funkcije pristupačnosti?"</string>
@@ -2169,14 +2165,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Ponovo aktiviraj"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nema poslovnih aplikacija"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nema ličnih aplikacija"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Želite da otvorite poslovnu aplikaciju <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Želite da otvorite u ličnoj aplikaciji <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Želite da otvorite u poslovnoj aplikaciji <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Želite da pozovete iz poslovne aplikacije?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Želite da prebacite na poslovnu aplikaciju?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Vaša organizacija dozvoljava pozivanje samo iz poslovnih aplikacija"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Vaša organizacija dozvoljava slanje poruka samo iz poslovnih aplikacija"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Koristi lični pregledač"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Koristi poslovni pregledač"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Pozovi"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Prebaci"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN za otključavanje SIM mreže"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN za otključavanje podskupa SIM mreže"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN za otključavanje poslovne SIM kartice"</string>
@@ -2338,7 +2337,7 @@
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Uređaj <xliff:g id="DEVICE_NAME">%s</xliff:g> je konfigurisan"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Raspored tastature je podešen na <xliff:g id="LAYOUT_1">%s</xliff:g>. Dodirnite da biste to promenili."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Raspored tastature je podešen na <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Dodirnite da biste to promenili."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Raspored tastature je podešen na <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Dodirnite da biste to promenili."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Raspored tastature je <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Dodirnite da biste to promenili."</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Raspored tastature je podešen na <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Dodirnite da biste promenili."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fizičke tastature su konfigurisane"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Dodirnite da biste videli tastature"</string>

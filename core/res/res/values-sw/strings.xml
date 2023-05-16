@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Huruhusu programu kupata maelezo ya huduma inayopendelewa ya malipo ya nfc kama vile huduma zilizosajiliwa na njia."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Muamala kupitia Kipengele Salama"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Huruhusu programu kupokea maelezo kuhusu miamala inayofanyika kupitia Kipengele Salama."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"zima kufuli la skrini yako"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Inaruhusu programu kulemaza ufunguo wa vitufe na usalama mwingine ambata wa nenosiri. Kwa mfano, simu inalemaza ufunguo wa viitufe inapopokea simu inayoingia, kisha inawezesha upya ufunguo wa vitufe wakati simu inapokamilika."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"iombe kiwango cha uchangamano wa kufunga skrini"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ondoa"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ungependa kupandisha sauti zaidi ya kiwango kinachopendekezwa?\n\nKusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Tahadhari,\nUmezidi kiasi cha mawimbi ya sauti ya juu ambayo mtu anaweza kusikiliza kwa usalama ndani ya wiki kupitia vipokea sauti vya kichwani.\n\nKuvuka kikomo hiki kutaharibu usikivu wako kabisa."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Tahadhari,\nUmezidisha mara 5 ya kiwango cha mawimbi ya sauti ya juu ambayo mtu anaweza kusikiliza kwa usalama ndani ya wiki kupitia vipokea sauti vya kichwani.\n\nSauti imepunguzwa ili kulinda usikivu wako."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Kiwango cha sauti ambacho unasikilizia maudhui kinaweza kusababisha athari kwenye usikivu unapoendelea kusikiliza kwa muda mrefu.\n\nKuendelea kucheza maudhui katika kiwango hiki cha sauti kwa muda mrefu kunaweza kuharibu usikivu wako."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Tahadhari,\nKwa sasa unasikiliza maudhui ya sauti yanayochezwa kwa kiwango cha sauti kisicho salama.\n\nKuendelea kusikiliza maudhui katika kiwango hiki cha sauti ya juu kutaharibu usikivu wako kabisa."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Ungependa kuendelea kusikiliza kwa sauti ya kiwango cha juu?\n\nKiwango cha sauti ya vipokea sauti vya kichwani kimekuwa juu kwa muda mrefu kuliko inavyopendekezwa, hali ambayo inaweza kuharibu uwezo wako wa kusikia"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Sauti ya kiwango cha juu imetambuliwa\n\nKiwango cha sauti ya vipokea sauti vya kichwani kimekuwa juu zaidi kuliko inavyopendekezwa, hali ambayo inaweza kuharibu uwezo wako wa kusikia"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ungependa kutumia njia ya mkato ya ufikivu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Unapowasha kipengele cha njia ya mkato, hatua ya kubonyeza vitufe vyote viwili vya sauti kwa sekunde tatu itafungua kipengele cha ufikivu."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Ungependa kuwasha njia ya mkato ya vipengele vya ufikivu?"</string>
@@ -2168,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Acha kusitisha"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Hakuna programu za kazini"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Hakuna programu za binafsi"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Ungependa kufungua <xliff:g id="APP">%s</xliff:g> ukitumia wasifu wa kazini?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Ungependa kufungua <xliff:g id="APP">%s</xliff:g> ukitumia wasifu wa binafsi?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Ungependa kufungua <xliff:g id="APP">%s</xliff:g> ukitumia wasifu wa kazini?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Ungependa kupiga simu ukitumia programu ya kazini?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Ungependa kubadilisha ili utumie programu ya kazini?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Shirika lako linakuruhusu upige simu ukitumia programu za kazini pekee"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Shirika lako linakuruhusu utume ujumbe ukitumia programu za kazini pekee"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Tumia kivinjari cha binafsi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Tumia kivinjari cha kazini"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Piga simu"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Badilisha"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ya kufungua mtandao wa SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN ya kufungua SIM iliyofungwa na mtoa huduma za simu"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN ya kufungua SIM ya shirika"</string>

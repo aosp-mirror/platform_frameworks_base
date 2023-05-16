@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允许应用获取首选 NFC 付款服务信息，例如注册的应用标识符和路线目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距离通信"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"允许应用与近距离无线通信(NFC)标签、卡和读取器通信。"</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"安全元件事务事件"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"允许应用接收与安全元件上发生的事务相关的信息。"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"停用屏幕锁定"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"允许该应用停用键锁以及任何关联的密码安全措施。例如，让手机在接听来电时停用键锁，在通话结束后重新启用键锁。"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"请求屏幕锁定复杂度"</string>
@@ -690,7 +688,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"请将手机向左移动"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"请将手机向右移动"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"请直视您的设备。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到人脸，请将手机举到与眼睛齐平的位置。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到您的脸，请将手机举到与眼睛齐平的位置。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"请重新注册您的面孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"无法识别人脸，请重试。"</string>
@@ -728,7 +726,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"使用人脸解锁或屏幕锁定凭据验证身份，才能继续操作"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"出了点问题。请重试。"</string>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"出了点问题，请重试。"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"面孔图标"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"读取同步设置"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"允许该应用读取某个帐号的同步设置。例如，此权限可确定“联系人”应用是否与某个帐号同步。"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"删除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要将音量调高到建议的音量以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"警告！\n您在一周内使用头戴式耳机收听的高分贝音频量已超出安全范围限值。\n\n继续超限收听会导致您的听力永久受损。"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"警告！\n您在一周内使用头戴式耳机收听的高分贝音频量已超出安全范围限值的 5 倍。\n\n为保护您的听力，系统已调低音量。"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"长时间以当前音量收听媒体可能会导致听力受损。\n\n如果您继续以这样的音量长时间播放，则可能会损害您的听力。"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"警告！\n当前的内容播放音量已超出安全范围限值。\n\n继续以这样的音量收听会导致您的听力永久受损。"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"继续以较高的音量聆听？\n\n耳机音量保持较高的时间超过了建议时长，可能会损害您的听力"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"检测到较高音量\n\n耳机音量水平超过了建议值，可能会损害您的听力"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用无障碍快捷方式吗？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"启用这项快捷方式后，同时按下两个音量按钮 3 秒钟即可启动无障碍功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要开启无障碍功能快捷方式吗？"</string>
@@ -2168,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暂停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"没有支持该内容的工作应用"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"没有支持该内容的个人应用"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"打开工作 <xliff:g id="APP">%s</xliff:g>？"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"在个人 <xliff:g id="APP">%s</xliff:g> 中打开？"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"在工作 <xliff:g id="APP">%s</xliff:g> 中打开？"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"通过工作应用拨打电话？"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"切换到工作应用？"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"贵组织仅允许您通过工作应用拨打电话"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"贵组织仅允许您通过工作应用发送消息"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用个人浏览器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作浏览器"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"拨打电话"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"切换"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 网络解锁 PIN 码"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 网络子集解锁 PIN 码"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 企业解锁 PIN 码"</string>

@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"앱이 NFC(근거리 무선 통신) 태그, 카드 및 리더와 통신할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"보안 요소 트랜잭션 이벤트"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"앱이 보안 요소에서 발생하는 트랜잭션에 관한 정보를 받도록 허용합니다."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"화면 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"화면 잠금 복잡도 요청"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"삭제"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"경고:\n1주일 동안 헤드폰을 통해 안전하게 들을 수 있는 큰 소리 신호량을 초과했습니다.\n\n이 한도를 초과하면 청력이 영구적으로 손상됩니다."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"경고:\n1주일 동안 헤드폰을 통해 안전하게 들을 수 있는 큰 소리 신호량을 5배 초과했습니다.\n\n청력을 보호하기 위해 볼륨을 낮췄습니다."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"지금과 같은 수준으로 오랫동안 미디어를 청취할 경우 청력 손상이 발생할 수 있습니다.\n\n지금과 같은 수준으로 장기적으로 계속 들으면 청력이 손상될 수 있습니다."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"경고:\n현재 안전하지 않은 수준으로 크게 콘텐츠를 재생하여 듣고 있습니다.\n\n지금과 같은 수준으로 계속해서 들으면 청력이 영구적으로 손상됩니다."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"계속해서 높은 볼륨으로 들으시겠습니까?\n\n헤드폰 볼륨이 권장 시간보다 오랫동안 높은 상태였으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"큰 소리가 감지됨\n\n헤드폰 볼륨이 권장 시간보다 오랫동안 높은 상태였으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"접근성 단축키를 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"단축키가 사용 설정된 경우 볼륨 버튼 두 개를 동시에 3초간 누르면 접근성 기능이 시작됩니다."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"접근성 기능 바로가기를 사용 설정하시겠습니까?"</string>
@@ -2168,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"일시중지 해제"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"직장 앱 없음"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"개인 앱 없음"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"직장 <xliff:g id="APP">%s</xliff:g> 앱을 여시겠습니까?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"개인 <xliff:g id="APP">%s</xliff:g> 앱에서 여시겠습니까?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"직장 <xliff:g id="APP">%s</xliff:g> 앱에서 여시겠습니까?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"직장 앱을 사용한 통화인가요?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"직장 앱으로 전환할까요?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"귀하의 조직에서 직장 앱을 사용한 통화만 허용했습니다."</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"귀하의 조직에서 직장 앱을 사용한 메시지 전송만 허용했습니다."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"개인 브라우저 사용"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"직장 브라우저 사용"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"통화"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"전환"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 네트워크 잠금 해제 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 네트워크 하위 집합 잠금 해제 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 회사 잠금 해제 PIN"</string>
@@ -2335,10 +2334,10 @@
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"설정으로 이동"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"사용 중지"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>에 설정 완료됨"</string>
-    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g> 및 <xliff:g id="LAYOUT_2">%2$s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%s</xliff:g>로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g> 및 <xliff:g id="LAYOUT_2">%2$s</xliff:g>로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>로 설정됩니다. 변경하려면 탭하세요."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"실제 키보드에 구성됨"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"키보드를 보려면 탭하세요."</string>
 </resources>

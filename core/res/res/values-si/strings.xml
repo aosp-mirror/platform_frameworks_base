@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ලියාපදිංචි කළ ආධාර සහ ගමන් මාර්ග ගමනාන්ත වැනි කැමති nfc ගෙවීම් සේවා තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ආසන්න ක්ෂේත්‍ර සන්නිවේදනය පාලනය කරන්න"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ආසන්න ක්ෂේත්‍ර සන්නිවේදන (NFC) ටැග්, පත්, සහ කියවන්නන් සමඟ සන්නිවේදනය කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"සුරක්ෂිත මූලද්‍රව්‍ය ගනුදෙනු සිදුවීම"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"සුරක්ෂිත මූලද්‍රව්‍යයක සිදු වන ගනුදෙනු පිළිබඳ තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ඔබගේ තිරයේ අගුල අබල කරන්න"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"යතුරු අගුල සහ ඕනෑම සම්බන්ධිත මුරපද ආරක්ෂාවක් අබල කිරීමට යෙදුමට අවසර දෙන්න. මෙහි උදාහරණයක් වන්නේ පැමිණෙන ඇමතුමක් ලැබෙද්දී, දුරකථනය අක්‍රිය වන අතර ඇමතුම අවසාන වන විට යතුරු අගුල නැවත සක්‍රිය වෙයි."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"තිර අඟුලු සංකීර්ණතාව ඉල්ලන්න"</string>
@@ -706,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ඔබගේ මුහුණු ආකෘතිය තැනිය නොහැකිය. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"අඳුරු කණ්ණාඩි අනාවරණය කර ගන්නා ලදි. ඔබගේ මුහුණ සම්පූර්ණයෙන් දෘශ්‍යමාන විය යුතුය."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"මුහුණු ආවරණය අනාවරණය කර ගන්නා ලදි. ඔබගේ මුහුණ සම්පූර්ණයෙන් දෘශ්‍යමාන විය යුතුය."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"මුහුණු වැසීමක් හමු විය. මුහුණ සම්පූර්ණයෙන්ම පෙනිය යුතුය."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"මුහුණ සත්‍යාපනය කළ නොහැක. දෘඩාංගය නොමැත."</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ඉවත් කරන්න"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"නිර්දේශිතයි මට්ටමට වඩා ශබ්දය වැඩිද?\n\nදිගු කාලයක් සඳහා ඉහළ ශබ්දයක් ඇසීමෙන් ඇතැම් විට ඔබගේ ඇසීමට හානි විය හැක."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"අවවාදයයි,\nඔබ හෙඩ්ෆෝන් හරහා සතියක් තුළ සුරක්ෂිතව සවන් දිය හැකි ශබ්ද සංඥා ප්‍රමාණය ඉක්මවා ඇත.\n\nමෙම සීමාව ඉක්මවා යාම ඔබේ ශ්‍රවණයට ස්ථිරවම හානි කරනු ඇත."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"අවවාදයයි,\nඔබ හෙඩ්ෆෝන් හරහා සතියක් තුළ සුරක්ෂිතව සවන් දිය හැකි ශබ්ද සංඥා ප්‍රමාණය මෙන් 5 ගුණයක් ඉක්මවා ඇත.\n\nඔබේ ශ්‍රවණය ආරක්ෂා කිරීමට ශබ්දය අඩු කර ඇත."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"ඔබ මාධ්‍යයට සවන් දෙන මට්ටම දීර්ඝ කාලයක් තිස්සේ පවතින විට ශ්‍රවණාබාධ ඇති විය හැක.\n\nදිගු කාලයක් මෙම මට්ටමේ දී වාදනය කිරීම ඔබේ ශ්‍රවණයට හානි කළ හැක."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"අවවාදයයි,\nඔබ දැනට අනාරක්ෂිත මට්ටමින් වාදනය වන ඝෝෂාකාරී අන්තර්ගතයට සවන් දෙයි.\n\nමෙම මහා හඬින් සවන් දීම ඔබේ ශ්‍රවණයට ස්ථිරවම හානි කරනු ඇත."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ඉහළ හඬකින් දිගටම සවන් දෙනවා ද?\n\nනිර්දේශිත කාලයට වඩා දිගු කාලයක් හෙඩ්ෆෝන් හඬ පරිමාව ඉහළ මට්ටමක පවතින අතර, එය ඔබේ ශ්‍රවණයට හානි කළ හැක"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ඝෝෂාකාරී හඬ අනාවරණය විය\n\nනිර්දේශිත ප්‍රමාණයට වඩා හෙඩ්ෆෝන් හඬ පරිමාව වැඩි වී ඇති අතර, එය ඔබේ ශ්‍රවණයට හානි කළ හැක"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ප්‍රවේශ්‍යතා කෙටිමඟ භාවිතා කරන්නද?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"කෙටිමග ක්‍රියාත්මක විට, හඬ පරිමා බොත්තම් දෙකම තත්පර 3ක් තිස්සේ එබීමෙන් ප්‍රවේශ්‍යතා විශේෂාංගය ආරම්භ වනු ඇත."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ප්‍රවේශ්‍යතා විශේෂාංග සඳහා කෙටි මග ක්‍රියාත්මක කරන්නද?"</string>
@@ -2168,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"විරාම නොකරන්න"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"කාර්යාල යෙදුම් නැත"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"පුද්ගලික යෙදුම් නැත"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"කාර්යාල <xliff:g id="APP">%s</xliff:g> විවෘත කරන්න ද?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"පුද්ගලික <xliff:g id="APP">%s</xliff:g> තුළ විවෘත කරන්න ද?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"කාර්යාල <xliff:g id="APP">%s</xliff:g> තුළ විවෘත කරන්න ද?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"කාර්යාල යෙදුමෙන් අමතන්න ද?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"කාර්යාල යෙදුම වෙත මාරු වන්නද?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"ඔබේ සංවිධානය ඔබට කාර්යාල යෙදුම්වලින් ඇමතුම් කිරීමට පමණක් ඉඩ දෙයි"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"ඔබේ සංවිධානය ඔබට කාර්යාල යෙදුම්වලින් පණිවුඩ යැවීමට පමණක් ඉඩ දෙයි"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"පුද්ගලික බ්‍රව්සරය භාවිත කරන්න"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"කාර්යාල බ්‍රව්සරය භාවිත කරන්න"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"අමතන්න"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"මාරු කරන්න"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ජාල අගුලු හැරීමේ PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM ජාල උප කට්ටල අගුලු හැරීමේ PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM සමාගම් අගුලු හැරීමේ PIN"</string>

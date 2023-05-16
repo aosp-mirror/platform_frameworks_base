@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a aplicación obteña información do servizo de pago de NFC preferido, como as axudas rexistradas e o destino da ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite á aplicación comunicarse con etiquetas, tarxetas e lectores Near Field Communication (NFC)."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Evento de transacción no elemento seguro"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Permite que a aplicación reciba información sobre transaccións que ocorran nun elemento seguro."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desactivar o bloqueo da pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite á aplicación desactivar o bloqueo do teclado e calquera seguranza dos contrasinais asociada. Por exemplo, o teléfono desactiva o bloqueo do teclado ao recibir unha chamada telefónica entrante e, a continuación, volve activar o bloqueo do teclado unha vez finalizada a chamada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"solicitar o nivel de complexidade do bloqueo de pantalla"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Quitar"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Queres subir o volume máis do nivel recomendado?\n\nA reprodución de son a un volume elevado durante moito tempo pode provocar danos nos oídos."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Advertencia:\nSuperaches a cantidade de sinais acústicos elevados que podes escoitar de forma segura con auriculares nunha semana.\n\nSe superas este límite, os teus oídos quedarán danados permanentemente."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Advertencia:\nSuperaches 5 veces a cantidade de sinais acústicos elevados que podes escoitar de forma segura con auriculares nunha semana.\n\nBaixouse o volume para protexer os teus oídos."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"O nivel ao que escoitas o contido multimedia pode causar danos auditivos se o mantés durante longos períodos de tempo.\n\nSe segues reproducindo audio a este nivel de volume durante moito tempo, poderían danárseche os oídos."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Advertencia:\nEstás escoitando contido a un nivel de volume perigoso.\n\nSe segues escoitando audio a este nivel de volume, os teus oídos quedarán danados permanentemente."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Queres seguir escoitando contido cun volume alto?\n\nUsaches os auriculares cun volume alto durante máis tempo do recomendado, o que podería provocarche danos auditivos"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Detectouse son alto\n\nUsaches os auriculares cun volume máis alto do recomendado, o que podería provocarche danos auditivos"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Queres utilizar o atallo de accesibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Cando o atallo está activado, podes premer os dous botóns de volume durante 3 segundos para iniciar unha función de accesibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Queres activar as funcións de accesibilidade?"</string>
@@ -2168,14 +2164,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reactivar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Non hai ningunha aplicación do traballo compatible"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Non hai ningunha aplicación persoal compatible"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Queres abrir a aplicación <xliff:g id="APP">%s</xliff:g> do traballo?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Queres abrir o contido na aplicación <xliff:g id="APP">%s</xliff:g> persoal?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Queres abrir o contido na aplicación <xliff:g id="APP">%s</xliff:g> do traballo?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utilizar navegador persoal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utilizar navegador de traballo"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueo da rede SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN de desbloqueo do subconxunto da rede SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN de desbloqueo corporativo da SIM"</string>
