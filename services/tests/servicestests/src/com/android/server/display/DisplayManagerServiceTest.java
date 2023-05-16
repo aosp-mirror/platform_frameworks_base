@@ -1079,7 +1079,7 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, atLeastOnce()).setContentRecordingSession(
                 mContentRecordingSessionCaptor.capture(), nullable(IMediaProjection.class));
         ContentRecordingSession session = mContentRecordingSessionCaptor.getValue();
-        assertThat(session.isWaitingToRecord()).isTrue();
+        assertThat(session.isWaitingForConsent()).isTrue();
     }
 
     @Test
@@ -1114,7 +1114,7 @@ public class DisplayManagerServiceTest {
         assertThat(session.getContentToRecord()).isEqualTo(RECORD_CONTENT_DISPLAY);
         assertThat(session.getVirtualDisplayId()).isEqualTo(displayId);
         assertThat(session.getDisplayToRecord()).isEqualTo(displayToRecord);
-        assertThat(session.isWaitingToRecord()).isFalse();
+        assertThat(session.isWaitingForConsent()).isFalse();
     }
 
     @Test
