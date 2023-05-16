@@ -17,9 +17,7 @@ Tests belong in the `packages/SystemUI/tests/src/com/android/systemui/keyguard/d
 By default, AOSP ships with a "bottom right" and a "bottom left" slot, each with a slot capacity of `1`, allowing only one Quick Affordance on each side of the lock screen.
 
 ### Customizing Slots
-OEMs may choose to enable customization of slots. An entry point in settings will appear when overriding the `custom_lockscreen_shortcuts_enabled` resource in `packages/SystemUI/res/values/config.xml`.
-
-OEMs may also choose to override the IDs and number of slots and/or override the default capacities. This can be achieved by overridding the `config_keyguardQuickAffordanceSlots` resource in `packages/SystemUI/res/values/config.xml`.
+OEMs may choose to override the IDs and number of slots and/or override the default capacities. This can be achieved by overridding the `config_keyguardQuickAffordanceSlots` resource in `packages/SystemUI/res/values/config.xml`.
 
 ### Default Quick Affordances
 OEMs may also choose to predefine default Quick Affordances for each slot. To achieve this, a developer may override the `config_keyguardQuickAffordanceDefaults` resource in `packages/SystemUI/res/values/config.xml`. Note that defaults only work until the user of the device selects a different quick affordance for that slot, even if they select the "None" option.

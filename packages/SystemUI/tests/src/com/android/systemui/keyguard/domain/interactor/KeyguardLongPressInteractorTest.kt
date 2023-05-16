@@ -21,7 +21,6 @@ import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -40,7 +39,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -67,7 +65,6 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        overrideResource(R.bool.long_press_keyguard_customize_lockscreen_enabled, true)
         whenever(accessibilityManager.getRecommendedTimeoutMillis(anyInt(), anyInt())).thenAnswer {
             it.arguments[0]
         }
@@ -77,13 +74,6 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
 
         runBlocking { createUnderTest() }
-    }
-
-    @After
-    fun tearDown() {
-        mContext
-            .getOrCreateTestableResources()
-            .removeOverride(R.bool.long_press_keyguard_customize_lockscreen_enabled)
     }
 
     @Test
@@ -115,17 +105,6 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
 
                 assertThat(isEnabled()).isFalse()
             }
-        }
-
-    @Test
-    fun isEnabled_alwaysFalseWhenConfigEnabledBooleanIsFalse() =
-        testScope.runTest {
-            overrideResource(R.bool.long_press_keyguard_customize_lockscreen_enabled, false)
-            createUnderTest()
-            val isEnabled by collectLastValue(underTest.isLongPressHandlingEnabled)
-            runCurrent()
-
-            assertThat(isEnabled).isFalse()
         }
 
     @Test
@@ -288,7 +267,6 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
     ) {
         underTest =
             KeyguardLongPressInteractor(
-                appContext = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor =
                     KeyguardTransitionInteractor(

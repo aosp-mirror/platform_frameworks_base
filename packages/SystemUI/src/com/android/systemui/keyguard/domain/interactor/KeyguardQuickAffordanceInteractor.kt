@@ -19,15 +19,12 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.app.AlertDialog
 import android.app.admin.DevicePolicyManager
-import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.R
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.dock.DockManager
@@ -78,7 +75,6 @@ constructor(
     private val devicePolicyManager: DevicePolicyManager,
     private val dockManager: DockManager,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
-    @Application private val appContext: Context,
 ) {
     private val isUsingRepository: Boolean
         get() = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)
@@ -412,8 +408,7 @@ constructor(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value =
                     !isFeatureDisabledByDevicePolicy() &&
-                        featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES) &&
-                        appContext.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled),
+                        featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES),
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_CLOCKS_ENABLED,

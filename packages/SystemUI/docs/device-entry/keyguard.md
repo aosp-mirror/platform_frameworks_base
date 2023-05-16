@@ -20,10 +20,6 @@ Begins with the device in low power mode, with the display active for [AOD][3] o
 
 An indication to power off the device most likely comes from one of two signals: the user presses the power button or the screen timeout has passed. This may [lock the device](#How-the-device-locks)
 
-#### Long-pressing on keyguard
-
-OEMs may choose to enable a long-press action that displays a button at the bottom of lockscreen. This button links to lockscreen customization. This can be achieved by overriding the `long_press_keyguard_customize_lockscreen_enabled` resource in `packages/SystemUI/res/values/config.xml`.
-
 #### On Lockscreen
 
 #### On Lockscreen, occluded by an activity

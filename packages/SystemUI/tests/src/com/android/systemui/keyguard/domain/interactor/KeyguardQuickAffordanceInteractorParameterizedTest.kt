@@ -340,7 +340,6 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 devicePolicyManager = devicePolicyManager,
                 dockManager = dockManager,
                 backgroundDispatcher = testDispatcher,
-                appContext = mContext,
             )
     }
 

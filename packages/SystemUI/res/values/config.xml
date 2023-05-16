@@ -44,12 +44,6 @@
     <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
     <integer name="navigation_bar_deadzone_orientation">0</integer>
 
-    <!-- Whether or not lockscreen shortcuts can be customized -->
-    <bool name="custom_lockscreen_shortcuts_enabled">false</bool>
-
-    <!-- Whether or not long-pressing on keyguard will display to customize lockscreen -->
-    <bool name="long_press_keyguard_customize_lockscreen_enabled">false</bool>
-
     <bool name="config_dead_zone_flash">false</bool>
 
     <!-- Whether to enable dimming navigation buttons when wallpaper is not visible, should be

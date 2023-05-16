@@ -211,7 +211,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             )
         val keyguardLongPressInteractor =
             KeyguardLongPressInteractor(
-                appContext = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor =
                     KeyguardTransitionInteractor(
@@ -241,7 +240,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         devicePolicyManager = devicePolicyManager,
                         dockManager = dockManager,
                         backgroundDispatcher = testDispatcher,
-                        appContext = mContext,
                     ),
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),
                 burnInHelperWrapper = burnInHelperWrapper,
