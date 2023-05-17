@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 class PinBouncerViewModel(
     private val applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
+    override val isInputEnabled: StateFlow<Boolean>,
 ) : AuthMethodBouncerViewModel {
 
     private val entered = MutableStateFlow<List<Int>>(emptyList())

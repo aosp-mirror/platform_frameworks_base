@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
+import com.android.systemui.R
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.qualifiers.Application
@@ -24,10 +25,14 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input on bouncer UIs. */
 class BouncerViewModel
@@ -40,16 +45,42 @@ constructor(
 ) {
     private val interactor: BouncerInteractor = interactorFactory.create(containerName)
 
+    /**
+     * Whether updates to the message should be cross-animated from one message to another.
+     *
+     * If `false`, no animation should be applied, the message text should just be replaced
+     * instantly.
+     */
+    val isMessageUpdateAnimationsEnabled: StateFlow<Boolean> =
+        interactor.throttling
+            .map { it == null }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = interactor.throttling.value == null,
+            )
+
+    private val isInputEnabled: StateFlow<Boolean> =
+        interactor.throttling
+            .map { it == null }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = interactor.throttling.value == null,
+            )
+
     private val pin: PinBouncerViewModel by lazy {
         PinBouncerViewModel(
             applicationScope = applicationScope,
             interactor = interactor,
+            isInputEnabled = isInputEnabled,
         )
     }
 
     private val password: PasswordBouncerViewModel by lazy {
         PasswordBouncerViewModel(
             interactor = interactor,
+            isInputEnabled = isInputEnabled,
         )
     }
 
@@ -58,6 +89,7 @@ constructor(
             applicationContext = applicationContext,
             applicationScope = applicationScope,
             interactor = interactor,
+            isInputEnabled = isInputEnabled,
         )
     }
 
@@ -81,9 +113,57 @@ constructor(
                 initialValue = interactor.message.value ?: "",
             )
 
+    private val _throttlingDialogMessage = MutableStateFlow<String?>(null)
+    /**
+     * A message for a throttling dialog to show when the user has attempted the wrong credential
+     * too many times and now must wait a while before attempting again.
+     *
+     * If `null`, no dialog should be shown.
+     *
+     * Once the dialog is shown, the UI should call [onThrottlingDialogDismissed] when the user
+     * dismisses this dialog.
+     */
+    val throttlingDialogMessage: StateFlow<String?> = _throttlingDialogMessage.asStateFlow()
+
+    init {
+        applicationScope.launch {
+            interactor.throttling
+                .map { model ->
+                    model?.let {
+                        when (interactor.authenticationMethod.value) {
+                            is AuthenticationMethodModel.PIN ->
+                                R.string.kg_too_many_failed_pin_attempts_dialog_message
+                            is AuthenticationMethodModel.Password ->
+                                R.string.kg_too_many_failed_password_attempts_dialog_message
+                            is AuthenticationMethodModel.Pattern ->
+                                R.string.kg_too_many_failed_pattern_attempts_dialog_message
+                            else -> null
+                        }?.let { stringResourceId ->
+                            applicationContext.getString(
+                                stringResourceId,
+                                model.failedAttemptCount,
+                                model.totalDurationSec,
+                            )
+                        }
+                    }
+                }
+                .distinctUntilChanged()
+                .collect { dialogMessageOrNull ->
+                    if (dialogMessageOrNull != null) {
+                        _throttlingDialogMessage.value = dialogMessageOrNull
+                    }
+                }
+        }
+    }
+
     /** Notifies that the emergency services button was clicked. */
     fun onEmergencyServicesButtonClicked() {
         // TODO(b/280877228): implement this
+    }
+
+    /** Notifies that a throttling dialog has been dismissed by the user. */
+    fun onThrottlingDialogDismissed() {
+        _throttlingDialogMessage.value = null
     }
 
     private fun toViewModel(

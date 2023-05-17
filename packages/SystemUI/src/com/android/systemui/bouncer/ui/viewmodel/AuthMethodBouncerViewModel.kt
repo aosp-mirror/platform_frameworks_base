@@ -16,4 +16,14 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
-sealed interface AuthMethodBouncerViewModel
+import kotlinx.coroutines.flow.StateFlow
+
+sealed interface AuthMethodBouncerViewModel {
+    /**
+     * Whether user input is enabled.
+     *
+     * If `false`, user input should be completely ignored in the UI as the user is "locked out" of
+     * being able to attempt to unlock the device.
+     */
+    val isInputEnabled: StateFlow<Boolean>
+}
