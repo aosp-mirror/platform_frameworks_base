@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"حذف"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"هشدار،\nشما از میزان صدای بلندی که انسان می‌تواند به‌طور ایمن در یک هفته ازطریق هدفون گوش دهد فراتر رفته‌اید.\n\nعبور از این حد به شنوایی شما آسیب می‌رساند."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"هشدار،\nشما از میزان صدای بلندی که انسان می‌تواند به‌طور ایمن در یک هفته ازطریق هدفون گوش دهد ۵ بار فراتر رفته‌اید.\n\nبرای محافظت از شنوایی شما، صدا کاهش یافته است."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"میزان صدایی که با آن به رسانه گوش می‌کنید درصورت ادامه در درازمدت می‌تواند منجر به آسیب به شنوایی شود.\n\nادامه پخش با این صدا برای مدت طولانی می‌تواند به شنوایی شما آسیب برساند."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"هشدار،\nمیزان صدای بلندِ محتوایی که الآن می‌شنوید خطرناک است.\n\nاگر با همین بلندی صدا ادامه دهید شنوایی‌تان برای همیشه آسیب خواهد دید."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"همچنان می‌خواهید با صدای بلند گوش کنید؟\n\nصدای هدفون برای مدتی طولانی‌تر از حد توصیه‌شده بلند بوده است. این موضوع می‌تواند به شنوایی شما آسیب بزند."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"صدای بلند شناسایی شد\n\nصدای هدفون برای مدتی طولانی‌تر از حد توصیه‌شده بلند بوده است. این موضوع می‌تواند به شنوایی شما آسیب بزند."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"از میان‌بر دسترس‌پذیری استفاده شود؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"وقتی میان‌بر روشن باشد، با فشار دادن هردو دکمه صدا به‌مدت ۳ ثانیه ویژگی دسترس‌پذیری فعال می‌شود."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"میان‌بر برای ویژگی‌های دسترس‌پذیری روشن شود؟"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"لغو مکث"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"برنامه کاری‌ای وجود ندارد"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"برنامه شخصی‌ای وجود ندارد"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> کاری باز شود؟"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"در <xliff:g id="APP">%s</xliff:g> شخصی باز شود؟"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"در <xliff:g id="APP">%s</xliff:g> کاری باز شود؟"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"تماس ازطریق برنامه کاری برقرار شود؟"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"به برنامه کاری جابه‌جا شوید؟"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"سازمانتان به شما اجازه می‌دهد فقط ازطریق برنامه‌های کاری تماس بگیرید"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"سازمانتان به شما اجازه می‌دهد فقط ازطریق برنامه‌های کاری پیام ارسال کنید"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استفاده از مرورگر شخصی"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استفاده از مرورگر کاری"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"تماس گرفتن"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"عوض کردن"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"پین باز کردن قفل شبکه سیم‌کارت"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"پین باز کردن قفل زیرمجموعه شبکه سیم‌کارت"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"پین باز کردن قفل شرکت سیم‌کارت"</string>
@@ -2330,7 +2331,7 @@
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‏Dual Screen دردسترس نیست چون «بهینه‌سازی باتری» روشن است. می‌توانید این ویژگی را در «تنظیمات» خاموش کنید."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"رفتن به تنظیمات"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"خاموش کردن"</string>
-    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> پیکربندی شد"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"‫<xliff:g id="DEVICE_NAME">%s</xliff:g> پیکربندی شد"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"طرح‌بندی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"طرح‌بندی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
     <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"طرح‌بندی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>

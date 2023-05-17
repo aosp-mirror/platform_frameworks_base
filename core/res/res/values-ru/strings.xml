@@ -1684,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Удалить"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Установить громкость выше рекомендуемого уровня?\n\nВоздействие громкого звука в течение долгого времени может привести к повреждению слуха."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Внимание!\nПревышено количество громких звуков, которое считается безопасным при прослушивании в наушниках в течение недели.\n\nВыход за пределы лимита ведет к необратимому повреждению слуха."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Внимание!\nКоличество громких звуков, которое считается безопасным при прослушивании в наушниках в течение недели, превышено в 5 раз.\n\nГромкость снижена для защиты слуха."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Выбранный у вас уровень громкости вреден для слуха при долгом воздействии.\n\nПрослушивание на текущем уровне громкости в течение длительного времени может привести к повреждению слуха."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Внимание!\nВы слушаете аудио на опасном уровне громкости.\n\nПрослушивание на текущем уровне громкости ведет к необратимому повреждению слуха."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Продолжить воспроизведение с высокой громкостью?\n\nВы используете наушники при высоком уровне громкости дольше, чем рекомендуется. Это может привести к повреждению слуха."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Обнаружен громкий звук\n\nУровень громкости наушников выше, чем рекомендуется. Это может привести к повреждению слуха."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Использовать быстрое включение?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Чтобы использовать функцию специальных возможностей, когда она включена, нажмите и удерживайте обе кнопки регулировки громкости в течение трех секунд."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Использовать быстрое включение?"</string>
@@ -2166,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Включить"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Не поддерживается рабочими приложениями."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Не поддерживается личными приложениями."</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Открыть рабочее приложение \"<xliff:g id="APP">%s</xliff:g>\"?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Открыть в личном приложении \"<xliff:g id="APP">%s</xliff:g>\"?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Открыть в рабочем приложении \"<xliff:g id="APP">%s</xliff:g>\"?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Позвонить из рабочего приложения?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Перейти в рабочее приложение?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"В вашей организации разрешено звонить только из рабочих приложений."</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"В вашей организации разрешено отправлять сообщения только из рабочих приложений."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Использовать личный браузер"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Использовать рабочий браузер"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Позвонить"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Перейти"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код для разблокировки сети SIM-карты"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-код для разблокировки подмножества сети SIM-карты"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-код для разблокировки корпоративной SIM-карты"</string>
@@ -2333,10 +2334,10 @@
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Открыть настройки"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Отключить"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Устройство \"<xliff:g id="DEVICE_NAME">%s</xliff:g>\" настроено"</string>
-    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Для клавиатуры настроена раскладка <xliff:g id="LAYOUT_1">%s</xliff:g>. Нажмите, чтобы изменить."</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Для клавиатуры настроены раскладки <xliff:g id="LAYOUT_1">%1$s</xliff:g> и <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Нажмите, чтобы изменить."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Для клавиатуры настроены раскладки <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> и <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Нажмите, чтобы изменить."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Для клавиатуры настроено несколько раскладок: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> и другие. Нажмите, чтобы изменить."</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Настроена раскладка клавиатуры для яз.: <xliff:g id="LAYOUT_1">%s</xliff:g>. Нажмите, чтобы изменить."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Настроены раскладки клавиатуры для яз.: <xliff:g id="LAYOUT_1">%1$s</xliff:g> и <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Нажмите, чтобы изменить."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Настроены раскладки клавиатуры для яз.: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> и <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Нажмите, чтобы изменить."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Настроены раскладки клавиатуры для яз.: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> и др. Нажмите, чтобы изменить."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физические клавиатуры настроены"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Нажмите, чтобы посмотреть подключенные клавиатуры."</string>
 </resources>
