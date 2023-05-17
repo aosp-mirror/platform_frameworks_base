@@ -365,6 +365,7 @@ public class KeyguardPatternViewController
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long secondsInFuture = (long) Math.ceil(
                 (elapsedRealtimeDeadline - elapsedRealtime) / 1000.0);
+        getKeyguardSecurityCallback().onAttemptLockoutStart(secondsInFuture);
         mCountdownTimer = new CountDownTimer(secondsInFuture * 1000, 1000) {
 
             @Override

@@ -21,6 +21,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardMessageAreaController
 import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
@@ -29,13 +30,19 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.bouncer.data.factory.BouncerMessageFactory
+import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageInteractor
+import com.android.systemui.keyguard.bouncer.domain.interactor.CountDownTimerUtil
+import com.android.systemui.keyguard.data.repository.FakeBouncerMessageRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
+import com.android.systemui.log.BouncerLogger
 import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
 import com.android.systemui.multishade.data.repository.MultiShadeRepository
 import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor
@@ -54,11 +61,13 @@ import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
+import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
@@ -69,10 +78,10 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidTestingRunner::class)
@@ -106,7 +115,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
     @Mock
-    private lateinit var unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
+    private lateinit var unfoldTransitionProgressProvider:
+        Optional<UnfoldTransitionProgressProvider>
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
@@ -146,6 +156,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.DUAL_SHADE, false)
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
+        featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         val inputProxy = MultiShadeInputProxy()
         testScope = TestScope()
         val multiShadeInteractor =
@@ -181,6 +192,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 pulsingGestureListener,
                 keyguardBouncerViewModel,
                 keyguardBouncerComponentFactory,
+                Mockito.mock(KeyguardMessageAreaController.Factory::class.java),
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
                 featureFlags,
@@ -200,6 +212,14 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                         shadeController = shadeController,
                     )
                 },
+                BouncerMessageInteractor(
+                    FakeBouncerMessageRepository(),
+                    Mockito.mock(BouncerMessageFactory::class.java),
+                    FakeUserRepository(),
+                    CountDownTimerUtil(),
+                    featureFlags
+                ),
+                BouncerLogger(logcatLogBuffer("BouncerLog"))
             )
 
         controller.setupExpandedStatusBar()
