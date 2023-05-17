@@ -238,6 +238,11 @@ object Flags {
     @JvmField
     val DELAY_BOUNCER = releasedFlag(235, "delay_bouncer")
 
+    /** Migrate the indication area to the new keyguard root view. */
+    // TODO(b/280067944): Tracking bug.
+    @JvmField
+    val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
