@@ -24,9 +24,7 @@ import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -178,7 +176,14 @@ public class TransitionUtil {
         }
 
         // Put all the OPEN/SHOW on top
-        if (TransitionUtil.isOpeningType(mode)) {
+        if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+            // Wallpaper is always at the bottom, opening wallpaper on top of closing one.
+            if (mode == WindowManager.TRANSIT_OPEN || mode == WindowManager.TRANSIT_TO_FRONT) {
+                t.setLayer(leash, -zSplitLine + info.getChanges().size() - layer);
+            } else {
+                t.setLayer(leash, -zSplitLine - layer);
+            }
+        } else if (TransitionUtil.isOpeningType(mode)) {
             if (isOpening) {
                 t.setLayer(leash, zSplitLine + info.getChanges().size() - layer);
                 if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) == 0) {
