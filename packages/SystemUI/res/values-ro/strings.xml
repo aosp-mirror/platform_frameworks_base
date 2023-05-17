@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"dezactivează"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Sunete și vibrații"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Setări"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Redus la un volum mai sigur"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Volumul a fost ridicat mai mult timp decât este recomandat"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volumul a fost redus la un nivel mai sigur"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Volumul căștilor a fost ridicat mai mult timp decât este recomandat"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Volumul căștilor a depășit limita de siguranță pentru săptămâna aceasta"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Ascultă în continuare"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Redu volumul"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplicația este fixată"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Astfel rămâne afișat până anulezi fixarea. Atinge lung opțiunile Înapoi și Recente pentru a anula fixarea."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Astfel rămâne afișat până anulezi fixarea. Atinge lung opțiunile Înapoi și Acasă pentru a anula fixarea."</string>
@@ -940,6 +943,8 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Setări"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> de la <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se redă în <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> din <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
+    <skip />
     <string name="controls_media_button_play" msgid="2705068099607410633">"Redă"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Întrerupe"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Melodia anterioară"</string>
@@ -1139,10 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conectează-ți creionul la un încărcător"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Nivelul bateriei creionului este scăzut"</string>
     <string name="video_camera" msgid="7654002575156149298">"Cameră video"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Nu poți iniția apeluri din acest profil"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Politica privind activitatea îți permite să efectuezi apeluri telefonice numai din profilul de serviciu"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Nu poți iniția apeluri dintr-o aplicație personală"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Organizația îți permite să inițiezi apeluri numai din aplicațiile pentru lucru"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Comută la profilul de serviciu"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Închide"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalează o aplicație de lucru pentru telefon"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Anulează"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizează ecranul de blocare"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Deblochează pentru a personaliza ecranul de blocare"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Conexiune Wi-Fi indisponibilă"</string>
