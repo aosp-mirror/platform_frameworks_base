@@ -16,6 +16,7 @@
 
 package com.android.server.policy;
 
+import static android.os.Build.HW_TIMEOUT_MULTIPLIER;
 import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.STATE_ON;
@@ -43,8 +44,11 @@ import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_SHUT
 import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAVIOR_MUTE;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.withSettings;
@@ -64,6 +68,7 @@ import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
@@ -79,6 +84,7 @@ import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -100,6 +106,8 @@ import java.util.function.Supplier;
 
 class TestPhoneWindowManager {
     private static final long SHORTCUT_KEY_DELAY_MILLIS = 150;
+    private static final long TEST_SINGLE_KEY_DELAY_MILLIS
+            = SingleKeyGestureDetector.MULTI_PRESS_TIMEOUT + 1000L * HW_TIMEOUT_MULTIPLIER;
 
     private PhoneWindowManager mPhoneWindowManager;
     private Context mContext;
@@ -134,6 +142,8 @@ class TestPhoneWindowManager {
 
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
 
+    @Mock private KeyguardServiceDelegate mKeyguardServiceDelegate;
+
     private StaticMockitoSession mMockitoSession;
     private HandlerThread mHandlerThread;
     private Handler mHandler;
@@ -151,6 +161,10 @@ class TestPhoneWindowManager {
         Supplier<GlobalActions> getGlobalActionsFactory() {
             return () -> mGlobalActions;
         }
+
+        KeyguardServiceDelegate getKeyguardServiceDelegate() {
+            return mKeyguardServiceDelegate;
+        }
     }
 
     TestPhoneWindowManager(Context context) {
@@ -158,12 +172,12 @@ class TestPhoneWindowManager {
         mHandlerThread = new HandlerThread("fake window manager");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
-        mHandler.runWithScissors(()-> setUp(context),  0 /* timeout */);
+        mContext = mockingDetails(context).isSpy() ? context : spy(context);
+        mHandler.runWithScissors(this::setUp,  0 /* timeout */);
     }
 
-    private void setUp(Context context) {
+    private void setUp() {
         mPhoneWindowManager = spy(new PhoneWindowManager());
-        mContext = spy(context);
 
         // Use stubOnly() to reduce memory usage if it doesn't need verification.
         final MockSettings spyStubOnly = withSettings().stubOnly()
@@ -251,6 +265,7 @@ class TestPhoneWindowManager {
         overrideLaunchAccessibility();
         doReturn(false).when(mPhoneWindowManager).keyguardOn();
         doNothing().when(mContext).startActivityAsUser(any(), any());
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
         Mockito.reset(mContext);
     }
 
@@ -379,6 +394,14 @@ class TestPhoneWindowManager {
 
     void overrideLaunchHome() {
         doNothing().when(mPhoneWindowManager).launchHomeFromHotKey(anyInt());
+    }
+
+    void overrideIsUserSetupComplete(boolean isCompleted) {
+        doReturn(isCompleted).when(mPhoneWindowManager).isUserSetupComplete();
+    }
+
+    void setKeyguardServiceDelegateIsShowing(boolean isShowing) {
+        doReturn(isShowing).when(mKeyguardServiceDelegate).isShowing();
     }
 
     /**
@@ -513,5 +536,19 @@ class TestPhoneWindowManager {
     void assertGoToHomescreen() {
         waitForIdle();
         verify(mPhoneWindowManager).launchHomeFromHotKey(anyInt());
+    }
+
+    void assertOpenAllAppView() {
+        waitForIdle();
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext, timeout(TEST_SINGLE_KEY_DELAY_MILLIS))
+                .startActivityAsUser(intentCaptor.capture(), isNull(), any(UserHandle.class));
+        Assert.assertEquals(Intent.ACTION_ALL_APPS, intentCaptor.getValue().getAction());
+    }
+
+    void assertNotOpenAllAppView() {
+        waitForIdle();
+        verify(mContext, after(TEST_SINGLE_KEY_DELAY_MILLIS).never())
+                .startActivityAsUser(any(Intent.class), any(), any(UserHandle.class));
     }
 }
