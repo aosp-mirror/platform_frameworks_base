@@ -190,10 +190,10 @@ public class UninstallUninstalling extends Activity implements
 
             dialogBuilder.setCancelable(false);
             if (isCloneUser) {
-                dialogBuilder.setMessage(getActivity().getString(R.string.uninstalling_cloned_app,
+                dialogBuilder.setTitle(getActivity().getString(R.string.uninstalling_cloned_app,
                         ((UninstallUninstalling) getActivity()).mLabel));
             } else {
-                dialogBuilder.setMessage(getActivity().getString(R.string.uninstalling_app,
+                dialogBuilder.setTitle(getActivity().getString(R.string.uninstalling_app,
                         ((UninstallUninstalling) getActivity()).mLabel));
             }
 
