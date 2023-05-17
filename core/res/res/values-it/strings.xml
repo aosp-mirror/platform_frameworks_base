@@ -687,7 +687,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta il telefono verso sinistra"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta il telefono verso destra"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Guarda più direttamente verso il dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Impossibile vedere il volto. Tieni il telefono all\'altezza degli occhi."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Impossibile vedere il volto. Tieni il telefono all\'altezza degli occhi"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Troppo movimento. Tieni fermo il telefono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ripeti l\'acquisizione del volto."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossibile riconoscere il volto. Riprova."</string>
@@ -695,7 +695,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Guarda dritto nel telefono"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Guarda dritto nel telefono"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Guarda dritto nel telefono"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Rimuovi tutto ciò che ti nasconde il viso."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Rimuovi tutto ciò che ti nasconde il viso"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Pulisci la parte superiore dello schermo, inclusa la barra nera"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -703,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossibile creare il modello del volto. Riprova."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Sono stati rilevati occhiali scuri. Il tuo volto deve essere visibile per intero."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Rilevata mascherina. Il volto deve essere visibile per intero."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Il tuo volto è coperto. Deve essere visibile per intero."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. verificare volto. Hardware non disponibile."</string>
@@ -1683,10 +1683,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Rimuovi"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Avviso,\nHai superato il limite di segnali audio a forte volume che è possibile ascoltare in sicurezza in una settimana tramite le cuffie.\n\nIl superamento di questo limite causerà danni permanenti al tuo udito."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Avviso,\nHai superato di 5 volte il limite di segnali audio a forte volume che è possibile ascoltare in sicurezza in una settimana tramite le cuffie.\n\nIl volume è stato abbassato per proteggere il tuo udito."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Il livello a cui stai ascoltando contenuti multimediali può causare danni all\'udito se viene usato per periodi di tempo prolungati.\n\nSe continui l\'ascolto a questo livello per lunghi periodi di tempo, il tuo udito potrebbe subire danni."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Avviso,\nStai ascoltando contenuti ad alto volume a un livello non sicuro.\n\nSe continui l\'ascolto a questo volume, il tuo udito subirà danni permanenti."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Vuoi continuare ad ascoltare a un volume alto?\n\nIl volume delle cuffie è rimasto alto per un periodo superiore a quello raccomandato, con il rischio di danneggiare l\'udito"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Rilevato un suono forte\n\nIl volume delle cuffie è più alto di quello raccomandato, con il rischio di danneggiare l\'udito"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usare la scorciatoia Accessibilità?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vuoi attivare la scorciatoia per le funzioni di accessibilità?"</string>
@@ -2165,14 +2163,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Riattiva"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nessuna app di lavoro"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nessuna app personale"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Aprire l\'app <xliff:g id="APP">%s</xliff:g> di lavoro?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Aprire nell\'app <xliff:g id="APP">%s</xliff:g> personale?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Aprire nell\'app <xliff:g id="APP">%s</xliff:g> di lavoro?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usa il browser personale"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usa il browser di lavoro"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN di sblocco rete SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN di sblocco sottoinsieme rete SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN sblocco aziendale SIM"</string>
