@@ -418,7 +418,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovať"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"História"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nové"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Ticho"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tichý"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Upozornenia"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzácie"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazať všetky tiché upozornenia"</string>
@@ -460,7 +460,7 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tomto zariadení je nainštalovaná certifikačná autorita. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku na vašom zariadení."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku vo vašom pracovnom profile, ale nie osobnom."</string>
-    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Toto zariadenie je k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vašu aktivitu v sieti vrátane e‑mailov a dát prehliadania vidí poskytovateľ siete VPN."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Toto zariadenie je pripojené na internet prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša sieťová aktivita, ako sú e‑maily a dáta prehliadania, je viditeľná pre poskytovateľa siete VPN."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Toto zariadenie je k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vašu aktivitu v sieti vrátane e‑mailov a dát prehliadania vidí váš správca IT."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Toto zariadenie je k internetu pripojené prostredníctvom aplikácií <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vašu aktivitu v sieti vrátane e‑mailov a dát prehliadania vidí váš správca IT."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše pracovné aplikácie sú k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vašu aktivitu v sieti v pracovných aplikáciách vrátane e‑mailov a dát prehliadania vidí váš správca IT a poskytovateľ siete VPN."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"zakázať"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Zvuk a vibrácie"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Nastavenia"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Znížené na bezpečnú hlasitosť"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Hlasitosť bola vysoká dlhšie, ako sa odporúča"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Hlasitosť bola znížená na bezpečnejšiu úroveň"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Hlasitosť slúchadiel bola vysoká dlhšie, ako sa odporúča"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Hlasitosť slúchadiel prekročila bezpečný limit pre tento týždeň"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Pokračovať v počúvaní"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Znížiť hlasitosť"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikácia je pripnutá"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidiel Späť a Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidiel Späť a Domov."</string>
@@ -985,10 +988,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Reproduktory a obrazovky"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Navrhované zariadenia"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Ak chcete preniesť médiá do iného zariadenia, ukončite zdieľanú reláciu"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Ukončiť"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ako vysielanie funguje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Vysielanie"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ľudia v okolí s kompatibilnými zariadeniami s rozhraním Bluetooth si môžu vypočuť médiá, ktoré vysielate"</string>
@@ -1141,10 +1142,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Pripojte dotykové pero k nabíjačke"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Stav batérie dotykového pera je nízky"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Z tohto profilu nemôžete volať"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Pracovné pravidlá vám umožňujú telefonovať iba v pracovnom profile"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Nemôžete volať z osobnej aplikácie"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Vaša organizácia vám povoľuje volať iba z pracovných aplikácií"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Prepnúť na pracovný profil"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Zavrieť"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Inštalovať pracovnú telefónnu aplikáciu"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Zrušiť"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Prispôsobiť uzamknutú obrazovku"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Ak chcete prispôsobiť uzamknutú obrazovku, odomknite ju"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi‑Fi nie je k dispozícii"</string>

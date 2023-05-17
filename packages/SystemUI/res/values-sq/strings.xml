@@ -460,7 +460,7 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Në këtë pajisje është instaluar një autoritet certifikate. Trafiku i rrjetit tënd të sigurt mund të monitorohet ose modifikohet."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratori ka aktivizuar regjistrimin e rrjetit, i cili monitoron trafikun në pajisjen tënde."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratori yt ka aktivizuar regjistrimin e rrjetit, i cili monitoron trafikun në profilin tënd të punës, por jo në profilin tënd personal."</string>
-    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për ofruesin e VPN-së."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et dhe të dhënat e shfletimit, është i dukshëm për ofruesin e VPN-së."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për administratorin tënd të teknologjisë së informacionit."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP_0">%1$s</xliff:g> dhe <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për administratorin tënd të teknologjisë së informacionit."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Aplikacionet e tua të punës janë të lidhura me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet në aplikacionet e punës, duke përfshirë email-et dhe të dhënat e shfletimit, është i dukshëm për administratorin e teknologjisë së informacionit dhe ofruesin e VPN-së."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"çaktivizo"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Tingulli dhe dridhjet"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Cilësimet"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Ulur në një volum më të sigurt"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Volumi ka qenë i lartë për një kohë më të gjatë nga sa rekomandohet"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volumi është ulur në një nivel më të sigurt"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Volumi i kufjeve ka qenë i lartë për një kohë më të gjatë nga sa rekomandohet"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Volumi i kufjeve ka tejkaluar kufirin e sigurisë për këtë javë"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Vazhdo të dëgjosh"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Ul volumin"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikacioni është i gozhduar"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Prapa\" dhe \"Përmbledhje\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Prapa\" dhe \"Kreu\" për ta hequr nga gozhdimi."</string>
@@ -1139,10 +1142,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Lidhe stilolapsin me një karikues"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria e stilolapsit në nivel të ulët"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Nuk mund të telefonosh nga ky profil"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Politika jote e punës të lejon të bësh telefonata vetëm nga profili i punës"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Nuk mund të telefonohet nga një aplikacion personal"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Organizata jote të lejon që të telefonosh vetëm nga aplikacionet e punës"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Kalo te profili i punës"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Mbyll"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalo një aplikacion të telefonit të punës"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Anulo"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizo ekranin e kyçjes"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Shkyçe për të personalizuar ekranin e kyçjes"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi nuk ofrohet"</string>

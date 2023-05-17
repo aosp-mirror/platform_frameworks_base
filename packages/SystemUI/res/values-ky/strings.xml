@@ -174,11 +174,11 @@
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Манжа изи менен ачуу функциясын тууралоо үчүн учурдагы манжа изи сүрөттөрү менен үлгүлөр өчүрүлөт.\n\nАлар өчүрүлгөндөн кийин, манжа изиңизди колдонуп телефонуңуздун кулпусун ачуу же өзүңүздү ырастоо үчүн Манжа изи менен ачуу функциясын кайра жөндөшүңүз керек."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Манжа изи менен ачуу функциясын тууралоо үчүн учурдагы манжа изи сүрөттөрү менен үлгүсү өчүрүлөт.\n\nАлар өчүрүлгөндөн кийин, манжа изиңизди колдонуп телефонуңуздун кулпусун ачуу же өзүңүздү ырастоо үчүн Манжа изи менен ачуу функциясын кайра жөндөшүңүз керек."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Манжа изи менен ачуу функциясы жөндөлгөн жок. Параметрлерге өтүп, кайталап көрүңүз."</string>
-    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Жүзүнөн таанып ачуу функциясын кайрадан жөндөңүз"</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Жүзүнөн таанып ачуу функциясын кайра коюңуз"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Жүзүнөн таанып ачуу"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Жүзүнөн таанып ачууну коюу"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Жүзүнөн таанып ачуу функциясын кошуу үчүн жүзүңүздүн учурдагы үлгүсү өчүрүлөт.\n\nТелефонуңуздун кулпусун жүзүңүз аркылуу ачуу үчүн бул функцияны кайра жөндөшүңүз керек болот."</string>
-    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Жүзүнөн таанып ачуу функциясы жөндөлгөн жок. Параметрлерге өтүп, кайталап көрүңүз."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Жүзүнөн таанып ачуу функциясы кошулган жок. Параметрлерге өтүп, кайталап көрүңүз."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Манжа изинин сенсорун басыңыз"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Жүз таанылбай жатат. Манжа изин колдонуңуз."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"өчүрүү"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Үн жана дирилдөө"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Параметрлер"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Коопсуз үн көлөмүнө төмөндөтүлдү"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Үн көлөмү сунушталгандан узагыраак убакыт жогору болду"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Үндүн катуулугу коопсуз деңгээлге чейин акырындатылды"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Гарнитуранын үнүн катуу чыгарып, сунушталган убакыттан узагыраак угуп жатасыз"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Гарнитуранын үнүнүн катуулугу бул аптада коопсуз деңгээлден жогору болду"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Уга берем"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Үнүн акырындатуу"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Колдонмо кадалды"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн \"Артка\" жана \"Назар\" баскычтарын басып, кармап туруңуз."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Артка\" жана \"Башкы бет\" баскычтарын басып, кармап туруңуз."</string>
@@ -985,10 +988,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Динамиктер жана дисплейлер"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Сунушталган түзмөктөр"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Медиафайлдарды башка түзмөккө жылдыруу үчүн жалпы сеансыңызды токтотуңуз"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Токтотуу"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Кабарлоо кантип иштейт"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Кабарлоо"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Шайкеш Bluetooth түзмөктөрү болгон жакын жердеги кишилер кабарлап жаткан медиаңызды уга алышат"</string>
@@ -1141,10 +1142,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Стилусту кубаттаңыз"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Стилустун батареясы отурайын деп калды"</string>
     <string name="video_camera" msgid="7654002575156149298">"Видео камера"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Бул профилден чала албайсыз"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Жумуш саясатыңызга ылайык, жумуш профилинен гана чалууларды аткара аласыз"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Жеке колдонмодон чалуу мүмкүн эмес"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Уюмуңуз жумуш колдонмолорунан гана чалууга уруксат берет"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Жумуш профилине которулуу"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Жабуу"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Жумуш үчүн телефон колдонмосун орнотуу"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Жокко чыгаруу"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Кулпу экранын тууралоо"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Кулпуланган экранды тууралоо үчүн кулпусун ачыңыз"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi жеткиликтүү эмес"</string>
