@@ -328,10 +328,10 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.healthservices.HealthService";
     private static final String SYSTEM_STATE_DISPLAY_SERVICE_CLASS =
             "com.android.clockwork.systemstatedisplay.SystemStateDisplayService";
-    private static final String WEAR_SIDEKICK_SERVICE_CLASS =
-            "com.google.android.clockwork.sidekick.SidekickService";
     private static final String WEAR_DISPLAYOFFLOAD_SERVICE_CLASS =
             "com.android.clockwork.displayoffload.DisplayOffloadService";
+    private static final String WEAR_MODE_SERVICE_CLASS =
+            "com.android.clockwork.modes.ModeManagerService";
     private static final String WEAR_DISPLAY_SERVICE_CLASS =
             "com.android.clockwork.display.WearDisplayService";
     private static final String WEAR_TIME_SERVICE_CLASS =
@@ -1211,13 +1211,6 @@ public final class SystemServer implements Dumpable {
         // Package manager isn't started yet; need to use SysProp not hardware feature
         if (SystemProperties.getBoolean("config.enable_display_offload", false)) {
             mSystemServiceManager.startService(WEAR_DISPLAYOFFLOAD_SERVICE_CLASS);
-        }
-        t.traceEnd();
-
-        t.traceBegin("StartSidekickService");
-        // Package manager isn't started yet; need to use SysProp not hardware feature
-        if (SystemProperties.getBoolean("config.enable_sidekick_graphics", false)) {
-            mSystemServiceManager.startService(WEAR_SIDEKICK_SERVICE_CLASS);
         }
         t.traceEnd();
 
@@ -2607,6 +2600,10 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartWearSettingsService");
             mSystemServiceManager.startService(WEAR_SETTINGS_SERVICE_CLASS);
+            t.traceEnd();
+
+            t.traceBegin("StartWearModeService");
+            mSystemServiceManager.startService(WEAR_MODE_SERVICE_CLASS);
             t.traceEnd();
         }
 
