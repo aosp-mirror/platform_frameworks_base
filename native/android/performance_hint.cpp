@@ -120,6 +120,11 @@ APerformanceHintManager* APerformanceHintManager::create(sp<IHintManager> manage
 
 APerformanceHintSession* APerformanceHintManager::createSession(
         const int32_t* threadIds, size_t size, int64_t initialTargetWorkDurationNanos) {
+    // If |mPreferredRateNanos| is -1, it means hint session is not supported.
+    // Hence no need to attempt to create hint session.
+    if (mPreferredRateNanos == -1L) {
+        return nullptr;
+    }
     std::vector<int32_t> tids(threadIds, threadIds + size);
     sp<IHintSession> session;
     binder::Status ret =
