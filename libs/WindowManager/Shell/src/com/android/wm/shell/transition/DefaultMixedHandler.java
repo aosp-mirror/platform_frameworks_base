@@ -304,8 +304,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             return animateRecentsDuringSplit(mixed, info, startTransaction, finishTransaction,
                     finishCallback);
         } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
-            return mKeyguardHandler.startAnimation(
-                    transition, info, startTransaction, finishTransaction, finishCallback);
+            return animateKeyguard(mixed, info, startTransaction, finishTransaction,
+                    finishCallback);
         } else {
             mActiveTransitions.remove(mixed);
             throw new IllegalStateException("Starting mixed animation without a known mixed type? "
@@ -555,6 +555,27 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             mActiveTransitions.remove(mixed);
         }
         return handled;
+    }
+
+    private boolean animateKeyguard(@NonNull final MixedTransition mixed,
+            @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        boolean consumed = mKeyguardHandler.startAnimation(
+                mixed.mTransition, info, startTransaction, finishTransaction, finishCallback);
+        if (!consumed) {
+            return false;
+        }
+        // Sync pip state.
+        if (mPipHandler != null) {
+            // We don't know when to apply `startTransaction` so use a separate transaction here.
+            // This should be fine because these surface properties are independent.
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            mPipHandler.syncPipSurfaceState(info, t, finishTransaction);
+            t.apply();
+        }
+        return true;
     }
 
     @Override

@@ -32,7 +32,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -404,8 +403,8 @@ public class LocaleStore {
     /**
      * Returns a list of system locale that removes all extensions except for the numbering system.
      */
-    public static List<LocaleInfo> getSystemCurrentLocales() {
-        List<LocaleInfo> localeList = new ArrayList<>();
+    public static Set<LocaleInfo> getSystemCurrentLocales() {
+        Set<LocaleInfo> localeList = new HashSet<>();
         LocaleList systemLangList = LocaleList.getDefault();
         for(int i = 0; i < systemLangList.size(); i++) {
             Locale sysLocale = getLocaleWithOnlyNumberingSystem(systemLangList.get(i));

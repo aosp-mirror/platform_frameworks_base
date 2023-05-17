@@ -338,8 +338,7 @@ object Flags {
 
     // TODO(b/280426085): Tracking Bug
     @JvmField
-    val NEW_BLUETOOTH_REPOSITORY =
-        unreleasedFlag(612, "new_bluetooth_repository", teamfood = true)
+    val NEW_BLUETOOTH_REPOSITORY = unreleasedFlag(612, "new_bluetooth_repository")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -562,7 +561,7 @@ object Flags {
 
     // TODO(b/270987164): Tracking Bug
     @JvmField
-    val TRACKPAD_GESTURE_FEATURES = releasedFlag(1205, "trackpad_gesture_features")
+    val TRACKPAD_GESTURE_FEATURES = unreleasedFlag(1205, "trackpad_gesture_features", teamfood = true)
 
     // TODO(b/263826204): Tracking Bug
     @JvmField
