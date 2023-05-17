@@ -648,7 +648,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"请将手机向左移动"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"请将手机向右移动"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"请直视您的设备。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到人脸，请将手机举到与眼睛齐平的位置。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到您的脸，请将手机举到与眼睛齐平的位置。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"请重新注册您的面孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"无法识别人脸，请重试。"</string>
@@ -686,7 +686,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"使用人脸解锁或屏幕锁定凭据验证身份，才能继续操作"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"出了点问题。请重试。"</string>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"出了点问题，请重试。"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"面孔图标"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"读取同步设置"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"允许该应用读取某个帐号的同步设置。例如，此权限可确定“联系人”应用是否与某个帐号同步。"</string>

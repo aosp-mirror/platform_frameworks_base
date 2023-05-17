@@ -648,7 +648,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Поместете го телефонот налево"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Поместете го телефонот надесно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Погледнете подиректно во уредот."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не ви се гледа ликот. Држете го телефонот во висина на очите."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не се гледа ликот. Држете го телефонот во висина на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Премногу движење. Држете го телефонот стабилно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторно регистрирајте го лицето."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Не се препознава ликот. Обидете се пак."</string>
@@ -1704,8 +1704,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Исклучи ја кратенката"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Користи кратенка"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија на бои"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Корекција на бои"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија на боите"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Корекција на боите"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим со една рака"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дополнително затемнување"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ги задржавте копчињата за јачина на звук. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е вклучена."</string>

@@ -665,7 +665,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"No es pot crear el model facial. Torna-ho a provar."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"S\'han detectat ulleres fosques. La cara ha de ser completament visible."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"S\'ha detectat una mascareta. La cara ha de ser completament visible."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"S\'ha detectat una mascareta. La cara ha de veure\'s sencera."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No es pot verificar la cara. Maquinari no disponible."</string>

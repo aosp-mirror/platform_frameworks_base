@@ -317,7 +317,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder à vos activités physiques"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et filmer des vidéos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"découvrir les appareils à proximité et s\'y connecter"</string>
@@ -1659,7 +1659,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"Pour déverrouiller l\'appareil, connectez-vous avec votre compte Google."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nom d\'utilisateur (courriel)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Mot de passe"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"Connexion"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"Se connecter"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Nom d\'utilisateur ou mot de passe non valide."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Vous avez oublié votre nom d\'utilisateur ou votre mot de passe?\nRendez-vous sur la page "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Vérification du compte en cours…"</string>

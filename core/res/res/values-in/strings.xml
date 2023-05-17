@@ -663,7 +663,7 @@
     <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Tidak dapat membuat model wajah Anda. Coba lagi."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Kacamata hitam terdeteksi. Wajah Anda harus terlihat sepenuhnya."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Kacamata hitam terdeteksi. Wajah harus terlihat sepenuhnya."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Penutup wajah terdeteksi. Wajah harus terlihat sepenuhnya."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
