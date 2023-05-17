@@ -213,7 +213,6 @@ java_defaults {
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,
-    defaults_visibility: ["//visibility:private"],
     visibility: ["//visibility:public"],
 }
 
@@ -230,8 +229,6 @@ java_defaults {
         tag: ".jar",
         dest: "android-non-updatable.jar",
     },
-    defaults_visibility: ["//visibility:private"],
-    visibility: ["//visibility:private"],
 }
 
 java_library {
@@ -402,7 +399,6 @@ java_library {
 
 java_genrule {
     name: "android_stubs_private_hjar",
-    visibility: ["//visibility:private"],
     srcs: [":android_stubs_private_jar{.hjar}"],
     out: ["android_stubs_private.jar"],
     cmd: "cp $(in) $(out)",
@@ -411,7 +407,6 @@ java_genrule {
 java_library {
     name: "android_stubs_private",
     defaults: ["android_stubs_dists_default"],
-    visibility: ["//visibility:private"],
     sdk_version: "none",
     system_modules: "none",
     static_libs: ["android_stubs_private_hjar"],
@@ -422,7 +417,6 @@ java_library {
 
 java_genrule {
     name: "android_stubs_private_framework_aidl",
-    visibility: ["//visibility:private"],
     tools: ["sdkparcelables"],
     srcs: [":android_stubs_private"],
     out: ["framework.aidl"],
@@ -586,7 +580,6 @@ droidstubs {
         "metalava-manual",
     ],
     args: priv_apps,
-    visibility: ["//visibility:private"],
 }
 
 java_library {
