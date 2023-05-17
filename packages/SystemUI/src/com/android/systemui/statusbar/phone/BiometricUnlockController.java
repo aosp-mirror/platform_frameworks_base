@@ -309,7 +309,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mLogger = biometricUnlockLogger;
         mSystemClock = systemClock;
 
-        dumpManager.registerDumpable(getClass().getName(), this);
+        dumpManager.registerDumpable(this);
     }
 
     public void setKeyguardViewController(KeyguardViewController keyguardViewController) {

@@ -87,7 +87,7 @@ open class BroadcastDispatcher @Inject constructor(
     private val receiversByUser = SparseArray<UserBroadcastDispatcher>(20)
 
     fun initialize() {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerDumpable(this)
     }
 
     /**

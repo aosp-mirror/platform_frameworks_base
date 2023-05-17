@@ -188,8 +188,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
         mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
 
-        mDumpManager.unregisterDumpable(getClass().toString()); // unregister previous clocks
-        mDumpManager.registerDumpable(getClass().toString(), this);
+        mDumpManager.unregisterDumpable(getClass().getSimpleName()); // unregister previous clocks
+        mDumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     @Override

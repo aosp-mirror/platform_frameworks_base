@@ -227,7 +227,7 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     init {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerDumpable(this)
         resetFavorites()
         userChanging = false
         context.registerReceiver(

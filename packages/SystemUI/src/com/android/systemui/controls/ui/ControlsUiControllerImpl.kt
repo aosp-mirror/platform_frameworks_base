@@ -167,7 +167,7 @@ class ControlsUiControllerImpl @Inject constructor (
         get() = !hidden
 
     init {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerDumpable(this)
     }
 
     private fun createCallback(

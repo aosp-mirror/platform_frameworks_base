@@ -62,7 +62,7 @@ class KeyguardLiftController @Inject constructor(
     }
 
     private fun init() {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerDumpable(this)
         statusBarStateController.addCallback(statusBarStateListener)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         updateListeningState()

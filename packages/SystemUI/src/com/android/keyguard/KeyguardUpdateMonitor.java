@@ -2304,7 +2304,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mLockPatternUtils = lockPatternUtils;
         mAuthController = authController;
         mSecureSettings = secureSettings;
-        dumpManager.registerDumpable(getClass().getName(), this);
+        dumpManager.registerDumpable(this);
         mSensorPrivacyManager = sensorPrivacyManager;
         mActiveUnlockConfig = activeUnlockConfiguration;
         mLogger = logger;

@@ -258,7 +258,7 @@ public class SystemUIApplication extends Application implements
                 notifyBootCompleted(mServices[i]);
             }
 
-            dumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
+            dumpManager.registerDumpable(mServices[i].getClass().getSimpleName(), mServices[i]);
         }
         mSysUIComponent.getInitController().executePostInitTasks();
         log.traceEnd();

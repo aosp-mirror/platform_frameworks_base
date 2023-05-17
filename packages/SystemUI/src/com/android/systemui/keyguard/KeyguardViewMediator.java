@@ -93,7 +93,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.window.IRemoteTransition;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -161,7 +160,6 @@ import dagger.Lazy;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
@@ -1273,7 +1271,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mKeyguardDisplayManager = keyguardDisplayManager;
         mShadeController = shadeControllerLazy;
-        dumpManager.registerDumpable(getClass().getName(), this);
+        dumpManager.registerDumpable(this);
         mDeviceConfig = deviceConfig;
         mScreenOnCoordinator = screenOnCoordinator;
         mKeyguardTransitions = keyguardTransitions;

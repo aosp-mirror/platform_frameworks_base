@@ -71,7 +71,7 @@ constructor(
     private val entries: MutableMap<String, Entry> = mutableMapOf()
 
     init {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerDumpable(this)
     }
 
     /** Add a listener for changes to the media route (ie. device). */
