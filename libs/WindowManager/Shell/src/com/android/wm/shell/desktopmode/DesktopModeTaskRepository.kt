@@ -43,6 +43,7 @@ class DesktopModeTaskRepository {
          */
         val activeTasks: ArraySet<Int> = ArraySet(),
         val visibleTasks: ArraySet<Int> = ArraySet(),
+        var stashed: Boolean = false
     )
 
     // Tasks currently in freeform mode, ordered from top to bottom (top is at index 0).
@@ -312,6 +313,33 @@ class DesktopModeTaskRepository {
     }
 
     /**
+     * Update stashed status on display with id [displayId]
+     */
+    fun setStashed(displayId: Int, stashed: Boolean) {
+        val data = displayData.getOrCreate(displayId)
+        val oldValue = data.stashed
+        data.stashed = stashed
+        if (oldValue != stashed) {
+            KtProtoLog.d(
+                    WM_SHELL_DESKTOP_MODE,
+                    "DesktopTaskRepo: mark stashed=%b displayId=%d",
+                    stashed,
+                    displayId
+            )
+            visibleTasksListeners.forEach { (listener, executor) ->
+                executor.execute { listener.onStashedChanged(displayId, stashed) }
+            }
+        }
+    }
+
+    /**
+     * Check if display with id [displayId] has desktop tasks stashed
+     */
+    fun isStashed(displayId: Int): Boolean {
+        return displayData[displayId]?.stashed ?: false
+    }
+
+    /**
      * Defines interface for classes that can listen to changes for active tasks in desktop mode.
      */
     interface ActiveTasksListener {
@@ -331,5 +359,11 @@ class DesktopModeTaskRepository {
          */
         @JvmDefault
         fun onVisibilityChanged(displayId: Int, hasVisibleFreeformTasks: Boolean) {}
+
+        /**
+         * Called when the desktop stashed status changes.
+         */
+        @JvmDefault
+        fun onStashedChanged(displayId: Int, stashed: Boolean) {}
     }
 }
