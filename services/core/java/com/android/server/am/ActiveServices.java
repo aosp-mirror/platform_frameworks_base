@@ -8254,12 +8254,14 @@ public final class ActiveServices {
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mDelegationService
                         : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
                 0 /* api_sate */,
-                null /* api_type */,
-                null /* api_timestamp */,
+                0 /* api_type */,
+                0 /* api_timestamp */,
                 mAm.getUidStateLocked(r.appInfo.uid),
                 mAm.getUidProcessCapabilityLocked(r.appInfo.uid),
                 mAm.getUidStateLocked(r.mRecentCallingUid),
-                mAm.getUidProcessCapabilityLocked(r.mRecentCallingUid));
+                mAm.getUidProcessCapabilityLocked(r.mRecentCallingUid),
+                0,
+                0);
 
         int event = 0;
         if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {
@@ -8434,6 +8436,9 @@ public final class ActiveServices {
                 true, false, null, false,
                 AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
         registerAppOpCallbackLocked(r);
+        synchronized (mFGSLogger) {
+            mFGSLogger.logForegroundServiceStart(r.appInfo.uid, 0, r);
+        }
         logFGSStateChangeLocked(r,
                 FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
                 0, FGS_STOP_REASON_UNKNOWN, FGS_TYPE_POLICY_CHECK_UNKNOWN);
