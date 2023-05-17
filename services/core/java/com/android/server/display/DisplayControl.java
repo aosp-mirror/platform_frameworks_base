@@ -37,6 +37,7 @@ public class DisplayControl {
     private static native int nativeSetHdrConversionMode(int conversionMode,
             int preferredHdrOutputType, int[] autoHdrTypes, int autoHdrTypesLength);
     private static native int[] nativeGetSupportedHdrOutputTypes();
+    private static native int[] nativeGetHdrOutputTypesWithLatency();
     private static native boolean nativeGetHdrOutputConversionSupport();
 
     /**
@@ -125,6 +126,14 @@ public class DisplayControl {
      */
     public static @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypes() {
         return nativeGetSupportedHdrOutputTypes();
+    }
+
+    /**
+     * Returns the HDR output types which introduces latency on conversion to them.
+     * @hide
+     */
+    public static @Display.HdrCapabilities.HdrType int[] getHdrOutputTypesWithLatency() {
+        return nativeGetHdrOutputTypesWithLatency();
     }
 
     /**
