@@ -508,5 +508,15 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
             );
             return result[0];
         }
+
+        @Override
+        public void stashDesktopApps(int displayId) throws RemoteException {
+            // Stashing of desktop apps not needed. Apps always launch on desktop
+        }
+
+        @Override
+        public void setTaskListener(IDesktopTaskListener listener) throws RemoteException {
+            // TODO(b/261234402): move visibility from sysui state to listener
+        }
     }
 }
