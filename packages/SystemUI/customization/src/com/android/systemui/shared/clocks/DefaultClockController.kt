@@ -265,7 +265,7 @@ class DefaultClockController(
             }
         }
 
-        override fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {
+        override fun onPickerCarouselSwiping(swipingFraction: Float) {
             // TODO(b/278936436): refactor this part when we change recomputePadding
             // when on the side, swipingFraction = 0, translationY should offset
             // the top margin change in recomputePadding to make clock be centered
