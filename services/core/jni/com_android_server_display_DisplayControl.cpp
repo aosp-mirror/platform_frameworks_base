@@ -110,7 +110,32 @@ static jintArray nativeGetSupportedHdrOutputTypes(JNIEnv* env, jclass clazz) {
         return nullptr;
     }
     jint* arrayValues = env->GetIntArrayElements(array, 0);
-    int index = 0;
+    size_t index = 0;
+    for (auto hdrOutputType : hdrOutputTypes) {
+        arrayValues[index++] = static_cast<jint>(hdrOutputType);
+    }
+    env->ReleaseIntArrayElements(array, arrayValues, 0);
+    return array;
+}
+
+static jintArray nativeGetHdrOutputTypesWithLatency(JNIEnv* env, jclass clazz) {
+    std::vector<gui::HdrConversionCapability> hdrConversionCapabilities;
+    SurfaceComposerClient::getHdrConversionCapabilities(&hdrConversionCapabilities);
+
+    // Extract unique HDR output types with latency.
+    std::set<int> hdrOutputTypes;
+    for (const auto& hdrConversionCapability : hdrConversionCapabilities) {
+        if (hdrConversionCapability.outputType > 0 && hdrConversionCapability.addsLatency) {
+            hdrOutputTypes.insert(hdrConversionCapability.outputType);
+        }
+    }
+    jintArray array = env->NewIntArray(hdrOutputTypes.size());
+    if (array == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return nullptr;
+    }
+    jint* arrayValues = env->GetIntArrayElements(array, 0);
+    size_t index = 0;
     for (auto hdrOutputType : hdrOutputTypes) {
         arrayValues[index++] = static_cast<jint>(hdrOutputType);
     }
@@ -167,7 +192,9 @@ static const JNINativeMethod sDisplayMethods[] = {
             (void*)nativeSetHdrConversionMode },
     {"nativeGetSupportedHdrOutputTypes", "()[I",
             (void*)nativeGetSupportedHdrOutputTypes },
-     {"nativeGetHdrOutputConversionSupport", "()Z",
+    {"nativeGetHdrOutputTypesWithLatency", "()[I",
+            (void*)nativeGetHdrOutputTypesWithLatency },
+    {"nativeGetHdrOutputConversionSupport", "()Z",
             (void*) nativeGetHdrOutputConversionSupport },
         // clang-format on
 };
