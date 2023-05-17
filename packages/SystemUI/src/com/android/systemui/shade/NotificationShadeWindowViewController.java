@@ -36,6 +36,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
@@ -45,12 +46,14 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.KeyguardBouncerViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
+import com.android.systemui.log.BouncerLogger;
 import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
 import com.android.systemui.multishade.domain.interactor.MultiShadeMotionEventInteractor;
 import com.android.systemui.multishade.ui.view.MultiShadeView;
@@ -149,12 +152,15 @@ public class NotificationShadeWindowViewController {
             PulsingGestureListener pulsingGestureListener,
             KeyguardBouncerViewModel keyguardBouncerViewModel,
             KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory,
+            KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             FeatureFlags featureFlags,
             Provider<MultiShadeInteractor> multiShadeInteractorProvider,
             SystemClock clock,
-            Provider<MultiShadeMotionEventInteractor> multiShadeMotionEventInteractorProvider) {
+            Provider<MultiShadeMotionEventInteractor> multiShadeMotionEventInteractorProvider,
+            BouncerMessageInteractor bouncerMessageInteractor,
+            BouncerLogger bouncerLogger) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -183,7 +189,11 @@ public class NotificationShadeWindowViewController {
                 mView.findViewById(R.id.keyguard_bouncer_container),
                 keyguardBouncerViewModel,
                 primaryBouncerToGoneTransitionViewModel,
-                keyguardBouncerComponentFactory);
+                keyguardBouncerComponentFactory,
+                messageAreaControllerFactory,
+                bouncerMessageInteractor,
+                bouncerLogger,
+                featureFlags);
 
         collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
                 mLockscreenToDreamingTransition);

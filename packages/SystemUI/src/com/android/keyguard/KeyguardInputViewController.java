@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -33,6 +34,10 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageInteractor;
+import com.android.systemui.keyguard.bouncer.ui.BouncerMessageView;
+import com.android.systemui.keyguard.ui.binder.BouncerMessageViewBinder;
+import com.android.systemui.log.BouncerLogger;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -167,6 +172,24 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
 
     /** Determines the message to show in the bouncer when it first appears. */
     protected abstract int getInitialMessageResId();
+
+    /**
+     * Binds the {@link KeyguardInputView#getBouncerMessageView()} view with the provided context.
+     */
+    public void bindMessageView(
+            @NonNull BouncerMessageInteractor bouncerMessageInteractor,
+            KeyguardMessageAreaController.Factory messageAreaControllerFactory,
+            BouncerLogger bouncerLogger,
+            FeatureFlags featureFlags) {
+        BouncerMessageView bouncerMessageView = (BouncerMessageView) mView.getBouncerMessageView();
+        if (bouncerMessageView != null) {
+            BouncerMessageViewBinder.bind(bouncerMessageView,
+                    bouncerMessageInteractor,
+                    messageAreaControllerFactory,
+                    bouncerLogger,
+                    featureFlags);
+        }
+    }
 
     /** Factory for a {@link KeyguardInputViewController}. */
     public static class Factory {
