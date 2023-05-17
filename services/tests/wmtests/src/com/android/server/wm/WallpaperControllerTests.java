@@ -32,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.window.flags.Flags.multiCrop;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -39,6 +40,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -484,6 +486,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
     @Test
     public void testUpdateWallpaperOffset_resize_shouldCenterEnabled() {
+        assumeFalse(multiCrop());
         final DisplayContent dc = new TestDisplayContent.Builder(mAtm, INITIAL_WIDTH,
                 INITIAL_HEIGHT).build();
         dc.mWallpaperController.setShouldOffsetWallpaperCenter(true);

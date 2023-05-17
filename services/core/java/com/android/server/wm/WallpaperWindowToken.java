@@ -25,9 +25,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.SparseArray;
 import android.view.animation.Animation;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -48,6 +50,12 @@ class WallpaperWindowToken extends WindowToken {
     float mWallpaperYStep = -1;
     int mWallpaperDisplayOffsetX = Integer.MIN_VALUE;
     int mWallpaperDisplayOffsetY = Integer.MIN_VALUE;
+
+    /**
+     * Map from {@link android.app.WallpaperManager.ScreenOrientation} to crop rectangles.
+     * Crop rectangles represent the part of the wallpaper displayed for each screen orientation.
+     */
+    private SparseArray<Rect> mCropHints = new SparseArray<>();
 
     WallpaperWindowToken(WindowManagerService service, IBinder token, boolean explicit,
             DisplayContent dc, boolean ownerCanManageAppTokens) {
@@ -96,6 +104,14 @@ class WallpaperWindowToken extends WindowToken {
 
     boolean canShowWhenLocked() {
         return mShowWhenLocked;
+    }
+
+    void setCropHints(SparseArray<Rect> cropHints) {
+        mCropHints = cropHints.clone();
+    }
+
+    SparseArray<Rect> getCropHints() {
+        return mCropHints;
     }
 
     void sendWindowWallpaperCommand(

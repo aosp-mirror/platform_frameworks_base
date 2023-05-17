@@ -153,6 +153,7 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.INPUT_METHOD_W
 import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
 import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerServiceDumpProto.WINDOW_FRAMES_VALID;
+import static com.android.window.flags.Flags.multiCrop;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -238,6 +239,7 @@ import android.util.EventLog;
 import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
@@ -342,6 +344,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
+import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -8129,6 +8132,25 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setWallpaperCropHints(IBinder binder, SparseArray<Rect> cropHints) {
+            synchronized (mGlobalLock) {
+                final WindowToken token = mRoot.getWindowToken(binder);
+                if (token == null || token.asWallpaperToken() == null) {
+                    ProtoLog.w(WM_ERROR,
+                            "setWallpaperCropHints: non-existent wallpaper token: %s", binder);
+                    return;
+                }
+                token.asWallpaperToken().setCropHints(cropHints);
+            }
+        }
+
+        @Override
+        public void setWallpaperCropUtils(WallpaperCropUtils wallpaperCropUtils) {
+            mRoot.getDisplayContent(DEFAULT_DISPLAY).mWallpaperController
+                    .setWallpaperCropUtils(wallpaperCropUtils);
+        }
+
+        @Override
         public boolean isUidFocused(int uid) {
             synchronized (mGlobalLock) {
                 for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
@@ -9354,7 +9376,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                if (!mAtmService.isCallerRecents(callingUid)) {
+                if (!mAtmService.isCallerRecents(callingUid)
+                        && (!multiCrop() || callingUid != SYSTEM_UID)) {
                     Slog.e(TAG, "Unable to verify uid for getPossibleDisplayInfo"
                             + " on uid " + callingUid);
                     return new ArrayList<>();
