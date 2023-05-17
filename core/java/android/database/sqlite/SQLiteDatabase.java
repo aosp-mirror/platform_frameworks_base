@@ -2166,6 +2166,31 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
+     * Return a {@link SQLiteRawStatement} connected to the database.  A transaction must be in
+     * progress or an exception will be thrown.  The resulting object will be closed automatically
+     * when the current transaction closes.
+     * @param sql The SQL string to be compiled into a prepared statement.
+     * @return A raw statement holding the compiled sql.
+     * @throws IllegalStateException if a transaction is not in progress.
+     * @throws SQLiteException if the sql cannot be compiled.
+     * @hide
+     */
+    public SQLiteRawStatement createRawStatement(@NonNull String sql) {
+        return new SQLiteRawStatement(this, sql);
+    }
+
+    /**
+     * Return the "rowid" of the last row to be inserted on the current connection.  See the
+     * SQLite documentation for the specific details.  This method must only be called when inside
+     * a transaction.  {@link IllegalStateException} is thrown if the method is called outside a
+     * transaction.
+     * @hide
+     */
+    public long lastInsertRowId() {
+        return getThreadSession().lastInsertRowId();
+    }
+
+    /**
      * Verifies that a SQL SELECT statement is valid by compiling it.
      * If the SQL statement is not valid, this method will throw a {@link SQLiteException}.
      *
