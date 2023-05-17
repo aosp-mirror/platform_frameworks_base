@@ -385,6 +385,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 case MotionEvent.ACTION_MOVE: {
                     final DesktopModeWindowDecoration decoration =
                             mWindowDecorByTaskId.get(mTaskId);
+                    if (e.findPointerIndex(mDragPointerId) == -1) {
+                        mDragPointerId = e.getPointerId(0);
+                    }
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDesktopTasksController.ifPresent(c -> c.onDragPositioningMove(taskInfo,
                             decoration.mTaskSurface, e.getRawY(dragPointerIdx)));
@@ -395,6 +398,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
+                    if (e.findPointerIndex(mDragPointerId) == -1) {
+                        mDragPointerId = e.getPointerId(0);
+                    }
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     // Position of the task is calculated by subtracting the raw location of the
                     // motion event (the location of the motion relative to the display) by the
