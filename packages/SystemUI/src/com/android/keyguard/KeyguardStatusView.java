@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static java.util.Collections.emptySet;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Trace;
 import android.util.AttributeSet;
@@ -47,6 +48,7 @@ public class KeyguardStatusView extends GridLayout {
     private KeyguardSliceView mKeyguardSlice;
     private View mMediaHostContainer;
 
+    private int mDrawAlpha = 255;
     private float mDarkAmount = 0;
 
     public KeyguardStatusView(Context context) {
@@ -136,30 +138,16 @@ public class KeyguardStatusView extends GridLayout {
         Trace.endSection();
     }
 
-    /**
-     * Clock content will be clipped when goes beyond bounds,
-     * so we setAlpha for all views except clock
-     */
-    public void setAlpha(float alpha, boolean excludeClock) {
-        if (!excludeClock) {
-            setAlpha(alpha);
-            return;
-        }
-        if (alpha == 1 || alpha == 0) {
-            setAlpha(alpha);
-        }
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            if (child == mStatusViewContainer) {
-                for (int j = 0; j < mStatusViewContainer.getChildCount(); j++) {
-                    View innerChild = mStatusViewContainer.getChildAt(j);
-                    if (innerChild != mClockView) {
-                        innerChild.setAlpha(alpha);
-                    }
-                }
-            } else {
-                child.setAlpha(alpha);
-            }
-        }
+    @Override
+    protected boolean onSetAlpha(int alpha) {
+        mDrawAlpha = alpha;
+        return true;
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        int restoreTo = KeyguardClockFrame.saveCanvasAlpha(this, canvas, mDrawAlpha);
+        super.dispatchDraw(canvas);
+        canvas.restoreToCount(restoreTo);
     }
 }

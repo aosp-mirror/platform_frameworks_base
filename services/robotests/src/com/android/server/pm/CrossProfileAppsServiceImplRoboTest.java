@@ -201,7 +201,7 @@ public class CrossProfileAppsServiceImplRoboTest {
     }
 
     private void mockCrossProfileAppWhitelisted() {
-        when(mDevicePolicyManagerInternal.getAllCrossProfilePackages())
+        when(mDevicePolicyManagerInternal.getAllCrossProfilePackages(anyInt()))
                 .thenReturn(Lists.newArrayList(CROSS_PROFILE_APP_PACKAGE_NAME));
     }
 
@@ -662,7 +662,7 @@ public class CrossProfileAppsServiceImplRoboTest {
     }
 
     private void mockCrossProfileAppNotWhitelisted() {
-        when(mDevicePolicyManagerInternal.getAllCrossProfilePackages())
+        when(mDevicePolicyManagerInternal.getAllCrossProfilePackages(anyInt()))
                 .thenReturn(new ArrayList<>());
     }
 

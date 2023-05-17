@@ -18,9 +18,7 @@
 -->
 <shape
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle">
-  <solid android:color="?androidprv:attr/colorSurface"/>
   <size
       android:width="@dimen/dream_overlay_bottom_affordance_height"
       android:height="@dimen/dream_overlay_bottom_affordance_width"/>

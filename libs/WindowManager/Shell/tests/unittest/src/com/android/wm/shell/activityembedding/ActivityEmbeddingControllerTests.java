@@ -29,9 +29,13 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.graphics.Rect;
+import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -58,7 +62,8 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
     @Before
     public void setup() {
         super.setUp();
-        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any(), any());
+        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any(),
+                any());
     }
 
     @Test
@@ -180,6 +185,44 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
                 mFinishTransaction);
         verify(mStartTransaction).apply();
         verifyNoMoreInteractions(mFinishTransaction);
+    }
+
+    @UiThreadTest
+    @Test
+    public void testMergeAnimation() {
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(createEmbeddedChange(
+                        EMBEDDED_LEFT_BOUNDS, EMBEDDED_LEFT_BOUNDS, TASK_BOUNDS))
+                .build();
+
+        final ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mController.onAnimationFinished(mTransition);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+        doReturn(animator).when(mAnimRunner).createAnimator(any(), any(), any(), any(), any());
+        mController.startAnimation(mTransition, info, mStartTransaction,
+                mFinishTransaction, mFinishCallback);
+        verify(mFinishCallback, never()).onTransitionFinished(any(), any());
+        mController.mergeAnimation(mTransition, info, new SurfaceControl.Transaction(),
+                mTransition,
+                (wct, cb) -> {
+                });
+        verify(mFinishCallback).onTransitionFinished(any(), any());
     }
 
     @Test

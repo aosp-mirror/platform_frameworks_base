@@ -145,4 +145,10 @@ interface IDynamicSystemService
      */
     @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
     long suggestScratchSize();
+
+    /**
+     * Get the active DSU slot
+     */
+    @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
+    String getActiveDsuSlot();
 }
