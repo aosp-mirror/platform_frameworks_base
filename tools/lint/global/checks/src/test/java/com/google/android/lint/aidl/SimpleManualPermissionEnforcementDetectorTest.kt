@@ -51,10 +51,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:7: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:7: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                0 errors, 1 warnings
+                1 errors, 0 warnings
                 """
             )
             .expectFixDiffs(
@@ -168,10 +168,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:8: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:8: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                             mContext.enforceCallingOrSelfPermission(
                             ^
-                0 errors, 1 warnings
+                1 errors, 0 warnings
                 """
             )
             .expectFixDiffs(
@@ -209,10 +209,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:8: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:8: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.READ_CONTACTS, "foo");
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                0 errors, 1 warnings
+                1 errors, 0 warnings
                 """
             )
             .expectFixDiffs(
@@ -252,10 +252,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:10: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:10: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                             mContext.enforceCallingOrSelfPermission(
                             ^
-                0 errors, 1 warnings
+                1 errors, 0 warnings
                 """
             )
             .expectFixDiffs(
@@ -414,10 +414,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:14: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:14: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         helper();
                         ~~~~~~~~~
-                0 errors, 1 warnings
+                1 errors, 0 warnings
                 """
             )
             .expectFixDiffs(
@@ -506,10 +506,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:16: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:16: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         mContext.enforceCallingOrSelfPermission("FOO", "foo");
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                0 errors, 1 warnings
+                1 errors, 0 warnings
                 """
             )
             .expectFixDiffs(
@@ -558,10 +558,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:19: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:19: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         helperHelper();
                         ~~~~~~~~~~~~~~~
-                0 errors, 1 warnings
+                1 errors, 0 warnings
                 """
             )
             .expectFixDiffs(
@@ -599,10 +599,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 .run()
                 .expect(
                     """
-                    src/Foo.java:7: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                    src/Foo.java:7: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                             if (mContext.checkCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo")
                             ^
-                    0 errors, 1 warnings
+                    1 errors, 0 warnings
                     """
                 )
                 .expectFixDiffs(
