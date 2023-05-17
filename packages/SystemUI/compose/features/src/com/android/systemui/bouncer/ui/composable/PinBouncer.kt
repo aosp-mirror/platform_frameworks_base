@@ -63,6 +63,7 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.compose.modifiers.thenIf
 import kotlin.math.max
 
 @Composable
@@ -75,6 +76,7 @@ internal fun PinBouncer(
 
     // The length of the PIN input received so far, so we know how many dots to render.
     val pinLength: Pair<Int, Int> by viewModel.pinLengths.collectAsState()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -116,6 +118,7 @@ internal fun PinBouncer(
                 val digit = index + 1
                 PinButton(
                     onClicked = { viewModel.onPinButtonClicked(digit) },
+                    isEnabled = isInputEnabled,
                 ) { contentColor ->
                     PinDigit(digit, contentColor)
                 }
@@ -124,6 +127,7 @@ internal fun PinBouncer(
             PinButton(
                 onClicked = { viewModel.onBackspaceButtonClicked() },
                 onLongPressed = { viewModel.onBackspaceButtonLongPressed() },
+                isEnabled = isInputEnabled,
                 isHighlighted = true,
             ) { contentColor ->
                 PinIcon(
@@ -138,6 +142,7 @@ internal fun PinBouncer(
 
             PinButton(
                 onClicked = { viewModel.onPinButtonClicked(0) },
+                isEnabled = isInputEnabled,
             ) { contentColor ->
                 PinDigit(0, contentColor)
             }
@@ -145,6 +150,7 @@ internal fun PinBouncer(
             PinButton(
                 onClicked = { viewModel.onAuthenticateButtonClicked() },
                 isHighlighted = true,
+                isEnabled = isInputEnabled,
             ) { contentColor ->
                 PinIcon(
                     Icon.Resource(
@@ -187,6 +193,7 @@ private fun PinIcon(
 @Composable
 private fun PinButton(
     onClicked: () -> Unit,
+    isEnabled: Boolean,
     modifier: Modifier = Modifier,
     onLongPressed: (() -> Unit)? = null,
     isHighlighted: Boolean = false,
@@ -228,16 +235,18 @@ private fun PinButton(
                         cornerRadius = CornerRadius(cornerRadius.toPx()),
                     )
                 }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = {
-                            isPressed = true
-                            tryAwaitRelease()
-                            isPressed = false
-                        },
-                        onTap = { onClicked() },
-                        onLongPress = onLongPressed?.let { { onLongPressed() } },
-                    )
+                .thenIf(isEnabled) {
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = {
+                                isPressed = true
+                                tryAwaitRelease()
+                                isPressed = false
+                            },
+                            onTap = { onClicked() },
+                            onLongPress = onLongPressed?.let { { onLongPressed() } },
+                        )
+                    }
                 },
     ) {
         content(contentColor)

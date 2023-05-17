@@ -53,6 +53,7 @@ internal fun PasswordBouncer(
 ) {
     val focusRequester = remember { FocusRequester() }
     val password: String by viewModel.password.collectAsState()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
 
     LaunchedEffect(Unit) {
         // When the UI comes up, request focus on the TextField to bring up the software keyboard.
@@ -71,6 +72,7 @@ internal fun PasswordBouncer(
         TextField(
             value = password,
             onValueChange = viewModel::onPasswordInputChanged,
+            enabled = isInputEnabled,
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
             textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
