@@ -15,7 +15,6 @@
 
 package com.android.server.pm;
 
-import static android.Manifest.permission.GET_APP_METADATA;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
@@ -96,7 +95,6 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ComponentEnabledSetting;
@@ -148,7 +146,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.PerUidReadTimeouts;
-import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeRecord;
@@ -157,7 +154,6 @@ import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
@@ -484,18 +480,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final long WATCHDOG_TIMEOUT = 1000*60*10;     // ten minutes
 
     /**
-     * Wall-clock timeout (in milliseconds) after which we *require* that an fstrim
-     * be run on this device.  We use the value in the Settings.Global.MANDATORY_FSTRIM_INTERVAL
-     * settings entry if available, otherwise we use the hardcoded default.  If it's been
-     * more than this long since the last fstrim, we force one during the boot sequence.
-     *
-     * This backstops other fstrim scheduling:  if the device is alive at midnight+idle,
-     * one gets run at the next available charging+idle time.  This final mandatory
-     * no-fstrim check kicks in only of the other scheduling criteria is never met.
-     */
-    private static final long DEFAULT_MANDATORY_FSTRIM_INTERVAL = 3 * DateUtils.DAY_IN_MILLIS;
-
-    /**
      * Default IncFs timeouts. Maximum values in IncFs is 1hr.
      *
      * <p>If flag value is empty, the default value will be assigned.
@@ -600,8 +584,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     final Handler mBackgroundHandler;
 
     final ProcessLoggingHandler mProcessLoggingHandler;
-
-    private final boolean mEnableFreeCacheV2;
 
     private final int mSdkVersion;
     final Context mContext;
@@ -949,8 +931,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // When the service constructor finished plus a delay (used for broadcast delay computation)
     private long mServiceStartWithDelay;
 
-    private static final long FREE_STORAGE_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
-            TimeUnit.HOURS.toMillis(2); /* two hours */
     static final long DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
             TimeUnit.DAYS.toMillis(7); /* 7 days */
 
@@ -1004,6 +984,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final SuspendPackageHelper mSuspendPackageHelper;
     private final DistractingPackageHelper mDistractingPackageHelper;
     private final StorageEventHelper mStorageEventHelper;
+    private final FreeStorageHelper mFreeStorageHelper;
+
 
     private static final boolean ENABLE_BOOST = false;
 
@@ -1826,7 +1808,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mSnapshotStatistics = null;
 
         mPackages.putAll(testParams.packages);
-        mEnableFreeCacheV2 = testParams.enableFreeCacheV2;
+        mFreeStorageHelper = testParams.freeStorageHelper;
         mSdkVersion = testParams.sdkVersion;
         mAppInstallDir = testParams.appInstallDir;
         mIsEngBuild = testParams.isEngBuild;
@@ -1880,7 +1862,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mFactoryTest = factoryTest;
         mMetrics = injector.getDisplayMetrics();
         mInstaller = injector.getInstaller();
-        mEnableFreeCacheV2 = SystemProperties.getBoolean("fw.free_cache_v2", true);
+        mFreeStorageHelper = new FreeStorageHelper(this);
 
         // Create sub-components that provide services / data. Order here is important.
         t.traceBegin("createSubComponents");
@@ -2795,138 +2777,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      */
     public void freeStorage(String volumeUuid, long bytes,
             @StorageManager.AllocateFlags int flags) throws IOException {
-        final StorageManager storage = mInjector.getSystemService(StorageManager.class);
-        final File file = storage.findPathForUuid(volumeUuid);
-        if (file.getUsableSpace() >= bytes) return;
-
-        if (mEnableFreeCacheV2) {
-            final boolean internalVolume = Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL,
-                    volumeUuid);
-            final boolean aggressive = (flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
-
-            // 1. Pre-flight to determine if we have any chance to succeed
-            // 2. Consider preloaded data (after 1w honeymoon, unless aggressive)
-            if (internalVolume && (aggressive || SystemProperties
-                    .getBoolean("persist.sys.preloads.file_cache_expired", false))) {
-                deletePreloadsFileCache();
-                if (file.getUsableSpace() >= bytes) return;
-            }
-
-            // 3. Consider parsed APK data (aggressive only)
-            if (internalVolume && aggressive) {
-                FileUtils.deleteContents(mCacheDir);
-                if (file.getUsableSpace() >= bytes) return;
-            }
-
-            // 4. Consider cached app data (above quotas)
-            synchronized (mInstallLock) {
-                try {
-                    mInstaller.freeCache(volumeUuid, bytes, Installer.FLAG_FREE_CACHE_V2);
-                } catch (InstallerException ignored) {
-                }
-            }
-            if (file.getUsableSpace() >= bytes) return;
-
-            Computer computer = snapshotComputer();
-            // 5. Consider shared libraries with refcount=0 and age>min cache period
-            if (internalVolume && mSharedLibraries.pruneUnusedStaticSharedLibraries(computer, bytes,
-                    android.provider.Settings.Global.getLong(mContext.getContentResolver(),
-                            Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
-                            FREE_STORAGE_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD))) {
-                return;
-            }
-
-            // 6. Consider dexopt output (aggressive only)
-            // TODO: Implement
-
-            // 7. Consider installed instant apps unused longer than min cache period
-            if (internalVolume) {
-                if (mInstantAppRegistry.pruneInstalledInstantApps(computer, bytes,
-                        android.provider.Settings.Global.getLong(
-                                mContext.getContentResolver(),
-                                Global.INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
-                                InstantAppRegistry
-                                        .DEFAULT_INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD))) {
-                    return;
-                }
-            }
-
-            // 8. Consider cached app data (below quotas)
-            synchronized (mInstallLock) {
-                try {
-                    mInstaller.freeCache(volumeUuid, bytes,
-                            Installer.FLAG_FREE_CACHE_V2 | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
-                } catch (InstallerException ignored) {
-                }
-            }
-            if (file.getUsableSpace() >= bytes) return;
-
-            // 9. Consider DropBox entries
-            // TODO: Implement
-
-            // 10. Consider instant meta-data (uninstalled apps) older that min cache period
-            if (internalVolume) {
-                if (mInstantAppRegistry.pruneUninstalledInstantApps(computer, bytes,
-                        android.provider.Settings.Global.getLong(
-                                mContext.getContentResolver(),
-                                Global.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
-                                InstantAppRegistry
-                                        .DEFAULT_UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD))) {
-                    return;
-                }
-            }
-
-            // 11. Free storage service cache
-            StorageManagerInternal smInternal =
-                    mInjector.getLocalService(StorageManagerInternal.class);
-            long freeBytesRequired = bytes - file.getUsableSpace();
-            if (freeBytesRequired > 0) {
-                smInternal.freeCache(volumeUuid, freeBytesRequired);
-            }
-
-            // 12. Clear temp install session files
-            mInstallerService.freeStageDirs(volumeUuid);
-        } else {
-            synchronized (mInstallLock) {
-                try {
-                    mInstaller.freeCache(volumeUuid, bytes, 0);
-                } catch (InstallerException ignored) {
-                }
-            }
-        }
-        if (file.getUsableSpace() >= bytes) return;
-
-        throw new IOException("Failed to free " + bytes + " on storage device at " + file);
+        mFreeStorageHelper.freeStorage(volumeUuid, bytes, flags);
     }
 
     int freeCacheForInstallation(int recommendedInstallLocation, PackageLite pkgLite,
             String resolvedPath, String mPackageAbiOverride, int installFlags) {
-        // TODO: focus freeing disk space on the target device
-        final StorageManager storage = StorageManager.from(mContext);
-        final long lowThreshold = storage.getStorageLowBytes(Environment.getDataDirectory());
-
-        final long sizeBytes = PackageManagerServiceUtils.calculateInstalledSize(resolvedPath,
-                mPackageAbiOverride);
-        if (sizeBytes >= 0) {
-            synchronized (mInstallLock) {
-                try {
-                    mInstaller.freeCache(null, sizeBytes + lowThreshold, 0);
-                    PackageInfoLite pkgInfoLite = PackageManagerServiceUtils.getMinimalPackageInfo(
-                            mContext, pkgLite, resolvedPath, installFlags,
-                            mPackageAbiOverride);
-                    // The cache free must have deleted the file we downloaded to install.
-                    if (pkgInfoLite.recommendedInstallLocation
-                            == InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI) {
-                        pkgInfoLite.recommendedInstallLocation =
-                                InstallLocationUtils.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
-                    }
-                    return pkgInfoLite.recommendedInstallLocation;
-                } catch (Installer.InstallerException e) {
-                    Slog.w(TAG, "Failed to free cache", e);
-                }
-            }
-        }
-        return recommendedInstallLocation;
+        return mFreeStorageHelper.freeCacheForInstallation(recommendedInstallLocation, pkgLite,
+                resolvedPath, mPackageAbiOverride, installFlags);
     }
 
     public ModuleInfo getModuleInfo(String packageName, @PackageManager.ModuleInfoFlags int flags) {
@@ -3005,34 +2862,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     public void performFstrimIfNeeded() {
-        PackageManagerServiceUtils.enforceSystemOrRoot("Only the system can request fstrim");
-
-        // Before everything else, see whether we need to fstrim.
-        try {
-            IStorageManager sm = InstallLocationUtils.getStorageManager();
-            if (sm != null) {
-                boolean doTrim = false;
-                final long interval = android.provider.Settings.Global.getLong(
-                        mContext.getContentResolver(),
-                        android.provider.Settings.Global.FSTRIM_MANDATORY_INTERVAL,
-                        DEFAULT_MANDATORY_FSTRIM_INTERVAL);
-                if (interval > 0) {
-                    final long timeSinceLast = System.currentTimeMillis() - sm.lastMaintenance();
-                    if (timeSinceLast > interval) {
-                        doTrim = true;
-                        Slog.w(TAG, "No disk maintenance in " + timeSinceLast
-                                + "; running immediately");
-                    }
-                }
-                if (doTrim) {
-                    sm.runMaintenance();
-                }
-            } else {
-                Slog.e(TAG, "storageManager service unavailable!");
-            }
-        } catch (RemoteException e) {
-            // Can't happen; StorageManagerService is local
-        }
+        mFreeStorageHelper.performFstrimIfNeeded();
     }
 
     public void updatePackagesIfNeeded() {
