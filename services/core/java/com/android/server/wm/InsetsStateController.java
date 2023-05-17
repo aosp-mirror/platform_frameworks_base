@@ -190,7 +190,7 @@ class InsetsStateController {
         }
     }
 
-    void onInsetsModified(InsetsControlTarget caller) {
+    void onRequestedVisibleTypesChanged(InsetsControlTarget caller) {
         boolean changed = false;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             changed |= mProviders.valueAt(i).updateClientVisibility(caller);
@@ -352,7 +352,7 @@ class InsetsStateController {
             // to the clients, so that the clients can change the current visibilities to the
             // requested visibilities with animations.
             for (int i = newControlTargets.size() - 1; i >= 0; i--) {
-                onInsetsModified(newControlTargets.valueAt(i));
+                onRequestedVisibleTypesChanged(newControlTargets.valueAt(i));
             }
             newControlTargets.clear();
         });
