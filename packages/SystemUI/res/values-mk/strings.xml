@@ -460,7 +460,7 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На уредов е инсталиран авторитет за сертификат. Вашиот безбеден мрежен сообраќај можно е да се следи или изменува."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Вашиот администратор вклучил евиденција на мрежата, што подразбира следење на сообраќајот на вашиот уред."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Вашиот администратор вклучил мрежна евиденција, што подразбира следење на сообраќајот во работниот, но не и во личниот профил."</string>
-    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Уредов е поврзан на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, заедно со е-пораките и податоците од прелистување, е видлива за VPN-операторот."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Уредов е поврзан на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност (заедно со е-пораките и податоците од прелистувањето) е видлива за VPN-операторот."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Уредов е поврзан на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, заедно со е-пораките и податоците од прелистување, е видлива за вашиот IT-администратор."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Уредот е поврзан на интернет преку <xliff:g id="VPN_APP_0">%1$s</xliff:g> и <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Вашата мрежна активност, вклучително е-пораките и податоците од прелистување, е видлива за IT-администраторот."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Вашите работни апликации се поврзани на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, вклучително е-пораките и податоците од прелистување, е видлива за вашиот IT-администратор и давател на услуги за VPN."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"оневозможи"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Звук и вибрации"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Поставки"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Намалено на побезбедна јачина на звук"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Јачината на звукот е висока подолго од препорачаното"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Звукот е намален на побезбедна вредност"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Јачината на звукот е висока подолго од препорачаното"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Јачината на звукот на слушалките го надмина безбедното ограничување за седмицава"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Продолжете со слушање"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Намалете го звукот"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Апликацијата е закачена"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ќе се гледа сѐ додека не го откачите. Допрете и држете „Назад“ и „Краток преглед“ за откачување."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ќе се гледа сѐ додека не го откачите. Допрете и задржете „Назад“ и „Почетен екран“ за откачување."</string>
@@ -940,6 +943,8 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Поставки"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> од <xliff:g id="ARTIST_NAME">%2$s</xliff:g> е пуштено на <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> од <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
+    <skip />
     <string name="controls_media_button_play" msgid="2705068099607410633">"Пушти"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Пауза"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Претходна песна"</string>
@@ -985,10 +990,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Звучници и екрани"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Предложени уреди"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Сопрете ја споделената сесија за да ги преместите аудиовизуелните содржини на друг уред"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Сопри"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Како функционира емитувањето"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Емитување"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Луѓето во ваша близина со компатибилни уреди со Bluetooth може да ги слушаат аудиозаписите што ги емитувате"</string>
@@ -1059,7 +1062,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Нема други достапни мрежи"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Нема достапни мрежи"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Допрете на мрежа за да се поврзете"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Допрете мрежа за да се поврзете"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Отклучете за да се прикажат мрежите"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Се пребаруваат мрежи…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Не успеа да се поврзе на мрежата"</string>
@@ -1141,10 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Поврзете го пенкалото со полнач"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Слаба батерија на пенкало"</string>
     <string name="video_camera" msgid="7654002575156149298">"Видеокамера"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Не можете да се јавите од профилов"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Вашето работно правило ви дозволува да упатувате повици само од работниот профил"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Не може да повикувате од лична апликација"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Вашата организацијата ви дозволува да упатувате повици само од работни апликации"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Префрли се на работен профил"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Затвори"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Инсталирајте работна апликација на телефон"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Откажи"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Приспособете го заклучениот екран"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Отклучување за приспособување на заклучениот екран"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi не е достапно"</string>
