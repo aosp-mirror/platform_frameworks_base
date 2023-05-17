@@ -296,7 +296,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         for (CachedBluetoothDevice device : getDevices()) {
             isActive |= device.isActiveDevice(BluetoothProfile.HEADSET)
                     || device.isActiveDevice(BluetoothProfile.A2DP)
-                    || device.isActiveDevice(BluetoothProfile.HEARING_AID);
+                    || device.isActiveDevice(BluetoothProfile.HEARING_AID)
+                    || device.isActiveDevice(BluetoothProfile.LE_AUDIO);
         }
 
         if (mIsActive != isActive) {
@@ -315,7 +316,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
                 boolean isConnected = device.isConnectedProfile(profile);
                 if (profileId == BluetoothProfile.HEADSET
                         || profileId == BluetoothProfile.A2DP
-                        || profileId == BluetoothProfile.HEARING_AID) {
+                        || profileId == BluetoothProfile.HEARING_AID
+                        || profileId == BluetoothProfile.LE_AUDIO) {
                     audioProfileConnected |= isConnected;
                 } else {
                     otherProfileConnected |= isConnected;
