@@ -181,7 +181,11 @@ class DragDropController {
                     }
                 } finally {
                     if (surface != null) {
-                        surface.release();
+                        try (final SurfaceControl.Transaction transaction =
+                                mService.mTransactionFactory.get()) {
+                            transaction.remove(surface);
+                            transaction.apply();
+                        }
                     }
                 }
             }
