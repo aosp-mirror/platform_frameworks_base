@@ -77,7 +77,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"バブル"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ふきだしが非表示になっています。"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"タップしてこのアプリを再起動すると、表示が適切になります。"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"タップしてこのアプリを再起動すると、より見やすく表示されます。"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"カメラに関する問題の場合は、\nタップすると修正できます"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"修正されなかった場合は、\nタップすると元に戻ります"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"カメラに関する問題でない場合は、タップすると閉じます。"</string>
