@@ -667,6 +667,11 @@ object Flags {
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag(2400, "warn_on_blocking_binder_transactions")
 
+    // TODO(b/283071711): Tracking bug
+    @JvmField
+    val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
+            unreleasedFlag(2401, "trim_resources_with_background_trim_on_lock")
+
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
     @Keep
