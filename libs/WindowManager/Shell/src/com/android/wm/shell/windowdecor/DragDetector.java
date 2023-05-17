@@ -73,8 +73,11 @@ class DragDetector {
                 return mResultOfDownAction;
             }
             case ACTION_MOVE: {
+                if (ev.findPointerIndex(mDragPointerId) == -1) {
+                    mDragPointerId = ev.getPointerId(0);
+                }
+                final int dragPointerIndex = ev.findPointerIndex(mDragPointerId);
                 if (!mIsDragEvent) {
-                    int dragPointerIndex = ev.findPointerIndex(mDragPointerId);
                     float dx = ev.getRawX(dragPointerIndex) - mInputDownPoint.x;
                     float dy = ev.getRawY(dragPointerIndex) - mInputDownPoint.y;
                     // Touches generate noisy moves, so only once the move is past the touch
