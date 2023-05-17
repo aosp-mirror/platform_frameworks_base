@@ -155,7 +155,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             boolean detectTripleTap,
             boolean detectShortcutTrigger,
             @NonNull WindowMagnificationPromptController promptController,
-            int displayId) {
+            int displayId,
+            FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper) {
         super(displayId, detectTripleTap, detectShortcutTrigger, trace, callback);
         if (DEBUG_ALL) {
             Log.i(mLogTag,
@@ -203,7 +204,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         mDetectingState = new DetectingState(context);
         mViewportDraggingState = new ViewportDraggingState();
         mPanningScalingState = new PanningScalingState(context);
-        mSinglePanningState = new SinglePanningState(context);
+        mSinglePanningState = new SinglePanningState(context,
+                fullScreenMagnificationVibrationHelper);
         setSinglePanningEnabled(
                 context.getResources()
                         .getBoolean(R.bool.config_enable_a11y_magnification_single_panning));
@@ -1334,11 +1336,17 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     }
 
     final class SinglePanningState extends SimpleOnGestureListener implements State {
+
+
         private final GestureDetector mScrollGestureDetector;
         private MotionEventInfo mEvent;
+        private final FullScreenMagnificationVibrationHelper
+                mFullScreenMagnificationVibrationHelper;
 
-        SinglePanningState(Context context) {
+        SinglePanningState(Context context, FullScreenMagnificationVibrationHelper
+                fullScreenMagnificationVibrationHelper) {
             mScrollGestureDetector = new GestureDetector(context, this, Handler.getMain());
+            mFullScreenMagnificationVibrationHelper = fullScreenMagnificationVibrationHelper;
         }
 
         @Override
@@ -1378,9 +1386,19 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (mFullScreenMagnificationController.isAtEdge(mDisplayId)) {
                 clear();
                 transitionTo(mDelegatingState);
+                vibrateIfNeeded();
             }
             return /* event consumed: */ true;
         }
+
+        private void vibrateIfNeeded() {
+            if ((mFullScreenMagnificationController.isAtLeftEdge(mDisplayId)
+                    || mFullScreenMagnificationController.isAtRightEdge(mDisplayId))) {
+                mFullScreenMagnificationVibrationHelper.vibrateIfSettingEnabled();
+            }
+        }
+
+
 
         @Override
         public String toString() {
