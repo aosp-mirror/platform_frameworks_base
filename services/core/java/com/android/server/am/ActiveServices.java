@@ -2214,6 +2214,8 @@ public final class ActiveServices {
                         }
                     }
 
+                    boolean resetNeededForLogging = false;
+
                     // Re-evaluate mAllowWhileInUsePermissionInFgs and mAllowStartForeground
                     // (i.e. while-in-use and BFSL flags) if needed.
                     //
@@ -2296,8 +2298,22 @@ public final class ActiveServices {
                                 !r.isForeground
                                 && delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs;
                         if (resetNeeded) {
-                            resetFgsRestrictionLocked(r);
+                            // We don't want to reset mDebugWhileInUseReasonInBindService here --
+                            // we'll instead reset it in the following code, using the simulated
+                            // legacy logic.
+                            resetFgsRestrictionLocked(r,
+                                    /*resetDebugWhileInUseReasonInBindService=*/ false);
                         }
+
+                        // Simulate the reset flow in the legacy logic to reset
+                        // mDebugWhileInUseReasonInBindService.
+                        // (Which is only used to compare to the old logic.)
+                        final long legacyDelayMs = SystemClock.elapsedRealtime() - r.createRealTime;
+                        if ((r.mStartForegroundCount == 0)
+                                && (legacyDelayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs)) {
+                            r.mDebugWhileInUseReasonInBindService = REASON_DENIED;
+                        }
+
                         setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
                                 r.appInfo.uid, r.intent.getIntent(), r, r.userId,
                                 BackgroundStartPrivileges.NONE,
@@ -2314,12 +2330,24 @@ public final class ActiveServices {
                             r.mInfoAllowStartForeground = temp;
                         }
                         r.mLoggedInfoAllowStartForeground = false;
+
+                        resetNeededForLogging = resetNeeded;
                     }
 
                     // If the service has any bindings and it's not yet a FGS
                     // we compare the new and old while-in-use logics.
                     // (If it's not the first startForeground() call, we already reset the
                     // while-in-use and BFSL flags, so the logic change wouldn't matter.)
+                    //
+                    // Note, mDebugWhileInUseReasonInBindService does *not* fully simulate the
+                    // legacy logic, because we'll only set it in bindService(), but the actual
+                    // mAllowWhileInUsePermissionInFgsReason can change afterwards, in a subsequent
+                    // Service.startForeground(). This check will only provide "rough" check.
+                    // But if mDebugWhileInUseReasonInBindService is _not_ DENIED, and
+                    // mDebugWhileInUseReasonInStartForeground _is_ DENIED, then that means we'd
+                    // now detected a behavior change.
+                    // OTOH, if it's changing from non-DENIED to another non-DENIED, that may
+                    // not be a problem.
                     if (enableFgsWhileInUseFix
                             && !r.isForeground
                             && (r.getConnections().size() > 0)
@@ -2329,6 +2357,10 @@ public final class ActiveServices {
                                 + reasonCodeToString(r.mDebugWhileInUseReasonInBindService)
                                 + " new="
                                 + reasonCodeToString(r.mDebugWhileInUseReasonInStartForeground)
+                                + " startForegroundCount=" + r.mStartForegroundCount
+                                + " started=" + r.startRequested
+                                + " num_bindings=" + r.getConnections().size()
+                                + " resetNeeded=" + resetNeededForLogging
                                 + " "
                                 + r.shortInstanceName);
                     }
@@ -7574,15 +7606,27 @@ public final class ActiveServices {
         }
     }
 
+    /**
+     * Reset various while-in-use and BFSL related information.
+     */
     void resetFgsRestrictionLocked(ServiceRecord r) {
+        resetFgsRestrictionLocked(r, /*resetDebugWhileInUseReasonInBindService=*/ true);
+    }
+
+    /**
+     * Reset various while-in-use and BFSL related information.
+     */
+    void resetFgsRestrictionLocked(ServiceRecord r,
+            boolean resetDebugWhileInUseReasonInBindService) {
         r.mAllowWhileInUsePermissionInFgs = false;
         r.mAllowWhileInUsePermissionInFgsReason = REASON_DENIED;
         r.mDebugWhileInUseReasonInStartForeground = REASON_DENIED;
-        // We don't reset mWhileInUseReasonInBindService here, because if we do this, we would
-        // lose it in the "reevaluation" case in startForeground(), where we call
-        // resetFgsRestrictionLocked().
-        // Not resetting this is fine because it's only used in the first Service.startForeground()
-        // case, and there's no situations where we call resetFgsRestrictionLocked() before that.
+
+        // In Service.startForeground(), we reset this field using a legacy logic,
+        // so resetting this field is optional.
+        if (resetDebugWhileInUseReasonInBindService) {
+            r.mDebugWhileInUseReasonInBindService = REASON_DENIED;
+        }
         r.mAllowStartForeground = REASON_DENIED;
         r.mInfoAllowStartForeground = null;
         r.mInfoTempFgsAllowListReason = null;
