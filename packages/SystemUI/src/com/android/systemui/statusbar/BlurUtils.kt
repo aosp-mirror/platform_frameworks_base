@@ -48,7 +48,7 @@ open class BlurUtils @Inject constructor(
     private var earlyWakeupEnabled = false
 
     init {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerDumpable(this)
     }
 
     /**

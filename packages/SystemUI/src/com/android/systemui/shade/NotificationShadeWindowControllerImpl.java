@@ -154,7 +154,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mKeyguardBypassController = keyguardBypassController;
         mColorExtractor = colorExtractor;
         mScreenOffAnimationController = screenOffAnimationController;
-        dumpManager.registerDumpable(getClass().getName(), this);
+        dumpManager.registerDumpable(this);
         mAuthController = authController;
         mLastKeyguardRotationAllowed = mKeyguardStateController.isKeyguardScreenRotationAllowed();
         mLockScreenDisplayTimeout = context.getResources()

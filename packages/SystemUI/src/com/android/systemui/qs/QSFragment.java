@@ -245,7 +245,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();
         mQSContainerImplController.init();
         mContainer = mQSContainerImplController.getView();
-        mDumpManager.registerDumpable(mContainer.getClass().getName(), mContainer);
+        mDumpManager.registerDumpable(mContainer.getClass().getSimpleName(), mContainer);
 
         mQSAnimator = qsFragmentComponent.getQSAnimator();
         mQSSquishinessController = qsFragmentComponent.getQSSquishinessController();
@@ -318,7 +318,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDumpManager.registerDumpable(getClass().getName(), this);
+        mDumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     @Override
@@ -333,9 +333,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mScrollListener = null;
         if (mContainer != null) {
-            mDumpManager.unregisterDumpable(mContainer.getClass().getName());
+            mDumpManager.unregisterDumpable(mContainer.getClass().getSimpleName());
         }
-        mDumpManager.unregisterDumpable(getClass().getName());
+        mDumpManager.unregisterDumpable(getClass().getSimpleName());
         mListeningAndVisibilityLifecycleOwner.destroy();
     }
 
