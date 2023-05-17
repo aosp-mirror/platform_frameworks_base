@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-heli: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-heli"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Kuuldeaparaadid"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
+    <!-- no translation found for bluetooth_profile_le_audio (1725521360076451751) -->
     <skip />
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Kuuldeaparaatidega ühendatud"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ühendatud üksusega LE Audio"</string>
@@ -142,7 +142,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Tühista"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Sidumine annab ühenduse ajal juurdepääsu kontaktidele ja kõneajaloole."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda vale PIN-koodi või parooli tõttu."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda vale PIN-koodi või pääsuvõtme tõttu."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ei saa sidet luua."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> hülgas sidumise."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Arvuti"</string>
@@ -216,6 +216,8 @@
     <string name="choose_profile" msgid="343803890897657450">"Profiili valimine"</string>
     <string name="category_personal" msgid="6236798763159385225">"Isiklik"</string>
     <string name="category_work" msgid="4014193632325996115">"Töö"</string>
+    <!-- no translation found for category_clone (1554511758987195974) -->
+    <skip />
     <string name="development_settings_title" msgid="140296922921597393">"Arendaja valikud"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Arendaja valikute lubamine"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Rakenduse arenduse valikute määramine"</string>
