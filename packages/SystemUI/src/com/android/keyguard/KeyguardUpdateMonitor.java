@@ -1461,14 +1461,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         ErrorAuthenticationStatus error = (ErrorAuthenticationStatus) status;
                         handleFaceError(error.getMsgId(), error.getMsg());
                     } else if (status instanceof FailedAuthenticationStatus) {
-                        if (isFaceLockedOut()) {
-                            // TODO b/270090188: remove this hack when biometrics fixes this issue.
-                            // FailedAuthenticationStatus is emitted after ErrorAuthenticationStatus
-                            // for lockout error is received
-                            mLogger.d("onAuthenticationFailed called after"
-                                    + " face has been locked out");
-                            return;
-                        }
                         handleFaceAuthFailed();
                     } else if (status instanceof HelpAuthenticationStatus) {
                         HelpAuthenticationStatus helpMsg = (HelpAuthenticationStatus) status;
@@ -1977,13 +1969,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
                 @Override
                 public void onAuthenticationFailed() {
-                    if (isFaceLockedOut()) {
-                        // TODO b/270090188: remove this hack when biometrics fixes this issue.
-                        // onAuthenticationFailed is called after onAuthenticationError
-                        // for lockout error is received
-                        mLogger.d("onAuthenticationFailed called after face has been locked out");
-                        return;
-                    }
                     handleFaceAuthFailed();
                 }
 
