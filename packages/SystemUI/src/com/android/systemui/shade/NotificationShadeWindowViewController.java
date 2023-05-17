@@ -407,19 +407,15 @@ public class NotificationShadeWindowViewController {
                     return true;
                 }
 
-                if (handled) {
-                    return true;
-                }
-
                 if (mMultiShadeMotionEventInteractor != null) {
                     // This interactor is not null only if the dual shade feature is enabled.
                     return mMultiShadeMotionEventInteractor.onTouchEvent(ev, mView.getWidth());
                 } else if (mDragDownHelper.isDragDownEnabled()
                         || mDragDownHelper.isDraggingDown()) {
                     // we still want to finish our drag down gesture when locking the screen
-                    return mDragDownHelper.onTouchEvent(ev);
+                    return mDragDownHelper.onTouchEvent(ev) || handled;
                 } else {
-                    return false;
+                    return handled;
                 }
             }
 
