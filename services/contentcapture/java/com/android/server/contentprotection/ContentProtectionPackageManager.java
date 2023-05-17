@@ -34,8 +34,9 @@ import java.util.Arrays;
  *
  * @hide
  */
-final class ContentProtectionPackageManager {
-    private static final String TAG = ContentProtectionPackageManager.class.getSimpleName();
+public class ContentProtectionPackageManager {
+
+    private static final String TAG = "ContentProtectionPackageManager";
 
     private static final PackageInfoFlags PACKAGE_INFO_FLAGS =
             PackageInfoFlags.of(PackageManager.GET_PERMISSIONS);
@@ -51,7 +52,7 @@ final class ContentProtectionPackageManager {
         try {
             return mPackageManager.getPackageInfo(packageName, PACKAGE_INFO_FLAGS);
         } catch (NameNotFoundException ex) {
-            Slog.w(TAG, "Package info not found: ", ex);
+            Slog.w(TAG, "Package info not found for: " + packageName, ex);
             return null;
         }
     }
