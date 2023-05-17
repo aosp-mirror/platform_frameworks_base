@@ -1752,7 +1752,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 /* multi_window */
                 false,
                 /* bal_code */
-                -1
+                -1,
+                /* task_stack */
+                null
         );
 
         boolean restrictActivitySwitch = ActivitySecurityModelFeatureFlags

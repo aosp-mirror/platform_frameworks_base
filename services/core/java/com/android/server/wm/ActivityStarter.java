@@ -2029,6 +2029,13 @@ class ActivityStarter {
         }
 
         // ASM rules have failed. Log why
+        return logAsmFailureAndCheckFeatureEnabled(r, newTask, targetTask, shouldBlockActivityStart,
+                taskToFront);
+    }
+
+    private boolean logAsmFailureAndCheckFeatureEnabled(ActivityRecord r, boolean newTask,
+            Task targetTask, boolean shouldBlockActivityStart, boolean taskToFront) {
+        // ASM rules have failed. Log why
         ActivityRecord targetTopActivity = targetTask == null ? null
                 : targetTask.getActivity(ar -> !ar.finishing && !ar.isAlwaysOnTop());
 
@@ -2037,6 +2044,13 @@ class ActivityStarter {
                 : (mSourceRecord.getTask().equals(targetTask)
                         ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_SAME_TASK
                         :  FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_DIFFERENT_TASK);
+
+        boolean blockActivityStartAndFeatureEnabled = ActivitySecurityModelFeatureFlags
+                .shouldRestrictActivitySwitch(mCallingUid)
+                && shouldBlockActivityStart;
+
+        String asmDebugInfo = getDebugInfoForActivitySecurity("Launch", r, targetTask,
+                targetTopActivity, blockActivityStartAndFeatureEnabled, /*taskToFront*/taskToFront);
 
         FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
                 /* caller_uid */
@@ -2066,24 +2080,21 @@ class ActivityStarter {
                 targetTask != null && mSourceRecord != null
                         && !targetTask.equals(mSourceRecord.getTask()) && targetTask.isVisible(),
                 /* bal_code */
-                mBalCode
+                mBalCode,
+                /* task_stack */
+                asmDebugInfo
         );
-
-        boolean blockActivityStartAndFeatureEnabled = ActivitySecurityModelFeatureFlags
-                    .shouldRestrictActivitySwitch(mCallingUid)
-                && shouldBlockActivityStart;
 
         String launchedFromPackageName = r.launchedFromPackage;
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
             String toastText = ActivitySecurityModelFeatureFlags.DOC_LINK
                     + (blockActivityStartAndFeatureEnabled ? " blocked " : " would block ")
                     + getApplicationLabel(mService.mContext.getPackageManager(),
-                        launchedFromPackageName);
+                    launchedFromPackageName);
             UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
                     toastText, Toast.LENGTH_LONG).show());
 
-            logDebugInfoForActivitySecurity("Launch", r, targetTask, targetTopActivity,
-                    blockActivityStartAndFeatureEnabled, /* taskToFront */ taskToFront);
+            Slog.i(TAG, asmDebugInfo);
         }
 
         if (blockActivityStartAndFeatureEnabled) {
@@ -2101,7 +2112,7 @@ class ActivityStarter {
     }
 
     /** Only called when an activity launch may be blocked, which should happen very rarely */
-    private void logDebugInfoForActivitySecurity(String action, ActivityRecord r, Task targetTask,
+    private String getDebugInfoForActivitySecurity(String action, ActivityRecord r, Task targetTask,
             ActivityRecord targetTopActivity, boolean blockActivityStartAndFeatureEnabled,
             boolean taskToFront) {
         final String prefix = "[ASM] ";
@@ -2162,7 +2173,7 @@ class ActivityStarter {
         joiner.add(prefix + "BalCode: " + balCodeToString(mBalCode));
 
         joiner.add(prefix + "------ Activity Security " + action + " Debug Logging End ------");
-        Slog.i(TAG, joiner.toString());
+        return joiner.toString();
     }
 
     /**
@@ -2336,7 +2347,7 @@ class ActivityStarter {
                             + ActivitySecurityModelFeatureFlags.DOC_LINK,
                     Toast.LENGTH_LONG).show());
 
-            logDebugInfoForActivitySecurity("Clear Top", mStartActivity, targetTask, targetTaskTop,
+            getDebugInfoForActivitySecurity("Clear Top", mStartActivity, targetTask, targetTaskTop,
                     shouldBlockActivityStart, /* taskToFront */ true);
         }
     }
