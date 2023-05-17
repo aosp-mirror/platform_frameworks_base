@@ -115,8 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni aparati"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
-    <skip />
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Povezan na slušne aparate"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Povezano s LE zvukom"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Povezano sa zvukom medija"</string>
@@ -216,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Odaberite profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Lično"</string>
     <string name="category_work" msgid="4014193632325996115">"Posao"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Klonirajte"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opcije za programere"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Omogući opcije za programere"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Postavi opcije za razvoj aplikacija"</string>
