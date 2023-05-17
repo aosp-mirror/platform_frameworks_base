@@ -1319,7 +1319,7 @@
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
     <dimen name="media_output_dialog_app_tier_icon_size">20dp</dimen>
     <dimen name="media_output_dialog_background_radius">16dp</dimen>
-    <dimen name="media_output_dialog_active_background_radius">28dp</dimen>
+    <dimen name="media_output_dialog_active_background_radius">30dp</dimen>
     <dimen name="media_output_dialog_default_margin_end">16dp</dimen>
     <dimen name="media_output_dialog_selectable_margin_end">80dp</dimen>
     <dimen name="media_output_dialog_list_padding_top">8dp</dimen>
