@@ -63,6 +63,7 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
@@ -649,7 +650,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onRoleHoldersChanged_notesRole_sameUser_shouldUpdateShortcuts() {
+    fun onRoleHoldersChanged_notesRole_shouldUpdateShortcuts() {
         val user = userTracker.userHandle
         val controller = spy(createNoteTaskController())
         doNothing().whenever(controller).updateNoteTaskAsUser(any())
@@ -658,22 +659,41 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
         verify(controller).updateNoteTaskAsUser(user)
     }
-
-    @Test
-    fun onRoleHoldersChanged_notesRole_differentUser_shouldUpdateShortcutsInUserProcess() {
-        // FakeUserTracker will default to UserHandle.SYSTEM.
-        val user = UserHandle.CURRENT
-
-        createNoteTaskController(isEnabled = true).onRoleHoldersChanged(ROLE_NOTES, user)
-
-        verify(context).startServiceAsUser(any(), eq(user))
-    }
     // endregion
 
     // region updateNoteTaskAsUser
     @Test
-    fun updateNoteTaskAsUser_withNotesRole_withShortcuts_shouldUpdateShortcuts() {
-        createNoteTaskController(isEnabled = true).updateNoteTaskAsUser(userTracker.userHandle)
+    fun updateNoteTaskAsUser_sameUser_shouldUpdateShortcuts() {
+        val user = userTracker.userHandle
+        val controller = spy(createNoteTaskController())
+        doNothing().whenever(controller).updateNoteTaskAsUserInternal(any())
+
+        controller.updateNoteTaskAsUser(user)
+
+        verify(controller).updateNoteTaskAsUserInternal(user)
+        verify(context, never()).startServiceAsUser(any(), any())
+    }
+
+    @Test
+    fun updateNoteTaskAsUser_differentUser_shouldUpdateShortcutsInUserProcess() {
+        // FakeUserTracker will default to UserHandle.SYSTEM.
+        val user = UserHandle.CURRENT
+        val controller = spy(createNoteTaskController(isEnabled = true))
+        doNothing().whenever(controller).updateNoteTaskAsUserInternal(any())
+
+        controller.updateNoteTaskAsUser(user)
+
+        verify(controller, never()).updateNoteTaskAsUserInternal(any())
+        val intent = withArgCaptor { verify(context).startServiceAsUser(capture(), eq(user)) }
+        assertThat(intent).hasComponentClass(NoteTaskControllerUpdateService::class.java)
+    }
+    // endregion
+
+    // region internalUpdateNoteTaskAsUser
+    @Test
+    fun updateNoteTaskAsUserInternal_withNotesRole_withShortcuts_shouldUpdateShortcuts() {
+        createNoteTaskController(isEnabled = true)
+            .updateNoteTaskAsUserInternal(userTracker.userHandle)
 
         val actualComponent = argumentCaptor<ComponentName>()
         verify(context.packageManager)
@@ -702,11 +722,12 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun updateNoteTaskAsUser_noNotesRole_shouldDisableShortcuts() {
+    fun updateNoteTaskAsUserInternal_noNotesRole_shouldDisableShortcuts() {
         whenever(roleManager.getRoleHoldersAsUser(ROLE_NOTES, userTracker.userHandle))
             .thenReturn(emptyList())
 
-        createNoteTaskController(isEnabled = true).updateNoteTaskAsUser(userTracker.userHandle)
+        createNoteTaskController(isEnabled = true)
+            .updateNoteTaskAsUserInternal(userTracker.userHandle)
 
         val argument = argumentCaptor<ComponentName>()
         verify(context.packageManager)
@@ -723,8 +744,9 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun updateNoteTaskAsUser_flagDisabled_shouldDisableShortcuts() {
-        createNoteTaskController(isEnabled = false).updateNoteTaskAsUser(userTracker.userHandle)
+    fun updateNoteTaskAsUserInternal_flagDisabled_shouldDisableShortcuts() {
+        createNoteTaskController(isEnabled = false)
+            .updateNoteTaskAsUserInternal(userTracker.userHandle)
 
         val argument = argumentCaptor<ComponentName>()
         verify(context.packageManager)
@@ -738,6 +760,20 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         verify(shortcutManager).disableShortcuts(listOf(SHORTCUT_ID))
         verify(shortcutManager, never()).enableShortcuts(any())
         verify(shortcutManager, never()).updateShortcuts(any())
+    }
+    // endregion
+
+    // startregion updateNoteTaskForAllUsers
+    @Test
+    fun updateNoteTaskForAllUsers_shouldRunUpdateForCurrentUserAndProfiles() {
+        userTracker.set(mainAndWorkProfileUsers, mainAndWorkProfileUsers.indexOf(mainUserInfo))
+        val controller = spy(createNoteTaskController())
+        doNothing().whenever(controller).updateNoteTaskAsUser(any())
+
+        controller.updateNoteTaskForCurrentUserAndManagedProfiles()
+
+        verify(controller).updateNoteTaskAsUser(mainUserInfo.userHandle)
+        verify(controller).updateNoteTaskAsUser(workUserInfo.userHandle)
     }
     // endregion
 
