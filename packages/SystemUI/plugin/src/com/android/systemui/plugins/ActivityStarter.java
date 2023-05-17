@@ -61,7 +61,6 @@ public interface ActivityStarter {
      */
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade, int flags);
     void startActivity(Intent intent, boolean dismissShade);
-
     default void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController) {
         startActivity(intent, dismissShade, animationController,
@@ -101,6 +100,11 @@ public interface ActivityStarter {
     /** Authenticates if needed and dismisses keyguard to execute an action. */
     void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
             boolean afterKeyguardGone, @Nullable String customMessage);
+
+    /** Starts an activity and dismisses keyguard. */
+    void startActivityDismissingKeyguard(Intent intent,
+            boolean onlyProvisioned,
+            boolean dismissShade);
 
     /** Starts an activity and dismisses keyguard. */
     void startActivityDismissingKeyguard(Intent intent,

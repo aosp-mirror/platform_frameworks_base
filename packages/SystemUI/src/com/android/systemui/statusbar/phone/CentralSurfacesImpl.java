@@ -31,7 +31,6 @@ import static androidx.lifecycle.Lifecycle.State.RESUMED;
 
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
-import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
@@ -43,8 +42,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
-import android.app.ActivityTaskManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -52,7 +49,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.TaskInfo;
-import android.app.TaskStackBuilder;
 import android.app.UiModeManager;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
@@ -138,7 +134,6 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -168,7 +163,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.notetask.NoteTaskController;
-import com.android.systemui.plugins.ActivityStarter.Callback;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
@@ -543,6 +538,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final WallpaperManager mWallpaperManager;
     private final UserTracker mUserTracker;
     private final Provider<FingerprintManager> mFingerprintManager;
+    private final ActivityStarter mActivityStarter;
 
     private CentralSurfacesComponent mCentralSurfacesComponent;
 
@@ -820,7 +816,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             LightRevealScrim lightRevealScrim,
             AlternateBouncerInteractor alternateBouncerInteractor,
             UserTracker userTracker,
-            Provider<FingerprintManager> fingerprintManager
+            Provider<FingerprintManager> fingerprintManager,
+            ActivityStarter activityStarter
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -907,6 +904,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUserTracker = userTracker;
         mFingerprintManager = fingerprintManager;
+        mActivityStarter = activityStarter;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -1441,12 +1439,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 message.write(SystemProperties.get("ro.serialno"));
                 message.write("\n");
 
-                startActivityDismissingKeyguard(Intent.createChooser(new Intent(Intent.ACTION_SEND)
-                                .setType("*/*")
-                                .putExtra(Intent.EXTRA_SUBJECT, "Rejected touch report")
-                                .putExtra(Intent.EXTRA_STREAM, session)
-                                .putExtra(Intent.EXTRA_TEXT, message.toString()),
-                        "Share rejected touch report")
+                mActivityStarter.startActivityDismissingKeyguard(Intent.createChooser(new Intent(
+                                                Intent.ACTION_SEND)
+                                                .setType("*/*")
+                                                .putExtra(Intent.EXTRA_SUBJECT, "Rejected touch "
+                                                        + "report")
+                                                .putExtra(Intent.EXTRA_STREAM, session)
+                                                .putExtra(Intent.EXTRA_TEXT, message.toString()),
+                                        "Share rejected touch report")
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                         true /* onlyProvisioned */, true /* dismissShade */);
             });
@@ -1803,133 +1803,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return (mDisabled1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
     }
 
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
-            int flags) {
-        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade, flags);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startActivity(Intent intent, boolean dismissShade) {
-        startActivityDismissingKeyguard(intent, false /* onlyProvisioned */, dismissShade);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startActivity(Intent intent, boolean dismissShade,
-            @androidx.annotation.Nullable ActivityLaunchAnimator.Controller animationController) {
-        startActivity(intent, dismissShade, animationController, false);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            boolean showOverLockscreenWhenLocked) {
-        startActivity(intent, dismissShade, animationController, showOverLockscreenWhenLocked,
-                getActivityUserHandle(intent));
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            boolean showOverLockscreenWhenLocked, UserHandle userHandle) {
-        // Make sure that we dismiss the keyguard if it is directly dismissable or when we don't
-        // want to show the activity above it.
-        if (mKeyguardStateController.isUnlocked() || !showOverLockscreenWhenLocked) {
-            startActivityDismissingKeyguard(intent, false, dismissShade,
-                    false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
-                    0 /* flags */, animationController, userHandle);
-            return;
-        }
-
-        boolean animate =
-                animationController != null && shouldAnimateLaunch(true /* isActivityIntent */,
-                        showOverLockscreenWhenLocked);
-
-        ActivityLaunchAnimator.Controller controller = null;
-        if (animate) {
-            // Wrap the animation controller to dismiss the shade and set
-            // mIsLaunchingActivityOverLockscreen during the animation.
-            ActivityLaunchAnimator.Controller delegate = wrapAnimationController(
-                    animationController, dismissShade, /* isLaunchForActivity= */ true);
-            controller = new DelegateLaunchAnimatorController(delegate) {
-                @Override
-                public void onIntentStarted(boolean willAnimate) {
-                    getDelegate().onIntentStarted(willAnimate);
-
-                    if (willAnimate) {
-                        CentralSurfacesImpl.this.mIsLaunchingActivityOverLockscreen = true;
-                    }
-                }
-
-                @Override
-                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
-                    super.onLaunchAnimationStart(isExpandingFullyAbove);
-
-                    // Double check that the keyguard is still showing and not going away, but if so
-                    // set the keyguard occluded. Typically, WM will let KeyguardViewMediator know
-                    // directly, but we're overriding that to play the custom launch animation, so
-                    // we need to take care of that here. The unocclude animation is not overridden,
-                    // so WM will call KeyguardViewMediator's unocclude animation runner when the
-                    // activity is exited.
-                    if (mKeyguardStateController.isShowing()
-                            && !mKeyguardStateController.isKeyguardGoingAway()) {
-                        Log.d(TAG, "Setting occluded = true in #startActivity.");
-                        mKeyguardViewMediator.setOccluded(true /* isOccluded */,
-                                true /* animate */);
-                    }
-                }
-
-                @Override
-                public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
-                    // Set mIsLaunchingActivityOverLockscreen to false before actually finishing the
-                    // animation so that we can assume that mIsLaunchingActivityOverLockscreen
-                    // being true means that we will collapse the shade (or at least run the
-                    // post collapse runnables) later on.
-                    CentralSurfacesImpl.this.mIsLaunchingActivityOverLockscreen = false;
-                    getDelegate().onLaunchAnimationEnd(isExpandingFullyAbove);
-                }
-
-                @Override
-                public void onLaunchAnimationCancelled(@Nullable Boolean newKeyguardOccludedState) {
-                    if (newKeyguardOccludedState != null) {
-                        mKeyguardViewMediator.setOccluded(
-                                newKeyguardOccludedState, false /* animate */);
-                    }
-
-                    // Set mIsLaunchingActivityOverLockscreen to false before actually finishing the
-                    // animation so that we can assume that mIsLaunchingActivityOverLockscreen
-                    // being true means that we will collapse the shade (or at least run the
-                    // post collapse runnables) later on.
-                    CentralSurfacesImpl.this.mIsLaunchingActivityOverLockscreen = false;
-                    getDelegate().onLaunchAnimationCancelled(newKeyguardOccludedState);
-                }
-            };
-        } else if (dismissShade) {
-            // The animation will take care of dismissing the shade at the end of the animation. If
-            // we don't animate, collapse it directly.
-            collapseShade();
-        }
-
-        // We should exit the dream to prevent the activity from starting below the
-        // dream.
-        if (mKeyguardUpdateMonitor.isDreaming()) {
-            awakenDreams();
-        }
-
-        mActivityLaunchAnimator.startIntentWithAnimation(controller, animate,
-                intent.getPackage(), showOverLockscreenWhenLocked, (adapter) -> TaskStackBuilder
-                        .create(mContext)
-                        .addNextIntent(intent)
-                        .startActivities(
-                                CentralSurfaces.getActivityOptions(getDisplayId(), adapter),
-                                userHandle));
-    }
-
     /**
      * Whether we are currently animating an activity launch above the lockscreen (occluding
      * activity).
@@ -1937,18 +1810,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean isLaunchingActivityOverLockscreen() {
         return mIsLaunchingActivityOverLockscreen;
-    }
-
-    @Override
-    public void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade) {
-        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade);
-    }
-
-    @Override
-    public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
-        startActivityDismissingKeyguard(intent, false, dismissShade,
-                false /* disallowEnterPictureInPictureWhileLaunching */, callback, 0,
-                null /* animationController */, getActivityUserHandle(intent));
     }
 
     @Override
@@ -2430,226 +2291,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mDisplayId;
     }
 
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
-            boolean dismissShade, int flags) {
-        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
-                false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
-                flags, null /* animationController */, getActivityUserHandle(intent));
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
-            boolean dismissShade) {
-        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade, 0);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
-            boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
-            Callback callback, int flags,
-            @androidx.annotation.Nullable ActivityLaunchAnimator.Controller animationController,
-            UserHandle userHandle) {
-        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
-                disallowEnterPictureInPictureWhileLaunching, callback, flags, animationController,
-                userHandle, null /* customMessage */);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
-            final boolean dismissShade, final boolean disallowEnterPictureInPictureWhileLaunching,
-            final Callback callback, int flags,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            final UserHandle userHandle, @Nullable String customMessage) {
-        if (onlyProvisioned && !mDeviceProvisionedController.isDeviceProvisioned()) return;
-
-        final boolean willLaunchResolverActivity =
-                mActivityIntentHelper.wouldLaunchResolverActivity(intent,
-                        mLockscreenUserManager.getCurrentUserId());
-
-        boolean animate =
-                animationController != null && !willLaunchResolverActivity && shouldAnimateLaunch(
-                        true /* isActivityIntent */);
-        ActivityLaunchAnimator.Controller animController =
-                animationController != null ? wrapAnimationController(animationController,
-                        dismissShade, /* isLaunchForActivity= */ true) : null;
-
-        // If we animate, we will dismiss the shade only once the animation is done. This is taken
-        // care of by the StatusBarLaunchAnimationController.
-        boolean dismissShadeDirectly = dismissShade && animController == null;
-
-        Runnable runnable = () -> {
-            mAssistManagerLazy.get().hideAssist();
-            intent.setFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.addFlags(flags);
-            int[] result = new int[]{ActivityManager.START_CANCELED};
-
-            mActivityLaunchAnimator.startIntentWithAnimation(animController,
-                    animate, intent.getPackage(), (adapter) -> {
-                        ActivityOptions options = new ActivityOptions(
-                                CentralSurfaces.getActivityOptions(mDisplayId, adapter));
-
-                        // We know that the intent of the caller is to dismiss the keyguard and
-                        // this runnable is called right after the keyguard is solved, so we tell
-                        // WM that we should dismiss it to avoid flickers when opening an activity
-                        // that can also be shown over the keyguard.
-                        options.setDismissKeyguard();
-                        options.setDisallowEnterPictureInPictureWhileLaunching(
-                                disallowEnterPictureInPictureWhileLaunching);
-                        if (CameraIntents.isInsecureCameraIntent(intent)) {
-                            // Normally an activity will set it's requested rotation
-                            // animation on its window. However when launching an activity
-                            // causes the orientation to change this is too late. In these cases
-                            // the default animation is used. This doesn't look good for
-                            // the camera (as it rotates the camera contents out of sync
-                            // with physical reality). So, we ask the WindowManager to
-                            // force the crossfade animation if an orientation change
-                            // happens to occur during the launch.
-                            options.setRotationAnimationHint(
-                                    WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
-                        }
-                        if (Settings.Panel.ACTION_VOLUME.equals(intent.getAction())) {
-                            // Settings Panel is implemented as activity(not a dialog), so
-                            // underlying app is paused and may enter picture-in-picture mode
-                            // as a result.
-                            // So we need to disable picture-in-picture mode here
-                            // if it is volume panel.
-                            options.setDisallowEnterPictureInPictureWhileLaunching(true);
-                        }
-
-                        try {
-                            result[0] = ActivityTaskManager.getService().startActivityAsUser(
-                                    null, mContext.getBasePackageName(),
-                                    mContext.getAttributionTag(),
-                                    intent,
-                                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
-                                    options.toBundle(), userHandle.getIdentifier());
-                        } catch (RemoteException e) {
-                            Log.w(TAG, "Unable to start activity", e);
-                        }
-                        return result[0];
-                    });
-
-            if (callback != null) {
-                callback.onActivityStarted(result[0]);
-            }
-        };
-        Runnable cancelRunnable = () -> {
-            if (callback != null) {
-                callback.onActivityStarted(ActivityManager.START_CANCELED);
-            }
-        };
-        // Do not deferKeyguard when occluded because, when keyguard is occluded,
-        // we do not launch the activity until keyguard is done.
-        boolean occluded = mKeyguardStateController.isShowing()
-                && mKeyguardStateController.isOccluded();
-        boolean deferred = !occluded;
-        executeRunnableDismissingKeyguard(runnable, cancelRunnable, dismissShadeDirectly,
-                willLaunchResolverActivity, deferred /* deferred */, animate,
-                customMessage /* customMessage */);
-    }
-
-    /**
-     * Return a {@link ActivityLaunchAnimator.Controller} wrapping {@code animationController} so
-     * that:
-     *  - if it launches in the notification shade window and {@code dismissShade} is true, then
-     *    the shade will be instantly dismissed at the end of the animation.
-     *  - if it launches in status bar window, it will make the status bar window match the device
-     *    size during the animation (that way, the animation won't be clipped by the status bar
-     *    size).
-     *
-     * @param animationController the controller that is wrapped and will drive the main animation.
-     * @param dismissShade whether the notification shade will be dismissed at the end of the
-     *                     animation. This is ignored if {@code animationController} is not
-     *                     animating in the shade window.
-     * @param isLaunchForActivity whether the launch is for an activity.
-     *
-     * Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too.
-     */
-    @Nullable
-    private ActivityLaunchAnimator.Controller wrapAnimationController(
-            ActivityLaunchAnimator.Controller animationController, boolean dismissShade,
-            boolean isLaunchForActivity) {
-        View rootView = animationController.getLaunchContainer().getRootView();
-
-        Optional<ActivityLaunchAnimator.Controller> controllerFromStatusBar =
-                mStatusBarWindowController.wrapAnimationControllerIfInStatusBar(
-                        rootView, animationController);
-        if (controllerFromStatusBar.isPresent()) {
-            return controllerFromStatusBar.get();
-        }
-
-        if (dismissShade) {
-            // If the view is not in the status bar, then we are animating a view in the shade.
-            // We have to make sure that we collapse it when the animation ends or is cancelled.
-            return new StatusBarLaunchAnimatorController(animationController, this,
-                    isLaunchForActivity);
-        }
-
-        return animationController;
-    }
-
     @Override
     public void readyForKeyguardDone() {
         mStatusBarKeyguardViewManager.readyForKeyguardDone();
-    }
-
-
-     /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void executeRunnableDismissingKeyguard(final Runnable runnable,
-            final Runnable cancelAction,
-            final boolean dismissShade,
-            final boolean afterKeyguardGone,
-            final boolean deferred) {
-        executeRunnableDismissingKeyguard(runnable, cancelAction, dismissShade, afterKeyguardGone,
-                deferred, false /* willAnimateOnKeyguard */, null /* customMessage */);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void executeRunnableDismissingKeyguard(final Runnable runnable,
-            final Runnable cancelAction,
-            final boolean dismissShade,
-            final boolean afterKeyguardGone,
-            final boolean deferred,
-            final boolean willAnimateOnKeyguard,
-            @Nullable String customMessage) {
-        OnDismissAction onDismissAction = new OnDismissAction() {
-            @Override
-            public boolean onDismiss() {
-                if (runnable != null) {
-                    if (mKeyguardStateController.isShowing()
-                            && mKeyguardStateController.isOccluded()) {
-                        mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
-                    } else {
-                        mMainExecutor.execute(runnable);
-                    }
-                }
-                if (dismissShade) {
-                    if (mShadeController.isExpandedVisible() && !mBouncerShowing) {
-                        mShadeController.animateCollapseShadeDelayed();
-                    } else {
-                        // Do it after DismissAction has been processed to conserve the needed
-                        // ordering.
-                        mMainExecutor.execute(mShadeController::runPostCollapseRunnables);
-                    }
-                }
-                return deferred;
-            }
-
-            @Override
-            public boolean willRunAnimationOnKeyguard() {
-                return willAnimateOnKeyguard;
-            }
-        };
-        dismissKeyguardThenExecute(onDismissAction, cancelAction, afterKeyguardGone, customMessage);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -2719,47 +2363,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mKeyguardStateController.isShowing() && requiresShadeOpen) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
-        dismissKeyguardThenExecute(action, null /* cancelAction */,
+        mActivityStarter.dismissKeyguardThenExecute(action, null /* cancelAction */,
                 afterKeyguardGone /* afterKeyguardGone */);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    protected void dismissKeyguardThenExecute(OnDismissAction action, boolean afterKeyguardGone) {
-        dismissKeyguardThenExecute(action, null /* cancelRunnable */, afterKeyguardGone);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
-            boolean afterKeyguardGone) {
-        dismissKeyguardThenExecute(action, cancelAction, afterKeyguardGone, null);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
-            boolean afterKeyguardGone, String customMessage) {
-        if (!action.willRunAnimationOnKeyguard()
-                && mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_ASLEEP
-                && mKeyguardStateController.canDismissLockScreen()
-                && !mStatusBarStateController.leaveOpenOnKeyguardHide()
-                && mDozeServiceHost.isPulsing()) {
-            // Reuse the biometric wake-and-unlock transition if we dismiss keyguard from a pulse.
-            // TODO: Factor this transition out of BiometricUnlockController.
-            mBiometricUnlockController.startWakeAndUnlock(
-                    BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING);
-        }
-        if (mKeyguardStateController.isShowing()) {
-            mStatusBarKeyguardViewManager.dismissWithAction(action, cancelAction,
-                    afterKeyguardGone, customMessage);
-        } else {
-            // If the keyguard isn't showing but the device is dreaming, we should exit the dream.
-            if (mKeyguardUpdateMonitor.isDreaming()) {
-                awakenDreams();
-            }
-            action.onDismiss();
-        }
-
     }
 
     /**
@@ -2935,61 +2540,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 | ((bouncerShowing    ? 1 : 0) << 10)
                 | ((secure            ? 1 : 0) << 11)
                 | ((currentlyInsecure ? 1 : 0) << 12);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void postQSRunnableDismissingKeyguard(final Runnable runnable) {
-        mMainExecutor.execute(() -> {
-            mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
-            executeRunnableDismissingKeyguard(
-                    () -> mMainExecutor.execute(runnable), null, false, false, false);
-        });
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void postStartActivityDismissingKeyguard(PendingIntent intent) {
-        postStartActivityDismissingKeyguard(intent, null /* animationController */);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void postStartActivityDismissingKeyguard(final PendingIntent intent,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
-        mMainExecutor.execute(() -> startPendingIntentDismissingKeyguard(intent,
-                null /* intentSentUiThreadCallback */, animationController));
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void postStartActivityDismissingKeyguard(final Intent intent, int delay) {
-        postStartActivityDismissingKeyguard(intent, delay, null /* animationController */);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void postStartActivityDismissingKeyguard(Intent intent, int delay,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
-        postStartActivityDismissingKeyguard(intent, delay, animationController,
-                null /* customMessage */);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void postStartActivityDismissingKeyguard(Intent intent, int delay,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            @Nullable String customMessage) {
-        mMainExecutor.executeDelayed(
-                () ->
-                        startActivityDismissingKeyguard(intent, true /* onlyProvisioned */,
-                                true /* dismissShade */,
-                                false /* disallowEnterPictureInPictureWhileLaunching */,
-                                null /* callback */,
-                                0 /* flags */,
-                                animationController,
-                                getActivityUserHandle(intent), customMessage),
-                delay);
     }
 
     @Override
@@ -4120,95 +3670,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 return willAnimateOnKeyguard;
             }
         };
-        dismissKeyguardThenExecute(onDismissAction, afterKeyguardGone);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
-        startPendingIntentDismissingKeyguard(intent, null);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startPendingIntentDismissingKeyguard(
-            final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback) {
-        startPendingIntentDismissingKeyguard(intent, intentSentUiThreadCallback,
-                (ActivityLaunchAnimator.Controller) null);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startPendingIntentDismissingKeyguard(PendingIntent intent,
-            Runnable intentSentUiThreadCallback, View associatedView) {
-        ActivityLaunchAnimator.Controller animationController = null;
-        if (associatedView instanceof ExpandableNotificationRow) {
-            animationController = mNotificationAnimationProvider.getAnimatorController(
-                    ((ExpandableNotificationRow) associatedView));
-        }
-
-        startPendingIntentDismissingKeyguard(intent, intentSentUiThreadCallback,
-                animationController);
-    }
-
-    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
-    @Override
-    public void startPendingIntentDismissingKeyguard(
-            final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
-        final boolean willLaunchResolverActivity = intent.isActivity()
-                && mActivityIntentHelper.wouldPendingLaunchResolverActivity(intent,
-                mLockscreenUserManager.getCurrentUserId());
-
-        boolean animate = !willLaunchResolverActivity
-                && animationController != null
-                && shouldAnimateLaunch(intent.isActivity());
-
-        // If we animate, don't collapse the shade and defer the keyguard dismiss (in case we run
-        // the animation on the keyguard). The animation will take care of (instantly) collapsing
-        // the shade and hiding the keyguard once it is done.
-        boolean collapse = !animate;
-        executeActionDismissingKeyguard(() -> {
-            try {
-                // We wrap animationCallback with a StatusBarLaunchAnimatorController so that the
-                // shade is collapsed after the animation (or when it is cancelled, aborted, etc).
-                ActivityLaunchAnimator.Controller controller =
-                        animationController != null ? wrapAnimationController(
-                                animationController, /* dismissShade= */ true, intent.isActivity())
-                                : null;
-
-                mActivityLaunchAnimator.startPendingIntentWithAnimation(
-                        controller, animate, intent.getCreatorPackage(),
-                        (animationAdapter) -> {
-                            ActivityOptions options = new ActivityOptions(
-                                    CentralSurfaces.getActivityOptions(
-                                            mDisplayId, animationAdapter));
-                            // TODO b/221255671: restrict this to only be set for notifications
-                            options.setEligibleForLegacyPermissionPrompt(true);
-                            return intent.sendAndReturnResult(null, 0, null, null, null,
-                                    null, options.toBundle());
-                        });
-            } catch (PendingIntent.CanceledException e) {
-                // the stack trace isn't very helpful here.
-                // Just log the exception message.
-                Log.w(TAG, "Sending intent failed: " + e);
-                if (!collapse) {
-                    // executeActionDismissingKeyguard did not collapse for us already.
-                    collapsePanelOnMainThread();
-                }
-                // TODO: Dismiss Keyguard.
-            }
-            if (intent.isActivity()) {
-                mAssistManagerLazy.get().hideAssist();
-            }
-            if (intentSentUiThreadCallback != null) {
-                postOnUiThread(intentSentUiThreadCallback);
-            }
-        }, willLaunchResolverActivity, collapse, animate);
-    }
-
-    private void postOnUiThread(Runnable runnable) {
-        mMainExecutor.execute(runnable);
+        mActivityStarter.dismissKeyguardThenExecute(onDismissAction, /* cancel= */ null,
+                afterKeyguardGone);
     }
 
     private void onShadeVisibilityChanged(boolean visible) {

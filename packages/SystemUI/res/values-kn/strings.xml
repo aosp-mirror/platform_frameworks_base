@@ -230,7 +230,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"ಸೆನ್ಸರ್‌ಗಳು ಆಫ್ ಆಗಿವೆ"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸು."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{ಇನ್ನೂ # ಅಧಿಸೂಚನೆ ಒಳಗಿದೆ.}one{ಇನ್ನೂ # ಅಧಿಸೂಚನೆಗಳು ಒಳಗಿವೆ.}other{ಇನ್ನೂ # ಅಧಿಸೂಚನೆಗಳು ಒಳಗಿವೆ.}}"</string>
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{ಇನ್ನೂ # ನೋಟಿಫಿಕೇಶನ್ ಒಳಗಿದೆ.}one{ಇನ್ನೂ # ನೋಟಿಫಿಕೇಶನ್‌ಗಳು ಒಳಗಿವೆ.}other{ಇನ್ನೂ # ನೋಟಿಫಿಕೇಶನ್‌ಗಳು ಒಳಗಿವೆ.}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"ಪರದೆಯನ್ನು ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"ಪರದೆಯನ್ನು ಪೋರ್ಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="dessert_case" msgid="9104973640704357717">"ಡೆಸರ್ಟ್ ಕೇಸ್"</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="sound_settings" msgid="8874581353127418308">"ಧ್ವನಿ &amp; ವೈಬ್ರೇಷನ್"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"ಸುರಕ್ಷಿತ ವಾಲ್ಯೂಮ್‌ಗೆ ಕಡಿಮೆ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"ಶಿಫಾರಸು ಮಾಡಿದ ಸಮಯಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ವಾಲ್ಯೂಮ್ ಹೆಚ್ಚಾಗಿರುತ್ತದೆ"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"ವಾಲ್ಯೂಮ್ ಅನ್ನು ಸುರಕ್ಷಿತ ಮಟ್ಟಕ್ಕೆ ತಗ್ಗಿಸಲಾಗಿದೆ"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್‌ ಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ಹೆಚ್ಚಿನ ಸಮಯದವರೆಗೆ ಅಧಿಕವಾಗಿದೆ"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"ಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್ ಈ ವಾರದ‌ ಮಟ್ಟಿಗೆ ಸುರಕ್ಷಿತ ಮಿತಿಯನ್ನು ಮೀರಿದೆ"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"ಆಲಿಸುತ್ತಿರಿ"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"ವಾಲ್ಯೂಮ್ ತಗ್ಗಿಸಿ"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ಆ್ಯಪ್ ಅನ್ನು ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ ಹಾಗೂ ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕಿಸಿ."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ ಹಾಗೂ ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ."</string>
@@ -985,10 +988,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ಸ್ಪೀಕರ್‌ಗಳು ಮತ್ತು ಡಿಸ್‌ಪ್ಲೇಗಳು"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ಸೂಚಿಸಿದ ಸಾಧನಗಳು"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"ಮೀಡಿಯಾವನ್ನು ಮತ್ತೊಂದು ಸಾಧನಕ್ಕೆ ಸರಿಸಲು ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸೆಶನ್ ಅನ್ನು ನಿಲ್ಲಿಸಿ"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ಪ್ರಸಾರವು ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ಪ್ರಸಾರ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ಹೊಂದಾಣಿಕೆಯಾಗುವ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ಹೊಂದಿರುವ ಸಮೀಪದಲ್ಲಿರುವ ಜನರು ನೀವು ಪ್ರಸಾರ ಮಾಡುತ್ತಿರುವ ಮಾಧ್ಯಮವನ್ನು ಆಲಿಸಬಹುದು"</string>
@@ -1103,7 +1104,7 @@
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"ಮೈಕ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"ಅಸಿಸ್ಟೆಂಟ್ ಆಲಿಸುತ್ತಿದೆ"</string>
-    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ಅಧಿಸೂಚನೆ}one{# ಅಧಿಸೂಚನೆಗಳು}other{# ಅಧಿಸೂಚನೆಗಳು}}"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ನೋಟಿಫಿಕೇಶನ್}one{# ನೋಟಿಫಿಕೇಶನ್‌ಗಳು}other{# ನೋಟಿಫಿಕೇಶನ್‌ಗಳು}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"ಟಿಪ್ಪಣಿಗಳನ್ನು ಬರೆದುಕೊಳ್ಳುವುದು"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ಪ್ರಸಾರ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
@@ -1141,10 +1142,15 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ನಿಮ್ಮ ಸ್ಟೈಲಸ್ ಅನ್ನು ಚಾರ್ಜರ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ಸ್ಟೈಲಸ್ ಬ್ಯಾಟರಿ ಕಡಿಮೆಯಿದೆ"</string>
     <string name="video_camera" msgid="7654002575156149298">"ವೀಡಿಯೊ ಕ್ಯಾಮರಾ"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"ಈ ಪ್ರೊಫೈಲ್‌ನಿಂದ ಕರೆ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"ನಿಮ್ಮ ಕೆಲಸದ ನೀತಿಯು ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ನಿಂದ ಮಾತ್ರ ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಲು ನಿಮಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
+    <skip />
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ಗೆ ಬದಲಿಸಿ"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"ಮುಚ್ಚಿರಿ"</string>
+    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
+    <skip />
     <string name="lock_screen_settings" msgid="6152703934761402399">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ವೈ-ಫೈ ಲಭ್ಯವಿಲ್ಲ"</string>

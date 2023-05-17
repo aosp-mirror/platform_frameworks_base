@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioak pantaila-argazkia hauteman du."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioak eta irekitako beste aplikazio batzuek pantaila-argazkia hauteman dute."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Gehitu oharrean"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"Pantaila-grabagailua"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pantaila-grabaketa prozesatzen"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pantailaren grabaketa-saioaren jakinarazpen jarraitua"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Grabatzen hasi nahi duzu?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Grabatzen duzunean, pantailan ikusgai dagoen edo gailuan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Aplikazio bat grabatzen duzunean, aplikazio horretan ikusgai dagoen edo bertan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Hasi grabatzen"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabatu audioa"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Gailuaren audioa"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Gailuko soinuak; adibidez, musika, deiak eta tonuak"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofonoa"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Gailuaren audioa eta mikrofonoa"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Hasi"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Pantaila grabatzen"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Pantaila eta audioa grabatzen"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Erakutsi pantaila-ukitzeak"</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Erabiltzailearen aplikazio eta datu guztiak ezabatuko dira."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Kendu"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioarekin grabatzen edo igortzen hasi nahi duzu?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Zerbait grabatzen edo igortzen duzunean, pantailan ikusgai dagoen edo gailuak erreproduzitzen duen informazio guztia atzi dezake <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak. Pasahitzak, ordainketen xehetasunak, argazkiak, mezuak eta erreproduzitzen dituzun audioak sartzen dira informazio horretan."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Grabatzen edo igortzen hasi nahi duzu?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Zerbait grabatzen edo igortzen duzunean, pantailan ikusgai dagoen edo gailuak erreproduzitzen duen informazio guztia erabili ahalko du funtzio hori eskaintzen duen zerbitzuak. Pasahitzak, ordainketen xehetasunak, argazkiak, mezuak eta erreproduzitzen dituzun audioak sartzen dira informazio horretan."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Pantaila osoa"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Aplikazio bakar bat"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Partekatu edo grabatu aplikazio bat"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioarekin grabatzen edo igortzen hasi nahi duzu?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Edukia partekatzen, grabatzen edo igortzen ari zarenean, pantailan ikusgai dagoen edo gailuan erreproduzitzen ari den guztia atzi dezake <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Aplikazio bat partekatzen, grabatzen edo igortzen ari zarenean, aplikazio horretan ikusgai dagoen edo bertan erreproduzitzen ari den guztia atzi dezake <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Hasi"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Igortzen hasi nahi duzu?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Edukia igortzen ari zarenean, pantailan ikusgai dagoen edo gailuan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Aplikazio bat igortzen ari zarenean, aplikazio horretan ikusgai dagoen edo bertan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Hasi igortzen"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Partekatzen hasi nahi duzu?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Edukia partekatzen, grabatzen edo igortzen ari zarenean, pantailan ikusgai dagoen edo gailuan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Aplikazio bat partekatzen, grabatzen edo igortzen ari zarenean, aplikazio horretan ikusgai dagoen edo bertan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Hasi"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"IKT saileko administratzaileak blokeatu du"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Pantaila-kapturak egiteko aukera desgaituta dago, gailu-gidalerroei jarraikiz"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Garbitu guztiak"</string>
@@ -484,7 +460,7 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Autoritate ziurtagiri-emaile bat dago instalatuta gailuan. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure laneko profileko trafikoa gainbegira dezake, baina ez zure profil pertsonalekoa."</string>
-    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Gailua <xliff:g id="VPN_APP">%1$s</xliff:g> bidez dago konektatuta Internetera. IKT saileko administratzaileak sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Gailua <xliff:g id="VPN_APP">%1$s</xliff:g> bidez dago konektatuta Internetera. VPN hornitzaileak sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Gailua <xliff:g id="VPN_APP">%1$s</xliff:g> bidez dago konektatuta Internetera. IKT saileko administratzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Gailua <xliff:g id="VPN_APP_0">%1$s</xliff:g> eta <xliff:g id="VPN_APP_1">%2$s</xliff:g> bidez dago konektatuta Internetera. IKT saileko administratzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Laneko aplikazioak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera. IKT saileko administratzaileak eta VPNaren hornitzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko dituzte."</string>
@@ -503,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desgaitu"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Audioa eta dardara"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Ezarpenak"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Bolumena jaitsi da entzumena babesteko"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Gomendatutakoa baino denbora gehiagoan eduki da bolumena ozen"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Bolumena maila seguruago batera jaitsi da"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Entzungailuen bolumena gomendatutako denboran baino gehiagoan eduki da ozen"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Entzungailuen bolumenak aste honetarako muga segurua gainditu du"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Jarraitu entzuten"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Jaitsi bolumena"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikazioa ainguratuta dago"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Atzera\" eta \"Ikuspegi orokorra\" botoiak."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Atzera eta Hasiera botoiak."</string>
@@ -1163,10 +1142,15 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Konektatu arkatza kargagailu batera"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Arkatzak bateria gutxi du"</string>
     <string name="video_camera" msgid="7654002575156149298">"Bideokamera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Ezin duzu deitu profil honetatik"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Deiak laneko profiletik soilik egiteko baimena ematen dizute laneko gidalerroek"</string>
+    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
+    <skip />
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Aldatu laneko profilera"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Itxi"</string>
+    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
+    <skip />
     <string name="lock_screen_settings" msgid="6152703934761402399">"Pertsonalizatu pantaila blokeatua"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Desblokeatu eta pertsonalizatu pantaila blokeatua"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wifi-konexioa ez dago erabilgarri"</string>

@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eltávolítás"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Az ajánlott szint fölé szeretné emelni a hangerőt?\n\nHa hosszú időn át teszi ki magát nagy hangerőnek, azzal károsíthatja a hallását."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Figyelem!\nTúllépte azt az időt, ameddig egy ember fejlhallgatóval biztonságosan hallgathat hangos hangokat egy hét alatt.\n\nEnnek a határértéknek a túllépése maradandóan károsítani fogja a hallását."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Figyelem!\nÖtszörösen túllépte azt az időt, ameddig egy ember fejlhallgatóval biztonságosan hallgathat hangos hangokat egy hét alatt.\n\nA rendszer csökkentette a hangerőt a hallása védelme érdekében."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Az a hangerő, amelyen jelenleg médiatartalmat hallgat, hosszabb idejű hallgatás esetén halláskárosodást okozhat.\n\nHa továbbra is ezen a hangerőn folytatja a lejátszást hosszabb ideig, károsíthatja a hallását."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Figyelem!\nJelenleg nem biztonságos szinten hallgat hangos médiatartalmat.\n\nHa továbbra is ezen a hangerőn folytatja a lejátszást, maradandóan károsodni fog a hallása."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Maradjon a magas hangerő?\n\nA fejhallgató hangereje az ajánlottnál hosszabb ideig volt magasra állítva, ami károsíthatja a hallását."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Nagy hangerő észlelhető\n\nA fejhallgató hangereje magasabb az ajánlottnál, ami károsíthatja a hallását."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Szeretné használni a Kisegítő lehetőségek billentyűparancsot?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ha a gyorsparancs aktív, akkor a két hangerőgomb három másodpercig tartó együttes lenyomásával kisegítő funkciót indíthat el."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Bekapcsol gyorsparancsot a kisegítő lehetőségekhez?"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Szüneteltetés feloldása"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nincs munkahelyi alkalmazás"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nincs személyes alkalmazás"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Megnyitja a munkahelyi <xliff:g id="APP">%s</xliff:g> alkalmazást?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"A személyes <xliff:g id="APP">%s</xliff:g> alkalmazásban szeretné megnyitni?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"A munkahelyi <xliff:g id="APP">%s</xliff:g> alkalmazásban szeretné megnyitni?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Hívás a munkahelyi alkalmazásból?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Átvált a munkahelyi alkalmazásra?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Szervezete csak munkahelyi alkalmazásokból engedélyezi a hívásindítást"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Szervezete csak munkahelyi alkalmazásokból engedélyezi az üzenetküldést"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Személyes böngésző használata"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Munkahelyi böngésző használata"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Hívás"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Váltás"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Hálózati SIM feloldó PIN-kódja"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Hálózati SIM alkészletének feloldó PIN-kódja"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Vállalati SIM feloldó PIN-kódja"</string>

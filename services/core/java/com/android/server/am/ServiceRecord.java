@@ -622,12 +622,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             pw.println(mBackgroundStartPrivilegesByStartMerged);
         }
         pw.print(prefix); pw.print("mAllowWhileInUsePermissionInFgsReason=");
-        pw.println(mAllowWhileInUsePermissionInFgsReason);
+        pw.println(PowerExemptionManager.reasonCodeToString(mAllowWhileInUsePermissionInFgsReason));
 
         pw.print(prefix); pw.print("debugWhileInUseReasonInStartForeground=");
-        pw.println(mDebugWhileInUseReasonInStartForeground);
+        pw.println(PowerExemptionManager.reasonCodeToString(
+                mDebugWhileInUseReasonInStartForeground));
         pw.print(prefix); pw.print("debugWhileInUseReasonInBindService=");
-        pw.println(mDebugWhileInUseReasonInBindService);
+        pw.println(PowerExemptionManager.reasonCodeToString(mDebugWhileInUseReasonInBindService));
 
         pw.print(prefix); pw.print("allowUiJobScheduling="); pw.println(mAllowUiJobScheduling);
         pw.print(prefix); pw.print("recentCallingPackage=");

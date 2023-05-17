@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
 import static android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_BIOMETRIC_PROMPT_TRANSITION;
 
@@ -512,6 +513,9 @@ public class AuthContainerView extends LinearLayout
     @Override
     public void onOrientationChanged() {
         maybeUpdatePositionForUdfps(true /* invalidate */);
+        if (mBiometricView != null) {
+            mBiometricView.onOrientationChanged();
+        }
     }
 
     @Override
@@ -899,7 +903,9 @@ public class AuthContainerView extends LinearLayout
                 windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-        lp.setFitInsetsTypes(lp.getFitInsetsTypes() & ~WindowInsets.Type.ime());
+        lp.setFitInsetsTypes(lp.getFitInsetsTypes() & ~WindowInsets.Type.ime()
+                & ~WindowInsets.Type.systemBars());
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         lp.setTitle("BiometricPrompt");
         lp.accessibilityTitle = title;
         lp.dimAmount = BACKGROUND_DIM_AMOUNT;

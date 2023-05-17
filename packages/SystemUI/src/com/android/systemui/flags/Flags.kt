@@ -63,7 +63,7 @@ object Flags {
 
     // TODO(b/279735475): Tracking Bug
     @JvmField
-    val NEW_LIGHT_BAR_LOGIC = unreleasedFlag(279735475, "new_light_bar_logic", teamfood = true)
+    val NEW_LIGHT_BAR_LOGIC = releasedFlag(279735475, "new_light_bar_logic")
 
     /**
      * This flag is server-controlled and should stay as [unreleasedFlag] since we never want to
@@ -166,8 +166,9 @@ object Flags {
      * Migrates control of the LightRevealScrim's reveal effect and amount from legacy code to the
      * new KeyguardTransitionRepository.
      */
+    // TODO(b/281655028): Tracking bug
     @JvmField
-    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = false)
+    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = true)
 
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
@@ -241,6 +242,11 @@ object Flags {
     // TODO(b/279794160): Tracking bug.
     @JvmField
     val DELAY_BOUNCER = releasedFlag(235, "delay_bouncer")
+
+    /** Migrate the indication area to the new keyguard root view. */
+    // TODO(b/280067944): Tracking bug.
+    @JvmField
+    val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -664,6 +670,11 @@ object Flags {
     @JvmField
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag(2400, "warn_on_blocking_binder_transactions")
+
+    // TODO(b/283071711): Tracking bug
+    @JvmField
+    val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
+            unreleasedFlag(2401, "trim_resources_with_background_trim_on_lock")
 
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
