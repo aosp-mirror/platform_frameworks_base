@@ -591,10 +591,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite aplicației să obțină informații despre serviciul de plăți NFC preferat, de exemplu, identificatorii de aplicație înregistrați și destinația traseului."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlare schimb de date prin Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite aplicației să comunice cu etichetele, cardurile și cititoarele NFC (Near Field Communication)."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Eveniment de tranzacție în cadrul unui element securizat"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Permite aplicației să primească informații despre tranzacțiile care au loc în cadrul unui element securizat."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"dezactivează blocarea ecranului"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite aplicației să dezactiveze blocarea tastelor și orice modalitate asociată de securizare prin parolă. De exemplu, telefonul dezactivează blocarea tastelor când se primește un apel telefonic și reactivează blocarea tastelor la terminarea apelului."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"să solicite complexitatea blocării ecranului"</string>
@@ -1687,10 +1685,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Elimină"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mărești volumul peste nivelul recomandat?\n\nDacă asculți perioade lungi la volum ridicat, auzul poate fi afectat."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Avertisment\nAi depășit numărul de semnale cu sunet puternic pe care le poți asculta într-o săptămână în căști.\n\nDepășirea limitei îți va afecta definitiv auzul."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Avertisment\nAi depășit de cinci ori numărul de semnale cu sunet puternic pe care le poți asculta într-o săptămână în căști.\n\nAm micșorat volumul pentru a-ți proteja auzul."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Nivelul la care asculți conținut media îți poate afecta auzul dacă este susținut pe perioade lungi de timp.\n\nContinuarea redării la acest nivel pentru perioade lungi de timp îți poate afecta auzul."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Avertisment\nAsculți conținut zgomotos la un nivel de sunet nesigur.\n\nContinuarea ascultării la acest volum îți va afecta definitiv auzul."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Vrei să asculți în continuare la volum ridicat?\n\nVolumul căștilor a fost ridicat mai mult timp decât este recomandat, iar acest lucru îți poate afecta auzul"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"S-au detectat sunete cu volum ridicat\n\nVolumul căștilor a fost mai ridicat decât este recomandat, iar acest lucru îți poate afecta auzul"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Folosești comanda rapidă pentru accesibilitate?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Când comanda rapidă e activată, dacă apeși ambele butoane de volum timp de trei secunde, vei lansa o funcție de accesibilitate."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Activezi comanda rapidă pentru funcțiile de accesibilitate?"</string>
@@ -2169,14 +2165,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reactivează"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nicio aplicație pentru lucru"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nicio aplicație personală"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Deschizi <xliff:g id="APP">%s</xliff:g> pentru lucru?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Deschizi în aplicația <xliff:g id="APP">%s</xliff:g> personală?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Deschizi în aplicația <xliff:g id="APP">%s</xliff:g> pentru lucru?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Apelezi din aplicația pentru lucru?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Comuți la aplicația pentru lucru?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Organizația îți permite să inițiezi apeluri numai din aplicațiile pentru lucru"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organizația îți permite să trimiți mesaje numai din aplicațiile pentru lucru"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Folosește browserul personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Folosește browserul de serviciu"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Apelează"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Comută"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Codul PIN de deblocare SIM privind rețeaua"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Codul PIN de deblocare SIM privind subsetul de rețea"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Codul PIN de deblocare SIM corporativă"</string>
@@ -2339,7 +2338,7 @@
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Aspectul tastaturii este setat la <xliff:g id="LAYOUT_1">%s</xliff:g>. Atinge pentru a-l schimba."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Aspectul tastaturii este setat la <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Atinge pentru a-l schimba."</string>
     <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Aspectul tastaturii este setat la <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Atinge pentru a-l schimba."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Aspectul tastaturii este setat la <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Atinge pentru a-l schimba."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Tastatura este setată la <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Atinge pentru a schimba."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Tastaturile fizice au fost configurate"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Atinge pentru a vedea tastaturile"</string>
 </resources>

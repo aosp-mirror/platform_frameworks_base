@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得由用戶允許授權的 NFC 付款服務資訊 (如已註冊的付款輔助功能和最終付款對象)。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"允許應用程式使用近距離無線通訊 (NFC) 標記、卡片及讀取程式進行通訊。"</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"安全元件交易活動"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"允許應用程式接收在安全元件上發生的交易相關資訊。"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"停用螢幕上鎖"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全措施。例如：手機收到來電時停用按鍵鎖定，通話結束後重新啟用按鍵鎖定。"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"要求螢幕鎖定複雜程度"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量 (比建議的音量更大聲) 嗎？\n\n長時間聆聽高分貝音量可能會導致你的聽力受損。"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"警告：\n你於一週內使用耳機聆聽的高分貝音訊量已超過安全範圍\n\n繼續此行為將導致聽力永久受損。"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"警告：\n你於一週內使用耳機聆聽的高分貝音訊量已超過安全範圍 5 倍。\n\n為保護你的聽力，系統已調低音量。"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"目前的媒體播放音量在長時間聆聽下可能會損害聽力。\n\n如繼續以此音量播放內容，長時間可能導致聽力受損。"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"警告：\n目前的內容播放音量已超過安全聆聽範圍。\n\n繼續聆聽此音量將導致聽力永久受損。"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"要繼續以高音量聆聽嗎？\n\n你以高音量使用耳機的時間已超過建議範圍，可能會導致聽力受損"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"系統偵測到巨響\n\n耳機音量已有一段時間超過建議水平，可能會導致聽力受損"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙功能快速鍵嗎？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用快速鍵後，同時按住音量按鈕 3 秒便可啟用無障礙功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要開啟無障礙功能捷徑嗎？"</string>
@@ -2168,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暫停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"沒有適用的工作應用程式"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"沒有適用的個人應用程式"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"要開啟「<xliff:g id="APP">%s</xliff:g>」嗎？"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"要在個人「<xliff:g id="APP">%s</xliff:g>」中開啟嗎？"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"要在工作「<xliff:g id="APP">%s</xliff:g>」中開啟嗎？"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"要透過工作應用程式打電話嗎？"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"要切換至工作應用程式嗎？"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"你的機構只允許你透過工作應用程式打電話"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"你的機構只允許你透過工作應用程式傳送訊息"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用個人瀏覽器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作瀏覽器"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"打電話"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"切換"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 網絡解鎖 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 網絡子集解鎖 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 公司解鎖 PIN"</string>

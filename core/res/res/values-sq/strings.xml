@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lejon aplikacionin të marrë informacione për shërbimin e preferuar të pagesës me NFC si p.sh. ndihmat e regjistruara dhe destinacionin e itinerarit."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollo \"Komunikimin e fushës në afërsi\" NFC"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Lejon aplikacionin të komunikojë me etiketimet e \"Komunikimit të fushës së afërt (NFC)\", kartat dhe lexuesit."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Ngjarje transaksioni me elementin e sigurt"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Lejon që aplikacioni të marrë informacione për transaksionet që kryhen në një element të sigurt."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"çaktivizo kyçjen e ekranit"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Lejon aplikacionin të çaktivizojë kyçjen e tasteve dhe çdo mbrojtje të lidhur me fjalëkalimin. Për shembull, telefoni çaktivizon kyçjen e tasteve kur merr një telefonatë hyrëse, pastaj riaktivizon kyçjen e tasteve kur mbaron telefonata."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"kërko kompleksitetin e kyçjes së ekranit"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Hiq"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Të ngrihet volumi mbi nivelin e rekomanduar?\n\nDëgjimi me volum të lartë për periudha të gjata mund të dëmtojë dëgjimin."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Paralajmërim:\nE ke kaluar sasinë e sinjaleve të larta zanore që mund të dëgjojë në mënyrë të sigurt një person gjatë një jave nëpërmjet kufjeve.\n\nNëse e kalon këtë kufi, kjo gjë do ta dëmtojë përgjithmonë dëgjimin tënd."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Paralajmërim:\nE ke kaluar 5 herë sasinë e sinjaleve të larta zanore që mund të dëgjojë në mënyrë të sigurt një person gjatë një jave nëpërmjet kufjeve.\n\nVolumi është ulur për të mbrojtur dëgjimin tënd."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Niveli me të cilin po dëgjon median mund të shkaktojë dëmtim të dëgjimit nëse vazhdon për periudha të gjata kohore.\n\nNëse vazhdon të luash me këtë nivel për periudha të gjata kohore, kjo gjë mund të dëmtojë dëgjimin tënd."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Paralajmërim:\nPo dëgjon aktualisht përmbajtje me zë të lartë që po luhet në një nivel jo të sigurt.\n\nNëse vazhdon të dëgjosh me një nivel kaq të lartë, kjo gjë do të dëmtojë përgjithmonë dëgjimin tënd."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"A do të vazhdosh të dëgjosh me një volum të lartë?\n\nVolumi i kufjeve ka qenë i lartë për një kohë më të gjatë nga sa rekomandohet, çka mund të të dëmtojë dëgjimin"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"U zbulua tingull i lartë\n\nVolumi i kufjeve ka qenë më i lartë nga sa rekomandohet, çka mund të të dëmtojë dëgjimin"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Të përdoret shkurtorja e qasshmërisë?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kur shkurtorja është e aktivizuar, shtypja e të dy butonave për 3 sekonda do të nisë një funksion qasshmërie."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Të aktivizohet shkurtorja për veçoritë e qasshmërisë?"</string>
@@ -2168,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Hiq nga pauza"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nuk ka aplikacione pune"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nuk ka aplikacione personale"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Të hapet <xliff:g id="APP">%s</xliff:g> i punës?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Të hapet te <xliff:g id="APP">%s</xliff:g> personal?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Të hapet te <xliff:g id="APP">%s</xliff:g> i punës?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Të telefonohet nga aplikacioni i punës?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Të kalohet tek aplikacioni i punës?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Organizata jote të lejon që të telefonosh vetëm nga aplikacionet e punës"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organizata jote të lejon që të dërgosh mesazhe vetëm nga aplikacionet e punës"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Përdor shfletuesin personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Përdor shfletuesin e punës"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Telefono"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Ndërro"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kodi PIN i shkyçjes së rrjetit të kartës SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Kodi PIN i shkyçjes së nënrenditjes së rrjetit të kartës SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Kodi PIN i shkyçjes së kartës SIM të korporatës"</string>

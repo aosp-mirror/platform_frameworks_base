@@ -1371,7 +1371,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်။ နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"အန်နာလော့ အသံကိရိယာကို တွေ့ထားပါသည်"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"တပ်ဆင်ထားသော ကိရိယာကို ဤဖုန်းနှင့် တွဲသုံး၍မရပါ။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB အမှားရှာပြင်ခြင်း ချိတ်ဆက်ထားသည်"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB အမှားရှာပြင်ခြင်း ချိတ်ထားသည်"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB အမှားရှာပြင်ခြင်းကို ပိတ်ရန် တို့ပါ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ဖြင့် အမှားရှာပြင်ခြင်းကို ပိတ်ရန် ရွေးပါ။"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ချိတ်ဆက်ပြီးပြီ"</string>
@@ -1684,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ဖယ်ရှားရန်"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"အသံကို အကြံပြုထားသည့် ပမာဏထက် မြှင့်ပေးရမလား?\n\nအသံကို မြင့်သည့် အဆင့်မှာ ကြာရှည်စွာ နားထောင်ခြင်းက သင်၏ နားကို ထိခိုက်စေနိုင်သည်။"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"သတိပေးချက်-\nတစ်ပတ်တာအတွင်း နားကြပ်ဖြင့် ဘေးကင်းကင်း အသံကျယ်လောင်စွာ နားထောင်နိုင်သည့် ပမာဏကို ကျော်လွန်သွားပါပြီ။\n\nဤကန့်သတ်ချက်ကျော်လွန်ခြင်းက သင့်အကြားအာရုံကို ထာဝရထိခိုက်စေမည်။"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"သတိပေးချက်-\nတစ်ပတ်တာအတွင်း နားကြပ်ဖြင့် ဘေးကင်းကင်း အသံကျယ်လောင်စွာ နားထောင်နိုင်သည့် ပမာဏထက် ၅ ဆ ကျော်လွန်သွားပါပြီ။\n\nသင့်အကြားအာရုံကို မထိခိုက်စေရန် အသံတိုးလိုက်သည်။"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"မီဒီယာကို ယခုနားထောင်သည့်အဆင့်ဖြင့် အချိန်ကြာမြင့်စွာ နားထောင်ပါက အကြားအာရုံကို ထိခိုက်နိုင်သည်။\n\nဤအဆင့်ဖြင့် အချိန်ကြာမြင့်စွာ ဆက်ဖွင့်ခြင်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်။"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"သတိပေးချက်-\nသင်သည် ကျယ်လောင်သော အကြောင်းအရာကို အန္တရာယ်ရှိသောအဆင့်ဖြင့် လက်ရှိဖွင့်ထားသည်။\n\nဤသို့ကျယ်လောင်စွာ ဆက်လက်နားထောင်ခြင်းက သင့်အကြားအာရုံကို ထာဝရထိခိုက်စေမည်။"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"အသံကျယ်ကျယ်ဖြင့် ဆက်နားဆင်မလား။\n\nနားကြပ်အသံအား အကြံပြုထားသည်ထက် ပိုကြာရှည်စွာ ချဲ့ထားပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ကျယ်လောင်သောအသံကို သိရှိသည်\n\nနားကြပ်အသံအား အကြံပြုထားသည်ထက် ပိုချဲ့ထားပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"အများသုံးနိုင်မှု ဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုလိုပါသလား။"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံထိန်းခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးနိုင်သည့် ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများအတွက် ဖြတ်လမ်းကို ဖွင့်မလား။"</string>
@@ -2166,14 +2164,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ပြန်ဖွင့်ရန်"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"အလုပ်သုံးအက်ပ်များ မရှိပါ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ကိုယ်ပိုင်အက်ပ်များ မရှိပါ"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"အလုပ်သုံး <xliff:g id="APP">%s</xliff:g> ဖွင့်မလား။"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ကိုယ်ပိုင် <xliff:g id="APP">%s</xliff:g> တွင် ဖွင့်မလား။"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"အလုပ် <xliff:g id="APP">%s</xliff:g> တွင် ဖွင့်မလား။"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ကိုယ်ပိုင်ဘရောင်ဇာ သုံးရန်"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"အလုပ်သုံးဘရောင်ဇာ သုံးရန်"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ဆင်းမ်ကွန်ရက် လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"ဆင်းမ်ကွန်ရက်ခွဲ လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"ဆင်းမ်ကော်ပိုရိတ် လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>
@@ -2334,8 +2341,8 @@
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ပိတ်ရန်"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> စီစဉ်သတ်မှတ်ထားသည်"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"ကီးဘုတ်အပြင်အဆင်ကို <xliff:g id="LAYOUT_1">%s</xliff:g> ဟု သတ်မှတ်ထားသည်။ ပြောင်းရန်တို့ပါ။"</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"ကီးဘုတ်အပြင်အဆင်ကို <xliff:g id="LAYOUT_1">%1$s</xliff:g>၊ <xliff:g id="LAYOUT_2">%2$s</xliff:g> ဟု သတ်မှတ်ထားသည်။ ပြောင်းရန်တို့ပါ။"</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ကီးဘုတ်အပြင်အဆင်ကို <xliff:g id="LAYOUT_1">%1$s</xliff:g>၊ <xliff:g id="LAYOUT_2">%2$s</xliff:g>၊ <xliff:g id="LAYOUT_3">%3$s</xliff:g> ဟု သတ်မှတ်ထားသည်။ ပြောင်းရန်တို့ပါ။"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"ကီးဘုတ်ကို <xliff:g id="LAYOUT_1">%1$s</xliff:g>၊ <xliff:g id="LAYOUT_2">%2$s</xliff:g> ဟု သတ်မှတ်ထားသည်။ ပြောင်းရန်တို့ပါ။"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ကီးဘုတ်ကို <xliff:g id="LAYOUT_1">%1$s</xliff:g>၊ <xliff:g id="LAYOUT_2">%2$s</xliff:g>၊ <xliff:g id="LAYOUT_3">%3$s</xliff:g> ဟု သတ်မှတ်ထားသည်။ ပြောင်းရန်တို့ပါ။"</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ကီးဘုတ်အပြင်အဆင်ကို <xliff:g id="LAYOUT_1">%1$s</xliff:g>၊ <xliff:g id="LAYOUT_2">%2$s</xliff:g>၊ <xliff:g id="LAYOUT_3">%3$s</xliff:g> သို့ သတ်မှတ်လိုက်သည်… ပြောင်းရန် တို့ပါ။"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ပကတိကီးဘုတ်များကို စီစဉ်သတ်မှတ်ထားသည်"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ကီးဘုတ်များကြည့်ရန် တို့ပါ"</string>

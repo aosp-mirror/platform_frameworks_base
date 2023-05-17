@@ -308,7 +308,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करें"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"मैसेज (एसएमएस)"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"फ़ाइलें"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"फ़ाइल"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"अपने डिवाइस में मौजूद फ़ाइलों का ऐक्सेस दें"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"संगीत और ऑडियो"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"आपके डिवाइस पर संगीत और ऑडियो को ऐक्सेस करने की अनुमति"</string>
@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"अगर ऐप्लिकेशन को अनुमति दी जाती है, तो वह पैसे चुकाने की आपकी उस पसंदीदा सेवा के बारे में जानकारी पा सकता है जो NFC का इस्तेमाल करती है. इसमें रजिस्टर किए गए डिवाइस और उनके आउटपुट के रूट जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नियर फ़ील्‍ड कम्‍यूनिकेशन नियंत्रित करें"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ऐप्स  को नियर फ़ील्ड कम्यूनिकेशन (NFC) टैग, कार्ड, और रीडर के साथ संचार करने देता है."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"सुरक्षा चिप में होने वाला लेन-देन की जानकारी"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"इससे ऐप्लिकेशन को सुरक्षा चिप पर होने वाले लेन-देन की जानकारी मिलेगी."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"अपना स्‍क्रीन लॉक अक्षम करें"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ऐप्स को कीलॉक और कोई भी संबद्ध पासवर्ड सुरक्षा बंद करने देता है. उदाहरण के लिए, इनकमिंग फ़ोन कॉल पाते समय फ़ोन, कीलॉक को बंद कर देता है, फिर कॉल खत्म होने पर कीलॉक को फिर से चालू कर देता है."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"जानें कि स्क्रीन लॉक कितना मुश्किल बनाया गया है"</string>
@@ -633,7 +631,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फ़िंगरप्रिंट की पहचान नहीं की जा सकी. फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फ़िंगरप्रिंट सेंसर को साफ़ करके फिर से कोशिश करें"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"फ़िंगरप्रिंट सेंसर को साफ़ करके फिर से कोशिश करें"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेंसर को उंगली से दबाएं"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेंसर को उंगली से दबाकर रखें"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"किसी दूसरे फ़िंगरप्रिंट से कोशिश करें"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"बहुत रोशनी है"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाएं"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर ज़्यादा समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"चेतावनी,\nआपने हेडफ़ोन पर एक हफ़्ते में, सुरक्षित तरीके से तेज़ साउंड सिग्नल सुनने की सीमा को पार कर लिया है.\n\nइस सीमा को पार करने पर, आपकी सुनने की क्षमता को हमेशा के लिए नुकसान पहुंच सकता है."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"चेतावनी,\nआपने हेडफ़ोन पर एक हफ़्ते में, सुरक्षित तरीके से तेज़ साउंड सिग्नल सुनने की सीमा से पांच गुना ज़्यादा बार तेज़ साउंड सिग्नल सुन लिए हैं.\n\nआपकी सुनने की क्षमता की सुरक्षा के लिए, आवाज़ को धीमा कर दिया गया है."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"मौजूदा लेवल पर ज़्यादा समय तक मीडिया को सुनने से, आपकी सुनने की क्षमता को नुकसान पहुंच सकता है.\n\nबहुत देर तक इस लेवल पर मीडिया चलाना जारी रखने से, आपकी सुनने की क्षमता को नुकसान पहुंच सकता है."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"चेतावनी,\nतेज़ आवाज़ वाले कॉन्टेंट को, आवाज़ के असुरक्षित लेवल पर सुना जा रहा है.\n\nबहुत देर तक इतनी तेज़ आवाज़ को सुनने पर, आपकी सुनने की क्षमता को हमेशा के लिए नुकसान पहुंच सकता है."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"क्या तेज़ आवाज़ में गाने सुनना जारी रखना है?\n\nहेडफ़ोन की आवाज़ सुझाए गए समय के बाद भी ज़्यादा रही. इससे आपकी सुनने की क्षमता को नुकसान पहुंच सकता है"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"तेज़ आवाज़ का पता चला है\n\nहेडफ़ोन की आवाज़ सुझाए गए लेवल से ज़्यादा है. इससे आपकी सुनने की क्षमता को नुकसान पहुंच सकता है"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"सुलभता शॉर्टकट का इस्तेमाल करना चाहते हैं?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट के चालू होने पर, दाेनाें वॉल्यूम बटन (आवाज़ कम या ज़्यादा करने वाले बटन) को तीन सेकंड तक दबाने से, सुलभता सुविधा शुरू हाे जाएगी."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"क्या आप सुलभता सुविधाओं के लिए शॉर्टकट चालू करना चाहते हैं?"</string>
@@ -2168,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"चालू करें"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"यह कॉन्टेंट, ऑफ़िस के काम से जुड़े आपके किसी भी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"यह कॉन्टेंट आपके किसी भी निजी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"वर्क प्रोफ़ाइल वाला <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन खोलें?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"निजी प्रोफ़ाइल वाले <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन में जाकर खोलें?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"वर्क प्रोफ़ाइल वाले <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन में जाकर खोलें?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"क्या आपको वर्क ऐप्लिकेशन से कॉल करना है?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"क्या आपको वर्क ऐप्लिकेशन में स्विच करना है?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"आपके संगठन ने, सिर्फ़ वर्क ऐप्लिकेशन से कॉल करने की अनुमति दी है"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"आपके संगठन ने, सिर्फ़ वर्क ऐप्लिकेशन से मैसेज भेजने की अनुमति दी है"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"निजी ब्राउज़र का इस्तेमाल करें"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ऑफ़िस के काम से जुड़े ब्राउज़र का इस्तेमाल करें"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"कॉल करें"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"स्विच करें"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क को अनलॉक करने का पिन"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"सिम नेटवर्क के सबसेट को अनलॉक करने का पिन"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"कारोबार के लिए इस्तेमाल होने वाले सिम को अनलॉक करने का पिन"</string>

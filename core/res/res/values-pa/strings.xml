@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ਐਪ ਨੂੰ ਤਰਜੀਹੀ NFC ਭੁਗਤਾਨਸ਼ੁਦਾ ਸੇਵਾ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਕਿ ਰਜਿਸਟਰ ਕੀਤੇ ਸਾਧਨ ਅਤੇ ਮੰਜ਼ਿਲ ਰਸਤਾ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ (NFC) ਟੈਗਾਂ, ਕਾਰਡਾਂ ਅਤੇ ਰੀਡਰਾਂ ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"ਸੁਰੱਖਿਅਤ ਅੰਸ਼ ਦੇ ਲੈਣ-ਦੇਣ ਸੰਬੰਧੀ ਇਵੈਂਟ"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"ਐਪ ਨੂੰ ਸੁਰੱਖਿਅਤ ਅੰਸ਼ \'ਤੇ ਹੋਣ ਵਾਲੇ ਲੈਣ-ਦੇਣ ਬਾਰੇ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ਆਪਣਾ ਸਕ੍ਰੀਨ  ਲਾਕ  ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ਐਪ ਨੂੰ ਕੀਲਾਕ ਅਤੇ ਕਿਸੇ ਵੀ ਸੰਬੰਧਿਤ ਪਾਸਵਰਡ ਸੁਰੱਖਿਆ ਨੂੰ ਬੰਦ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਫ਼ੋਨ ਇੱਕ ਇਨਕਮਿੰਗ ਫ਼ੋਨ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਨ ਵੇਲੇ ਬੰਦ ਕਰਦਾ ਹੈ, ਫਿਰ ਜਦੋਂ ਕਾਲ ਖਤਮ ਹੁੰਦੀ ਹੈ ਤਾਂ ਕੀਲਾਕ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਲਈ ਬੇਨਤੀ ਕਰੋ"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ਹਟਾਓ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ਕੀ ਵੌਲਿਊਮ  ਸਿਫ਼ਾਰਸ਼  ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਿਊਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"ਚਿਤਾਵਨੀ,\nਤੁਸੀਂ ਉੱਚੀ ਧੁਨੀ ਦੇ ਸਿਗਨਲਾਂ ਦੀ ਮਾਤਰਾ ਨੂੰ ਪਾਰ ਕਰ ਚੁੱਕੇ ਹੋ ਜਿਸਨੂੰ ਕੋਈ ਵਿਅਕਤੀ ਹਫ਼ਤੇ ਵਿੱਚ ਹੈੱਡਫ਼ੋਨਾਂ \'ਤੇ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਸੁਣ ਸਕਦਾ ਹੈ।\n\nਇਸ ਸੀਮਾ ਨੂੰ ਪਾਰ ਕਰਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਪੱਕੇ ਤੌਰ \'ਤੇ ਨੁਕਸਾਨ ਹੋ ਜਾਵੇਗਾ।"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"ਚਿਤਾਵਨੀ,\nਤੁਸੀਂ ਉੱਚੀ ਧੁਨੀ ਦੇ ਸਿਗਨਲਾਂ ਦੀ ਮਾਤਰਾ ਤੋਂ 5 ਗੁਣਾ ਪਾਰ ਕਰ ਚੁੱਕੇ ਹੋ ਜਿਸਨੂੰ ਕੋਈ ਵਿਅਕਤੀ ਹਫ਼ਤੇ ਵਿੱਚ ਹੈੱਡਫ਼ੋਨਾਂ \'ਤੇ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਸੁਣ ਸਕਦਾ ਹੈ।\n\nਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਦੀ ਸੁਰੱਖਿਆ ਕਰਨ ਲਈ ਆਵਾਜ਼ ਨੂੰ ਘਟਾ ਦਿੱਤਾ ਗਿਆ ਹੈ।"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"ਜਿਸ ਪੱਧਰ \'ਤੇ ਤੁਸੀਂ ਮੀਡੀਆ ਨੂੰ ਸੁਣ ਰਹੇ ਹੋ, ਤਾਂ ਉਸ ਨੂੰ ਲੰਬੇ ਸਮੇਂ ਤੱਕ ਸੁਣਨ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਹੋ ਸਕਦਾ ਹੈ।\n\nਲੰਬੇ ਸਮੇਂ ਤੱਕ ਇਸ ਪੱਧਰ \'ਤੇ ਚਲਾਉਣਾ ਜਾਰੀ ਰੱਖਣ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਹੋ ਸਕਦਾ ਹੈ।"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"ਚਿਤਾਵਨੀ,\nਤੁਸੀਂ ਫ਼ਿਲਹਾਲ ਅਸੁਰੱਖਿਅਤ ਪੱਧਰ \'ਤੇ ਚੱਲ ਰਹੀ ਉੱਚੀ ਆਵਾਜ਼ ਵਿੱਚ ਸਮੱਗਰੀ ਨੂੰ ਸੁਣ ਰਹੇ ਹੋ।\n\nਇਸ ਉੱਚੀ ਆਵਾਜ਼ ਨੂੰ ਸੁਣਨਾ ਜਾਰੀ ਰੱਖਣ ਨਾਲ ਤੁਹਾਡੇ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਪੱਕੇ ਤੌਰ \'ਤੇ ਨੁਕਸਾਨ ਹੋ ਸਕਦਾ ਹੈ।"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ਕੀ ਉੱਚੀ ਅਵਾਜ਼ ਵਿੱਚ ਸੁਣਨਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਸਿਫ਼ਾਰਸ਼ੀ ਸਮੇਂ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖੀ ਗਈ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ਉੱਚੀ ਧੁਨੀ ਦਾ ਪਤਾ ਲੱਗਾ\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਨੂੰ ਸਿਫ਼ਾਰਸ਼ੀ ਪੱਧਰ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖਿਆ ਗਿਆ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੋਣ \'ਤੇ, ਕਿਸੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਲਈ ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
@@ -2168,14 +2164,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ਰੋਕ ਹਟਾਓ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ਕੋਈ ਕੰਮ ਸੰਬੰਧੀ ਐਪ ਨਹੀਂ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ਕੋਈ ਨਿੱਜੀ ਐਪ ਨਹੀਂ"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"ਕੀ ਕੰਮ ਸੰਬੰਧੀ <xliff:g id="APP">%s</xliff:g> ਨੂੰ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ਕੀ ਨਿੱਜੀ <xliff:g id="APP">%s</xliff:g> ਵਿੱਚ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"ਕੀ ਕੰਮ ਸੰਬੰਧੀ <xliff:g id="APP">%s</xliff:g> ਵਿੱਚ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ਨਿੱਜੀ ਬ੍ਰਾਊਜ਼ਰ ਵਰਤੋ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ਕੰਮ ਸੰਬੰਧੀ ਬ੍ਰਾਊਜ਼ਰ ਵਰਤੋ"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ਸਿਮ ਨੈੱਟਵਰਕ ਅਣਲਾਕ ਪਿੰਨ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"ਸਿਮ ਨੈੱਟਵਰਕ ਸਬਸੈੱਟ ਅਣਲਾਕ ਪਿੰਨ"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"ਸਿਮ ਕਾਰਪੋਰੇਟ ਅਣਲਾਕ ਪਿੰਨ"</string>
@@ -2337,7 +2342,7 @@
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ਦਾ ਸੰਰੂਪਣ ਕੀਤਾ ਗਿਆ"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%s</xliff:g> \'ਤੇ ਸੈੱਟ ਹੈ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> \'ਤੇ ਸੈੱਟ ਹੈ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>\'ਤੇ ਸੈੱਟ ਹੈ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> \'ਤੇ ਸੈੱਟ ਹੈ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> \'ਤੇ ਸੈੱਟ ਹੈ… ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡਾਂ ਦਾ ਸੰਰੂਪਣ ਕੀਤਾ ਗਿਆ"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ਕੀ-ਬੋਰਡਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>

@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Gerir forritinu kleift að fá valda NFC-greiðsluþjónustu, svo sem skráða aðstoð og áfangastað leiðar."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"stjórna nándarsamskiptum (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Leyfir forriti að eiga samskipti við NFC-merki, -spjöld og -lesara (nándarsamskipti)."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Færslutilvik í öryggiseiningu"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Gerir forritinu kleift að móttaka upplýsingar um færslur sem fara fram í öryggiseiningu."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"slökkva á skjálásnum"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Leyfir forriti að slökkva á símalásnum og öðrum öryggisaðgerðum tengdum aðgangsorði. Til dæmis gerir síminn lásinn óvirkan þegar símtal berst og læsist svo aftur að símtali loknu."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"biðja um flókinn skjálás"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Fjarlægja"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Hækka hljóðstyrk umfram ráðlagðan styrk?\n\nEf hlustað er á háum hljóðstyrk í langan tíma kann það að skaða heyrnina."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Viðvörun,\nÞú hefur náð hámarksfjölda háværra hljóðmerkja sem öruggt er að hlusta á innan viku í heyrnartólum.\n\nEf farið er yfir þessi mörk veldur það varanlegum heyrnarskaða."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Viðvörun,\nÞú hefur náð fimmföldum hámarksfjölda háværra hljóðmerkja sem öruggt er að hlusta á innan viku í heyrnartólum.\n\nBúið er að lækka hljóðstyrkinn til að vernda heyrnina hjá þér."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Hljóðstyrkurinn sem þú notar til að hlusta á efni getur valdið heyrnarskaða við langvarandi notkun.\n\nLangvarandi spilun á þessum hljóðstyrk getur valdið heyrnarskaða."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Viðvörun,\nÞú ert að hlusta á hávært efni með of háum hljóðstyrk.\n\nEf þú heldur áfram að hlusta á þessum hljóðstyrk veldur það varanlegum heyrnarskaða."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Halda áfram að hlusta með háum hljóðstyrk?\n\nHljóðstyrkur í heyrnartólum hefur verið hár í lengri tíma en mælt er með sem gæti valdið heyrnarskaða"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Hátt hljóð greindist\n\nHljóðstyrkur í heyrnartólum hefur verið hærri en mælt er með sem gæti valdið heyrnarskaða"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Viltu nota aðgengisflýtileið?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Þegar flýtileiðin er virk er kveikt á aðgengiseiginleikanum með því að halda báðum hljóðstyrkshnöppunum inni í þrjár sekúndur."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Kveikja á flýtileið fyrir aðgangseiginleika?"</string>
@@ -2168,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Ljúka hléi"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Engin vinnuforrit"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Engin forrit til einkanota"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Opna <xliff:g id="APP">%s</xliff:g> með vinnuprófíl?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Opna í <xliff:g id="APP">%s</xliff:g> til einkanota?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Opna í <xliff:g id="APP">%s</xliff:g> með vinnuprófíl?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Hringja úr vinnuforriti?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Skipta yfir í vinnuforrit?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Fyrirtækið heimilar þér aðeins að hringja úr vinnuforritum"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Fyrirtækið heimilar þér aðeins að senda skilaboð úr vinnuforritum"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Nota einkavafra"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Nota vinnuvafra"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Hringja"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Skipta"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-númer fyrir opnun á SIM-korti netkerfis"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-númer fyrir opnun á SIM-korti netkerfishlutmengis"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-númer fyrir opnun á SIM-korti fyrirtækis"</string>

@@ -1684,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ລຶບອອກ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ເພີ່ມ​ລະ​ດັບ​ສຽງ​ໃຫ້​ເກີນກວ່າ​ລະ​ດັບ​ທີ່​ແນະ​ນຳ​ບໍ?\n\n​ການ​ຮັບ​ຟັງ​ສຽງ​ໃນ​ລະ​ດັບ​ທີ່​ສູງ​ເປັນ​ໄລ​ຍະ​ເວ​ລາ​ດົນ​​ອາດ​ເຮັດ​ໃຫ້​ການ​ຟັງ​ຂອງ​ທ່ານ​ມີ​ບັນ​ຫາ​ໄດ້."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"ຄຳເຕືອນ,\nທ່ານມີສັນຍານສຽງດັງເກີນຈຳນວນທີ່ຄົນເຮົາສາມາດຟັງໄດ້ຢ່າງປອດໄພໃນໜຶ່ງອາທິດຜ່ານຫູຟັງ.\n\nການໃຊ້ເກີນຂີດຈຳກັດນີ້ຈະທຳລາຍການໄດ້ຍິນຂອງທ່ານຢ່າງຖາວອນ."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"ຄຳເຕືອນ,\nທ່ານມີສັນຍານສຽງດັງເກີນ 5 ເທື່ອຂອງສັນຍານສຽງທີ່ຄົນເຮົາສາມາດຟັງໄດ້ຢ່າງປອດໄພໃນໜຶ່ງອາທິດຜ່ານຫູຟັງ.\n\nໄດ້ຫຼຸດລະດັບສຽງລົງແລ້ວເພື່ອປົກປ້ອງການໄດ້ຍິນຂອງທ່ານ."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"ລະດັບທີ່ທ່ານກໍາລັງຟັງສື່ສາມາດສົ່ງຜົນໃຫ້ເກີດຄວາມເສຍຫາຍຕໍ່ການໄດ້ຍິນເມື່ອຖືກຄົງໄວ້ເປັນເວລາດົນນານ.\n\nການສືບຕໍ່ຫຼິ້ນໃນລະດັບນີ້ເປັນເວລາດົນອາດເຮັດໃຫ້ການໄດ້ຍິນຂອງທ່ານເສຍຫາຍໄດ້."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"ຄຳເຕືອນ,\nປັດຈຸບັນນີ້ທ່ານກຳລັງຟັງເນື້ອຫາທີ່ມີສຽງດັງໃນລະດັບທີ່ບໍ່ປອດໄພ.\n\nການສືບຕໍ່ຟັງສຽງດັງນີ້ຈະທໍາລາຍການໄດ້ຍິນຂອງທ່ານຢ່າງຖາວອນ."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ສືບຕໍ່ຟັງໃນລະດັບສຽງທີ່ດັງບໍ?\n\nຫູຟັງຢູ່ໃນລະດັບສຽງທີ່ດັງເປັນໄລຍະເວລາດົນກວ່າທີ່ແນະນຳ, ເຊິ່ງສາມາດເປັນອັນຕະລາຍຕໍ່ການໄດ້ຍິນຂອງທ່ານໄດ້"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ກວດພົບສຽງດັງ\n\nຫູຟັງຢູ່ໃນລະດັບສຽງທີ່ດັງກວ່າທີ່ແນະນຳ, ເຊິ່ງສາມາດເປັນອັນຕະລາຍຕໍ່ການໄດ້ຍິນຂອງທ່ານໄດ້"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ໃຊ້ປຸ່ມລັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ເມື່ອເປີດໃຊ້ທາງລັດແລ້ວ, ການກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີຈະເປັນການເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ເປີດໃຊ້ທາງລັດສຳລັບຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
@@ -2166,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ຍົກເລີກການຢຸດຊົ່ວຄາວ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ບໍ່ມີແອັບບ່ອນເຮັດວຽກ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ບໍ່ມີແອັບສ່ວນຕົວ"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"ເປີດ <xliff:g id="APP">%s</xliff:g> ສຳລັບວຽກບໍ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ເປີດໃນ <xliff:g id="APP">%s</xliff:g> ສ່ວນຕົວບໍ?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"ເປີດໃນ <xliff:g id="APP">%s</xliff:g> ສຳລັບວຽກບໍ?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"ໂທຈາກແອັບບ່ອນເຮັດວຽກບໍ?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ສະຫຼັບໄປເປັນແອັບບ່ອນເຮັດວຽກບໍ?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"ອົງການຈັດຕັ້ງຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານໂທຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"ອົງການຈັດຕັ້ງຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານສົ່ງຂໍ້ຄວາມໄດ້ຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບສ່ວນຕົວ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບບ່ອນເຮັດວຽກ"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"ໂທ"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"ສະຫຼັບ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ປົດລັອກເຄືອຂ່າຍຊິມ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN ການປົດລັອກຊຸດຍ່ອຍເຄືອຂ່າຍຊິມ"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN ປົດລັອກ SIM ອົງການ"</string>

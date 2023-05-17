@@ -591,10 +591,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозвољава апликацији да преузима информације о жељеној NFC услузи за плаћање, попут регистрованих идентификатора апликација и одредишта преусмеравања."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрола комуникације у ужем пољу (Near Field Communication)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозвољава апликацији да комуницира са ознакама, картицама и читачима комуникације кратког домета (NFC)."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Трансакција у оквиру безбедносног елемента"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Омогућава апликацији да добија информације о транскацијама које се извршавају у оквиру безбедносног елемента."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"онемогућавање закључавања екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозвољава апликацији да онемогући закључавање тастатуре и све повезане безбедносне мере са лозинкама. На пример, телефон онемогућава закључавање тастатуре при пријему долазног телефонског позива, а затим га поново омогућава по завршетку позива."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"тражење сложености закључавања екрана"</string>
@@ -1687,10 +1685,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Уклони"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Желите да појачате звук изнад препорученог нивоа?\n\nСлушање гласне музике дуже време може да вам оштети слух."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Упозорење,\nпремашили сте број гласних звучних сигнала које је безбедно слушати преко слушалица током недељу дана.\n\nПрекорачењем тог ограничења трајно ћете оштетити слух."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Упозорење,\nПет пута сте премашили број гласних звучних сигнала које је безбедно слушати преко слушалица током недељу дана.\n\nЈачина звука треба да се смањи да бисте заштитили слух."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Ниво на ком слушате медијски садржај може да доведе до оштећења слуха ако то траје током дужег периода.\n\nАко наставите да слушате тако гласно током дужег периода, може да дође до оштећења слуха."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Упозорење,\nтренутно слушате гласан садржај на небезбедном нивоу.\n\nАко наставите да слушате тако гласно, трајно ћете оштетити слух."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Желите да наставите да слушате гласну музику?\n\nЈачина звука у слушалицама је била висока дуже него што се препоручује, што може да оштети слух"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Препознат је гласан звук\n\nЈачина звука у слушалицама је била већа него што се препоручује, што може да оштети слух"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Желите ли да користите пречицу за приступачност?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Када је пречица укључена, притисните оба дугмета за јачину звука да бисте покренули функцију приступачности."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Желите да укључите пречицу за функције приступачности?"</string>
@@ -2169,14 +2165,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Поново активирај"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Нема пословних апликација"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Нема личних апликација"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Желите да отворите пословну апликацију <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Желите да отворите у личној апликацији <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Желите да отворите у пословној апликацији <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Желите да позовете из пословне апликације?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Желите да пребаците на пословну апликацију?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Ваша организација дозвољава позивање само из пословних апликација"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Ваша организација дозвољава слање порука само из пословних апликација"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Користи лични прегледач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Користи пословни прегледач"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Позови"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Пребаци"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN за откључавање SIM мреже"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN за откључавање подскупа SIM мреже"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN за откључавање пословне SIM картице"</string>
@@ -2338,7 +2337,7 @@
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Уређај <xliff:g id="DEVICE_NAME">%s</xliff:g> је конфигурисан"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Распоред тастатуре је подешен на <xliff:g id="LAYOUT_1">%s</xliff:g>. Додирните да бисте то променили."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Распоред тастатуре је подешен на <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Додирните да бисте то променили."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Распоред тастатуре је подешен на <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Додирните да бисте то променили."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Распоред тастатуре је <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Додирните да бисте то променили."</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Распоред тастатуре је подешен на <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Додирните да бисте променили."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физичке тастатуре су конфигурисане"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Додирните да бисте видели тастатуре"</string>

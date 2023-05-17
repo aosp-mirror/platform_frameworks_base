@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"यसले एपलाई दर्ता गरिएका सहायता तथा मार्गको गन्तव्य जस्ता रुचाइएका NFC भुक्तानी सेवासम्बन्धी जानकारी प्राप्त गर्न दिन्छ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नजिक क्षेत्र संचार नियन्त्रणहरू"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"एपलाई नयाँ क्षेत्र संचार (NFC) ट्यागहरू, कार्डहरू र पाठकहरूसँग अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"\"सुरक्षित तत्त्व\" मा भएको कारोबार"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"यो विकल्प छनौट गर्नाले एपलाई \"सुरक्षित तत्त्व\" मा भएका कारोबारहरूका बारेमा जानकारी प्राप्त गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"स्क्रिन लक असक्षम पार्नुहोस्"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"कुनै सम्बन्धित पासवर्ड सुरक्षा र किलकलाई असक्षम पार्न एपलाई अनुमति दिन्छ। उदाहरणको लागि, अन्तर्गमन फोन कल प्राप्त गर्दा फोनले किलकलाई असक्षम पार्छ, त्यसपछि कल सकिएको बेला किलक पुनःसक्षम पार्छ।"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"स्क्रिन लकको जटिलतासम्बन्धी जानकारी प्राप्त गर्ने अनुरोध गर्नुहोस्"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाउनुहोस्"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"चेतावनी,\nतपाईंले एक हप्तामा हेडफोनमार्फत सुरक्षित रूपमा सुन्न मिल्ने ठुला आवाजयुक्त सिग्नलहरूको मात्राका सम्बन्धमा तोकिएको सीमा नाघ्नुभएको छ।\n\nयो सीमा नाघेका खण्डमा तपाईंको श्रवण शक्ति सदाका लागि खराब हुने छ।"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"चेतावनी,\nतपाईंले एक हप्तामा हेडफोनमार्फत सुरक्षित रूपमा सुन्न मिल्ने ठुला आवाजयुक्त सिग्नलहरूको मात्राका सम्बन्धमा तोकिएको सीमा ५ गुणाले नाघ्नुभएको छ।\n\nतपाईंको श्रवण शक्तिमा असर नपरोस् भन्नाका लागि भोल्युम घटाइएको छ।"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"तपाईंले अहिले जति भोल्युममा मिडिया सुनिरहनुभएको छ त्यति नै भोल्युममा लामो समयसम्म मिडिया सुन्नुभयो भने तपाईंको श्रवण शक्ति खराब हुन सक्छ।\n\nतपाईंले लामो समयसम्म यति नै भोल्युममा मिडिया सुनिराख्नुभयो भने तपाईंको श्रवण शक्ति खराब हुन सक्छ।"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"चेतावनी,\nतपाईं अहिले असुरक्षित रूपमा उच्च भोल्युममा सामग्री सुन्दै हुनुहुन्छ।\n\nतपाईंले लामो समयसम्म यति नै भोल्युममा सामग्री सुनिराख्नुभयो भने तपाईंको श्रवण शक्ति सदाका लागि खराब हुने छ।"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ठुलो आवाजमा सुनिरहन चाहनुहुन्छ?\n\nहेडफोनको भोल्युम सिफारिस गरिएको समयभन्दा लामो समयदेखि उच्च छ। यसले तपाईंको श्रवण शक्तिमा क्षति पुर्‍याउन सक्छ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ठुलो आवाज पत्ता लाग्यो\n\nहेडफोनको भोल्युम सिफारिस गरिएको स्तरभन्दा उच्च छ। यसले तपाईंको श्रवण शक्ति क्षय गर्न सक्छ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"पहुँच सम्बन्धी सर्टकट प्रयोग गर्ने हो?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"यो सर्टकट सक्रिय हुँदा, ३ सेकेन्डसम्म दुवै भोल्युम बटन थिच्नुले पहुँचसम्बन्धी कुनै सुविधा सुरु गर्ने छ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"एक्सेसिबिलिटीसम्बन्धी सुविधा  प्रयोग गर्न सर्टकट अन गर्ने हो?"</string>
@@ -2168,14 +2164,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"अनपज गर्नुहोस्"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"यो सामग्री खोल्न मिल्ने कुनै पनि कामसम्बन्धी एप छैन"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"यो सामग्री खोल्न मिल्ने कुनै पनि व्यक्तिगत एप छैन"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"कामसम्बन्धी <xliff:g id="APP">%s</xliff:g> खोल्ने हो?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"व्यक्तिगत <xliff:g id="APP">%s</xliff:g> मा खोल्ने हो?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"कामसम्बन्धी <xliff:g id="APP">%s</xliff:g> मा खोल्ने हो?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"व्यक्तिगत ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउजर प्रयोग गर्नुहोस्"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM को नेटवर्क अनलक गर्ने PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM को नेटवर्कको सबसेट अनलक गर्ने PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM को कर्पोरेट लक खोल्ने PIN"</string>
@@ -2335,10 +2340,10 @@
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"सेटिङमा जानुहोस्"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"अफ गर्नुहोस्"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> कन्फिगर गरिएको छ"</string>
-    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"किबोर्ड लेआउट सेट गरी <xliff:g id="LAYOUT_1">%s</xliff:g> बनाइएको छ। परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"किबोर्ड लेआउट सेट गरी <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> बनाइएको छ। परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"किबोर्ड लेआउट सेट गरी <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> बनाइएको छ। परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"किबोर्ड लेआउट सेट गरी <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> बनाइएको छ… परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"किबोर्ड लेआउट <xliff:g id="LAYOUT_1">%s</xliff:g> भाषामा सेट गरिएको छ। बदल्न ट्याप गर्नुहोस्।"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"किबोर्ड लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> भाषामा सेट गरिएको छ। बदल्न ट्याप गर्नुहोस्।"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"किबोर्ड लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> भाषामा सेट गरिएको छ। बदल्न ट्याप गर्नुहोस्।"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"किबोर्ड लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> भाषामा सेट गरिएको छ… बदल्न ट्याप गर्नुहोस्।"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"भौतिक किबोर्डहरू कन्फिगर गरिएका छन्"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"किबोर्डहरू हेर्न ट्याप गर्नुहोस्"</string>
 </resources>

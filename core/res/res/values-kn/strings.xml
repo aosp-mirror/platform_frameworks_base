@@ -590,10 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ನೋಂದಾಯಿತ ಅಪ್ಲಿಕೇಶನ್ ಗುರುತಿಸುವಿಕೆಗಳು ಮತ್ತು ಮಾರ್ಗ ಗಮ್ಯಸ್ಥಾನಗಳಂತಹ ಆದ್ಯತೆಯ NFC ಪಾವತಿ ಸೇವೆಗಳ ಬಗ್ಗೆ ಮಾಹಿತಿಯನ್ನು ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ಸಮೀಪ ಕ್ಷೇತ್ರ ಸಂವಹನವನ್ನು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ಸಮೀಪದ ಕ್ಷೇತ್ರ ಸಂವಹನ (NFC) ಟ್ಯಾಗ್‌ಗಳು, ಕಾರ್ಡ್‌ಗಳು, ಮತ್ತು ಓದುಗರನ್ನು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
-    <skip />
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"ಸುರಕ್ಷಿತ ಅಂಶದ ವಹಿವಾಟು ಈವೆಂಟ್"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"ಸುರಕ್ಷಿತ ಅಂಶದಲ್ಲಿ ನಡೆಯುತ್ತಿರುವ ವಹಿವಾಟುಗಳ ಕುರಿತು ಮಾಹಿತಿಯನ್ನು ಸ್ವೀಕರಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ಕೀಲಾಕ್ ಮತ್ತು ಯಾವುದೇ ಸಂಬಂಧಿತ ಭದ್ರತಾ ಪಾಸ್‍‍ವರ್ಡ್ ಭದ್ರತೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಒಳಬರುವ ಕರೆಯನ್ನು ಸ್ವೀಕರಿಸುವಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಫೋನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ, ನಂತರ ಕರೆಯು ಅಂತ್ಯಗೊಂಡಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಮರು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಸಂಕೀರ್ಣತೆಯನ್ನು ವಿನಂತಿಸಿ"</string>
@@ -1686,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ತೆಗೆದುಹಾಕು"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ವಾಲ್ಯೂಮ್‌ ಅನ್ನು ಶಿಫಾರಸು ಮಾಡಲಾದ ಮಟ್ಟಕ್ಕಿಂತಲೂ ಹೆಚ್ಚು ಮಾಡಬೇಕೆ?\n\nದೀರ್ಘ ಅವಧಿಯವರೆಗೆ ಹೆಚ್ಚಿನ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದರಿಂದ ನಿಮ್ಮ ಆಲಿಸುವಿಕೆ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಹಾನಿಯುಂಟು ಮಾಡಬಹುದು."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"ಎಚ್ಚರಿಕೆ,\nಒಬ್ಬ ವ್ಯಕ್ತಿ ಒಂದು ವಾರದಲ್ಲಿ ಹೆಡ್‌ಫೋನ್‌ಗಳ ಮೂಲಕ ಗಟ್ಟಿಯಾದ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಸುರಕ್ಷಿತವಾಗಿ ಆಲಿಸಬಹುದಾದ ಮಿತಿಯನ್ನು ನೀವು ಮೀರಿದ್ದೀರಿ.\n\nಈ ಮಿತಿಯನ್ನು ಮೀರಿದರೆ ನಿಮ್ಮ ಆಲಿಸುವ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಶಾಶ್ವತ ಹಾನಿಯುಂಟಾಗುತ್ತದೆ."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"ಎಚ್ಚರಿಕೆ,\nಒಬ್ಬ ವ್ಯಕ್ತಿ ಒಂದು ವಾರದಲ್ಲಿ ಹೆಡ್‌ಫೋನ್‌ಗಳ ಮೂಲಕ ಸುರಕ್ಷಿತವಾಗಿ ಆಲಿಸಬಹುದಾದ ಗಟ್ಟಿಯಾದ ವಾಲ್ಯೂಮ್‌ನ 5 ಪಟ್ಟು ಮಿತಿಯನ್ನು ನೀವು ಮೀರಿದ್ದೀರಿ.\n\nನಿಮ್ಮ ಆಲಿಸುವ ಸಾಮರ್ಥ್ಯವನ್ನು ರಕ್ಷಿಸುವುದಕ್ಕಾಗಿ ವಾಲ್ಯೂಮ್ ಅನ್ನು ಕಡಿಮೆಗೊಳಿಸಲಾಗಿದೆ."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"ನೀವು ಪ್ರಸ್ತುತ ಆಲಿಸುತ್ತಿರುವ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಮಾಧ್ಯಮವನ್ನು ಆಲಿಸುವುದನ್ನು ನೀವು ದೀರ್ಘಕಾಲ ಮುಂದುವರಿಸಿದರೆ, ನಿಮ್ಮ ಆಲಿಸುವ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಹಾನಿಯುಂಟಾಗಬಹುದು.\n\nಇದೇ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ದೀರ್ಘಕಾಲದವರೆಗೆ ಮಾಧ್ಯಮವನ್ನು ಪ್ಲೇ ಮಾಡುವುದನ್ನು ಮುಂದುವರಿಸಿದರೆ ನಿಮ್ಮ ಆಲಿಸುವ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಹಾನಿಯುಂಟಾಗಬಹುದು."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"ಎಚ್ಚರಿಕೆ,\nನೀವು ಪ್ರಸ್ತುತ ಅಸುರಕ್ಷಿತ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಪ್ಲೇ ಆಗುತ್ತಿರುವ ಮಾಧ್ಯಮವನ್ನು ಆಲಿಸುತ್ತಿದ್ದೀರಿ.\n\nಇಷ್ಟು ಗಟ್ಟಿಯಾದ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದನ್ನು ಮುಂದುವರಿಸಿದರೆ, ನಿಮ್ಮ ಆಲಿಸುವ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಶಾಶ್ವತ ಹಾನಿಯುಂಟಾಗುತ್ತದೆ."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ಹೆಚ್ಚಿನ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದನ್ನು ಮುಂದುವರಿಸಬೇಕೇ?\n\nಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್ ಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ಹೆಚ್ಚಿನ ಸಮಯದವರೆಗೆ ಅಧಿಕವಾಗಿದ್ದು, ಇದರಿಂದ ನಿಮ್ಮ ಶ್ರವಣ ಶಕ್ತಿಗೆ ಹಾನಿಯಾಗಬಹುದು"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ದೊಡ್ಡ ಧ್ವನಿ ಪತ್ತೆಯಾಗಿದೆ\n\nಹೆಡ್‌ಫೋನ್ ವಾಲ್ಯೂಮ್ ಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ಹೆಚ್ಚಾಗಿದ್ದು, ಇದರಿಂದ ನಿಮ್ಮ ಶ್ರವಣ ಶಕ್ತಿಗೆ ಹಾನಿಯಾಗಬಹುದು"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಶಾರ್ಟ್‌ಕಟ್ ಬಳಸುವುದೇ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ಶಾರ್ಟ್‌ಕಟ್ ಆನ್ ಆಗಿರುವಾಗ, ಎರಡೂ ವಾಲ್ಯೂಮ್ ಬಟನ್‌ಗಳನ್ನು 3 ಸೆಕೆಂಡುಗಳ ಕಾಲ ಒತ್ತಿದರೆ ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ವೈಶಿಷ್ಟ್ಯವೊಂದು ಪ್ರಾರಂಭವಾಗುತ್ತದೆ."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ವೈಶಿಷ್ಟ್ಯಗಳಿಗಾಗಿ ಶಾರ್ಟ್‌ಕಟ್ ಆನ್ ಮಾಡಬೇಕೇ?"</string>
@@ -2078,7 +2074,7 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಮತ್ತು ಬದಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಬದಲಾಗಿದೆ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ಏನನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="review_notification_settings_title" msgid="5102557424459810820">"ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"ನೋಟಿಫಿಕೇಶನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 ನಿಂದ ಪ್ರಾರಂಭಿಸಿ, ನೀವು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡುವ ಆ್ಯಪ್‌ಗಳಿಗೆ, ಅಧಿಸೂಚನೆಗಳನ್ನು ಕಳುಹಿಸಲು ನಿಮ್ಮ ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗಳಿಗಾಗಿ ಈ ಅನುಮತಿಯನ್ನು ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ನಂತರ ರಿಮೈಂಡ್ ಮಾಡಿ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ವಜಾಗೊಳಿಸಿ"</string>
@@ -2097,7 +2093,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ಸರಿ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು Android 12 ರಲ್ಲಿ Android ಅಡಾಪ್ಟಿವ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಬದಲಾಯಿಸಿವೆ. ಈ ವೈಶಿಷ್ಟ್ಯವು ಸೂಚಿಸಿದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಯೋಜಿಸುತ್ತದೆ.\n\nವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು ಸಂಪರ್ಕ ಹೆಸರುಗಳು ಮತ್ತು ಸಂದೇಶಗಳಂತಹ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆ ವಿಷಯವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ಈ ವೈಶಿಷ್ಟ್ಯವು ಫೋನ್ ಕರೆಗಳಿಗೆ ಉತ್ತರಿಸುವುದು ಮತ್ತು \'ಅಡಚಣೆ ಮಾಡಬೇಡಿ\' ಅನ್ನು ನಿಯಂತ್ರಿಸುವಂತಹ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಜಾಗೊಳಿಸಬಹುದು ಅಥವಾ ಪ್ರತಿಕ್ರಿಯಿಸಬಹುದು."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ವರ್ಧಿತ ನೋಟಿಫಿಕೇಶನ್‌ಗಳು Android 12 ರಲ್ಲಿ Android ಅಡಾಪ್ಟಿವ್ ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿವೆ. ಈ ವೈಶಿಷ್ಟ್ಯವು ಸೂಚಿಸಿದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಯೋಜಿಸುತ್ತದೆ.\n\nವರ್ಧಿತ ನೋಟಿಫಿಕೇಶನ್‌ಗಳು ಸಂಪರ್ಕ ಹೆಸರುಗಳು ಮತ್ತು ಸಂದೇಶಗಳಂತಹ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆ ವಿಷಯವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ಈ ವೈಶಿಷ್ಟ್ಯವು ಫೋನ್ ಕರೆಗಳಿಗೆ ಉತ್ತರಿಸುವುದು ಮತ್ತು \'ಅಡಚಣೆ ಮಾಡಬೇಡಿ\' ಅನ್ನು ನಿಯಂತ್ರಿಸುವಂತಹ ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ವಜಾಗೊಳಿಸಬಹುದು ಅಥವಾ ಪ್ರತಿಕ್ರಿಯಿಸಬಹುದು."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ದೈನಂದಿನ ಸ್ಥಿತಿಯ ಮಾಹಿತಿಯ ಅಧಿಸೂಚನೆ"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ಬ್ಯಾಟರಿ ಸೇವರ್ ಅನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ವಿಸ್ತರಿಸಲು ಬ್ಯಾಟರಿ ಬಳಕೆಯನ್ನು ಕಡಿಮೆ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
@@ -2168,14 +2164,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ವಿರಾಮವನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ಯಾವುದೇ ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳಿಲ್ಲ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ಯಾವುದೇ ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳಿಲ್ಲ"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"ಉದ್ಯೋಗದ <xliff:g id="APP">%s</xliff:g> ಆ್ಯಪ್‌ನಲ್ಲಿ ತೆರೆಯಬೇಕೆ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ವೈಯಕ್ತಿಕ <xliff:g id="APP">%s</xliff:g> ಆ್ಯಪ್‌ನಲ್ಲಿ ತೆರೆಯಬೇಕೆ?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"ವೈಯಕ್ತಿಕ <xliff:g id="APP">%s</xliff:g> ಆ್ಯಪ್‌ನಲ್ಲಿ ತೆರೆಯಬೇಕೆ?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ವೈಯಕ್ತಿಕ ಬ್ರೌಸರ್ ಬಳಸಿ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ಉದ್ಯೋಗ ಬ್ರೌಸರ್ ಬಳಸಿ"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ನೆಟ್‌ವರ್ಕ್‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡುವ ಪಿನ್‌"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM ನೆಟ್‌ವರ್ಕ್ ಸಬ್‌ಸೆಟ್‌ನ ಅನ್‌ಲಾಕ್‌ ಮಾಡುವ ಪಿನ್‌"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM ಕಾರ್ಪೊರೇಟ್ ಅನ್‌ಲಾಕ್‌ ಮಾಡುವ ಪಿನ್‌"</string>
