@@ -1774,21 +1774,23 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (record.exists()) {
                 Slog.w(TAG, "User:" + userID + ", wallpaper tyep = " + type
                         + ", wallpaper fail detect!! reset to default wallpaper");
-                clearWallpaperData(userID, type);
+                clearWallpaperBitmaps(userID, type);
                 record.delete();
             }
         });
     }
 
-    private void clearWallpaperData(int userID, int wallpaperType) {
+    private void clearWallpaperBitmaps(int userID, int wallpaperType) {
         final WallpaperData wallpaper = new WallpaperData(userID, wallpaperType);
-        if (wallpaper.sourceExists()) {
-            wallpaper.wallpaperFile.delete();
-        }
-        if (wallpaper.cropExists()) {
-            wallpaper.cropFile.delete();
-        }
+        clearWallpaperBitmaps(wallpaper);
+    }
 
+    private boolean clearWallpaperBitmaps(WallpaperData wallpaper) {
+        boolean sourceExists = wallpaper.sourceExists();
+        boolean cropExists = wallpaper.cropExists();
+        if (sourceExists) wallpaper.wallpaperFile.delete();
+        if (cropExists) wallpaper.cropFile.delete();
+        return sourceExists || cropExists;
     }
 
     @Override
@@ -1965,10 +1967,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         // files from the previous static wallpaper may still be stored in memory.
         // delete them in order to show the default wallpaper.
-        if (wallpaper.wallpaperFile.exists()) {
-            wallpaper.wallpaperFile.delete();
-            wallpaper.cropFile.delete();
-        }
+        clearWallpaperBitmaps(wallpaper);
 
         bindWallpaperComponentLocked(mImageWallpaper, true, false, fallback, reply);
         if ((wallpaper.mWhich & FLAG_SYSTEM) != 0) mHomeWallpaperWaitingForUnlock = true;
@@ -2033,9 +2032,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (wallpaper.wallpaperFile.exists()) {
-                wallpaper.wallpaperFile.delete();
-                wallpaper.cropFile.delete();
+            if (clearWallpaperBitmaps(wallpaper)) {
                 if (which == FLAG_LOCK) {
                     mLockWallpaperMap.remove(userId);
                     final IWallpaperManagerCallback cb = mKeyguardListener;
@@ -3104,9 +3101,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
         } catch (ErrnoException e) {
             Slog.e(TAG, "Can't migrate system wallpaper: " + e.getMessage());
-            lockWP.wallpaperFile.delete();
-            lockWP.cropFile.delete();
-            return;
+            clearWallpaperBitmaps(lockWP);
         }
     }
 
@@ -3247,6 +3242,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                 }
                             });
                         }
+                    }
+                    if (!mImageWallpaper.equals(newWallpaper.wallpaperComponent)) {
+                        clearWallpaperBitmaps(newWallpaper);
                     }
                     newWallpaper.wallpaperId = makeWallpaperIdLocked();
                     notifyCallbacksLocked(newWallpaper);
