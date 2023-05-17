@@ -46,6 +46,7 @@ import com.android.wm.shell.common.ExecutorUtils
 import com.android.wm.shell.common.ExternalInterfaceBinder
 import com.android.wm.shell.common.RemoteCallable
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.annotations.ExternalThread
 import com.android.wm.shell.common.annotations.ShellMainThread
@@ -116,6 +117,18 @@ class DesktopTasksController(
                 shellTaskOrganizer.applyTransaction(wct)
             }
         }
+    }
+
+    /**
+     * Stash desktop tasks on display with id [displayId].
+     *
+     * When desktop tasks are stashed, launcher home screen icons are fully visible. New apps
+     * launched in this state will be added to the desktop. Existing desktop tasks will be brought
+     * back to front during the launch.
+     */
+    fun stashDesktopApps(displayId: Int) {
+        KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: stashDesktopApps")
+        desktopModeTaskRepository.setStashed(displayId, true)
     }
 
     /** Get number of tasks that are marked as visible */
@@ -397,6 +410,11 @@ class DesktopTasksController(
         transition: IBinder,
         request: TransitionRequestInfo
     ): WindowContainerTransaction? {
+        KtProtoLog.v(
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopTasksController: handleRequest request=%s",
+            request
+        )
         // Check if we should skip handling this transition
         val shouldHandleRequest =
             when {
@@ -418,41 +436,61 @@ class DesktopTasksController(
         }
 
         val task: RunningTaskInfo = request.triggerTask
-        val activeTasks = desktopModeTaskRepository.getActiveTasks(task.displayId)
 
-        // Check if we should switch a fullscreen task to freeform
-        if (task.windowingMode == WINDOWING_MODE_FULLSCREEN) {
-            // If there are any visible desktop tasks, switch the task to freeform
-            if (activeTasks.any { desktopModeTaskRepository.isVisibleTask(it) }) {
-                KtProtoLog.d(
-                    WM_SHELL_DESKTOP_MODE,
-                    "DesktopTasksController: switch fullscreen task to freeform on transition" +
-                        " taskId=%d",
-                    task.taskId
-                )
-                return WindowContainerTransaction().also { wct ->
-                    addMoveToDesktopChanges(wct, task.token)
-                }
-            }
+        return when {
+            // If display has tasks stashed, handle as stashed launch
+            desktopModeTaskRepository.isStashed(task.displayId) -> handleStashedTaskLaunch(task)
+            // Check if fullscreen task should be updated
+            task.windowingMode == WINDOWING_MODE_FULLSCREEN -> handleFullscreenTaskLaunch(task)
+            // Check if freeform task should be updated
+            task.windowingMode == WINDOWING_MODE_FREEFORM -> handleFreeformTaskLaunch(task)
+            else -> null
         }
+    }
 
-        // CHeck if we should switch a freeform task to fullscreen
-        if (task.windowingMode == WINDOWING_MODE_FREEFORM) {
-            // If no visible desktop tasks, switch this task to freeform as the transition came
-            // outside of this controller
-            if (activeTasks.none { desktopModeTaskRepository.isVisibleTask(it) }) {
-                KtProtoLog.d(
+    private fun handleFreeformTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {
+        val activeTasks = desktopModeTaskRepository.getActiveTasks(task.displayId)
+        if (activeTasks.none { desktopModeTaskRepository.isVisibleTask(it) }) {
+            KtProtoLog.d(
                     WM_SHELL_DESKTOP_MODE,
                     "DesktopTasksController: switch freeform task to fullscreen oon transition" +
-                        " taskId=%d",
+                            " taskId=%d",
                     task.taskId
-                )
-                return WindowContainerTransaction().also { wct ->
-                    addMoveToFullscreenChanges(wct, task.token)
-                }
+            )
+            return WindowContainerTransaction().also { wct ->
+                addMoveToFullscreenChanges(wct, task.token)
             }
         }
         return null
+    }
+
+    private fun handleFullscreenTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {
+        val activeTasks = desktopModeTaskRepository.getActiveTasks(task.displayId)
+        if (activeTasks.any { desktopModeTaskRepository.isVisibleTask(it) }) {
+            KtProtoLog.d(
+                    WM_SHELL_DESKTOP_MODE,
+                    "DesktopTasksController: switch fullscreen task to freeform on transition" +
+                            " taskId=%d",
+                    task.taskId
+            )
+            return WindowContainerTransaction().also { wct ->
+                addMoveToDesktopChanges(wct, task.token)
+            }
+        }
+        return null
+    }
+
+    private fun handleStashedTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction {
+        KtProtoLog.d(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTasksController: launch apps with stashed on transition taskId=%d",
+                task.taskId
+        )
+        val wct = WindowContainerTransaction()
+        bringDesktopAppsToFront(task.displayId, wct)
+        addMoveToDesktopChanges(wct, task.token)
+        desktopModeTaskRepository.setStashed(task.displayId, false)
+        return wct
     }
 
     private fun addMoveToDesktopChanges(
@@ -658,8 +696,46 @@ class DesktopTasksController(
     @BinderThread
     private class IDesktopModeImpl(private var controller: DesktopTasksController?) :
         IDesktopMode.Stub(), ExternalInterfaceBinder {
+
+        private lateinit var remoteListener:
+                SingleInstanceRemoteListener<DesktopTasksController, IDesktopTaskListener>
+
+        private val listener: VisibleTasksListener = object : VisibleTasksListener {
+            override fun onVisibilityChanged(displayId: Int, visible: Boolean) {
+                // TODO(b/261234402): move visibility from sysui state to listener
+                remoteListener.call { l -> l.onVisibilityChanged(displayId, visible) }
+            }
+
+            override fun onStashedChanged(displayId: Int, stashed: Boolean) {
+                KtProtoLog.v(
+                        WM_SHELL_DESKTOP_MODE,
+                        "IDesktopModeImpl: onStashedChanged stashed=%b display=%d",
+                        stashed,
+                        displayId
+                )
+                remoteListener.call { l -> l.onStashedChanged(displayId, stashed) }
+            }
+        }
+
+        init {
+            remoteListener =
+                    SingleInstanceRemoteListener<DesktopTasksController, IDesktopTaskListener>(
+                            controller,
+                            { c ->
+                                c.desktopModeTaskRepository.addVisibleTasksListener(
+                                        listener,
+                                        c.mainExecutor
+                                )
+                            },
+                            { c ->
+                                c.desktopModeTaskRepository.removeVisibleTasksListener(listener)
+                            }
+                    )
+        }
+
         /** Invalidates this instance, preventing future calls from updating the controller. */
         override fun invalidate() {
+            remoteListener.unregister()
             controller = null
         }
 
@@ -668,6 +744,13 @@ class DesktopTasksController(
                 controller,
                 "showDesktopApps"
             ) { c -> c.showDesktopApps(displayId) }
+        }
+
+        override fun stashDesktopApps(displayId: Int) {
+            ExecutorUtils.executeRemoteCallWithTaskPermission(
+                    controller,
+                    "stashDesktopApps"
+            ) { c -> c.stashDesktopApps(displayId) }
         }
 
         override fun getVisibleTaskCount(displayId: Int): Int {
@@ -679,6 +762,18 @@ class DesktopTasksController(
                 true /* blocking */
             )
             return result[0]
+        }
+
+        override fun setTaskListener(listener: IDesktopTaskListener?) {
+            KtProtoLog.v(
+                    WM_SHELL_DESKTOP_MODE,
+                    "IDesktopModeImpl: set task listener=%s",
+                    listener ?: "null"
+            )
+            ExecutorUtils.executeRemoteCallWithTaskPermission(
+                    controller,
+                    "setTaskListener"
+            ) { _ -> listener?.let { remoteListener.register(it) } ?: remoteListener.unregister() }
         }
     }
 
