@@ -34,6 +34,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 
+import com.google.common.util.concurrent.MoreExecutors;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -117,7 +119,7 @@ public class DeviceStateControllerTests {
     public void testUnregisterDeviceStateCallback() {
         initialize(true /* supportFold */, true /* supportHalfFolded */);
         assertEquals(1, mTarget.mDeviceStateCallbacks.size());
-        assertEquals(mDelegate, mTarget.mDeviceStateCallbacks.get(0));
+        assertTrue(mTarget.mDeviceStateCallbacks.containsKey(mDelegate));
 
         mTarget.onStateChanged(mOpenDeviceStates[0]);
         assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
@@ -194,8 +196,9 @@ public class DeviceStateControllerTests {
             when(mMockContext.getResources()).thenReturn((mockRes));
             mockFold(mSupportFold, mSupportHalfFold);
             Handler mockHandler = mock(Handler.class);
-            mTarget = new DeviceStateController(mMockContext, mockHandler);
-            mTarget.registerDeviceStateCallback(mDelegate);
+            mTarget = new DeviceStateController(mMockContext, mockHandler,
+                    new WindowManagerGlobalLock());
+            mTarget.registerDeviceStateCallback(mDelegate, MoreExecutors.directExecutor());
         }
     }
 }

@@ -16,11 +16,13 @@
 
 package com.android.server.wm;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+import android.util.ArrayMap;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -29,6 +31,8 @@ import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -37,6 +41,9 @@ import java.util.function.Consumer;
  */
 final class DeviceStateController implements DeviceStateManager.DeviceStateCallback {
 
+    // Used to synchronize WindowManager services call paths with DeviceStateManager's callbacks.
+    @NonNull
+    private final WindowManagerGlobalLock mWmLock;
     @NonNull
     private final DeviceStateManager mDeviceStateManager;
     @NonNull
@@ -50,10 +57,10 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
     private final int mConcurrentDisplayDeviceState;
     @NonNull
     private final int[] mReverseRotationAroundZAxisStates;
-    @GuardedBy("this")
+    @GuardedBy("mWmLock")
     @NonNull
     @VisibleForTesting
-    final List<Consumer<DeviceState>> mDeviceStateCallbacks = new ArrayList<>();
+    final Map<Consumer<DeviceState>, Executor> mDeviceStateCallbacks = new ArrayMap<>();
 
     private final boolean mMatchBuiltInDisplayOrientationToDefaultDisplay;
 
@@ -70,7 +77,9 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
         CONCURRENT,
     }
 
-    DeviceStateController(@NonNull Context context, @NonNull Handler handler) {
+    DeviceStateController(@NonNull Context context, @NonNull Handler handler,
+            @NonNull WindowManagerGlobalLock wmLock) {
+        mWmLock = wmLock;
         mDeviceStateManager = context.getSystemService(DeviceStateManager.class);
 
         mOpenDeviceStates = context.getResources()
@@ -94,14 +103,20 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
         }
     }
 
-    void registerDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
-        synchronized (this) {
-            mDeviceStateCallbacks.add(callback);
+    /**
+     * Registers a callback to be notified when the device state changes. Callers should always
+     * post the work onto their own worker thread to avoid holding the WindowManagerGlobalLock for
+     * an extended period of time.
+     */
+    void registerDeviceStateCallback(@NonNull Consumer<DeviceState> callback,
+            @NonNull @CallbackExecutor Executor executor) {
+        synchronized (mWmLock) {
+            mDeviceStateCallbacks.put(callback, executor);
         }
     }
 
     void unregisterDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
-        synchronized (this) {
+        synchronized (mWmLock) {
             mDeviceStateCallbacks.remove(callback);
         }
     }
@@ -144,10 +159,20 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
         if (mCurrentDeviceState == null || !mCurrentDeviceState.equals(deviceState)) {
             mCurrentDeviceState = deviceState;
 
-            synchronized (this) {
-                for (Consumer<DeviceState> callback : mDeviceStateCallbacks) {
-                    callback.accept(mCurrentDeviceState);
+            // Make a copy here because it's possible that the consumer tries to remove a callback
+            // while we're still iterating through the list, which would end up in a
+            // ConcurrentModificationException.
+            final List<Map.Entry<Consumer<DeviceState>, Executor>> entries = new ArrayList<>();
+            synchronized (mWmLock) {
+                for (Map.Entry<Consumer<DeviceState>, Executor> entry
+                        : mDeviceStateCallbacks.entrySet()) {
+                    entries.add(entry);
                 }
+            }
+
+            for (int i = 0; i < entries.size(); i++) {
+                Map.Entry<Consumer<DeviceState>, Executor> entry = entries.get(i);
+                entry.getValue().execute(() -> entry.getKey().accept(mCurrentDeviceState));
             }
         }
     }
