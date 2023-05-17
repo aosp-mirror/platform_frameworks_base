@@ -22,8 +22,6 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.fail;
@@ -54,7 +52,6 @@ import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -120,6 +117,7 @@ import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteracto
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.notetask.NoteTaskController;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
@@ -327,6 +325,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private FingerprintManager mFingerprintManager;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
     @Mock IPowerManager mPowerManagerService;
+    @Mock ActivityStarter mActivityStarter;
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -548,7 +547,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mLightRevealScrim,
                 mAlternateBouncerInteractor,
                 mUserTracker,
-                () -> mFingerprintManager
+                () -> mFingerprintManager,
+                mActivityStarter
         ) {
             @Override
             protected ViewRootImpl getViewRootImpl() {
@@ -592,60 +592,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void testSetBouncerShowing_noCrash() {
         mCentralSurfaces.setBouncerShowing(true);
-    }
-
-    @Test
-    public void executeRunnableDismissingKeyguard_nullRunnable_showingAndOccluded() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
-
-        mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
-    }
-
-    @Test
-    public void executeRunnableDismissingKeyguard_nullRunnable_showing() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
-
-        mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
-    }
-
-    @Test
-    public void executeRunnableDismissingKeyguard_nullRunnable_notShowing() {
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
-
-        mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
-    }
-
-    @Test
-    public void executeRunnableDismissingKeyguard_dreaming_notShowing() throws RemoteException {
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(true);
-
-        mCentralSurfaces.executeRunnableDismissingKeyguard(() ->  {},
-                /* cancelAction= */ null,
-                /* dismissShade= */ false,
-                /* afterKeyguardGone= */ false,
-                /* deferred= */ false);
-        mUiBgExecutor.runAllReady();
-        verify(mDreamManager, times(1)).awaken();
-    }
-
-    @Test
-    public void executeRunnableDismissingKeyguard_notDreaming_notShowing() throws RemoteException {
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(false);
-
-        mCentralSurfaces.executeRunnableDismissingKeyguard(() ->  {},
-                /* cancelAction= */ null,
-                /* dismissShade= */ false,
-                /* afterKeyguardGone= */ false,
-                /* deferred= */ false);
-        mUiBgExecutor.runAllReady();
-        verify(mDreamManager, never()).awaken();
     }
 
     @Test
@@ -1278,23 +1224,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mScreenLifecycle.dispatchScreenTurnedOff();
 
         verify(mQuickSettingsController).closeQs();
-    }
-
-    @Test
-    public void startActivityDismissingKeyguard_isShowingAndIsOccluded() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        mCentralSurfaces.startActivityDismissingKeyguard(
-                new Intent(),
-                /* onlyProvisioned = */false,
-                /* dismissShade = */false);
-        ArgumentCaptor<OnDismissAction> onDismissActionCaptor =
-                ArgumentCaptor.forClass(OnDismissAction.class);
-        verify(mStatusBarKeyguardViewManager)
-                .dismissWithAction(onDismissActionCaptor.capture(), any(Runnable.class), eq(true),
-                        eq(null));
-        assertThat(onDismissActionCaptor.getValue().onDismiss()).isFalse();
-        verify(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any(Runnable.class));
     }
 
     @Test
