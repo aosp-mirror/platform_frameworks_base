@@ -28,7 +28,7 @@
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Con las llaves de acceso, no tienes que crear ni recordar contraseñas complicadas"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Las llaves de acceso son claves digitales cifradas que puedes crear con tu huella digital, cara o bloqueo de pantalla"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Se guardan en un gestor de contraseñas para que puedas iniciar sesión en otros dispositivos"</string>
-    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Más información sobre llaves de acceso"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Más información sobre las llaves de acceso"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnología sin contraseñas"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Las llaves de acceso te permiten iniciar sesión sin necesidad de contraseñas. Solo necesitas usar la huella digital, el reconocimiento facial, el PIN o patrón para verificar tu identidad y crear una llave de acceso."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografía de claves públicas"</string>
@@ -57,9 +57,9 @@
     <string name="set_as_default" msgid="4415328591568654603">"Fijar como predeterminado"</string>
     <string name="settings" msgid="6536394145760913145">"Ajustes"</string>
     <string name="use_once" msgid="9027366575315399714">"Usar una vez"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> contraseñas • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> llaves de acceso"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Contraseñas: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Llaves de acceso: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> contraseñas"</string>
-    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> llaves de acceso"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Llaves de acceso: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> credenciales"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Llave de acceso"</string>
     <string name="another_device" msgid="5147276802037801217">"Otro dispositivo"</string>
