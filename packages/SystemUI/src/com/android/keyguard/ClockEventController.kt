@@ -15,18 +15,18 @@
  */
 package com.android.keyguard
 
-import android.app.WallpaperManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
 import android.text.format.DateFormat
-import android.util.TypedValue
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.ViewTreeObserver
+import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -99,6 +99,28 @@ constructor(
 
                 if (!regionSamplingEnabled) {
                     updateColors()
+                } else {
+                    clock?.let {
+                        smallRegionSampler = createRegionSampler(
+                                it.smallClock.view,
+                                mainExecutor,
+                                bgExecutor,
+                                regionSamplingEnabled,
+                                isLockscreen = true,
+                                ::updateColors
+                        )?.apply { startRegionSampler() }
+
+                        largeRegionSampler = createRegionSampler(
+                                it.largeClock.view,
+                                mainExecutor,
+                                bgExecutor,
+                                regionSamplingEnabled,
+                                isLockscreen = true,
+                                ::updateColors
+                        )?.apply { startRegionSampler() }
+
+                        updateColors()
+                    }
                 }
                 updateFontSizes()
                 updateTimeListeners()
@@ -110,8 +132,25 @@ constructor(
                 }
                 value.smallClock.view.addOnAttachStateChangeListener(
                     object : OnAttachStateChangeListener {
-                        override fun onViewAttachedToWindow(p0: View?) {
+                        var pastVisibility: Int? = null
+                        override fun onViewAttachedToWindow(view: View?) {
                             value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                            if (view != null) {
+                                val smallClockFrame = view.parent as FrameLayout
+                                pastVisibility = smallClockFrame.visibility
+                                smallClockFrame.viewTreeObserver.addOnGlobalLayoutListener(
+                                        ViewTreeObserver.OnGlobalLayoutListener {
+                                    val currentVisibility = smallClockFrame.visibility
+                                    if (pastVisibility != currentVisibility) {
+                                        pastVisibility = currentVisibility
+                                        // when small clock  visible, recalculate bounds and sample
+                                        if (currentVisibility == View.VISIBLE) {
+                                            smallRegionSampler?.stopRegionSampler()
+                                            smallRegionSampler?.startRegionSampler()
+                                        }
+                                    }
+                                })
+                            }
                         }
 
                         override fun onViewDetachedFromWindow(p0: View?) {
@@ -141,21 +180,19 @@ constructor(
 
 
     private fun updateColors() {
-        val wallpaperManager = WallpaperManager.getInstance(context)
         if (regionSamplingEnabled) {
-            regionSampler?.let { regionSampler ->
-                clock?.let { clock ->
-                    if (regionSampler.sampledView == clock.smallClock.view) {
-                        smallClockIsDark = regionSampler.currentRegionDarkness().isDark
-                        clock.smallClock.events.onRegionDarknessChanged(smallClockIsDark)
-                        return@updateColors
-                    } else if (regionSampler.sampledView == clock.largeClock.view) {
-                        largeClockIsDark = regionSampler.currentRegionDarkness().isDark
-                        clock.largeClock.events.onRegionDarknessChanged(largeClockIsDark)
-                        return@updateColors
-                    }
+            clock?.let { clock ->
+                smallRegionSampler?.let {
+                    smallClockIsDark = it.currentRegionDarkness().isDark
+                    clock.smallClock.events.onRegionDarknessChanged(smallClockIsDark)
+                }
+
+                largeRegionSampler?.let {
+                    largeClockIsDark = it.currentRegionDarkness().isDark
+                    clock.largeClock.events.onRegionDarknessChanged(largeClockIsDark)
                 }
             }
+            return
         }
 
         val isLightTheme = TypedValue()
@@ -168,23 +205,6 @@ constructor(
             largeClock.events.onRegionDarknessChanged(largeClockIsDark)
         }
     }
-
-    private fun updateRegionSampler(sampledRegion: View) {
-        regionSampler?.stopRegionSampler()
-        regionSampler =
-            createRegionSampler(
-                    sampledRegion,
-                    mainExecutor,
-                    bgExecutor,
-                    regionSamplingEnabled,
-                    isLockscreen = true,
-                    ::updateColors
-                )
-                ?.apply { startRegionSampler() }
-
-        updateColors()
-    }
-
     protected open fun createRegionSampler(
         sampledView: View,
         mainExecutor: Executor?,
@@ -202,7 +222,10 @@ constructor(
         ) { updateColors() }
     }
 
-    var regionSampler: RegionSampler? = null
+    var smallRegionSampler: RegionSampler? = null
+        private set
+    var largeRegionSampler: RegionSampler? = null
+        private set
     var smallTimeListener: TimeListener? = null
     var largeTimeListener: TimeListener? = null
     val shouldTimeListenerRun: Boolean
@@ -319,7 +342,8 @@ constructor(
         configurationController.removeCallback(configListener)
         batteryController.removeCallback(batteryCallback)
         keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
-        regionSampler?.stopRegionSampler()
+        smallRegionSampler?.stopRegionSampler()
+        largeRegionSampler?.stopRegionSampler()
         smallTimeListener?.stop()
         largeTimeListener?.stop()
     }
