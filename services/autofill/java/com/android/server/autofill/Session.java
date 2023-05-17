@@ -5086,13 +5086,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + id + " destroyed");
                 return;
             }
+            // Selected dataset id is logged regardless of authentication result.
+            mPresentationStatsEventLogger.maybeSetSelectedDatasetId(datasetIndex);
+            mPresentationStatsEventLogger.maybeSetSelectedDatasetPickReason(
+                dataset.getEligibleReason());
             // Autofill it directly...
             if (dataset.getAuthentication() == null) {
                 if (generateEvent) {
                     mService.logDatasetSelected(dataset.getId(), id, mClientState, uiType);
-                    mPresentationStatsEventLogger.maybeSetSelectedDatasetId(datasetIndex);
-                    mPresentationStatsEventLogger.maybeSetSelectedDatasetPickReason(
-                            dataset.getEligibleReason());
                 }
                 if (mCurrentViewId != null) {
                     mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
