@@ -55,6 +55,11 @@
         {
             "name": "BinaryTransparencyHostTest",
             "file_patterns": ["BinaryTransparencyService\\.java"]
+        },
+        {
+            // GWP-ASan's CTS test ensures that recoverable tombstones work,
+            // which is emitted by the NativeTombstoneManager.
+            "name": "CtsGwpAsanTestCases"
         }
     ],
     "presubmit-large": [
