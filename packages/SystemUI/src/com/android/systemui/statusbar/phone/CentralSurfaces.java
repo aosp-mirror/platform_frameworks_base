@@ -32,6 +32,7 @@ import android.view.KeyEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
 import androidx.annotation.NonNull;
@@ -43,7 +44,6 @@ import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.RemoteTransitionAdapter;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.Callback;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -52,6 +52,7 @@ import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shared.system.RemoteAnimationRunnerCompat;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -160,8 +161,9 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
         if (animationAdapter != null) {
             if (ENABLE_SHELL_TRANSITIONS) {
                 options = ActivityOptions.makeRemoteTransition(
-                        RemoteTransitionAdapter.adaptRemoteAnimation(animationAdapter,
-                                "SysUILaunch"));
+                        new RemoteTransition(
+                                RemoteAnimationRunnerCompat.wrap(animationAdapter.getRunner()),
+                                animationAdapter.getCallingApplication(), "SysUILaunch"));
             } else {
                 options = ActivityOptions.makeRemoteAnimation(animationAdapter);
             }
