@@ -520,7 +520,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Ni registrirana"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Ni na voljo"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Naslov MAC je naključno izbran"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 naprav ni povezanih}=1{1 naprava je povezana}one{# naprava je povezana}two{# napravi sta povezani}few{# naprave so povezane}other{# naprav je povezanih}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 naprav ni povezanih.}=1{1 naprava je povezana.}one{# naprava je povezana.}two{# napravi sta povezani.}few{# naprave so povezane.}other{# naprav je povezanih.}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daljši čas."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Krajši čas."</string>
     <string name="cancel" msgid="5665114069455378395">"Prekliči"</string>
