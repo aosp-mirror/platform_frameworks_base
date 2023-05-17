@@ -176,7 +176,14 @@ public class TransitionUtil {
         }
 
         // Put all the OPEN/SHOW on top
-        if (TransitionUtil.isOpeningType(mode)) {
+        if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+            // Wallpaper is always at the bottom, opening wallpaper on top of closing one.
+            if (mode == WindowManager.TRANSIT_OPEN || mode == WindowManager.TRANSIT_TO_FRONT) {
+                t.setLayer(leash, -zSplitLine + info.getChanges().size() - layer);
+            } else {
+                t.setLayer(leash, -zSplitLine - layer);
+            }
+        } else if (TransitionUtil.isOpeningType(mode)) {
             if (isOpening) {
                 t.setLayer(leash, zSplitLine + info.getChanges().size() - layer);
                 if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) == 0) {
