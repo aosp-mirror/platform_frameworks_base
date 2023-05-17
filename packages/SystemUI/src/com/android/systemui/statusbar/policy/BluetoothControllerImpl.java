@@ -157,11 +157,20 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     private String getDeviceString(CachedBluetoothDevice device) {
         return device.getName()
+                + " profiles=" + getDeviceProfilesString(device)
                 + " connected=" + device.isConnected()
                 + " active[A2DP]=" + device.isActiveDevice(BluetoothProfile.A2DP)
                 + " active[HEADSET]=" + device.isActiveDevice(BluetoothProfile.HEADSET)
                 + " active[HEARING_AID]=" + device.isActiveDevice(BluetoothProfile.HEARING_AID)
                 + " active[LE_AUDIO]=" + device.isActiveDevice(BluetoothProfile.LE_AUDIO);
+    }
+
+    private String getDeviceProfilesString(CachedBluetoothDevice device) {
+        List<String> profileIds = new ArrayList<>();
+        for (LocalBluetoothProfile profile : device.getProfiles()) {
+            profileIds.add(String.valueOf(profile.getProfileId()));
+        }
+        return "[" + String.join(",", profileIds) + "]";
     }
 
     @Override
