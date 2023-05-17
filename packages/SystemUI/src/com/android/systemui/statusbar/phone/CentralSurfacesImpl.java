@@ -2837,7 +2837,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     private void updateDozingState() {
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, "Dozing", 0);
+            Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, "Dozing", String.valueOf(mDozing),
+                    0);
+        }
         Trace.beginSection("CentralSurfaces#updateDozingState");
 
         boolean keyguardVisible = mKeyguardStateController.isVisible();
@@ -3191,6 +3195,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         @Override
         public void onStartedWakingUp() {
+            // Between onStartedWakingUp() and onFinishedWakingUp(), the system is changing the
+            // display power mode. To avoid jank, animations should NOT run during these power
+            // mode transitions, which means that whenever possible, animations should
+            // start running during the onFinishedWakingUp() callback instead of this callback.
             String tag = "CentralSurfaces#onStartedWakingUp";
             DejankUtils.startDetectingBlockingIpcs(tag);
             mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
@@ -3235,6 +3243,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                 updateVisibleToUser();
                 updateIsKeyguard();
+            });
+            DejankUtils.stopDetectingBlockingIpcs(tag);
+        }
+
+        @Override
+        public void onFinishedWakingUp() {
+            mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
+                // stopDozing() starts the LOCKSCREEN_TRANSITION_FROM_AOD animation.
                 mDozeServiceHost.stopDozing();
                 // This is intentionally below the stopDozing call above, since it avoids that we're
                 // unnecessarily animating the wakeUp transition. Animations should only be enabled
@@ -3248,13 +3264,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
                     mShadeController.makeExpandedInvisible();
                 }
-
             });
-            DejankUtils.stopDetectingBlockingIpcs(tag);
-        }
-
-        @Override
-        public void onFinishedWakingUp() {
             mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false, false);
             if (mKeyguardStateController.isOccluded()

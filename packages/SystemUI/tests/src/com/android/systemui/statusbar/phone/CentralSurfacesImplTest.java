@@ -1103,8 +1103,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         clearInvocations(mNotificationPanelViewController);
 
         mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
-        verify(mDozeServiceHost).stopDozing();
+        verify(mDozeServiceHost, never()).stopDozing();
         verify(mNotificationPanelViewController).expand(eq(false));
+        mCentralSurfaces.mWakefulnessObserver.onFinishedWakingUp();
+        verify(mDozeServiceHost).stopDozing();
     }
 
     @Test
@@ -1118,6 +1120,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.setBouncerShowing(true);
         mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
         verify(mNotificationPanelViewController, never()).expand(anyBoolean());
+        mCentralSurfaces.mWakefulnessObserver.onFinishedWakingUp();
+        verify(mDozeServiceHost).stopDozing();
     }
 
     @Test
