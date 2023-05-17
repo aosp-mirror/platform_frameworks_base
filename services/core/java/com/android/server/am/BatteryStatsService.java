@@ -2287,34 +2287,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    /**
-     * Bluetooth on stat logging
-     */
-    @Override
-    @EnforcePermission(BLUETOOTH_CONNECT)
-    public void noteBluetoothOn(int uid, int reason, String packageName) {
-        super.noteBluetoothOn_enforcePermission();
-
-        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
-                Binder.getCallingUid(), null,
-                FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED,
-                reason, packageName);
-    }
-
-    /**
-     * Bluetooth off stat logging
-     */
-    @Override
-    @EnforcePermission(BLUETOOTH_CONNECT)
-    public void noteBluetoothOff(int uid, int reason, String packageName) {
-        super.noteBluetoothOff_enforcePermission();
-
-        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
-                Binder.getCallingUid(), null,
-                FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED,
-                reason, packageName);
-    }
-
     @Override
     @EnforcePermission(UPDATE_DEVICE_STATS)
     public void noteBleScanStarted(final WorkSource ws, final boolean isUnoptimized) {

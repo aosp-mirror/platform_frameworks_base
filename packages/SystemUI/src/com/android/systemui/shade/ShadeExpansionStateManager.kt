@@ -49,23 +49,14 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     private var dragDownPxAmount: Float = 0f
 
     /**
-     * Adds a listener that will be notified when the panel expansion fraction has changed.
+     * Adds a listener that will be notified when the panel expansion fraction has changed and
+     * returns the current state in a ShadeExpansionChangeEvent for legacy purposes (b/23035507).
      *
-     * Listener will also be immediately notified with the current values.
-     */
-    fun addExpansionListener(listener: ShadeExpansionListener) {
-        addShadeExpansionListener(listener)
-        listener.onPanelExpansionChanged(
-            ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
-        )
-    }
-
-    /**
-     * Adds a listener that will be notified when the panel expansion fraction has changed.
      * @see #addExpansionListener
      */
-    fun addShadeExpansionListener(listener: ShadeExpansionListener) {
+    fun addExpansionListener(listener: ShadeExpansionListener): ShadeExpansionChangeEvent {
         expansionListeners.add(listener)
+        return ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
     }
 
     /** Removes an expansion listener. */
