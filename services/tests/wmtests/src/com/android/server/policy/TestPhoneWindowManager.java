@@ -43,6 +43,7 @@ import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_SHUT
 import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAVIOR_MUTE;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
@@ -64,6 +65,7 @@ import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
@@ -79,6 +81,7 @@ import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -134,6 +137,8 @@ class TestPhoneWindowManager {
 
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
 
+    @Mock private KeyguardServiceDelegate mKeyguardServiceDelegate;
+
     private StaticMockitoSession mMockitoSession;
     private HandlerThread mHandlerThread;
     private Handler mHandler;
@@ -150,6 +155,10 @@ class TestPhoneWindowManager {
 
         Supplier<GlobalActions> getGlobalActionsFactory() {
             return () -> mGlobalActions;
+        }
+
+        KeyguardServiceDelegate getKeyguardServiceDelegate() {
+            return mKeyguardServiceDelegate;
         }
     }
 
@@ -325,6 +334,10 @@ class TestPhoneWindowManager {
         }
     }
 
+    void overrideShortPressOnStemPrimaryBehavior(int behavior) {
+        mPhoneWindowManager.mShortPressOnStemPrimaryBehavior = behavior;
+    }
+
     void overrideCanStartDreaming(boolean canDream) {
         doReturn(canDream).when(mDreamManagerInternal).canStartDreaming(anyBoolean());
     }
@@ -379,6 +392,14 @@ class TestPhoneWindowManager {
 
     void overrideLaunchHome() {
         doNothing().when(mPhoneWindowManager).launchHomeFromHotKey(anyInt());
+    }
+
+    void overrideIsUserSetupComplete(boolean isCompleted) {
+        doReturn(isCompleted).when(mPhoneWindowManager).isUserSetupComplete();
+    }
+
+    void setKeyguardServiceDelegateIsShowing(boolean isShowing) {
+        doReturn(isShowing).when(mKeyguardServiceDelegate).isShowing();
     }
 
     /**
@@ -513,5 +534,19 @@ class TestPhoneWindowManager {
     void assertGoToHomescreen() {
         waitForIdle();
         verify(mPhoneWindowManager).launchHomeFromHotKey(anyInt());
+    }
+
+    void assertOpenAllAppView() {
+        waitForIdle();
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext, timeout(SingleKeyGestureDetector.MULTI_PRESS_TIMEOUT * 2))
+                .startActivityAsUser(intentCaptor.capture(), isNull(), any(UserHandle.class));
+        Assert.assertEquals(Intent.ACTION_ALL_APPS, intentCaptor.getValue().getAction());
+    }
+
+    void assertNotOpenAllAppView() {
+        waitForIdle();
+        verify(mContext, never()).startActivityAsUser(
+                any(Intent.class), any(), any(UserHandle.class));
     }
 }
