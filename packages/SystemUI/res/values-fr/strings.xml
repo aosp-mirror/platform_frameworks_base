@@ -749,7 +749,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Rebasculer sur <xliff:g id="CARRIER">%s</xliff:g> ?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Il n\'y aura pas de basculement automatique entre les données mobile selon la disponibilité"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Non, merci"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Oui, revenir"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Oui, rebasculer"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"L\'application Paramètres ne peut pas valider votre réponse, car une application masque la demande d\'autorisation."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Autoriser <xliff:g id="APP_0">%1$s</xliff:g> à afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g> ?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Accès aux informations de <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -972,7 +972,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Recherche de réseaux…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Échec de la connexion au réseau"</string>
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Connexion automatique au Wi-Fi désactivée pour le moment"</string>
-    <string name="see_all_networks" msgid="3773666844913168122">"Tout afficher"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Tout voir"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pour changer de réseau, déconnectez l\'Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Pour améliorer l\'expérience sur l\'appareil, les applis et les services peuvent continuer de rechercher les réseaux Wi-Fi, même si le Wi-Fi est désactivé. Vous pouvez modifier cela dans les paramètres de recherche Wi-Fi. "<annotation id="link">"Modifier"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Désactiver le mode Avion"</string>

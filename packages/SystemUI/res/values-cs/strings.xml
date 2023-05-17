@@ -258,7 +258,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Převrácení barev"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Korekce barev"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Velikost písma"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Správa uživatelů"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Spravovat uživatele"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hotovo"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Zavřít"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Připojeno"</string>
@@ -369,7 +369,7 @@
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Přidáním nového uživatele ukončíte režim hosta a smažete všechny aplikace a data z aktuální relace hosta."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Bylo dosaženo limitu uživatelů"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Lze vytvořit jen jednoho uživatele.}few{Přidat můžete maximálně # uživatele.}many{Přidat můžete maximálně # uživatele.}other{Přidat můžete maximálně # uživatelů.}}"</string>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"Odstranit uživatele?"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"Odebrat uživatele?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Veškeré aplikace a data tohoto uživatele budou smazána."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Odstranit"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mít přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze za řízení při nahrávání nebo odesílání. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
@@ -1002,7 +1002,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Náhled obrázku"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"upravit"</string>
     <string name="add" msgid="81036585205287996">"Přidat"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Správa uživatelů"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Spravovat uživatele"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Toto oznámení nepodporuje přetažení na rozdělenou obrazovku."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Síť Wi‑Fi není k dispozici"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritní režim"</string>
