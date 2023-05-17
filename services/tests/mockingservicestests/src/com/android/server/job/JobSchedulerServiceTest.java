@@ -440,6 +440,13 @@ public class JobSchedulerServiceTest {
                 JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         assertEquals(nowElapsed + 4 * initialBackoffMs, rescheduledJob.getEarliestRunTime());
         assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 3, systemStop = 2 * SYSTEM_STOP_TO_FAILURE_RATIO
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_ANR);
+        assertEquals(nowElapsed + 5 * initialBackoffMs, rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
     }
 
     /**
