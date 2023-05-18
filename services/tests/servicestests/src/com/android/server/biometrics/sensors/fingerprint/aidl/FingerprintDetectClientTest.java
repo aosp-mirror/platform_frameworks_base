@@ -163,6 +163,6 @@ public class FingerprintDetectClientTest {
                         .setOpPackageName("a-test")
                         .build(),
                 mBiometricLogger, mBiometricContext,
-                mUdfpsOverlayController, null, true /* isStrongBiometric */);
+                mUdfpsOverlayController, true /* isStrongBiometric */);
     }
 }

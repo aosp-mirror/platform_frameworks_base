@@ -436,7 +436,7 @@ public class FingerprintAuthenticationClientTest {
                 mBiometricLogger, mBiometricContext,
                 true /* isStrongBiometric */,
                 null /* taskStackListener */, null /* lockoutCache */,
-                mUdfpsOverlayController, mSideFpsController, null, allowBackgroundAuthentication,
+                mUdfpsOverlayController, mSideFpsController, allowBackgroundAuthentication,
                 mSensorProps,
                 new Handler(mLooper.getLooper()), 0 /* biometricStrength */, mClock) {
             @Override
