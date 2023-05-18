@@ -130,6 +130,7 @@ public class PackageInfo implements Parcelable {
      * Information collected from the &lt;application&gt; tag, or null if
      * there was none.
      */
+    @Nullable
     public ApplicationInfo applicationInfo;
 
     /**
