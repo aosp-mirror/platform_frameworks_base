@@ -232,7 +232,10 @@ public final class MediaProjectionManagerService extends SystemService
                 return;
             }
 
-            if ((serviceTypes & ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION) != 0) {
+            if (mActivityManagerInternal.hasRunningForegroundService(
+                    uid, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)) {
+                // If there is any process within this UID running a FGS
+                // with the mediaProjection type, that's Okay.
                 return;
             }
 
