@@ -1061,7 +1061,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_ENABLE_FGS_WHILE_IN_USE_FIX =
             "key_enable_fgs_while_in_use_fix";
 
-    private static final boolean DEFAULT_ENABLE_FGS_WHILE_IN_USE_FIX = true;
+    private static final boolean DEFAULT_ENABLE_FGS_WHILE_IN_USE_FIX = false;
 
     public volatile boolean mEnableFgsWhileInUseFix = DEFAULT_ENABLE_FGS_WHILE_IN_USE_FIX;
 
