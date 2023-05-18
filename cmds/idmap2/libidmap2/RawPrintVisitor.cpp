@@ -161,7 +161,7 @@ void RawPrintVisitor::print(uint8_t value, const char* fmt, ...) {
   va_end(ap);
 
   stream_ << base::StringPrintf("%08zx:       %02x", offset_, value) << "  " << comment
-          << std::endl;
+          << '\n';
   offset_ += sizeof(uint8_t);
 }
 
@@ -173,7 +173,7 @@ void RawPrintVisitor::print(uint16_t value, const char* fmt, ...) {
   base::StringAppendV(&comment, fmt, ap);
   va_end(ap);
 
-  stream_ << base::StringPrintf("%08zx:     %04x", offset_, value) << "  " << comment << std::endl;
+  stream_ << base::StringPrintf("%08zx:     %04x", offset_, value) << "  " << comment << '\n';
   offset_ += sizeof(uint16_t);
 }
 
@@ -185,7 +185,7 @@ void RawPrintVisitor::print(uint32_t value, const char* fmt, ...) {
   base::StringAppendV(&comment, fmt, ap);
   va_end(ap);
 
-  stream_ << base::StringPrintf("%08zx: %08x", offset_, value) << "  " << comment << std::endl;
+  stream_ << base::StringPrintf("%08zx: %08x", offset_, value) << "  " << comment << '\n';
   offset_ += sizeof(uint32_t);
 }
 
@@ -198,7 +198,7 @@ void RawPrintVisitor::print(const std::string& value, bool print_value, const ch
   va_end(ap);
 
   stream_ << base::StringPrintf("%08zx: %08x", offset_, (uint32_t)value.size()) << "  " << comment
-          << " size" << std::endl;
+          << " size" << '\n';
   offset_ += sizeof(uint32_t);
 
   stream_ << base::StringPrintf("%08zx: ", offset_) << "........  " << comment;
@@ -207,7 +207,7 @@ void RawPrintVisitor::print(const std::string& value, bool print_value, const ch
   if (print_value) {
     stream_ << ": " << value;
   }
-  stream_ << std::endl;
+  stream_ << '\n';
 }
 
 void RawPrintVisitor::align() {

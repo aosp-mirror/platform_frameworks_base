@@ -61,7 +61,7 @@ class LogInfo {
 #ifdef __ANDROID__
     LOG(WARNING) << msg.GetString();
 #else
-    std::cerr << "W " << msg.GetString() << std::endl;
+    std::cerr << "W " << msg.GetString() << '\n';
 #endif
     lines_.push_back("W " + msg.GetString());
   }
