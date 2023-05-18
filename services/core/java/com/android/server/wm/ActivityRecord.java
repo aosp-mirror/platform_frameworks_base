@@ -712,7 +712,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * when running ANIM_SCENE_TRANSITION.
      * @see WindowContainer#providesOrientation()
      */
-    private final boolean mStyleFillsParent;
+    final boolean mStyleFillsParent;
 
     // The input dispatching timeout for this application token in milliseconds.
     long mInputDispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
