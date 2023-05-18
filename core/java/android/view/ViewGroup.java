@@ -2043,7 +2043,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final float x = event.getXDispatchLocation(pointerIndex);
         final float y = event.getYDispatchLocation(pointerIndex);
         if (isOnScrollbarThumb(x, y) || isDraggingScrollBar()) {
-            return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_ARROW);
+            // Return null here so that it fallbacks to the default PointerIcon for the source
+            // device. For mouse, the default PointerIcon is PointerIcon.TYPE_ARROW.
+            // For stylus, the default PointerIcon is PointerIcon.TYPE_NULL.
+            return null;
         }
         // Check what the child under the pointer says about the pointer.
         final int childrenCount = mChildrenCount;

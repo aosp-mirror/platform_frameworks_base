@@ -1596,8 +1596,8 @@ PointerIconStyle NativeInputManager::getDefaultPointerIconId() {
 }
 
 PointerIconStyle NativeInputManager::getDefaultStylusIconId() {
-    // TODO: add resource for default stylus icon and change this
-    return PointerIconStyle::TYPE_CROSSHAIR;
+    // Use the empty icon as the default pointer icon for a hovering stylus.
+    return PointerIconStyle::TYPE_NULL;
 }
 
 PointerIconStyle NativeInputManager::getCustomPointerIconId() {
