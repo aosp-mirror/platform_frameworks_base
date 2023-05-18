@@ -4527,7 +4527,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
                 dc.mRemoteInsetsControlTarget.setRequestedVisibleTypes(requestedVisibleTypes);
-                dc.getInsetsStateController().onInsetsModified(dc.mRemoteInsetsControlTarget);
+                dc.getInsetsStateController().onRequestedVisibleTypesChanged(
+                        dc.mRemoteInsetsControlTarget);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

@@ -440,8 +440,8 @@ class InsetsPolicy {
         return originalState;
     }
 
-    void onInsetsModified(InsetsControlTarget caller) {
-        mStateController.onInsetsModified(caller);
+    void onRequestedVisibleTypesChanged(InsetsControlTarget caller) {
+        mStateController.onRequestedVisibleTypesChanged(caller);
         checkAbortTransient(caller);
         updateBarControlTarget(mFocusedWin);
     }

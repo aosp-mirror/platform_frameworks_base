@@ -190,17 +190,16 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // This can be the IME z-order target while app cannot be the IME z-order target.
         // This is also the only IME control target in this test, so IME won't be invisible caused
         // by the control-target change.
-        mDisplayContent.updateImeInputAndControlTarget(
-                createWindow(null, TYPE_APPLICATION, "base"));
+        final WindowState base = createWindow(null, TYPE_APPLICATION, "base");
+        mDisplayContent.updateImeInputAndControlTarget(base);
 
         // Make IME and stay visible during the test.
         mImeWindow.setHasSurface(true);
         getController().getOrCreateSourceProvider(ID_IME, ime())
                 .setWindowContainer(mImeWindow, null, null);
-        getController().onImeControlTargetChanged(
-                mDisplayContent.getImeInputTarget().getWindowState());
-        mDisplayContent.getImeInputTarget().getWindowState().setRequestedVisibleTypes(ime(), ime());
-        getController().onInsetsModified(mDisplayContent.getImeInputTarget().getWindowState());
+        getController().onImeControlTargetChanged(base);
+        base.setRequestedVisibleTypes(ime(), ime());
+        getController().onRequestedVisibleTypesChanged(base);
 
         // Send our spy window (app) into the system so that we can detect the invocation.
         final WindowState win = createWindow(null, TYPE_APPLICATION, "app");
@@ -481,7 +480,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.updateImeInputAndControlTarget(app);
 
         app.setRequestedVisibleTypes(ime(), ime());
-        getController().onInsetsModified(app);
+        getController().onRequestedVisibleTypesChanged(app);
         assertTrue(ime.getControllableInsetProvider().getSource().isVisible());
 
         getController().updateAboveInsetsState(true /* notifyInsetsChange */);
