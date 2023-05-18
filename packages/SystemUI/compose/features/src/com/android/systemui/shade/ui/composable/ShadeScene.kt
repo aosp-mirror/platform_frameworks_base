@@ -48,25 +48,32 @@ class ShadeScene
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val viewModel: ShadeSceneViewModel,
+    private val viewModelFactory: ShadeSceneViewModel.Factory,
 ) : ComposableScene {
     override val key = SceneKey.Shade
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
-        viewModel.upDestinationSceneKey
-            .map { sceneKey -> destinationScenes(up = sceneKey) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value),
-            )
+    private var unsafeViewModel: ShadeSceneViewModel? = null
+
+    override fun destinationScenes(
+        containerName: String,
+    ): StateFlow<Map<UserAction, SceneModel>> =
+        getOrCreateViewModelSingleton(containerName).let { viewModel ->
+            viewModel.upDestinationSceneKey
+                .map { sceneKey -> destinationScenes(up = sceneKey) }
+                .stateIn(
+                    scope = applicationScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value),
+                )
+        }
 
     @Composable
     override fun Content(
+        containerName: String,
         modifier: Modifier,
     ) {
         ShadeScene(
-            viewModel = viewModel,
+            viewModel = getOrCreateViewModelSingleton(containerName),
             modifier = modifier,
         )
     }
@@ -78,6 +85,13 @@ constructor(
             UserAction.Swipe(Direction.UP) to SceneModel(up),
             UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.QuickSettings),
         )
+    }
+
+    private fun getOrCreateViewModelSingleton(
+        containerName: String,
+    ): ShadeSceneViewModel {
+        return unsafeViewModel
+            ?: viewModelFactory.create(containerName).also { unsafeViewModel = it }
     }
 }
 
