@@ -301,7 +301,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 try {
                     for (int i = 0; i < mPausingTasks.size(); ++i) {
                         snapshots[i] = ActivityTaskManager.getService().takeTaskSnapshot(
-                                mPausingTasks.get(0).mTaskInfo.taskId);
+                                mPausingTasks.get(0).mTaskInfo.taskId, false /* updateCache */);
                     }
                 } catch (RemoteException e) {
                     taskIds = null;
@@ -671,7 +671,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             try {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.screenshotTask: taskId=%d", mInstanceId, taskId);
-                return ActivityTaskManager.getService().takeTaskSnapshot(taskId);
+                return ActivityTaskManager.getService().takeTaskSnapshot(taskId,
+                        true /* updateCache */);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to screenshot task", e);
             }
