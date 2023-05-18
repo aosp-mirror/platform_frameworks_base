@@ -16,6 +16,7 @@
 
 #include "VulkanSurface.h"
 
+#include <include/android/SkSurfaceAndroid.h>
 #include <GrDirectContext.h>
 #include <SkSurface.h>
 #include <algorithm>
@@ -470,12 +471,12 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
             surfaceProps = SkSurfaceProps(SkSurfaceProps::kAlwaysDither_Flag | surfaceProps.flags(),
                                           surfaceProps.pixelGeometry());
         }
-        bufferInfo->skSurface = SkSurface::MakeFromAHardwareBuffer(
+        bufferInfo->skSurface = SkSurfaces::WrapAndroidHardwareBuffer(
                 mGrContext, ANativeWindowBuffer_getHardwareBuffer(bufferInfo->buffer.get()),
                 kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, &surfaceProps,
                 /*from_window=*/true);
         if (bufferInfo->skSurface.get() == nullptr) {
-            ALOGE("SkSurface::MakeFromAHardwareBuffer failed");
+            ALOGE("SkSurfaces::WrapAndroidHardwareBuffer failed");
             mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer,
                                         mNativeBuffers[idx].dequeue_fence.release());
             mNativeBuffers[idx].dequeued = false;

@@ -54,7 +54,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
     bool opaque = true;
     android::uirenderer::Rect contentDrawBounds(0, 0, 1, 1);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
     pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
@@ -76,7 +76,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     renderNodes.push_back(halfGreenNode);
     android::uirenderer::Rect contentDrawBounds(0, 0, 2, 2);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    auto surface = SkSurface::MakeRasterN32Premul(2, 2);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(2, 2));
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
     pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds, surface,
@@ -100,7 +100,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
     renderNodes.push_back(redNode);
     android::uirenderer::Rect contentDrawBounds(0, 0, 2, 2);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    auto surface = SkSurface::MakeRasterN32Premul(2, 2);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(2, 2));
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
     pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds, surface,
@@ -116,7 +116,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderLayer) {
             0, 0, 1, 1, [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
                 redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
             });
-    auto surfaceLayer1 = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surfaceLayer1 = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
     surfaceLayer1->getCanvas()->drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surfaceLayer1, 0, 0), SK_ColorWHITE);
     redNode->setLayerSurface(surfaceLayer1);
@@ -127,7 +127,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderLayer) {
             0, 0, 2, 2, [](RenderProperties& props, SkiaRecordingCanvas& blueCanvas) {
                 blueCanvas.drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
             });
-    auto surfaceLayer2 = SkSurface::MakeRasterN32Premul(2, 2);
+    auto surfaceLayer2 = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(2, 2));
     surfaceLayer2->getCanvas()->drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surfaceLayer2, 0, 0), SK_ColorWHITE);
     blueNode->setLayerSurface(surfaceLayer2);
@@ -169,7 +169,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderOverdraw) {
     // empty contentDrawBounds is avoiding backdrop/content logic, which would lead to less overdraw
     android::uirenderer::Rect contentDrawBounds(0, 0, 0, 0);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
 
     // Initialize the canvas to blue.
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
@@ -428,7 +428,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, pictureCallback) {
     renderNodes.push_back(redNode);
     bool opaque = true;
     android::uirenderer::Rect contentDrawBounds(0, 0, 1, 1);
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
     pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
                           SkMatrix::I());
 

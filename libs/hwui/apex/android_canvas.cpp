@@ -45,9 +45,9 @@ static bool convert(const ANativeWindow_Buffer* buffer,
     SkImageInfo imageInfo = uirenderer::ANativeWindowToImageInfo(*buffer, cs);
     size_t rowBytes = buffer->stride * imageInfo.bytesPerPixel();
 
-    // If SkSurface::MakeRasterDirect fails then we should as well as we will not be able to
+    // If SkSurfaces::WrapPixels fails then we should as well as we will not be able to
     // draw into the canvas.
-    sk_sp<SkSurface> surface = SkSurface::MakeRasterDirect(imageInfo, buffer->bits, rowBytes);
+    sk_sp<SkSurface> surface = SkSurfaces::WrapPixels(imageInfo, buffer->bits, rowBytes);
     if (surface.get() != nullptr) {
         if (outBitmap) {
             outBitmap->setInfo(imageInfo, rowBytes);
