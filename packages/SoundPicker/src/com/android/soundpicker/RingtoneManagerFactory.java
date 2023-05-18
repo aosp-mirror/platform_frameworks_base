@@ -19,15 +19,22 @@ package com.android.soundpicker;
 import android.content.Context;
 import android.media.RingtoneManager;
 
+import dagger.hilt.android.qualifiers.ApplicationContext;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * A factory class used to create {@link RingtoneManager}.
  */
+@Singleton
 public class RingtoneManagerFactory {
 
     private final Context mApplicationContext;
 
-    RingtoneManagerFactory(Context context) {
-        mApplicationContext = context.getApplicationContext();
+    @Inject
+    RingtoneManagerFactory(@ApplicationContext Context applicationContext) {
+        mApplicationContext = applicationContext;
     }
 
     /**

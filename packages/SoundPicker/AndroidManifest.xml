@@ -12,8 +12,10 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
 
     <application
+            android:name=".RingtonePickerApplication"
             android:allowBackup="false"
             android:label="@string/app_label"
+            android:theme="@style/Theme.AppCompat"
             android:supportsRtl="true">
         <receiver android:name="RingtoneReceiver"
                 android:exported="true">
@@ -25,7 +27,7 @@
         <service android:name="RingtoneOverlayService" />
 
         <activity android:name="RingtonePickerActivity"
-                android:theme="@style/PickerDialogTheme"
+                android:theme="@style/Theme.AppCompat.Dialog"
                 android:enabled="@*android:bool/config_defaultRingtonePickerEnabled"
                 android:excludeFromRecents="true"
                 android:exported="true">

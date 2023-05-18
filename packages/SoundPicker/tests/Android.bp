@@ -28,6 +28,7 @@ android_test {
         "androidx.test.rules",
         "androidx.test.ext.junit",
         "mockito-target-minus-junit4",
+        "guava-android-testlib",
         "SoundPickerLib",
     ],
     srcs: [

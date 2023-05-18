@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.database.Cursor;
@@ -36,6 +37,11 @@ import android.provider.Settings;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.testing.TestingExecutors;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,11 +49,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 
 @RunWith(AndroidJUnit4.class)
 public class RingtonePickerViewModelTest {
 
     private static final Uri DEFAULT_URI = Uri.parse("https://www.google.com/login.html");
+    private static final int RINGTONE_TYPE_UNKNOWN = -1;
     private static final int POS_UNKNOWN = -1;
     private static final int NO_ATTRIBUTES_FLAGS = 0;
     private static final int SILENT_RINGTONE_POSITION = 0;
@@ -62,7 +70,11 @@ public class RingtonePickerViewModelTest {
     private RingtoneManager mMockRingtoneManager;
     @Mock
     private Cursor mMockCursor;
+    @Mock
+    private ListeningExecutorServiceFactory mMockListeningExecutorServiceFactory;
 
+    private ExecutorService mMainThreadExecutor;
+    private ListeningExecutorService mBackgroundThreadExecutor;
     private Ringtone mMockDefaultRingtone;
     private Ringtone mMockRingtone;
     private RingtonePickerViewModel mViewModel;
@@ -76,23 +88,55 @@ public class RingtonePickerViewModelTest {
         mMockRingtone = createMockRingtone();
         when(mMockRingtoneFactory.create(DEFAULT_URI)).thenReturn(mMockDefaultRingtone);
         when(mMockRingtoneManager.getRingtone(anyInt())).thenReturn(mMockRingtone);
+        mMainThreadExecutor = TestingExecutors.sameThreadScheduledExecutor();
+        mBackgroundThreadExecutor = TestingExecutors.sameThreadScheduledExecutor();
+        when(mMockListeningExecutorServiceFactory.createSingleThreadExecutor()).thenReturn(
+                mBackgroundThreadExecutor);
 
-        mViewModel = new RingtonePickerViewModel(mMockRingtoneManagerFactory, mMockRingtoneFactory);
-
+        mViewModel = new RingtonePickerViewModel(mMockRingtoneManagerFactory, mMockRingtoneFactory,
+                mMockListeningExecutorServiceFactory);
         mViewModel.setSilentItemPosition(SILENT_RINGTONE_POSITION);
         mViewModel.setDefaultItemPosition(DEFAULT_RINGTONE_POSITION);
         mViewModel.setSampleItemPosition(RINGTONE_POSITION);
     }
 
+    @After
+    public void teardown() {
+        if (mMainThreadExecutor != null && !mMainThreadExecutor.isShutdown()) {
+            mMainThreadExecutor.shutdown();
+        }
+        if (mBackgroundThreadExecutor != null && !mBackgroundThreadExecutor.isShutdown()) {
+            mBackgroundThreadExecutor.shutdown();
+        }
+    }
+
+    @Test
+    public void testInitRingtoneManager_whenTypeIsUnknown_createManagerButDoNotSetType() {
+        mViewModel.initRingtoneManager(RINGTONE_TYPE_UNKNOWN);
+
+        verify(mMockRingtoneManagerFactory).create();
+        verify(mMockRingtoneManager, never()).setType(anyInt());
+    }
+
+    @Test
+    public void testInitRingtoneManager_whenTypeIsNotUnknown_createManagerAndSetType() {
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_NOTIFICATION);
+
+        verify(mMockRingtoneManagerFactory).create();
+        verify(mMockRingtoneManager).setType(RingtoneManager.TYPE_NOTIFICATION);
+    }
+
     @Test
     public void testGetStreamType_returnsTheCorrectStreamType() {
         when(mMockRingtoneManager.inferStreamType()).thenReturn(AudioManager.STREAM_ALARM);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         assertEquals(mViewModel.getRingtoneStreamType(), AudioManager.STREAM_ALARM);
     }
 
     @Test
     public void testGetRingtoneCursor_returnsTheCorrectRingtoneCursor() {
         when(mMockRingtoneManager.getCursor()).thenReturn(mMockCursor);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         assertEquals(mViewModel.getRingtoneCursor(), mMockCursor);
     }
 
@@ -100,12 +144,14 @@ public class RingtonePickerViewModelTest {
     public void testGetRingtoneUri_returnsTheCorrectRingtoneUri() {
         Uri expectedUri = DEFAULT_URI;
         when(mMockRingtoneManager.getRingtoneUri(anyInt())).thenReturn(expectedUri);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         Uri actualUri = mViewModel.getRingtoneUri(DEFAULT_RINGTONE_POSITION);
         assertEquals(actualUri, expectedUri);
     }
 
     @Test
     public void testOnPause_withChangingConfigurationTrue_doNotStopPlayingRingtone() {
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         mViewModel.playRingtone(RINGTONE_POSITION, DEFAULT_URI,
                 AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
         verifyRingtonePlayCalledAndMockPlayingState(mMockRingtone);
@@ -115,6 +161,7 @@ public class RingtonePickerViewModelTest {
 
     @Test
     public void testOnPause_withChangingConfigurationFalse_stopPlayingRingtone() {
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         mViewModel.setSampleItemPosition(DEFAULT_RINGTONE_POSITION);
         mViewModel.playRingtone(DEFAULT_RINGTONE_POSITION, DEFAULT_URI,
                 AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
@@ -125,6 +172,7 @@ public class RingtonePickerViewModelTest {
 
     @Test
     public void testOnViewModelRecreated_previousRingtoneCanStillBeStopped() {
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         mViewModel.setSampleItemPosition(RINGTONE_POSITION);
         Ringtone mockRingtone1 = createMockRingtone();
         Ringtone mockRingtone2 = createMockRingtone();
@@ -136,7 +184,9 @@ public class RingtonePickerViewModelTest {
         // This will result in a new view model getting created.
         mViewModel.onStop(/* isChangingConfigurations= */ true);
         verify(mockRingtone1, never()).stop();
-        mViewModel = new RingtonePickerViewModel(mMockRingtoneManagerFactory, mMockRingtoneFactory);
+        mViewModel = new RingtonePickerViewModel(mMockRingtoneManagerFactory, mMockRingtoneFactory,
+                mMockListeningExecutorServiceFactory);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         mViewModel.setSampleItemPosition(RINGTONE_POSITION);
         mViewModel.playRingtone(DEFAULT_RINGTONE_POSITION, DEFAULT_URI,
                 AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
@@ -147,6 +197,7 @@ public class RingtonePickerViewModelTest {
 
     @Test
     public void testOnStop_withChangingConfigurationTrueAndDefaultRingtonePlaying_saveRingtone() {
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         mViewModel.setSampleItemPosition(DEFAULT_RINGTONE_POSITION);
         mViewModel.playRingtone(DEFAULT_RINGTONE_POSITION, DEFAULT_URI,
                 AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
@@ -157,6 +208,7 @@ public class RingtonePickerViewModelTest {
 
     @Test
     public void testOnStop_withChangingConfigurationTrueAndCurrentRingtonePlaying_saveRingtone() {
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         mViewModel.setSampleItemPosition(RINGTONE_POSITION);
         mViewModel.playRingtone(RINGTONE_POSITION, DEFAULT_URI,
                 AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
@@ -174,6 +226,7 @@ public class RingtonePickerViewModelTest {
 
     @Test
     public void testOnStop_withChangingConfigurationFalse_stopPlayingRingtone() {
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         mViewModel.setSampleItemPosition(DEFAULT_RINGTONE_POSITION);
         mViewModel.playRingtone(DEFAULT_RINGTONE_POSITION, DEFAULT_URI,
                 AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
@@ -203,20 +256,93 @@ public class RingtonePickerViewModelTest {
     }
 
     @Test
-    public void testAddRingtone_returnsTheCorrectUri() throws IOException {
+    public void testCancelPendingAsyncTasks_correctlyCancelsPendingTasks()
+            throws IOException {
+        FutureCallback<Uri> mockCallback = mock(FutureCallback.class);
+
+        when(mMockListeningExecutorServiceFactory.createSingleThreadExecutor()).thenReturn(
+                TestingExecutors.noOpScheduledExecutor());
+        when(mMockRingtoneManager.addCustomExternalRingtone(DEFAULT_URI,
+                RingtoneManager.TYPE_NOTIFICATION)).thenReturn(DEFAULT_URI);
+        mViewModel = new RingtonePickerViewModel(mMockRingtoneManagerFactory, mMockRingtoneFactory,
+                mMockListeningExecutorServiceFactory);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
+        mViewModel.addRingtoneAsync(DEFAULT_URI, RingtoneManager.TYPE_NOTIFICATION, mockCallback,
+                mMainThreadExecutor);
+        verify(mockCallback, never()).onFailure(any());
+        // Calling cancelPendingAsyncTasks should cancel the pending task. Cancelling an async
+        // task invokes the onFailure method in the callable.
+        mViewModel.cancelPendingAsyncTasks();
+        verify(mockCallback).onFailure(any());
+        verify(mockCallback, never()).onSuccess(any());
+
+    }
+
+    @Test
+    public void testAddRingtoneAsync_cancelPreviousTaskBeforeStartingNewOne()
+            throws IOException {
+        FutureCallback<Uri> mockCallback1 = mock(FutureCallback.class);
+        FutureCallback<Uri> mockCallback2 = mock(FutureCallback.class);
+
+        when(mMockListeningExecutorServiceFactory.createSingleThreadExecutor()).thenReturn(
+                TestingExecutors.noOpScheduledExecutor());
+        when(mMockRingtoneManager.addCustomExternalRingtone(DEFAULT_URI,
+                RingtoneManager.TYPE_NOTIFICATION)).thenReturn(DEFAULT_URI);
+        mViewModel = new RingtonePickerViewModel(mMockRingtoneManagerFactory, mMockRingtoneFactory,
+                mMockListeningExecutorServiceFactory);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
+        mViewModel.addRingtoneAsync(DEFAULT_URI, RingtoneManager.TYPE_NOTIFICATION, mockCallback1,
+                mMainThreadExecutor);
+        verify(mockCallback1, never()).onFailure(any());
+        // We call addRingtoneAsync again to cancel the previous task and start a new one.
+        // Cancelling an async task invokes the onFailure method in the callable.
+        mViewModel.addRingtoneAsync(DEFAULT_URI, RingtoneManager.TYPE_NOTIFICATION, mockCallback2,
+                mMainThreadExecutor);
+        verify(mockCallback1).onFailure(any());
+        verify(mockCallback1, never()).onSuccess(any());
+        verifyNoMoreInteractions(mockCallback2);
+    }
+
+    @Test
+    public void testAddRingtoneAsync_whenAddRingtoneIsSuccessful_successCallbackIsInvoked()
+            throws IOException {
         Uri expectedUri = DEFAULT_URI;
-        when(mMockRingtoneManager.addCustomExternalRingtone(any(), anyInt())).thenReturn(
-                expectedUri);
-        Uri actualUri = mViewModel.addRingtone(DEFAULT_URI, RingtoneManager.TYPE_NOTIFICATION);
+        FutureCallback<Uri> mockCallback = mock(FutureCallback.class);
+
+        when(mMockRingtoneManager.addCustomExternalRingtone(DEFAULT_URI,
+                RingtoneManager.TYPE_NOTIFICATION)).thenReturn(expectedUri);
+
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
+        mViewModel.addRingtoneAsync(DEFAULT_URI, RingtoneManager.TYPE_NOTIFICATION, mockCallback,
+                mMainThreadExecutor);
+
         verify(mMockRingtoneManager).addCustomExternalRingtone(DEFAULT_URI,
                 RingtoneManager.TYPE_NOTIFICATION);
-        assertEquals(actualUri, expectedUri);
+        verify(mockCallback).onSuccess(expectedUri);
+        verify(mockCallback, never()).onFailure(any());
+    }
+
+    @Test
+    public void testAddRingtoneAsync_whenAddRingtoneFailed_failureCallbackIsInvoked()
+            throws IOException {
+        FutureCallback<Uri> mockCallback = mock(FutureCallback.class);
+
+        when(mMockRingtoneManager.addCustomExternalRingtone(any(), anyInt())).thenThrow(
+                IOException.class);
+
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
+        mViewModel.addRingtoneAsync(DEFAULT_URI, RingtoneManager.TYPE_NOTIFICATION, mockCallback,
+                mMainThreadExecutor);
+
+        verify(mockCallback).onFailure(any(IOException.class));
+        verify(mockCallback, never()).onSuccess(any());
     }
 
     @Test
     public void testGetCurrentlySelectedRingtoneUri_checkedItemRingtonePos_returnsTheCorrectUri() {
         Uri expectedUri = DEFAULT_URI;
         when(mMockRingtoneManager.getRingtoneUri(RINGTONE_POSITION)).thenReturn(expectedUri);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         Uri actualUri = mViewModel.getCurrentlySelectedRingtoneUri(RINGTONE_POSITION, DEFAULT_URI);
 
         verify(mMockRingtoneManager).getRingtoneUri(RINGTONE_POSITION);
@@ -227,6 +353,7 @@ public class RingtonePickerViewModelTest {
     public void testPlayRingtone_stopsPreviouslyRunningRingtone() {
         // Start playing the first ringtone
         mViewModel.setSampleItemPosition(DEFAULT_RINGTONE_POSITION);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         mViewModel.playRingtone(DEFAULT_RINGTONE_POSITION, DEFAULT_URI,
                 AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
         verifyRingtonePlayCalledAndMockPlayingState(mMockDefaultRingtone);
@@ -242,6 +369,7 @@ public class RingtonePickerViewModelTest {
     @Test
     public void testPlayRingtone_samplePosEqualToSilentPos_onlyStopPlayingRingtone() {
         mViewModel.setSampleItemPosition(DEFAULT_RINGTONE_POSITION);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         mViewModel.playRingtone(DEFAULT_RINGTONE_POSITION, DEFAULT_URI,
                 AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
         verifyRingtonePlayCalledAndMockPlayingState(mMockDefaultRingtone);
@@ -260,6 +388,7 @@ public class RingtonePickerViewModelTest {
     @Test
     public void testPlayRingtone_samplePosEqualToDefaultPos_playDefaultRingtone() {
         mViewModel.setSampleItemPosition(DEFAULT_RINGTONE_POSITION);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
 
         when(mMockRingtoneManager.inferStreamType()).thenReturn(AudioManager.STREAM_ALARM);
 
@@ -274,6 +403,7 @@ public class RingtonePickerViewModelTest {
     @Test
     public void testPlayRingtone_samplePosNotEqualToDefaultPos_playRingtone() {
         mViewModel.setSampleItemPosition(RINGTONE_POSITION);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
 
         mViewModel.playRingtone(RINGTONE_POSITION, DEFAULT_URI,
                 AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
@@ -287,6 +417,7 @@ public class RingtonePickerViewModelTest {
     @Test
     public void testPlayRingtone_withNoAttributeFlags_doNotUpdateRingtoneAttributesFlags() {
         mViewModel.setSampleItemPosition(RINGTONE_POSITION);
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
 
         mViewModel.playRingtone(RINGTONE_POSITION, DEFAULT_URI,
                 NO_ATTRIBUTES_FLAGS);
@@ -299,7 +430,7 @@ public class RingtonePickerViewModelTest {
     public void testGetRingtonePosition_returnsTheCorrectRingtonePosition() {
         int expectedPosition = 1;
         when(mMockRingtoneManager.getRingtonePosition(any())).thenReturn(expectedPosition);
-
+        mViewModel.initRingtoneManager(RingtoneManager.TYPE_RINGTONE);
         int actualPosition = mViewModel.getRingtonePosition(DEFAULT_URI);
 
         assertEquals(actualPosition, expectedPosition);

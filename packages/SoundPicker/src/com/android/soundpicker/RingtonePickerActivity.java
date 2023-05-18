@@ -26,7 +26,6 @@ import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -45,8 +44,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.internal.app.AlertActivity;
-import com.android.internal.app.AlertController;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.google.common.util.concurrent.FutureCallback;
+
+import dagger.hilt.android.AndroidEntryPoint;
 
 import java.util.regex.Pattern;
 
@@ -56,9 +62,10 @@ import java.util.regex.Pattern;
  *
  * @see RingtoneManager#ACTION_RINGTONE_PICKER
  */
-public final class RingtonePickerActivity extends AlertActivity implements
+@AndroidEntryPoint(AppCompatActivity.class)
+public final class RingtonePickerActivity extends Hilt_RingtonePickerActivity implements
         AdapterView.OnItemSelectedListener, Runnable, DialogInterface.OnClickListener,
-        AlertController.AlertParams.OnPrepareListViewListener {
+        DialogInterface.OnDismissListener {
 
     private static final int POS_UNKNOWN = -1;
 
@@ -106,6 +113,10 @@ public final class RingtonePickerActivity extends AlertActivity implements
 
     private boolean mShowOkCancelButtons;
 
+    private AlertDialog mAlertDialog;
+
+    private int mCheckedItem = POS_UNKNOWN;
+
     private final DialogInterface.OnClickListener mRingtoneClickListener =
             new DialogInterface.OnClickListener() {
 
@@ -137,12 +148,28 @@ public final class RingtonePickerActivity extends AlertActivity implements
         }
 
     };
+    private final FutureCallback<Uri> mAddCustomRingtoneCallback = new FutureCallback<>() {
+        @Override
+        public void onSuccess(Uri ringtoneUri) {
+            requeryForAdapter();
+        }
+
+        @Override
+        public void onFailure(Throwable throwable) {
+            Log.e(TAG, "Failed to add custom ringtone.", throwable);
+            // Ringtone was not added, display error Toast
+            Toast.makeText(RingtonePickerActivity.this.getApplicationContext(),
+                    R.string.unable_to_add_ringtone, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRingtonePickerViewModel = new RingtonePickerViewModel(
-                new RingtoneManagerFactory(this), new RingtoneFactory(this));
+        setContentView(R.layout.activity_ringtone_picker);
+
+        mRingtonePickerViewModel = new ViewModelProvider(this).get(RingtonePickerViewModel.class);
+
         mHandler = new Handler();
 
         Intent intent = getIntent();
@@ -151,7 +178,7 @@ public final class RingtonePickerActivity extends AlertActivity implements
         // Get the types of ringtones to show
         mType = intent.getIntExtra(RingtoneManager.EXTRA_RINGTONE_TYPE,
                 RingtonePickerViewModel.RINGTONE_TYPE_UNKNOWN);
-        mRingtonePickerViewModel.setRingtoneType(mType);
+        mRingtonePickerViewModel.initRingtoneManager(mType);
         setupCursor();
 
         /*
@@ -183,36 +210,34 @@ public final class RingtonePickerActivity extends AlertActivity implements
         // Create the list of ringtones and hold on to it so we can update later.
         mAdapter = new BadgedRingtoneAdapter(this, mCursor,
                 /* isManagedProfile = */ UserManager.get(this).isManagedProfile(mPickerUserId));
-        if (savedInstanceState != null) {
-            setCheckedItem(savedInstanceState.getInt(SAVE_CLICKED_POS, POS_UNKNOWN));
-        }
 
-        final AlertController.AlertParams p = mAlertParams;
-        p.mAdapter = mAdapter;
-        p.mOnClickListener = mRingtoneClickListener;
-        p.mLabelColumn = COLUMN_LABEL;
-        p.mIsSingleChoice = true;
-        p.mOnItemSelectedListener = this;
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this,
+                android.R.style.ThemeOverlay_Material_Dialog);
+        alertDialogBuilder
+                .setSingleChoiceItems(mAdapter, getCheckedItem(), mRingtoneClickListener)
+                .setOnItemSelectedListener(this)
+                .setOnDismissListener(this);
         if (mShowOkCancelButtons) {
-            p.mPositiveButtonText = getString(com.android.internal.R.string.ok);
-            p.mPositiveButtonListener = this;
-            p.mNegativeButtonText = getString(com.android.internal.R.string.cancel);
-            p.mPositiveButtonListener = this;
-        }
-        p.mOnPrepareListViewListener = this;
-        p.mTitle = intent.getCharSequenceExtra(RingtoneManager.EXTRA_RINGTONE_TITLE);
-        if (p.mTitle == null) {
-            p.mTitle = getString(RingtonePickerViewModel.getTitleByType(mType));
+            alertDialogBuilder
+                    .setPositiveButton(getString(com.android.internal.R.string.ok), this)
+                    .setNegativeButton(getString(com.android.internal.R.string.cancel), this);
         }
 
-        setupAlert();
+        String title = intent.getStringExtra(RingtoneManager.EXTRA_RINGTONE_TITLE);
+        alertDialogBuilder.setTitle(
+                title != null ? title : getString(RingtonePickerViewModel.getTitleByType(mType)));
 
-        ListView listView = mAlert.getListView();
+        mAlertDialog = alertDialogBuilder.show();
+        ListView listView = mAlertDialog.getListView();
         if (listView != null) {
             // List view needs to gain focus in order for RSB to work.
             if (!listView.requestFocus()) {
                 Log.e(TAG, "Unable to gain focus! RSB may not work properly.");
             }
+            prepareListView(listView);
+        }
+        if (savedInstanceState != null) {
+            setCheckedItem(savedInstanceState.getInt(SAVE_CLICKED_POS, POS_UNKNOWN));
         }
     }
     @Override
@@ -226,66 +251,27 @@ public final class RingtonePickerActivity extends AlertActivity implements
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == ADD_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
-            // Add the custom ringtone in a separate thread
-            final AsyncTask<Uri, Void, Uri> installTask = new AsyncTask<Uri, Void, Uri>() {
-                @Override
-                protected Uri doInBackground(Uri... params) {
-                    return mRingtonePickerViewModel.addRingtone(params[0], mType);
-                }
-
-                @Override
-                protected void onPostExecute(Uri ringtoneUri) {
-                    if (ringtoneUri != null) {
-                        requeryForAdapter();
-                    } else {
-                        // Ringtone was not added, display error Toast
-                        Toast.makeText(RingtonePickerActivity.this, R.string.unable_to_add_ringtone,
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            };
-            installTask.execute(data.getData());
-        }
-    }
-
-    // Disabled because context menus aren't Material Design :(
-    /*
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfo) {
-        int position = ((AdapterContextMenuInfo) menuInfo).position;
-
-        Ringtone ringtone = getRingtone(getRingtoneManagerPosition(position));
-        if (ringtone != null && mRingtoneManager.isCustomRingtone(ringtone.getUri())) {
-            // It's a custom ringtone so we display the context menu
-            menu.setHeaderTitle(ringtone.getTitle(this));
-            menu.add(Menu.NONE, Menu.FIRST, Menu.NONE, R.string.delete_ringtone_text);
+            mRingtonePickerViewModel.addRingtoneAsync(data.getData(),
+                    mType,
+                    mAddCustomRingtoneCallback,
+                    // Causes the callback to be executed on the main thread.
+                    ContextCompat.getMainExecutor(this.getApplicationContext()));
         }
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case Menu.FIRST: {
-                int deletedRingtonePos = ((AdapterContextMenuInfo) item.getMenuInfo()).position;
-                Uri deletedRingtoneUri = getRingtone(
-                        getRingtoneManagerPosition(deletedRingtonePos)).getUri();
-                if(mRingtoneManager.deleteExternalRingtone(deletedRingtoneUri)) {
-                    requeryForAdapter();
-                } else {
-                    Toast.makeText(this, R.string.unable_to_delete_ringtone, Toast.LENGTH_SHORT)
-                            .show();
-                }
-                return true;
-            }
-            default: {
-                return false;
-            }
+    public void onDismiss(DialogInterface dialog) {
+        if (!isChangingConfigurations()) {
+            finish();
         }
     }
-    */
 
     @Override
     public void onDestroy() {
+        mRingtonePickerViewModel.cancelPendingAsyncTasks();
+        if (mAlertDialog != null && mAlertDialog.isShowing()) {
+            mAlertDialog.dismiss();
+        }
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
         }
@@ -296,7 +282,7 @@ public final class RingtonePickerActivity extends AlertActivity implements
         super.onDestroy();
     }
 
-    public void onPrepareListView(ListView listView) {
+    private void prepareListView(@NonNull ListView listView) {
         // Reset the static item count, as this method can be called multiple times
         mRingtonePickerViewModel.resetFixedItemCount();
 
@@ -363,7 +349,6 @@ public final class RingtonePickerActivity extends AlertActivity implements
             checkedPosition = mRingtonePickerViewModel.getSilentItemPosition();
         }
         setCheckedItem(checkedPosition);
-        setupAlert();
     }
 
     /**
@@ -374,7 +359,7 @@ public final class RingtonePickerActivity extends AlertActivity implements
      * @param textResId The resource ID of the text for the item.
      * @return The position of the inserted item.
      */
-    private int addStaticItem(ListView listView, int textResId) {
+    private int addStaticItem(@NonNull ListView listView, int textResId) {
         TextView textView = (TextView) getLayoutInflater().inflate(
                 com.android.internal.R.layout.select_dialog_singlechoice_material, listView, false);
         textView.setText(textResId);
@@ -383,20 +368,20 @@ public final class RingtonePickerActivity extends AlertActivity implements
         return listView.getHeaderViewsCount() - 1;
     }
 
-    private int addDefaultRingtoneItem(ListView listView) {
+    private int addDefaultRingtoneItem(@NonNull ListView listView) {
         int defaultRingtoneItemPos = addStaticItem(listView,
                 RingtonePickerViewModel.getDefaultRingtoneItemTextByType(mType));
         mRingtonePickerViewModel.setDefaultItemPosition(defaultRingtoneItemPos);
         return defaultRingtoneItemPos;
     }
 
-    private int addSilentItem(ListView listView) {
+    private int addSilentItem(@NonNull ListView listView) {
         int silentItemPos = addStaticItem(listView, com.android.internal.R.string.ringtone_silent);
         mRingtonePickerViewModel.setSilentItemPosition(silentItemPos);
         return silentItemPos;
     }
 
-    private void addNewSoundItem(ListView listView) {
+    private void addNewSoundItem(@NonNull ListView listView) {
         View view = getLayoutInflater().inflate(R.layout.add_new_sound_item, listView,
                 false /* attachToRoot */);
         TextView text = (TextView)view.findViewById(R.id.add_new_sound_text);
@@ -412,11 +397,16 @@ public final class RingtonePickerActivity extends AlertActivity implements
     }
 
     private int getCheckedItem() {
-        return mAlertParams.mCheckedItem;
+        return mCheckedItem;
     }
 
     private void setCheckedItem(int pos) {
-        mAlertParams.mCheckedItem = pos;
+        mCheckedItem = pos;
+        ListView listView = mAlertDialog.getListView();
+        if (listView != null) {
+            listView.setItemChecked(pos, true);
+            listView.smoothScrollToPosition(pos);
+        }
         mCheckedItemId = mAdapter.getItemId(
                 mRingtonePickerViewModel.itemPositionToRingtonePosition(pos));
     }
@@ -490,7 +480,6 @@ public final class RingtonePickerActivity extends AlertActivity implements
       setResult(RESULT_OK,
           new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, ringtoneUri));
     }
-
 
     private int getListPosition(int ringtoneManagerPos) {
 

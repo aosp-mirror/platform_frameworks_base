@@ -16,36 +16,29 @@
 
 package com.android.soundpicker;
 
-import android.content.Context;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
-import dagger.hilt.android.qualifiers.ApplicationContext;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * A factory class used to create {@link Ringtone}.
+ * A factory class used to create {@link ListeningExecutorService}.
  */
 @Singleton
-public class RingtoneFactory {
-
-    private final Context mApplicationContext;
+public class ListeningExecutorServiceFactory {
 
     @Inject
-    RingtoneFactory(@ApplicationContext Context applicationContext) {
-        mApplicationContext = applicationContext;
+    ListeningExecutorServiceFactory() {
     }
 
     /**
-     * Returns a {@link Ringtone} based on the provided URI.
+     * Returns a single thread {@link ListeningExecutorService}.
      *
-     * @param uri The URI used to get the {@link Ringtone}
-     * @return a {@link Ringtone}
      */
-    public Ringtone create(Uri uri) {
-        return RingtoneManager.getRingtone(mApplicationContext, uri);
+    public ListeningExecutorService createSingleThreadExecutor() {
+        return MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
     }
 }
