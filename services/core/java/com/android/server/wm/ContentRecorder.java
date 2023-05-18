@@ -276,6 +276,12 @@ final class ContentRecorder implements WindowContainerListener {
             return;
         }
 
+        if (mContentRecordingSession.isWaitingForConsent()) {
+            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING, "Content Recording: waiting to record, so do "
+                    + "nothing");
+            return;
+        }
+
         mRecordedWindowContainer = retrieveRecordedWindowContainer();
         if (mRecordedWindowContainer == null) {
             // Either the token is missing, or the window associated with the token is missing.

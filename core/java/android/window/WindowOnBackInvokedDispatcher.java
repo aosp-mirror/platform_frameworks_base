@@ -158,6 +158,16 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         mAllCallbacks.remove(callback);
         // Re-populate the top callback to WM if the removed callback was previously the top one.
         if (previousTopCallback == callback) {
+            // We should call onBackCancelled() when an active callback is removed from dispatcher.
+            if (mProgressAnimator.isBackAnimationInProgress()
+                    && callback instanceof OnBackAnimationCallback) {
+                // The ProgressAnimator will handle the new topCallback, so we don't want to call
+                // onBackCancelled() on it. We call immediately the callback instead.
+                OnBackAnimationCallback animatedCallback = (OnBackAnimationCallback) callback;
+                animatedCallback.onBackCancelled();
+                Log.d(TAG, "The callback was removed while a back animation was in progress, "
+                        + "an onBackCancelled() was dispatched.");
+            }
             setTopOnBackInvokedCallback(getTopCallback());
         }
     }

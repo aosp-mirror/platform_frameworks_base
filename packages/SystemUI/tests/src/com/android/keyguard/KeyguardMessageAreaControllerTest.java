@@ -27,6 +27,8 @@ import static org.mockito.Mockito.when;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.text.Editable;
+import android.text.TextWatcher;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -93,16 +95,16 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetMessage_AnnounceForAccessibility() {
-        ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
-        when(mKeyguardMessageArea.getText()).thenReturn("abc");
-        mMessageAreaController.setMessage("abc");
+    public void textChanged_AnnounceForAccessibility() {
+        ArgumentCaptor<TextWatcher> textWatcherArgumentCaptor = ArgumentCaptor.forClass(
+                TextWatcher.class);
+        mMessageAreaController.onViewAttached();
+        verify(mKeyguardMessageArea).addTextChangedListener(textWatcherArgumentCaptor.capture());
 
-        verify(mKeyguardMessageArea).setMessage("abc", /* animate= */ true);
+        textWatcherArgumentCaptor.getValue().afterTextChanged(
+                Editable.Factory.getInstance().newEditable("abc"));
         verify(mKeyguardMessageArea).removeCallbacks(any(Runnable.class));
-        verify(mKeyguardMessageArea).postDelayed(argumentCaptor.capture(), anyLong());
-        argumentCaptor.getValue().run();
-        verify(mKeyguardMessageArea).announceForAccessibility("abc");
+        verify(mKeyguardMessageArea).postDelayed(any(Runnable.class), anyLong());
     }
 
     @Test

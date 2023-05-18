@@ -218,7 +218,7 @@ class NotificationsQSContainerController @Inject constructor(
             containerPadding = 0
             stackScrollMargin = bottomStableInsets + notificationsBottomMargin
         }
-        val qsContainerPadding = if (!(isQSCustomizing || isQSDetailShowing)) {
+        val qsContainerPadding = if (!isQSDetailShowing) {
             // We also want this padding in the bottom in these cases
             if (splitShadeEnabled) {
                 stackScrollMargin - scrimShadeBottomMargin - footerActionsOffset

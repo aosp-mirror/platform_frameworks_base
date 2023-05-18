@@ -2310,6 +2310,9 @@ public class ComputerEngine implements Computer {
         if ((intent.getFlags() & Intent.FLAG_IGNORE_EPHEMERAL) != 0) {
             return false;
         }
+        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER) != 0) {
+            return false;
+        }
         if (!skipPackageCheck && intent.getPackage() != null) {
             return false;
         }

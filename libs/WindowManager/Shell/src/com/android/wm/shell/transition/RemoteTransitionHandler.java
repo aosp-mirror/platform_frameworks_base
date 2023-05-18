@@ -94,8 +94,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        if (!Transitions.SHELL_TRANSITIONS_ROTATION && TransitionUtil.hasDisplayChange(info)
-                && !TransitionUtil.alwaysReportToKeyguard(info)) {
+        if (!Transitions.SHELL_TRANSITIONS_ROTATION && TransitionUtil.hasDisplayChange(info)) {
             // Note that if the remote doesn't have permission ACCESS_SURFACE_FLINGER, some
             // operations of the start transaction may be ignored.
             mRequestedRemotes.remove(transition);

@@ -2583,7 +2583,7 @@
     <!-- Title for media controls [CHAR_LIMIT=50] -->
     <string name="controls_media_title">Media</string>
     <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=50] -->
-    <string name="controls_media_close_session">Hide this media control for <xliff:g id="app_name" example="YouTube Music">%1$s</xliff:g>?</string>
+    <string name="controls_media_close_session">Hide this media control for <xliff:g id="app_name" example="Foo Music App">%1$s</xliff:g>?</string>
     <!-- Explanation that controls associated with a specific media session are active [CHAR_LIMIT=50] -->
     <string name="controls_media_active_session">The current media session cannot be hidden.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
@@ -2596,6 +2596,8 @@
     <string name="controls_media_playing_item_description"><xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> by <xliff:g id="artist_name" example="Various artists">%2$s</xliff:g> is playing from <xliff:g id="app_label" example="Spotify">%3$s</xliff:g></string>
     <!-- Content description for media cotnrols progress bar [CHAR_LIMIT=NONE] -->
     <string name="controls_media_seekbar_description"><xliff:g id="elapsed_time" example="1:30">%1$s</xliff:g> of <xliff:g id="total_time" example="3:00">%2$s</xliff:g></string>
+    <!-- Placeholder title to inform user that an app has posted media controls [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_empty_title"><xliff:g id="app_name" example="Foo Music App">%1$s</xliff:g> is running</string>
 
     <!-- Description for button in media controls. Pressing button starts playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_button_play">Play</string>
@@ -3101,17 +3103,20 @@
     <!-- Switch to work profile dialer app for placing a call dialog. -->
     <!-- Text for Switch to work profile dialog's Title. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=60] -->
-    <string name="call_from_work_profile_title">Can\'t call from this profile</string>
+    <string name="call_from_work_profile_title">Can\'t call from a personal app</string>
     <!-- Text for switch to work profile for call dialog to guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=NONE]
     -->
-    <string name="call_from_work_profile_text">Your work policy allows you to make phone calls only from the work profile</string>
+    <string name="call_from_work_profile_text">Your organization only allows you to make calls from work apps</string>
     <!-- Label for the button to switch to work profile for placing call. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
     <string name="call_from_work_profile_action">Switch to work profile</string>
+    <!-- Label for the button to switch to work profile for placing call. Switch to work profile dialog guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
+    <string name="install_dialer_on_work_profile_action">Install a work phone app</string>
     <!-- Label for the close button on switch to work profile dialog. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
-    <string name="call_from_work_profile_close">Close</string>
+    <string name="call_from_work_profile_close">Cancel</string>
 
     <!--
     Label for a menu item in a menu that is shown when the user wishes to customize the lock screen.

@@ -75,6 +75,10 @@ public final class DeviceStateManagerServiceTest {
     private static final DeviceState UNSUPPORTED_DEVICE_STATE =
             new DeviceState(255, "UNSUPPORTED", 0 /* flags */);
 
+    private static final int[] SUPPORTED_DEVICE_STATE_IDENTIFIERS =
+            new int[]{DEFAULT_DEVICE_STATE.getIdentifier(), OTHER_DEVICE_STATE.getIdentifier(),
+                    DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP.getIdentifier()};
+
     private static final int FAKE_PROCESS_ID = 100;
 
     private TestDeviceStatePolicy mPolicy;
@@ -88,6 +92,11 @@ public final class DeviceStateManagerServiceTest {
         mProvider = new TestDeviceStateProvider();
         mPolicy = new TestDeviceStatePolicy(mProvider);
         mSysPropSetter = new TestSystemPropertySetter();
+        setupDeviceStateManagerService();
+        flushHandler(); // Flush the handler to ensure the initial values are committed.
+    }
+
+    private void setupDeviceStateManagerService() {
         mService = new DeviceStateManagerService(InstrumentationRegistry.getContext(), mPolicy,
                 mSysPropSetter);
 
@@ -97,8 +106,6 @@ public final class DeviceStateManagerServiceTest {
         when(mService.mActivityTaskManagerInternal.getTopApp())
                 .thenReturn(mWindowProcessController);
         when(mWindowProcessController.getPid()).thenReturn(FAKE_PROCESS_ID);
-
-        flushHandler(); // Flush the handler to ensure the initial values are committed.
     }
 
     private void flushHandler() {
@@ -264,12 +271,24 @@ public final class DeviceStateManagerServiceTest {
     public void getDeviceStateInfo() throws RemoteException {
         DeviceStateInfo info = mService.getBinderService().getDeviceStateInfo();
         assertNotNull(info);
-        assertArrayEquals(info.supportedStates,
-                new int[] { DEFAULT_DEVICE_STATE.getIdentifier(),
-                        OTHER_DEVICE_STATE.getIdentifier(),
-                        DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP.getIdentifier()});
+        assertArrayEquals(info.supportedStates, SUPPORTED_DEVICE_STATE_IDENTIFIERS);
         assertEquals(info.baseState, DEFAULT_DEVICE_STATE.getIdentifier());
         assertEquals(info.currentState, DEFAULT_DEVICE_STATE.getIdentifier());
+    }
+
+    @Test
+    public void getDeviceStateInfo_baseStateAndCommittedStateNotSet() throws RemoteException {
+        // Create a provider and a service without an initial base state.
+        mProvider = new TestDeviceStateProvider(null /* initialState */);
+        mPolicy = new TestDeviceStatePolicy(mProvider);
+        setupDeviceStateManagerService();
+        flushHandler(); // Flush the handler to ensure the initial values are committed.
+
+        DeviceStateInfo info = mService.getBinderService().getDeviceStateInfo();
+
+        assertArrayEquals(info.supportedStates, SUPPORTED_DEVICE_STATE_IDENTIFIERS);
+        assertEquals(info.baseState, INVALID_DEVICE_STATE);
+        assertEquals(info.currentState, INVALID_DEVICE_STATE);
     }
 
     @FlakyTest(bugId = 223153452)
@@ -322,6 +341,21 @@ public final class DeviceStateManagerServiceTest {
                 DEFAULT_DEVICE_STATE.getIdentifier());
         assertEquals(callback.getLastNotifiedInfo().currentState,
                 DEFAULT_DEVICE_STATE.getIdentifier());
+    }
+
+    @Test
+    public void registerCallback_initialValueUnavailable() throws RemoteException {
+        // Create a provider and a service without an initial base state.
+        mProvider = new TestDeviceStateProvider(null /* initialState */);
+        mPolicy = new TestDeviceStatePolicy(mProvider);
+        setupDeviceStateManagerService();
+        flushHandler(); // Flush the handler to ensure the initial values are committed.
+
+        TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
+        mService.getBinderService().registerCallback(callback);
+        flushHandler();
+        // The callback should never be called when the base state is not set yet.
+        assertNull(callback.getLastNotifiedInfo());
     }
 
     @Test
@@ -939,7 +973,17 @@ public final class DeviceStateManagerServiceTest {
                 DEFAULT_DEVICE_STATE,
                 OTHER_DEVICE_STATE,
                 DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP};
+
+        @Nullable private final DeviceState mInitialState;
         private Listener mListener;
+
+        private TestDeviceStateProvider() {
+            this(DEFAULT_DEVICE_STATE);
+        }
+
+        private TestDeviceStateProvider(@Nullable DeviceState initialState) {
+            mInitialState = initialState;
+        }
 
         @Override
         public void setListener(Listener listener) {
@@ -950,7 +994,9 @@ public final class DeviceStateManagerServiceTest {
             mListener = listener;
             mListener.onSupportedDeviceStatesChanged(mSupportedDeviceStates,
                     SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED);
-            mListener.onStateChanged(mSupportedDeviceStates[0].getIdentifier());
+            if (mInitialState != null) {
+                mListener.onStateChanged(mInitialState.getIdentifier());
+            }
         }
 
         public void notifySupportedDeviceStates(DeviceState[] supportedDeviceStates) {

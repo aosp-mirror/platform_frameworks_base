@@ -5350,7 +5350,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
                 int installReason, List<String> whiteListedPermissions) {
             return mInstallPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
-                    installReason, whiteListedPermissions, null);
+                    installReason, whiteListedPermissions, null).first;
         }
 
         @Override

@@ -247,13 +247,18 @@ public class AppClipsActivity extends ComponentActivity {
         }
 
         updateImageDimensions();
-        mViewModel.saveScreenshotThenFinish(drawable, bounds);
+        mViewModel.saveScreenshotThenFinish(drawable, bounds, getUser());
     }
 
     private void setResultThenFinish(Uri uri) {
         if (mResultReceiver == null) {
             return;
         }
+
+        // Grant permission here instead of in the trampoline activity because this activity can run
+        // as work profile user so the URI can belong to the work profile user while the trampoline
+        // activity always runs as main user.
+        grantUriPermission(mCallingPackageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         Bundle data = new Bundle();
         data.putInt(Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE,

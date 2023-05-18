@@ -675,8 +675,6 @@
   <java-symbol type="string" name="contentServiceSyncNotificationTitle" />
   <java-symbol type="string" name="contentServiceTooManyDeletesNotificationDesc" />
   <java-symbol type="string" name="csd_dose_reached_warning" />
-  <java-symbol type="string" name="csd_dose_repeat_warning" />
-  <java-symbol type="string" name="csd_entering_RS2_warning" />
   <java-symbol type="string" name="csd_momentary_exposure_warning" />
   <java-symbol type="string" name="date_and_time" />
   <java-symbol type="string" name="date_picker_decrement_day_button" />
@@ -1579,6 +1577,14 @@
   <java-symbol type="string" name="miniresolver_open_work" />
   <java-symbol type="string" name="miniresolver_use_personal_browser" />
   <java-symbol type="string" name="miniresolver_use_work_browser" />
+  <java-symbol type="string" name="miniresolver_call_in_work" />
+  <java-symbol type="string" name="miniresolver_switch_to_work" />
+  <java-symbol type="string" name="miniresolver_call" />
+  <java-symbol type="string" name="miniresolver_switch" />
+  <java-symbol type="string" name="miniresolver_call_information" />
+  <java-symbol type="string" name="miniresolver_sms_information" />
+  <java-symbol type="id" name="miniresolver_info_section" />
+  <java-symbol type="id" name="miniresolver_info_section_text" />
   <java-symbol type="id" name="button_open" />
   <java-symbol type="id" name="use_same_profile_browser" />
 
@@ -3654,8 +3660,8 @@
   <java-symbol type="dimen" name="autofill_dataset_picker_max_width"/>
   <java-symbol type="dimen" name="autofill_dataset_picker_max_height"/>
   <java-symbol type="dimen" name="autofill_save_custom_subtitle_max_height"/>
-  <java-symbol type="dimen" name="autofill_save_icon_max_size"/>
   <java-symbol type="integer" name="autofill_max_visible_datasets" />
+  <java-symbol type="dimen" name="autofill_dialog_max_width" />
 
   <java-symbol type="style" name="Theme.DeviceDefault.Autofill" />
   <java-symbol type="style" name="Theme.DeviceDefault.Light.Autofill" />
@@ -4530,6 +4536,7 @@
   <java-symbol type="string" name="dismiss_action" />
 
   <java-symbol type="bool" name="config_magnification_area" />
+  <java-symbol type="bool" name="config_magnification_always_on_enabled" />
 
   <java-symbol type="bool" name="config_trackerAppNeedsPermissions"/>
   <!-- FullScreenMagnification thumbnail -->
@@ -5011,7 +5018,7 @@
 
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
-  
+
   <java-symbol name="materialColorOnSecondaryFixedVariant" type="attr"/>
   <java-symbol name="materialColorOnTertiaryFixedVariant" type="attr"/>
   <java-symbol name="materialColorSurfaceContainerLowest" type="attr"/>

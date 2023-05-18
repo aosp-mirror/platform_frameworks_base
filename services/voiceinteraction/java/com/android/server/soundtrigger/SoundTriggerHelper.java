@@ -1252,6 +1252,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     mEventLogger.enqueue(new SessionEvent(Type.RESUME_FAILED,
                                 modelData.getModelId(), String.valueOf(status))
                             .printLog(ALOGW, TAG));
+                    modelData.setRequested(false);
                     callback.onResumeFailed(status);
                 } catch (RemoteException e) {
                     mEventLogger.enqueue(new SessionEvent(Type.RESUME_FAILED,
@@ -1300,6 +1301,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     mEventLogger.enqueue(new SessionEvent(Type.PAUSE_FAILED,
                                 modelData.getModelId(), String.valueOf(status))
                             .printLog(ALOGW, TAG));
+                    modelData.setRequested(false);
                     callback.onPauseFailed(status);
                 } catch (RemoteException e) {
                     mEventLogger.enqueue(new SessionEvent(Type.PAUSE_FAILED,
@@ -1453,6 +1455,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         synchronized void setNotLoaded() {
+            mRecognitionToken = null;
             mModelState = MODEL_NOTLOADED;
         }
 
@@ -1462,6 +1465,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         synchronized void clearState() {
             mModelState = MODEL_NOTLOADED;
+            mRecognitionToken = null;
             mRecognitionConfig = null;
             mRequested = false;
             mCallback = null;

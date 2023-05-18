@@ -45,6 +45,9 @@
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
     <!-- The threshold to progress back animation for edge swipe -->
     <dimen name="navigation_edge_action_progress_threshold">412dp</dimen>
+    <!-- This value is used to calculate the target if the screen is wider than the
+        navigation_edge_action_progress_threshold. See BackAnimation#setSwipeThresholds -->
+    <item name="back_progress_non_linear_factor" format="float" type="dimen">0.2</item>
     <!-- The minimum display position of the arrow on the screen -->
     <dimen name="navigation_edge_arrow_min_y">64dp</dimen>
     <!-- The amount by which the arrow is shifted to avoid the finger-->
@@ -807,6 +810,7 @@
     <!-- The width/height of the unlock icon view on keyguard. -->
     <dimen name="keyguard_lock_height">42dp</dimen>
     <dimen name="keyguard_lock_padding">20dp</dimen>
+    <dimen name="secondary_message_padding">8dp</dimen>
 
     <dimen name="keyguard_security_container_padding_top">20dp</dimen>
 
@@ -1318,6 +1322,7 @@
     <dimen name="media_output_dialog_active_background_radius">28dp</dimen>
     <dimen name="media_output_dialog_default_margin_end">16dp</dimen>
     <dimen name="media_output_dialog_selectable_margin_end">80dp</dimen>
+    <dimen name="media_output_dialog_list_padding_top">8dp</dimen>
 
     <!-- Distance that the full shade transition takes in order to complete by tapping on a button
          like "expand". -->
@@ -1641,6 +1646,19 @@
     <dimen name="dream_overlay_bottom_affordance_height">64dp</dimen>
     <dimen name="dream_overlay_bottom_affordance_width">64dp</dimen>
     <dimen name="dream_overlay_bottom_affordance_radius">32dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_key_text_shadow_dx">0.5dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_key_text_shadow_dy">0.5dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_key_text_shadow_radius">1dp</dimen>
+    <item name="dream_overlay_bottom_affordance_key_shadow_alpha" format="float" type="dimen">
+        0.35
+    </item>
+    <dimen name="dream_overlay_bottom_affordance_ambient_text_shadow_dx">0.5dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_ambient_text_shadow_dy">0.5dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_ambient_text_shadow_radius">2dp</dimen>
+    <item name="dream_overlay_bottom_affordance_ambient_shadow_alpha" format="float" type="dimen">
+        0.4
+    </item>
+    <dimen name="dream_overlay_bottom_affordance_inset">1dp</dimen>
     <dimen name="dream_overlay_bottom_affordance_padding">14dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_text_size">86dp</dimen>
     <dimen name="dream_overlay_complication_clock_subtitle_text_size">24sp</dimen>
@@ -1772,8 +1790,12 @@
     <!-- Rear Display Education dimens -->
     <dimen name="rear_display_animation_width">273dp</dimen>
     <dimen name="rear_display_animation_height">200dp</dimen>
+    <dimen name="rear_display_animation_width_opened">273dp</dimen>
+    <dimen name="rear_display_animation_height_opened">200dp</dimen>
     <dimen name="rear_display_title_top_padding">24dp</dimen>
     <dimen name="rear_display_title_bottom_padding">16dp</dimen>
+    <dimen name="rear_display_title_top_padding_opened">24dp</dimen>
+    <dimen name="rear_display_title_bottom_padding_opened">16dp</dimen>
 
     <!-- Bouncer user switcher margins -->
     <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>

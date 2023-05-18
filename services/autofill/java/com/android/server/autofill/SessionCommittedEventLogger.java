@@ -16,13 +16,8 @@
 
 package com.android.server.autofill;
 
+import static android.view.autofill.AutofillManager.COMMIT_REASON_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_ACTIVITY_FINISHED;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_SESSION_DESTROYED;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_UNKNOWN;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_CHANGED;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_CLICKED;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_COMMITTED;
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.IntDef;
@@ -32,7 +27,7 @@ import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
-
+import android.view.autofill.AutofillManager.AutofillCommitReason;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
@@ -44,35 +39,6 @@ import java.util.Optional;
  */
 public final class SessionCommittedEventLogger {
   private static final String TAG = "SessionCommittedEventLogger";
-
-  /**
-   * Reasons why presentation was not shown. These are wrappers around
-   * {@link com.android.os.AtomsProto.AutofillSessionCommitted.AutofillCommitReason}.
-   */
-  @IntDef(prefix = {"COMMIT_REASON"}, value = {
-      COMMIT_REASON_UNKNOWN,
-      COMMIT_REASON_ACTIVITY_FINISHED,
-      COMMIT_REASON_VIEW_COMMITTED,
-      COMMIT_REASON_VIEW_CLICKED,
-      COMMIT_REASON_VIEW_CHANGED,
-      COMMIT_REASON_SESSION_DESTROYED
-  })
-  @Retention(RetentionPolicy.SOURCE)
-  public @interface CommitReason {
-  }
-
-  public static final int COMMIT_REASON_UNKNOWN =
-      AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_UNKNOWN;
-  public static final int COMMIT_REASON_ACTIVITY_FINISHED =
-      AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_ACTIVITY_FINISHED;
-  public static final int COMMIT_REASON_VIEW_COMMITTED =
-      AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_COMMITTED;
-  public static final int COMMIT_REASON_VIEW_CLICKED =
-      AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_CLICKED;
-  public static final int COMMIT_REASON_VIEW_CHANGED =
-      AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_CHANGED;
-  public static final int COMMIT_REASON_SESSION_DESTROYED =
-      AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_SESSION_DESTROYED;
 
   private final int mSessionId;
   private Optional<SessionCommittedEventInternal> mEventInternal;
@@ -110,9 +76,9 @@ public final class SessionCommittedEventLogger {
   /**
    * Set commit_reason as long as mEventInternal presents.
    */
-  public void maybeSetCommitReason(@CommitReason int val) {
+  public void maybeSetCommitReason(@AutofillCommitReason int val) {
     mEventInternal.ifPresent(event -> {
-      event.mCommitReason = val;
+        event.mCommitReason = val;
     });
   }
 

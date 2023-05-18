@@ -52,6 +52,8 @@ interface IAppOpsService {
     int checkAudioOperation(int code, int usage, int uid, String packageName);
     boolean shouldCollectNotes(int opCode);
     void setCameraAudioRestriction(int mode);
+    void startWatchingModeWithFlags(int op, String packageName, int flags,
+            IAppOpsCallback callback);
     // End of methods also called by native code.
     // Any new method exposed to native must be added after the last one, do not reorder
 
@@ -109,8 +111,6 @@ interface IAppOpsService {
 
     void startWatchingStarted(in int[] ops, IAppOpsStartedCallback callback);
     void stopWatchingStarted(IAppOpsStartedCallback callback);
-
-    void startWatchingModeWithFlags(int op, String packageName, int flags, IAppOpsCallback callback);
 
     void startWatchingNoted(in int[] ops, IAppOpsNotedCallback callback);
     void stopWatchingNoted(IAppOpsNotedCallback callback);

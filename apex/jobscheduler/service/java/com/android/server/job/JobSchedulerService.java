@@ -195,7 +195,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private static final long REQUIRE_NETWORK_CONSTRAINT_FOR_NETWORK_JOB_WORK_ITEMS = 241104082L;
 
     /**
-     * Require the app to have the INTERNET and ACCESS_NETWORK_STATE permissions when scheduling
+     * Require the app to have the ACCESS_NETWORK_STATE permissions when scheduling
      * a job with a connectivity constraint.
      */
     @ChangeId
@@ -1503,6 +1503,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
 
                     toCancel.enqueueWorkLocked(work);
+                    if (toCancel.getJob().isUserInitiated()) {
+                        // The app is in a state to successfully schedule a UI job. Presumably, the
+                        // user has asked for this additional bit of work, so remove any demotion
+                        // flags. Only do this for UI jobs since they have strict scheduling
+                        // requirements; it's harder to assume other jobs were scheduled due to
+                        // user interaction/request.
+                        toCancel.removeInternalFlags(
+                                JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER
+                                        | JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ);
+                    }
                     mJobs.touchJob(toCancel);
                     sEnqueuedJwiHighWaterMarkLogger.logSampleWithUid(uId, toCancel.getWorkCount());
 
@@ -2590,34 +2600,43 @@ public class JobSchedulerService extends com.android.server.SystemService
         } else {
             numSystemStops++;
         }
-        final int backoffAttempts = Math.max(1,
-                numFailures + numSystemStops / mConstants.SYSTEM_STOP_TO_FAILURE_RATIO);
-        long delayMillis;
+        final int backoffAttempts =
+                numFailures + numSystemStops / mConstants.SYSTEM_STOP_TO_FAILURE_RATIO;
+        final long earliestRuntimeMs;
 
-        switch (job.getBackoffPolicy()) {
-            case JobInfo.BACKOFF_POLICY_LINEAR: {
-                long backoff = initialBackoffMillis;
-                if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME_MS) {
-                    backoff = mConstants.MIN_LINEAR_BACKOFF_TIME_MS;
+        if (backoffAttempts == 0) {
+            earliestRuntimeMs = JobStatus.NO_EARLIEST_RUNTIME;
+        } else {
+            long delayMillis;
+            switch (job.getBackoffPolicy()) {
+                case JobInfo.BACKOFF_POLICY_LINEAR: {
+                    long backoff = initialBackoffMillis;
+                    if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME_MS) {
+                        backoff = mConstants.MIN_LINEAR_BACKOFF_TIME_MS;
+                    }
+                    delayMillis = backoff * backoffAttempts;
                 }
-                delayMillis = backoff * backoffAttempts;
-            } break;
-            default:
-                if (DEBUG) {
-                    Slog.v(TAG, "Unrecognised back-off policy, defaulting to exponential.");
+                break;
+                default:
+                    if (DEBUG) {
+                        Slog.v(TAG, "Unrecognised back-off policy, defaulting to exponential.");
+                    }
+                    // Intentional fallthrough.
+                case JobInfo.BACKOFF_POLICY_EXPONENTIAL: {
+                    long backoff = initialBackoffMillis;
+                    if (backoff < mConstants.MIN_EXP_BACKOFF_TIME_MS) {
+                        backoff = mConstants.MIN_EXP_BACKOFF_TIME_MS;
+                    }
+                    delayMillis = (long) Math.scalb(backoff, backoffAttempts - 1);
                 }
-            case JobInfo.BACKOFF_POLICY_EXPONENTIAL: {
-                long backoff = initialBackoffMillis;
-                if (backoff < mConstants.MIN_EXP_BACKOFF_TIME_MS) {
-                    backoff = mConstants.MIN_EXP_BACKOFF_TIME_MS;
-                }
-                delayMillis = (long) Math.scalb(backoff, backoffAttempts - 1);
-            } break;
+                break;
+            }
+            delayMillis =
+                    Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
+            earliestRuntimeMs = elapsedNowMillis + delayMillis;
         }
-        delayMillis =
-                Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
         JobStatus newJob = new JobStatus(failureToReschedule,
-                elapsedNowMillis + delayMillis,
+                earliestRuntimeMs,
                 JobStatus.NO_LATEST_RUNTIME, numFailures, numSystemStops,
                 failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis(),
                 failureToReschedule.getCumulativeExecutionTimeMs());
@@ -4001,12 +4020,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (job.getRequiredNetwork() != null
                     && CompatChanges.isChangeEnabled(
                             REQUIRE_NETWORK_PERMISSIONS_FOR_CONNECTIVITY_JOBS, uid)) {
-                // All networking, including with the local network and even local to the device,
-                // requires the INTERNET permission.
-                if (!hasPermission(uid, pid, Manifest.permission.INTERNET)) {
-                    throw new SecurityException(Manifest.permission.INTERNET
-                            + " required for jobs with a connectivity constraint");
-                }
                 if (!hasPermission(uid, pid, Manifest.permission.ACCESS_NETWORK_STATE)) {
                     throw new SecurityException(Manifest.permission.ACCESS_NETWORK_STATE
                             + " required for jobs with a connectivity constraint");

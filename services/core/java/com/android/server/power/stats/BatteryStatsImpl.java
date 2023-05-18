@@ -1675,6 +1675,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     String mLastWakeupReason = null;
     long mLastWakeupUptimeMs = 0;
+    long mLastWakeupElapsedTimeMs = 0;
     private final HashMap<String, SamplingTimer> mWakeupReasonStats = new HashMap<>();
 
     public Map<String, ? extends Timer> getWakeupReasonStats() {
@@ -5048,7 +5049,7 @@ public class BatteryStatsImpl extends BatteryStats {
             SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
             timer.add(deltaUptimeMs * 1000, 1, elapsedRealtimeMs); // time in in microseconds
             FrameworkStatsLog.write(FrameworkStatsLog.KERNEL_WAKEUP_REPORTED, mLastWakeupReason,
-                    /* duration_usec */ deltaUptimeMs * 1000);
+                    /* duration_usec */ deltaUptimeMs * 1000, mLastWakeupElapsedTimeMs);
             mLastWakeupReason = null;
         }
     }
@@ -5059,6 +5060,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mHistory.recordWakeupEvent(elapsedRealtimeMs, uptimeMs, reason);
         mLastWakeupReason = reason;
         mLastWakeupUptimeMs = uptimeMs;
+        mLastWakeupElapsedTimeMs = elapsedRealtimeMs;
     }
 
     @GuardedBy("this")

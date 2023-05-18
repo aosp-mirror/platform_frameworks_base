@@ -107,6 +107,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManagerInternal;
+import android.provider.DeviceConfig;
 import android.system.Os;
 import android.system.OsConstants;
 import android.text.TextUtils;
@@ -180,6 +181,8 @@ public final class ProcessList {
     // A system property to control if obb app data isolation is enabled in vold.
     static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
+
+    private static final String APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = ":isSdkSandboxNext";
 
     // OOM adjustments for processes in various states:
 
@@ -537,6 +540,78 @@ public final class ProcessList {
     private final int[] mZygoteSigChldMessage = new int[3];
 
     ActivityManagerGlobalLock mProcLock;
+
+    private static final String PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS =
+            "apply_sdk_sandbox_next_restrictions";
+    private static final boolean DEFAULT_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = false;
+
+    @GuardedBy("mService")
+    private ProcessListSettingsListener mProcessListSettingsListener;
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    ProcessListSettingsListener getProcessListSettingsListener() {
+        synchronized (mService) {
+            if (mProcessListSettingsListener == null) {
+                mProcessListSettingsListener = new ProcessListSettingsListener(mService.mContext);
+                mProcessListSettingsListener.registerObserver();
+            }
+            return mProcessListSettingsListener;
+        }
+    }
+
+    static class ProcessListSettingsListener implements DeviceConfig.OnPropertiesChangedListener {
+
+        private final Context mContext;
+        private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
+        private boolean mSdkSandboxApplyRestrictionsNext =
+                DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ADSERVICES,
+                PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS,
+                DEFAULT_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS);
+
+        ProcessListSettingsListener(Context context) {
+            mContext = context;
+        }
+
+        private void registerObserver() {
+            DeviceConfig.addOnPropertiesChangedListener(
+                    DeviceConfig.NAMESPACE_ADSERVICES, mContext.getMainExecutor(), this);
+        }
+
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+        void unregisterObserver() {
+            DeviceConfig.removeOnPropertiesChangedListener(this);
+        }
+
+        boolean applySdkSandboxRestrictionsNext() {
+            synchronized (mLock) {
+                return mSdkSandboxApplyRestrictionsNext;
+            }
+        }
+
+        @Override
+        public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
+            synchronized (mLock) {
+                for (String name : properties.getKeyset()) {
+                    if (name == null) {
+                        continue;
+                    }
+
+                    switch (name) {
+                        case PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS:
+                            mSdkSandboxApplyRestrictionsNext =
+                                properties.getBoolean(
+                                    PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS,
+                                    DEFAULT_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS);
+                            break;
+                        default:
+                    }
+                }
+            }
+        }
+    }
 
     final class IsolatedUidRange {
         @VisibleForTesting
@@ -1883,8 +1958,9 @@ public final class ProcessList {
                         new IllegalStateException("SELinux tag not defined for "
                                 + app.info.packageName + " (uid " + app.uid + ")"));
             }
-            final String seInfo = app.info.seInfo
-                    + (TextUtils.isEmpty(app.info.seInfoUser) ? "" : app.info.seInfoUser);
+
+            String seInfo = updateSeInfo(app);
+
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
             final String entryPoint = "android.app.ActivityThread";
@@ -1905,6 +1981,21 @@ public final class ProcessList {
                     false, false, true, false, false, app.userId, "start failure");
             return false;
         }
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mService")
+    String updateSeInfo(ProcessRecord app) {
+        String extraInfo = "";
+        // By the time the first the SDK sandbox process is started, device config service
+        // should be available.
+        if (app.isSdkSandbox
+                && getProcessListSettingsListener().applySdkSandboxRestrictionsNext()) {
+            extraInfo = APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS;
+        }
+
+        return app.info.seInfo
+                + (TextUtils.isEmpty(app.info.seInfoUser) ? "" : app.info.seInfoUser) + extraInfo;
     }
 
 

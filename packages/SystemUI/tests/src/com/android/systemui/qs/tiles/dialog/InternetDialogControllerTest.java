@@ -43,6 +43,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -959,6 +960,26 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         String dds = spyController.getMobileNetworkSummary(SUB_ID);
 
         assertThat(dds).contains(mContext.getString(R.string.carrier_network_change_mode));
+    }
+
+    @Test
+    public void onStop_cleanUp() {
+        doReturn(SUB_ID).when(mTelephonyManager).getSubscriptionId();
+        assertThat(mInternetDialogController.mSubIdTelephonyManagerMap.get(SUB_ID)).isEqualTo(
+                mTelephonyManager);
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.get(SUB_ID)).isNotNull();
+
+        mInternetDialogController.onStop();
+
+        verify(mTelephonyManager).unregisterTelephonyCallback(any(TelephonyCallback.class));
+        assertThat(mInternetDialogController.mSubIdTelephonyDisplayInfoMap.isEmpty()).isTrue();
+        assertThat(mInternetDialogController.mSubIdTelephonyManagerMap.isEmpty()).isTrue();
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.isEmpty()).isTrue();
+        verify(mSubscriptionManager).removeOnSubscriptionsChangedListener(mInternetDialogController
+                .mOnSubscriptionsChangedListener);
+        verify(mAccessPointController).removeAccessPointCallback(mInternetDialogController);
+        verify(mConnectivityManager).unregisterNetworkCallback(
+                any(ConnectivityManager.NetworkCallback.class));
     }
 
     private String getResourcesString(String name) {

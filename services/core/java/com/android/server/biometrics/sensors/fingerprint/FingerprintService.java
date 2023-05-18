@@ -91,6 +91,7 @@ import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvider;
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21;
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21UdfpsMock;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
 import com.google.android.collect.Lists;
 
@@ -328,6 +329,16 @@ public class FingerprintService extends SystemService {
                     Slog.e(TAG, "Invalid package", e);
                     return -1;
                 }
+            }
+            final long identity2 = Binder.clearCallingIdentity();
+            try {
+                VirtualDeviceManagerInternal vdm = getLocalService(
+                        VirtualDeviceManagerInternal.class);
+                if (vdm != null) {
+                    vdm.onAuthenticationPrompt(callingUid);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity2);
             }
             return provider.second.scheduleAuthenticate(token, operationId,
                     0 /* cookie */, new ClientMonitorCallbackConverter(receiver), options,

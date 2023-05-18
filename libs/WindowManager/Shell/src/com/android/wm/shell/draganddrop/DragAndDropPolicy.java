@@ -266,6 +266,7 @@ public class DragAndDropPolicy {
         final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
         final Bundle opts = intent.hasExtra(EXTRA_ACTIVITY_OPTIONS)
                 ? intent.getBundleExtra(EXTRA_ACTIVITY_OPTIONS) : new Bundle();
+        final UserHandle user = intent.getParcelableExtra(EXTRA_USER);
 
         if (isTask) {
             final int taskId = intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
@@ -273,14 +274,14 @@ public class DragAndDropPolicy {
         } else if (isShortcut) {
             final String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
             final String id = intent.getStringExtra(EXTRA_SHORTCUT_ID);
-            final UserHandle user = intent.getParcelableExtra(EXTRA_USER);
             mStarter.startShortcut(packageName, id, position, opts, user);
         } else {
             final PendingIntent launchIntent = intent.getParcelableExtra(EXTRA_PENDING_INTENT);
             // Put BAL flags to avoid activity start aborted.
             opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
             opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
-            mStarter.startIntent(launchIntent, null /* fillIntent */, position, opts);
+            mStarter.startIntent(launchIntent, user.getIdentifier(), null /* fillIntent */,
+                    position, opts);
         }
     }
 
@@ -334,8 +335,8 @@ public class DragAndDropPolicy {
         void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options);
         void startShortcut(String packageName, String shortcutId, @SplitPosition int position,
                 @Nullable Bundle options, UserHandle user);
-        void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
-                @Nullable Bundle options);
+        void startIntent(PendingIntent intent, int userId, Intent fillInIntent,
+                @SplitPosition int position, @Nullable Bundle options);
         void enterSplitScreen(int taskId, boolean leftOrTop);
 
         /**
@@ -379,8 +380,8 @@ public class DragAndDropPolicy {
         }
 
         @Override
-        public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent, int position,
-                @Nullable Bundle options) {
+        public void startIntent(PendingIntent intent, int userId, @Nullable Intent fillInIntent,
+                int position, @Nullable Bundle options) {
             try {
                 intent.send(mContext, 0, fillInIntent, null, null, null, options);
             } catch (PendingIntent.CanceledException e) {

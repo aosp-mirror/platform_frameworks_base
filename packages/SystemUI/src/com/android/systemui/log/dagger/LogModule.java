@@ -60,7 +60,7 @@ public class LogModule {
         if (Compile.IS_DEBUG && notifPipelineFlags.isDevLoggingEnabled()) {
             maxSize *= 10;
         }
-        return factory.create("NotifLog", maxSize, false /* systrace */);
+        return factory.create("NotifLog", maxSize, Compile.IS_DEBUG /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to notifications on the lockscreen. */
@@ -373,6 +373,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for use by {@link com.android.keyguard.KeyguardUpdateMonitor}.
+     */
+    @Provides
+    @SysUISingleton
+    @CarrierTextManagerLog
+    public static LogBuffer provideCarrierTextManagerLog(LogBufferFactory factory) {
+        return factory.create("CarrierTextManagerLog", 100);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for use by {@link com.android.systemui.ScreenDecorations}.
      */
     @Provides
@@ -391,6 +401,17 @@ public class LogModule {
     @FaceAuthLog
     public static LogBuffer provideFaceAuthLog(LogBufferFactory factory) {
         return factory.create("DeviceEntryFaceAuthRepositoryLog", 300);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by classes in the
+     *  {@link com.android.systemui.keyguard.bouncer} package.
+     */
+    @Provides
+    @SysUISingleton
+    @BouncerLog
+    public static LogBuffer provideBouncerLog(LogBufferFactory factory) {
+        return factory.create("BouncerLog", 100);
     }
 
     /**
@@ -416,9 +437,17 @@ public class LogModule {
     /** Provides a logging buffer for the primary bouncer. */
     @Provides
     @SysUISingleton
-    @BouncerLog
+    @BouncerTableLog
     public static TableLogBuffer provideBouncerLogBuffer(TableLogBufferFactory factory) {
-        return factory.create("BouncerLog", 250);
+        return factory.create("BouncerTableLog", 250);
+    }
+
+    /** Provides a table logging buffer for the Monitor. */
+    @Provides
+    @SysUISingleton
+    @MonitorLog
+    public static TableLogBuffer provideMonitorTableLogBuffer(TableLogBufferFactory factory) {
+        return factory.create("MonitorLog", 250);
     }
 
     /**

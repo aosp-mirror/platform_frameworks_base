@@ -2962,6 +2962,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mDisplaySwitchTransitionLauncher.requestDisplaySwitchTransitionIfNeeded(mDisplayId,
                         mInitialDisplayWidth, mInitialDisplayHeight, newWidth, newHeight);
                 mDisplayRotation.physicalDisplayChanged();
+                mDisplayPolicy.physicalDisplayChanged();
             }
 
             // If there is an override set for base values - use it, otherwise use new values.
@@ -2993,6 +2994,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             reconfigureDisplayLocked();
 
             if (physicalDisplayChanged) {
+                mDisplayPolicy.physicalDisplayUpdated();
                 mDisplaySwitchTransitionLauncher.onDisplayUpdated(currentRotation, getRotation(),
                         getDisplayAreaInfo());
             }
@@ -3042,7 +3044,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         + mBaseDisplayHeight + " on display:" + getDisplayId());
             }
         }
-        if (mDisplayReady) {
+        if (mDisplayReady && !mDisplayPolicy.shouldKeepCurrentDecorInsets()) {
             mDisplayPolicy.mDecorInsets.invalidate();
         }
     }
@@ -6691,9 +6693,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /**
      * Start recording if this DisplayContent no longer has content. Stop recording if it now
-     * has content or the display is not on.
+     * has content or the display is not on. Update recording if the content has changed (for
+     * example, the user has granted consent to token re-use, so we can now start mirroring).
      */
-    @VisibleForTesting void updateRecording() {
+    void updateRecording() {
         if (mContentRecorder == null || !mContentRecorder.isContentRecordingSessionSet()) {
             if (!setDisplayMirroring()) {
                 return;

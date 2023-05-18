@@ -37,6 +37,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,9 +78,10 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, FalsingCollector falsingCollector,
-            EmergencyButtonController emergencyButtonController) {
+            EmergencyButtonController emergencyButtonController,
+            FeatureFlags featureFlags) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
-                messageAreaControllerFactory);
+                messageAreaControllerFactory, featureFlags);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
@@ -179,10 +181,10 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                     handleAttemptLockout(deadline);
                 }
             }
+            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             if (timeoutMs == 0) {
                 mMessageAreaController.setMessage(mView.getWrongPasswordStringId());
             }
-            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             startErrorAnimation();
         }
     }

@@ -34,6 +34,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.PowerExemptionManager;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
@@ -55,12 +56,14 @@ import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,6 +101,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private PowerExemptionManager mPowerExemptionManager = mock(PowerExemptionManager.class);
     private KeyguardManager mKeyguardManager = mock(KeyguardManager.class);
     private FeatureFlags mFlags = mock(FeatureFlags.class);
+    private UserTracker mUserTracker = mock(UserTracker.class);
 
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private MediaOutputDialog mMediaOutputDialog;
@@ -119,13 +123,17 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         when(mMediaController.getMetadata()).thenReturn(mMediaMetadata);
         when(mMediaMetadata.getDescription()).thenReturn(mMediaDescription);
         mMediaControllers.add(mMediaController);
-        when(mMediaSessionManager.getActiveSessions(any())).thenReturn(mMediaControllers);
+        final UserHandle userHandle = mock(UserHandle.class);
+        when(mUserTracker.getUserHandle()).thenReturn(userHandle);
+        when(mMediaSessionManager.getActiveSessionsForUser(any(),
+                Mockito.eq(userHandle))).thenReturn(
+                mMediaControllers);
 
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
-                mKeyguardManager, mFlags);
+                mKeyguardManager, mFlags, mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = makeTestDialog(mMediaOutputController);
         mMediaOutputDialog.show();

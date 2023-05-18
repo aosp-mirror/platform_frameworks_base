@@ -104,6 +104,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final InputMonitorFactory mInputMonitorFactory;
     private TaskOperations mTaskOperations;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
+    private final Transitions mTransitions;
 
     private Optional<SplitScreenController> mSplitScreenController;
 
@@ -118,6 +119,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
+            Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             Optional<SplitScreenController> splitScreenController) {
@@ -128,6 +130,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 taskOrganizer,
                 displayController,
                 syncQueue,
+                transitions,
                 desktopModeController,
                 desktopTasksController,
                 splitScreenController,
@@ -144,6 +147,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
+            Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             Optional<SplitScreenController> splitScreenController,
@@ -158,6 +162,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mDisplayController = displayController;
         mSplitScreenController = splitScreenController;
         mSyncQueue = syncQueue;
+        mTransitions = transitions;
         mDesktopModeController = desktopModeController;
         mDesktopTasksController = desktopTasksController;
 
@@ -818,7 +823,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         } else {
             windowDecoration.createResizeVeil();
             return new VeiledResizeTaskPositioner(mTaskOrganizer, windowDecoration,
-                    mDisplayController, disallowedAreaForEndBounds, mDragStartListener);
+                    mDisplayController, disallowedAreaForEndBounds, mDragStartListener,
+                    mTransitions);
         }
     }
 

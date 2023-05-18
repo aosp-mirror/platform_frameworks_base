@@ -439,7 +439,9 @@ final class InputMonitor {
                                 ? mDisplayContent.getImeInputTarget().getActivityRecord() : null;
                         if (app != null) {
                             mDisplayContent.removeImeSurfaceImmediately();
-                            mDisplayContent.mAtmService.takeTaskSnapshot(app.getTask().mTaskId);
+                            if (app.getTask() != null) {
+                                mDisplayContent.mAtmService.takeTaskSnapshot(app.getTask().mTaskId);
+                            }
                         }
                     } else {
                         // Disable IME icon explicitly when IME attached to the app in case

@@ -810,7 +810,7 @@ class JobConcurrencyManager {
                 mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable,
                 mRecycledAssignmentInfo, mRecycledPrivilegedState);
 
-        noteConcurrency();
+        noteConcurrency(true);
     }
 
     @VisibleForTesting
@@ -1437,11 +1437,13 @@ class JobConcurrencyManager {
         }
     }
 
-    private void noteConcurrency() {
+    private void noteConcurrency(boolean logForHistogram) {
         mService.mJobPackageTracker.noteConcurrency(mRunningJobs.size(),
                 // TODO: log per type instead of only TOP
                 mWorkCountTracker.getRunningJobCount(WORK_TYPE_TOP));
-        sConcurrencyHistogramLogger.logSample(mActiveServices.size());
+        if (logForHistogram) {
+            sConcurrencyHistogramLogger.logSample(mActiveServices.size());
+        }
     }
 
     @GuardedBy("mLock")
@@ -1582,7 +1584,9 @@ class JobConcurrencyManager {
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         if (pendingJobQueue.size() == 0) {
             worker.clearPreferredUid();
-            noteConcurrency();
+            // Don't log the drop in concurrency to the histogram, otherwise, we'll end up
+            // overcounting lower concurrency values as jobs end execution.
+            noteConcurrency(false);
             return;
         }
         if (mActiveServices.size() >= mSteadyStateConcurrencyLimit) {
@@ -1612,7 +1616,9 @@ class JobConcurrencyManager {
                 // scheduled), but we should
                 // be able to stop the other jobs soon so don't start running anything new until we
                 // get back below the limit.
-                noteConcurrency();
+                // Don't log the drop in concurrency to the histogram, otherwise, we'll end up
+                // overcounting lower concurrency values as jobs end execution.
+                noteConcurrency(false);
                 return;
             }
         }
@@ -1761,7 +1767,9 @@ class JobConcurrencyManager {
             }
         }
 
-        noteConcurrency();
+        // Don't log the drop in concurrency to the histogram, otherwise, we'll end up
+        // overcounting lower concurrency values as jobs end execution.
+        noteConcurrency(false);
     }
 
     /**

@@ -150,7 +150,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         List<CredentialOption> filteredOptions = new ArrayList<>();
         for (CredentialOption option : clientRequest.getCredentialOptions()) {
             if (providerCapabilities.contains(option.getType())
-                    && isProviderAllowed(option, info.getComponentName())
+                    && isProviderAllowed(option, info)
                     && checkSystemProviderRequirement(option, info.isSystemProvider())) {
                 Slog.i(TAG, "Option of type: " + option.getType() + " meets all filtering"
                         + "conditions");
@@ -167,9 +167,14 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return null;
     }
 
-    private static boolean isProviderAllowed(CredentialOption option, ComponentName componentName) {
+    private static boolean isProviderAllowed(CredentialOption option,
+            CredentialProviderInfo providerInfo) {
+        if (providerInfo.isSystemProvider()) {
+            // Always allow system providers , including the remote provider
+            return true;
+        }
         if (!option.getAllowedProviders().isEmpty() && !option.getAllowedProviders().contains(
-                componentName)) {
+                providerInfo.getComponentName())) {
             Slog.i(TAG, "Provider allow list specified but does not contain this provider");
             return false;
         }
@@ -435,7 +440,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         BeginGetCredentialResponse response = PendingIntentResultHandler
                 .extractResponseContent(providerPendingIntentResponse
                         .getResultData());
-        mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/true);
+        mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/true, null);
         if (response != null && !mProviderResponseDataHandler.isEmptyResponse(response)) {
             addToInitialRemoteResponse(response, /*isInitialResponse=*/ false);
             // Additional content received is in the form of new response content.
@@ -473,12 +478,14 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         addToInitialRemoteResponse(response, /*isInitialResponse=*/true);
         // Log the data.
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false,
+                    null);
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
             return;
         }
-        mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
+        mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false,
+                null);
         updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
                 /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }

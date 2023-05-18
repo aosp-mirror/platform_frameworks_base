@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_DEFAULT;
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_ONE_HANDED;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -63,7 +64,9 @@ import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.biometrics.SideFpsUiRequestSource;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
@@ -195,11 +198,15 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         when(mKeyguardPasswordView.getWindowInsetsController()).thenReturn(mWindowInsetsController);
         when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(SecurityMode.PIN);
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
+        FakeFeatureFlags featureFlags = new FakeFeatureFlags();
+        featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true);
+
         mKeyguardPasswordViewController = new KeyguardPasswordViewController(
                 (KeyguardPasswordView) mKeyguardPasswordView, mKeyguardUpdateMonitor,
                 SecurityMode.Password, mLockPatternUtils, null,
                 mKeyguardMessageAreaControllerFactory, null, null, mEmergencyButtonController,
-                null, mock(Resources.class), null, mKeyguardViewController);
+                null, mock(Resources.class), null, mKeyguardViewController,
+                featureFlags);
 
         mKeyguardSecurityContainerController = new KeyguardSecurityContainerController(
                 mView, mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
@@ -683,6 +690,14 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     public void testSideFpsControllerHide() {
         mKeyguardSecurityContainerController.updateSideFpsVisibility(/* isVisible= */ false);
         verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
+    }
+
+    @Test
+    public void setExpansion_setsAlpha() {
+        mKeyguardSecurityContainerController.setExpansion(EXPANSION_VISIBLE);
+
+        verify(mView).setAlpha(1f);
+        verify(mView).setTranslationY(0f);
     }
 
     private KeyguardSecurityContainer.SwipeListener getRegisteredSwipeListener() {

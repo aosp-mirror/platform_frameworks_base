@@ -42,6 +42,8 @@ public class DeviceStateCacheImpl extends DeviceStateCache {
 
     private AtomicInteger mDeviceOwnerType = new AtomicInteger(NO_DEVICE_OWNER);
     private Map<Integer, Boolean> mHasProfileOwner = new ConcurrentHashMap<>();
+    private Map<Integer, Boolean> mAffiliationWithDevice = new ConcurrentHashMap<>();
+
 
     @GuardedBy("mLock")
     private boolean mIsDeviceProvisioned = false;
@@ -68,6 +70,19 @@ public class DeviceStateCacheImpl extends DeviceStateCache {
         } else {
             mHasProfileOwner.remove(userId);
         }
+    }
+
+    void setHasAffiliationWithDevice(int userId, Boolean hasAffiliateProfileOwner) {
+        if (hasAffiliateProfileOwner) {
+            mAffiliationWithDevice.put(userId, true);
+        } else {
+            mAffiliationWithDevice.remove(userId);
+        }
+    }
+
+    @Override
+    public boolean hasAffiliationWithDevice(int userId) {
+        return mAffiliationWithDevice.getOrDefault(userId, false);
     }
 
     @Override

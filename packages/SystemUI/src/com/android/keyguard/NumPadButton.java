@@ -116,7 +116,12 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
      * @param isTransparentMode
      */
     public void setTransparentMode(boolean isTransparentMode) {
+        if (mIsTransparentMode == isTransparentMode) {
+            return;
+        }
+
         mIsTransparentMode = isTransparentMode;
+
         if (isTransparentMode) {
             setBackgroundColor(getResources().getColor(android.R.color.transparent));
         } else {

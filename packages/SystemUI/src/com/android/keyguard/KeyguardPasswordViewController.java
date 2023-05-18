@@ -40,6 +40,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.List;
@@ -104,10 +105,11 @@ public class KeyguardPasswordViewController
             @Main DelayableExecutor mainExecutor,
             @Main Resources resources,
             FalsingCollector falsingCollector,
-            KeyguardViewController keyguardViewController) {
+            KeyguardViewController keyguardViewController,
+            FeatureFlags featureFlags) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
-                emergencyButtonController);
+                emergencyButtonController, featureFlags);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
         mMainExecutor = mainExecutor;

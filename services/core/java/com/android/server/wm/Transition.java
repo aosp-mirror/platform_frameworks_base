@@ -21,6 +21,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -959,8 +961,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     true /* beforeStopping */)) {
                 return false;
             }
-            return mController.mAtm.enterPictureInPictureMode(ar, ar.pictureInPictureArgs,
-                    false /* fromClient */, true /* isAutoEnter */);
+            final int prevMode = ar.getTask().getWindowingMode();
+            final boolean inPip = mController.mAtm.enterPictureInPictureMode(ar,
+                    ar.pictureInPictureArgs, false /* fromClient */, true /* isAutoEnter */);
+            final int currentMode = ar.getTask().getWindowingMode();
+            if (prevMode == WINDOWING_MODE_FULLSCREEN && currentMode == WINDOWING_MODE_PINNED
+                    && mTransientLaunches != null
+                    && ar.mDisplayContent.hasTopFixedRotationLaunchingApp()) {
+                // There will be a display configuration change after finishing this transition.
+                // Skip dispatching the change for PiP task to avoid its activity drawing for the
+                // intermediate state which will cause flickering. The final PiP bounds in new
+                // rotation will be applied by PipTransition.
+                ar.mDisplayContent.mPinnedTaskController.setEnterPipTransaction(null);
+            }
+            return inPip;
         }
 
         // Legacy pip-entry (not via isAutoEnterEnabled).
@@ -1193,6 +1207,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final AsyncRotationController asyncRotationController = dc.getAsyncRotationController();
             if (asyncRotationController != null && containsChangeFor(dc, mTargets)) {
                 asyncRotationController.onTransitionFinished();
+            }
+            if (hasParticipatedDisplay && dc.mDisplayRotationCompatPolicy != null) {
+                final ChangeInfo changeInfo = mChanges.get(dc);
+                if (changeInfo != null
+                        && changeInfo.mRotation != dc.getWindowConfiguration().getRotation()) {
+                    dc.mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
+                }
             }
             if (mTransientLaunches != null) {
                 InsetsControlTarget prevImeTarget = dc.getImeTarget(
@@ -1449,6 +1470,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
                 if (ar == null || ar.getTask() == null
                         || ar.getTask().isVisibleRequested()) continue;
+                final ChangeInfo change = mChanges.get(ar);
+                // Intentionally skip record snapshot for changes originated from PiP.
+                if (change != null && change.mWindowingMode == WINDOWING_MODE_PINNED) continue;
                 mController.mSnapshotController.mTaskSnapshotController.recordSnapshot(
                         ar.getTask(), false /* allowSnapshotHome */);
             }
@@ -1509,7 +1533,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         mController.mLoggerHandler.post(mLogger::logOnSend);
         if (mLogger.mInfo != null) {
-            mController.mTransitionTracer.logSentTransition(this, mTargets, info);
+            mController.mTransitionTracer.logSentTransition(this, mTargets);
         }
     }
 

@@ -75,7 +75,7 @@ public class CallMetadataSyncConnectionServiceTest {
         callMetadataSyncData.addCall(call);
         mSyncConnectionService.mCrossDeviceSyncControllerCallback.processContextSyncMessage(
                 /* associationId= */ 0, callMetadataSyncData);
-        verify(mMockTelecomManager, times(1)).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, times(0)).addNewIncomingCall(any(), any());
     }
 
     @Test

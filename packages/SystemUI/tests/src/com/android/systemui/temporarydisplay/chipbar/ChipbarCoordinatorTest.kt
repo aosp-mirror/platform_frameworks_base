@@ -17,6 +17,7 @@
 package com.android.systemui.temporarydisplay.chipbar
 
 import android.os.PowerManager
+import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -461,7 +462,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayView_vibrationEffect_doubleClickEffect() {
+    fun displayView_vibrationEffect_doubleClickEffectWithHardwareFeedback() {
         underTest.displayView(
             createChipbarInfo(
                 Icon.Resource(R.id.check_box, null),
@@ -471,7 +472,14 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
             )
         )
 
-        verify(vibratorHelper).vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK))
+        verify(vibratorHelper)
+            .vibrate(
+                any(),
+                any(),
+                eq(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK)),
+                any(),
+                eq(VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK)),
+            )
     }
 
     /** Regression test for b/266119467. */

@@ -67,7 +67,10 @@ class ShadeViewDiffer(
     fun getViewLabel(view: View): String =
             nodes.values.firstOrNull { node -> node.view === view }?.label ?: view.toString()
 
-    private fun detachChildren(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
+    private fun detachChildren(
+        parentNode: ShadeNode,
+        specMap: Map<NodeController, NodeSpec>
+    ) = traceSection("detachChildren") {
         val views = nodes.values.associateBy { it.view }
         fun detachRecursively(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
             val parentSpec = specMap[parentNode.controller]
@@ -124,7 +127,10 @@ class ShadeViewDiffer(
         }
     }
 
-    private fun attachChildren(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
+    private fun attachChildren(
+        parentNode: ShadeNode,
+        specMap: Map<NodeController, NodeSpec>
+    ): Unit = traceSection("attachChildren") {
         val parentSpec = checkNotNull(specMap[parentNode.controller])
 
         for ((index, childSpec) in parentSpec.children.withIndex()) {

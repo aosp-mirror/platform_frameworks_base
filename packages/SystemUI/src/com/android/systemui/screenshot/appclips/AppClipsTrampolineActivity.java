@@ -21,7 +21,6 @@ import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED;
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_SUCCESS;
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED;
 import static android.content.Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE;
-import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 
 import static com.android.systemui.flags.Flags.SCREENSHOT_APP_CLIPS;
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_TRIGGERED;
@@ -34,6 +33,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
@@ -82,6 +82,8 @@ public class AppClipsTrampolineActivity extends Activity {
     private static final String TAG = AppClipsTrampolineActivity.class.getSimpleName();
     static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
     static final String EXTRA_SCREENSHOT_URI = TAG + "SCREENSHOT_URI";
+    @VisibleForTesting
+    static final String EXTRA_USE_WP_USER = TAG + "USE_WP_USER";
     static final String ACTION_FINISH_FROM_TRAMPOLINE = TAG + "FINISH_FROM_TRAMPOLINE";
     static final String EXTRA_RESULT_RECEIVER = TAG + "RESULT_RECEIVER";
     static final String EXTRA_CALLING_PACKAGE_NAME = TAG + "CALLING_PACKAGE_NAME";
@@ -98,6 +100,7 @@ public class AppClipsTrampolineActivity extends Activity {
     private final ResultReceiver mResultReceiver;
 
     private Intent mKillAppClipsBroadcastIntent;
+    private UserHandle mNotesAppUser;
 
     @Inject
     public AppClipsTrampolineActivity(DevicePolicyManager devicePolicyManager, FeatureFlags flags,
@@ -165,15 +168,21 @@ public class AppClipsTrampolineActivity extends Activity {
             return;
         }
 
+        mNotesAppUser = getUser();
+        if (getIntent().getBooleanExtra(EXTRA_USE_WP_USER, /* defaultValue= */ false)) {
+            // Get the work profile user internally instead of passing around via intent extras as
+            // this activity is exported apps could potentially mess around with intent extras.
+            mNotesAppUser = getWorkProfileUser().orElse(mNotesAppUser);
+        }
+
         String callingPackageName = getCallingPackage();
         Intent intent = new Intent().setComponent(componentName)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .putExtra(EXTRA_RESULT_RECEIVER, mResultReceiver)
                 .putExtra(EXTRA_CALLING_PACKAGE_NAME, callingPackageName);
-
         try {
-            // Start the App Clips activity.
-            startActivity(intent);
+            // Start the App Clips activity for the user corresponding to the notes app user.
+            startActivityAsUser(intent, mNotesAppUser);
 
             // Set up the broadcast intent that will inform the above App Clips activity to finish
             // when this trampoline activity is finished.
@@ -198,6 +207,13 @@ public class AppClipsTrampolineActivity extends Activity {
         }
     }
 
+    private Optional<UserHandle> getWorkProfileUser() {
+        return mUserTracker.getUserProfiles().stream()
+                .filter(profile -> mUserManager.isManagedProfile(profile.id))
+                .findFirst()
+                .map(UserInfo::getUserHandle);
+    }
+
     private void maybeStartActivityForWPUser() {
         UserHandle mainUser = mUserManager.getMainUser();
         if (mainUser == null) {
@@ -205,9 +221,13 @@ public class AppClipsTrampolineActivity extends Activity {
             return;
         }
 
-        // Start the activity as the main user with activity result forwarding.
+        // Start the activity as the main user with activity result forwarding. Set the intent extra
+        // so that the newly started trampoline activity starts the actual app clips activity as the
+        // work profile user. Starting the app clips activity as the work profile user is required
+        // to save the screenshot in work profile user storage and grant read permission to the URI.
         startActivityAsUser(
                 new Intent(this, AppClipsTrampolineActivity.class)
+                        .putExtra(EXTRA_USE_WP_USER, /* value= */ true)
                         .addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT), mainUser);
     }
 
@@ -221,7 +241,7 @@ public class AppClipsTrampolineActivity extends Activity {
         int callingPackageUid = 0;
         try {
             callingPackageUid = mPackageManager.getApplicationInfoAsUser(callingPackageName,
-                    APPLICATION_INFO_FLAGS, mUserTracker.getUserId()).uid;
+                    APPLICATION_INFO_FLAGS, mNotesAppUser.getIdentifier()).uid;
         } catch (NameNotFoundException e) {
             Log.d(TAG, "Couldn't find notes app UID " + e);
         }
@@ -254,14 +274,14 @@ public class AppClipsTrampolineActivity extends Activity {
 
             if (statusCode == CAPTURE_CONTENT_FOR_NOTE_SUCCESS) {
                 Uri uri = resultData.getParcelable(EXTRA_SCREENSHOT_URI, Uri.class);
-                convertedData.setData(uri).addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+                convertedData.setData(uri);
             }
 
             // Broadcast no longer required, setting it to null.
             mKillAppClipsBroadcastIntent = null;
 
             // Expand the note bubble before returning the result.
-            mNoteTaskController.showNoteTask(NoteTaskEntryPoint.APP_CLIPS);
+            mNoteTaskController.showNoteTaskAsUser(NoteTaskEntryPoint.APP_CLIPS, mNotesAppUser);
             setResult(RESULT_OK, convertedData);
             finish();
         }

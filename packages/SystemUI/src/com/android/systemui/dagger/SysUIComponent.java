@@ -42,6 +42,7 @@ import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
@@ -102,6 +103,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setTransitions(ShellTransitions t);
+
+        @BindsInstance
+        Builder setKeyguardTransitions(KeyguardTransitions k);
 
         @BindsInstance
         Builder setStartingSurface(Optional<StartingSurface> s);

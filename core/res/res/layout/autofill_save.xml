@@ -40,10 +40,10 @@
 
             <ImageView
                 android:id="@+id/autofill_save_icon"
-                android:scaleType="fitStart"
+                android:scaleType="fitCenter"
                 android:layout_gravity="center"
-                android:layout_width="@dimen/autofill_save_icon_size"
-                android:layout_height="@dimen/autofill_save_icon_size"/>
+                android:layout_height="@dimen/autofill_save_icon_max_height"
+                android:layout_width="fill_parent"/>
 
             <TextView
                 android:id="@+id/autofill_save_title"
@@ -60,7 +60,6 @@
                 android:id="@+id/autofill_save_custom_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/autofill_save_scroll_view_top_margin"
                 android:visibility="gone"/>
 
         </LinearLayout>

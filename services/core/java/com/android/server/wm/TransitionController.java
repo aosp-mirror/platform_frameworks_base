@@ -431,6 +431,19 @@ class TransitionController {
         return inCollectingTransition(wc) || inPlayingTransition(wc);
     }
 
+    /** Returns {@code true} if the id matches a collecting or playing transition. */
+    boolean inTransition(int syncId) {
+        if (mCollectingTransition != null && mCollectingTransition.getSyncId() == syncId) {
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (mPlayingTransitions.get(i).getSyncId() == syncId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** @return {@code true} if wc is in a participant subtree */
     boolean isTransitionOnDisplay(@NonNull DisplayContent dc) {
         if (mCollectingTransition != null && mCollectingTransition.isOnDisplay(dc)) {
@@ -503,8 +516,14 @@ class TransitionController {
      * playing, but can be "opened-up" for certain transition operations like calculating layers
      * for finishTransaction.
      */
-    boolean canAssignLayers() {
-        return mBuildingFinishLayers || !isPlaying();
+    boolean canAssignLayers(@NonNull WindowContainer wc) {
+        // Don't build window state into finish transaction in case another window is added or
+        // removed during transition playing.
+        if (mBuildingFinishLayers) {
+            return wc.asWindowState() == null;
+        }
+        // Always allow WindowState to assign layers since it won't affect transition.
+        return wc.asWindowState() != null || !isPlaying();
     }
 
     @WindowConfiguration.WindowingMode

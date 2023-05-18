@@ -13,87 +13,88 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center"
-              android:padding="@dimen/grant_admin_dialog_padding"
-              android:paddingBottom="0dp">
-    <ImageView
-        android:id="@+id/dialog_with_icon_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription=""/>
-    <TextView
-        android:id="@+id/dialog_with_icon_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        style="@style/DialogWithIconTitle"
-        android:text="@string/user_grant_admin_title"
-        android:textDirection="locale"/>
-    <TextView
-        android:id="@+id/dialog_with_icon_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:gravity="center"
-        style="@style/TextAppearanceSmall"
-        android:text=""
-        android:textDirection="locale"/>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/new_user_dialog_id">
+
     <LinearLayout
-        android:id="@+id/custom_layout"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingBottom="0dp">
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/button_panel"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:paddingBottom="0dp">
-        <Button
-            android:id="@+id/button_cancel"
-            style="@style/DialogButtonNegative"
-            android:layout_width="wrap_content"
-            android:buttonCornerRadius="28dp"
-            android:layout_height="wrap_content"
-            android:visibility="gone"/>
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" >
-        </Space>
-        <Button
-            android:id="@+id/button_back"
+        android:padding="@dimen/dialog_content_padding">
+        <ImageView
+            android:id="@+id/dialog_with_icon_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/DialogButtonNegative"
-            android:buttonCornerRadius="40dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:text="Back"
-            android:visibility="gone"
-        />
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="0.05"
-        >
-        </Space>
-        <Button
-            android:id="@+id/button_ok"
+            android:importantForAccessibility="no"/>
+        <TextView
+            android:id="@+id/dialog_with_icon_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/DialogButtonPositive"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="gone"
-        />
+            android:gravity="center"
+            style="@style/DialogWithIconTitle"/>
+        <TextView
+            android:id="@+id/dialog_with_icon_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:gravity="center"
+            style="@style/TextAppearanceSmall"/>
+
+        <LinearLayout
+            android:id="@+id/custom_layout"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/button_panel"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/button_cancel"
+                style="@style/DialogButtonNegative"
+                android:layout_width="wrap_content"
+                android:buttonCornerRadius="28dp"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1">
+            </Space>
+
+            <Button
+                android:id="@+id/button_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/DialogButtonNegative"
+                android:buttonCornerRadius="40dp"
+                android:visibility="gone"/>
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="0.05">
+            </Space>
+
+            <Button
+                android:id="@+id/button_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/DialogButtonPositive"
+                android:visibility="gone"
+            />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

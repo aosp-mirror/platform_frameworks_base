@@ -22,20 +22,14 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
-import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.text.TextUtils;
-import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Wraps IBiometricAuthenticator implementation and stores information about the authenticator,
@@ -73,7 +67,6 @@ public abstract class BiometricSensor {
     public final int id;
     public final @Authenticators.Types int oemStrength; // strength as configured by the OEM
     public final int modality;
-    @NonNull public final List<ComponentInfoInternal> componentInfo;
     public final IBiometricAuthenticator impl;
 
     private @Authenticators.Types int mUpdatedStrength; // updated by BiometricStrengthController
@@ -93,16 +86,15 @@ public abstract class BiometricSensor {
      */
     abstract boolean confirmationSupported();
 
-    BiometricSensor(@NonNull Context context, int modality, @NonNull SensorPropertiesInternal props,
-            IBiometricAuthenticator impl) {
+    BiometricSensor(@NonNull Context context, int id, int modality,
+            @Authenticators.Types int strength, IBiometricAuthenticator impl) {
         this.mContext = context;
-        this.id = props.sensorId;
+        this.id = id;
         this.modality = modality;
-        this.oemStrength = Utils.propertyStrengthToAuthenticatorStrength(props.sensorStrength);
-        this.componentInfo = Collections.unmodifiableList(props.componentInfo);
+        this.oemStrength = strength;
         this.impl = impl;
 
-        mUpdatedStrength = oemStrength;
+        mUpdatedStrength = strength;
         goToStateUnknown();
     }
 
@@ -186,25 +178,8 @@ public abstract class BiometricSensor {
         return "ID(" + id + ")"
                 + ", oemStrength: " + oemStrength
                 + ", updatedStrength: " + mUpdatedStrength
-                + ", modality: " + modality
+                + ", modality " + modality
                 + ", state: " + mSensorState
                 + ", cookie: " + mCookie;
-    }
-
-    protected void dump(@NonNull IndentingPrintWriter pw) {
-        pw.println(TextUtils.formatSimple("ID: %d", id));
-        pw.increaseIndent();
-        pw.println(TextUtils.formatSimple("oemStrength: %d", oemStrength));
-        pw.println(TextUtils.formatSimple("updatedStrength: %d", mUpdatedStrength));
-        pw.println(TextUtils.formatSimple("modality: %d", modality));
-        pw.println("componentInfo:");
-        for (ComponentInfoInternal info : componentInfo) {
-            pw.increaseIndent();
-            info.dump(pw);
-            pw.decreaseIndent();
-        }
-        pw.println(TextUtils.formatSimple("state: %d", mSensorState));
-        pw.println(TextUtils.formatSimple("cookie: %d", mCookie));
-        pw.decreaseIndent();
     }
 }

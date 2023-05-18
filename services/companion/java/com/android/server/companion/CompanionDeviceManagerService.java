@@ -306,6 +306,7 @@ public class CompanionDeviceManagerService extends SystemService {
         } else if (phase == PHASE_BOOT_COMPLETED) {
             // Run the Inactive Association Removal job service daily.
             InactiveAssociationsRemovalService.schedule(getContext());
+            mCrossDeviceSyncController.onBootCompleted();
         }
     }
 
@@ -1382,10 +1383,11 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback) {
+        public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback,
+                @CrossDeviceSyncControllerCallback.Type int type) {
             if (CompanionDeviceConfig.isEnabled(
                     CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
-                mCrossDeviceSyncController.registerCallMetadataSyncCallback(callback);
+                mCrossDeviceSyncController.registerCallMetadataSyncCallback(callback, type);
             }
         }
 

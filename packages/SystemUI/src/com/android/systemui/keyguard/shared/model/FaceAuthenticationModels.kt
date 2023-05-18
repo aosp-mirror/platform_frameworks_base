@@ -38,7 +38,8 @@ data class AcquiredAuthenticationStatus(val acquiredInfo: Int) : AuthenticationS
 object FailedAuthenticationStatus : AuthenticationStatus()
 
 /** Face authentication error message */
-data class ErrorAuthenticationStatus(val msgId: Int, val msg: String?) : AuthenticationStatus() {
+data class ErrorAuthenticationStatus(val msgId: Int, val msg: String? = null) :
+    AuthenticationStatus() {
     /**
      * Method that checks if [msgId] is a lockout error. A lockout error means that face
      * authentication is locked out.

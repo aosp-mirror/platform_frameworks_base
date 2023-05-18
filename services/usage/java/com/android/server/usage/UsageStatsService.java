@@ -2539,10 +2539,19 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public void reportChooserSelection(String packageName, int userId, String contentType,
-                                           String[] annotations, String action) {
+        public void reportChooserSelection(@NonNull String packageName, int userId,
+                @NonNull String contentType, String[] annotations, @NonNull String action) {
             if (packageName == null) {
-                Slog.w(TAG, "Event report user selecting a null package");
+                throw new IllegalArgumentException("Package selection must not be null.");
+            }
+            // A valid contentType and action must be provided for chooser selection events.
+            if (contentType == null || contentType.isBlank()
+                    || action == null || action.isBlank()) {
+                return;
+            }
+            // Verify if this package exists before reporting an event for it.
+            if (mPackageManagerInternal.getPackageUid(packageName, 0, userId) < 0) {
+                Slog.w(TAG, "Event report user selecting an invalid package");
                 return;
             }
 

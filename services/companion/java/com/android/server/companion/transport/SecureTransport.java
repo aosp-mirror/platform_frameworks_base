@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Future;
 
 class SecureTransport extends Transport implements SecureChannel.Callback {
     private final SecureChannel mSecureChannel;
@@ -68,24 +67,13 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
     }
 
     @Override
-    public Future<byte[]> requestForResponse(int message, byte[] data) {
-        // Check if channel is secured and start securing
-        if (!mShouldProcessRequests) {
-            Slog.d(TAG, "Establishing secure connection.");
-            try {
-                mSecureChannel.establishSecureConnection();
-            } catch (Exception e) {
-                Slog.w(TAG, "Failed to initiate secure channel handshake.", e);
-                onError(e);
-            }
-        }
-
-        return super.requestForResponse(message, data);
-    }
-
-    @Override
     protected void sendMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException {
+        // Check if channel is secured; otherwise start securing
+        if (!mShouldProcessRequests) {
+            establishSecureConnection();
+        }
+
         if (DEBUG) {
             Slog.d(TAG, "Queueing message 0x" + Integer.toHexString(message)
                     + " sequence " + sequence + " length " + data.length
@@ -100,6 +88,16 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
                     .putInt(data.length)
                     .put(data)
                     .array());
+        }
+    }
+
+    private void establishSecureConnection() {
+        Slog.d(TAG, "Establishing secure connection.");
+        try {
+            mSecureChannel.establishSecureConnection();
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to initiate secure channel handshake.", e);
+            onError(e);
         }
     }
 

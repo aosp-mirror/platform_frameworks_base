@@ -57,6 +57,30 @@ public final class MediaRoute2Info implements Parcelable {
         }
     };
 
+    /**
+     * The {@link #getOriginalId() original id} of the route that represents the built-in media
+     * route.
+     *
+     * <p>A route with this id will only be visible to apps with permission to do system routing,
+     * which means having {@link android.Manifest.permission#BLUETOOTH_CONNECT} and {@link
+     * android.Manifest.permission#BLUETOOTH_SCAN}, or {@link
+     * android.Manifest.permission#MODIFY_AUDIO_ROUTING}.
+     *
+     * @hide
+     */
+    public static final String ROUTE_ID_DEVICE = "DEVICE_ROUTE";
+
+    /**
+     * The {@link #getOriginalId() original id} of the route that represents the default system
+     * media route.
+     *
+     * <p>A route with this id will be visible to apps with no permission over system routing. See
+     * {@link #ROUTE_ID_DEVICE} for details.
+     *
+     * @hide
+     */
+    public static final String ROUTE_ID_DEFAULT = "DEFAULT_ROUTE";
+
     /** @hide */
     @IntDef({CONNECTION_STATE_DISCONNECTED, CONNECTION_STATE_CONNECTING,
             CONNECTION_STATE_CONNECTED})

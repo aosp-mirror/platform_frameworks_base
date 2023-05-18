@@ -18,6 +18,7 @@ package com.android.server.credentials.metrics.shared;
 
 import android.annotation.NonNull;
 
+import com.android.server.credentials.MetricUtilities;
 import com.android.server.credentials.metrics.EntryEnum;
 
 import java.util.Collections;
@@ -121,7 +122,7 @@ public class ResponseCollective {
      * @return a count of this particular entry enum stored by this provider
      */
     public int getCountForEntry(EntryEnum e) {
-        return mEntryCounts.get(e);
+        return mEntryCounts.getOrDefault(e, MetricUtilities.ZERO);
     }
 
     /**
@@ -167,7 +168,7 @@ public class ResponseCollective {
     public static <T> Map<T, Integer> combineTypeCountMaps(Map<T, Integer> first,
             Map<T, Integer> second) {
         for (T response : second.keySet()) {
-            first.merge(response, first.getOrDefault(response, 0), Integer::sum);
+            first.put(response, first.getOrDefault(response, 0) + second.get(response));
         }
         return first;
     }

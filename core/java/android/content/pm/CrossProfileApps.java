@@ -27,6 +27,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.AppOpsManager.Mode;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -110,8 +111,8 @@ public class CrossProfileApps {
                     component,
                     targetUser.getIdentifier(),
                     true,
-                    null,
-                    null);
+                    mContext.getActivityToken(),
+                    ActivityOptions.makeBasic().toBundle());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

@@ -112,8 +112,9 @@
     <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
     <dimen name="broadcast_dialog_margin">16dp</dimen>
 
-    <!-- Size of grant admin privileges dialog padding -->
-    <dimen name="grant_admin_dialog_padding">16dp</dimen>
+    <dimen name="dialog_content_padding">16dp</dimen>
+    <dimen name="radio_button_padding">12dp</dimen>
+    <dimen name="radio_button_padding_start">8dp</dimen>
 
     <dimen name="dialog_button_horizontal_padding">16dp</dimen>
     <dimen name="dialog_button_vertical_padding">8dp</dimen>

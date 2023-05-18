@@ -78,8 +78,15 @@ public class SplitScreenUtils {
         return taskInfo != null ? getPackageName(taskInfo.baseIntent) : null;
     }
 
-    /** Returns true if they are the same package. */
-    public static boolean samePackage(String packageName1, String packageName2) {
-        return packageName1 != null && packageName1.equals(packageName2);
+    /** Retrieve user id from a taskId */
+    public static int getUserId(int taskId, ShellTaskOrganizer taskOrganizer) {
+        final ActivityManager.RunningTaskInfo taskInfo = taskOrganizer.getRunningTaskInfo(taskId);
+        return taskInfo != null ? taskInfo.userId : -1;
+    }
+
+    /** Returns true if package names and user ids match. */
+    public static boolean samePackage(String packageName1, String packageName2,
+            int userId1, int userId2) {
+        return (packageName1 != null && packageName1.equals(packageName2)) && (userId1 == userId2);
     }
 }

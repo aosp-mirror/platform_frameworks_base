@@ -2231,7 +2231,7 @@ public abstract class WallpaperService extends Service {
 
             mDestroyed = true;
 
-            if (mIWallpaperEngine.mDisplayManager != null) {
+            if (mIWallpaperEngine != null && mIWallpaperEngine.mDisplayManager != null) {
                 mIWallpaperEngine.mDisplayManager.unregisterDisplayListener(mDisplayListener);
             }
 

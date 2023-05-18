@@ -42,6 +42,9 @@ message Telecom {
       ONGOING = 2;
       ON_HOLD = 3;
       RINGING_SILENCED = 4;
+      AUDIO_PROCESSING = 5;
+      RINGING_SIMULATED = 6;
+      DISCONNECTED = 7;
     }
     Status status = 3;
 
@@ -89,8 +92,6 @@ message Telecom {
     END = 6;
     PUT_ON_HOLD = 7;
     TAKE_OFF_HOLD = 8;
-    REJECT_AND_BLOCK = 9;
-    IGNORE = 10;
   }
 
   // The list of active calls.

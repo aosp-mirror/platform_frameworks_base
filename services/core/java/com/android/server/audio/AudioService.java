@@ -3373,8 +3373,13 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_ADJUST_STREAM_VOL, streamType,
-                direction/*val1*/, flags/*val2*/, callingPackage));
+        final VolumeEvent evt = new VolumeEvent(VolumeEvent.VOL_ADJUST_STREAM_VOL, streamType,
+                direction/*val1*/, flags/*val2*/, callingPackage);
+        sVolumeLogger.enqueue(evt);
+        // also logging mute/unmute calls to the dedicated logger
+        if (isMuteAdjust(direction)) {
+            sMuteLogger.enqueue(evt);
+        }
         adjustStreamVolume(streamType, direction, flags, callingPackage, callingPackage,
                 Binder.getCallingUid(), Binder.getCallingPid(), attributionTag,
                 callingHasAudioSettingsPermission(), AudioDeviceVolumeManager.ADJUST_MODE_NORMAL);
@@ -3475,7 +3480,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         // If either the client forces allowing ringer modes for this adjustment,
-        // or the stream type is one that is affected by ringer modes
+        // or stream is used for UI sonification
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
                 (isUiSoundsStreamType(streamTypeAlias))) {
             int ringerMode = getRingerModeInternal();
@@ -3495,6 +3500,13 @@ public class AudioService extends IAudioService.Stub
             // If suppressing a volume down adjustment in vibrate mode, display the UI hint
             if ((result & AudioManager.FLAG_SHOW_VIBRATE_HINT) != 0) {
                 flags |= AudioManager.FLAG_SHOW_VIBRATE_HINT;
+            }
+        } else if (isStreamMutedByRingerOrZenMode(streamTypeAlias) && streamState.mIsMuted) {
+            // if the stream is currently muted streams by ringer/zen mode
+            // then it cannot be unmuted (without FLAG_ALLOW_RINGER_MODES)
+            if (direction == AudioManager.ADJUST_TOGGLE_MUTE
+                    || direction == AudioManager.ADJUST_UNMUTE) {
+                adjustVolume = false;
             }
         }
 
@@ -6410,6 +6422,26 @@ public class AudioService extends IAudioService.Stub
                 .record();
 
         mDeviceBroker.setBluetoothScoOn(on, eventSource);
+    }
+
+    /** @see AudioManager#setA2dpSuspended(boolean) */
+    @android.annotation.EnforcePermission(android.Manifest.permission.BLUETOOTH_STACK)
+    public void setA2dpSuspended(boolean enable) {
+        super.setA2dpSuspended_enforcePermission();
+        final String eventSource = new StringBuilder("setA2dpSuspended(").append(enable)
+                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
+                .append(Binder.getCallingPid()).toString();
+        mDeviceBroker.setA2dpSuspended(enable, false /*internal*/, eventSource);
+    }
+
+    /** @see AudioManager#setA2dpSuspended(boolean) */
+    @android.annotation.EnforcePermission(android.Manifest.permission.BLUETOOTH_STACK)
+    public void setLeAudioSuspended(boolean enable) {
+        super.setLeAudioSuspended_enforcePermission();
+        final String eventSource = new StringBuilder("setLeAudioSuspended(").append(enable)
+                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
+                .append(Binder.getCallingPid()).toString();
+        mDeviceBroker.setLeAudioSuspended(enable, false /*internal*/, eventSource);
     }
 
     /** @see AudioManager#isBluetoothScoOn()
@@ -11020,6 +11052,11 @@ public class AudioService extends IAudioService.Stub
                         + " from system=" + mMicMuteFromSystemCached);
         dumpAccessibilityServiceUids(pw);
         dumpAssistantServicesUids(pw);
+
+        pw.print("  supportsBluetoothVariableLatency=");
+        pw.println(AudioSystem.supportsBluetoothVariableLatency());
+        pw.print("  isBluetoothVariableLatencyEnabled=");
+        pw.println(AudioSystem.isBluetoothVariableLatencyEnabled());
 
         dumpAudioPolicies(pw);
         mDynPolicyLogger.dump(pw);

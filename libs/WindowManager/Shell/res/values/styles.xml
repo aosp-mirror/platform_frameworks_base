@@ -151,12 +151,10 @@
         </item>
     </style>
 
-    <style name="ReachabilityEduHandLayout">
+    <style name="ReachabilityEduHandLayout" parent="Theme.AppCompat.Light">
         <item name="android:focusable">false</item>
         <item name="android:focusableInTouchMode">false</item>
         <item name="android:background">@android:color/transparent</item>
-        <item name="android:contentDescription">@string/restart_button_description</item>
-        <item name="android:visibility">invisible</item>
         <item name="android:lineSpacingExtra">-1sp</item>
         <item name="android:textSize">12sp</item>
         <item name="android:textAlignment">center</item>

@@ -318,11 +318,21 @@ public class CachedBluetoothDeviceManager {
             return mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
                 state);
         }
-        if (profileId == BluetoothProfile.CSIP_SET_COORDINATOR) {
+        if (profileId == BluetoothProfile.HEADSET
+                || profileId == BluetoothProfile.A2DP
+                || profileId == BluetoothProfile.LE_AUDIO
+                || profileId == BluetoothProfile.CSIP_SET_COORDINATOR) {
             return mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
                 state);
         }
         return false;
+    }
+
+    /** Handles when the device been set as active/inactive. */
+    public synchronized void onActiveDeviceChanged(CachedBluetoothDevice cachedBluetoothDevice) {
+        if (cachedBluetoothDevice.isHearingAidDevice()) {
+            mHearingAidDeviceManager.onActiveDeviceChanged(cachedBluetoothDevice);
+        }
     }
 
     public synchronized void onDeviceUnpaired(CachedBluetoothDevice device) {

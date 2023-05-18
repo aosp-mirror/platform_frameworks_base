@@ -67,6 +67,12 @@
     <dimen name="controls_header_horizontal_padding">12dp</dimen>
     <dimen name="controls_content_margin_horizontal">16dp</dimen>
 
+    <!-- Rear Display Education dimens -->
+    <dimen name="rear_display_animation_width">246dp</dimen>
+    <dimen name="rear_display_animation_height">180dp</dimen>
+    <dimen name="rear_display_title_top_padding">4dp</dimen>
+    <dimen name="rear_display_title_bottom_padding">0dp</dimen>
+
     <!-- Bouncer user switcher margins -->
     <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>
     <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">0dp</dimen>

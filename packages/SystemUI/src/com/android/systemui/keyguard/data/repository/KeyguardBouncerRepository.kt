@@ -22,7 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
-import com.android.systemui.log.dagger.BouncerLog
+import com.android.systemui.log.dagger.BouncerTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.util.time.SystemClock
@@ -105,7 +105,7 @@ class KeyguardBouncerRepositoryImpl
 constructor(
     private val clock: SystemClock,
     @Application private val applicationScope: CoroutineScope,
-    @BouncerLog private val buffer: TableLogBuffer,
+    @BouncerTableLog private val buffer: TableLogBuffer,
 ) : KeyguardBouncerRepository {
     /** Values associated with the PrimaryBouncer (pin/pattern/password) input. */
     private val _primaryBouncerShow = MutableStateFlow(false)

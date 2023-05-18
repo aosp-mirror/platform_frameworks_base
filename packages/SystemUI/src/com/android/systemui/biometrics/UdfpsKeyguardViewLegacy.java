@@ -176,9 +176,9 @@ public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
         }
 
         mTextColorPrimary = Utils.getColorAttrDefaultColor(mContext,
-            android.R.attr.textColorPrimary);
+                com.android.internal.R.attr.materialColorOnSurface);
         final int backgroundColor = Utils.getColorAttrDefaultColor(getContext(),
-                com.android.internal.R.attr.colorSurface);
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh);
         mBgProtection.setImageTintList(ColorStateList.valueOf(backgroundColor));
         mLockScreenFp.invalidate(); // updated with a valueCallback
     }

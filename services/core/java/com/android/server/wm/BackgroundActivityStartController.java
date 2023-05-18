@@ -342,6 +342,14 @@ public class BackgroundActivityStartController {
                     /*background*/ true, callingUid, realCallingUid,
                     intent, "Device Owner");
             }
+            // don't abort if the callingUid is a affiliated profile owner
+            if (mService.isAffiliatedProfileOwner(callingUid)) {
+                return logStartAllowedAndReturnCode(
+                    BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                    resultIfPiSenderAllowsBal, balAllowedByPiSender,
+                    /*background*/ true, callingUid, realCallingUid,
+                    intent, "Affiliated Profile Owner");
+            }
             // don't abort if the callingUid has companion device
             final int callingUserId = UserHandle.getUserId(callingUid);
             if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {

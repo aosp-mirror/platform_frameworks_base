@@ -245,7 +245,7 @@ final class DisplayRotationCompatPolicy {
     }
 
     /**
-     * Notifies that animation in {@link ScreenAnimationRotation} has finished.
+     * Notifies that animation in {@link ScreenRotationAnimation} has finished.
      *
      * <p>This class uses this signal as a trigger for notifying the user about forced rotation
      * reason with the {@link Toast}.

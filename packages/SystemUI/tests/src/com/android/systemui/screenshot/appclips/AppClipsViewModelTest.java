@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.net.Uri;
+import android.os.Process;
 import android.os.UserHandle;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -57,10 +58,10 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     private static final Drawable FAKE_DRAWABLE = new ShapeDrawable();
     private static final Rect FAKE_RECT = new Rect();
     private static final Uri FAKE_URI = Uri.parse("www.test-uri.com");
+    private static final UserHandle USER_HANDLE = Process.myUserHandle();
 
     @Mock private AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
     @Mock private ImageExporter mImageExporter;
-
     private AppClipsViewModel mViewModel;
 
     @Before
@@ -99,10 +100,10 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     @Test
     public void saveScreenshot_throwsError_shouldUpdateErrorWithFailed() {
         when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
-                any(UserHandle.class))).thenReturn(
+                eq(USER_HANDLE))).thenReturn(
                 Futures.immediateFailedFuture(new ExecutionException(new Throwable())));
 
-        mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT);
+        mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT, USER_HANDLE);
         waitForIdleSync();
 
         assertThat(mViewModel.getErrorLiveData().getValue())
@@ -113,10 +114,9 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     @Test
     public void saveScreenshot_failsSilently_shouldUpdateErrorWithFailed() {
         when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
-                any(UserHandle.class))).thenReturn(
-                        Futures.immediateFuture(new ImageExporter.Result()));
+                eq(USER_HANDLE))).thenReturn(Futures.immediateFuture(new ImageExporter.Result()));
 
-        mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT);
+        mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT, USER_HANDLE);
         waitForIdleSync();
 
         assertThat(mViewModel.getErrorLiveData().getValue())
@@ -129,9 +129,9 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
         ImageExporter.Result result = new ImageExporter.Result();
         result.uri = FAKE_URI;
         when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
-                any(UserHandle.class))).thenReturn(Futures.immediateFuture(result));
+                eq(USER_HANDLE))).thenReturn(Futures.immediateFuture(result));
 
-        mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT);
+        mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT, USER_HANDLE);
         waitForIdleSync();
 
         assertThat(mViewModel.getErrorLiveData().getValue()).isNull();

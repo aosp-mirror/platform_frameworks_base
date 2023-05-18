@@ -250,6 +250,10 @@ public class UserManager {
      * use {@link android.accounts.AccountManager} APIs to add or remove accounts when account
      * management is disallowed.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -266,6 +270,9 @@ public class UserManager {
      * no effect in a managed profile. When it is set by a device owner, a profile owner on the
      * primary user or by a profile owner of an organization-owned managed profile on the parent
      * profile, it disallows the primary user from changing Wi-Fi access points.
+     *
+     * <p>Holders of the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -284,6 +291,9 @@ public class UserManager {
      * a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by any of these owners, it applies globally - i.e., it disables airplane mode
      * from changing Wi-Fi state.
+     *
+     * <p>Holders of the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -305,6 +315,9 @@ public class UserManager {
      * a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by any of these owners, it prevents all users from using
      * Wi-Fi tethering. Other forms of tethering are not affected.
+     *
+     * <p>Holders of the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * This user restriction disables only Wi-Fi tethering.
      * Use {@link #DISALLOW_CONFIG_TETHERING} to limit all forms of tethering.
@@ -346,6 +359,9 @@ public class UserManager {
      * sharing Wi-Fi for networks configured by these owners.
      * Other networks not configured by these owners are not affected.
      *
+     * <p>Holders of the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -364,6 +380,9 @@ public class UserManager {
      * a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by any of these owners, it prevents all users from using
      * Wi-Fi Direct.
+     *
+     * <p>Holders of the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -384,6 +403,9 @@ public class UserManager {
      * a new Wi-Fi configuration. This does not limit the owner and carrier's ability
      * to add a new configuration.
      *
+     * <p>Holders of the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -398,6 +420,9 @@ public class UserManager {
      * Specifies if a user is disallowed from changing the device
      * language. The default value is <code>false</code>.
      *
+     * <p>Holders of the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCALE}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -411,6 +436,10 @@ public class UserManager {
      * prevents device owners and profile owners installing apps. The default value is
      * {@code false}.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -422,6 +451,10 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from uninstalling applications.
      * The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -442,6 +475,10 @@ public class UserManager {
      * managed profile on the parent profile, it prevents the primary user from turning on
      * location sharing.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCATION}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -460,6 +497,10 @@ public class UserManager {
      * When it is set by any of these owners, it applies globally - i.e., it disables airplane mode
      * on the entire device.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_AIRPLANE_MODE}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -476,6 +517,10 @@ public class UserManager {
      *
      * <p>The default value is <code>false</code>.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_DISPLAY}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>This user restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -489,6 +534,10 @@ public class UserManager {
      * Specifies if ambient display is disallowed for the user.
      *
      * <p>The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_DISPLAY}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>This user restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
@@ -504,6 +553,10 @@ public class UserManager {
      *
      * <p>The default value is <code>false</code>.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_DISPLAY}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>This user restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -518,6 +571,10 @@ public class UserManager {
      * "Unknown Sources" setting, that allows installation of apps from unknown sources.
      * Unknown sources exclude adb and special apps such as trusted app stores.
      * The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -535,6 +592,10 @@ public class UserManager {
      *
      * This restriction can be enabled by the profile owner, in which case all accounts and
      * profiles will be affected.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * The default value is <code>false</code>.
      *
@@ -559,6 +620,10 @@ public class UserManager {
      * primary user or by a profile owner of an organization-owned managed profile on the parent
      * profile, it disallows the primary user from configuring bluetooth.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_BLUETOOTH}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -581,6 +646,10 @@ public class UserManager {
      * profile, it disables the primary user from using bluetooth and configuring bluetooth
      * in Settings.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_BLUETOOTH}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -598,6 +667,10 @@ public class UserManager {
      * owner, it applies globally. When it is set by a profile owner on the primary user or by a
      * profile owner of an organization-owned managed profile on the parent profile, it disables
      * the primary user from any outgoing bluetooth sharing.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_BLUETOOTH}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Default is <code>true</code> for managed profiles and false otherwise.
      *
@@ -626,6 +699,10 @@ public class UserManager {
      * user on the device is able to use file transfer over USB because the UI for file transfer
      * is always associated with the primary user.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -640,6 +717,10 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring user
      * credentials. The default value is <code>false</code>.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -653,6 +734,10 @@ public class UserManager {
      * When set on a non-admin secondary user, this specifies if the user can remove itself.
      * This restriction has no effect on managed profiles.
      * The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USERS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -692,6 +777,10 @@ public class UserManager {
      * that user only, including starting activities, making service calls, accessing content
      * providers, sending broadcasts, installing/uninstalling packages, clearing user data, etc.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -712,6 +801,10 @@ public class UserManager {
      * <p>From Android 12 ({@linkplain android.os.Build.VERSION_CODES#S API level 31}) enforcing
      * this restriction clears currently active VPN if it was configured by the user.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_VPN}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -728,6 +821,10 @@ public class UserManager {
      * owner, a profile owner on the primary user or by a profile owner of an organization-owned
      * managed profile on the parent profile, it disallows the primary user from turning location
      * on or off.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCATION}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -755,6 +852,10 @@ public class UserManager {
      * from configuring date, time and timezone and disables all configuring of date, time and
      * timezone in Settings.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_TIME}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -776,6 +877,10 @@ public class UserManager {
      * the parent profile, it disables the primary user from using Tethering and hotspots and
      * disables all configuring of Tethering and hotspots in Settings.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>In Android 9.0 or higher, if tethering is enabled when this restriction is set,
@@ -796,6 +901,10 @@ public class UserManager {
      * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can reset the network settings of the device.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -810,6 +919,10 @@ public class UserManager {
      * The default value is <code>false</code>.
      * <p>This restriction has no effect on non-admin users since they cannot factory reset the
      * device.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_FACTORY_RESET}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -826,6 +939,10 @@ public class UserManager {
      * primary user can add other users.
      * <p> When the device is an organization-owned device provisioned with a managed profile,
      * this restriction will be set as a base restriction which cannot be removed by any admin.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USERS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -858,6 +975,10 @@ public class UserManager {
      * <p>The default value for an unmanaged user is <code>false</code>.
      * For users with a device owner set, the default is <code>true</code>.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILES}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -876,6 +997,10 @@ public class UserManager {
      * the system enforces app verification across all users on the device. Running in earlier
      * Android versions, this restriction affects only the profile that sets it.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -892,6 +1017,10 @@ public class UserManager {
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
      * on the primary user or by a profile owner of an organization-owned managed profile on
      * the parent profile, it disables the primary user from configuring cell broadcasts.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -914,6 +1043,10 @@ public class UserManager {
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
      * on the primary user or by a profile owner of an organization-owned managed profile on
      * the parent profile, it disables the primary user from configuring mobile networks.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -949,6 +1082,10 @@ public class UserManager {
      * {@link DevicePolicyManager#addPersistentPreferredActivity(ComponentName, IntentFilter, ComponentName)}
      * to add a default intent handler for a given intent filter.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -965,6 +1102,10 @@ public class UserManager {
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
      * on the primary user or by a profile owner of an organization-owned managed profile on
      * the parent profile, it disables the primary user from mounting physical external media.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PHYSICAL_MEDIA}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -986,6 +1127,10 @@ public class UserManager {
      * organization-owned managed profile on the parent profile, it will disallow the primary user
      * from adjusting the microphone volume.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MICROPHONE}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -1004,6 +1149,10 @@ public class UserManager {
      * <p>When the restriction is set by profile owners, then it only applies to relevant
      * profiles.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_AUDIO_OUTPUT}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>This restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -1021,6 +1170,10 @@ public class UserManager {
      * no effect in a managed profile. When it is set by a device owner, a profile owner on the
      * primary user or by a profile owner of an organization-owned managed profile on the parent
      * profile, it disallows the primary user from making outgoing phone calls.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CALLS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -1041,6 +1194,10 @@ public class UserManager {
      * on the primary user or by a profile owner of an organization-owned managed profile on
      * the parent profile, it disables the primary user from sending or receiving SMS messages.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SMS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -1055,6 +1212,10 @@ public class UserManager {
      * Specifies if the user is not allowed to have fun. In some cases, the
      * device owner may wish to prevent the user from experiencing amusement or
      * joy while using the device. The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_FUN}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -1072,6 +1233,10 @@ public class UserManager {
      *
      * <p>This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WINDOWS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -1091,6 +1256,10 @@ public class UserManager {
      * the profile owner of the primary user or a secondary user, the restriction affects only the
      * calling user. This user restriction has no effect on managed profiles.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -1108,6 +1277,10 @@ public class UserManager {
      * optical character recognition (OCR), we strongly recommend combining this user restriction
      * with {@link DevicePolicyManager#setScreenCaptureDisabled(ComponentName, boolean)}.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -1119,6 +1292,10 @@ public class UserManager {
     /**
      * Specifies if the user is not allowed to use NFC to beam out data from apps.
      * The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -1145,6 +1322,10 @@ public class UserManager {
      * are able to set wallpaper regardless of this restriction.
      * The default value is <code>false</code>.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WALLPAPER}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -1162,6 +1343,10 @@ public class UserManager {
      * on the primary user or by a profile owner of an organization-owned managed profile on
      * the parent profile, it disables the primary user from rebooting the device into safe
      * boot mode.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SAFE_BOOT}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -1191,6 +1376,10 @@ public class UserManager {
      *
      * <p>This restriction can be set by device owners and profile owners.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RUN_IN_BACKGROUND}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -1208,6 +1397,10 @@ public class UserManager {
      * profile owner of an organization-owned managed profile on the parent profile, it disables
      * the primary user from using camera.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -1219,6 +1412,10 @@ public class UserManager {
 
     /**
      * Specifies if a user is not allowed to unmute the device's global volume.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_AUDIO_OUTPUT}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * @see DevicePolicyManager#setMasterVolumeMuted(ComponentName, boolean)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
@@ -1236,6 +1433,10 @@ public class UserManager {
      * on the primary user or by a profile owner of an organization-owned managed profile on
      * the parent profile, it disables the primary user from using cellular data when roaming.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -1248,6 +1449,10 @@ public class UserManager {
      * Specifies if a user is not allowed to change their icon. Device owner and profile owner
      * can set this restriction. When it is set by device owner, only the target user will be
      * affected. The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USERS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -1285,6 +1490,11 @@ public class UserManager {
      *
      * <p>Can be set by profile owners. It only has effect on managed profiles when set by managed
      * profile owner. Has no effect on non-managed profiles or users.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -1302,7 +1512,12 @@ public class UserManager {
      * {@link android.content.Intent#ACTION_VIEW},
      * category {@link android.content.Intent#CATEGORY_BROWSABLE}, scheme http or https, and which
      * define a host can handle intents from the managed profile.
-     * The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILES}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -1318,6 +1533,10 @@ public class UserManager {
      *
      * <p>Device owner and profile owner can set this restriction. When it is set by device owner,
      * only the target user will be affected.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_AUTOFILL}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -1336,6 +1555,10 @@ public class UserManager {
      * managed profile on the parent profile, it disables the primary user's screen from being
      * captured for artificial intelligence purposes.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SCREEN_CONTENT}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -1353,6 +1576,10 @@ public class UserManager {
      * managed profile on the parent profile, it disables the primary user from receiving content
      * suggestions for selections based on the contents of their screen.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SCREEN_CONTENT}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -1368,6 +1595,10 @@ public class UserManager {
      * Device owner can still switch user via
      * {@link DevicePolicyManager#switchUser(ComponentName, UserHandle)} when this restriction is
      * set.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USERS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -1391,7 +1622,12 @@ public class UserManager {
      * This restriction is only meaningful when set by profile owner. When it is set by device
      * owner, it does not have any effect.
      * <p>
-     * The default value is <code>false</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
@@ -1403,6 +1639,10 @@ public class UserManager {
      * Specifies whether the user is allowed to print.
      *
      * This restriction can be set by device or profile owner.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PRINTING}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * The default value is {@code false}.
      *
@@ -1418,6 +1658,10 @@ public class UserManager {
      * <p>This restriction can only be set by a device owner or a profile owner of an
      * organization-owned managed profile on the parent profile. When it is set by either of these
      * owners, it applies globally.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RESTRICT_PRIVATE_DNS}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -1525,6 +1769,10 @@ public class UserManager {
      * In all cases, the setting applies globally on the device and will prevent the device from
      * scanning for or connecting to 2g networks, except in the case of an emergency.
      *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
      * <p>The default value is <code>false</code>.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -1537,15 +1785,19 @@ public class UserManager {
      * This user restriction specifies if Ultra-wideband is disallowed on the device. If
      * Ultra-wideband is disallowed it cannot be turned on via Settings.
      *
+     * <p>
+     * Ultra-wideband (UWB) is a radio technology that can use a very low energy level
+     * for short-range, high-bandwidth communications over a large portion of the radio spectrum.
+     *
      * <p>This restriction can only be set by a device owner or a profile owner of an
      * organization-owned managed profile on the parent profile.
      * In both cases, the restriction applies globally on the device and will turn off the
      * ultra-wideband radio if it's currently on and prevent the radio from being turned on in
      * the future.
      *
-     * <p>
-     * Ultra-wideband (UWB) is a radio technology that can use a very low energy level
-     * for short-range, high-bandwidth communications over a large portion of the radio spectrum.
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Default is <code>false</code>.
      *

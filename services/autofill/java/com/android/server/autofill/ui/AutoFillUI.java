@@ -52,6 +52,8 @@ import com.android.server.LocalServices;
 import com.android.server.UiModeManagerInternal;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
+import com.android.server.autofill.PresentationStatsEventLogger;
+import com.android.server.autofill.SaveEventLogger;
 import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
@@ -326,7 +328,7 @@ public final class AutoFillUI {
             @NonNull ValueFinder valueFinder, @NonNull ComponentName componentName,
             @NonNull AutoFillUiCallback callback, @NonNull Context context,
             @NonNull PendingUi pendingSaveUi, boolean isUpdate, boolean compatMode,
-            boolean showServiceIcon) {
+            boolean showServiceIcon, @Nullable SaveEventLogger mSaveEventLogger) {
         if (sVerbose) {
             Slogf.v(TAG, "showSaveUi(update=%b) for %s and display %d: %s", isUpdate,
                     componentName.toShortString(), context.getDisplayId(), info);
@@ -355,6 +357,9 @@ public final class AutoFillUI {
                 @Override
                 public void onSave() {
                     log.setType(MetricsEvent.TYPE_ACTION);
+                    if (mSaveEventLogger != null) {
+                        mSaveEventLogger.maybeSetSaveButtonClicked(true);
+                    }
                     hideSaveUiUiThread(callback);
                     callback.save();
                     destroySaveUiUiThread(pendingSaveUi, true);
@@ -363,6 +368,9 @@ public final class AutoFillUI {
                 @Override
                 public void onCancel(IntentSender listener) {
                     log.setType(MetricsEvent.TYPE_DISMISS);
+                    if (mSaveEventLogger != null) {
+                        mSaveEventLogger.maybeSetCancelButtonClicked(true);
+                    }
                     hideSaveUiUiThread(callback);
                     if (listener != null) {
                         try {
@@ -384,6 +392,9 @@ public final class AutoFillUI {
                         callback.cancelSave();
                     }
                     mMetricsLogger.write(log);
+                    if (mSaveEventLogger != null) {
+                        mSaveEventLogger.maybeSetDialogDismissed(true);
+                    }
                 }
 
                 @Override
@@ -400,7 +411,8 @@ public final class AutoFillUI {
     public void showFillDialog(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @Nullable String filterText, @Nullable String servicePackageName,
             @NonNull ComponentName componentName, @Nullable Drawable serviceIcon,
-            @NonNull AutoFillUiCallback callback, int sessionId, boolean compatMode) {
+            @NonNull AutoFillUiCallback callback, int sessionId, boolean compatMode,
+            @Nullable PresentationStatsEventLogger mPresentationStatsEventLogger) {
         if (sVerbose) {
             Slog.v(TAG, "showFillDialog for "
                     + componentName.toShortString() + ": " + response);
@@ -442,6 +454,10 @@ public final class AutoFillUI {
                         @Override
                         public void onDatasetPicked(Dataset dataset) {
                             log(MetricsEvent.TYPE_ACTION);
+                            if (mPresentationStatsEventLogger != null) {
+                                mPresentationStatsEventLogger.maybeSetPositiveCtaButtonClicked(
+                                    true);
+                            }
                             hideFillDialogUiThread(callback);
                             if (mCallback != null) {
                                 final int datasetIndex = response.getDatasets().indexOf(dataset);
@@ -453,6 +469,9 @@ public final class AutoFillUI {
                         @Override
                         public void onDismissed() {
                             log(MetricsEvent.TYPE_DISMISS);
+                            if (mPresentationStatsEventLogger != null) {
+                                mPresentationStatsEventLogger.maybeSetDialogDismissed(true);
+                            }
                             hideFillDialogUiThread(callback);
                             callback.requestShowSoftInput(focusedId);
                             callback.requestFallbackFromFillDialog();
@@ -461,6 +480,10 @@ public final class AutoFillUI {
                         @Override
                         public void onCanceled() {
                             log(MetricsEvent.TYPE_CLOSE);
+                            if (mPresentationStatsEventLogger != null) {
+                                mPresentationStatsEventLogger.maybeSetNegativeCtaButtonClicked(
+                                    true);
+                            }
                             hideFillDialogUiThread(callback);
                             callback.requestShowSoftInput(focusedId);
                             callback.requestFallbackFromFillDialog();

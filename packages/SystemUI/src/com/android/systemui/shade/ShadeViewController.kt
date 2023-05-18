@@ -48,7 +48,7 @@ interface ShadeViewController {
     fun expandToNotifications()
 
     /** Returns whether the shade is expanding or collapsing itself or quick settings. */
-    val isExpanding: Boolean
+    val isExpandingOrCollapsing: Boolean
 
     /**
      * Returns whether the shade height is greater than zero (i.e. partially or fully expanded),

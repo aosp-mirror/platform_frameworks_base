@@ -70,6 +70,11 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract void onAppsOnVirtualDeviceChanged();
 
     /**
+     * Notifies that an authentication prompt is about to be shown for an app with the given uid.
+     */
+    public abstract void onAuthenticationPrompt(int uid);
+
+    /**
      * Gets the owner uid for a deviceId.
      *
      * @param deviceId which device we're asking about

@@ -234,7 +234,24 @@ public abstract class Condition {
     }
 
     protected final String getTag() {
+        if (isOverridingCondition()) {
+            return mTag + "[OVRD]";
+        }
+
         return mTag;
+    }
+
+    /**
+     * Returns the state of the condition.
+     * - "Invalid", condition hasn't been set / not monitored
+     * - "True", condition has been met
+     * - "False", condition has not been met
+     */
+    protected final String getState() {
+        if (!isConditionSet()) {
+            return "Invalid";
+        }
+        return isConditionMet() ? "True" : "False";
     }
 
     /**

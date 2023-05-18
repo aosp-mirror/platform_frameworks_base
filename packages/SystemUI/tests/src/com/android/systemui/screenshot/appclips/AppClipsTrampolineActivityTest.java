@@ -27,6 +27,7 @@ import static android.content.Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE;
 import static com.android.systemui.flags.Flags.SCREENSHOT_APP_CLIPS;
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_TRIGGERED;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_USE_WP_USER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -74,6 +75,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
@@ -82,7 +84,6 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
     private static final String TEST_URI_STRING = "www.test-uri.com";
     private static final Uri TEST_URI = Uri.parse(TEST_URI_STRING);
     private static final int TEST_UID = 42;
-    private static final int TEST_USER_ID = 43;
     private static final String TEST_CALLING_PACKAGE = "test-calling-package";
 
     @Mock
@@ -287,6 +288,7 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         assertThat(actualIntent.getComponent()).isEqualTo(
                 new ComponentName(mContext, AppClipsTrampolineActivity.class));
         assertThat(actualIntent.getFlags()).isEqualTo(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        assertThat(actualIntent.getBooleanExtra(EXTRA_USE_WP_USER, false)).isTrue();
         assertThat(activity.mStartingUser).isEqualTo(UserHandle.SYSTEM);
     }
 
@@ -313,13 +315,13 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         when(mOptionalBubbles.get()).thenReturn(mBubbles);
         when(mBubbles.isAppBubbleTaskId(anyInt())).thenReturn(true);
         when(mDevicePolicyManager.getScreenCaptureDisabled(eq(null))).thenReturn(false);
-        when(mUserTracker.getUserId()).thenReturn(TEST_USER_ID);
+        when(mUserTracker.getUserProfiles()).thenReturn(List.of());
 
         ApplicationInfo testApplicationInfo = new ApplicationInfo();
         testApplicationInfo.uid = TEST_UID;
         when(mPackageManager.getApplicationInfoAsUser(eq(TEST_CALLING_PACKAGE),
                 any(ApplicationInfoFlags.class),
-                eq(TEST_USER_ID))).thenReturn(testApplicationInfo);
+                eq(mContext.getUser().getIdentifier()))).thenReturn(testApplicationInfo);
     }
 
     public static final class AppClipsTrampolineActivityTestable extends

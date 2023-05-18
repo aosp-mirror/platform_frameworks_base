@@ -918,6 +918,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runSendBroadcast(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
         Intent intent;
         try {
             intent = makeIntent(UserHandle.USER_CURRENT);
@@ -931,9 +932,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.println("Broadcasting: " + intent);
         pw.flush();
         Bundle bundle = mBroadcastOptions == null ? null : mBroadcastOptions.toBundle();
-        mInterface.broadcastIntentWithFeature(null, null, intent, null, receiver, 0, null, null,
-                requiredPermissions, null, null, android.app.AppOpsManager.OP_NONE, bundle, true,
-                false, mUserId);
+        final int result = mInterface.broadcastIntentWithFeature(null, null, intent, null,
+                receiver, 0, null, null, requiredPermissions, null, null,
+                android.app.AppOpsManager.OP_NONE, bundle, true, false, mUserId);
+        Slogf.i(TAG, "Broadcasted %s: " + result, intent);
         if (!mAsync) {
             receiver.waitForFinish();
         }
@@ -3445,7 +3447,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runWaitForBroadcastIdle(PrintWriter pw) throws RemoteException {
         pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
-        mInternal.waitForBroadcastIdle(pw);
+        boolean flushBroadcastLoopers = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--flush-broadcast-loopers")) {
+                flushBroadcastLoopers = true;
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        mInternal.waitForBroadcastIdle(pw, flushBroadcastLoopers);
         return 0;
     }
 

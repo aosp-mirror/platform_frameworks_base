@@ -211,7 +211,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
-        verify(mSplitScreenStarter).startIntent(any(), any(),
+        verify(mSplitScreenStarter).startIntent(any(), anyInt(), any(),
                 eq(SPLIT_POSITION_UNDEFINED), any());
     }
 
@@ -223,12 +223,12 @@ public class DragAndDropPolicyTest extends ShellTestCase {
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_LEFT), mActivityClipData);
-        verify(mSplitScreenStarter).startIntent(any(), any(),
+        verify(mSplitScreenStarter).startIntent(any(), anyInt(), any(),
                 eq(SPLIT_POSITION_TOP_OR_LEFT), any());
         reset(mSplitScreenStarter);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_RIGHT), mActivityClipData);
-        verify(mSplitScreenStarter).startIntent(any(), any(),
+        verify(mSplitScreenStarter).startIntent(any(), anyInt(), any(),
                 eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), any());
     }
 
@@ -240,12 +240,12 @@ public class DragAndDropPolicyTest extends ShellTestCase {
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_TOP), mActivityClipData);
-        verify(mSplitScreenStarter).startIntent(any(), any(),
+        verify(mSplitScreenStarter).startIntent(any(), anyInt(), any(),
                 eq(SPLIT_POSITION_TOP_OR_LEFT), any());
         reset(mSplitScreenStarter);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_BOTTOM), mActivityClipData);
-        verify(mSplitScreenStarter).startIntent(any(), any(),
+        verify(mSplitScreenStarter).startIntent(any(), anyInt(), any(),
                 eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), any());
     }
 

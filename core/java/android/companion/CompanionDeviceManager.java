@@ -1331,10 +1331,12 @@ public final class CompanionDeviceManager {
 
     /**
      * Enable or disable secure transport for testing. Defaults to enabled.
+     * Should not be used outside of testing.
      *
      * @param enabled true to enable. false to disable.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void enableSecureTransport(boolean enabled) {
         try {
             mService.enableSecureTransport(enabled);

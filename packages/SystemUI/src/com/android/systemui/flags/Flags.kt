@@ -120,7 +120,12 @@ object Flags {
         resourceBooleanFlag(204, R.bool.config_enableBouncerUserSwitcher, "bouncer_user_switcher")
 
     // TODO(b/254512676): Tracking Bug
-    @JvmField val LOCKSCREEN_CUSTOM_CLOCKS = releasedFlag(207, "lockscreen_custom_clocks")
+    @JvmField
+    val LOCKSCREEN_CUSTOM_CLOCKS = resourceBooleanFlag(
+        207,
+        R.bool.config_enableLockScreenCustomClocks,
+        "lockscreen_custom_clocks"
+    )
 
     // TODO(b/275694445): Tracking Bug
     @JvmField
@@ -235,7 +240,7 @@ object Flags {
     /** Whether to delay showing bouncer UI when face auth or active unlock are enrolled. */
     // TODO(b/279794160): Tracking bug.
     @JvmField
-    val DELAY_BOUNCER = unreleasedFlag(235, "delay_bouncer")
+    val DELAY_BOUNCER = releasedFlag(235, "delay_bouncer")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -333,8 +338,7 @@ object Flags {
 
     // TODO(b/280426085): Tracking Bug
     @JvmField
-    val NEW_BLUETOOTH_REPOSITORY =
-        unreleasedFlag(612, "new_bluetooth_repository", teamfood = true)
+    val NEW_BLUETOOTH_REPOSITORY = unreleasedFlag(612, "new_bluetooth_repository")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -557,7 +561,7 @@ object Flags {
 
     // TODO(b/270987164): Tracking Bug
     @JvmField
-    val TRACKPAD_GESTURE_FEATURES = releasedFlag(1205, "trackpad_gesture_features")
+    val TRACKPAD_GESTURE_FEATURES = unreleasedFlag(1205, "trackpad_gesture_features", teamfood = true)
 
     // TODO(b/263826204): Tracking Bug
     @JvmField
@@ -608,7 +612,8 @@ object Flags {
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
     // TODO(b/278714186) Tracking Bug
-    @JvmField val CLIPBOARD_IMAGE_TIMEOUT = unreleasedFlag(1702, "clipboard_image_timeout")
+    @JvmField val CLIPBOARD_IMAGE_TIMEOUT =
+            unreleasedFlag(1702, "clipboard_image_timeout", teamfood = true)
     // TODO(b/279405451): Tracking Bug
     @JvmField
     val CLIPBOARD_SHARED_TRANSITIONS = unreleasedFlag(1703, "clipboard_shared_transitions")
@@ -659,15 +664,6 @@ object Flags {
     @JvmField
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag(2400, "warn_on_blocking_binder_transactions")
-
-    // 2500 - output switcher
-    // TODO(b/261538825): Tracking Bug
-    @JvmField
-    val OUTPUT_SWITCHER_ADVANCED_LAYOUT = releasedFlag(2500, "output_switcher_advanced_layout")
-    @JvmField
-    val OUTPUT_SWITCHER_ROUTES_PROCESSING = releasedFlag(2501, "output_switcher_routes_processing")
-    @JvmField
-    val OUTPUT_SWITCHER_DEVICE_STATUS = releasedFlag(2502, "output_switcher_device_status")
 
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug

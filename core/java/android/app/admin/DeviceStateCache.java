@@ -50,6 +50,14 @@ public abstract class DeviceStateCache {
     public abstract boolean isUserOrganizationManaged(@UserIdInt int userHandle);
 
     /**
+     * Returns whether a user has affiliated IDs.
+     */
+
+    public boolean hasAffiliationWithDevice(int userId) {
+        return false;
+    }
+
+    /**
      * Empty implementation.
      */
     private static class EmptyDeviceStateCache extends DeviceStateCache {

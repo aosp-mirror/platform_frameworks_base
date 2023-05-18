@@ -32,6 +32,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.log.TableLogBufferBase;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -44,6 +45,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 import kotlinx.coroutines.CoroutineScope;
@@ -59,6 +61,8 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Mock
     private CoroutineScope mScope;
+    @Mock
+    private TableLogBufferBase mLogBuffer;
 
     private Monitor mConditionMonitor;
 
@@ -629,5 +633,43 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
         verify(callback).onActiveChanged(eq(true));
         verify(callback).onConditionsChanged(eq(true));
+    }
+
+    @Test
+    public void testLoggingCallback() {
+        final Monitor monitor = new Monitor(mExecutor, Collections.emptySet(), mLogBuffer);
+
+        final FakeCondition condition = new FakeCondition(mScope);
+        final FakeCondition overridingCondition = new FakeCondition(
+                mScope,
+                /* initialValue= */ false,
+                /* overriding= */ true);
+
+        final Monitor.Callback callback = mock(Monitor.Callback.class);
+        monitor.addSubscription(getDefaultBuilder(callback)
+                .addCondition(condition)
+                .addCondition(overridingCondition)
+                .build());
+        mExecutor.runAllReady();
+
+        // condition set to true
+        condition.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+        verify(mLogBuffer).logChange("", "FakeCondition", "True");
+
+        // condition set to false
+        condition.fakeUpdateCondition(false);
+        mExecutor.runAllReady();
+        verify(mLogBuffer).logChange("", "FakeCondition", "False");
+
+        // condition unset
+        condition.fakeClearCondition();
+        mExecutor.runAllReady();
+        verify(mLogBuffer).logChange("", "FakeCondition", "Invalid");
+
+        // overriding condition set to true
+        overridingCondition.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+        verify(mLogBuffer).logChange("", "FakeCondition[OVRD]", "True");
     }
 }

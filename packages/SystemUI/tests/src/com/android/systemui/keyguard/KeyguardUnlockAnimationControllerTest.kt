@@ -113,8 +113,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        keyguardUnlockAnimationController.surfaceBehindEntryAnimator.cancel()
-        keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.cancel()
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(true)
     }
 
     /**

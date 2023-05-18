@@ -70,6 +70,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemService;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -262,6 +263,11 @@ public class AuthService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
+                VirtualDeviceManagerInternal vdm = getLocalService(
+                        VirtualDeviceManagerInternal.class);
+                if (vdm != null) {
+                    vdm.onAuthenticationPrompt(callingUid);
+                }
                 return mBiometricService.authenticate(
                         token, sessionId, userId, receiver, opPackageName, promptInfo);
             } finally {

@@ -54,6 +54,7 @@ import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
 import org.junit.Before;
@@ -91,6 +92,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     private PowerExemptionManager mPowerExemptionManager = mock(PowerExemptionManager.class);
     private KeyguardManager mKeyguardManager = mock(KeyguardManager.class);
     private FeatureFlags mFlags = mock(FeatureFlags.class);
+    private UserTracker mUserTracker = mock(UserTracker.class);
 
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private MediaOutputBaseDialogImpl mMediaOutputBaseDialogImpl;
@@ -123,7 +125,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
-                mKeyguardManager, mFlags);
+                mKeyguardManager, mFlags, mUserTracker);
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext, mBroadcastSender,
                 mMediaOutputController);
         mMediaOutputBaseDialogImpl.onCreate(new Bundle());
