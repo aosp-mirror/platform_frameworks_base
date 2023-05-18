@@ -44,11 +44,13 @@ import kotlinx.coroutines.flow.asStateFlow
 class QuickSettingsScene
 @Inject
 constructor(
-    private val viewModel: QuickSettingsSceneViewModel,
+    private val viewModelFactory: QuickSettingsSceneViewModel.Factory,
 ) : ComposableScene {
     override val key = SceneKey.QuickSettings
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    override fun destinationScenes(
+        containerName: String,
+    ): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
                     UserAction.Swipe(Direction.UP) to SceneModel(SceneKey.Shade),
@@ -58,10 +60,11 @@ constructor(
 
     @Composable
     override fun Content(
+        containerName: String,
         modifier: Modifier,
     ) {
         QuickSettingsScene(
-            viewModel = viewModel,
+            viewModel = viewModelFactory.create(containerName),
             modifier = modifier,
         )
     }
