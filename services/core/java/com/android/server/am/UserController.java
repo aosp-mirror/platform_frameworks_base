@@ -3590,6 +3590,8 @@ class UserController implements Handler.Callback {
                 if (mUserSwitchingDialog != null) {
                     mUserSwitchingDialog.dismiss(onDismissed);
                     mUserSwitchingDialog = null;
+                } else if (onDismissed != null) {
+                    onDismissed.run();
                 }
             }
         }
