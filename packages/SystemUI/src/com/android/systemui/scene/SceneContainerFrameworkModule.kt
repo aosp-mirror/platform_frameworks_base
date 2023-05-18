@@ -16,7 +16,7 @@
 
 package com.android.systemui.scene
 
-import com.android.systemui.scene.shared.page.SceneModule
+import com.android.systemui.scene.ui.composable.SceneModule
 import dagger.Module
 
 @Module(

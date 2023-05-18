@@ -52,25 +52,32 @@ class LockscreenScene
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val viewModel: LockscreenSceneViewModel,
+    private val viewModelFactory: LockscreenSceneViewModel.Factory,
 ) : ComposableScene {
     override val key = SceneKey.Lockscreen
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
-        viewModel.upDestinationSceneKey
-            .map { pageKey -> destinationScenes(up = pageKey) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value)
-            )
+    private var unsafeViewModel: LockscreenSceneViewModel? = null
+
+    override fun destinationScenes(
+        containerName: String,
+    ): StateFlow<Map<UserAction, SceneModel>> =
+        getOrCreateViewModelSingleton(containerName).let { viewModel ->
+            viewModel.upDestinationSceneKey
+                .map { pageKey -> destinationScenes(up = pageKey) }
+                .stateIn(
+                    scope = applicationScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value)
+                )
+        }
 
     @Composable
     override fun Content(
+        containerName: String,
         modifier: Modifier,
     ) {
         LockscreenScene(
-            viewModel = viewModel,
+            viewModel = getOrCreateViewModelSingleton(containerName),
             modifier = modifier,
         )
     }
@@ -82,6 +89,13 @@ constructor(
             UserAction.Swipe(Direction.UP) to SceneModel(up),
             UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.Shade)
         )
+    }
+
+    private fun getOrCreateViewModelSingleton(
+        containerName: String,
+    ): LockscreenSceneViewModel {
+        return unsafeViewModel
+            ?: viewModelFactory.create(containerName).also { unsafeViewModel = it }
     }
 }
 
