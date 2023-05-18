@@ -62,6 +62,7 @@ public class KeyguardPinViewController
         mLockPatternUtils = lockPatternUtils;
         mFeatureFlags = featureFlags;
         mBackspaceKey = view.findViewById(R.id.delete_button);
+        mPinLength = mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser());
     }
 
     @Override
@@ -99,7 +100,6 @@ public class KeyguardPinViewController
     @Override
     public void startAppearAnimation() {
         if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
-            mPinLength = mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser());
             mPasswordEntry.setUsePinShapes(true);
             updateAutoConfirmationState();
         }
