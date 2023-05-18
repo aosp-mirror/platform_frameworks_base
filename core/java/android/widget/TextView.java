@@ -9223,18 +9223,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
-        if (mSpannable != null && mLinksClickable) {
-            final float x = event.getX(pointerIndex);
-            final float y = event.getY(pointerIndex);
-            final int offset = getOffsetForPosition(x, y);
-            final ClickableSpan[] clickables = mSpannable.getSpans(offset, offset,
-                    ClickableSpan.class);
-            if (clickables.length > 0) {
-                return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_HAND);
+        if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            if (mSpannable != null && mLinksClickable) {
+                final float x = event.getX(pointerIndex);
+                final float y = event.getY(pointerIndex);
+                final int offset = getOffsetForPosition(x, y);
+                final ClickableSpan[] clickables = mSpannable.getSpans(offset, offset,
+                        ClickableSpan.class);
+                if (clickables.length > 0) {
+                    return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_HAND);
+                }
             }
-        }
-        if (isTextSelectable() || isTextEditable()) {
-            return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_TEXT);
+            if (isTextSelectable() || isTextEditable()) {
+                return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_TEXT);
+            }
         }
         return super.onResolvePointerIcon(event, pointerIndex);
     }

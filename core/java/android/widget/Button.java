@@ -18,6 +18,7 @@ package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.InputDevice;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
@@ -173,7 +174,8 @@ public class Button extends TextView {
 
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
-        if (getPointerIcon() == null && isClickable() && isEnabled()) {
+        if (getPointerIcon() == null && isClickable() && isEnabled()
+                && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
         }
         return super.onResolvePointerIcon(event, pointerIndex);

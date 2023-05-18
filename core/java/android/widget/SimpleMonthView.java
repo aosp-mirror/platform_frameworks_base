@@ -39,6 +39,7 @@ import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.MathUtils;
 import android.util.StateSet;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
@@ -1041,12 +1042,15 @@ class SimpleMonthView extends View {
         if (!isEnabled()) {
             return null;
         }
-        // Add 0.5f to event coordinates to match the logic in onTouchEvent.
-        final int x = (int) (event.getX() + 0.5f);
-        final int y = (int) (event.getY() + 0.5f);
-        final int dayUnderPointer = getDayAtLocation(x, y);
-        if (dayUnderPointer >= 0) {
-            return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+
+        if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            // Add 0.5f to event coordinates to match the logic in onTouchEvent.
+            final int x = (int) (event.getX() + 0.5f);
+            final int y = (int) (event.getY() + 0.5f);
+            final int dayUnderPointer = getDayAtLocation(x, y);
+            if (dayUnderPointer >= 0) {
+                return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+            }
         }
         return super.onResolvePointerIcon(event, pointerIndex);
     }

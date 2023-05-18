@@ -18,6 +18,7 @@ package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.widget.RemoteViews.RemoteView;
@@ -99,7 +100,8 @@ public class ImageButton extends ImageView {
 
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
-        if (getPointerIcon() == null && isClickable() && isEnabled()) {
+        if (getPointerIcon() == null && isClickable() && isEnabled()
+                && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
         }
         return super.onResolvePointerIcon(event, pointerIndex);
