@@ -628,6 +628,9 @@ object Flags {
     // TODO(b/265944639): Tracking Bug
     @JvmField val DUAL_SHADE = unreleasedFlag(1801, "dual_shade")
 
+    // TODO(b/283300105): Tracking Bug
+    @JvmField val SCENE_CONTAINER = unreleasedFlag(1802, "scene_container")
+
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag(1900, "keycode_flag")
 
