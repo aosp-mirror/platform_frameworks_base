@@ -17245,12 +17245,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void onProcessFreezableChangedLocked(ProcessRecord app) {
-        if (mEnableModernQueue) {
-            mBroadcastQueues[0].onProcessFreezableChangedLocked(app);
-        }
-    }
-
     @VisibleForTesting
     public final class LocalService extends ActivityManagerInternal
             implements ActivityManagerLocal {
