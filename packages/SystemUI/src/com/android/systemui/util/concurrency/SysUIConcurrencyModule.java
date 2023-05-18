@@ -29,18 +29,28 @@ import com.android.systemui.dagger.qualifiers.BroadcastRunning;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
 
+import dagger.Module;
+import dagger.Provides;
+
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
-
-import dagger.Module;
-import dagger.Provides;
 
 /**
  * Dagger Module for classes found within the concurrent package.
  */
 @Module
 public abstract class SysUIConcurrencyModule {
+
+    // Slow BG executor can potentially affect UI if UI is waiting for an updated state from this
+    // thread
+    private static final Long BG_SLOW_DISPATCH_THRESHOLD = 1000L;
+    private static final Long BG_SLOW_DELIVERY_THRESHOLD = 1000L;
+    private static final Long LONG_SLOW_DISPATCH_THRESHOLD = 2500L;
+    private static final Long LONG_SLOW_DELIVERY_THRESHOLD = 2500L;
+    private static final Long BROADCAST_SLOW_DISPATCH_THRESHOLD = 1000L;
+    private static final Long BROADCAST_SLOW_DELIVERY_THRESHOLD = 1000L;
+
     /** Background Looper */
     @Provides
     @SysUISingleton
@@ -49,6 +59,8 @@ public abstract class SysUIConcurrencyModule {
         HandlerThread thread = new HandlerThread("SysUiBg",
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
+        thread.getLooper().setSlowLogThresholdMs(BG_SLOW_DISPATCH_THRESHOLD,
+                BG_SLOW_DELIVERY_THRESHOLD);
         return thread.getLooper();
     }
 
@@ -60,6 +72,8 @@ public abstract class SysUIConcurrencyModule {
         HandlerThread thread = new HandlerThread("BroadcastRunning",
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
+        thread.getLooper().setSlowLogThresholdMs(BROADCAST_SLOW_DISPATCH_THRESHOLD,
+                BROADCAST_SLOW_DELIVERY_THRESHOLD);
         return thread.getLooper();
     }
 
@@ -71,6 +85,8 @@ public abstract class SysUIConcurrencyModule {
         HandlerThread thread = new HandlerThread("SysUiLng",
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
+        thread.getLooper().setSlowLogThresholdMs(LONG_SLOW_DISPATCH_THRESHOLD,
+                LONG_SLOW_DELIVERY_THRESHOLD);
         return thread.getLooper();
     }
 
