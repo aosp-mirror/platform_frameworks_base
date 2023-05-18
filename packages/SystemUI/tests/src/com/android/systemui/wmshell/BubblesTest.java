@@ -300,10 +300,6 @@ public class BubblesTest extends SysuiTestCase {
 
     private UserHandle mUser0;
 
-    // The window context being used by the controller, use this to verify
-    // any actions on the context.
-    private Context mBubbleControllerContext;
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -440,8 +436,6 @@ public class BubblesTest extends SysuiTestCase {
         // Get a reference to KeyguardStateController.Callback
         verify(mKeyguardStateController, atLeastOnce())
                 .addCallback(mKeyguardStateControllerCallbackCaptor.capture());
-
-        mBubbleControllerContext = mBubbleController.getContext();
     }
 
     @After
@@ -471,6 +465,11 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void instantiateController_addInitCallback() {
         verify(mShellInit, times(1)).addInitCallback(any(), any());
+    }
+
+    @Test
+    public void instantiateController_registerConfigChangeListener() {
+        verify(mShellController, times(1)).addConfigurationChangeListener(any());
     }
 
     @Test
@@ -1386,28 +1385,13 @@ public class BubblesTest extends SysuiTestCase {
         assertStackCollapsed();
     }
 
-    @Test
-    public void testRegisterUnregisterComponentCallbacks() {
-        spyOn(mBubbleControllerContext);
-        mBubbleController.updateBubble(mBubbleEntry);
-        verify(mBubbleControllerContext).registerComponentCallbacks(eq(mBubbleController));
-
-        mBubbleData.dismissBubbleWithKey(mBubbleEntry.getKey(), REASON_APP_CANCEL);
-        // TODO: not certain why this isn't called normally when tests are run, perhaps because
-        // it's after an animation in BSV. This calls BubbleController#removeFromWindowManagerMaybe
-        mBubbleController.onAllBubblesAnimatedOut();
-
-        verify(mBubbleControllerContext).unregisterComponentCallbacks(eq(mBubbleController));
-    }
 
     @Test
     public void testRegisterUnregisterBroadcastListener() {
-        spyOn(mBubbleControllerContext);
+        spyOn(mContext);
         mBubbleController.updateBubble(mBubbleEntry);
-        verify(mBubbleControllerContext).registerReceiver(
-                mBroadcastReceiverArgumentCaptor.capture(),
-                mFilterArgumentCaptor.capture(),
-                eq(Context.RECEIVER_EXPORTED));
+        verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
         assertThat(mFilterArgumentCaptor.getValue()
                 .hasAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)).isTrue();
         assertThat(mFilterArgumentCaptor.getValue()
@@ -1418,54 +1402,47 @@ public class BubblesTest extends SysuiTestCase {
         // it's after an animation in BSV. This calls BubbleController#removeFromWindowManagerMaybe
         mBubbleController.onAllBubblesAnimatedOut();
 
-        verify(mBubbleControllerContext).unregisterReceiver(
-                eq(mBroadcastReceiverArgumentCaptor.getValue()));
+        verify(mContext).unregisterReceiver(eq(mBroadcastReceiverArgumentCaptor.getValue()));
     }
 
     @Test
     public void testBroadcastReceiverCloseDialogs_notGestureNav() {
-        spyOn(mBubbleControllerContext);
+        spyOn(mContext);
         mBubbleController.updateBubble(mBubbleEntry);
         mBubbleData.setExpanded(true);
-        verify(mBubbleControllerContext).registerReceiver(
-                mBroadcastReceiverArgumentCaptor.capture(),
-                mFilterArgumentCaptor.capture(),
-                eq(Context.RECEIVER_EXPORTED));
+        verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
         Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mBubbleControllerContext, i);
+        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
 
         assertStackExpanded();
     }
 
     @Test
     public void testBroadcastReceiverCloseDialogs_reasonGestureNav() {
-        spyOn(mBubbleControllerContext);
+        spyOn(mContext);
         mBubbleController.updateBubble(mBubbleEntry);
         mBubbleData.setExpanded(true);
 
-        verify(mBubbleControllerContext).registerReceiver(
-                mBroadcastReceiverArgumentCaptor.capture(),
-                mFilterArgumentCaptor.capture(),
-                eq(Context.RECEIVER_EXPORTED));
+        verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
         Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         i.putExtra("reason", "gestureNav");
-        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mBubbleControllerContext, i);
+        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
         assertStackCollapsed();
     }
 
     @Test
     public void testBroadcastReceiver_screenOff() {
-        spyOn(mBubbleControllerContext);
+        spyOn(mContext);
         mBubbleController.updateBubble(mBubbleEntry);
         mBubbleData.setExpanded(true);
 
-        verify(mBubbleControllerContext).registerReceiver(
-                mBroadcastReceiverArgumentCaptor.capture(),
-                mFilterArgumentCaptor.capture(),
-                eq(Context.RECEIVER_EXPORTED));
+        verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
 
         Intent i = new Intent(Intent.ACTION_SCREEN_OFF);
-        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mBubbleControllerContext, i);
+        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
         assertStackCollapsed();
     }
 
