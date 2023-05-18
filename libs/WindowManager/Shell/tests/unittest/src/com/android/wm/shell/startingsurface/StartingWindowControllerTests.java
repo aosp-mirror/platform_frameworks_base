@@ -81,7 +81,7 @@ public class StartingWindowControllerTests extends ShellTestCase {
         doReturn(mock(Display.class)).when(mDisplayManager).getDisplay(anyInt());
         doReturn(mDisplayManager).when(mContext).getSystemService(eq(DisplayManager.class));
         mShellInit = spy(new ShellInit(mMainExecutor));
-        mShellController = spy(new ShellController(mShellInit, mShellCommandHandler,
+        mShellController = spy(new ShellController(mContext, mShellInit, mShellCommandHandler,
                 mMainExecutor));
         mController = new StartingWindowController(mContext, mShellInit, mShellController,
                 mTaskOrganizer, mMainExecutor, mTypeAlgorithm, mIconProvider, mTransactionPool);
