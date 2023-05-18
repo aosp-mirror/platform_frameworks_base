@@ -890,6 +890,15 @@ public class LocationProviderManager extends
 
                         @Override
                         public boolean test(Location location) {
+                            if (Double.isNaN(location.getLatitude()) || location.getLatitude() < -90
+                                    || location.getLatitude() > 90
+                                    || Double.isNaN(location.getLongitude())
+                                    || location.getLongitude() < -180
+                                    || location.getLongitude() > 180) {
+                                Log.e(TAG, mName + " provider registration " + getIdentity()
+                                        + " dropped delivery - invalid latitude or longitude.");
+                                return false;
+                            }
                             if (mPreviousLocation != null) {
                                 // check fastest interval
                                 long deltaMs = location.getElapsedRealtimeMillis()
