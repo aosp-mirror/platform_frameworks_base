@@ -16,6 +16,8 @@
 
 package android.database.sqlite;
 
+import android.annotation.NonNull;
+
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
@@ -35,6 +37,7 @@ import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.Reference;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -167,6 +170,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private static native int nativeGetDbLookaside(long connectionPtr);
     private static native void nativeCancel(long connectionPtr);
     private static native void nativeResetCancel(long connectionPtr, boolean cancelable);
+    private static native int nativeLastInsertRowId(long connectionPtr);
 
     private SQLiteConnection(SQLiteConnectionPool pool,
             SQLiteDatabaseConfiguration configuration,
@@ -1052,7 +1056,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
-    private PreparedStatement acquirePreparedStatement(String sql) {
+    /**
+     * Return a {@link #PreparedStatement}, possibly from the cache.
+     */
+    PreparedStatement acquirePreparedStatement(String sql) {
         ++mPool.mTotalPrepareStatements;
         PreparedStatement statement = mPreparedStatementCache.get(sql);
         boolean skipCache = false;
@@ -1088,7 +1095,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         return statement;
     }
 
-    private void releasePreparedStatement(PreparedStatement statement) {
+    /**
+     * Release a {@link #PreparedStatement} that was originally supplied by this connection.
+     */
+    void releasePreparedStatement(PreparedStatement statement) {
         statement.mInUse = false;
         if (statement.mInCache) {
             try {
@@ -1114,6 +1124,24 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private void finalizePreparedStatement(PreparedStatement statement) {
         nativeFinalizeStatement(mConnectionPtr, statement.mStatementPtr);
         recyclePreparedStatement(statement);
+    }
+
+    /**
+     * Return a prepared statement for use by {@link SQLiteRawStatement}.  This throws if the
+     * prepared statement is incompatible with this connection.
+     */
+    PreparedStatement acquirePersistentStatement(@NonNull String sql) {
+        final int cookie = mRecentOperations.beginOperation("prepare", sql, null);
+        try {
+            final PreparedStatement statement = acquirePreparedStatement(sql);
+            throwIfStatementForbidden(statement);
+            return statement;
+        } catch (RuntimeException e) {
+            mRecentOperations.failOperation(cookie, e);
+            throw e;
+        } finally {
+            mRecentOperations.endOperation(cookie);
+        }
     }
 
     private void attachCancellationSignal(CancellationSignal cancellationSignal) {
@@ -1200,7 +1228,14 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
-    private void throwIfStatementForbidden(PreparedStatement statement) {
+    /**
+     * Verify that the statement is read-only, if the connection only allows read-only
+     * operations.
+     * @param statement The statement to check.
+     * @throws SQLiteException if the statement could update the database inside a read-only
+     * transaction.
+     */
+    void throwIfStatementForbidden(PreparedStatement statement) {
         if (mOnlyAllowReadOnlyOperations && !statement.mReadOnly) {
             throw new SQLiteException("Cannot execute this statement because it "
                     + "might modify the database but the connection is read-only.");
@@ -1401,8 +1436,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      * In particular, closing the connection requires a guarantee of deterministic
      * resource disposal because all native statement objects must be freed before
      * the native database object can be closed.  So no finalizers here.
+     *
+     * The class is package-visible so that {@link SQLiteRawStatement} can use it.
      */
-    private static final class PreparedStatement {
+    static final class PreparedStatement {
         // Next item in pool.
         public PreparedStatement mPoolNext;
 
@@ -1741,5 +1778,19 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             return methodName;
         }
 
+    }
+
+    /**
+     * Return the ROWID of the last row to be inserted under this connection.  Returns 0 if there
+     * has never been an insert on this connection.
+     * @return The ROWID of the last row to be inserted under this connection.
+     * @hide
+     */
+    long lastInsertRowId() {
+        try {
+            return nativeLastInsertRowId(mConnectionPtr);
+        } finally {
+            Reference.reachabilityFence(this);
+        }
     }
 }

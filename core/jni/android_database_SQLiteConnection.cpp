@@ -880,6 +880,10 @@ static void nativeResetCancel(JNIEnv* env, jobject clazz, jlong connectionPtr,
     }
 }
 
+static jint nativeLastInsertRowId(JNIEnv* env, jclass, jlong connectionPtr) {
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
+    return sqlite3_last_insert_rowid(connection->db);
+}
 
 static const JNINativeMethod sMethods[] =
 {
@@ -938,6 +942,8 @@ static const JNINativeMethod sMethods[] =
             (void*)nativeCancel },
     { "nativeResetCancel", "(JZ)V",
             (void*)nativeResetCancel },
+
+    { "nativeLastInsertRowId", "(J)I", (void*) nativeLastInsertRowId }
 };
 
 int register_android_database_SQLiteConnection(JNIEnv *env)
