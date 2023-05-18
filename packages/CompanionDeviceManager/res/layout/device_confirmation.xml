@@ -14,17 +14,25 @@
      limitations under the License.
 -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/container"
-    android:layout_height="wrap_content"
-    style="@style/ContainerLayout"
-    >
+<ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:scrollbars="none"
+        android:fillViewport="true"
+        android:clipChildren="false"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <include layout="@layout/title" />
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_height="wrap_content"
+        style="@style/ContainerLayout">
 
-    <include layout="@layout/profile_summary" />
+        <include layout="@layout/title" />
 
-    <include layout="@layout/buttons" />
+        <include layout="@layout/profile_summary" />
 
-</LinearLayout>
+        <include layout="@layout/buttons" />
+
+    </LinearLayout>
+
+</ScrollView>
