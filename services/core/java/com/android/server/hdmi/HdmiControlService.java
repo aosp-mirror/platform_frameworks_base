@@ -21,8 +21,10 @@ import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVIC
 import static android.hardware.hdmi.HdmiControlManager.EARC_FEATURE_DISABLED;
 import static android.hardware.hdmi.HdmiControlManager.EARC_FEATURE_ENABLED;
 import static android.hardware.hdmi.HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
+import static android.hardware.hdmi.HdmiControlManager.POWER_CONTROL_MODE_NONE;
 import static android.hardware.hdmi.HdmiControlManager.SOUNDBAR_MODE_DISABLED;
 import static android.hardware.hdmi.HdmiControlManager.SOUNDBAR_MODE_ENABLED;
+import static android.hardware.hdmi.HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED;
 
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.DISABLED;
@@ -222,6 +224,10 @@ public class HdmiControlService extends SystemService {
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason {
     }
+
+    // Timeout in millisecond for device clean up (5s).
+    // Normal actions timeout is 2s but some of them would have several sequences of timeout.
+    static final int DEVICE_CLEANUP_TIMEOUT = 5000;
 
     @VisibleForTesting
     static final AudioDeviceAttributes AUDIO_OUTPUT_DEVICE_HDMI = new AudioDeviceAttributes(
@@ -489,6 +495,9 @@ public class HdmiControlService extends SystemService {
 
     @Nullable
     private DeviceConfigWrapper mDeviceConfig;
+
+    @Nullable
+    private WakeLockWrapper mWakeLock;
 
     @Nullable
     private PowerManagerWrapper mPowerManager;
@@ -3014,7 +3023,7 @@ public class HdmiControlService extends SystemService {
         }
         String powerControlMode = getHdmiCecConfig().getStringValue(
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
-        if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_NONE)) {
+        if (powerControlMode.equals(POWER_CONTROL_MODE_NONE)) {
             return false;
         }
         int hdmiCecEnabled = getHdmiCecConfig().getIntValue(
@@ -3655,6 +3664,9 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     @VisibleForTesting
     protected void onStandby(final int standbyAction) {
+        if (shouldAcquireWakeLock()) {
+            acquireWakeLock();
+        }
         mWakeUpMessageReceived = false;
         assertRunOnServiceThread();
         mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY,
@@ -3762,6 +3774,7 @@ public class HdmiControlService extends SystemService {
                     return;
                 }
 
+                releaseWakeLock();
                 if (isAudioSystemDevice() || !isPowerStandby()) {
                     return;
                 }
@@ -3778,6 +3791,49 @@ public class HdmiControlService extends SystemService {
         }
         // Always reset this flag to set up for the next standby
         mStandbyMessageReceived = false;
+    }
+
+    private boolean shouldAcquireWakeLock() {
+        boolean sendStandbyOnSleep = false;
+        if (tv() != null) {
+            sendStandbyOnSleep = mHdmiCecConfig.getIntValue(
+                    HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP)
+                    == TV_SEND_STANDBY_ON_SLEEP_ENABLED;
+        } else if (playback() != null) {
+            sendStandbyOnSleep = !mHdmiCecConfig.getStringValue(
+                            HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE)
+                    .equals(POWER_CONTROL_MODE_NONE);
+        }
+
+        return isCecControlEnabled() && isPowerOnOrTransient() && sendStandbyOnSleep;
+    }
+
+    /**
+     * Acquire the wake lock used to hold the thread until the standby process is finished.
+     */
+    @VisibleForTesting
+    protected void acquireWakeLock() {
+        releaseWakeLock();
+        mWakeLock = mPowerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock.acquire(DEVICE_CLEANUP_TIMEOUT);
+    }
+
+    /**
+     * Release the wake lock acquired when the standby process started.
+     */
+    @VisibleForTesting
+    protected void releaseWakeLock() {
+        if (mWakeLock != null) {
+            try {
+                if (mWakeLock.isHeld()) {
+                    mWakeLock.release();
+                }
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Exception when releasing wake lock.");
+            }
+            mWakeLock = null;
+        }
     }
 
     @VisibleForTesting

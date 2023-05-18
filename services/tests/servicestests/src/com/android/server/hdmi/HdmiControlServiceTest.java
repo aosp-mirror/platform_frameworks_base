@@ -21,6 +21,7 @@ import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
+import static com.android.server.hdmi.HdmiControlService.DEVICE_CLEANUP_TIMEOUT;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 
@@ -37,6 +38,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -63,6 +65,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -87,6 +90,7 @@ public class HdmiControlServiceTest {
     private HdmiEarcController mHdmiEarcController;
     private FakeEarcNativeWrapper mEarcNativeWrapper;
     private FakePowerManagerWrapper mPowerManager;
+    private WakeLockWrapper mWakeLockSpy;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
@@ -164,7 +168,8 @@ public class HdmiControlServiceTest {
                         .build();
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlServiceSpy.initService();
-        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
+        mWakeLockSpy = spy(new FakePowerManagerWrapper.FakeWakeLockWrapper());
+        mPowerManager = new FakePowerManagerWrapper(mContextSpy, mWakeLockSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mHdmiControlServiceSpy.setEarcSupported(true);
@@ -243,6 +248,29 @@ public class HdmiControlServiceTest {
         verify(mAudioSystemDeviceSpy, times(1)).invokeStandbyCompletedCallback(any());
         assertTrue(mNativeWrapper.getIsCecControlEnabled());
     }
+
+    @Test
+    public void onStandby_acquireAndReleaseWakeLockSuccessfully() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM);
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        doReturn(true).when(mHdmiControlServiceSpy).isStandbyMessageReceived();
+        mTestLooper.dispatchAll();
+
+        assertFalse(mPowerManager.wasWakeLockInstanceCreated());
+        mHdmiControlServiceSpy.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+
+        InOrder inOrder = inOrder(mHdmiControlServiceSpy, mWakeLockSpy);
+        inOrder.verify(mWakeLockSpy, times(1)).acquire(DEVICE_CLEANUP_TIMEOUT);
+        inOrder.verify(mHdmiControlServiceSpy, times(1)).disableCecLocalDevices(any());
+        inOrder.verify(mHdmiControlServiceSpy, times(1))
+                .onPendingActionsCleared(HdmiControlService.STANDBY_SCREEN_OFF);
+        inOrder.verify(mWakeLockSpy, times(1)).release();
+
+        assertTrue(mPowerManager.wasWakeLockInstanceCreated());
+    }
+
     @Test
     public void initialPowerStatus_normalBoot_isTransientToStandby() {
         assertThat(mHdmiControlServiceSpy.getInitialPowerStatus()).isEqualTo(

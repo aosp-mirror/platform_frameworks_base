@@ -28,7 +28,6 @@ import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.os.SystemProperties;
 import android.sysprop.HdmiProperties;
 import android.util.Slog;
@@ -601,7 +600,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     private class SystemWakeLock implements ActiveWakeLock {
-        private final WakeLock mWakeLock;
+        private final WakeLockWrapper mWakeLock;
         public SystemWakeLock() {
             mWakeLock = mService.getPowerManager().newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             mWakeLock.setReferenceCounted(false);

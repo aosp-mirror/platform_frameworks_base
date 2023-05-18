@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.HdmiControlService.DEVICE_CLEANUP_TIMEOUT;
+
 import android.annotation.CallSuper;
 import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
@@ -61,9 +63,6 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     private static final int MAX_HDMI_ACTIVE_SOURCE_HISTORY = 10;
     private static final int MSG_DISABLE_DEVICE_TIMEOUT = 1;
     private static final int MSG_USER_CONTROL_RELEASE_TIMEOUT = 2;
-    // Timeout in millisecond for device clean up (5s).
-    // Normal actions timeout is 2s but some of them would have several sequence of timeout.
-    private static final int DEVICE_CLEANUP_TIMEOUT = 5000;
     // Within the timer, a received <User Control Pressed> will start "Press and Hold" behavior.
     // When it expires, we can assume <User Control Release> is received.
     private static final int FOLLOWER_SAFETY_TIMEOUT = 550;
