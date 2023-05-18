@@ -139,7 +139,7 @@ public class MediaProjectionManagerServiceTest {
         doReturn(mPackageManager).when(mContext).getPackageManager();
 
         mClock = new OffsettableClock.Stopped();
-        mWaitingDisplaySession.setWaitingToRecord(true);
+        mWaitingDisplaySession.setWaitingForConsent(true);
         mWaitingDisplaySession.setVirtualDisplayId(5);
 
         mAppInfo.targetSdkVersion = 32;
@@ -484,7 +484,7 @@ public class MediaProjectionManagerServiceTest {
                 mSessionCaptor.capture());
         // Examine latest value.
         final ContentRecordingSession capturedSession = mSessionCaptor.getValue();
-        assertThat(capturedSession.isWaitingToRecord()).isFalse();
+        assertThat(capturedSession.isWaitingForConsent()).isFalse();
         assertThat(capturedSession.getVirtualDisplayId()).isEqualTo(INVALID_DISPLAY);
     }
 
