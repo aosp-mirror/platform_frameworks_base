@@ -500,6 +500,11 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         }
 
         @Override
+        public void showDesktopApp(int taskId) throws RemoteException {
+            // TODO
+        }
+
+        @Override
         public int getVisibleTaskCount(int displayId) throws RemoteException {
             int[] result = new int[1];
             executeRemoteCallWithTaskPermission(mController, "getVisibleTaskCount",

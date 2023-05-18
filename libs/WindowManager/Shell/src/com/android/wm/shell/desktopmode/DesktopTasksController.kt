@@ -277,6 +277,11 @@ class DesktopTasksController(
     }
 
     /** Move a task to the front */
+    fun moveTaskToFront(taskId: Int) {
+        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task -> moveTaskToFront(task) }
+    }
+
+    /** Move a task to the front */
     fun moveTaskToFront(taskInfo: RunningTaskInfo) {
         KtProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
@@ -770,6 +775,13 @@ class DesktopTasksController(
                     controller,
                     "hideStashedDesktopApps"
             ) { c -> c.hideStashedDesktopApps(displayId) }
+        }
+
+        override fun showDesktopApp(taskId: Int) {
+            ExecutorUtils.executeRemoteCallWithTaskPermission(
+                    controller,
+                    "showDesktopApp"
+            ) { c -> c.moveTaskToFront(taskId) }
         }
 
         override fun getVisibleTaskCount(displayId: Int): Int {
