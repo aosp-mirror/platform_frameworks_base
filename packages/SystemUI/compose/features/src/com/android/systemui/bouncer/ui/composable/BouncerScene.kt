@@ -55,11 +55,13 @@ import kotlinx.coroutines.flow.asStateFlow
 class BouncerScene
 @Inject
 constructor(
-    private val viewModel: BouncerViewModel,
+    private val viewModelFactory: BouncerViewModel.Factory,
 ) : ComposableScene {
     override val key = SceneKey.Bouncer
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    override fun destinationScenes(
+        containerName: String,
+    ): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
                     UserAction.Back to SceneModel(SceneKey.Lockscreen),
@@ -67,7 +69,11 @@ constructor(
             )
             .asStateFlow()
 
-    @Composable override fun Content(modifier: Modifier) = BouncerScene(viewModel, modifier)
+    @Composable
+    override fun Content(
+        containerName: String,
+        modifier: Modifier,
+    ) = BouncerScene(viewModelFactory.create(containerName), modifier)
 }
 
 @Composable
