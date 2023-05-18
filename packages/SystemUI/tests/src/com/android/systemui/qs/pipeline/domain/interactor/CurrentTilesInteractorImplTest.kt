@@ -589,6 +589,26 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
                 .isTrue()
         }
 
+    @Test
+    fun retainedTiles_callbackNotRemoved() =
+        testScope.runTest(USER_INFO_0) {
+            val tiles by collectLastValue(underTest.currentTiles)
+            tileSpecRepository.setTiles(USER_INFO_0.id, listOf(TileSpec.create("a")))
+
+            val tileA = tiles!![0].tile
+            val callback = mock<QSTile.Callback>()
+            tileA.addCallback(callback)
+
+            tileSpecRepository.setTiles(
+                USER_INFO_0.id,
+                listOf(TileSpec.create("a"), CUSTOM_TILE_SPEC)
+            )
+            val newTileA = tiles!![0].tile
+            assertThat(tileA).isSameInstanceAs(newTileA)
+
+            assertThat((tileA as FakeQSTile).callbacks).containsExactly(callback)
+        }
+
     private fun QSTile.State.fillIn(state: Int, label: CharSequence, secondaryLabel: CharSequence) {
         this.state = state
         this.label = label
