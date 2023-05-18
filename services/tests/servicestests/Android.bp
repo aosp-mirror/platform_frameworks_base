@@ -28,6 +28,7 @@ android_test {
         "services.accessibility",
         "services.appwidget",
         "services.autofill",
+        "services.contentcapture",
         "services.backup",
         "services.companion",
         "services.core",
