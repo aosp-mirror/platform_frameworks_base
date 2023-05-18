@@ -47,7 +47,7 @@ constructor(
             return false
         }
 
-        if (!hostAppUserHandle.isWorkProfile() && personalProfileScreenCaptureDisabled) {
+        if (personalProfileScreenCaptureDisabled) {
             // Disable screen capturing as personal apps should not capture the screen
             return false
         }
