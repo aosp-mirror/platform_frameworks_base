@@ -536,10 +536,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mShortPressOnSleepBehavior;
     int mShortPressOnWindowBehavior;
     int mPowerVolUpBehavior;
-    int mShortPressOnStemPrimaryBehavior;
-    int mDoublePressOnStemPrimaryBehavior;
-    int mTriplePressOnStemPrimaryBehavior;
-    int mLongPressOnStemPrimaryBehavior;
     boolean mStylusButtonsEnabled = true;
     boolean mHasSoftInput = false;
     boolean mHapticTextHandleEnabled;
@@ -552,6 +548,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     long mWakeUpToLastStateTimeout;
     int mSearchKeyBehavior;
     ComponentName mSearchKeyTargetActivity;
+
+    // Key Behavior - Stem Primary
+    private int mShortPressOnStemPrimaryBehavior;
+    private int mDoublePressOnStemPrimaryBehavior;
+    private int mTriplePressOnStemPrimaryBehavior;
+    private int mLongPressOnStemPrimaryBehavior;
 
     private boolean mHandleVolumeKeysInWM;
 
@@ -1989,6 +1991,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         Supplier<GlobalActions> getGlobalActionsFactory() {
             return () -> new GlobalActions(mContext, mWindowManagerFuncs);
         }
+
+        KeyguardServiceDelegate getKeyguardServiceDelegate() {
+            return new KeyguardServiceDelegate(mContext,
+                    new StateCallback() {
+                        @Override
+                        public void onTrustedChanged() {
+                            mWindowManagerFuncs.notifyKeyguardTrustedChanged();
+                        }
+
+                        @Override
+                        public void onShowingChanged() {
+                            mWindowManagerFuncs.onKeyguardShowingAndNotOccludedChanged();
+                        }
+                    });
+        }
     }
 
     /** {@inheritDoc} */
@@ -2246,18 +2263,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mKeyguardDrawnTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_keyguardDrawnTimeout);
-        mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
-                new StateCallback() {
-                    @Override
-                    public void onTrustedChanged() {
-                        mWindowManagerFuncs.notifyKeyguardTrustedChanged();
-                    }
-
-                    @Override
-                    public void onShowingChanged() {
-                        mWindowManagerFuncs.onKeyguardShowingAndNotOccludedChanged();
-                    }
-                });
+        mKeyguardDelegate = injector.getKeyguardServiceDelegate();
         initKeyCombinationRules();
         initSingleKeyGestureRules();
         mSideFpsEventHandler = new SideFpsEventHandler(mContext, mHandler, mPowerManager);

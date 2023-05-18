@@ -17,18 +17,12 @@
 package com.android.wm.shell.bubbles;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
-import static android.content.pm.ActivityInfo.CONFIG_DENSITY;
-import static android.content.pm.ActivityInfo.CONFIG_FONT_SCALE;
-import static android.content.pm.ActivityInfo.CONFIG_LAYOUT_DIRECTION;
-import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
@@ -53,7 +47,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -81,6 +74,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.view.IWindowManager;
 import android.view.SurfaceControl;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets;
@@ -108,7 +102,6 @@ import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.common.annotations.ExternalMainThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
@@ -116,6 +109,7 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -141,7 +135,7 @@ import java.util.function.IntConsumer;
  *
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
-public class BubbleController implements ComponentCallbacks2,
+public class BubbleController implements ConfigurationChangeListener,
         RemoteCallable<BubbleController> {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
@@ -158,6 +152,7 @@ public class BubbleController implements ComponentCallbacks2,
      */
     private static final boolean BUBBLE_BAR_ENABLED =
             SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false);
+
 
     /**
      * Common interface to send updates to bubble views.
@@ -242,17 +237,17 @@ public class BubbleController implements ComponentCallbacks2,
     /** Whether or not the BubbleStackView has been added to the WindowManager. */
     private boolean mAddedToWindowManager = false;
 
-    /**
-     * Saved configuration, used to detect changes in
-     * {@link #onConfigurationChanged(Configuration)}
-     */
-    private final Configuration mLastConfiguration = new Configuration();
+    /** Saved screen density, used to detect display size changes in {@link #onConfigChanged}. */
+    private int mDensityDpi = Configuration.DENSITY_DPI_UNDEFINED;
 
-    /**
-     * Saved screen bounds, used to detect screen size changes in
-     * {@link #onConfigurationChanged(Configuration)}.
-     */
-    private final Rect mScreenBounds = new Rect();
+    /** Saved screen bounds, used to detect screen size changes in {@link #onConfigChanged}. **/
+    private Rect mScreenBounds = new Rect();
+
+    /** Saved font scale, used to detect font size changes in {@link #onConfigChanged}. */
+    private float mFontScale = 0;
+
+    /** Saved direction, used to detect layout direction changes @link #onConfigChanged}. */
+    private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
 
     /** Saved insets, used to detect WindowInset changes. */
     private WindowInsets mWindowInsets;
@@ -298,8 +293,7 @@ public class BubbleController implements ComponentCallbacks2,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService) {
-        mContext = context.createWindowContext(TYPE_APPLICATION_OVERLAY, null);
-        mLastConfiguration.setTo(mContext.getResources().getConfiguration());
+        mContext = context;
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
         mLauncherApps = launcherApps;
@@ -323,11 +317,11 @@ public class BubbleController implements ComponentCallbacks2,
         mBubblePositioner = positioner;
         mBubbleData = data;
         mSavedUserBubbleData = new SparseArray<>();
-        mBubbleIconFactory = new BubbleIconFactory(mContext,
-                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
-                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
-                mContext.getResources().getColor(R.color.important_conversation),
-                mContext.getResources().getDimensionPixelSize(
+        mBubbleIconFactory = new BubbleIconFactory(context,
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_size),
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                context.getResources().getColor(R.color.important_conversation),
+                context.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
         mTaskViewTransitions = taskViewTransitions;
@@ -488,6 +482,7 @@ public class BubbleController implements ComponentCallbacks2,
         }
         mCurrentProfiles = userProfiles;
 
+        mShellController.addConfigurationChangeListener(this);
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_BUBBLES,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
@@ -779,7 +774,6 @@ public class BubbleController implements ComponentCallbacks2,
         try {
             mAddedToWindowManager = true;
             registerBroadcastReceiver();
-            mContext.registerComponentCallbacks(this);
             mBubbleData.getOverflow().initialize(this);
             // (TODO: b/273314541) some duplication in the inset listener
             if (isShowingAsBubbleBar()) {
@@ -837,7 +831,6 @@ public class BubbleController implements ComponentCallbacks2,
         // Put on background for this binder call, was causing jank
         mBackgroundExecutor.execute(() -> {
             try {
-                mContext.unregisterComponentCallbacks(this);
                 mContext.unregisterReceiver(mBroadcastReceiver);
             } catch (IllegalArgumentException e) {
                 // Not sure if this happens in production, but was happening in tests
@@ -937,7 +930,8 @@ public class BubbleController implements ComponentCallbacks2,
         mSavedUserBubbleData.remove(userId);
     }
 
-    private void onThemeChanged() {
+    @Override
+    public void onThemeChanged() {
         if (mStackView != null) {
             mStackView.onThemeChanged();
         }
@@ -969,60 +963,34 @@ public class BubbleController implements ComponentCallbacks2,
         }
     }
 
-    // Note: Component callbacks are always called on the main thread of the process
-    @ExternalMainThread
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        mMainExecutor.execute(() -> {
-            final int diff = newConfig.diff(mLastConfiguration);
-            final boolean themeChanged = (diff & CONFIG_ASSETS_PATHS) != 0
-                    || (diff & CONFIG_UI_MODE) != 0;
-            if (themeChanged) {
-                onThemeChanged();
+        if (mBubblePositioner != null) {
+            mBubblePositioner.update();
+        }
+        if (mStackView != null && newConfig != null) {
+            if (newConfig.densityDpi != mDensityDpi
+                    || !newConfig.windowConfiguration.getBounds().equals(mScreenBounds)) {
+                mDensityDpi = newConfig.densityDpi;
+                mScreenBounds.set(newConfig.windowConfiguration.getBounds());
+                mBubbleData.onMaxBubblesChanged();
+                mBubbleIconFactory = new BubbleIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                        mContext.getResources().getColor(R.color.important_conversation),
+                        mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.importance_ring_stroke_width));
+                mStackView.onDisplaySizeChanged();
             }
-            if (mBubblePositioner != null) {
-                mBubblePositioner.update();
+            if (newConfig.fontScale != mFontScale) {
+                mFontScale = newConfig.fontScale;
+                mStackView.updateFontScale();
             }
-            if (mStackView != null) {
-                final boolean densityChanged = (diff & CONFIG_DENSITY) != 0;
-                final boolean fontScaleChanged = (diff & CONFIG_FONT_SCALE) != 0;
-                final boolean layoutDirectionChanged = (diff & CONFIG_LAYOUT_DIRECTION) != 0;
-                if (densityChanged
-                        || !newConfig.windowConfiguration.getBounds().equals(mScreenBounds)) {
-                    mScreenBounds.set(newConfig.windowConfiguration.getBounds());
-                    mBubbleData.onMaxBubblesChanged();
-                    mBubbleIconFactory = new BubbleIconFactory(mContext,
-                            mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
-                            mContext.getResources().getDimensionPixelSize(
-                                    R.dimen.bubble_badge_size),
-                            mContext.getResources().getColor(R.color.important_conversation),
-                            mContext.getResources().getDimensionPixelSize(
-                                    com.android.internal.R.dimen.importance_ring_stroke_width));
-                    mStackView.onDisplaySizeChanged();
-                }
-                if (fontScaleChanged) {
-                    mStackView.updateFontScale();
-                }
-                if (layoutDirectionChanged) {
-                    mStackView.onLayoutDirectionChanged(newConfig.getLayoutDirection());
-                }
+            if (newConfig.getLayoutDirection() != mLayoutDirection) {
+                mLayoutDirection = newConfig.getLayoutDirection();
+                mStackView.onLayoutDirectionChanged(mLayoutDirection);
             }
-            mLastConfiguration.setTo(newConfig);
-        });
-    }
-
-    // Note: Component callbacks are always called on the main thread of the process
-    @ExternalMainThread
-    @Override
-    public void onTrimMemory(int level) {
-        // Do nothing
-    }
-
-    // Note: Component callbacks are always called on the main thread of the process
-    @ExternalMainThread
-    @Override
-    public void onLowMemory() {
-        // Do nothing
+        }
     }
 
     private void onNotificationPanelExpandedChanged(boolean expanded) {

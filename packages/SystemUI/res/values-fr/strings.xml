@@ -99,7 +99,7 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Enregistreur d\'écran"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Enregistrement de l\'écran…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notification en cours pour une session d\'enregistrement de l\'écran"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Lancer l\'enregistrement ?"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Commencer à enregistrer ?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Lorsque vous enregistrez, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Lorsque vous enregistrez une appli, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Lancer l\'enregistrement"</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"désactiver"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Son et vibreur"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Paramètres"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Volume réduit à un niveau plus sûr"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"La période pendant laquelle le volume est resté élevé est supérieure à celle recommandée"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volume réduit à un niveau plus sûr"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Le volume du casque est élevé depuis plus longtemps que recommandé"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Le volume du casque a dépassé la limite de sécurité pour cette semaine"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Continuer d\'écouter"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Réduire le volume"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"L\'application est épinglée"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Récents."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Accueil."</string>
@@ -812,7 +815,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Rebasculer sur <xliff:g id="CARRIER">%s</xliff:g> ?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Il n\'y aura pas de basculement automatique entre les données mobile selon la disponibilité"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Non, merci"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Oui, revenir"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Oui, rebasculer"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"L\'application Paramètres ne peut pas valider votre réponse, car une application masque la demande d\'autorisation."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Autoriser <xliff:g id="APP_0">%1$s</xliff:g> à afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g> ?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Accès aux informations de <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -985,10 +988,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Enceintes et écrans"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Appareils suggérés"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Arrêter votre session partagée pour déplacer des contenus multimédias vers un autre appareil"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Arrêter"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Fonctionnement des annonces"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Annonce"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les personnes à proximité équipées d\'appareils Bluetooth compatibles peuvent écouter le contenu multimédia que vous diffusez"</string>
@@ -1064,7 +1065,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Recherche de réseaux…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Échec de la connexion au réseau"</string>
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Connexion automatique au Wi-Fi désactivée pour le moment"</string>
-    <string name="see_all_networks" msgid="3773666844913168122">"Tout afficher"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Tout voir"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pour changer de réseau, déconnectez l\'Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Pour améliorer l\'expérience sur l\'appareil, les applis et les services peuvent continuer de rechercher les réseaux Wi-Fi, même si le Wi-Fi est désactivé. Vous pouvez modifier cela dans les paramètres de recherche Wi-Fi. "<annotation id="link">"Modifier"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Désactiver le mode Avion"</string>
@@ -1141,10 +1142,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connectez votre stylet à un chargeur"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"La batterie du stylet est faible"</string>
     <string name="video_camera" msgid="7654002575156149298">"Caméra"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Impossible d\'appeler depuis ce profil"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Votre règle professionnelle ne vous permet de passer des appels que depuis le profil professionnel"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Impossible d\'appeler depuis une appli personnelle"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Votre organisation ne vous autorise à passer des appels que depuis des applis professionnelles"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Passer au profil professionnel"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Fermer"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Installer une appli professionnelle pour téléphoner"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Annuler"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Personnaliser écran verrouillage"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Déverrouiller pour personnaliser l\'écran de verrouillage"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi non disponible"</string>

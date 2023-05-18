@@ -78,6 +78,7 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
@@ -1715,6 +1716,17 @@
             <meta-data android:name="android.view.im"
                        android:resource="@xml/ime_meta_handwriting"/>
         </service>
+
+        <activity android:name="android.widget.PointerIconTestActivity"
+                  android:label="PointerIconTestActivity"
+                  android:screenOrientation="portrait"
+                  android:exported="true"
+                  android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

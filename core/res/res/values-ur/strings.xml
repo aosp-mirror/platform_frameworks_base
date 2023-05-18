@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ہٹائیں"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"والیوم کو تجویز کردہ سطح سے زیادہ کریں؟\n\nزیادہ وقت تک اونچی آواز میں سننے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"وارننگ،\nآپ بلند آواز کے سگنلز کی حد سے تجاوز کر چکے ہیں جنہیں ایک ہفتے میں کوئی ہیڈ فونز پر محفوظ طریقے سے سن سکتا ہے۔\n\nاس حد سے تجاوز کرنے سے آپ کی سماعت کو مستقل طور پر نقصان پہنچے گا۔"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"وارننگ،\nآپ بلند آواز کے سگنلز کی حد سے 5 گنا تجاوز کر چکے ہیں جنہیں ایک ہفتے میں کوئی ہیڈ فونز پر محفوظ طریقے سے سن سکتا ہے۔\n\nآپ کی سماعت کی حفاظت کے لیے والیوم کو کم کر دیا گیا ہے۔"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"جس سطح پر آپ میڈیا کو سن رہے ہیں اس پر طویل عرصے تک برقرار رہنے کے نتیجے میں سماعت کو نقصان پہنچ سکتا ہے۔\n\nاس سطح پر طویل عرصے تک چلانے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"وارننگ،\nآپ فی الحال غیر محفوظ سطح پر چلائے گئے مواد کو بلند آواز میں سن رہے ہیں۔\n\nاس بلند آواز کو مسلسل سننے سے آپ کی سماعت کو مستقل طور پر نقصان پہنچے گا۔"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"اونچی آواز میں سننا جاری رکھیں؟\n\nہیڈ فون کا والیوم تجویز کردہ وقت سے زیادہ دیر تک بلند رہا ہے، جو آپ کی سماعت کو نقصان پہنچا سکتا ہے"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"تیز آواز کا پتہ چلا\n\nہیڈ فون کا والیوم تجویز کردہ سے زیادہ بلند رہا ہے، جو آپ کی سماعت کو نقصان پہنچا سکتا ہے"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ایکسیسبیلٹی شارٹ کٹ استعمال کریں؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"شارٹ کٹ آن ہونے پر، 3 سیکنڈ تک دونوں والیوم بٹنز کو دبانے سے ایک ایکسیسبیلٹی خصوصیت شروع ہو جائے گی۔"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ایکسیسبیلٹی خصوصیات کے لیے شارٹ کٹ آن کریں؟"</string>
@@ -2164,14 +2162,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"غیر موقوف کریں"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"کوئی ورک ایپ نہیں"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"کوئی ذاتی ایپ نہیں"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"دفتری <xliff:g id="APP">%s</xliff:g> کھولیں؟"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ذاتی <xliff:g id="APP">%s</xliff:g> میں کھولیں؟"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"دفتری <xliff:g id="APP">%s</xliff:g> میں کھولیں؟"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ذاتی براؤزر استعمال کریں"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ورک براؤزر استعمال کریں"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏SIM نیٹ ورک غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"‏SIM نیٹ ورک سب سیٹ کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"‏SIM کارپوریٹ کو غیر مقفل کرنے کا PIN"</string>
@@ -2330,7 +2337,7 @@
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‏Dual Screen دستیاب نہیں ہے کیونکہ بیٹری سیور آن ہے۔ آپ اسے ترتیبات میں آف کر سکتے ہیں۔"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"ترتیبات پر جائیں"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"آف کریں"</string>
-    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> میں کنفیگر کیا گیا"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"‫<xliff:g id="DEVICE_NAME">%s</xliff:g> کنفیگر کیا گیا"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"کی بورڈ لے آؤٹ <xliff:g id="LAYOUT_1">%s</xliff:g> پر سیٹ ہے۔ تبدیل کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"کی بورڈ لے آؤٹ <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g> پر سیٹ ہے۔ تبدیل کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"کی بورڈ لے آؤٹ <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g> پر سیٹ ہے۔ تبدیل کرنے کیلئے تھپتھپائیں۔"</string>

@@ -33,6 +33,7 @@ import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.os.UserHandle
 import android.os.UserManager
+import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
@@ -46,6 +47,7 @@ import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyA
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.util.kotlin.getOrNull
+import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
 import com.android.wm.shell.bubbles.Bubbles.BubbleExpandListener
@@ -76,6 +78,7 @@ constructor(
     @NoteTaskEnabledKey private val isEnabled: Boolean,
     private val devicePolicyManager: DevicePolicyManager,
     private val userTracker: UserTracker,
+    private val secureSettings: SecureSettings,
 ) {
 
     @VisibleForTesting val infoReference = AtomicReference<NoteTaskInfo?>()
@@ -146,7 +149,7 @@ constructor(
             userTracker.userProfiles.firstOrNull { userManager.isManagedProfile(it.id) }?.userHandle
                 ?: userTracker.userHandle
         } else {
-            userTracker.userHandle
+            secureSettings.preferredUser
         }
 
     /**
@@ -250,6 +253,11 @@ constructor(
      * Widget Picker to all users.
      */
     fun setNoteTaskShortcutEnabled(value: Boolean, user: UserHandle) {
+        if (!userManager.isUserUnlocked(user)) {
+            debugLog { "setNoteTaskShortcutEnabled call but user locked: user=$user" }
+            return
+        }
+
         val componentName = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
 
         val enabledState =
@@ -305,6 +313,10 @@ constructor(
     /** @see OnRoleHoldersChangedListener */
     fun onRoleHoldersChanged(roleName: String, user: UserHandle) {
         if (roleName != ROLE_NOTES) return
+        if (!userManager.isUserUnlocked(user)) {
+            debugLog { "onRoleHoldersChanged call but user locked: role=$roleName, user=$user" }
+            return
+        }
 
         if (user == userTracker.userHandle) {
             updateNoteTaskAsUser(user)
@@ -314,6 +326,16 @@ constructor(
             context.startServiceAsUser(intent, user)
         }
     }
+
+    private val SecureSettings.preferredUser: UserHandle
+        get() {
+            val userId =
+                secureSettings.getInt(
+                    Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
+                    userTracker.userHandle.identifier,
+                )
+            return UserHandle.of(userId)
+        }
 
     companion object {
         val TAG = NoteTaskController::class.simpleName.orEmpty()

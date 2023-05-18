@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"બંધ કરો"</string>
     <string name="sound_settings" msgid="8874581353127418308">"સાઉન્ડ અને વાઇબ્રેશન"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"સેટિંગ"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"વૉલ્યૂમ ઘટાડીને સલામત વૉલ્યૂમ જેટલું કર્યું"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"સુઝાવ આપેલા સમય કરતાં વધુ સમય સુધી વૉલ્યૂમ વધારે રહ્યું છે"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"વૉલ્યૂમને વધુ સલામત લેવલ સુધી ઘટાડ્યું"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"હૅડફોનનું વૉલ્યૂમ સુઝાવ આપેલા સમય કરતાં વધારે સમય સુધી ઊંચા વૉલ્યૂમ પર રહ્યું છે"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"હૅડફોનનું વૉલ્યૂમ આ અઠવાડિયા માટેની સુરક્ષિત મર્યાદા કરતાં વધારે છે"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"સાંભળવાનું ચાલુ રાખો"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"વૉલ્યૂમ ઘટાડો"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ઍપને પિન કરેલી છે"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને વ્યૂમાં રાખે છે. અનપિન કરવા માટે પાછળ અને ઓવરવ્યૂને સ્પર્શ કરી રાખો."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને વ્યૂમાં રાખે છે. અનપિન કરવા માટે પાછળ અને હોમને સ્પર્શ કરી રાખો."</string>
@@ -985,10 +988,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"સ્પીકર અને ડિસ્પ્લે"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"સૂચવેલા ડિવાઇસ"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"મીડિયાને બીજા ડિવાઇસ પર ખસેડવા માટે તમારું શેર કરેલું સત્ર રોકો"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"રોકો"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"બ્રોડકાસ્ટ પ્રક્રિયાની કામ કરવાની રીત"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"બ્રોડકાસ્ટ કરો"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"સુસંગત બ્લૂટૂથ ડિવાઇસ ધરાવતા નજીકના લોકો તમે જે મીડિયા બ્રોડકાસ્ટ કરી રહ્યાં છો તે સાંભળી શકે છે"</string>
@@ -1141,10 +1142,15 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"તમારા સ્ટાઇલસને ચાર્જર સાથે કનેક્ટ કરો"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"સ્ટાઇલસની બૅટરીમાં ચાર્જ ઓછો છે"</string>
     <string name="video_camera" msgid="7654002575156149298">"વીડિયો કૅમેરા"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"આ પ્રોફાઇલ પરથી કૉલ કરી શકતા નથી"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"તમારી ઑફિસની પૉલિસી તમને માત્ર ઑફિસની પ્રોફાઇલ પરથી જ ફોન કૉલ કરવાની મંજૂરી આપે છે"</string>
+    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
+    <skip />
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ઑફિસની પ્રોફાઇલ પર સ્વિચ કરો"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"બંધ કરો"</string>
+    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
+    <skip />
     <string name="lock_screen_settings" msgid="6152703934761402399">"લૉક સ્ક્રીન કસ્ટમાઇઝ કરો"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"લૉક સ્ક્રીનને કસ્ટમાઇઝ કરવા માટે અનલૉક કરો"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"વાઇ-ફાઇ ઉપલબ્ધ નથી"</string>
