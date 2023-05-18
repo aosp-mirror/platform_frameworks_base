@@ -453,9 +453,9 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 postGroupNotification(currentUser);
                 mNotificationManager.notifyAsUser(null, mNotificationId,  notification,
                         currentUser);
-            } catch (IOException e) {
+            } catch (IOException | IllegalStateException e) {
                 Log.e(TAG, "Error saving screen recording: " + e.getMessage());
-                showErrorToast(R.string.screenrecord_delete_error);
+                showErrorToast(R.string.screenrecord_save_error);
                 mNotificationManager.cancelAsUser(null, mNotificationId, currentUser);
             }
         });

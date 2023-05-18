@@ -41,7 +41,9 @@ import kotlinx.coroutines.flow.asStateFlow
 class GoneScene @Inject constructor() : ComposableScene {
     override val key = SceneKey.Gone
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    override fun destinationScenes(
+        containerName: String,
+    ): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
                     UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.Shade),
@@ -51,6 +53,7 @@ class GoneScene @Inject constructor() : ComposableScene {
 
     @Composable
     override fun Content(
+        containerName: String,
         modifier: Modifier,
     ) {
         /*

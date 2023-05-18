@@ -59,7 +59,7 @@ interface Scene {
      * The API is designed such that it's possible to emit ever-changing values for each
      * [UserAction] to enable, disable, or change the destination scene of a given user action.
      */
-    fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    fun destinationScenes(containerName: String): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow(emptyMap<UserAction, SceneModel>()).asStateFlow()
 }
 
