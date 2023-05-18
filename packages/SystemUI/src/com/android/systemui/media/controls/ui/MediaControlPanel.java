@@ -617,10 +617,7 @@ public class MediaControlPanel {
         seamlessView.setContentDescription(deviceString);
         seamlessView.setOnClickListener(
                 v -> {
-                    if (mFalsingManager.isFalseTap(
-                            mFeatureFlags.isEnabled(Flags.MEDIA_FALSING_PENALTY)
-                                    ? FalsingManager.MODERATE_PENALTY :
-                                    FalsingManager.LOW_PENALTY)) {
+                    if (mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
                         return;
                     }
 
@@ -1130,10 +1127,7 @@ public class MediaControlPanel {
             } else {
                 button.setEnabled(true);
                 button.setOnClickListener(v -> {
-                    if (!mFalsingManager.isFalseTap(
-                            mFeatureFlags.isEnabled(Flags.MEDIA_FALSING_PENALTY)
-                                    ? FalsingManager.MODERATE_PENALTY :
-                                    FalsingManager.LOW_PENALTY)) {
+                    if (!mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
                         mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
                         logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
                         action.run();
