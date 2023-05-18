@@ -17,7 +17,7 @@
 package com.android.systemui.scene.ui.composable
 
 import com.android.systemui.bouncer.ui.composable.BouncerScene
-import com.android.systemui.keyguard.ui.composable.LockScreenScene
+import com.android.systemui.keyguard.ui.composable.LockscreenScene
 import com.android.systemui.qs.ui.composable.QuickSettingsScene
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.shade.ui.composable.ShadeScene
@@ -30,7 +30,7 @@ object SceneModule {
     fun scenes(
         bouncer: BouncerScene,
         gone: GoneScene,
-        lockScreen: LockScreenScene,
+        lockScreen: LockscreenScene,
         qs: QuickSettingsScene,
         shade: ShadeScene,
     ): Set<Scene> {
