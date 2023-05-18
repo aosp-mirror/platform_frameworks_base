@@ -247,6 +247,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mFeatureFlags,
                 mInteractionJankMonitor,
                 mShadeLogger,
+                mDumpManager,
                 mock(KeyguardFaceAuthInteractor.class),
                 mock(ShadeRepository.class),
                 mCastController
