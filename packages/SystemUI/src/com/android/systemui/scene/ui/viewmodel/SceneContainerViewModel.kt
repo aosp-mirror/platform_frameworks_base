@@ -29,7 +29,7 @@ class SceneContainerViewModel
 @AssistedInject
 constructor(
     private val interactor: SceneInteractor,
-    @Assisted private val containerName: String,
+    @Assisted val containerName: String,
 ) {
     /**
      * Keys of all scenes in the container.
