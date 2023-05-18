@@ -32,6 +32,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.ArrayMap;
+import android.view.SurfaceControlRegistry;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -52,6 +53,7 @@ import java.util.function.Supplier;
 public class ShellController {
     private static final String TAG = ShellController.class.getSimpleName();
 
+    private final Context mContext;
     private final ShellInit mShellInit;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mMainExecutor;
@@ -72,8 +74,11 @@ public class ShellController {
     private Configuration mLastConfiguration;
 
 
-    public ShellController(ShellInit shellInit, ShellCommandHandler shellCommandHandler,
+    public ShellController(Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellExecutor mainExecutor) {
+        mContext = context;
         mShellInit = shellInit;
         mShellCommandHandler = shellCommandHandler;
         mMainExecutor = mainExecutor;
@@ -254,6 +259,16 @@ public class ShellController {
         }
     }
 
+    private void handleInit() {
+        SurfaceControlRegistry.createProcessInstance(mContext);
+        mShellInit.init();
+    }
+
+    private void handleDump(PrintWriter pw) {
+        mShellCommandHandler.dump(pw);
+        SurfaceControlRegistry.dump(100 /* limit */, false /* runGc */, pw);
+    }
+
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
@@ -279,7 +294,7 @@ public class ShellController {
         @Override
         public void onInit() {
             try {
-                mMainExecutor.executeBlocking(() -> mShellInit.init());
+                mMainExecutor.executeBlocking(() -> ShellController.this.handleInit());
             } catch (InterruptedException e) {
                 throw new RuntimeException("Failed to initialize the Shell in 2s", e);
             }
@@ -344,7 +359,7 @@ public class ShellController {
         @Override
         public void dump(PrintWriter pw) {
             try {
-                mMainExecutor.executeBlocking(() -> mShellCommandHandler.dump(pw));
+                mMainExecutor.executeBlocking(() -> ShellController.this.handleDump(pw));
             } catch (InterruptedException e) {
                 throw new RuntimeException("Failed to dump the Shell in 2s", e);
             }
