@@ -130,9 +130,12 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        int restoreTo = KeyguardClockFrame.saveCanvasAlpha(this, canvas, mDrawAlpha);
-        super.dispatchDraw(canvas);
-        canvas.restoreToCount(restoreTo);
+        KeyguardClockFrame.saveCanvasAlpha(
+                this, canvas, mDrawAlpha,
+                c -> {
+                    super.dispatchDraw(c);
+                    return kotlin.Unit.INSTANCE;
+                });
     }
 
     public void setLogBuffer(LogBuffer logBuffer) {
