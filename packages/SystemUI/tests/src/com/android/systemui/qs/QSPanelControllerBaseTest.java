@@ -321,4 +321,30 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         assertThat(mController.shouldUseHorizontalLayout()).isFalse();
         verify(mHorizontalLayoutListener).run();
     }
+
+    @Test
+    public void changeTiles_callbackRemovedOnOldOnes() {
+        // Start with one tile
+        assertThat(mController.mRecords.size()).isEqualTo(1);
+        QSPanelControllerBase.TileRecord record = mController.mRecords.get(0);
+
+        assertThat(record.tile).isEqualTo(mQSTile);
+
+        // Change to a different tile
+        when(mQSHost.getTiles()).thenReturn(List.of(mOtherTile));
+        mController.setTiles();
+
+        verify(mQSTile).removeCallback(record.callback);
+        verify(mOtherTile, never()).removeCallback(any());
+        verify(mOtherTile, never()).removeCallbacks();
+    }
+
+    @Test
+    public void onViewDetached_removesJustTheAssociatedCallback() {
+        QSPanelControllerBase.TileRecord record = mController.mRecords.get(0);
+
+        mController.onViewDetached();
+        verify(mQSTile).removeCallback(record.callback);
+        verify(mQSTile, never()).removeCallbacks();
+    }
 }
