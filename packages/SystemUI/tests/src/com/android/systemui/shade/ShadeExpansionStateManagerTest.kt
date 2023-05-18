@@ -35,7 +35,8 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
     @Test
     fun onPanelExpansionChanged_listenerNotified() {
         val listener = TestShadeExpansionListener()
-        shadeExpansionStateManager.addExpansionListener(listener)
+        val currentState = shadeExpansionStateManager.addExpansionListener(listener)
+        listener.onPanelExpansionChanged(currentState)
         val fraction = 0.6f
         val expanded = true
         val tracking = true
@@ -68,7 +69,8 @@ class ShadeExpansionStateManagerTest : SysuiTestCase() {
         )
         val listener = TestShadeExpansionListener()
 
-        shadeExpansionStateManager.addExpansionListener(listener)
+        val currentState = shadeExpansionStateManager.addExpansionListener(listener)
+        listener.onPanelExpansionChanged(currentState)
 
         assertThat(listener.fraction).isEqualTo(fraction)
         assertThat(listener.expanded).isEqualTo(expanded)
