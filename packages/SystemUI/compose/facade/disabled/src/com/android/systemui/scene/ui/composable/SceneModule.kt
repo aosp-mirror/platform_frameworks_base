@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.page
+package com.android.systemui.scene.ui.composable
 
 import com.android.systemui.scene.shared.model.Scene
 import dagger.Module
