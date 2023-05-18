@@ -9206,6 +9206,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final DropboxRateLimiter mDropboxRateLimiter = new DropboxRateLimiter();
 
+    /** Initializes the Dropbox Rate Limiter parameters from flags. */
+    public void initDropboxRateLimiter() {
+        mDropboxRateLimiter.init();
+    }
+
     /**
      * Write a description of an error (crash, WTF, ANR) to the drop box.
      * @param eventType to include in the drop box tag ("crash", "wtf", etc.)

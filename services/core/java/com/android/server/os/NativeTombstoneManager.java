@@ -96,6 +96,8 @@ public final class NativeTombstoneManager {
         registerForUserRemoval();
         registerForPackageRemoval();
 
+        BootReceiver.initDropboxRateLimiter();
+
         // Scan existing tombstones.
         mHandler.post(() -> {
             final File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();

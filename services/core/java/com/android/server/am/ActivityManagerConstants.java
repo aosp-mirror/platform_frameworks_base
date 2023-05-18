@@ -1345,6 +1345,8 @@ final class ActivityManagerConstants extends ContentObserver {
         // The following read from Settings.
         updateActivityStartsLoggingEnabled();
         updateForegroundServiceStartsLoggingEnabled();
+        // Read DropboxRateLimiter params from flags.
+        mService.initDropboxRateLimiter();
     }
 
     private void loadDeviceConfigConstants() {
