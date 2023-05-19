@@ -1092,12 +1092,9 @@ final class DevicePolicyEngine {
                 if (policies.get(admin).getValue() != null
                         && policies.get(admin).getValue().getPackageName().equals(packageName)) {
                     try {
-                        if (packageManager.getPackageInfo(
-                                packageName, 0, userId) == null
-                                || packageManager.getReceiverInfo(policies.get(admin).getValue(),
-                                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                                userId) == null) {
+                        if (packageManager.getPackageInfo(packageName, 0, userId) == null
+                                || packageManager.getActivityInfo(
+                                        policies.get(admin).getValue(), 0, userId) == null) {
                             Slogf.e(TAG, String.format(
                                     "Persistent preferred activity in package %s not found for "
                                             + "user %d, removing policy for admin",
