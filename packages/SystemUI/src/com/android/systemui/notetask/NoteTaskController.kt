@@ -288,8 +288,27 @@ constructor(
     }
 
     /**
+     * Like [updateNoteTaskAsUser] but automatically apply to the current user and all its work
+     * profiles.
+     *
+     * @see updateNoteTaskAsUser
+     * @see UserTracker.userHandle
+     * @see UserTracker.userProfiles
+     */
+    fun updateNoteTaskForCurrentUserAndManagedProfiles() {
+        updateNoteTaskAsUser(userTracker.userHandle)
+        for (profile in userTracker.userProfiles) {
+            if (userManager.isManagedProfile(profile.id)) {
+                updateNoteTaskAsUser(profile.userHandle)
+            }
+        }
+    }
+
+    /**
      * Updates all [NoteTaskController] related information, including but not exclusively the
      * widget shortcut created by the [user] - by default it will use the current user.
+     *
+     * If the user is not current user, the update will be dispatched to run in that user's process.
      *
      * Keep in mind the shortcut API has a
      * [rate limiting](https://developer.android.com/develop/ui/views/launch/shortcuts/managing-shortcuts#rate-limiting)
@@ -297,6 +316,27 @@ constructor(
      * function during System UI initialization.
      */
     fun updateNoteTaskAsUser(user: UserHandle) {
+        if (!userManager.isUserUnlocked(user)) {
+            debugLog { "updateNoteTaskAsUser call but user locked: user=$user" }
+            return
+        }
+
+        if (user == userTracker.userHandle) {
+            updateNoteTaskAsUserInternal(user)
+        } else {
+            // TODO(b/278729185): Replace fire and forget service with a bounded service.
+            val intent = NoteTaskControllerUpdateService.createIntent(context)
+            context.startServiceAsUser(intent, user)
+        }
+    }
+
+    @InternalNoteTaskApi
+    fun updateNoteTaskAsUserInternal(user: UserHandle) {
+        if (!userManager.isUserUnlocked(user)) {
+            debugLog { "updateNoteTaskAsUserInternal call but user locked: user=$user" }
+            return
+        }
+
         val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
         val hasNotesRoleHolder = isEnabled && !packageName.isNullOrEmpty()
 
@@ -314,18 +354,8 @@ constructor(
     /** @see OnRoleHoldersChangedListener */
     fun onRoleHoldersChanged(roleName: String, user: UserHandle) {
         if (roleName != ROLE_NOTES) return
-        if (!userManager.isUserUnlocked(user)) {
-            debugLog { "onRoleHoldersChanged call but user locked: role=$roleName, user=$user" }
-            return
-        }
 
-        if (user == userTracker.userHandle) {
-            updateNoteTaskAsUser(user)
-        } else {
-            // TODO(b/278729185): Replace fire and forget service with a bounded service.
-            val intent = NoteTaskControllerUpdateService.createIntent(context)
-            context.startServiceAsUser(intent, user)
-        }
+        updateNoteTaskAsUser(user)
     }
 
     private val SecureSettings.preferredUser: UserHandle
