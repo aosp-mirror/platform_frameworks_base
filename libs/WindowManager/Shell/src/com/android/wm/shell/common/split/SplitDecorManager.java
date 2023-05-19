@@ -293,6 +293,9 @@ public class SplitDecorManager extends WindowlessWindowManager {
         }
 
         if (mResizingIconView == null) {
+            if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
+                animFinishedCallback.accept(false);
+            }
             return;
         }
 
@@ -311,6 +314,9 @@ public class SplitDecorManager extends WindowlessWindowManager {
                         releaseDecor(finishT);
                         finishT.apply();
                         finishT.close();
+                        if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
+                            animFinishedCallback.accept(true);
+                        }
                     }
                 });
                 return;
