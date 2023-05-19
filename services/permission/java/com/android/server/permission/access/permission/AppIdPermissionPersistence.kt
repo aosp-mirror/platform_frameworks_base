@@ -27,6 +27,7 @@ import com.android.server.permission.access.MutableAppIdPermissionFlags
 import com.android.server.permission.access.WriteMode
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.util.andInv
 import com.android.server.permission.access.util.attribute
 import com.android.server.permission.access.util.attributeInt
 import com.android.server.permission.access.util.attributeIntHex
@@ -38,6 +39,7 @@ import com.android.server.permission.access.util.getAttributeIntHexOrThrow
 import com.android.server.permission.access.util.getAttributeIntOrThrow
 import com.android.server.permission.access.util.getAttributeValue
 import com.android.server.permission.access.util.getAttributeValueOrThrow
+import com.android.server.permission.access.util.hasBits
 import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 
@@ -225,7 +227,13 @@ class AppIdPermissionPersistence {
     private fun BinaryXmlSerializer.serializeAppIdPermission(name: String, flags: Int) {
         tag(TAG_PERMISSION) {
             attributeInterned(ATTR_NAME, name)
-            attributeInt(ATTR_FLAGS, flags)
+            // Never serialize one-time permissions as granted.
+            val serializedFlags = if (flags.hasBits(PermissionFlags.ONE_TIME)) {
+                flags andInv PermissionFlags.RUNTIME_GRANTED
+            } else {
+                flags
+            }
+            attributeInt(ATTR_FLAGS, serializedFlags)
         }
     }
 
