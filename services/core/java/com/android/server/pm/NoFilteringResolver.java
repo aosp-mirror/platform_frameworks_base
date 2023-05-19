@@ -24,7 +24,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 
 import com.android.internal.R;
-import com.android.internal.config.appcloning.AppCloningDeviceConfigHelper;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
@@ -57,10 +56,9 @@ public class NoFilteringResolver extends CrossProfileResolver {
      * (PackageManager.MATCH_CLONE_PROFILE) bit set.
      * @return true if resolver would be used for cross profile resolution.
      */
-    public static boolean isIntentRedirectionAllowed(Context context,
-            AppCloningDeviceConfigHelper appCloningDeviceConfigHelper, boolean resolveForStart,
+    public static boolean isIntentRedirectionAllowed(Context context, boolean resolveForStart,
             long flags) {
-        return isAppCloningBuildingBlocksEnabled(context, appCloningDeviceConfigHelper)
+        return isAppCloningBuildingBlocksEnabled(context)
                     && (resolveForStart || (((flags & PackageManager.MATCH_CLONE_PROFILE) != 0)
                     && hasPermission(context, Manifest.permission.QUERY_CLONED_APPS)));
     }
@@ -142,14 +140,12 @@ public class NoFilteringResolver extends CrossProfileResolver {
     }
 
     /**
-     * Checks if the AppCloningBuildingBlocks flag is enabled.
+     * Checks if the AppCloningBuildingBlocks config is enabled.
      */
-    private static boolean isAppCloningBuildingBlocksEnabled(Context context,
-            AppCloningDeviceConfigHelper appCloningDeviceConfigHelper) {
+    private static boolean isAppCloningBuildingBlocksEnabled(Context context) {
         final long token = Binder.clearCallingIdentity();
         try {
-            return context.getResources().getBoolean(R.bool.config_enableAppCloningBuildingBlocks)
-                    && appCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks();
+            return context.getResources().getBoolean(R.bool.config_enableAppCloningBuildingBlocks);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
