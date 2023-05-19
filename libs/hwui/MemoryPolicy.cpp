@@ -28,7 +28,10 @@ namespace android::uirenderer {
 constexpr static MemoryPolicy sDefaultMemoryPolicy;
 constexpr static MemoryPolicy sPersistentOrSystemPolicy{
         .contextTimeout = 10_s,
+        .minimumResourceRetention = 1_s,
+        .maximumResourceRetention = 10_s,
         .useAlternativeUiHidden = true,
+        .purgeScratchOnly = false,
 };
 constexpr static MemoryPolicy sLowRamPolicy{
         .useAlternativeUiHidden = true,

@@ -53,6 +53,8 @@ struct MemoryPolicy {
     // The minimum amount of time to hold onto items in the resource cache
     // The actual time used will be the max of this & when frames were actually rendered
     nsecs_t minimumResourceRetention = 10_s;
+    // The maximum amount of time to hold onto items in the resource cache
+    nsecs_t maximumResourceRetention = 100000_s;
     // If false, use only TRIM_UI_HIDDEN to drive background cache limits;
     // If true, use all signals (such as all contexts are stopped) to drive the limits
     bool useAlternativeUiHidden = true;
