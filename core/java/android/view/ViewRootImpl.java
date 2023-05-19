@@ -4875,19 +4875,11 @@ public final class ViewRootImpl implements ViewParent,
             dirty.offset(surfaceInsets.left, surfaceInsets.top);
         }
 
-        boolean accessibilityFocusDirty = false;
-        final Drawable drawable = mAttachInfo.mAccessibilityFocusDrawable;
-        if (drawable != null) {
-            final Rect bounds = mAttachInfo.mTmpInvalRect;
-            final boolean hasFocus = getAccessibilityFocusedRect(bounds);
-            if (!hasFocus) {
-                bounds.setEmpty();
-            }
-            if (!bounds.equals(drawable.getBounds())) {
-                accessibilityFocusDirty = true;
-                // Force recalculation of transparent regions
-                requestLayout();
-            }
+        boolean accessibilityFocusDirty = isAccessibilityFocusDirty();
+
+        // Force recalculation of transparent regions
+        if (accessibilityFocusDirty) {
+            requestLayout();
         }
 
         mAttachInfo.mDrawingTime =
@@ -5434,8 +5426,9 @@ public final class ViewRootImpl implements ViewParent,
         mAccessibilityFocusedVirtualView = node;
         updateKeepClearForAccessibilityFocusRect();
 
-        if (mAttachInfo.mThreadedRenderer != null) {
-            mAttachInfo.mThreadedRenderer.invalidateRoot();
+        requestInvalidateRootRenderNode();
+        if (isAccessibilityFocusDirty()) {
+            scheduleTraversals();
         }
     }
 
@@ -9829,6 +9822,21 @@ public final class ViewRootImpl implements ViewParent,
         final int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
                 sourceNodeId);
         return AccessibilityNodeIdManager.getInstance().findView(accessibilityViewId);
+    }
+
+    private boolean isAccessibilityFocusDirty() {
+        final Drawable drawable = mAttachInfo.mAccessibilityFocusDrawable;
+        if (drawable != null) {
+            final Rect bounds = mAttachInfo.mTmpInvalRect;
+            final boolean hasFocus = getAccessibilityFocusedRect(bounds);
+            if (!hasFocus) {
+                bounds.setEmpty();
+            }
+            if (!bounds.equals(drawable.getBounds())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
