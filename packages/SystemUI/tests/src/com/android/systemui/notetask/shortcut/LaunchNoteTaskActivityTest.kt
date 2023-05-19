@@ -17,9 +17,6 @@
 package com.android.systemui.notetask.shortcut
 
 import android.content.Intent
-import android.content.pm.UserInfo
-import android.os.UserHandle
-import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -29,17 +26,14 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
-import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.whenever
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -48,8 +42,6 @@ import org.mockito.MockitoAnnotations
 class LaunchNoteTaskActivityTest : SysuiTestCase() {
 
     @Mock lateinit var noteTaskController: NoteTaskController
-    @Mock lateinit var userManager: UserManager
-    private val userTracker: FakeUserTracker = FakeUserTracker()
 
     @Rule
     @JvmField
@@ -60,8 +52,6 @@ class LaunchNoteTaskActivityTest : SysuiTestCase() {
                 override fun create(intent: Intent?) =
                     LaunchNoteTaskActivity(
                         controller = noteTaskController,
-                        userManager = userManager,
-                        userTracker = userTracker
                     )
             },
             /* initialTouchMode= */ false,
@@ -71,7 +61,6 @@ class LaunchNoteTaskActivityTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(userManager.isManagedProfile(eq(workProfileUser.id))).thenReturn(true)
     }
 
     @After
@@ -83,36 +72,7 @@ class LaunchNoteTaskActivityTest : SysuiTestCase() {
     fun startActivityOnNonWorkProfileUser_shouldLaunchNoteTask() {
         activityRule.launchActivity(/* startIntent= */ null)
 
-        verify(noteTaskController).showNoteTask(eq(NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT))
-    }
-
-    @Test
-    fun startActivityOnWorkProfileUser_shouldLaunchProxyActivity() {
-        val mainUserHandle: UserHandle = mainUser.userHandle
-        userTracker.set(listOf(mainUser, workProfileUser), selectedUserIndex = 1)
-        whenever(userManager.isManagedProfile).thenReturn(true)
-        whenever(userManager.mainUser).thenReturn(mainUserHandle)
-
-        activityRule.launchActivity(/* startIntent= */ null)
-
-        verify(noteTaskController).startNoteTaskProxyActivityForUser(eq(mainUserHandle))
-    }
-
-    @Test
-    fun startActivityOnWorkProfileUser_noMainUser_shouldNotLaunch() {
-        userTracker.set(listOf(mainUser, workProfileUser), selectedUserIndex = 1)
-        whenever(userManager.isManagedProfile).thenReturn(true)
-        whenever(userManager.mainUser).thenReturn(null)
-
-        activityRule.launchActivity(/* startIntent= */ null)
-
-        verify(noteTaskController, never()).showNoteTask(any())
-        verify(noteTaskController, never()).startNoteTaskProxyActivityForUser(any())
-    }
-
-    private companion object {
-        val mainUser = UserInfo(/* id= */ 0, /* name= */ "primary", /* flags= */ UserInfo.FLAG_MAIN)
-        val workProfileUser =
-            UserInfo(/* id= */ 10, /* name= */ "work", /* flags= */ UserInfo.FLAG_PROFILE)
+        verify(noteTaskController)
+            .showNoteTaskAsUser(eq(NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT), any())
     }
 }
