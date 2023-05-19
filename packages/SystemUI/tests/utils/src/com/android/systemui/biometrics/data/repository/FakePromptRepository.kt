@@ -1,7 +1,7 @@
 package com.android.systemui.biometrics.data.repository
 
 import android.hardware.biometrics.PromptInfo
-import com.android.systemui.biometrics.data.model.PromptKind
+import com.android.systemui.biometrics.shared.model.PromptKind
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -20,26 +20,32 @@ class FakePromptRepository : PromptRepository {
     private var _challenge = MutableStateFlow<Long?>(null)
     override val challenge = _challenge.asStateFlow()
 
-    private val _kind = MutableStateFlow(PromptKind.ANY_BIOMETRIC)
+    private val _kind = MutableStateFlow<PromptKind>(PromptKind.Biometric())
     override val kind = _kind.asStateFlow()
+
+    private val _isConfirmationRequired = MutableStateFlow(false)
+    override val isConfirmationRequired = _isConfirmationRequired.asStateFlow()
 
     override fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
         gatekeeperChallenge: Long?,
-        kind: PromptKind
+        kind: PromptKind,
+        requireConfirmation: Boolean,
     ) {
         _promptInfo.value = promptInfo
         _userId.value = userId
         _challenge.value = gatekeeperChallenge
         _kind.value = kind
+        _isConfirmationRequired.value = requireConfirmation
     }
 
     override fun unsetPrompt() {
         _promptInfo.value = null
         _userId.value = null
         _challenge.value = null
-        _kind.value = PromptKind.ANY_BIOMETRIC
+        _kind.value = PromptKind.Biometric()
+        _isConfirmationRequired.value = false
     }
 
     fun setIsShowing(showing: Boolean) {
