@@ -50,7 +50,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -723,15 +722,13 @@ public class LockPatternUtils {
     }
 
     /**
-     * Whether the auto pin feature logic is available or not.
-     * @return true, if deviceConfig flag is set to true or the flag is not propagated and
-     * defaultValue is true.
+     * Whether the auto pin feature is available or not.
+     * @return true. This method is always returning true due to feature flags not working
+     * properly (b/282246482). Ideally, this should check if deviceConfig flag is set to true
+     * and then return the appropriate value.
      */
     public static boolean isAutoPinConfirmFeatureAvailable() {
-        return DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_AUTO_PIN_CONFIRMATION,
-                FLAG_ENABLE_AUTO_PIN_CONFIRMATION,
-                /* defaultValue= */ true);
+        return true;
     }
 
     /** Returns if the given quality maps to an alphabetic password */
