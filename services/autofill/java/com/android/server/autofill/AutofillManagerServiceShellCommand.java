@@ -349,7 +349,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
     private int isFieldDetectionServiceEnabled(PrintWriter pw) {
         final int userId = getNextIntArgRequired();
         String name = mService.getFieldDetectionServiceName(userId);
-        boolean enabled = !TextUtils.isEmpty(name);
+        boolean pccFlagEnabled = mService.isPccClassificationFlagEnabled();
+        boolean enabled = (!TextUtils.isEmpty(name)) && pccFlagEnabled;
         pw.println(enabled);
         return 0;
     }
