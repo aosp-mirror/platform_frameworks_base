@@ -19,7 +19,6 @@ package com.android.systemui.keyguard;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
-import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
@@ -30,13 +29,11 @@ import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
-import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionOldType;
 import static android.view.WindowManager.TransitionType;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.Service;
@@ -116,6 +113,14 @@ public class KeyguardService extends Service {
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
             final int taskId = taskInfo != null ? change.getTaskInfo().taskId : -1;
 
+            if (taskId != -1 && change.getParent() != null) {
+                final TransitionInfo.Change parentChange = info.getChange(change.getParent());
+                if (parentChange != null && parentChange.getTaskInfo() != null) {
+                    // Only adding the root task as the animation target.
+                    continue;
+                }
+            }
+
             final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
                     // wallpapers go into the "below" layer space
                     info.getChanges().size() - i,
@@ -123,13 +128,6 @@ public class KeyguardService extends Service {
                     (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0,
                     info, t, leashMap);
 
-            // Use hasAnimatingParent to mark the anything below root task
-            if (taskId != -1 && change.getParent() != null) {
-                final TransitionInfo.Change parentChange = info.getChange(change.getParent());
-                if (parentChange != null && parentChange.getTaskInfo() != null) {
-                    target.hasAnimatingParent = true;
-                }
-            }
             out.add(target);
         }
         return out.toArray(new RemoteAnimationTarget[out.size()]);
@@ -173,18 +171,15 @@ public class KeyguardService extends Service {
                         wrap(info, true /* wallpapers */, t, mLeashMap);
                 final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
 
-                // Sets the alpha to 0 for the opening root task for fade in animation. And since
-                // the fade in animation can only apply on the first opening app, so set alpha to 1
-                // for anything else.
-                for (RemoteAnimationTarget target : apps) {
-                    if (target.taskId != -1
-                            && target.mode == RemoteAnimationTarget.MODE_OPENING
-                            && !target.hasAnimatingParent) {
-                        t.setAlpha(target.leash, 0.0f);
-                    } else {
-                        t.setAlpha(target.leash, 1.0f);
+                // Set alpha back to 1 for the independent changes because we will be animating
+                // children instead.
+                for (TransitionInfo.Change chg : info.getChanges()) {
+                    if (TransitionInfo.isIndependent(chg, info)) {
+                        t.setAlpha(chg.getLeash(), 1.f);
                     }
                 }
+                initAlphaForAnimationTargets(t, apps);
+                initAlphaForAnimationTargets(t, wallpapers);
                 t.apply();
                 synchronized (mFinishCallbacks) {
                     mFinishCallbacks.put(transition, finishCallback);
@@ -221,6 +216,14 @@ public class KeyguardService extends Service {
                     currentFinishCB.onTransitionFinished(null /* wct */, null /* t */);
                 } catch (RemoteException e) {
                     // nothing, we'll just let it finish on its own I guess.
+                }
+            }
+
+            private static void initAlphaForAnimationTargets(@NonNull SurfaceControl.Transaction t,
+                    @NonNull RemoteAnimationTarget[] targets) {
+                for (RemoteAnimationTarget target : targets) {
+                    if (target.mode != MODE_OPENING) continue;
+                    t.setAlpha(target.leash, 0.f);
                 }
             }
         };
