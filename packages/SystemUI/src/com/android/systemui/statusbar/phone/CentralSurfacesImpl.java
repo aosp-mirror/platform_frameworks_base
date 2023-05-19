@@ -500,7 +500,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     private final PluginDependencyProvider mPluginDependencyProvider;
-    private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final ExtensionController mExtensionController;
     private final UserInfoControllerImpl mUserInfoControllerImpl;
     private final DemoModeController mDemoModeController;
@@ -787,7 +786,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             InitController initController,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             PluginDependencyProvider pluginDependencyProvider,
-            KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
@@ -884,7 +882,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mKeyguardViewMediatorCallback = viewMediatorCallback;
         mInitController = initController;
         mPluginDependencyProvider = pluginDependencyProvider;
-        mKeyguardDismissUtil = keyguardDismissUtil;
         mExtensionController = extensionController;
         mUserInfoControllerImpl = userInfoControllerImpl;
         mIconPolicy = phoneStatusBarPolicy;
@@ -1742,7 +1739,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
         mMediaManager.setBiometricUnlockController(mBiometricUnlockController);
-        mKeyguardDismissUtil.setDismissHandler(this::executeWhenUnlocked);
         Trace.endSection();
     }
 
@@ -2364,15 +2360,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void resetUserExpandedStates() {
         mNotificationsController.resetUserExpandedStates();
-    }
-
-    private void executeWhenUnlocked(OnDismissAction action, boolean requiresShadeOpen,
-            boolean afterKeyguardGone) {
-        if (mKeyguardStateController.isShowing() && requiresShadeOpen) {
-            mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
-        }
-        mActivityStarter.dismissKeyguardThenExecute(action, null /* cancelAction */,
-                afterKeyguardGone /* afterKeyguardGone */);
     }
 
     /**
