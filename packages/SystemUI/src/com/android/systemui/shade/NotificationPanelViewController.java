@@ -2001,6 +2001,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
         updateExpansionAndVisibility();
         mNotificationStackScrollLayoutController.setPanelFlinging(false);
+        // expandImmediate should be always reset at the end of animation
+        mQsController.setExpandImmediate(false);
     }
 
     private boolean isInContentBounds(float x, float y) {
