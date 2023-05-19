@@ -16,14 +16,37 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-sealed interface AuthMethodBouncerViewModel {
+sealed class AuthMethodBouncerViewModel(
     /**
      * Whether user input is enabled.
      *
      * If `false`, user input should be completely ignored in the UI as the user is "locked out" of
      * being able to attempt to unlock the device.
      */
-    val isInputEnabled: StateFlow<Boolean>
+    val isInputEnabled: StateFlow<Boolean>,
+) {
+
+    private val _animateFailure = MutableStateFlow(false)
+    /**
+     * Whether a failure animation should be shown. Once consumed, the UI must call
+     * [onFailureAnimationShown] to consume this state.
+     */
+    val animateFailure: StateFlow<Boolean> = _animateFailure.asStateFlow()
+
+    /**
+     * Notifies that the failure animation has been shown. This should be called to consume a `true`
+     * value in [animateFailure].
+     */
+    fun onFailureAnimationShown() {
+        _animateFailure.value = false
+    }
+
+    /** Ask the UI to show the failure animation. */
+    protected fun showFailureAnimation() {
+        _animateFailure.value = true
+    }
 }

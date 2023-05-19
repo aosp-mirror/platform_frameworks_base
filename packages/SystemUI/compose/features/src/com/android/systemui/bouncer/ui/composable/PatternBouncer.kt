@@ -18,6 +18,7 @@ package com.android.systemui.bouncer.ui.composable
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -49,6 +50,7 @@ import com.android.systemui.compose.modifiers.thenIf
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -86,6 +88,7 @@ internal fun PatternBouncer(
     val selectedDots: List<PatternDotViewModel> by viewModel.selectedDots.collectAsState()
     val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
     val isAnimationEnabled: Boolean by viewModel.isPatternVisible.collectAsState()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
 
     // Map of animatables for the scale of each dot, keyed by dot.
     val dotScalingAnimatables = remember(dots) { dots.associateWith { Animatable(1f) } }
@@ -171,6 +174,17 @@ internal fun PatternBouncer(
                     }
                 }
             }
+        }
+    }
+
+    // Show the failure animation if the user entered the wrong input.
+    LaunchedEffect(animateFailure) {
+        if (animateFailure) {
+            showFailureAnimation(
+                dots = dots,
+                scalingAnimatables = dotScalingAnimatables,
+            )
+            viewModel.onFailureAnimationShown()
         }
     }
 
@@ -290,8 +304,61 @@ private fun lineAlpha(gridSpacing: Float, lineLength: Float = gridSpacing): Floa
     return ((lineLength / gridSpacing - 0.3f) * 4f).coerceIn(0f, 1f)
 }
 
+private suspend fun showFailureAnimation(
+    dots: List<PatternDotViewModel>,
+    scalingAnimatables: Map<PatternDotViewModel, Animatable<Float, AnimationVector1D>>,
+) {
+    val dotsByRow =
+        buildList<MutableList<PatternDotViewModel>> {
+            dots.forEach { dot ->
+                val rowIndex = dot.y
+                while (size <= rowIndex) {
+                    add(mutableListOf())
+                }
+                get(rowIndex).add(dot)
+            }
+        }
+
+    coroutineScope {
+        dotsByRow.forEachIndexed { rowIndex, rowDots ->
+            rowDots.forEach { dot ->
+                scalingAnimatables[dot]?.let { dotScaleAnimatable ->
+                    launch {
+                        dotScaleAnimatable.animateTo(
+                            targetValue =
+                                FAILURE_ANIMATION_DOT_DIAMETER_DP / DOT_DIAMETER_DP.toFloat(),
+                            animationSpec =
+                                tween(
+                                    durationMillis =
+                                        FAILURE_ANIMATION_DOT_SHRINK_ANIMATION_DURATION_MS,
+                                    delayMillis =
+                                        rowIndex * FAILURE_ANIMATION_DOT_SHRINK_STAGGER_DELAY_MS,
+                                    easing = Easings.LinearEasing,
+                                ),
+                        )
+
+                        dotScaleAnimatable.animateTo(
+                            targetValue = 1f,
+                            animationSpec =
+                                tween(
+                                    durationMillis =
+                                        FAILURE_ANIMATION_DOT_REVERT_ANIMATION_DURATION,
+                                    easing = Easings.StandardEasing,
+                                ),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 private const val DOT_DIAMETER_DP = 16
 private const val SELECTED_DOT_DIAMETER_DP = 24
 private const val SELECTED_DOT_REACTION_ANIMATION_DURATION_MS = 83
 private const val SELECTED_DOT_RETRACT_ANIMATION_DURATION_MS = 750
 private const val LINE_STROKE_WIDTH_DP = 16
+private const val FAILURE_ANIMATION_DOT_DIAMETER_DP = 13
+private const val FAILURE_ANIMATION_DOT_SHRINK_ANIMATION_DURATION_MS = 50
+private const val FAILURE_ANIMATION_DOT_SHRINK_STAGGER_DELAY_MS = 33
+private const val FAILURE_ANIMATION_DOT_REVERT_ANIMATION_DURATION = 617
