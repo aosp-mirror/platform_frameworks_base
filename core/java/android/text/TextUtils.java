@@ -872,126 +872,128 @@ public class TextUtils {
                 if (kind == 0)
                     break;
 
+                final Object span;
                 switch (kind) {
                 case ALIGNMENT_SPAN:
-                    readSpan(p, sp, new AlignmentSpan.Standard(p));
+                    span = new AlignmentSpan.Standard(p);
                     break;
 
                 case FOREGROUND_COLOR_SPAN:
-                    readSpan(p, sp, new ForegroundColorSpan(p));
+                    span = new ForegroundColorSpan(p);
                     break;
 
                 case RELATIVE_SIZE_SPAN:
-                    readSpan(p, sp, new RelativeSizeSpan(p));
+                    span = new RelativeSizeSpan(p);
                     break;
 
                 case SCALE_X_SPAN:
-                    readSpan(p, sp, new ScaleXSpan(p));
+                    span = new ScaleXSpan(p);
                     break;
 
                 case STRIKETHROUGH_SPAN:
-                    readSpan(p, sp, new StrikethroughSpan(p));
+                    span = new StrikethroughSpan(p);
                     break;
 
                 case UNDERLINE_SPAN:
-                    readSpan(p, sp, new UnderlineSpan(p));
+                    span = new UnderlineSpan(p);
                     break;
 
                 case STYLE_SPAN:
-                    readSpan(p, sp, new StyleSpan(p));
+                    span = new StyleSpan(p);
                     break;
 
                 case BULLET_SPAN:
-                    readSpan(p, sp, new BulletSpan(p));
+                    span = new BulletSpan(p);
                     break;
 
                 case QUOTE_SPAN:
-                    readSpan(p, sp, new QuoteSpan(p));
+                    span = new QuoteSpan(p);
                     break;
 
                 case LEADING_MARGIN_SPAN:
-                    readSpan(p, sp, new LeadingMarginSpan.Standard(p));
+                    span = new LeadingMarginSpan.Standard(p);
                     break;
 
                 case URL_SPAN:
-                    readSpan(p, sp, new URLSpan(p));
+                    span = new URLSpan(p);
                     break;
 
                 case BACKGROUND_COLOR_SPAN:
-                    readSpan(p, sp, new BackgroundColorSpan(p));
+                    span = new BackgroundColorSpan(p);
                     break;
 
                 case TYPEFACE_SPAN:
-                    readSpan(p, sp, new TypefaceSpan(p));
+                    span = new TypefaceSpan(p);
                     break;
 
                 case SUPERSCRIPT_SPAN:
-                    readSpan(p, sp, new SuperscriptSpan(p));
+                    span = new SuperscriptSpan(p);
                     break;
 
                 case SUBSCRIPT_SPAN:
-                    readSpan(p, sp, new SubscriptSpan(p));
+                    span = new SubscriptSpan(p);
                     break;
 
                 case ABSOLUTE_SIZE_SPAN:
-                    readSpan(p, sp, new AbsoluteSizeSpan(p));
+                    span = new AbsoluteSizeSpan(p);
                     break;
 
                 case TEXT_APPEARANCE_SPAN:
-                    readSpan(p, sp, new TextAppearanceSpan(p));
+                    span = new TextAppearanceSpan(p);
                     break;
 
                 case ANNOTATION:
-                    readSpan(p, sp, new Annotation(p));
+                    span = new Annotation(p);
                     break;
 
                 case SUGGESTION_SPAN:
-                    readSpan(p, sp, new SuggestionSpan(p));
+                    span = new SuggestionSpan(p);
                     break;
 
                 case SPELL_CHECK_SPAN:
-                    readSpan(p, sp, new SpellCheckSpan(p));
+                    span = new SpellCheckSpan(p);
                     break;
 
                 case SUGGESTION_RANGE_SPAN:
-                    readSpan(p, sp, new SuggestionRangeSpan(p));
+                    span = new SuggestionRangeSpan(p);
                     break;
 
                 case EASY_EDIT_SPAN:
-                    readSpan(p, sp, new EasyEditSpan(p));
+                    span = new EasyEditSpan(p);
                     break;
 
                 case LOCALE_SPAN:
-                    readSpan(p, sp, new LocaleSpan(p));
+                    span = new LocaleSpan(p);
                     break;
 
                 case TTS_SPAN:
-                    readSpan(p, sp, new TtsSpan(p));
+                    span = new TtsSpan(p);
                     break;
 
                 case ACCESSIBILITY_CLICKABLE_SPAN:
-                    readSpan(p, sp, new AccessibilityClickableSpan(p));
+                    span = new AccessibilityClickableSpan(p);
                     break;
 
                 case ACCESSIBILITY_URL_SPAN:
-                    readSpan(p, sp, new AccessibilityURLSpan(p));
+                    span = new AccessibilityURLSpan(p);
                     break;
 
                 case LINE_BACKGROUND_SPAN:
-                    readSpan(p, sp, new LineBackgroundSpan.Standard(p));
+                    span = new LineBackgroundSpan.Standard(p);
                     break;
 
                 case LINE_HEIGHT_SPAN:
-                    readSpan(p, sp, new LineHeightSpan.Standard(p));
+                    span = new LineHeightSpan.Standard(p);
                     break;
 
                 case ACCESSIBILITY_REPLACEMENT_SPAN:
-                    readSpan(p, sp, new AccessibilityReplacementSpan(p));
+                    span = new AccessibilityReplacementSpan(p);
                     break;
 
                 default:
                     throw new RuntimeException("bogus span encoding " + kind);
                 }
+                readSpan(p, sp, span);
             }
 
             return sp;
