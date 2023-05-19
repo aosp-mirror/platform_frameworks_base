@@ -420,6 +420,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
             mBtHelper.stopBluetoothSco(eventSource);
         }
 
+        // In BT classic for communication, the device changes from a2dp to sco device, but for
+        // LE Audio it stays the same and we must trigger the proper stream volume alignment, if
+        // LE Audio communication device is activated after the audio system has already switched to
+        // MODE_IN_CALL mode.
+        if (isBluetoothLeAudioRequested()) {
+            final int streamType = mAudioService.getBluetoothContextualVolumeStream();
+            final int leAudioVolIndex = getVssVolumeForDevice(streamType, device.getInternalType());
+            final int leAudioMaxVolIndex = getMaxVssVolumeForStream(streamType);
+            if (AudioService.DEBUG_COMM_RTE) {
+                Log.v(TAG, "setCommunicationRouteForClient restoring LE Audio device volume lvl.");
+            }
+            postSetLeAudioVolumeIndex(leAudioVolIndex, leAudioMaxVolIndex, streamType);
+        }
+
         updateCommunicationRoute(eventSource);
     }
 
@@ -630,6 +644,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
      */
     /*package*/ boolean isBluetoothScoRequested() {
         return isDeviceRequestedForCommunication(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
+    }
+
+    /**
+     * Helper method on top of isDeviceRequestedForCommunication() indicating if
+     * Bluetooth LE Audio communication device is currently requested or not.
+     * @return true if Bluetooth LE Audio device is requested, false otherwise.
+     */
+    /*package*/ boolean isBluetoothLeAudioRequested() {
+        return isDeviceRequestedForCommunication(AudioDeviceInfo.TYPE_BLE_HEADSET)
+                || isDeviceRequestedForCommunication(AudioDeviceInfo.TYPE_BLE_SPEAKER);
     }
 
     /**
