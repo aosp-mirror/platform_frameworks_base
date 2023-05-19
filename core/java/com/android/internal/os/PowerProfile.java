@@ -821,24 +821,6 @@ public class PowerProfile {
         return 0;
     }
 
-    /**
-     * Description of a CPU power bracket: which cluster/frequency combinations are included.
-     * @deprecated Use getCpuPowerBracketDescription
-     */
-    @Deprecated
-    public String getCpuPowerBracketDescription(int powerBracket) {
-        return "unsupported";
-    }
-
-    /**
-     * Returns the CPU power bracket corresponding to the specified cluster and frequency step
-     * @deprecated Use getCpuPowerBracketForScalingStep
-     */
-    @Deprecated
-    public int getPowerBracketForCpuCore(int cluster, int step) {
-        return 0;
-    }
-
     private int mNumDisplays;
 
     private void initDisplays() {

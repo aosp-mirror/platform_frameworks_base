@@ -537,14 +537,9 @@ public class PowerProfileTest {
         return null;
     }
 
-    private void assertEquals(int expected, int actual) {
-        Assert.assertEquals(expected, actual);
-    }
-
     private void assertEquals(double expected, double actual) {
         Assert.assertEquals(expected, actual, 0.1);
     }
-
 
     @Test
     public void powerBrackets_specifiedInPowerProfile() {

@@ -62,15 +62,14 @@ public class SystemServicePowerCalculatorTest {
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
             .setAveragePower(PowerProfile.POWER_CPU_ACTIVE, 720)
-            .setNumCpuClusters(2)
-            .setNumSpeedStepsInCpuCluster(0, 2)
-            .setNumSpeedStepsInCpuCluster(1, 2)
-            .setAveragePowerForCpuCluster(0, 360)
-            .setAveragePowerForCpuCluster(1, 480)
-            .setAveragePowerForCpuCore(0, 0, 300)
-            .setAveragePowerForCpuCore(0, 1, 400)
-            .setAveragePowerForCpuCore(1, 0, 500)
-            .setAveragePowerForCpuCore(1, 1, 600);
+            .setCpuScalingPolicy(0, new int[]{0, 1}, new int[]{100, 200})
+            .setCpuScalingPolicy(2, new int[]{2, 3}, new int[]{300, 400})
+            .setAveragePowerForCpuScalingPolicy(0, 360)
+            .setAveragePowerForCpuScalingPolicy(2, 480)
+            .setAveragePowerForCpuScalingStep(0, 0, 300)
+            .setAveragePowerForCpuScalingStep(0, 1, 400)
+            .setAveragePowerForCpuScalingStep(2, 0, 500)
+            .setAveragePowerForCpuScalingStep(2, 1, 600);
 
     @Mock
     private BatteryStatsImpl.UserInfoProvider mMockUserInfoProvider;
@@ -113,9 +112,10 @@ public class SystemServicePowerCalculatorTest {
         prepareBatteryStats(null);
 
         SystemServicePowerCalculator calculator = new SystemServicePowerCalculator(
-                mStatsRule.getPowerProfile());
+                mStatsRule.getCpuScalingPolicies(), mStatsRule.getPowerProfile());
 
-        mStatsRule.apply(new CpuPowerCalculator(mStatsRule.getPowerProfile()), calculator);
+        mStatsRule.apply(new CpuPowerCalculator(mStatsRule.getCpuScalingPolicies(),
+                mStatsRule.getPowerProfile()), calculator);
 
         assertThat(mStatsRule.getUidBatteryConsumer(APP_UID1)
                 .getConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES))
@@ -145,9 +145,10 @@ public class SystemServicePowerCalculatorTest {
         prepareBatteryStats(new long[]{50000000, 100000000});
 
         SystemServicePowerCalculator calculator = new SystemServicePowerCalculator(
-                mStatsRule.getPowerProfile());
+                mStatsRule.getCpuScalingPolicies(), mStatsRule.getPowerProfile());
 
-        mStatsRule.apply(new CpuPowerCalculator(mStatsRule.getPowerProfile()), calculator);
+        mStatsRule.apply(new CpuPowerCalculator(mStatsRule.getCpuScalingPolicies(),
+                mStatsRule.getPowerProfile()), calculator);
 
         assertThat(mStatsRule.getUidBatteryConsumer(APP_UID1)
                 .getConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES))

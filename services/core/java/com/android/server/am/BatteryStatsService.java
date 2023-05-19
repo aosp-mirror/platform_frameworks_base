@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.BATTERY_STATS;
-import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.DEVICE_POWER;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.POWER_SAVER;
@@ -96,6 +95,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
+import com.android.internal.os.CpuScalingPolicies;
+import com.android.internal.os.CpuScalingPolicyReader;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
 import com.android.internal.os.RpmStats;
@@ -152,6 +153,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private static IBatteryStats sService;
 
     private final PowerProfile mPowerProfile;
+    private final CpuScalingPolicies mCpuScalingPolicies;
     final BatteryStatsImpl mStats;
     final CpuWakeupStats mCpuWakeupStats;
     private final BatteryUsageStatsStore mBatteryUsageStatsStore;
@@ -368,14 +370,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mHandler = new Handler(mHandlerThread.getLooper());
 
         mPowerProfile = new PowerProfile(context);
+        mCpuScalingPolicies = new CpuScalingPolicyReader().read();
 
         mStats = new BatteryStatsImpl(systemDir, handler, this,
-                this, mUserManagerUserInfoProvider);
+                this, mUserManagerUserInfoProvider, mPowerProfile, mCpuScalingPolicies);
         mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
-        mStats.setPowerProfileLocked(mPowerProfile);
 
         final boolean resetOnUnplugHighBatteryLevel = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_batteryStatsResetOnUnplugHighBatteryLevel);
@@ -2916,8 +2918,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
                                         null, mStats.mHandler, null, null,
-                                        mUserManagerUserInfoProvider);
-                                checkinStats.setPowerProfileLocked(mPowerProfile);
+                                        mUserManagerUserInfoProvider, mPowerProfile,
+                                        mCpuScalingPolicies);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpProtoLocked(
@@ -2957,8 +2959,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
                                         null, mStats.mHandler, null, null,
-                                        mUserManagerUserInfoProvider);
-                                checkinStats.setPowerProfileLocked(mPowerProfile);
+                                        mUserManagerUserInfoProvider, mPowerProfile,
+                                        mCpuScalingPolicies);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpCheckin(mContext, pw, apps, flags,

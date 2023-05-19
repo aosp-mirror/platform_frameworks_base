@@ -25,6 +25,7 @@ import android.os.UidBatteryConsumer;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 
 /**
@@ -39,23 +40,19 @@ public class SystemServicePowerCalculator extends PowerCalculator {
     // to this layout:
     // {cluster1-speed1, cluster1-speed2, ..., cluster2-speed1, cluster2-speed2, ...}
     private final UsageBasedPowerEstimator[] mPowerEstimators;
-    private final com.android.server.power.stats.CpuPowerCalculator mCpuPowerCalculator;
+    private final CpuPowerCalculator mCpuPowerCalculator;
 
-    public SystemServicePowerCalculator(PowerProfile powerProfile) {
-        mCpuPowerCalculator = new CpuPowerCalculator(powerProfile);
-        int numFreqs = 0;
-        final int numCpuClusters = powerProfile.getNumCpuClusters();
-        for (int cluster = 0; cluster < numCpuClusters; cluster++) {
-            numFreqs += powerProfile.getNumSpeedStepsInCpuCluster(cluster);
-        }
-
-        mPowerEstimators = new UsageBasedPowerEstimator[numFreqs];
+    public SystemServicePowerCalculator(CpuScalingPolicies cpuScalingPolicies,
+            PowerProfile powerProfile) {
+        mCpuPowerCalculator = new CpuPowerCalculator(cpuScalingPolicies, powerProfile);
+        mPowerEstimators = new UsageBasedPowerEstimator[cpuScalingPolicies.getScalingStepCount()];
         int index = 0;
-        for (int cluster = 0; cluster < numCpuClusters; cluster++) {
-            final int numSpeeds = powerProfile.getNumSpeedStepsInCpuCluster(cluster);
+        int[] policies = cpuScalingPolicies.getPolicies();
+        for (int policy : policies) {
+            final int numSpeeds = cpuScalingPolicies.getFrequencies(policy).length;
             for (int speed = 0; speed < numSpeeds; speed++) {
                 mPowerEstimators[index++] = new UsageBasedPowerEstimator(
-                        powerProfile.getAveragePowerForCpuCore(cluster, speed));
+                        powerProfile.getAveragePowerForCpuScalingStep(policy, speed));
             }
         }
     }
