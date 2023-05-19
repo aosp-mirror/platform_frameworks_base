@@ -107,7 +107,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         mShellInit = spy(new ShellInit(mMainExecutor));
-        mShellController = spy(new ShellController(mShellInit, mShellCommandHandler,
+        mShellController = spy(new ShellController(mContext, mShellInit, mShellCommandHandler,
                 mMainExecutor));
         mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
                 mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
