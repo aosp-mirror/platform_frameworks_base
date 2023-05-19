@@ -51,6 +51,7 @@ public class CachedBluetoothDeviceManager {
     CsipDeviceManager mCsipDeviceManager;
     BluetoothDevice mOngoingSetMemberPair;
     boolean mIsLateBonding;
+    int mGroupIdOfLateBonding;
 
     public CachedBluetoothDeviceManager(Context context, LocalBluetoothManager localBtManager) {
         mContext = context;
@@ -213,6 +214,14 @@ public class CachedBluetoothDeviceManager {
      * @return The name, or if unavailable, the address.
      */
     public String getName(BluetoothDevice device) {
+        if (isOngoingPairByCsip(device)) {
+            CachedBluetoothDevice firstDevice =
+                    mCsipDeviceManager.getFirstMemberDevice(mGroupIdOfLateBonding);
+            if (firstDevice != null && firstDevice.getName() != null) {
+                return firstDevice.getName();
+            }
+        }
+
         CachedBluetoothDevice cachedDevice = findDevice(device);
         if (cachedDevice != null && cachedDevice.getName() != null) {
             return cachedDevice.getName();
@@ -314,6 +323,7 @@ public class CachedBluetoothDeviceManager {
             // To clear the SetMemberPair flag when the Bluetooth is turning off.
             mOngoingSetMemberPair = null;
             mIsLateBonding = false;
+            mGroupIdOfLateBonding = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
         }
     }
 
@@ -426,6 +436,7 @@ public class CachedBluetoothDeviceManager {
             return false;
         }
 
+        Log.d(TAG, "isLateBonding: " + mIsLateBonding);
         return mIsLateBonding;
     }
 
@@ -444,11 +455,13 @@ public class CachedBluetoothDeviceManager {
         Log.d(TAG, "Bond " + device.getAnonymizedAddress() + " groupId=" + groupId + " by CSIP ");
         mOngoingSetMemberPair = device;
         mIsLateBonding = checkLateBonding(groupId);
+        mGroupIdOfLateBonding = groupId;
         syncConfigFromMainDevice(device, groupId);
         if (!device.createBond(BluetoothDevice.TRANSPORT_LE)) {
             Log.d(TAG, "Bonding could not be started");
             mOngoingSetMemberPair = null;
             mIsLateBonding = false;
+            mGroupIdOfLateBonding = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
         }
     }
 
@@ -494,6 +507,7 @@ public class CachedBluetoothDeviceManager {
 
         mOngoingSetMemberPair = null;
         mIsLateBonding = false;
+        mGroupIdOfLateBonding = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
         if (bondState != BluetoothDevice.BOND_NONE) {
             if (findDevice(device) == null) {
                 final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
