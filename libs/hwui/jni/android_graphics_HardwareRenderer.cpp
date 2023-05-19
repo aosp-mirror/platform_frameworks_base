@@ -364,6 +364,10 @@ static void android_view_ThreadedRenderer_trimMemory(JNIEnv* env, jobject clazz,
     RenderProxy::trimMemory(level);
 }
 
+static void android_view_ThreadedRenderer_trimCaches(JNIEnv* env, jobject clazz, jint level) {
+    RenderProxy::trimCaches(level);
+}
+
 static void android_view_ThreadedRenderer_overrideProperty(JNIEnv* env, jobject clazz,
         jstring name, jstring value) {
     const char* nameCharArray = env->GetStringUTFChars(name, NULL);
@@ -1029,6 +1033,7 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_notifyCallbackPending},
         {"nNotifyExpensiveFrame", "(J)V",
          (void*)android_view_ThreadedRenderer_notifyExpensiveFrame},
+        {"nTrimCaches", "(I)V", (void*)android_view_ThreadedRenderer_trimCaches},
 };
 
 static JavaVM* mJvm = nullptr;
