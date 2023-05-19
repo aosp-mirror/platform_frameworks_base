@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private val KEY_TIMESTAMP = "appliedTimestamp"
 
@@ -320,20 +321,20 @@ open class ClockRegistry(
         }
     }
 
-    public fun mutateSetting(mutator: (ClockSettings) -> ClockSettings) {
-        scope.launch(bgDispatcher) { applySettings(mutator(settings ?: ClockSettings())) }
+    public suspend fun mutateSetting(mutator: (ClockSettings) -> ClockSettings) {
+        withContext(bgDispatcher) { applySettings(mutator(settings ?: ClockSettings())) }
     }
 
     var currentClockId: ClockId
         get() = settings?.clockId ?: fallbackClockId
         set(value) {
-            mutateSetting { it.copy(clockId = value) }
+            scope.launch(bgDispatcher) { mutateSetting { it.copy(clockId = value) } }
         }
 
     var seedColor: Int?
         get() = settings?.seedColor
         set(value) {
-            mutateSetting { it.copy(seedColor = value) }
+            scope.launch(bgDispatcher) { mutateSetting { it.copy(seedColor = value) } }
         }
 
     init {
@@ -501,11 +502,25 @@ open class ClockRegistry(
 
     fun createExampleClock(clockId: ClockId): ClockController? = createClock(clockId)
 
-    fun registerClockChangeListener(listener: ClockChangeListener) =
+    /**
+     * Adds [listener] to receive future clock changes.
+     *
+     * Calling from main thread to make sure the access is thread safe.
+     */
+    fun registerClockChangeListener(listener: ClockChangeListener) {
+        assertMainThread()
         clockChangeListeners.add(listener)
+    }
 
-    fun unregisterClockChangeListener(listener: ClockChangeListener) =
+    /**
+     * Removes [listener] from future clock changes.
+     *
+     * Calling from main thread to make sure the access is thread safe.
+     */
+    fun unregisterClockChangeListener(listener: ClockChangeListener) {
+        assertMainThread()
         clockChangeListeners.remove(listener)
+    }
 
     fun createCurrentClock(): ClockController {
         val clockId = currentClockId
