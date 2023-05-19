@@ -37,7 +37,6 @@ import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
 import com.android.app.animation.Interpolators
-import com.android.internal.logging.InstanceId
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
@@ -50,7 +49,6 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
-import com.android.systemui.temporarydisplay.TemporaryViewUiEventLogger
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -84,7 +82,6 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         wakeLockBuilder: WakeLock.Builder,
         systemClock: SystemClock,
         private val rippleController: MediaTttReceiverRippleController,
-        private val temporaryViewUiEventLogger: TemporaryViewUiEventLogger,
 ) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttReceiverLogger>(
         context,
         logger,
@@ -97,7 +94,6 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         R.layout.media_ttt_chip_receiver,
         wakeLockBuilder,
         systemClock,
-        temporaryViewUiEventLogger,
 ) {
     @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
     override val windowLayoutParams = commonWindowLayoutParams.apply {
@@ -129,11 +125,6 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         }
     }
 
-    // A map to store instance id per route info id.
-    private var instanceMap: MutableMap<String, InstanceId> = mutableMapOf()
-
-    private val displayListener = Listener { id, _ -> instanceMap.remove(id) }
-
     private fun updateMediaTapToTransferReceiverDisplay(
         @StatusBarManager.MediaTransferReceiverState displayState: Int,
         routeInfo: MediaRoute2Info,
@@ -148,18 +139,12 @@ open class MediaTttChipControllerReceiver @Inject constructor(
             logger.logStateChangeError(displayState)
             return
         }
-
-        val instanceId: InstanceId = instanceMap[routeInfo.id]
-                ?: temporaryViewUiEventLogger.getNewInstanceId()
-        uiEventLogger.logReceiverStateChange(chipState, instanceId)
+        uiEventLogger.logReceiverStateChange(chipState)
 
         if (chipState != ChipStateReceiver.CLOSE_TO_SENDER) {
             removeView(routeInfo.id, removalReason = chipState.name)
             return
         }
-
-        // Save instance id to use for logging view events.
-        instanceMap[routeInfo.id] = instanceId
         if (appIcon == null) {
             displayView(
                 ChipReceiverInfo(
@@ -167,7 +152,6 @@ open class MediaTttChipControllerReceiver @Inject constructor(
                     appIconDrawableOverride = null,
                     appName,
                     id = routeInfo.id,
-                    instanceId = instanceId,
                 )
             )
             return
@@ -182,7 +166,6 @@ open class MediaTttChipControllerReceiver @Inject constructor(
                             drawable,
                             appName,
                             id = routeInfo.id,
-                            instanceId = instanceId,
                         )
                     )
                 },
@@ -197,7 +180,6 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         if (mediaTttFlags.isMediaTttEnabled()) {
             commandQueue.addCallback(commandQueueCallbacks)
         }
-        registerListener(displayListener)
     }
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
@@ -360,5 +342,4 @@ data class ChipReceiverInfo(
     override val wakeReason: String = MediaTttUtils.WAKE_REASON_RECEIVER,
     override val id: String,
     override val priority: ViewPriority = ViewPriority.NORMAL,
-    override val instanceId: InstanceId,
 ) : TemporaryViewInfo()
