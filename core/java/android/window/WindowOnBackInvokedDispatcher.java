@@ -31,6 +31,8 @@ import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -66,7 +68,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     /** Convenience hashmap to quickly decide if a callback has been added. */
     private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();
     /** Holds all callbacks by priorities. */
-    private final TreeMap<Integer, ArrayList<OnBackInvokedCallback>>
+
+    @VisibleForTesting
+    public final TreeMap<Integer, ArrayList<OnBackInvokedCallback>>
             mOnBackInvokedCallbacks = new TreeMap<>();
     private Checker mChecker;
 
