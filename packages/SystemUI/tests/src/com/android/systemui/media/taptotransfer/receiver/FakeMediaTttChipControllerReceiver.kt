@@ -26,7 +26,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.temporarydisplay.TemporaryViewUiEventLogger
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.view.ViewUtil
@@ -49,7 +48,6 @@ class FakeMediaTttChipControllerReceiver(
     wakeLockBuilder: WakeLock.Builder,
     systemClock: SystemClock,
     rippleController: MediaTttReceiverRippleController,
-    temporaryViewUiEventLogger: TemporaryViewUiEventLogger,
 ) :
     MediaTttChipControllerReceiver(
         commandQueue,
@@ -68,7 +66,6 @@ class FakeMediaTttChipControllerReceiver(
         wakeLockBuilder,
         systemClock,
         rippleController,
-        temporaryViewUiEventLogger,
     ) {
     override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
         // Just bypass the animation in tests
