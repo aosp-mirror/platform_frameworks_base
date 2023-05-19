@@ -78,7 +78,7 @@ public class ShellControllerTest extends ShellTestCase {
         mConfigChangeListener = new TestConfigurationChangeListener();
         mUserChangeListener = new TestUserChangeListener();
         mExecutor = new TestShellExecutor();
-        mController = new ShellController(mShellInit, mShellCommandHandler, mExecutor);
+        mController = new ShellController(mContext, mShellInit, mShellCommandHandler, mExecutor);
         mController.onConfigurationChanged(getConfigurationCopy());
     }
 
