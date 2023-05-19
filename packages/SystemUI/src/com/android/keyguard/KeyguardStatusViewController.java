@@ -315,6 +315,14 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
+     * Returns true if the large clock will block the notification shelf in AOD
+     */
+    public boolean isLargeClockBlockingNotificationShelf() {
+        ClockController clock = mKeyguardClockSwitchController.getClock();
+        return clock != null && clock.getLargeClock().getConfig().getHasCustomWeatherDataDisplay();
+    }
+
+    /**
      * Updates the alignment of the KeyguardStatusView and animates the transition if requested.
      */
     public void updateAlignment(
