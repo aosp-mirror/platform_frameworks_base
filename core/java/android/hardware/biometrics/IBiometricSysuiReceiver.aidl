@@ -29,5 +29,7 @@ oneway interface IBiometricSysuiReceiver {
     // Notifies the client that an internal event, e.g. back button has occurred.
     void onSystemEvent(int event);
     // Notifies that the dialog has finished animating.
-    void onDialogAnimatedIn();
+    void onDialogAnimatedIn(boolean startFingerprintNow);
+    // Notifies that the fingerprint should start now (after onDialogAnimatedIn(false)).
+    void onStartFingerprintNow();
 }
