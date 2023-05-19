@@ -32,7 +32,6 @@ import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
 import android.app.usage.NetworkStatsManager;
-import android.hardware.radio.V1_5.AccessNetwork;
 import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.Uid.Sensor;
@@ -1727,27 +1726,38 @@ public class BatteryStatsNoteTest extends TestCase {
             }
         }
 
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.UNKNOWN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.UNKNOWN,
                 ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.GERAN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.GERAN,
                 ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.UTRAN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.UTRAN,
                 ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.EUTRAN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.EUTRAN,
                 ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.CDMA2000,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.CDMA2000,
                 ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.IWLAN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.IWLAN,
                 ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.NGRAN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
                 ServiceState.FREQUENCY_RANGE_UNKNOWN, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.NGRAN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
                 ServiceState.FREQUENCY_RANGE_LOW, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.NGRAN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
                 ServiceState.FREQUENCY_RANGE_MID, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.NGRAN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
                 ServiceState.FREQUENCY_RANGE_HIGH, new int[txLevelCount], 0));
-        specificInfoList.add(new ActivityStatsTechSpecificInfo(AccessNetwork.NGRAN,
+        specificInfoList.add(new ActivityStatsTechSpecificInfo(
+                AccessNetworkConstants.AccessNetworkType.NGRAN,
                 ServiceState.FREQUENCY_RANGE_MMWAVE, new int[txLevelCount], 0));
 
         final ActivityStatsTechSpecificInfo[] specificInfos = specificInfoList.toArray(
