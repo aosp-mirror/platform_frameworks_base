@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadFourFingerSwipe;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadMultiFingerSwipe;
+import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -1011,7 +1012,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             boolean isWithinInsets = isWithinInsets((int) ev.getX(), (int) ev.getY());
             boolean isBackAllowedCommon = !mDisabledForQuickstep && mIsBackGestureAllowed
                     && !mGestureBlockingActivityRunning
-                    && !QuickStepContract.isBackGestureDisabled(mSysUiFlags);
+                    && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
+                    && !isTrackpadScroll(mIsTrackpadGestureFeaturesEnabled, ev);
             if (isTrackpadMultiFingerSwipe) {
                 // Trackpad back gestures don't have zones, so we don't need to check if the down
                 // event is within insets.
