@@ -26,6 +26,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLI
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_OWN_FOCUS;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
@@ -510,6 +511,13 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testIsInTouchMode_returnsDefaultInTouchModeForinexistingDisplay() {
+        assertThat(mWm.isInTouchMode(INVALID_DISPLAY)).isEqualTo(
+                mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_defaultInTouchMode));
     }
 
     @Test
