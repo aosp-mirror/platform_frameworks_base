@@ -275,8 +275,12 @@ public class DisplayMetrics {
      */
     public float density;
     /**
-     * The screen density expressed as dots-per-inch.  May be either
-     * {@link #DENSITY_LOW}, {@link #DENSITY_MEDIUM}, or {@link #DENSITY_HIGH}.
+     * The screen density expressed as dots-per-inch. May be any one of the
+     * {@code DENSITY_} constants defined above.
+     *
+     * New constants are frequently added, and constants added on new Android
+     * versions may be backported to previous Android versions, so applications
+     * should not strongly rely on density matching one of the enum constants.
      */
     public int densityDpi;
     /**
