@@ -202,9 +202,7 @@ public final class DreamManagerService extends SystemService {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            synchronized (mLock) {
-                updateWhenToDreamSettings();
-            }
+            updateWhenToDreamSettings();
         }
     }
 
@@ -253,15 +251,7 @@ public final class DreamManagerService extends SystemService {
             if (Build.IS_DEBUGGABLE) {
                 SystemProperties.addChangeCallback(mSystemPropertiesChanged);
             }
-            mContext.registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    writePulseGestureEnabled();
-                    synchronized (mLock) {
-                        stopDreamLocked(false /*immediate*/, "user switched");
-                    }
-                }
-            }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
+
             mContext.getContentResolver().registerContentObserver(
                     Settings.Secure.getUriFor(Settings.Secure.DOZE_DOUBLE_TAP_GESTURE), false,
                     mDozeEnabledObserver, UserHandle.USER_ALL);
@@ -299,6 +289,18 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
+    @Override
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        updateWhenToDreamSettings();
+
+        mHandler.post(() -> {
+            writePulseGestureEnabled();
+            synchronized (mLock) {
+                stopDreamLocked(false /*immediate*/, "user switched");
+            }
+        });
+    }
+
     private void dumpInternal(PrintWriter pw) {
         synchronized (mLock) {
             pw.println("DREAM MANAGER (dumpsys dreams)");
@@ -314,6 +316,7 @@ public final class DreamManagerService extends SystemService {
             pw.println("mWhenToDream=" + mWhenToDream);
             pw.println("mKeepDreamingWhenUnpluggingDefault=" + mKeepDreamingWhenUnpluggingDefault);
             pw.println("getDozeComponent()=" + getDozeComponent());
+            pw.println("mDreamOverlayServiceName=" + mDreamOverlayServiceName.flattenToString());
             pw.println();
 
             DumpUtils.dumpAsync(mHandler, (pw1, prefix) -> mController.dump(pw1), pw, "", 200);
