@@ -18,9 +18,10 @@
 #define _ANDROID_SERVER_POWER_MANAGER_SERVICE_H
 
 #include <nativehelper/JNIHelp.h>
-#include "jni.h"
-
 #include <powermanager/PowerManager.h>
+#include <utils/Timers.h>
+
+#include "jni.h"
 
 namespace android {
 

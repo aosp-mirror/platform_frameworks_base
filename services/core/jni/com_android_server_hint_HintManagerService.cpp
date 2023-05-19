@@ -18,77 +18,78 @@
 
 //#define LOG_NDEBUG 0
 
+#include <aidl/android/hardware/power/IPower.h>
 #include <android-base/stringprintf.h>
-#include <android/hardware/power/IPower.h>
-#include <android_runtime/AndroidRuntime.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <powermanager/PowerHalController.h>
 #include <utils/Log.h>
 
-#include <unistd.h>
-#include <cinttypes>
-
-#include <sys/types.h>
+#include <unordered_map>
 
 #include "jni.h"
 
-using android::hardware::power::IPowerHintSession;
-using android::hardware::power::SessionHint;
-using android::hardware::power::WorkDuration;
+using aidl::android::hardware::power::IPowerHintSession;
+using aidl::android::hardware::power::SessionHint;
+using aidl::android::hardware::power::WorkDuration;
 
 using android::base::StringPrintf;
 
 namespace android {
 
 static power::PowerHalController gPowerHalController;
+static std::unordered_map<jlong, std::shared_ptr<IPowerHintSession>> gSessionMap;
+static std::mutex gSessionMapLock;
 
 static jlong createHintSession(JNIEnv* env, int32_t tgid, int32_t uid,
                                std::vector<int32_t> threadIds, int64_t durationNanos) {
-    auto result =
-            gPowerHalController.createHintSession(tgid, uid, std::move(threadIds), durationNanos);
+    auto result = gPowerHalController.createHintSession(tgid, uid, threadIds, durationNanos);
     if (result.isOk()) {
-        sp<IPowerHintSession> appSession = result.value();
-        if (appSession) appSession->incStrong(env);
-        return reinterpret_cast<jlong>(appSession.get());
+        auto session_ptr = reinterpret_cast<jlong>(result.value().get());
+        {
+            std::unique_lock<std::mutex> sessionLock(gSessionMapLock);
+            auto res = gSessionMap.insert({session_ptr, result.value()});
+            return res.second ? session_ptr : 0;
+        }
     }
     return 0;
 }
 
 static void pauseHintSession(JNIEnv* env, int64_t session_ptr) {
-    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
     appSession->pause();
 }
 
 static void resumeHintSession(JNIEnv* env, int64_t session_ptr) {
-    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
     appSession->resume();
 }
 
 static void closeHintSession(JNIEnv* env, int64_t session_ptr) {
-    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
     appSession->close();
-    appSession->decStrong(env);
+    std::unique_lock<std::mutex> sessionLock(gSessionMapLock);
+    gSessionMap.erase(session_ptr);
 }
 
 static void updateTargetWorkDuration(int64_t session_ptr, int64_t targetDurationNanos) {
-    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
     appSession->updateTargetWorkDuration(targetDurationNanos);
 }
 
 static void reportActualWorkDuration(int64_t session_ptr,
                                      const std::vector<WorkDuration>& actualDurations) {
-    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
     appSession->reportActualWorkDuration(actualDurations);
 }
 
 static void sendHint(int64_t session_ptr, SessionHint hint) {
-    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
     appSession->sendHint(hint);
 }
 
 static void setThreads(int64_t session_ptr, const std::vector<int32_t>& threadIds) {
-    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
     appSession->setThreads(threadIds);
 }
 
