@@ -37,7 +37,6 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
-import com.android.internal.config.appcloning.AppCloningDeviceConfigHelper;
 import com.android.server.LocalServices;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
@@ -61,8 +60,6 @@ public class CrossProfileIntentResolverEngine {
     private final DefaultAppProvider mDefaultAppProvider;
     private final Context mContext;
     private final UserManagerInternal mUserManagerInternal;
-
-    private AppCloningDeviceConfigHelper mAppCloningDeviceConfigHelper;
 
     public CrossProfileIntentResolverEngine(UserManagerService userManager,
             DomainVerificationManagerInternal domainVerificationManager,
@@ -253,12 +250,7 @@ public class CrossProfileIntentResolverEngine {
          * We would return NoFilteringResolver only if it is allowed(feature flag is set).
          */
         if (shouldUseNoFilteringResolver(sourceUserId, targetUserId)) {
-            if (mAppCloningDeviceConfigHelper == null) {
-                //lazy initialization of helper till required, to improve performance.
-                mAppCloningDeviceConfigHelper = AppCloningDeviceConfigHelper.getInstance(mContext);
-            }
-            if (NoFilteringResolver.isIntentRedirectionAllowed(mContext,
-                    mAppCloningDeviceConfigHelper, resolveForStart, flags)) {
+            if (NoFilteringResolver.isIntentRedirectionAllowed(mContext, resolveForStart, flags)) {
                 return new NoFilteringResolver(computer.getComponentResolver(),
                         mUserManager);
             } else {
