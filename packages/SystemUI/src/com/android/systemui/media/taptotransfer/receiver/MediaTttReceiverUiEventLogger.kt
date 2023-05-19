@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
+import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
@@ -25,8 +26,8 @@ import javax.inject.Inject
 @SysUISingleton
 class MediaTttReceiverUiEventLogger @Inject constructor(private val logger: UiEventLogger) {
     /** Logs that the receiver chip has changed states. */
-    fun logReceiverStateChange(chipState: ChipStateReceiver) {
-        logger.log(chipState.uiEvent)
+    fun logReceiverStateChange(chipState: ChipStateReceiver, instanceId: InstanceId) {
+        logger.log(chipState.uiEvent, instanceId)
     }
 }
 
