@@ -39,6 +39,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
+import android.icu.text.SimpleDateFormat;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -101,7 +102,9 @@ import com.android.wm.shell.pip.Pip;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -287,6 +290,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private LogArray mPredictionLog = new LogArray(MAX_NUM_LOGGED_PREDICTIONS);
     private LogArray mGestureLogInsideInsets = new LogArray(MAX_NUM_LOGGED_GESTURES);
     private LogArray mGestureLogOutsideInsets = new LogArray(MAX_NUM_LOGGED_GESTURES);
+    private SimpleDateFormat mLogDateFormat = new SimpleDateFormat("HH:mm:ss.SSS", Locale.US);
+    private Date mTmpLogDate = new Date();
 
     private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
@@ -1036,11 +1041,17 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             }
 
             // For debugging purposes, only log edge points
+            long curTime = System.currentTimeMillis();
+            mTmpLogDate.setTime(curTime);
+            String curTimeStr = mLogDateFormat.format(mTmpLogDate);
             (isWithinInsets ? mGestureLogInsideInsets : mGestureLogOutsideInsets).log(String.format(
-                    "Gesture [%d,alw=%B,%B,%B,%B,%B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
-                    System.currentTimeMillis(), isTrackpadMultiFingerSwipe, mAllowGesture,
+                    "Gesture [%d [%s],alw=%B, mltf=%B, left=%B, defLeft=%B, backAlw=%B, disbld=%B,"
+                            + " qsDisbld=%b, blkdAct=%B, pip=%B,"
+                            + " disp=%s, wl=%d, il=%d, wr=%d, ir=%d, excl=%s]",
+                    curTime, curTimeStr, mAllowGesture, isTrackpadMultiFingerSwipe,
                     mIsOnLeftEdge, mDeferSetIsOnLeftEdge, mIsBackGestureAllowed,
-                    QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisplaySize,
+                    QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisabledForQuickstep,
+                    mGestureBlockingActivityRunning, mIsInPip, mDisplaySize,
                     mEdgeWidthLeft, mLeftInset, mEdgeWidthRight, mRightInset, mExcludeRegion));
         } else if (mAllowGesture || mLogGesture) {
             if (!mThresholdCrossed) {
