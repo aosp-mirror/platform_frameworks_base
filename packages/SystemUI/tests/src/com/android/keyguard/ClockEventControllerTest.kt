@@ -47,6 +47,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -121,7 +122,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 bouncerRepository = bouncerRepository,
                 configurationRepository = FakeConfigurationRepository(),
             ),
-            KeyguardTransitionInteractor(repository = transitionRepository),
+            KeyguardTransitionInteractor(transitionRepository, TestScope().backgroundScope),
             broadcastDispatcher,
             batteryController,
             keyguardUpdateMonitor,

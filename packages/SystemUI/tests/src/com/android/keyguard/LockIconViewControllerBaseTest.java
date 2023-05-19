@@ -158,7 +158,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mVibrator,
                 mAuthRippleController,
                 mResources,
-                new KeyguardTransitionInteractor(mTransitionRepository),
+                new KeyguardTransitionInteractor(mTransitionRepository,
+                        TestScopeProvider.getTestScope().getBackgroundScope()),
                 KeyguardInteractorFactory.create(mFeatureFlags).getKeyguardInteractor(),
                 mFeatureFlags
         );

@@ -63,6 +63,7 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -146,7 +147,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 debugLogger,
                 mediaFlags,
                 keyguardUpdateMonitor,
-                KeyguardTransitionInteractor(repository = transitionRepository),
+                KeyguardTransitionInteractor(transitionRepository, TestScope().backgroundScope),
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))
