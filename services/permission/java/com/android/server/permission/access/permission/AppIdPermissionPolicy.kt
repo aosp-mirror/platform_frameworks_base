@@ -749,11 +749,16 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 // If this is an existing, non-system package,
                 // then we can't add any new permissions to it.
                 // Except if this is a permission that was added to the platform
-                val newFlags = if (!wasRevoked || isRequestedByInstalledPackage ||
+                var newFlags = if (!wasRevoked || isRequestedByInstalledPackage ||
                     isRequestedBySystemPackage || isCompatibilityPermission) {
                     PermissionFlags.INSTALL_GRANTED
                 } else {
                     PermissionFlags.INSTALL_REVOKED
+                }
+                if (permission.isAppOp) {
+                    newFlags = newFlags or (
+                        oldFlags and (PermissionFlags.ROLE or PermissionFlags.USER_SET)
+                    )
                 }
                 setPermissionFlags(appId, userId, permissionName, newFlags)
             }
@@ -783,6 +788,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 } else {
                     0
                 }
+            }
+            if (permission.isAppOp) {
+                newFlags = newFlags or (
+                    oldFlags and (PermissionFlags.ROLE or PermissionFlags.USER_SET)
+                )
             }
             // Different from the old implementation, which seemingly allows granting an
             // unallowlisted privileged permission via development or role but revokes it upon next
