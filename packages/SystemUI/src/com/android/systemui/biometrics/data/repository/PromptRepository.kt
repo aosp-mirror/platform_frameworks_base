@@ -2,7 +2,7 @@ package com.android.systemui.biometrics.data.repository
 
 import android.hardware.biometrics.PromptInfo
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.biometrics.data.model.PromptKind
+import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -35,12 +35,20 @@ interface PromptRepository {
     /** The kind of credential to use (biometric, pin, pattern, etc.). */
     val kind: StateFlow<PromptKind>
 
+    /**
+     * If explicit confirmation is required.
+     *
+     * Note: overlaps/conflicts with [PromptInfo.isConfirmationRequested], which needs clean up.
+     */
+    val isConfirmationRequired: StateFlow<Boolean>
+
     /** Update the prompt configuration, which should be set before [isShowing]. */
     fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
         gatekeeperChallenge: Long?,
-        kind: PromptKind = PromptKind.ANY_BIOMETRIC,
+        kind: PromptKind,
+        requireConfirmation: Boolean = false,
     )
 
     /** Unset the prompt info. */
@@ -74,29 +82,35 @@ class PromptRepositoryImpl @Inject constructor(private val authController: AuthC
     private val _userId: MutableStateFlow<Int?> = MutableStateFlow(null)
     override val userId = _userId.asStateFlow()
 
-    private val _kind: MutableStateFlow<PromptKind> = MutableStateFlow(PromptKind.ANY_BIOMETRIC)
+    private val _kind: MutableStateFlow<PromptKind> = MutableStateFlow(PromptKind.Biometric())
     override val kind = _kind.asStateFlow()
+
+    private val _isConfirmationRequired: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val isConfirmationRequired = _isConfirmationRequired.asStateFlow()
 
     override fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
+        requireConfirmation: Boolean,
     ) {
         _kind.value = kind
         _userId.value = userId
         _challenge.value = gatekeeperChallenge
         _promptInfo.value = promptInfo
+        _isConfirmationRequired.value = requireConfirmation
     }
 
     override fun unsetPrompt() {
         _promptInfo.value = null
         _userId.value = null
         _challenge.value = null
-        _kind.value = PromptKind.ANY_BIOMETRIC
+        _kind.value = PromptKind.Biometric()
+        _isConfirmationRequired.value = false
     }
 
     companion object {
-        private const val TAG = "BiometricPromptRepository"
+        private const val TAG = "PromptRepositoryImpl"
     }
 }

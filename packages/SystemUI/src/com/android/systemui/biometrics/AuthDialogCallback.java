@@ -70,5 +70,10 @@ public interface AuthDialogCallback {
     /**
      * Notifies when the dialog has finished animating.
      */
-    void onDialogAnimatedIn(long requestId);
+    void onDialogAnimatedIn(long requestId, boolean startFingerprintNow);
+
+    /**
+     * Notifies that the fingerprint sensor should be started now.
+     */
+    void onStartFingerprintNow(long requestId);
 }
