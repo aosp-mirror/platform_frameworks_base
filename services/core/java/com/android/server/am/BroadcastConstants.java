@@ -292,6 +292,15 @@ public class BroadcastConstants {
     private static final String KEY_CORE_DEFER_UNTIL_ACTIVE = "bcast_core_defer_until_active";
     private static final boolean DEFAULT_CORE_DEFER_UNTIL_ACTIVE = true;
 
+    /**
+     * For {@link BroadcastQueueModernImpl}: How frequently we should check for the pending
+     * cold start validity.
+     */
+    public long PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 30 * 1000;
+    private static final String KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS =
+            "pending_cold_start_check_interval_millis";
+    private static final long DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 30_000;
+
     // Settings override tracking for this instance
     private String mSettingsKey;
     private SettingsObserver mSettingsObserver;
@@ -441,6 +450,9 @@ public class BroadcastConstants {
                     DEFAULT_MAX_HISTORY_SUMMARY_SIZE);
             CORE_DEFER_UNTIL_ACTIVE = getDeviceConfigBoolean(KEY_CORE_DEFER_UNTIL_ACTIVE,
                     DEFAULT_CORE_DEFER_UNTIL_ACTIVE);
+            PENDING_COLD_START_CHECK_INTERVAL_MILLIS = getDeviceConfigLong(
+                    KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS,
+                    DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS);
         }
 
         // TODO: migrate BroadcastRecord to accept a BroadcastConstants
@@ -499,6 +511,8 @@ public class BroadcastConstants {
                     MAX_CONSECUTIVE_NORMAL_DISPATCHES).println();
             pw.print(KEY_CORE_DEFER_UNTIL_ACTIVE,
                     CORE_DEFER_UNTIL_ACTIVE).println();
+            pw.print(KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS,
+                    PENDING_COLD_START_CHECK_INTERVAL_MILLIS).println();
             pw.decreaseIndent();
             pw.println();
         }

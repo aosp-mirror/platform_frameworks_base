@@ -269,7 +269,9 @@ public class BroadcastQueueTest {
                     deliverRes = res;
                     break;
             }
+            res.setPendingStart(true);
             mHandlerThread.getThreadHandler().post(() -> {
+                res.setPendingStart(false);
                 synchronized (mAms) {
                     switch (behavior) {
                         case SUCCESS:
@@ -280,6 +282,10 @@ public class BroadcastQueueTest {
                         case FAIL_TIMEOUT_PREDECESSOR:
                             mActiveProcesses.remove(deliverRes);
                             mQueue.onApplicationTimeoutLocked(deliverRes);
+                            break;
+                        case KILLED_WITHOUT_NOTIFY:
+                            mActiveProcesses.remove(res);
+                            res.setKilled(true);
                             break;
                         default:
                             throw new UnsupportedOperationException();
@@ -310,6 +316,7 @@ public class BroadcastQueueTest {
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mConstants.TIMEOUT = 100;
         mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
+        mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 500;
 
         mSkipPolicy = spy(new BroadcastSkipPolicy(mAms));
         doReturn(null).when(mSkipPolicy).shouldSkipMessage(any(), any());
@@ -381,6 +388,8 @@ public class BroadcastQueueTest {
         FAIL_TIMEOUT_PREDECESSOR,
         /** Process fails by immediately returning null */
         FAIL_NULL,
+        /** Process is killed without reporting to BroadcastQueue */
+        KILLED_WITHOUT_NOTIFY,
     }
 
     private enum ProcessBehavior {
@@ -520,6 +529,11 @@ public class BroadcastQueueTest {
     static ResolveInfo withPriority(ResolveInfo info, int priority) {
         info.priority = priority;
         return info;
+    }
+
+    static BroadcastFilter withPriority(BroadcastFilter filter, int priority) {
+        filter.setPriority(priority);
+        return filter;
     }
 
     static ResolveInfo makeManifestReceiver(String packageName, String name) {
@@ -1259,6 +1273,46 @@ public class BroadcastQueueTest {
         // Confirm that we saw final manifest broadcast
         verifyScheduleReceiver(times(1), newApp, airplane,
                 new ComponentName(PACKAGE_GREEN, CLASS_GREEN));
+    }
+
+    /**
+     * Verify that when BroadcastQueue doesn't get notified when a process gets killed, it
+     * doesn't get stuck.
+     */
+    @Test
+    public void testKillWithoutNotify() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+
+        mNextProcessStartBehavior.set(ProcessStartBehavior.KILLED_WITHOUT_NOTIFY);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 10),
+                withPriority(makeRegisteredReceiver(receiverBlueApp), 5),
+                withPriority(makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW), 0))));
+
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_ORANGE, CLASS_ORANGE))));
+
+        waitForIdle();
+        final ProcessRecord receiverGreenApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final ProcessRecord receiverYellowApp = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW));
+        final ProcessRecord receiverOrangeApp = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
+                getUidForPackage(PACKAGE_ORANGE));
+
+        if (mImpl == Impl.MODERN) {
+            // Modern queue does not retry sending a broadcast once any broadcast delivery fails.
+            assertNull(receiverGreenApp);
+        } else {
+            verifyScheduleReceiver(times(1), receiverGreenApp, airplane);
+        }
+        verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
+        verifyScheduleReceiver(times(1), receiverYellowApp, airplane);
+        verifyScheduleReceiver(times(1), receiverOrangeApp, timezone);
     }
 
     @Test
