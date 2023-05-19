@@ -31,6 +31,12 @@ enum class TrimLevel {
     RUNNING_MODERATE = 5,
 };
 
+enum class CacheTrimLevel {
+    ALL_CACHES = 0,
+    FONT_CACHE = 1,
+    RESOURCE_CACHE = 2,
+};
+
 struct MemoryPolicy {
     // The initial scale factor applied to the display resolution. The default is 1, but
     // lower values may be used to start with a smaller initial cache size. The cache will
