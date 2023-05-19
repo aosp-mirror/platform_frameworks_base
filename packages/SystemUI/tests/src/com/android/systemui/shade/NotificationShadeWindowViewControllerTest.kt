@@ -111,8 +111,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
-    @Mock
-    private lateinit var unfoldTransitionProgressProvider:
+    @Mock private lateinit var unfoldTransitionProgressProvider:
             Optional<UnfoldTransitionProgressProvider>
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
@@ -195,6 +194,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                         keyguardTransitionInteractor =
                             KeyguardTransitionInteractor(
                                 repository = FakeKeyguardTransitionRepository(),
+                                scope = testScope.backgroundScope
                             ),
                         falsingManager = FalsingManagerFake(),
                         shadeController = shadeController,

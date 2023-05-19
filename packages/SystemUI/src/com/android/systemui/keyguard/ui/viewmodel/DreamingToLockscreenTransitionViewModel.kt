@@ -16,15 +16,17 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
-import com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE
+import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 
 /**
  * Breaks down DREAMING->LOCKSCREEN transition into discrete steps for corresponding views to
@@ -34,22 +36,32 @@ import kotlinx.coroutines.flow.Flow
 class DreamingToLockscreenTransitionViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardTransitionInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val fromDreamingTransitionInteractor: FromDreamingTransitionInteractor
 ) {
+    fun startTransition() = fromDreamingTransitionInteractor.startToLockscreenTransition()
+
     private val transitionAnimation =
         KeyguardTransitionAnimationFlow(
             transitionDuration = TO_LOCKSCREEN_DURATION,
-            transitionFlow = interactor.dreamingToLockscreenTransition,
+            transitionFlow = keyguardTransitionInteractor.dreamingToLockscreenTransition,
         )
+
+    val transitionEnded =
+        keyguardTransitionInteractor.dreamingToLockscreenTransition.filter { step ->
+            step.transitionState == TransitionState.FINISHED ||
+                step.transitionState == TransitionState.CANCELED
+        }
 
     /** Dream overlay y-translation on exit */
     fun dreamOverlayTranslationY(translatePx: Int): Flow<Float> {
         return transitionAnimation.createFlow(
-            duration = 600.milliseconds,
+            duration = TO_LOCKSCREEN_DURATION,
             onStep = { it * translatePx },
-            interpolator = EMPHASIZED_ACCELERATE,
+            interpolator = EMPHASIZED,
         )
     }
+
     /** Dream overlay views alpha - fade out */
     val dreamOverlayAlpha: Flow<Float> =
         transitionAnimation.createFlow(
@@ -65,7 +77,7 @@ constructor(
             // Reset on cancel or finish
             onFinish = { 0f },
             onCancel = { 0f },
-            interpolator = EMPHASIZED_DECELERATE,
+            interpolator = EMPHASIZED,
         )
     }
 
@@ -76,12 +88,4 @@ constructor(
             duration = 250.milliseconds,
             onStep = { it },
         )
-
-    companion object {
-        /* Length of time before ending the dream activity, in order to start unoccluding */
-        val DREAM_ANIMATION_DURATION = 250.milliseconds
-        @JvmField
-        val LOCKSCREEN_ANIMATION_DURATION_MS =
-            (TO_LOCKSCREEN_DURATION - DREAM_ANIMATION_DURATION).inWholeMilliseconds
-    }
 }

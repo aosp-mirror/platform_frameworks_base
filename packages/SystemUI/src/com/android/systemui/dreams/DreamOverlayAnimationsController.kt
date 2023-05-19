@@ -34,13 +34,11 @@ import com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP
 import com.android.systemui.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
-import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel.Companion.DREAM_ANIMATION_DURATION
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
-import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,6 +125,12 @@ constructor(
                             },
                             POSITION_TOP or POSITION_BOTTOM
                         )
+                    }
+                }
+
+                launch {
+                    transitionViewModel.transitionEnded.collect { _ ->
+                        mOverlayStateController.setExitAnimationsRunning(false)
                     }
                 }
             }
@@ -251,9 +255,9 @@ constructor(
     }
 
     /** Starts the dream content and dream overlay exit animations. */
-    fun wakeUp(doneCallback: Runnable, executor: DelayableExecutor) {
+    fun wakeUp() {
         cancelAnimations()
-        executor.executeDelayed(doneCallback, DREAM_ANIMATION_DURATION.inWholeMilliseconds)
+        mOverlayStateController.setExitAnimationsRunning(true)
     }
 
     /** Cancels the dream content and dream overlay animations, if they're currently running. */

@@ -33,6 +33,8 @@ data class WakefulnessModel(
 
     fun isDeviceInteractive() = !isAsleep()
 
+    fun isStartingToWakeOrAwake() = isStartingToWake() || state == WakefulnessState.AWAKE
+
     fun isStartingToSleepFromPowerButton() =
         isStartingToSleep() && lastWakeReason == WakeSleepReason.POWER_BUTTON
 

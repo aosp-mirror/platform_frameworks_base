@@ -207,6 +207,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                         keyguardTransitionInteractor =
                             KeyguardTransitionInteractor(
                                 repository = FakeKeyguardTransitionRepository(),
+                                scope = testScope.backgroundScope
                             ),
                         falsingManager = FalsingManagerFake(),
                         shadeController = shadeController,

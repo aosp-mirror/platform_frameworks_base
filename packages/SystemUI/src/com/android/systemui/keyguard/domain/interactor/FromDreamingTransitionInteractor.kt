@@ -23,7 +23,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
-import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
@@ -48,39 +47,23 @@ constructor(
 ) : TransitionInteractor(FromDreamingTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
-        listenForDreamingToLockscreen()
         listenForDreamingToOccluded()
         listenForDreamingToGone()
         listenForDreamingToDozing()
     }
 
-    private fun listenForDreamingToLockscreen() {
+    fun startToLockscreenTransition() {
         scope.launch {
-            keyguardInteractor.isAbleToDream
-                .sample(
-                    combine(
-                        keyguardInteractor.dozeTransitionModel,
-                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                        ::Pair
-                    ),
-                    ::toTriple
+            if (keyguardTransitionInteractor.startedKeyguardState.value == KeyguardState.DREAMING) {
+                keyguardTransitionRepository.startTransition(
+                    TransitionInfo(
+                        name,
+                        KeyguardState.DREAMING,
+                        KeyguardState.LOCKSCREEN,
+                        getAnimator(TO_LOCKSCREEN_DURATION),
+                    )
                 )
-                .collect { (isDreaming, dozeTransitionModel, lastStartedTransition) ->
-                    if (
-                        !isDreaming &&
-                            isDozeOff(dozeTransitionModel.to) &&
-                            lastStartedTransition.to == KeyguardState.DREAMING
-                    ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.DREAMING,
-                                KeyguardState.LOCKSCREEN,
-                                getAnimator(TO_LOCKSCREEN_DURATION),
-                            )
-                        )
-                    }
-                }
+            }
         }
     }
 
@@ -173,6 +156,6 @@ constructor(
 
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
-        val TO_LOCKSCREEN_DURATION = 1183.milliseconds
+        val TO_LOCKSCREEN_DURATION = 1167.milliseconds
     }
 }
