@@ -283,6 +283,57 @@ java_library {
 }
 
 java_defaults {
+    name: "non_updatable_api_library_defaults",
+    static_libs: ["framework-res-package-jar"],
+    libs: ["stub-annotations"],
+}
+
+java_api_library {
+    name: "android-non-updatable.stubs.from-text",
+    api_surface: "public",
+    api_files: [
+        ":non-updatable-current.txt",
+    ],
+    defaults: ["non_updatable_api_library_defaults"],
+    dep_api_srcs: "android_stubs_current.from-text",
+}
+
+java_api_library {
+    name: "android-non-updatable.stubs.system.from-text",
+    api_surface: "system",
+    api_files: [
+        ":non-updatable-current.txt",
+        ":non-updatable-system-current.txt",
+    ],
+    defaults: ["non_updatable_api_library_defaults"],
+    dep_api_srcs: "android_system_stubs_current.from-text",
+}
+
+java_api_library {
+    name: "android-non-updatable.stubs.test.from-text",
+    api_surface: "test",
+    api_files: [
+        ":non-updatable-current.txt",
+        ":non-updatable-system-current.txt",
+        ":non-updatable-test-current.txt",
+    ],
+    defaults: ["non_updatable_api_library_defaults"],
+    dep_api_srcs: "android_test_stubs_current.from-text",
+}
+
+java_api_library {
+    name: "android-non-updatable.stubs.module_lib.from-text",
+    api_surface: "module_lib",
+    api_files: [
+        ":non-updatable-current.txt",
+        ":non-updatable-system-current.txt",
+        ":non-updatable-module-lib-current.txt",
+    ],
+    defaults: ["non_updatable_api_library_defaults"],
+    dep_api_srcs: "android_module_lib_stubs_current_full.from-text",
+}
+
+java_defaults {
     name: "android_stubs_dists_default",
     dist: {
         targets: ["sdk"],
