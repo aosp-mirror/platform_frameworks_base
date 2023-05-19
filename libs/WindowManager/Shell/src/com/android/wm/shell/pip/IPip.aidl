@@ -57,27 +57,35 @@ interface IPip {
             in Rect destinationBounds, in SurfaceControl overlay) = 2;
 
     /**
+     * Notifies the swiping Activity to PiP onto home transition is aborted
+     *
+     * @param taskId the Task id that the Activity and overlay are currently in.
+     * @param componentName ComponentName represents the Activity
+     */
+    oneway void abortSwipePipToHome(int taskId, in ComponentName componentName) = 3;
+
+    /**
      * Sets listener to get pinned stack animation callbacks.
      */
-    oneway void setPipAnimationListener(IPipAnimationListener listener) = 3;
+    oneway void setPipAnimationListener(IPipAnimationListener listener) = 4;
 
     /**
      * Sets the shelf height and visibility.
      */
-    oneway void setShelfHeight(boolean visible, int shelfHeight) = 4;
+    oneway void setShelfHeight(boolean visible, int shelfHeight) = 5;
 
     /**
      * Sets the next pip animation type to be the alpha animation.
      */
-    oneway void setPipAnimationTypeToAlpha() = 5;
+    oneway void setPipAnimationTypeToAlpha() = 6;
 
     /**
      * Sets the height and visibility of the Launcher keep clear area.
      */
-    oneway void setLauncherKeepClearAreaHeight(boolean visible, int height) = 6;
+    oneway void setLauncherKeepClearAreaHeight(boolean visible, int height) = 7;
 
     /**
      * Sets the app icon size in pixel used by Launcher
      */
-     oneway void setLauncherAppIconSize(int iconSizePx) = 7;
+    oneway void setLauncherAppIconSize(int iconSizePx) = 8;
 }
