@@ -728,6 +728,12 @@ public class RemoteViews implements Parcelable, Filter {
                 mActions.get(i).visitUris(visitor);
             }
         }
+        if (mLandscape != null) {
+            mLandscape.visitUris(visitor);
+        }
+        if (mPortrait != null) {
+            mPortrait.visitUris(visitor);
+        }
     }
 
     private static void visitIconUri(Icon icon, @NonNull Consumer<Uri> visitor) {

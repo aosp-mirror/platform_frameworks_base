@@ -351,7 +351,7 @@
     <string name="debug_app_set" msgid="6599535090477753651">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás hibakeresése"</string>
     <string name="select_application" msgid="2543228890535466325">"Alkalmazás kiválasztása"</string>
     <string name="no_application" msgid="9038334538870247690">"Semmi"</string>
-    <string name="wait_for_debugger" msgid="7461199843335409809">"Várjon a hibakeresőre."</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"Várakozás a hibakeresőre"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"A javított alkalmazás a hibakeresőre vár."</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Bevitel"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Rajz"</string>
@@ -364,7 +364,7 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"A fedvény mutatja az aktuális érintési adatokat"</string>
     <string name="show_touches" msgid="8437666942161289025">"Koppintások megjelenítése"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Koppintások vizuális visszajelzésének megjelenítése"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"Képernyőfrissítések megj."</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Felületfrissítések megj."</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"A teljes ablakfelület villogjon frissítéskor."</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Frissítések megjelenítése"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Ablakos Flash-nézetek megjelenítéskor"</string>

@@ -1607,7 +1607,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telemóvel"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Altif. estação ancoragem"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Altif. estação carregamento"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Auscultadores"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>

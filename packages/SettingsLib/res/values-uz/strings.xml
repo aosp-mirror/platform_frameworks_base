@@ -51,7 +51,7 @@
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192-bit"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Saqlangan"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Ulanmagan"</string>
-    <string name="wifi_disabled_generic" msgid="2651916945380294607">"Yoqilmagan"</string>
+    <string name="wifi_disabled_generic" msgid="2651916945380294607">"Oʻchiq"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP manzilini sozlab bo‘lmadi"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Sifatsiz tarmoq sababli ulanib bo‘lmadi"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi ulanishini o‘rnatib bo‘lmadi"</string>
@@ -304,7 +304,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Translatsiya: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Shaxsiy DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Shaxsiy DNS rejimini tanlang"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"Yoqilmagan"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Oʻchiq"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Avtomatik"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Shaxsiy DNS provayderining host nomi"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS provayderining host nomini kiriting"</string>
@@ -442,7 +442,7 @@
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Bu variant endi yaroqsiz. Qaytadan urining."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Rang rejimi"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ranglaridan foydalanish"</string>
-    <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Yoqilmagan"</string>
+    <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Oʻchiq"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monoxrom"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deyteranomaliya (qizil/yashil)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaliya (qizil/yashil)"</string>
@@ -488,7 +488,7 @@
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Toʻliq quvvatlandi"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Administrator tomonidan boshqariladi"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Cheklangan sozlama tomonidan boshqariladi"</string>
-    <string name="disabled" msgid="8017887509554714950">"Yoqilmagan"</string>
+    <string name="disabled" msgid="8017887509554714950">"Oʻchiq"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Ruxsat berilgan"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Ruxsat berilmagan"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Notanish ilovalarni o‘rnatish"</string>
@@ -569,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Foydalanuvchi"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Cheklangan profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Foydalanuvchi qo‘shilsinmi?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Bu qurilmadan bir necha kishi alohida foydalanuvchilar qo‘shib foydalanishi mumkin. Har bir foydalanuvchiga diskda joy ajratiladi, tayinlangan hajm ilovalar, ekran foni rasmi, va hokazolarga taqsimlanishi mumkin. Foydalanuvchilar Wi-Fi kabi sozlamalarni o‘zgartirsa, qolganlarda ham aks etishi mumkin. \n\nYangi profil qo‘shilgach, uni sozlash lozim.\n\nQurilmaning istalgan foydalanuvchisi ilovalarni barcha hisoblar uchun yangilashi mumkin. Maxsus imkoniyatlar sozlamalari va xizmatlar yangi foydalanuvchiga o‘tkazilmasligi mumkin."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Bu qurilmadan bir necha kishi alohida foydalanuvchilar qo‘shib foydalanishi mumkin. Har bir foydalanuvchiga diskda joy ajratiladi, tayinlangan hajm ilovalar, ekran foni rasmi, va hokazolarga taqsimlanishi mumkin. Foydalanuvchilar Wi-Fi kabi sozlamalarni o‘zgartirsa, qolganlarda ham aks etishi mumkin. \n\nYangi profil qo‘shilgach, uni sozlash lozim.\n\nQurilmaning istalgan foydalanuvchisi ilovalarni barcha hisoblar uchun yangilashi mumkin. Qulayliklar sozlamalari va xizmatlar yangi foydalanuvchiga o‘tkazilmasligi mumkin."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Yangi profil qo‘shilgach, uni sozlash lozim.\n\nQurilmaning istalgan foydalanuvchisi ilovalarni barcha hisoblar uchun yangilashi mumkin."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Profil hozir sozlansinmi?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Agar foydalanuvchi profilini hozir sozlay olmasa, keyinroq ham sozlab olishi mumkin."</string>
@@ -606,7 +606,7 @@
     <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Juda koʻp marta muvaffaqiyatsiz urindingiz. Bu ish profili va undagi maʼlumotlar oʻchirib tashlanadi."</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Yopish"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Qurilma standarti"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Yoqilmagan"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Oʻchiq"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Yoniq"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Oʻzgarishlar kuchga kirishi uchun qurilmani oʻchirib yoqing. Buni hozir yoki keyinroq bajarishingiz mumkin."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Simli quloqlik"</string>

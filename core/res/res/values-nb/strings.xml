@@ -145,7 +145,7 @@
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Av"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via Wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Ring over mobilnettverk"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare Wifi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare wifi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
     <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g>-reserve for anrop"</string>
@@ -521,9 +521,9 @@
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"koble til og fra wifi"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Lar appen koble til og fra wifi-tilgangspunkter, og å gjøre endringer i enhetens konfigurasjon for wifi-nettverk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"tillate multicast for trådløse nettverk"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Lar appen motta pakker som sendes til alle enhetene på et Wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Lar appen motta pakker som sendes til alle enhetene på et Wifi-nettverk ved hjelp av multikastingsadresser, ikke bare Android TV-enheten din. Dette bruker mer strøm enn modus uten multikasting."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Lar appen motta pakker som sendes til alle enhetene på et Wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Lar appen motta pakker som sendes til alle enhetene på et wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Lar appen motta pakker som sendes til alle enhetene på et wifi-nettverk ved hjelp av multikastingsadresser, ikke bare Android TV-enheten din. Dette bruker mer strøm enn modus uten multikasting."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Lar appen motta pakker som sendes til alle enhetene på et wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"endre Bluetooth-innstillinger"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Lar appen konfigurere det lokale Bluetooth-nettbrettet, samt oppdage og koble sammen med eksterne enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Lar appen konfigurere Bluetooth på Android TV-enheten din samt oppdage og koble sammen med eksterne enheter."</string>
@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prøv et annet fingeravtrykk"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"For lyst"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prøv å justere"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Endre posisjonen til fingeren litt hver gang"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Endre fingerens posisjon litt hver gang"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Gjenkjenner ikke fingeravtrykket"</string>
@@ -650,7 +650,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Kan ikke gjenkjenne ansiktet lenger. Prøv på nytt."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"For likt – endre posituren din."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Vri hodet ditt litt mindre."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Vri hodet litt mindre."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Løft/senk ansiktet litt."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Vri hodet ditt litt mindre."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Fjern alt som skjuler ansiktet ditt."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Rengjør den øverste delen av skjermen, inkludert den svarte linjen"</string>
@@ -1109,7 +1109,7 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{for # minutt siden}other{For # minutter siden}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{For # time siden}other{For # timer siden}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# time siden}other{# timer siden}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{For # dag siden}other{For # dager siden}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{For # år siden}other{For # år siden}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minutt}other{# minutter}}"</string>
@@ -1353,7 +1353,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-internettdeling er slått på"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB er slått på"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-tilbehør er tilkoblet"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Trykk for å få flere alternativ."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Trykk for flere alternativer."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Den tilkoblede enheten lades. Trykk for å se flere alternativer."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analogt lydtilbehør ble oppdaget"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Den tilkoblede enheten er ikke kompatibel med denne telefonen. Trykk for å finne ut mer."</string>
@@ -2042,7 +2042,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vil du gi <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> tilgang til alle enhetslogger?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Gi éngangstilgang"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ikke tillat"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Enhetslogger registrerer det som skjer på enheten din. Apper kan bruke disse loggene til å finne og løse problemer.\n\nNoen logger kan inneholde sensitiv informasjon, så du bør bare gi tilgang til alle enhetslogger til apper du stoler på. \n\nHvis du ikke gir denne appen tilgang til alle enhetslogger, har den fremdeles tilgang til sine egne logger. Enhetsprodusenten kan fremdeles ha tilgang til noen logger eller noe informasjon på enheten din. Finn ut mer"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Enhetslogger registrerer det som skjer på enheten din. Apper kan bruke disse loggene til å finne og løse problemer.\n\nNoen logger kan inneholde sensitiv informasjon, så du bør bare gi apper du stoler på, tilgang til alle enhetslogger. \n\nHvis du ikke gir denne appen tilgang til alle enhetslogger, har den fremdeles tilgang til sine egne logger. Enhetsprodusenten kan fremdeles ha tilgang til noen logger eller noe informasjon på enheten din. Finn ut mer"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ikke vis igjen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vil vise <xliff:g id="APP_2">%2$s</xliff:g>-utsnitt"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Endre"</string>
@@ -2073,7 +2073,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Slå av"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Finn ut mer"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Forbedrede varsler erstatter tilpassede Android-varsler i Android 12. Denne funksjonen viser foreslåtte handlinger og svar og organiserer varslene dine.\n\nForbedrede varsler har tilgang til varselinnhold, inkludert personopplysninger som kontaktnavn og meldinger. Funksjonen kan også avvise og svare på varsler, for eksempel svare på anrop og kontrollere «Ikke forstyrr»."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Forbedrede varsler erstatter tilpassede Android-varsler i Android 12. Denne funksjonen viser foreslåtte handlinger og svar og organiserer varslene dine.\n\nForbedrede varsler har tilgang til varselinnhold, inkludert personopplysninger som kontaktnavn og meldinger. Funksjonen kan også lukke og svare på varsler, for eksempel svare på anrop og kontrollere «Ikke forstyrr»."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Varsel med informasjon om rutinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batteriet kan gå tomt før den vanlige ladingen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparing er aktivert for å forlenge batterilevetiden"</string>

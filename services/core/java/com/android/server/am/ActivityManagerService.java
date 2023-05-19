@@ -450,6 +450,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -5535,7 +5536,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             IIntentSender pendingResult, int matchFlags) {
         enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
                 "queryIntentComponentsForIntentSender()");
-        Preconditions.checkNotNull(pendingResult);
+        Objects.requireNonNull(pendingResult);
         final PendingIntentRecord res;
         try {
             res = (PendingIntentRecord) pendingResult;
@@ -5547,17 +5548,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             return null;
         }
         final int userId = res.key.userId;
+        final int uid = res.uid;
+        final String resolvedType = res.key.requestResolvedType;
         switch (res.key.type) {
             case ActivityManager.INTENT_SENDER_ACTIVITY:
-                return new ParceledListSlice<>(mContext.getPackageManager()
-                        .queryIntentActivitiesAsUser(intent, matchFlags, userId));
+                return new ParceledListSlice<>(mPackageManagerInt.queryIntentActivities(
+                        intent, resolvedType, matchFlags, uid, userId));
             case ActivityManager.INTENT_SENDER_SERVICE:
             case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
-                return new ParceledListSlice<>(mContext.getPackageManager()
-                        .queryIntentServicesAsUser(intent, matchFlags, userId));
+                return new ParceledListSlice<>(mPackageManagerInt.queryIntentServices(
+                        intent, matchFlags, uid, userId));
             case ActivityManager.INTENT_SENDER_BROADCAST:
-                return new ParceledListSlice<>(mContext.getPackageManager()
-                        .queryBroadcastReceiversAsUser(intent, matchFlags, userId));
+                return new ParceledListSlice<>(mPackageManagerInt.queryIntentReceivers(
+                        intent, resolvedType, matchFlags, uid, userId, false));
             default: // ActivityManager.INTENT_SENDER_ACTIVITY_RESULT
                 throw new IllegalStateException("Unsupported intent sender type: " + res.key.type);
         }
@@ -6794,7 +6797,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.unhandledBack();
     }
 
-    // TODO: Move to ContentProviderHelper?
+    // TODO: Replace this method with one that returns a bound IContentProvider.
     public ParcelFileDescriptor openContentUri(String uriString) throws RemoteException {
         enforceNotIsolatedCaller("openContentUri");
         final int userId = UserHandle.getCallingUserId();
@@ -6823,6 +6826,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Log.e(TAG, "Cannot find package for uid: " + uid);
                     return null;
                 }
+
+                final ApplicationInfo appInfo = mPackageManagerInt.getApplicationInfo(
+                        androidPackage.getPackageName(), /*flags*/0, Process.SYSTEM_UID,
+                        UserHandle.USER_SYSTEM);
+                if (!appInfo.isVendor() && !appInfo.isSystemApp() && !appInfo.isSystemExt()
+                        && !appInfo.isProduct()) {
+                    Log.e(TAG, "openContentUri may only be used by vendor/system/product.");
+                    return null;
+                }
+
                 final AttributionSource attributionSource = new AttributionSource(
                         Binder.getCallingUid(), androidPackage.getPackageName(), null);
                 pfd = cph.provider.openFile(attributionSource, uri, "r", null);
