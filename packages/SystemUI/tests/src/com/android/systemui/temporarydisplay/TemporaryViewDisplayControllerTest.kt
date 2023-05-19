@@ -24,6 +24,8 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
@@ -60,6 +62,9 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
     private lateinit var fakeWakeLock: WakeLockFake
 
+    private lateinit var fakeUiEventLogger: UiEventLoggerFake
+    private lateinit var uiEventLogger: TemporaryViewUiEventLogger
+
     @Mock
     private lateinit var logger: TemporaryViewLogger<ViewInfo>
     @Mock
@@ -87,6 +92,9 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         fakeWakeLockBuilder = WakeLockFake.Builder(context)
         fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
 
+        fakeUiEventLogger = UiEventLoggerFake()
+        uiEventLogger = TemporaryViewUiEventLogger(fakeUiEventLogger)
+
         underTest = TestController(
             context,
             logger,
@@ -98,6 +106,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
             powerManager,
             fakeWakeLockBuilder,
             fakeClock,
+            uiEventLogger,
         )
         underTest.start()
     }
@@ -126,6 +135,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         underTest.displayView(info)
 
         verify(logger).logViewAddition(info)
+        assertThat(fakeUiEventLogger.eventId(0))
+                .isEqualTo(TemporaryViewUiEvent.TEMPORARY_VIEW_ADDED.id)
     }
 
     @Test
@@ -1029,6 +1040,9 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(logger).logViewRemoval(DEFAULT_ID, reason)
         verify(configurationController).removeCallback(any())
         assertThat(listener.permanentlyRemovedIds).containsExactly(DEFAULT_ID)
+        assertThat(fakeUiEventLogger.logs.size).isEqualTo(1)
+        assertThat(fakeUiEventLogger.eventId(0))
+                .isEqualTo(TemporaryViewUiEvent.TEMPORARY_VIEW_ADDED.id)
     }
 
     @Test
@@ -1133,6 +1147,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         powerManager: PowerManager,
         wakeLockBuilder: WakeLock.Builder,
         systemClock: SystemClock,
+        uiEventLogger: TemporaryViewUiEventLogger,
     ) : TemporaryViewDisplayController<ViewInfo, TemporaryViewLogger<ViewInfo>>(
         context,
         logger,
@@ -1145,6 +1160,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         R.layout.chipbar,
         wakeLockBuilder,
         systemClock,
+        uiEventLogger,
     ) {
         var mostRecentViewInfo: ViewInfo? = null
 
@@ -1168,6 +1184,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         override val timeoutMs: Int = TIMEOUT_MS.toInt(),
         override val id: String = DEFAULT_ID,
         override val priority: ViewPriority = ViewPriority.NORMAL,
+        override val instanceId: InstanceId = InstanceId.fakeInstanceId(0),
     ) : TemporaryViewInfo()
 
     inner class Listener : TemporaryViewDisplayController.Listener {
