@@ -112,8 +112,6 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -128,7 +126,8 @@ import java.util.function.Predicate;
 final class LetterboxUiController {
 
     private static final Predicate<ActivityRecord> FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE =
-            activityRecord -> activityRecord.fillsParent() && !activityRecord.isFinishing();
+            activityRecord -> activityRecord.fillsParent() && !activityRecord.isFinishing()
+                    && activityRecord.nowVisible;
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxUiController" : TAG_ATM;
 
@@ -186,10 +185,6 @@ final class LetterboxUiController {
     // Corresponds to OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS
     private final boolean mIsOverrideEnableCompatFakeFocusEnabled;
 
-    // The list of observers for the destroy event of candidate opaque activities
-    // when dealing with translucent activities.
-    private final List<LetterboxUiController> mDestroyListeners = new ArrayList<>();
-
     @Nullable
     private final Boolean mBooleanPropertyAllowOrientationOverride;
     @Nullable
@@ -202,10 +197,6 @@ final class LetterboxUiController {
      */
     @Nullable
     private WindowContainerListener mLetterboxConfigListener;
-
-    @Nullable
-    @VisibleForTesting
-    ActivityRecord mFirstOpaqueActivityBeneath;
 
     private boolean mShowWallpaperForLetterboxBackground;
 
@@ -370,10 +361,6 @@ final class LetterboxUiController {
             mLetterbox.destroy();
             mLetterbox = null;
         }
-        for (int i = mDestroyListeners.size() - 1; i >= 0; i--) {
-            mDestroyListeners.get(i).updateInheritedLetterbox();
-        }
-        mDestroyListeners.clear();
         if (mLetterboxConfigListener != null) {
             mLetterboxConfigListener.onRemoved();
             mLetterboxConfigListener = null;
@@ -1590,11 +1577,7 @@ final class LetterboxUiController {
      * first opaque activity beneath.
      * @param parent The parent container.
      */
-    void updateInheritedLetterbox() {
-        final WindowContainer<?> parent = mActivityRecord.getParent();
-        if (parent == null) {
-            return;
-        }
+    void onActivityParentChanged(WindowContainer<?> parent) {
         if (!mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
             return;
         }
@@ -1604,28 +1587,27 @@ final class LetterboxUiController {
         }
         // In case mActivityRecord.hasCompatDisplayInsetsWithoutOverride() we don't apply the
         // opaque activity constraints because we're expecting the activity is already letterboxed.
-        mFirstOpaqueActivityBeneath = mActivityRecord.getTask().getActivity(
-                FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE /* callback */,
-                mActivityRecord /* boundary */, false /* includeBoundary */,
-                true /* traverseTopToBottom */);
-        if (mFirstOpaqueActivityBeneath == null || mFirstOpaqueActivityBeneath.isEmbedded()) {
-            // We skip letterboxing if the translucent activity doesn't have any opaque
-            // activities beneath or the activity below is embedded which never has letterbox.
-            mActivityRecord.recomputeConfiguration();
-            return;
-        }
         if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
                 || mActivityRecord.hasCompatDisplayInsetsWithoutInheritance()) {
             return;
         }
-        mFirstOpaqueActivityBeneath.mLetterboxUiController.mDestroyListeners.add(this);
-        inheritConfiguration(mFirstOpaqueActivityBeneath);
+        final ActivityRecord firstOpaqueActivityBeneath = mActivityRecord.getTask().getActivity(
+                FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE /* callback */,
+                mActivityRecord /* boundary */, false /* includeBoundary */,
+                true /* traverseTopToBottom */);
+        if (firstOpaqueActivityBeneath == null || firstOpaqueActivityBeneath.isEmbedded()) {
+            // We skip letterboxing if the translucent activity doesn't have any opaque
+            // activities beneath or the activity below is embedded which never has letterbox.
+            return;
+        }
+        inheritConfiguration(firstOpaqueActivityBeneath);
         mLetterboxConfigListener = WindowContainer.overrideConfigurationPropagation(
-                mActivityRecord, mFirstOpaqueActivityBeneath,
-                (opaqueConfig, transparentOverrideConfig) -> {
-                    resetTranslucentOverrideConfig(transparentOverrideConfig);
+                mActivityRecord, firstOpaqueActivityBeneath,
+                (opaqueConfig, transparentConfig) -> {
+                    final Configuration mutatedConfiguration =
+                            fromOriginalTranslucentConfig(transparentConfig);
                     final Rect parentBounds = parent.getWindowConfiguration().getBounds();
-                    final Rect bounds = transparentOverrideConfig.windowConfiguration.getBounds();
+                    final Rect bounds = mutatedConfiguration.windowConfiguration.getBounds();
                     final Rect letterboxBounds = opaqueConfig.windowConfiguration.getBounds();
                     // We cannot use letterboxBounds directly here because the position relies on
                     // letterboxing. Using letterboxBounds directly, would produce a double offset.
@@ -1634,9 +1616,9 @@ final class LetterboxUiController {
                             parentBounds.top + letterboxBounds.height());
                     // We need to initialize appBounds to avoid NPE. The actual value will
                     // be set ahead when resolving the Configuration for the activity.
-                    transparentOverrideConfig.windowConfiguration.setAppBounds(new Rect());
-                    inheritConfiguration(mFirstOpaqueActivityBeneath);
-                    return transparentOverrideConfig;
+                    mutatedConfiguration.windowConfiguration.setAppBounds(new Rect());
+                    inheritConfiguration(firstOpaqueActivityBeneath);
+                    return mutatedConfiguration;
                 });
     }
 
@@ -1709,19 +1691,26 @@ final class LetterboxUiController {
         if (!hasInheritedLetterboxBehavior() || mActivityRecord.getTask() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(mFirstOpaqueActivityBeneath);
+        return Optional.ofNullable(mActivityRecord.getTask().getActivity(
+                FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE /* callback */,
+                mActivityRecord /* boundary */, false /* includeBoundary */,
+                true /* traverseTopToBottom */));
     }
 
-    /** Resets the screen size related fields so they can be resolved by requested bounds later. */
-    private static void resetTranslucentOverrideConfig(Configuration config) {
+    // When overriding translucent activities configuration we need to keep some of the
+    // original properties
+    private Configuration fromOriginalTranslucentConfig(Configuration translucentConfig) {
+        final Configuration configuration = new Configuration(translucentConfig);
         // The values for the following properties will be defined during the configuration
         // resolution in {@link ActivityRecord#resolveOverrideConfiguration} using the
         // properties inherited from the first not finishing opaque activity beneath.
-        config.orientation = ORIENTATION_UNDEFINED;
-        config.screenWidthDp = config.compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
-        config.screenHeightDp = config.compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
-        config.smallestScreenWidthDp = config.compatSmallestScreenWidthDp =
-                SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+        configuration.orientation = ORIENTATION_UNDEFINED;
+        configuration.screenWidthDp = configuration.compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
+        configuration.screenHeightDp =
+                configuration.compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
+        configuration.smallestScreenWidthDp =
+                configuration.compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+        return configuration;
     }
 
     private void inheritConfiguration(ActivityRecord firstOpaque) {
@@ -1740,10 +1729,6 @@ final class LetterboxUiController {
     }
 
     private void clearInheritedConfig() {
-        if (mFirstOpaqueActivityBeneath != null) {
-            mFirstOpaqueActivityBeneath.mLetterboxUiController.mDestroyListeners.remove(this);
-        }
-        mFirstOpaqueActivityBeneath = null;
         mLetterboxConfigListener = null;
         mInheritedMinAspectRatio = UNDEFINED_ASPECT_RATIO;
         mInheritedMaxAspectRatio = UNDEFINED_ASPECT_RATIO;
