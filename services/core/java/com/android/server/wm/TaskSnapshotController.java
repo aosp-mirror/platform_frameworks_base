@@ -171,13 +171,14 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         snapshotTasks(tasks, false /* allowSnapshotHome */);
     }
 
-    void recordSnapshot(Task task, boolean allowSnapshotHome) {
+    TaskSnapshot recordSnapshot(Task task, boolean allowSnapshotHome) {
         final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
         final TaskSnapshot snapshot = recordSnapshotInner(task, allowSnapshotHome);
         if (!snapshotHome && snapshot != null) {
             mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
             task.onSnapshotChanged(snapshot);
         }
+        return snapshot;
     }
 
     private void snapshotTasks(ArraySet<Task> tasks, boolean allowSnapshotHome) {
