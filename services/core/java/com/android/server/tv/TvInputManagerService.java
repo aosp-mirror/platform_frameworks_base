@@ -4152,6 +4152,10 @@ public final class TvInputManagerService extends SystemService {
             synchronized (mLock) {
                 UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
                 TvInputState inputState = userState.inputMap.get(inputId);
+                if (inputState == null) {
+                    Slog.e(TAG, "failed to send TV message - unknown input id " + inputId);
+                    return;
+                }
                 ServiceState serviceState = userState.serviceStateMap.get(inputState.info
                         .getComponent());
                 for (IBinder token : serviceState.sessionTokens) {

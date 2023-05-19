@@ -84,8 +84,7 @@ object Flags {
     // TODO(b/278873737): Tracking Bug
     @JvmField
     val LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE =
-            unreleasedFlag(278873737, "load_notifications_before_the_user_switch_is_complete",
-                    teamfood = true)
+            releasedFlag(278873737, "load_notifications_before_the_user_switch_is_complete")
 
     // TODO(b/277338665): Tracking Bug
     @JvmField
@@ -387,8 +386,6 @@ object Flags {
 
     // TODO(b/254513168): Tracking Bug
     @JvmField val UMO_SURFACE_RIPPLE = releasedFlag(907, "umo_surface_ripple")
-
-    @JvmField val MEDIA_FALSING_PENALTY = releasedFlag(908, "media_falsing_media")
 
     // TODO(b/261734857): Tracking Bug
     @JvmField val UMO_TURBULENCE_NOISE = releasedFlag(909, "umo_turbulence_noise")
@@ -715,8 +712,4 @@ object Flags {
     @JvmField
     val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION =
             unreleasedFlag(2805, "split_shade_subpixel_optimization", teamfood = true)
-
-    // TODO(b/278761837): Tracking Bug
-    @JvmField
-    val USE_NEW_ACTIVITY_STARTER = releasedFlag(2801, name = "use_new_activity_starter")
 }

@@ -687,11 +687,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void updateRequestedVisibleTypes(IWindow window, @InsetsType int requestedVisibleTypes) {
         synchronized (mService.mGlobalLock) {
-            final WindowState windowState = mService.windowForClientLocked(this, window,
+            final WindowState win = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
-            if (windowState != null) {
-                windowState.setRequestedVisibleTypes(requestedVisibleTypes);
-                windowState.getDisplayContent().getInsetsPolicy().onInsetsModified(windowState);
+            if (win != null) {
+                win.setRequestedVisibleTypes(requestedVisibleTypes);
+                win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win);
             }
         }
     }
