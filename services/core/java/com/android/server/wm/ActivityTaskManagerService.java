@@ -3649,6 +3649,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
                     return;
                 }
+                EventLogTags.writeWmEnterPip(r.mUserId, System.identityHashCode(r),
+                        r.shortComponentName, Boolean.toString(isAutoEnter));
                 r.setPictureInPictureParams(params);
                 r.mAutoEnteringPip = isAutoEnter;
                 mRootWindowContainer.moveActivityToPinnedRootTask(r,
