@@ -354,7 +354,11 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     @Override
     protected void snapChild(final View animView, final float targetLeft, float velocity) {
-        superSnapChild(animView, targetLeft, velocity);
+        if (animView instanceof SwipeableView) {
+            // only perform the snapback animation on views that are swipeable inside the shade.
+            superSnapChild(animView, targetLeft, velocity);
+        }
+
         mCallback.onDragCancelled(animView);
         if (targetLeft == 0) {
             handleMenuCoveredOrDismissed();
