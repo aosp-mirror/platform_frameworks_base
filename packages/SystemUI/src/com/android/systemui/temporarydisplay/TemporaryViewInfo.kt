@@ -16,8 +16,6 @@
 
 package com.android.systemui.temporarydisplay
 
-import com.android.internal.logging.InstanceId
-
 /**
  * A superclass view state used with [TemporaryViewDisplayController].
  */
@@ -47,9 +45,6 @@ abstract class TemporaryViewInfo {
 
     /** The priority for this view. */
     abstract val priority: ViewPriority
-
-    /** Instance ID for logging purposes */
-    abstract val instanceId: InstanceId?
 }
 
 const val DEFAULT_TIMEOUT_MILLIS = 10000
