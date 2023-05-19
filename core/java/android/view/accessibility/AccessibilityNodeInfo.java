@@ -99,6 +99,9 @@ import java.util.Objects;
  * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
  * developer guide.</p>
  * </div>
+ * <aside class="note">
+ * <b>Note:</b> Use a {@link androidx.core.view.accessibility.AccessibilityNodeInfoCompat}
+ * wrapper instead of this class for backwards-compatibility. </aside>
  *
  * @see android.accessibilityservice.AccessibilityService
  * @see AccessibilityEvent
@@ -1569,6 +1572,10 @@ public class AccessibilityNodeInfo implements Parcelable {
      * id of a standard action id such as {@link #ACTION_CLICK} and an optional label that
      * describes the action.
      * </p>
+     * <p>
+     * Use {@link androidx.core.view.ViewCompat#addAccessibilityAction(View,
+     * AccessibilityNodeInfoCompat.AccessibilityActionCompat)} to register an action directly on the
+     * view.
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
      *   {@link android.accessibilityservice.AccessibilityService}.
@@ -5143,11 +5150,16 @@ public class AccessibilityNodeInfo implements Parcelable {
      * {@link View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)} and are performed
      * within {@link View#performAccessibilityAction(int, Bundle)}.
      * </p>
-     * <p class="note">
-     * <strong>Note:</strong> Views which support these actions should invoke
+     * <aside class="note">
+     * <b>Note:</b> Views which support these actions should invoke
      * {@link View#setImportantForAccessibility(int)} with
      * {@link View#IMPORTANT_FOR_ACCESSIBILITY_YES} to ensure an {@link AccessibilityService}
      * can discover the set of supported actions.
+     * </p>
+     * <aside class="note">
+     * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#addAccessibilityAction(View,
+     * AccessibilityNodeInfoCompat.AccessibilityActionCompat)} to register an action directly on the
+     * view.
      * </p>
      */
     public static final class AccessibilityAction implements Parcelable {
