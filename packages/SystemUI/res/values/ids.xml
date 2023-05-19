@@ -203,5 +203,8 @@
 
     <item type="id" name="log_access_dialog_allow_button" />
     <item type="id" name="log_access_dialog_deny_button" />
+
+    <!-- keyboard backlight indicator-->
+    <item type="id" name="backlight_icon" />
 </resources>
 
