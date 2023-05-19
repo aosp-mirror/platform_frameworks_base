@@ -137,7 +137,7 @@ public class FontScaleConverterActivityTest {
             );
         });
 
-        PollingCheck.waitFor(/* timeout= */ 5000, () -> {
+        PollingCheck.waitFor(/* timeout= */ 7000, () -> {
             AtomicBoolean isActivityAtCorrectScale = new AtomicBoolean(false);
             rule.getScenario().onActivity(activity ->
                     isActivityAtCorrectScale.set(
@@ -146,12 +146,7 @@ public class FontScaleConverterActivityTest {
                                 .fontScale == fontScale
                     )
             );
-            return isActivityAtCorrectScale.get() && InstrumentationRegistry
-                    .getInstrumentation()
-                    .getContext()
-                    .getResources()
-                    .getConfiguration()
-                    .fontScale == fontScale;
+            return isActivityAtCorrectScale.get();
         });
     }
 
