@@ -28,11 +28,14 @@ cc_defaults {
     tidy_checks: [
         "modernize-*",
         "-modernize-avoid-c-arrays",
+        "-modernize-use-nodiscard",
         "-modernize-use-trailing-return-type",
         "android-*",
         "misc-*",
+        "-misc-const-correctness",
         "readability-*",
         "-readability-identifier-length",
+        "-readability-implicit-bool-conversion",
     ],
     tidy_checks_as_errors: [
         "modernize-*",
@@ -56,6 +59,7 @@ cc_defaults {
         "-readability-const-return-type",
         "-readability-convert-member-functions-to-static",
         "-readability-duplicate-include",
+        "-readability-implicit-bool-conversion",
         "-readability-else-after-return",
         "-readability-named-parameter",
         "-readability-redundant-access-specifiers",
