@@ -7734,13 +7734,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
 
         boolean handled = false;
-        final ListenerInfo li = mListenerInfo;
+        final OnLongClickListener listener =
+                mListenerInfo == null ? null : mListenerInfo.mOnLongClickListener;
         boolean shouldPerformHapticFeedback = true;
-        if (li != null && li.mOnLongClickListener != null) {
-            handled = li.mOnLongClickListener.onLongClick(View.this);
+        if (listener != null) {
+            handled = listener.onLongClick(View.this);
             if (handled) {
-                shouldPerformHapticFeedback =
-                        li.mOnLongClickListener.onLongClickUseDefaultHapticFeedback(View.this);
+                shouldPerformHapticFeedback = listener.onLongClickUseDefaultHapticFeedback(
+                        View.this);
             }
         }
         if (!handled) {
