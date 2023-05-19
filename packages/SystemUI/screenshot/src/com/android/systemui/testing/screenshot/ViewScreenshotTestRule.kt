@@ -69,6 +69,7 @@ open class ViewScreenshotTestRule(
     protected fun takeScreenshot(
         mode: Mode = Mode.WrapContent,
         viewProvider: (ComponentActivity) -> View,
+        beforeScreenshot: (ComponentActivity) -> Unit = {}
     ): Bitmap {
         activityRule.scenario.onActivity { activity ->
             // Make sure that the activity draws full screen and fits the whole display instead of
@@ -94,6 +95,7 @@ open class ViewScreenshotTestRule(
             val content = activity.requireViewById<ViewGroup>(android.R.id.content)
             assertEquals(1, content.childCount)
             contentView = content.getChildAt(0)
+            beforeScreenshot(activity)
         }
 
         return if (isRobolectric) {
@@ -111,9 +113,10 @@ open class ViewScreenshotTestRule(
     fun screenshotTest(
         goldenIdentifier: String,
         mode: Mode = Mode.WrapContent,
-        viewProvider: (ComponentActivity) -> View,
+        beforeScreenshot: (ComponentActivity) -> Unit = {},
+        viewProvider: (ComponentActivity) -> View
     ) {
-        val bitmap = takeScreenshot(mode, viewProvider)
+        val bitmap = takeScreenshot(mode, viewProvider, beforeScreenshot)
         screenshotRule.assertBitmapAgainstGolden(
             bitmap,
             goldenIdentifier,
