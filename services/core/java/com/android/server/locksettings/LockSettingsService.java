@@ -889,22 +889,31 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     }
 
-    private void migrateOldDataAfterSystemReady() {
-        // Migrate the FRP credential to the persistent data block
+    @VisibleForTesting
+    void migrateOldDataAfterSystemReady() {
+        // Write the FRP persistent data block if needed.
+        //
+        // The original purpose of this code was to write the FRP block for the first time, when
+        // upgrading from Android 8.1 or earlier which didn't use the FRP block.  This code has
+        // since been repurposed to also fix the "bad" (non-forwards-compatible) FRP block written
+        // by Android 14 Beta 2.  For this reason, the database key used here has been renamed from
+        // "migrated_frp" to "migrated_frp2" to cause migrateFrpCredential() to run again on devices
+        // where it had run before.
         if (LockPatternUtils.frpCredentialEnabled(mContext)
-                && !getBoolean("migrated_frp", false, 0)) {
+                && !getBoolean("migrated_frp2", false, 0)) {
             migrateFrpCredential();
-            setBoolean("migrated_frp", true, 0);
+            setBoolean("migrated_frp2", true, 0);
         }
     }
 
     /**
-     * Migrate the credential for the FRP credential owner user if the following are satisfied:
-     * - the user has a secure credential
-     * - the FRP credential is not set up
+     * Write the FRP persistent data block if the following are satisfied:
+     * - the user who owns the FRP credential has a nonempty credential
+     * - the FRP persistent data block doesn't exist or uses the "bad" format from Android 14 Beta 2
      */
     private void migrateFrpCredential() {
-        if (mStorage.readPersistentDataBlock() != PersistentData.NONE) {
+        PersistentData data = mStorage.readPersistentDataBlock();
+        if (data != PersistentData.NONE && !data.isBadFormatFromAndroid14Beta()) {
             return;
         }
         for (UserInfo userInfo : mUserManager.getUsers()) {
