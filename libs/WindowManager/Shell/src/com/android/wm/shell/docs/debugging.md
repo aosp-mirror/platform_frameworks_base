@@ -26,6 +26,12 @@ building to check the log state (is enabled) before printing the print format st
 - Non-text ProtoLogs are not currently supported with the Shell library (you can't view them with
   traces in Winscope)
 
+### Kotlin
+
+Protolog tool does not yet have support for Kotlin code (see [b/168581922](https://b.corp.google.com/issues/168581922)).
+For logging in Kotlin, use the [KtProtoLog](frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/util/KtProtoLog.kt)
+class which has a similar API to the Java ProtoLog class.
+
 ### Enabling ProtoLog command line logging
 Run these commands to enable protologs for both WM Core and WM Shell to print to logcat.
 ```shell
