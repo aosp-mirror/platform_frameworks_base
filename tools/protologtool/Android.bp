@@ -11,7 +11,7 @@ java_library_host {
     name: "protologtool-lib",
     srcs: [
         "src/com/android/protolog/tool/**/*.kt",
-        ":protolog-common-src",
+        ":protolog-common-no-android-src",
     ],
     static_libs: [
         "javaparser",
