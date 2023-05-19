@@ -57,7 +57,6 @@ import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
-import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -69,11 +68,15 @@ import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
@@ -82,6 +85,7 @@ import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
 /** atest SystemUITests:NoteTaskControllerTest */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 internal class NoteTaskControllerTest : SysuiTestCase() {
@@ -101,6 +105,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var secureSettings: SecureSettings
     private val userTracker = FakeUserTracker()
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setUp() {
@@ -136,7 +142,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             context = context,
             resolver = resolver,
             eventLogger = eventLogger,
-            optionalBubbles = Optional.ofNullable(bubbles),
             userManager = userManager,
             keyguardManager = keyguardManager,
             isEnabled = isEnabled,
@@ -146,6 +151,9 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             shortcutManager = shortcutManager,
             activityManager = activityManager,
             secureSettings = secureSettings,
+            noteTaskBubblesController =
+                FakeNoteTaskBubbleController(context, testDispatcher, Optional.ofNullable(bubbles)),
+            applicationScope = testScope,
         )
 
     // region onBubbleExpandChanged
@@ -161,7 +169,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             )
 
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
-        verifyZeroInteractions(context, bubbles, keyguardManager, userManager)
+        verifyZeroInteractions(bubbles, keyguardManager, userManager)
     }
 
     @Test
@@ -176,7 +184,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             )
 
         verify(eventLogger).logNoteTaskClosed(expectedInfo)
-        verifyZeroInteractions(context, bubbles, keyguardManager, userManager)
+        verifyZeroInteractions(bubbles, keyguardManager, userManager)
     }
 
     @Test
@@ -190,7 +198,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
-        verifyZeroInteractions(context, bubbles, keyguardManager, userManager, eventLogger)
+        verifyZeroInteractions(bubbles, keyguardManager, userManager, eventLogger)
     }
 
     @Test
@@ -204,7 +212,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
-        verifyZeroInteractions(context, bubbles, keyguardManager, userManager, eventLogger)
+        verifyZeroInteractions(bubbles, keyguardManager, userManager, eventLogger)
     }
 
     @Test
@@ -215,7 +223,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 key = "any other key",
             )
 
-        verifyZeroInteractions(context, bubbles, keyguardManager, userManager, eventLogger)
+        verifyZeroInteractions(bubbles, keyguardManager, userManager, eventLogger)
     }
 
     @Test
@@ -226,7 +234,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 key = Bubble.getAppBubbleKeyForApp(NOTE_TASK_INFO.packageName, NOTE_TASK_INFO.user),
             )
 
-        verifyZeroInteractions(context, bubbles, keyguardManager, userManager, eventLogger)
+        verifyZeroInteractions(bubbles, keyguardManager, userManager, eventLogger)
     }
     // endregion
 
@@ -352,7 +360,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController().showNoteTask(entryPoint = expectedInfo.entryPoint!!)
 
         // Context package name used to create bubble icon from drawable resource id
-        verify(context).packageName
+        verify(context, atLeastOnce()).packageName
         verifyNoteTaskOpenInBubbleInUser(userTracker.userHandle)
         verifyZeroInteractions(eventLogger)
     }
@@ -361,7 +369,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     fun showNoteTask_bubblesIsNull_shouldDoNothing() {
         createNoteTaskController(bubbles = null).showNoteTask(entryPoint = TAIL_BUTTON)
 
-        verifyZeroInteractions(context, bubbles, eventLogger)
+        verifyZeroInteractions(bubbles, eventLogger)
     }
 
     @Test
@@ -373,14 +381,14 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         noteTaskController.showNoteTask(entryPoint = TAIL_BUTTON)
 
         verify(noteTaskController).showNoDefaultNotesAppToast()
-        verifyZeroInteractions(context, bubbles, eventLogger)
+        verifyZeroInteractions(bubbles, eventLogger)
     }
 
     @Test
     fun showNoteTask_flagDisabled_shouldDoNothing() {
         createNoteTaskController(isEnabled = false).showNoteTask(entryPoint = TAIL_BUTTON)
 
-        verifyZeroInteractions(context, bubbles, eventLogger)
+        verifyZeroInteractions(bubbles, eventLogger)
     }
 
     @Test
@@ -389,7 +397,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
         createNoteTaskController().showNoteTask(entryPoint = TAIL_BUTTON)
 
-        verifyZeroInteractions(context, bubbles, eventLogger)
+        verifyZeroInteractions(bubbles, eventLogger)
     }
 
     @Test
@@ -509,7 +517,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
         createNoteTaskController().showNoteTask(entryPoint = QUICK_AFFORDANCE)
 
-        verifyZeroInteractions(context, bubbles, eventLogger)
+        verifyZeroInteractions(bubbles, eventLogger)
     }
 
     @Test
@@ -525,7 +533,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
         createNoteTaskController().showNoteTask(entryPoint = QUICK_AFFORDANCE)
 
-        verifyZeroInteractions(context, bubbles, eventLogger)
+        verifyZeroInteractions(bubbles, eventLogger)
     }
 
     @Test
@@ -637,7 +645,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
         createNoteTaskController(isEnabled = true).onRoleHoldersChanged("NOT_NOTES", user)
 
-        verifyZeroInteractions(context)
+        verify(context, never()).startActivityAsUser(any(), any())
     }
 
     @Test
@@ -730,21 +738,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         verify(shortcutManager).disableShortcuts(listOf(SHORTCUT_ID))
         verify(shortcutManager, never()).enableShortcuts(any())
         verify(shortcutManager, never()).updateShortcuts(any())
-    }
-    // endregion
-
-    // startregion startNoteTaskProxyActivityForUser
-    @Test
-    fun startNoteTaskProxyActivityForUser_shouldStartLaunchNoteTaskProxyActivityWithExpectedUser() {
-        val user0 = UserHandle.of(0)
-        createNoteTaskController().startNoteTaskProxyActivityForUser(user0)
-
-        val intentCaptor = argumentCaptor<Intent>()
-        verify(context).startActivityAsUser(intentCaptor.capture(), eq(user0))
-        assertThat(intentCaptor.value).run {
-            hasComponentClass(LaunchNoteTaskManagedProfileProxyActivity::class.java)
-            hasFlags(FLAG_ACTIVITY_NEW_TASK)
-        }
     }
     // endregion
 

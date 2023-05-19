@@ -192,12 +192,6 @@
             android:excludeFromRecents="true" />
 
         <activity
-            android:name="com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
-            android:exported="false"
-            android:permission="com.android.systemui.permission.SELF"
-            android:excludeFromRecents="true" />
-
-        <activity
             android:name="com.android.systemui.notetask.LaunchNotesRoleSettingsTrampolineActivity"
             android:exported="false"
             android:permission="com.android.systemui.permission.SELF"
