@@ -21,9 +21,16 @@
 
 #include "TestHelpers.h"
 
+// Verify that the memory in use is a multiple of 4 bytes
+#define ASSERT_ALIGNED(w) \
+    ASSERT_EQ(((w)->sizeInUse() & 3), 0); \
+    ASSERT_EQ(((w)->freeSpace() & 3), 0); \
+    ASSERT_EQ(((w)->sizeOfSlots() & 3), 0)
+
 #define CREATE_WINDOW_1K \
     CursorWindow* w; \
-    CursorWindow::create(String8("test"), 1 << 10, &w);
+    CursorWindow::create(String8("test"), 1 << 10, &w); \
+    ASSERT_ALIGNED(w);
 
 #define CREATE_WINDOW_1K_3X3 \
     CursorWindow* w; \
@@ -31,11 +38,13 @@
     ASSERT_EQ(w->setNumColumns(3), OK); \
     ASSERT_EQ(w->allocRow(), OK); \
     ASSERT_EQ(w->allocRow(), OK); \
-    ASSERT_EQ(w->allocRow(), OK);
+    ASSERT_EQ(w->allocRow(), OK); \
+    ASSERT_ALIGNED(w);
 
 #define CREATE_WINDOW_2M \
     CursorWindow* w; \
-    CursorWindow::create(String8("test"), 1 << 21, &w);
+    CursorWindow::create(String8("test"), 1 << 21, &w); \
+    ASSERT_ALIGNED(w);
 
 static constexpr const size_t kHalfInlineSize = 8192;
 static constexpr const size_t kGiantSize = 1048576;
@@ -49,6 +58,7 @@ TEST(CursorWindowTest, Empty) {
     ASSERT_EQ(w->getNumColumns(), 0);
     ASSERT_EQ(w->size(), 1 << 10);
     ASSERT_EQ(w->freeSpace(), 1 << 10);
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, SetNumColumns) {
@@ -60,6 +70,7 @@ TEST(CursorWindowTest, SetNumColumns) {
     ASSERT_NE(w->setNumColumns(5), OK);
     ASSERT_NE(w->setNumColumns(3), OK);
     ASSERT_EQ(w->getNumColumns(), 4);
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, SetNumColumnsAfterRow) {
@@ -70,6 +81,7 @@ TEST(CursorWindowTest, SetNumColumnsAfterRow) {
     ASSERT_EQ(w->allocRow(), OK);
     ASSERT_NE(w->setNumColumns(4), OK);
     ASSERT_EQ(w->getNumColumns(), 0);
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, AllocRow) {
@@ -83,14 +95,17 @@ TEST(CursorWindowTest, AllocRow) {
     ASSERT_EQ(w->allocRow(), OK);
     ASSERT_LT(w->freeSpace(), before);
     ASSERT_EQ(w->getNumRows(), 1);
+    ASSERT_ALIGNED(w);
 
     // Verify we can unwind
     ASSERT_EQ(w->freeLastRow(), OK);
     ASSERT_EQ(w->freeSpace(), before);
     ASSERT_EQ(w->getNumRows(), 0);
+    ASSERT_ALIGNED(w);
 
     // Can't unwind when no rows left
     ASSERT_NE(w->freeLastRow(), OK);
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, AllocRowBounds) {
@@ -100,6 +115,7 @@ TEST(CursorWindowTest, AllocRowBounds) {
     ASSERT_EQ(w->setNumColumns(60), OK);
     ASSERT_EQ(w->allocRow(), OK);
     ASSERT_NE(w->allocRow(), OK);
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, StoreNull) {
@@ -116,6 +132,7 @@ TEST(CursorWindowTest, StoreNull) {
         auto field = w->getFieldSlot(0, 0);
         ASSERT_EQ(w->getFieldSlotType(field), CursorWindow::FIELD_TYPE_NULL);
     }
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, StoreLong) {
@@ -134,6 +151,7 @@ TEST(CursorWindowTest, StoreLong) {
         ASSERT_EQ(w->getFieldSlotType(field), CursorWindow::FIELD_TYPE_INTEGER);
         ASSERT_EQ(w->getFieldSlotValueLong(field), 0xcafe);
     }
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, StoreString) {
@@ -155,6 +173,7 @@ TEST(CursorWindowTest, StoreString) {
         auto actual = w->getFieldSlotValueString(field, &size);
         ASSERT_EQ(std::string(actual), "cafe");
     }
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, StoreBounds) {
@@ -175,6 +194,7 @@ TEST(CursorWindowTest, StoreBounds) {
     ASSERT_EQ(w->getFieldSlot(-1, 0), nullptr);
     ASSERT_EQ(w->getFieldSlot(0, -1), nullptr);
     ASSERT_EQ(w->getFieldSlot(-1, -1), nullptr);
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, Inflate) {
@@ -234,6 +254,7 @@ TEST(CursorWindowTest, Inflate) {
         ASSERT_NE(actual, buf);
         ASSERT_EQ(memcmp(buf, actual, kHalfInlineSize), 0);
     }
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, ParcelEmpty) {
@@ -249,10 +270,12 @@ TEST(CursorWindowTest, ParcelEmpty) {
     ASSERT_EQ(w->getNumColumns(), 0);
     ASSERT_EQ(w->size(), 0);
     ASSERT_EQ(w->freeSpace(), 0);
+    ASSERT_ALIGNED(w);
 
     // We can't mutate the window after parceling
     ASSERT_NE(w->setNumColumns(4), OK);
     ASSERT_NE(w->allocRow(), OK);
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, ParcelSmall) {
@@ -311,6 +334,7 @@ TEST(CursorWindowTest, ParcelSmall) {
         ASSERT_EQ(actualSize, 0);
         ASSERT_NE(actual, nullptr);
     }
+    ASSERT_ALIGNED(w);
 }
 
 TEST(CursorWindowTest, ParcelLarge) {
@@ -364,6 +388,7 @@ TEST(CursorWindowTest, ParcelLarge) {
         ASSERT_EQ(actualSize, 0);
         ASSERT_NE(actual, nullptr);
     }
+    ASSERT_ALIGNED(w);
 }
 
 } // android
