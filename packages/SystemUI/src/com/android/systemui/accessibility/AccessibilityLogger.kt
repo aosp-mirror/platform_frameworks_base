@@ -16,9 +16,11 @@
 
 package com.android.systemui.accessibility
 
+import com.android.internal.annotations.GuardedBy
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.logging.UiEventLogger.UiEventEnum
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 
 /**
@@ -26,7 +28,37 @@ import javax.inject.Inject
  *
  * See go/uievent
  */
-class AccessibilityLogger @Inject constructor(private val uiEventLogger: UiEventLogger) {
+class AccessibilityLogger
+@Inject
+constructor(private val uiEventLogger: UiEventLogger, private val clock: SystemClock) {
+
+    @GuardedBy("clock") private var lastTimeThrottledMs: Long = 0
+    @GuardedBy("clock") private var lastEventThrottled: UiEventEnum? = null
+
+    /**
+     * Logs the event, but any additional calls within the given delay window are ignored. The
+     * window resets every time a new event is received. i.e. it will only log one time until you
+     * wait at least [delayBeforeLoggingMs] before sending the next event.
+     *
+     * <p>Additionally, if a different type of event is passed in, the delay window for the previous
+     * one is forgotten. e.g. if you send two types of events interlaced all within the delay
+     * window, e.g. A->B->A within 1000ms, all three will be logged.
+     */
+    @JvmOverloads fun logThrottled(event: UiEventEnum, delayBeforeLoggingMs: Int = 2000) {
+        synchronized(clock) {
+            val currentTimeMs = clock.elapsedRealtime()
+            val shouldThrottle =
+                event == lastEventThrottled &&
+                    currentTimeMs - lastTimeThrottledMs < delayBeforeLoggingMs
+            lastEventThrottled = event
+            lastTimeThrottledMs = currentTimeMs
+            if (shouldThrottle) {
+                return
+            }
+        }
+        log(event)
+    }
+
     /** Logs the given event */
     fun log(event: UiEventEnum) {
         uiEventLogger.log(event)
