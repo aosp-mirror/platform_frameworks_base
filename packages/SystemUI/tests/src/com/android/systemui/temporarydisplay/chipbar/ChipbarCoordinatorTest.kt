@@ -30,6 +30,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.animation.doOnCancel
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -43,6 +44,8 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.temporarydisplay.TemporaryViewUiEvent
+import com.android.systemui.temporarydisplay.TemporaryViewUiEventLogger
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -87,6 +90,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var fakeExecutor: FakeExecutor
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
+    private lateinit var uiEventLogger: TemporaryViewUiEventLogger
 
     @Before
     fun setUp() {
@@ -101,6 +105,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
 
         uiEventLoggerFake = UiEventLoggerFake()
+        uiEventLogger = TemporaryViewUiEventLogger(uiEventLoggerFake)
         chipbarAnimator = TestChipbarAnimator()
 
         underTest =
@@ -121,6 +126,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
                 vibratorHelper,
                 fakeWakeLockBuilder,
                 fakeClock,
+                uiEventLogger,
             )
         underTest.start()
     }
@@ -632,7 +638,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun swipeToDismiss_swipeOccurs_viewDismissed() {
+    fun swipeToDismiss_swipeOccurs_viewDismissed_manuallyDismissedLogged() {
         underTest.displayView(
             createChipbarInfo(
                 Icon.Resource(R.drawable.ic_cake, contentDescription = null),
@@ -649,6 +655,9 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         callbackCaptor.value.invoke(MotionEvent.obtain(0L, 0L, 0, 0f, 0f, 0))
 
         verify(windowManager).removeView(view)
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(2)
+        assertThat(uiEventLoggerFake.eventId(1))
+            .isEqualTo(TemporaryViewUiEvent.TEMPORARY_VIEW_MANUALLY_DISMISSED.id)
     }
 
     @Test
@@ -664,6 +673,11 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         val view = getChipbarView()
         val callbackCaptor = argumentCaptor<(MotionEvent) -> Unit>()
         verify(swipeGestureHandler).addOnGestureDetectedCallback(any(), capture(callbackCaptor))
+
+        // only one log for view addition
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.eventId(0))
+            .isEqualTo(TemporaryViewUiEvent.TEMPORARY_VIEW_ADDED.id)
 
         // WHEN the view is updated to not allow swipe-to-dismiss
         underTest.displayView(
@@ -683,6 +697,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
 
         // THEN it is ignored and view isn't removed
         verify(windowManager, never()).removeView(view)
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
     }
 
     private fun createChipbarInfo(
@@ -703,6 +718,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
             timeoutMs = TIMEOUT,
             id = DEVICE_ID,
             priority = ViewPriority.NORMAL,
+            instanceId = InstanceId.fakeInstanceId(0),
         )
     }
 
