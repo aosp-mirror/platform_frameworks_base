@@ -14619,19 +14619,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * to the view's content description or text, or to the content descriptions
      * or text of the view's children (where applicable).
      * <p>
-     * For example, in a login screen with a TextView that displays an "incorrect
-     * password" notification, that view should be marked as a live region with
-     * mode {@link #ACCESSIBILITY_LIVE_REGION_POLITE}.
+     * To indicate that the user should be notified of changes, use
+     * {@link #ACCESSIBILITY_LIVE_REGION_POLITE}. Announcements from this region are queued and
+     * do not disrupt ongoing speech.
+     * <p>
+     * For example, selecting an option in a dropdown menu may update a panel below with the updated
+     * content. This panel may be marked as a live region with
+     * {@link #ACCESSIBILITY_LIVE_REGION_POLITE} to notify users of the change.
+     * <p>
+     * For notifying users about errors, such as in a login screen with text that displays an
+     * "incorrect password" notification, that view should send an AccessibilityEvent of type
+     * {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_ERROR} and set
+     * {@link AccessibilityNodeInfo#setError(CharSequence)} instead. Custom widgets should expose
+     * error-setting methods that support accessibility automatically. For example, instead of
+     * explicitly sending this event when using a TextView, use
+     * {@link android.widget.TextView#setError(CharSequence)}.
      * <p>
      * To disable change notifications for this view, use
      * {@link #ACCESSIBILITY_LIVE_REGION_NONE}. This is the default live region
      * mode for most views.
      * <p>
-     * To indicate that the user should be notified of changes, use
-     * {@link #ACCESSIBILITY_LIVE_REGION_POLITE}.
-     * <p>
      * If the view's changes should interrupt ongoing speech and notify the user
-     * immediately, use {@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}.
+     * immediately, use {@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}. This may result in disruptive
+     * announcements from an accessibility service, so it should generally be used only to convey
+     * information that is time-sensitive or critical for use of the application. Examples may
+     * include an incoming call or an emergency alert.
      * <p>
      * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#setAccessibilityLiveRegion(View, int)}
      * for backwards-compatibility. </aside>
