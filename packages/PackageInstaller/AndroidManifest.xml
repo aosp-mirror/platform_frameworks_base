@@ -142,10 +142,7 @@
         <provider android:name=".wear.WearPackageIconProvider"
                   android:authorities="com.google.android.packageinstaller.wear.provider"
                   android:grantUriPermissions="true"
-                  android:exported="true" />
-
-        <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver"
-            tools:node="remove" />
+                  android:exported="false" />
     </application>
 
 </manifest>
