@@ -59,7 +59,12 @@ system_optimized_java_defaults {
                 optimize: false,
                 shrink: true,
                 ignore_warnings: false,
-                proguard_flags_files: ["proguard.flags"],
+                proguard_flags_files: [
+                    "proguard.flags",
+                    // Ensure classes referenced in the framework-res manifest
+                    // and implemented in system_server are kept.
+                    ":framework-res{.aapt.proguardOptionsFile}",
+                ],
             },
             // Note: Optimizations are disabled by default if unspecified in
             // the java_library rule.
