@@ -22,9 +22,12 @@ import android.annotation.ColorInt
 import android.app.Dialog
 import android.content.Context
 import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.OvalShape
 import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -32,9 +35,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
 import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+import androidx.annotation.IdRes
+import androidx.core.view.setPadding
 import com.android.settingslib.Utils
 import com.android.systemui.R
-import com.android.systemui.util.children
 
 class KeyboardBacklightDialog(
     context: Context,
@@ -51,7 +55,7 @@ class KeyboardBacklightDialog(
     private data class BacklightIconProperties(
         val width: Int,
         val height: Int,
-        val leftMargin: Int,
+        val padding: Int,
     )
 
     private data class StepViewProperties(
@@ -71,6 +75,7 @@ class KeyboardBacklightDialog(
     private lateinit var rootProperties: RootProperties
     private lateinit var iconProperties: BacklightIconProperties
     private lateinit var stepProperties: StepViewProperties
+
     @ColorInt
     var filledRectangleColor = getColorFromStyle(com.android.internal.R.attr.materialColorPrimary)
     @ColorInt
@@ -78,7 +83,16 @@ class KeyboardBacklightDialog(
         getColorFromStyle(com.android.internal.R.attr.materialColorOutlineVariant)
     @ColorInt
     var backgroundColor = getColorFromStyle(com.android.internal.R.attr.materialColorSurfaceBright)
-    @ColorInt var iconColor = getColorFromStyle(com.android.internal.R.attr.materialColorOnPrimary)
+    @ColorInt
+    var defaultIconColor = getColorFromStyle(com.android.internal.R.attr.materialColorOnPrimary)
+    @ColorInt
+    var defaultIconBackgroundColor =
+        getColorFromStyle(com.android.internal.R.attr.materialColorPrimary)
+    @ColorInt
+    var dimmedIconColor = getColorFromStyle(com.android.internal.R.attr.materialColorOnSurface)
+    @ColorInt
+    var dimmedIconBackgroundColor =
+        getColorFromStyle(com.android.internal.R.attr.materialColorSurfaceDim)
 
     init {
         currentLevel = initialCurrentLevel
@@ -111,8 +125,7 @@ class KeyboardBacklightDialog(
                 BacklightIconProperties(
                     width = getDimensionPixelSize(R.dimen.backlight_indicator_icon_width),
                     height = getDimensionPixelSize(R.dimen.backlight_indicator_icon_height),
-                    leftMargin =
-                        getDimensionPixelSize(R.dimen.backlight_indicator_icon_left_margin),
+                    padding = getDimensionPixelSize(R.dimen.backlight_indicator_icon_padding),
                 )
             stepProperties =
                 StepViewProperties(
@@ -139,23 +152,34 @@ class KeyboardBacklightDialog(
         if (maxLevel != max || forceRefresh) {
             maxLevel = max
             rootView.removeAllViews()
+            rootView.addView(buildIconTile())
             buildStepViews().forEach { rootView.addView(it) }
         }
         currentLevel = current
-        updateLevel()
+        updateIconTile()
+        updateStepColors()
     }
 
-    private fun updateLevel() {
-        rootView.children.forEachIndexed(
-            action = { index, v ->
-                val drawable = v.background as ShapeDrawable
-                if (index <= currentLevel) {
-                    updateColor(drawable, filledRectangleColor)
-                } else {
-                    updateColor(drawable, emptyRectangleColor)
-                }
-            }
-        )
+    private fun updateIconTile() {
+        val iconTile = rootView.findViewById(BACKLIGHT_ICON_ID) as ImageView
+        val backgroundDrawable = iconTile.background as ShapeDrawable
+        if (currentLevel == 0) {
+            iconTile.setColorFilter(dimmedIconColor)
+            updateColor(backgroundDrawable, dimmedIconBackgroundColor)
+        } else {
+            iconTile.setColorFilter(defaultIconColor)
+            updateColor(backgroundDrawable, defaultIconBackgroundColor)
+        }
+    }
+
+    private fun updateStepColors() {
+        (1 until rootView.childCount).forEach { index ->
+            val drawable = rootView.getChildAt(index).background as ShapeDrawable
+            updateColor(
+                drawable,
+                if (index <= currentLevel) filledRectangleColor else emptyRectangleColor,
+            )
+        }
     }
 
     private fun updateColor(drawable: ShapeDrawable, @ColorInt color: Int) {
@@ -192,9 +216,33 @@ class KeyboardBacklightDialog(
     }
 
     private fun buildStepViews(): List<FrameLayout> {
-        val stepViews = (0..maxLevel).map { i -> createStepViewAt(i) }
-        stepViews[0].addView(createBacklightIconView())
-        return stepViews
+        return (1..maxLevel).map { i -> createStepViewAt(i) }
+    }
+
+    private fun buildIconTile(): View {
+        val diameter = stepProperties.height
+        val circleDrawable =
+            ShapeDrawable(OvalShape()).apply {
+                intrinsicHeight = diameter
+                intrinsicWidth = diameter
+            }
+
+        return ImageView(context).apply {
+            setImageResource(R.drawable.ic_keyboard_backlight)
+            id = BACKLIGHT_ICON_ID
+            setColorFilter(defaultIconColor)
+            setPadding(iconProperties.padding)
+            layoutParams =
+                MarginLayoutParams(diameter, diameter).apply {
+                    setMargins(
+                        /* left= */ stepProperties.horizontalMargin,
+                        /* top= */ 0,
+                        /* right= */ stepProperties.horizontalMargin,
+                        /* bottom= */ 0
+                    )
+                }
+            background = circleDrawable
+        }
     }
 
     private fun createStepViewAt(i: Int): FrameLayout {
@@ -218,18 +266,6 @@ class KeyboardBacklightDialog(
                 )
             drawable.paint.color = emptyRectangleColor
             background = drawable
-        }
-    }
-
-    private fun createBacklightIconView(): ImageView {
-        return ImageView(context).apply {
-            setImageResource(R.drawable.ic_keyboard_backlight)
-            setColorFilter(iconColor)
-            layoutParams =
-                FrameLayout.LayoutParams(iconProperties.width, iconProperties.height).apply {
-                    gravity = Gravity.CENTER
-                    leftMargin = iconProperties.leftMargin
-                }
         }
     }
 
@@ -262,30 +298,29 @@ class KeyboardBacklightDialog(
     private fun radiiForIndex(i: Int, last: Int): FloatArray {
         val smallRadius = stepProperties.smallRadius
         val largeRadius = stepProperties.largeRadius
-        return when (i) {
-            0 -> // left radii bigger
-            floatArrayOf(
-                    largeRadius,
-                    largeRadius,
-                    smallRadius,
-                    smallRadius,
-                    smallRadius,
-                    smallRadius,
-                    largeRadius,
-                    largeRadius
-                )
-            last -> // right radii bigger
-            floatArrayOf(
-                    smallRadius,
-                    smallRadius,
-                    largeRadius,
-                    largeRadius,
-                    largeRadius,
-                    largeRadius,
-                    smallRadius,
-                    smallRadius
-                )
-            else -> FloatArray(8) { smallRadius } // all radii equal
+        val radii = FloatArray(8) { smallRadius }
+        if (i == 1) {
+            radii.setLeftCorners(largeRadius)
         }
+        // note "first" and "last" might be the same tile
+        if (i == last) {
+            radii.setRightCorners(largeRadius)
+        }
+        return radii
+    }
+
+    private fun FloatArray.setLeftCorners(radius: Float) {
+        LEFT_CORNERS_INDICES.forEach { this[it] = radius }
+    }
+    private fun FloatArray.setRightCorners(radius: Float) {
+        RIGHT_CORNERS_INDICES.forEach { this[it] = radius }
+    }
+
+    private companion object {
+        @IdRes val BACKLIGHT_ICON_ID = R.id.backlight_icon
+
+        // indices used to define corners radii in ShapeDrawable
+        val LEFT_CORNERS_INDICES: IntArray = intArrayOf(0, 1, 6, 7)
+        val RIGHT_CORNERS_INDICES: IntArray = intArrayOf(2, 3, 4, 5)
     }
 }
