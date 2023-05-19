@@ -181,6 +181,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int FLUSH_REASON_VIEW_TREE_APPEARING = 9;
     /** @hide */
     public static final int FLUSH_REASON_VIEW_TREE_APPEARED = 10;
+    /** @hide */
+    public static final int FLUSH_REASON_LOGIN_DETECTED = 11;
 
     /**
      * After {@link UPSIDE_DOWN_CAKE}, {@link #notifyViewsDisappeared(AutofillId, long[])} wraps
@@ -191,20 +193,23 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     static final long NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS = 258825825L;
 
     /** @hide */
-    @IntDef(prefix = { "FLUSH_REASON_" }, value = {
-            FLUSH_REASON_FULL,
-            FLUSH_REASON_VIEW_ROOT_ENTERED,
-            FLUSH_REASON_SESSION_STARTED,
-            FLUSH_REASON_SESSION_FINISHED,
-            FLUSH_REASON_IDLE_TIMEOUT,
-            FLUSH_REASON_TEXT_CHANGE_TIMEOUT,
-            FLUSH_REASON_SESSION_CONNECTED,
-            FLUSH_REASON_FORCE_FLUSH,
-            FLUSH_REASON_VIEW_TREE_APPEARING,
-            FLUSH_REASON_VIEW_TREE_APPEARED
-    })
+    @IntDef(
+            prefix = {"FLUSH_REASON_"},
+            value = {
+                FLUSH_REASON_FULL,
+                FLUSH_REASON_VIEW_ROOT_ENTERED,
+                FLUSH_REASON_SESSION_STARTED,
+                FLUSH_REASON_SESSION_FINISHED,
+                FLUSH_REASON_IDLE_TIMEOUT,
+                FLUSH_REASON_TEXT_CHANGE_TIMEOUT,
+                FLUSH_REASON_SESSION_CONNECTED,
+                FLUSH_REASON_FORCE_FLUSH,
+                FLUSH_REASON_VIEW_TREE_APPEARING,
+                FLUSH_REASON_VIEW_TREE_APPEARED,
+                FLUSH_REASON_LOGIN_DETECTED
+            })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface FlushReason{}
+    public @interface FlushReason {}
 
     private final Object mLock = new Object();
 
@@ -685,8 +690,10 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "VIEW_TREE_APPEARING";
             case FLUSH_REASON_VIEW_TREE_APPEARED:
                 return "VIEW_TREE_APPEARED";
+            case FLUSH_REASON_LOGIN_DETECTED:
+                return "LOGIN_DETECTED";
             default:
-                return "UNKOWN-" + reason;
+                return "UNKNOWN-" + reason;
         }
     }
 
