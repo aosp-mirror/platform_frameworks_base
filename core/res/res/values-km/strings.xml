@@ -625,11 +625,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"មានបញ្ហាក្នុង​ការផ្ទៀងផ្ទាត់"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ប្រើ​ការ​ចាក់​សោ​អេក្រង់"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"បញ្ចូលការចាក់សោអេក្រង់របស់អ្នក ដើម្បីបន្ត"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"សង្កត់លើ​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យណែន"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"សង្កត់លើ​សេនស័រឱ្យណែន"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"មិនអាចសម្គាល់​ស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"សម្អាត​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ រួចព្យាយាម​ម្ដងទៀត"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"សម្អាត​ឧបករណ៍​ចាប់សញ្ញា រួចព្យាយាម​ម្ដងទៀត"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"សង្កត់លើ​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យណែន"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"សង្កត់លើ​សេនស័រឱ្យណែន"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ចលនាម្រាមដៃយឺតពេកហើយ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"សាកល្បងប្រើ​ស្នាមម្រាមដៃផ្សេងទៀត"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ភ្លឺពេក"</string>
@@ -673,7 +673,7 @@
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ដើម្បីប្រើមុខងារដោះសោតាមទម្រង់មុខ សូមបើក"<b>"ការចូលប្រើកាមេរ៉ា"</b>"នៅក្នុងការកំណត់ &gt; ឯកជនភាព"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"រៀបចំ​វិធីច្រើនទៀត​ដើម្បី​ដោះសោ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ចុច​ដើម្បីបញ្ចូល​ស្នាមម្រាមដៃ"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ការដោះសោ​ដោយប្រើ​ស្នាមម្រាមដៃ"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ការដោះសោ​ដោយស្កេន​ស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"មិនអាចប្រើ​ឧបករណ៍ចាប់ស្នាមម្រាមដៃ​បានទេ"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ទាក់ទងក្រុមហ៊ុន​ផ្ដល់ការជួសជុល។"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"មិនអាចបង្កើតគំរូមុខរបស់អ្នកបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"លុប​ចេញ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"សូមប្រុងប្រយ័ត្ន\nអ្នកបានលើសបរិមាណ​រលកសញ្ញាសំឡេងឮខ្លាំងដែលមនុស្សអាចស្ដាប់តាមកាស​បានដោយសុវត្ថិភាពក្នុងរយៈពេលមួយសប្ដាហ៍។\n\nការស្ដាប់លើសដែនកំណត់នេះ​នឹងបណ្ដាលឱ្យខូចត្រចៀករបស់អ្នក​ជាអចិន្ត្រៃយ៍។"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"សូមប្រុងប្រយ័ត្ន\nអ្នកបានលើសបរិមាណរលក​សញ្ញាសំឡេងឮខ្លាំងចំនួន 5 ដង ដែលមនុស្សអាចស្ដាប់តាមកាស​បានដោយសុវត្ថិភាពក្នុងរយៈពេលមួយសប្ដាហ៍។\n\nកម្រិតសំឡេងត្រូវបានបន្ថយ ដើម្បីការពារត្រចៀករបស់អ្នក។"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"កម្រិតដែលអ្នក​កំពុងស្ដាប់មេឌៀអាច​បណ្ដាលឱ្យខូច​ត្រចៀក នៅពលស្ដាប់ក្នុង​រយៈពេលយូរ។\n\nការបន្តចាក់នៅកម្រិតនេះ​ក្នុងរយៈពេលយូរ​អាចធ្វើឱ្យត្រចៀករបស់អ្នកខូច។"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"សូមប្រុងប្រយ័ត្ន\nបច្ចុប្បន្ន អ្នកកំពុងស្ដាប់ខ្លឹមសារឮខ្លាំង​ដែលបានចាក់នៅកម្រិត​គ្មានសុវត្ថិភាព។\n\nការបន្តស្ដាប់ឮខ្លាំងបែបនេះ​នឹងធ្វើឱ្យត្រចៀករបស់អ្នក​ខូចជាអចិន្ត្រៃយ៍។"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"បន្តស្ដាប់ក្នុងកម្រិតសំឡេងខ្ពស់ឬ?\n\nកម្រិតសំឡេងកាសមានកម្រិតខ្ពស់យូរជាងរយៈពេលដែលបានណែនាំ ដែលអាចបណ្ដាលឱ្យខូចត្រចៀករបស់អ្នក"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"បានចាប់ដឹងថាសំឡេងឮខ្លាំង\n\nកម្រិតសំឡេងកាសខ្ពស់ជាងកម្រិតដែលបានណែនាំ ដែលអាចបណ្ដាលឱ្យខូចត្រចៀករបស់អ្នក"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"នៅពេលបើក​ផ្លូវកាត់ ការចុច​ប៊ូតុង​កម្រិតសំឡេង​ទាំងពីរ​រយៈពេល 3 វិនាទី​នឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយប្រើ។"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"បើក​ផ្លូវកាត់​សម្រាប់មុខងារ​ភាពងាយស្រួលឬ?"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ឈប់ផ្អាក"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"គ្មាន​កម្មវិធី​ការងារ​ទេ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"គ្មាន​កម្មវិធី​ផ្ទាល់ខ្លួន​ទេ"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"បើក <xliff:g id="APP">%s</xliff:g> ការងារឬ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"បើកនៅក្នុង <xliff:g id="APP">%s</xliff:g> ផ្ទាល់ខ្លួនឬ?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"បើកនៅក្នុង <xliff:g id="APP">%s</xliff:g> ការងារឬ?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"ហៅទូរសព្ទពី​កម្មវិធីការងារឬ?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ប្ដូរទៅកម្មវិធីការងារឬ?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"ស្ថាប័ន​របស់អ្នក​អនុញ្ញាត​ឱ្យអ្នកធ្វើការហៅទូរសព្ទ​ពីកម្មវិធីការងារ​តែប៉ុណ្ណោះ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"ស្ថាប័ន​របស់អ្នក​អនុញ្ញាត​ឱ្យអ្នក​ផ្ញើសារ​ពី​កម្មវិធី​ការងារតែប៉ុណ្ណោះ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​ផ្ទាល់ខ្លួន"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​សម្រាប់​ការងារ"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"ហៅទូរសព្ទ"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"ប្ដូរ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"កូដ PIN ដោះ​សោ​បណ្ដាញ​ស៊ីម"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"កូដ PIN ដោះសោ​សំណុំរង​នៃ​បណ្ដាញស៊ីម"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"កូដ PIN ដោះសោ​ក្រុមហ៊ុនស៊ីម"</string>
@@ -2331,9 +2332,9 @@
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"ចូលទៅកាន់ \"ការកំណត់\""</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"បិទ"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"បានកំណត់​រចនាសម្ព័ន្ធ <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
-    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%s</xliff:g>។ សូមចុចដើម្បីប្ដូរ។"</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>។ សូមចុចដើម្បីប្ដូរ។"</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>។ សូមចុចដើម្បីប្ដូរ។"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%s</xliff:g>។ ចុចដើម្បីប្ដូរ។"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>។ ចុចដើម្បីប្ដូរ។"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>។ ចុចដើម្បីប្ដូរ។"</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… សូមចុចដើម្បីប្ដូរ។"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"បានកំណត់រចនាសម្ព័ន្ធ​ក្ដារចុចរូបវន្ត"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ចុចដើម្បីមើលក្ដារចុច"</string>

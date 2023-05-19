@@ -279,6 +279,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -6293,6 +6294,36 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             for (int index = 0; index < packagesToNotify.size(); index++) {
                 notifyInstallObserver(packagesToNotify.valueAt(index), false /* killApp */);
             }
+        }
+
+        /**
+         * Wait for the handler to finish handling all pending messages.
+         * @param timeoutMillis Maximum time in milliseconds to wait.
+         * @param forBackgroundHandler Whether to wait for the background handler instead.
+         * @return True if all the waiting messages in the handler has been handled.
+         *         False if timeout.
+         */
+        @Override
+        public boolean waitForHandler(long timeoutMillis, boolean forBackgroundHandler) {
+            final CountDownLatch latch = new CountDownLatch(1);
+            if (forBackgroundHandler) {
+                mBackgroundHandler.post(latch::countDown);
+            } else {
+                mHandler.post(latch::countDown);
+            }
+            final long endTimeMillis = System.currentTimeMillis() + timeoutMillis;
+            while (latch.getCount() > 0) {
+                try {
+                    final long remainingTimeMillis = endTimeMillis - System.currentTimeMillis();
+                    if (remainingTimeMillis <= 0) {
+                        return false;
+                    }
+                    return latch.await(remainingTimeMillis, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    // ignore and retry
+                }
+            }
+            return true;
         }
 
         @Override
