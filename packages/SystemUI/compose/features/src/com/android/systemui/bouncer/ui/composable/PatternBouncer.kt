@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.Easings
 import com.android.internal.R
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
@@ -67,9 +68,9 @@ internal fun PatternBouncer(
     val rowCount = viewModel.rowCount
 
     val dotColor = MaterialTheme.colorScheme.secondary
-    val dotRadius = with(LocalDensity.current) { 8.dp.toPx() }
+    val dotRadius = with(LocalDensity.current) { (DOT_DIAMETER_DP / 2).dp.toPx() }
     val lineColor = MaterialTheme.colorScheme.primary
-    val lineStrokeWidth = dotRadius * 2 + with(LocalDensity.current) { 4.dp.toPx() }
+    val lineStrokeWidth = with(LocalDensity.current) { LINE_STROKE_WIDTH_DP.dp.toPx() }
 
     var containerSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
     val horizontalSpacing = containerSize.width / colCount
@@ -121,9 +122,24 @@ internal fun PatternBouncer(
             // completion even if the LaunchedEffect is canceled because its key objects have
             // changed.
             scope.launch {
-                animatable.animateTo(if (isSelected) 2f else 1f)
                 if (isSelected) {
-                    animatable.animateTo(1f)
+                    animatable.animateTo(
+                        targetValue = (SELECTED_DOT_DIAMETER_DP / DOT_DIAMETER_DP.toFloat()),
+                        animationSpec =
+                            tween(
+                                durationMillis = SELECTED_DOT_REACTION_ANIMATION_DURATION_MS,
+                                easing = Easings.StandardAccelerateEasing,
+                            ),
+                    )
+                } else {
+                    animatable.animateTo(
+                        targetValue = 1f,
+                        animationSpec =
+                            tween(
+                                durationMillis = SELECTED_DOT_RETRACT_ANIMATION_DURATION_MS,
+                                easing = Easings.StandardDecelerateEasing,
+                            ),
+                    )
                 }
             }
         }
@@ -273,3 +289,9 @@ private fun lineAlpha(gridSpacing: Float, lineLength: Float = gridSpacing): Floa
     // farther the user input pointer goes from the line, the more opaque the line gets.
     return ((lineLength / gridSpacing - 0.3f) * 4f).coerceIn(0f, 1f)
 }
+
+private const val DOT_DIAMETER_DP = 16
+private const val SELECTED_DOT_DIAMETER_DP = 24
+private const val SELECTED_DOT_REACTION_ANIMATION_DURATION_MS = 83
+private const val SELECTED_DOT_RETRACT_ANIMATION_DURATION_MS = 750
+private const val LINE_STROKE_WIDTH_DP = 16
