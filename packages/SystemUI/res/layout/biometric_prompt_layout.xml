@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2019 The Android Open Source Project
+  ~ Copyright (C) 2023 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,8 +13,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<!-- TODO(b/251476085): inline in biometric_prompt_layout after Biometric*Views are un-flagged -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<com.android.systemui.biometrics.ui.BiometricPromptLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/contents"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/title"
@@ -35,7 +39,6 @@
         android:singleLine="true"
         android:marqueeRepeatLimit="1"
         android:ellipsize="marquee"
-        android:importantForAccessibility="no"
         style="@style/TextAppearance.AuthCredential.Subtitle"/>
 
     <TextView
@@ -43,6 +46,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars ="vertical"
+        android:importantForAccessibility="no"
         style="@style/TextAppearance.AuthCredential.Description"/>
 
     <Space android:id="@+id/space_above_icon"
@@ -114,7 +118,8 @@
             android:layout_gravity="center_vertical"
             android:ellipsize="end"
             android:maxLines="2"
-            android:maxWidth="@dimen/biometric_dialog_button_negative_max_width"/>
+            android:maxWidth="@dimen/biometric_dialog_button_negative_max_width"
+            android:visibility="gone"/>
         <!-- Cancel Button, replaces negative button when biometric is accepted -->
         <Button android:id="@+id/button_cancel"
             android:layout_width="wrap_content"
@@ -168,4 +173,4 @@
             android:visibility="visible" />
     </LinearLayout>
 
-</merge>
+</com.android.systemui.biometrics.ui.BiometricPromptLayout>
