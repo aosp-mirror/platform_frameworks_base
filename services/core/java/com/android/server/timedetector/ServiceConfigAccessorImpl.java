@@ -39,7 +39,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -64,8 +63,6 @@ import java.util.function.Supplier;
  * A singleton implementation of {@link ServiceConfigAccessor}.
  */
 final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
-
-    private static final int SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT = 2 * 1000;
 
     /**
      * An absolute threshold at/below which the system clock confidence can be upgraded. i.e. if the
@@ -122,9 +119,8 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         mConfigOriginPrioritiesSupplier = new ConfigOriginPrioritiesSupplier(context);
         mServerFlagsOriginPrioritiesSupplier =
                 new ServerFlagsOriginPrioritiesSupplier(mServerFlags);
-        mSystemClockUpdateThresholdMillis =
-                SystemProperties.getInt("ro.sys.time_detector_update_diff",
-                        SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT);
+        mSystemClockUpdateThresholdMillis = context.getResources().getInteger(
+                R.integer.config_timeDetectorAutoUpdateDiffMillis);
 
         // Wire up the config change listeners for anything that could affect ConfigurationInternal.
         // Use the main thread for event delivery, listeners can post to their chosen thread.
