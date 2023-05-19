@@ -219,6 +219,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 transitionInteractor =
                     KeyguardTransitionInteractor(
                         repository = FakeKeyguardTransitionRepository(),
+                        scope = testScope.backgroundScope
                     ),
                 repository = repository,
                 logger = UiEventLoggerFake(),

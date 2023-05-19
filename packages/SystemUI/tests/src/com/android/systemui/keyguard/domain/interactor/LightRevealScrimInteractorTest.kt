@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -45,7 +46,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
     private val fakeLightRevealScrimRepository = FakeLightRevealScrimRepository()
 
     private val keyguardTransitionInteractor =
-        KeyguardTransitionInteractor(fakeKeyguardTransitionRepository)
+        KeyguardTransitionInteractor(fakeKeyguardTransitionRepository, TestScope().backgroundScope)
 
     private lateinit var underTest: LightRevealScrimInteractor
 

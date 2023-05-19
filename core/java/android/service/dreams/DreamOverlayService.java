@@ -71,13 +71,7 @@ public abstract class DreamOverlayService extends Service {
 
         @Override
         public void wakeUp() {
-            mService.wakeUp(this, () -> {
-                try {
-                    mDreamOverlayCallback.onWakeUpComplete();
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not notify dream of wakeUp", e);
-                }
-            });
+            mService.wakeUp(this);
         }
 
         @Override
@@ -125,14 +119,14 @@ public abstract class DreamOverlayService extends Service {
         mCurrentClient = null;
     }
 
-    private void wakeUp(OverlayClient client, Runnable callback) {
+    private void wakeUp(OverlayClient client) {
         // Run on executor as this is a binder call from OverlayClient.
         mExecutor.execute(() -> {
             if (mCurrentClient != client) {
                 return;
             }
 
-            onWakeUp(callback);
+            onWakeUp();
         });
     }
 
@@ -190,19 +184,10 @@ public abstract class DreamOverlayService extends Service {
 
     /**
      * This method is overridden by implementations to handle when the dream has been requested
-     * to wakeup. This allows any overlay animations to run. By default, the method will invoke
-     * the callback immediately.
-     *
-     * This callback will be run on the {@link Executor} provided in the constructor if provided, or
-     * on the main executor if none was provided.
-     *
-     * @param onCompleteCallback The callback to trigger to notify the dream service that the
-     *                           overlay has completed waking up.
+     * to wakeup.
      * @hide
      */
-    public void onWakeUp(@NonNull Runnable onCompleteCallback) {
-        onCompleteCallback.run();
-    }
+    public void onWakeUp() {}
 
     /**
      * This method is overridden by implementations to handle when the dream has ended. There may
