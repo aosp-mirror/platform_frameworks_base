@@ -17,7 +17,6 @@
 package com.android.systemui.media.taptotransfer.sender
 
 import android.app.StatusBarManager
-import com.android.internal.logging.InstanceId
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
@@ -87,7 +86,7 @@ constructor(
     }
 
     /** Logs the current contents of the state map. */
-    fun logStateMap(map: Map<String, Pair<InstanceId, ChipStateSender>>) {
+    fun logStateMap(map: Map<String, ChipStateSender>) {
         buffer.log(
             TAG,
             LogLevel.DEBUG,
