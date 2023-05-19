@@ -480,6 +480,11 @@ public final class ViewNode extends AssistStructure.ViewNode {
         return mLocaleList;
     }
 
+    /** @hide */
+    public void setTextIdEntry(@NonNull String textIdEntry) {
+        mTextIdEntry = textIdEntry;
+    }
+
     private void writeSelfToParcel(@NonNull Parcel parcel, int parcelFlags) {
         long nodeFlags = mFlags;
 
