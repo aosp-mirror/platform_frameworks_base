@@ -4,7 +4,7 @@ import android.hardware.biometrics.PromptInfo
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.biometrics.data.model.PromptKind
+import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
@@ -60,7 +60,7 @@ class PromptRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun setsAndUnsetsPrompt() = runBlockingTest {
-        val kind = PromptKind.PIN
+        val kind = PromptKind.Pin
         val uid = 8
         val challenge = 90L
         val promptInfo = PromptInfo()

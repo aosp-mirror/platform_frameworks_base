@@ -67,6 +67,10 @@ public class Utils {
     static final String STORAGE_MANAGER_ENABLED_PROPERTY =
             "ro.storage_manager.enabled";
 
+    @VisibleForTesting
+    static final String INCOMPATIBLE_CHARGER_WARNING_DISABLED =
+            "incompatible_charger_warning_disabled";
+
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
@@ -652,6 +656,19 @@ public class Utils {
 
     /** Whether there is any incompatible chargers in the current UsbPort? */
     public static boolean containsIncompatibleChargers(Context context, String tag) {
+        // Avoid the caller doesn't have permission to read the "Settings.Secure" data.
+        try {
+            // Whether the incompatible charger warning is disabled or not
+            if (Settings.Secure.getInt(context.getContentResolver(),
+                    INCOMPATIBLE_CHARGER_WARNING_DISABLED, 0) == 1) {
+                Log.d(tag, "containsIncompatibleChargers: disabled");
+                return false;
+            }
+        } catch (Exception e) {
+            Log.e(tag, "containsIncompatibleChargers()", e);
+            return false;
+        }
+
         final List<UsbPort> usbPortList =
                 context.getSystemService(UsbManager.class).getPorts();
         if (usbPortList == null || usbPortList.isEmpty()) {

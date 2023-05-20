@@ -114,16 +114,7 @@ public class AuthPanelController extends ViewOutlineProvider {
     }
 
     private int getTopBound(@Position int position) {
-        switch (position) {
-            case POSITION_BOTTOM:
-                return Math.max(mContainerHeight - mContentHeight - mMargin, mMargin);
-            case POSITION_LEFT:
-            case POSITION_RIGHT:
-                return Math.max((mContainerHeight - mContentHeight) / 2, mMargin);
-            default:
-                Log.e(TAG, "Unrecognized position: " + position);
-                return getTopBound(POSITION_BOTTOM);
-        }
+        return Math.max(mContainerHeight - mContentHeight - mMargin, mMargin);
     }
 
     public void setContainerDimensions(int containerWidth, int containerHeight) {

@@ -21,6 +21,7 @@ sealed class BiometricPromptRequest(
         info: PromptInfo,
         userInfo: BiometricUserInfo,
         operationInfo: BiometricOperationInfo,
+        val modalities: BiometricModalities,
     ) :
         BiometricPromptRequest(
             title = info.title?.toString() ?: "",
@@ -28,7 +29,9 @@ sealed class BiometricPromptRequest(
             description = info.description?.toString() ?: "",
             userInfo = userInfo,
             operationInfo = operationInfo
-        )
+        ) {
+        val negativeButtonText: String = info.negativeButtonText?.toString() ?: ""
+    }
 
     /** Prompt using a credential (pin, pattern, password). */
     sealed class Credential(

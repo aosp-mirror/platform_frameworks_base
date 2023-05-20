@@ -174,6 +174,7 @@ public:
     }
 
     void trimMemory(TrimLevel level);
+    void trimCaches(CacheTrimLevel level);
 
     /**
      * isCurrent provides a way to query, if the caller is running on

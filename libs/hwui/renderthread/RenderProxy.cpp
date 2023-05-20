@@ -231,6 +231,15 @@ void RenderProxy::trimMemory(int level) {
     }
 }
 
+void RenderProxy::trimCaches(int level) {
+    // Avoid creating a RenderThread to do a trimMemory.
+    if (RenderThread::hasInstance()) {
+        RenderThread& thread = RenderThread::getInstance();
+        const auto trimLevel = static_cast<CacheTrimLevel>(level);
+        thread.queue().post([&thread, trimLevel]() { thread.trimCaches(trimLevel); });
+    }
+}
+
 void RenderProxy::purgeCaches() {
     if (RenderThread::hasInstance()) {
         RenderThread& thread = RenderThread::getInstance();

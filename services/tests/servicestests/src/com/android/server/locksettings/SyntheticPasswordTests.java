@@ -23,6 +23,7 @@ import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
 
 import static org.junit.Assert.assertEquals;
@@ -625,11 +626,9 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
-    public void testPasswordDataV2VersionCredentialTypePin_deserialize() {
-        // Test that we can deserialize existing PasswordData and don't inadvertently change the
-        // wire format.
+    public void testDeserializePasswordData_forPinWithLengthAvailable() {
         byte[] serialized = new byte[] {
-                0, 2, 0, 2, /* CREDENTIAL_TYPE_PASSWORD_OR_PIN */
+                0, 0, 0, 3, /* CREDENTIAL_TYPE_PIN */
                 11, /* scryptLogN */
                 22, /* scryptLogR */
                 33, /* scryptLogP */
@@ -637,25 +636,23 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 1, 2, -1, -2, 55, /* salt */
                 0, 0, 0, 6, /* passwordHandle.length */
                 2, 3, -2, -3, 44, 1, /* passwordHandle */
-                0, 0, 0, 5, /* pinLength */
+                0, 0, 0, 6, /* pinLength */
         };
         PasswordData deserialized = PasswordData.fromBytes(serialized);
 
         assertEquals(11, deserialized.scryptLogN);
         assertEquals(22, deserialized.scryptLogR);
         assertEquals(33, deserialized.scryptLogP);
-        assertEquals(5, deserialized.pinLength);
-        assertEquals(CREDENTIAL_TYPE_PASSWORD_OR_PIN, deserialized.credentialType);
+        assertEquals(CREDENTIAL_TYPE_PIN, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
+        assertEquals(6, deserialized.pinLength);
     }
 
     @Test
-    public void testPasswordDataV2VersionNegativePinLengthNoCredential_deserialize() {
-        // Test that we can deserialize existing PasswordData and don't inadvertently change the
-        // wire format.
+    public void testDeserializePasswordData_forPinWithLengthExplicitlyUnavailable() {
         byte[] serialized = new byte[] {
-                0, 2, -1, -1, /* CREDENTIAL_TYPE_NONE */
+                0, 0, 0, 3, /* CREDENTIAL_TYPE_PIN */
                 11, /* scryptLogN */
                 22, /* scryptLogR */
                 33, /* scryptLogP */
@@ -663,23 +660,52 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 1, 2, -1, -2, 55, /* salt */
                 0, 0, 0, 6, /* passwordHandle.length */
                 2, 3, -2, -3, 44, 1, /* passwordHandle */
-                -1, -1, -1, -2, /* pinLength */
+                -1, -1, -1, -1, /* pinLength */
         };
         PasswordData deserialized = PasswordData.fromBytes(serialized);
 
         assertEquals(11, deserialized.scryptLogN);
         assertEquals(22, deserialized.scryptLogR);
         assertEquals(33, deserialized.scryptLogP);
-        assertEquals(-2, deserialized.pinLength);
-        assertEquals(CREDENTIAL_TYPE_NONE, deserialized.credentialType);
+        assertEquals(CREDENTIAL_TYPE_PIN, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
+        assertEquals(PIN_LENGTH_UNAVAILABLE, deserialized.pinLength);
     }
 
     @Test
-    public void testPasswordDataV1VersionNoCredential_deserialize() {
-        // Test that we can deserialize existing PasswordData and don't inadvertently change the
-        // wire format.
+    public void testDeserializePasswordData_forPinWithVersionNumber() {
+        // Test deserializing a PasswordData that has a version number in the first two bytes.
+        // Files like this were created by some Android 14 beta versions.  This version number was a
+        // mistake and should be ignored by the deserializer.
+        byte[] serialized = new byte[] {
+                0, 2, /* version 2 */
+                0, 3, /* CREDENTIAL_TYPE_PIN */
+                11, /* scryptLogN */
+                22, /* scryptLogR */
+                33, /* scryptLogP */
+                0, 0, 0, 5, /* salt.length */
+                1, 2, -1, -2, 55, /* salt */
+                0, 0, 0, 6, /* passwordHandle.length */
+                2, 3, -2, -3, 44, 1, /* passwordHandle */
+                0, 0, 0, 6, /* pinLength */
+        };
+        PasswordData deserialized = PasswordData.fromBytes(serialized);
+
+        assertEquals(11, deserialized.scryptLogN);
+        assertEquals(22, deserialized.scryptLogR);
+        assertEquals(33, deserialized.scryptLogP);
+        assertEquals(CREDENTIAL_TYPE_PIN, deserialized.credentialType);
+        assertArrayEquals(PAYLOAD, deserialized.salt);
+        assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
+        assertEquals(6, deserialized.pinLength);
+    }
+
+    @Test
+    public void testDeserializePasswordData_forNoneCred() {
+        // Test that a PasswordData that uses CREDENTIAL_TYPE_NONE and lacks the PIN length field
+        // can be deserialized.  Files like this were created by Android 13 and earlier.  Android 14
+        // and later no longer create PasswordData for CREDENTIAL_TYPE_NONE.
         byte[] serialized = new byte[] {
                 -1, -1, -1, -1, /* CREDENTIAL_TYPE_NONE */
                 11, /* scryptLogN */
@@ -695,16 +721,17 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertEquals(11, deserialized.scryptLogN);
         assertEquals(22, deserialized.scryptLogR);
         assertEquals(33, deserialized.scryptLogP);
-        assertEquals(PIN_LENGTH_UNAVAILABLE, deserialized.pinLength);
         assertEquals(CREDENTIAL_TYPE_NONE, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
+        assertEquals(PIN_LENGTH_UNAVAILABLE, deserialized.pinLength);
     }
 
     @Test
-    public void testPasswordDataV1VersionCredentialTypePin_deserialize() {
-        // Test that we can deserialize existing PasswordData and don't inadvertently change the
-        // wire format.
+    public void testDeserializePasswordData_forPasswordOrPin() {
+        // Test that a PasswordData that uses CREDENTIAL_TYPE_PASSWORD_OR_PIN and lacks the PIN
+        // length field can be deserialized.  Files like this were created by Android 10 and
+        // earlier.  Android 11 eliminated CREDENTIAL_TYPE_PASSWORD_OR_PIN.
         byte[] serialized = new byte[] {
                 0, 0, 0, 2, /* CREDENTIAL_TYPE_PASSWORD_OR_PIN */
                 11, /* scryptLogN */
@@ -720,10 +747,10 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertEquals(11, deserialized.scryptLogN);
         assertEquals(22, deserialized.scryptLogR);
         assertEquals(33, deserialized.scryptLogP);
-        assertEquals(PIN_LENGTH_UNAVAILABLE, deserialized.pinLength);
         assertEquals(CREDENTIAL_TYPE_PASSWORD_OR_PIN, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
+        assertEquals(PIN_LENGTH_UNAVAILABLE, deserialized.pinLength);
     }
 
     @Test

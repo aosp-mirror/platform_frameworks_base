@@ -22,5 +22,5 @@ import com.android.systemui.scene.shared.model.Scene
 
 /** Compose-capable extension of [Scene]. */
 interface ComposableScene : Scene {
-    @Composable fun Content(modifier: Modifier)
+    @Composable fun Content(containerName: String, modifier: Modifier)
 }

@@ -492,6 +492,10 @@ public class Transitions implements RemoteCallable<Transitions>,
                 finishT.show(leash);
             } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                 finishT.hide(leash);
+            } else if (isOpening && mode == TRANSIT_CHANGE) {
+                // Just in case there is a race with another animation (eg. recents finish()).
+                // Changes are visible->visible so it's a problem if it isn't visible.
+                t.show(leash);
             }
         }
     }

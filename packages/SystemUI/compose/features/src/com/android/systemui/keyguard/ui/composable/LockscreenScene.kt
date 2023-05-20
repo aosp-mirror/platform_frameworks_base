@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.scene.shared.model.Direction
@@ -39,7 +38,6 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -47,16 +45,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** The lock screen scene shows when the device is locked. */
-@SysUISingleton
-class LockscreenScene
-@Inject
-constructor(
+class LockscreenScene(
     @Application private val applicationScope: CoroutineScope,
     private val viewModel: LockscreenSceneViewModel,
 ) : ComposableScene {
     override val key = SceneKey.Lockscreen
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    override fun destinationScenes(
+        containerName: String,
+    ): StateFlow<Map<UserAction, SceneModel>> =
         viewModel.upDestinationSceneKey
             .map { pageKey -> destinationScenes(up = pageKey) }
             .stateIn(
@@ -67,6 +64,7 @@ constructor(
 
     @Composable
     override fun Content(
+        containerName: String,
         modifier: Modifier,
     ) {
         LockscreenScene(

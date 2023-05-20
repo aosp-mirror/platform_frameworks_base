@@ -75,6 +75,7 @@ fun SceneContainer(
             if (key == currentSceneKey) {
                 Scene(
                     scene = composableScene,
+                    containerName = viewModel.containerName,
                     onSceneChanged = viewModel::setCurrentScene,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -87,6 +88,7 @@ fun SceneContainer(
 @Composable
 private fun Scene(
     scene: ComposableScene,
+    containerName: String,
     onSceneChanged: (SceneModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -97,11 +99,12 @@ private fun Scene(
             modifier = Modifier.align(Alignment.Center),
         ) {
             scene.Content(
+                containerName = containerName,
                 modifier = Modifier,
             )
 
             val destinationScenes: Map<UserAction, SceneModel> by
-                scene.destinationScenes().collectAsState()
+                scene.destinationScenes(containerName).collectAsState()
             val swipeLeftDestinationScene = destinationScenes[UserAction.Swipe(Direction.LEFT)]
             val swipeUpDestinationScene = destinationScenes[UserAction.Swipe(Direction.UP)]
             val swipeRightDestinationScene = destinationScenes[UserAction.Swipe(Direction.RIGHT)]

@@ -480,8 +480,13 @@ public class BiometricService extends SystemService {
             }
 
             @Override
-            public void onDialogAnimatedIn() {
-                mHandler.post(() -> handleOnDialogAnimatedIn(requestId));
+            public void onDialogAnimatedIn(boolean startFingerprintNow) {
+                mHandler.post(() -> handleOnDialogAnimatedIn(requestId, startFingerprintNow));
+            }
+
+            @Override
+            public void onStartFingerprintNow() {
+                mHandler.post(() -> handleOnStartFingerprintNow(requestId));
             }
         };
     }
@@ -1237,7 +1242,7 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleOnDialogAnimatedIn(long requestId) {
+    private void handleOnDialogAnimatedIn(long requestId, boolean startFingerprintNow) {
         Slog.d(TAG, "handleOnDialogAnimatedIn");
 
         final AuthSession session = getAuthSessionIfCurrent(requestId);
@@ -1246,7 +1251,19 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        session.onDialogAnimatedIn();
+        session.onDialogAnimatedIn(startFingerprintNow);
+    }
+
+    private void handleOnStartFingerprintNow(long requestId) {
+        Slog.d(TAG, "handleOnStartFingerprintNow");
+
+        final AuthSession session = getAuthSessionIfCurrent(requestId);
+        if (session == null) {
+            Slog.w(TAG, "handleOnStartFingerprintNow: AuthSession is not current");
+            return;
+        }
+
+        session.onStartFingerprint();
     }
 
     /**
