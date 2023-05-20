@@ -180,7 +180,8 @@ public class BackgroundActivityStartController {
             Intent intent,
             ActivityOptions checkedOptions) {
         return checkBackgroundActivityStart(callingUid, callingPid, callingPackage,
-                realCallingUid, realCallingPid, callerApp, originatingPendingIntent,
+                realCallingUid, realCallingPid,
+                callerApp, originatingPendingIntent,
                 backgroundStartPrivileges, intent, checkedOptions) == BAL_BLOCK;
     }
 
@@ -288,11 +289,13 @@ public class BackgroundActivityStartController {
             }
         }
 
+        String realCallingPackage = mService.getPackageNameIfUnique(realCallingUid, realCallingPid);
+
         // Legacy behavior allows to use caller foreground state to bypass BAL restriction.
         // The options here are the options passed by the sender and not those on the intent.
         final BackgroundStartPrivileges balAllowedByPiSender =
                 PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
-                        checkedOptions, realCallingUid);
+                        checkedOptions, realCallingUid, realCallingPackage);
 
         final boolean logVerdictChangeByPiDefaultChange = checkedOptions == null
                 || checkedOptions.getPendingIntentBackgroundActivityStartMode()
@@ -460,8 +463,11 @@ public class BackgroundActivityStartController {
         // If we are here, it means all exemptions not based on PI sender failed, so we'll block
         // unless resultIfPiSenderAllowsBal is an allow and the PI sender allows BAL
 
-        String realCallingPackage = callingUid == realCallingUid ? callingPackage :
-                mService.mContext.getPackageManager().getNameForUid(realCallingUid);
+        if (realCallingPackage == null) {
+            realCallingPackage = (callingUid == realCallingUid ? callingPackage :
+                    mService.mContext.getPackageManager().getNameForUid(realCallingUid))
+                    + "[debugOnly]";
+        }
 
         String stateDumpLog = " [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
