@@ -37,6 +37,7 @@ class PatternBouncerViewModel(
     private val applicationContext: Context,
     applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
+    override val isInputEnabled: StateFlow<Boolean>,
 ) : AuthMethodBouncerViewModel {
 
     /** The number of columns in the dot grid. */
@@ -62,6 +63,16 @@ class PatternBouncerViewModel(
     private val _dots = MutableStateFlow(defaultDots())
     /** All dots on the grid. */
     val dots: StateFlow<List<PatternDotViewModel>> = _dots.asStateFlow()
+
+    /** Whether the pattern itself should be rendered visibly. */
+    val isPatternVisible: StateFlow<Boolean> =
+        interactor.authenticationMethod
+            .map { authMethod -> isPatternVisible(authMethod) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = isPatternVisible(interactor.authenticationMethod.value),
+            )
 
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
@@ -144,6 +155,10 @@ class PatternBouncerViewModel(
         _dots.value = defaultDots()
         _currentDot.value = null
         _selectedDots.value = linkedSetOf()
+    }
+
+    private fun isPatternVisible(authMethodModel: AuthenticationMethodModel): Boolean {
+        return (authMethodModel as? AuthenticationMethodModel.Pattern)?.isPatternVisible ?: false
     }
 
     private fun defaultDots(): List<PatternDotViewModel> {
