@@ -2883,6 +2883,20 @@ public abstract class PackageManager {
             "android.software.car.templates_host";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:If this
+     * feature is supported, the device should also declare {@link #FEATURE_AUTOMOTIVE} and show
+     * a UI that can display multiple tasks at the same time on a single display. The user can
+     * perform multiple actions on different tasks simultaneously. Apps open in split screen mode
+     * by default, instead of full screen. Unlike Android's multi-window mode, where users can
+     * choose how to display apps, the device determines how apps are shown.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAR_SPLITSCREEN_MULTITASKING =
+            "android.software.car.splitscreen_multitasking";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
      * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
