@@ -248,6 +248,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private static final int MSG_DELIVERY_TIMEOUT_HARD = 3;
     private static final int MSG_BG_ACTIVITY_START_TIMEOUT = 4;
     private static final int MSG_CHECK_HEALTH = 5;
+    private static final int MSG_CHECK_PENDING_COLD_START_VALIDITY = 6;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
@@ -282,6 +283,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
             case MSG_CHECK_HEALTH: {
                 checkHealth();
+                return true;
+            }
+            case MSG_CHECK_PENDING_COLD_START_VALIDITY: {
+                checkPendingColdStartValidity();
                 return true;
             }
         }
@@ -450,10 +455,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 // skip to look for another warm process
                 if (mRunningColdStart == null) {
                     mRunningColdStart = queue;
-                } else {
+                } else if (isPendingColdStartValid()) {
                     // Move to considering next runnable queue
                     queue = nextQueue;
                     continue;
+                } else {
+                    // Pending cold start is not valid, so clear it and move on.
+                    clearInvalidPendingColdStart();
+                    mRunningColdStart = queue;
                 }
             }
 
@@ -486,9 +495,44 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_RECEIVER);
         }
 
+        checkPendingColdStartValidity();
         checkAndRemoveWaitingFor();
 
         traceEnd(cookie);
+    }
+
+    private boolean isPendingColdStartValid() {
+        if (mRunningColdStart.app.getPid() > 0) {
+            // If the process has already started, check if it wasn't killed.
+            return !mRunningColdStart.app.isKilled();
+        } else {
+            // Otherwise, check if the process start is still pending.
+            return mRunningColdStart.app.isPendingStart();
+        }
+    }
+
+    private void clearInvalidPendingColdStart() {
+        logw("Clearing invalid pending cold start: " + mRunningColdStart);
+        onApplicationCleanupLocked(mRunningColdStart.app);
+    }
+
+    private void checkPendingColdStartValidity() {
+        // There are a few cases where a starting process gets killed but AMS doesn't report
+        // this event. So, once we start waiting for a pending cold start, periodically check
+        // if the pending start is still valid and if not, clear it so that the queue doesn't
+        // keep waiting for the process start forever.
+        synchronized (mService) {
+            // If there is no pending cold start, then nothing to do.
+            if (mRunningColdStart == null) {
+                return;
+            }
+            if (isPendingColdStartValid()) {
+                mLocalHandler.sendEmptyMessageDelayed(MSG_CHECK_PENDING_COLD_START_VALIDITY,
+                        mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS);
+            } else {
+                clearInvalidPendingColdStart();
+            }
+        }
     }
 
     @Override
