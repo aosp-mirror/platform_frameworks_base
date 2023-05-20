@@ -333,15 +333,29 @@ public class KeyguardService extends Service {
     };
 
     private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
+        private static final String TRACK_NAME = "IKeyguardService";
+
+        /**
+         * Helper for tracing the most-recent call on the IKeyguardService interface.
+         * IKeyguardService is oneway, so we are most interested in the order of the calls as they
+         * are received. We use an async track to make it easier to visualize in the trace.
+         * @param name name of the trace section
+         */
+        private static void trace(String name) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TRACK_NAME, 0);
+            Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, TRACK_NAME, name, 0);
+        }
 
         @Override // Binder interface
         public void addStateMonitorCallback(IKeyguardStateCallback callback) {
+            trace("addStateMonitorCallback");
             checkPermission();
             mKeyguardViewMediator.addStateMonitorCallback(callback);
         }
 
         @Override // Binder interface
         public void verifyUnlock(IKeyguardExitCallback callback) {
+            trace("verifyUnlock");
             Trace.beginSection("KeyguardService.mBinder#verifyUnlock");
             checkPermission();
             mKeyguardViewMediator.verifyUnlock(callback);
@@ -350,6 +364,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void setOccluded(boolean isOccluded, boolean animate) {
+            trace("setOccluded isOccluded=" + isOccluded + " animate=" + animate);
             Log.d(TAG, "setOccluded(" + isOccluded + ")");
 
             Trace.beginSection("KeyguardService.mBinder#setOccluded");
@@ -360,24 +375,28 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
+            trace("dismiss message=" + message);
             checkPermission();
             mKeyguardViewMediator.dismiss(callback, message);
         }
 
         @Override // Binder interface
         public void onDreamingStarted() {
+            trace("onDreamingStarted");
             checkPermission();
             mKeyguardViewMediator.onDreamingStarted();
         }
 
         @Override // Binder interface
         public void onDreamingStopped() {
+            trace("onDreamingStopped");
             checkPermission();
             mKeyguardViewMediator.onDreamingStopped();
         }
 
         @Override // Binder interface
         public void onStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
+            trace("onStartedGoingToSleep pmSleepReason=" + pmSleepReason);
             checkPermission();
             mKeyguardViewMediator.onStartedGoingToSleep(
                     WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason));
@@ -388,6 +407,8 @@ public class KeyguardService extends Service {
         @Override // Binder interface
         public void onFinishedGoingToSleep(
                 @PowerManager.GoToSleepReason int pmSleepReason, boolean cameraGestureTriggered) {
+            trace("onFinishedGoingToSleep pmSleepReason=" + pmSleepReason
+                    + " cameraGestureTriggered=" + cameraGestureTriggered);
             checkPermission();
             mKeyguardViewMediator.onFinishedGoingToSleep(
                     WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason),
@@ -399,6 +420,8 @@ public class KeyguardService extends Service {
         @Override // Binder interface
         public void onStartedWakingUp(
                 @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
+            trace("onStartedWakingUp pmWakeReason=" + pmWakeReason
+                    + " cameraGestureTriggered=" + cameraGestureTriggered);
             Trace.beginSection("KeyguardService.mBinder#onStartedWakingUp");
             checkPermission();
             mKeyguardViewMediator.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
@@ -409,6 +432,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onFinishedWakingUp() {
+            trace("onFinishedWakingUp");
             Trace.beginSection("KeyguardService.mBinder#onFinishedWakingUp");
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.FINISHED_WAKING_UP);
@@ -417,6 +441,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onScreenTurningOn(IKeyguardDrawnCallback callback) {
+            trace("onScreenTurningOn");
             Trace.beginSection("KeyguardService.mBinder#onScreenTurningOn");
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON,
@@ -451,6 +476,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onScreenTurnedOn() {
+            trace("onScreenTurnedOn");
             Trace.beginSection("KeyguardService.mBinder#onScreenTurnedOn");
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_ON);
@@ -460,12 +486,14 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onScreenTurningOff() {
+            trace("onScreenTurningOff");
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_OFF);
         }
 
         @Override // Binder interface
         public void onScreenTurnedOff() {
+            trace("onScreenTurnedOff");
             checkPermission();
             mKeyguardViewMediator.onScreenTurnedOff();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_OFF);
@@ -474,12 +502,14 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void setKeyguardEnabled(boolean enabled) {
+            trace("setKeyguardEnabled enabled" + enabled);
             checkPermission();
             mKeyguardViewMediator.setKeyguardEnabled(enabled);
         }
 
         @Override // Binder interface
         public void onSystemReady() {
+            trace("onSystemReady");
             Trace.beginSection("KeyguardService.mBinder#onSystemReady");
             checkPermission();
             mKeyguardViewMediator.onSystemReady();
@@ -488,24 +518,28 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void doKeyguardTimeout(Bundle options) {
+            trace("doKeyguardTimeout");
             checkPermission();
             mKeyguardViewMediator.doKeyguardTimeout(options);
         }
 
         @Override // Binder interface
         public void setSwitchingUser(boolean switching) {
+            trace("setSwitchingUser switching=" + switching);
             checkPermission();
             mKeyguardViewMediator.setSwitchingUser(switching);
         }
 
         @Override // Binder interface
         public void setCurrentUser(int userId) {
+            trace("setCurrentUser userId=" + userId);
             checkPermission();
             mKeyguardViewMediator.setCurrentUser(userId);
         }
 
-        @Override
+        @Override // Binder interface
         public void onBootCompleted() {
+            trace("onBootCompleted");
             checkPermission();
             mKeyguardViewMediator.onBootCompleted();
         }
@@ -515,28 +549,33 @@ public class KeyguardService extends Service {
          * {@code IRemoteAnimationRunner#onAnimationStart} instead.
          */
         @Deprecated
-        @Override
+        @Override // Binder interface
         public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+            trace("startKeyguardExitAnimation startTime=" + startTime
+                    + " fadeoutDuration=" + fadeoutDuration);
             Trace.beginSection("KeyguardService.mBinder#startKeyguardExitAnimation");
             checkPermission();
             mKeyguardViewMediator.startKeyguardExitAnimation(startTime, fadeoutDuration);
             Trace.endSection();
         }
 
-        @Override
+        @Override // Binder interface
         public void onShortPowerPressedGoHome() {
+            trace("onShortPowerPressedGoHome");
             checkPermission();
             mKeyguardViewMediator.onShortPowerPressedGoHome();
         }
 
-        @Override
+        @Override // Binder interface
         public void dismissKeyguardToLaunch(Intent intentToLaunch) {
+            trace("dismissKeyguardToLaunch");
             checkPermission();
             mKeyguardViewMediator.dismissKeyguardToLaunch(intentToLaunch);
         }
 
-        @Override
+        @Override // Binder interface
         public void onSystemKeyPressed(int keycode) {
+            trace("onSystemKeyPressed keycode=" + keycode);
             checkPermission();
             mKeyguardViewMediator.onSystemKeyPressed(keycode);
         }
