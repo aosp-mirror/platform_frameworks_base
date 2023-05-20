@@ -88,6 +88,7 @@ public class SnapshotDrawerUtilsTest {
                 1, HardwareBuffer.USAGE_CPU_READ_RARELY);
         return new TaskSnapshot(
                 System.currentTimeMillis(),
+                0 /* captureTime */,
                 new ComponentName("", ""), buffer,
                 ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                 Surface.ROTATION_0, taskSize, contentInsets, new Rect() /* letterboxInsets */,
