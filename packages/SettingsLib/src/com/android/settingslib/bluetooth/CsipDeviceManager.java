@@ -241,6 +241,17 @@ public class CsipDeviceManager {
         return groupDevicesList;
     }
 
+    public CachedBluetoothDevice getFirstMemberDevice(int groupId) {
+        List<CachedBluetoothDevice> members = getGroupDevicesFromAllOfDevicesList(groupId);
+        if (members.isEmpty())
+            return null;
+
+        CachedBluetoothDevice firstMember = members.get(0);
+        log("getFirstMemberDevice: groupId=" + groupId
+                + " address=" + firstMember.getDevice().getAnonymizedAddress());
+        return firstMember;
+    }
+
     @VisibleForTesting
     CachedBluetoothDevice getPreferredMainDevice(int groupId,
             List<CachedBluetoothDevice> groupDevicesList) {

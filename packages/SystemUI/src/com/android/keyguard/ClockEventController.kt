@@ -23,6 +23,7 @@ import android.content.IntentFilter
 import android.content.res.Resources
 import android.text.format.DateFormat
 import android.util.TypedValue
+import android.util.Log
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.ViewTreeObserver
@@ -101,7 +102,12 @@ constructor(
                 }
                 updateFontSizes()
                 updateTimeListeners()
-                cachedWeatherData?.let { value.events.onWeatherDataChanged(it) }
+                cachedWeatherData?.let {
+                    if (WeatherData.DEBUG) {
+                        Log.i(TAG, "Pushing cached weather data to new clock: $it")
+                    }
+                    value.events.onWeatherDataChanged(it)
+                }
                 value.smallClock.view.addOnAttachStateChangeListener(
                     object : OnAttachStateChangeListener {
                         override fun onViewAttachedToWindow(p0: View?) {

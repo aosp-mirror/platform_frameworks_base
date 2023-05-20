@@ -145,50 +145,59 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withCorrectPin_returnsTrueAndUnlocksDevice() =
         testScope.runTest {
+            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             underTest.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
             assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
             assertThat(isUnlocked).isTrue()
+            assertThat(failedAttemptCount).isEqualTo(0)
         }
 
     @Test
     fun authenticate_withIncorrectPin_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
+            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             underTest.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
             assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(9, 8, 7))).isFalse()
             assertThat(isUnlocked).isFalse()
+            assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test
     fun authenticate_withCorrectPassword_returnsTrueAndUnlocksDevice() =
         testScope.runTest {
+            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             underTest.setAuthenticationMethod(AuthenticationMethodModel.Password("password"))
             assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate("password".toList())).isTrue()
             assertThat(isUnlocked).isTrue()
+            assertThat(failedAttemptCount).isEqualTo(0)
         }
 
     @Test
     fun authenticate_withIncorrectPassword_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
+            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             underTest.setAuthenticationMethod(AuthenticationMethodModel.Password("password"))
             assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate("alohomora".toList())).isFalse()
             assertThat(isUnlocked).isFalse()
+            assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test
     fun authenticate_withCorrectPattern_returnsTrueAndUnlocksDevice() =
         testScope.runTest {
+            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             underTest.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(
@@ -230,11 +239,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 )
                 .isTrue()
             assertThat(isUnlocked).isTrue()
+            assertThat(failedAttemptCount).isEqualTo(0)
         }
 
     @Test
     fun authenticate_withIncorrectPattern_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
+            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             underTest.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(
@@ -276,6 +287,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 )
                 .isFalse()
             assertThat(isUnlocked).isFalse()
+            assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test

@@ -16,12 +16,16 @@
 
 package com.android.systemui.scene
 
+import com.android.systemui.scene.data.model.SceneContainerConfigModule
 import com.android.systemui.scene.ui.composable.SceneModule
+import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModelModule
 import dagger.Module
 
 @Module(
     includes =
         [
+            SceneContainerConfigModule::class,
+            SceneContainerViewModelModule::class,
             SceneModule::class,
         ],
 )

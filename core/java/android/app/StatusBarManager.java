@@ -571,6 +571,15 @@ public class StatusBarManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long MEDIA_CONTROL_SESSION_ACTIONS = 203800354L;
 
+    /**
+     * Media controls based on {@link android.app.Notification.MediaStyle} notifications will be
+     * required to include a non-empty title, either in the {@link android.media.MediaMetadata} or
+     * notification title.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private static final long MEDIA_CONTROL_REQUIRES_TITLE = 274775190L;
+
     @UnsupportedAppUsage
     private Context mContext;
     private IStatusBarService mService;
@@ -1214,6 +1223,21 @@ public class StatusBarManager {
             android.Manifest.permission.LOG_COMPAT_CHANGE})
     public static boolean useMediaSessionActionsForApp(String packageName, UserHandle user) {
         return CompatChanges.isChangeEnabled(MEDIA_CONTROL_SESSION_ACTIONS, packageName, user);
+    }
+
+    /**
+     * Checks whether the given package must include a non-empty title for its media controls.
+     *
+     * @param packageName App posting media controls
+     * @param user Current user handle
+     * @return true if the app is required to provide a non-empty title
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
+            android.Manifest.permission.LOG_COMPAT_CHANGE})
+    public static boolean isMediaTitleRequiredForApp(String packageName, UserHandle user) {
+        return CompatChanges.isChangeEnabled(MEDIA_CONTROL_REQUIRES_TITLE, packageName, user);
     }
 
     /**

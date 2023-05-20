@@ -97,27 +97,6 @@ public class BiometricManager {
     public @interface BiometricError {}
 
     /**
-     * Single sensor or unspecified multi-sensor behavior (prefer an explicit choice if the
-     * device is multi-sensor).
-     * @hide
-     */
-    public static final int BIOMETRIC_MULTI_SENSOR_DEFAULT = 0;
-
-    /**
-     * Use face and fingerprint sensors together.
-     * @hide
-     */
-    public static final int BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE = 1;
-
-    /**
-     * @hide
-     */
-    @IntDef({BIOMETRIC_MULTI_SENSOR_DEFAULT,
-            BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface BiometricMultiSensorMode {}
-
-    /**
      * Types of authenticators, defined at a level of granularity supported by
      * {@link BiometricManager} and {@link BiometricPrompt}.
      *

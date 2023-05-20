@@ -19,17 +19,12 @@ package com.android.systemui.scene.ui.viewmodel
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.StateFlow
 
 /** Models UI state for a single scene container. */
-class SceneContainerViewModel
-@AssistedInject
-constructor(
+class SceneContainerViewModel(
     private val interactor: SceneInteractor,
-    @Assisted val containerName: String,
+    val containerName: String,
 ) {
     /**
      * Keys of all scenes in the container.
@@ -53,12 +48,5 @@ constructor(
     /** Notifies of the progress of a scene transition. */
     fun setSceneTransitionProgress(progress: Float) {
         interactor.setSceneTransitionProgress(containerName, progress)
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): SceneContainerViewModel
     }
 }

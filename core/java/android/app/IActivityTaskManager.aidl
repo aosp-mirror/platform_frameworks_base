@@ -261,6 +261,9 @@ interface IActivityTaskManager {
     void cancelTaskWindowTransition(int taskId);
 
     /**
+     * Fetches the snapshot for the task with the given id, taking a new snapshot if it is not in
+     * the task snapshot cache and it is requested.
+     *
      * @param taskId the id of the task to retrieve the sAutoapshots for
      * @param isLowResolution if set, if the snapshot needs to be loaded from disk, this will load
      *                          a reduced resolution of it, which is much faster
@@ -272,10 +275,14 @@ interface IActivityTaskManager {
             int taskId, boolean isLowResolution, boolean takeSnapshotIfNeeded);
 
     /**
+     * Requests for a new snapshot to be taken for the task with the given id, storing it in the
+     * task snapshot cache only if requested.
+     *
      * @param taskId the id of the task to take a snapshot of
+     * @param updateCache whether to store the new snapshot in the system's task snapshot cache
      * @return a graphic buffer representing a screenshot of a task
      */
-    android.window.TaskSnapshot takeTaskSnapshot(int taskId);
+    android.window.TaskSnapshot takeTaskSnapshot(int taskId, boolean updateCache);
 
     /**
      * Return the user id of last resumed activity.

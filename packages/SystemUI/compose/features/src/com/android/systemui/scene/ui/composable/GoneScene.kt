@@ -23,12 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,8 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * "Gone" is not a real scene but rather the absence of scenes when we want to skip showing any
  * content from the scene framework.
  */
-@SysUISingleton
-class GoneScene @Inject constructor() : ComposableScene {
+class GoneScene : ComposableScene {
     override val key = SceneKey.Gone
 
     override fun destinationScenes(

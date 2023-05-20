@@ -280,7 +280,7 @@ public class AutofillFeatureFlags {
     private static final boolean DEFAULT_AFAA_ON_IMPORTANT_VIEW_ENABLED = true;
     private static final String DEFAULT_AFAA_DENYLIST = "";
     private static final String DEFAULT_AFAA_ALLOWLIST = "";
-    private static final String DEFAULT_AFAA_NON_AUTOFILLABLE_IME_ACTIONS = "2,3,4";
+    private static final String DEFAULT_AFAA_NON_AUTOFILLABLE_IME_ACTIONS = "3,4";
     private static final boolean DEFAULT_AFAA_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES = true;
     private static final boolean DEFAULT_AFAA_SHOULD_ENABLE_MULTILINE_FILTER = true;
 

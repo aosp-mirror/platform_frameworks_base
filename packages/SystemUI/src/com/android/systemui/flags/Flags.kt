@@ -217,6 +217,7 @@ object Flags {
             )
 
     /** Whether to use a new data source for intents to run on keyguard dismissal. */
+    // TODO(b/275069969): Tracking bug.
     @JvmField
     val REFACTOR_KEYGUARD_DISMISS_INTENT = unreleasedFlag(231, "refactor_keyguard_dismiss_intent")
 
@@ -246,6 +247,11 @@ object Flags {
     // TODO(b/280067944): Tracking bug.
     @JvmField
     val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area")
+
+    /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
+    // TODO(b/283260512): Tracking bug.
+    @JvmField
+    val FP_LISTEN_OCCLUDING_APPS = unreleasedFlag(237, "fp_listen_occluding_apps")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -673,6 +679,10 @@ object Flags {
     val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
             unreleasedFlag(2401, "trim_resources_with_background_trim_on_lock")
 
+    // TODO:(b/283203305): Tracking bug
+    @JvmField
+    val TRIM_FONT_CACHES_AT_UNLOCK = releasedFlag(2402, "trim_font_caches_on_unlock")
+
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
     @Keep
@@ -717,4 +727,12 @@ object Flags {
     @JvmField
     val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION =
             unreleasedFlag(2805, "split_shade_subpixel_optimization", teamfood = true)
+
+    // TODO(b/278761837): Tracking Bug
+    @JvmField
+    val USE_NEW_ACTIVITY_STARTER = releasedFlag(2801, name = "use_new_activity_starter")
+
+    // TODO(b/283084712): Tracking Bug
+    @JvmField
+    val IMPROVED_HUN_ANIMATIONS = unreleasedFlag(283084712, "improved_hun_animations")
 }

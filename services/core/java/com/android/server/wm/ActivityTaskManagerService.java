@@ -3789,7 +3789,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             TaskSnapshot taskSnapshot = mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
                     task.mUserId, true /* restoreFromDisk */, isLowResolution);
             if (taskSnapshot == null && takeSnapshotIfNeeded) {
-                taskSnapshot = takeTaskSnapshot(taskId);
+                taskSnapshot = takeTaskSnapshot(taskId, false /* updateCache */);
             }
             return taskSnapshot;
         } finally {
@@ -3798,7 +3798,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public TaskSnapshot takeTaskSnapshot(int taskId) {
+    public TaskSnapshot takeTaskSnapshot(int taskId, boolean updateCache) {
         mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "takeTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -3809,8 +3809,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "takeTaskSnapshot: taskId=" + taskId + " not found or not visible");
                     return null;
                 }
-                return mWindowManager.mTaskSnapshotController.captureSnapshot(
-                        task, true /* snapshotHome */);
+                if (updateCache) {
+                    return mWindowManager.mTaskSnapshotController.recordSnapshot(task,
+                            true /* snapshotHome */);
+                } else {
+                    return mWindowManager.mTaskSnapshotController.captureSnapshot(task,
+                            true /* snapshotHome */);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

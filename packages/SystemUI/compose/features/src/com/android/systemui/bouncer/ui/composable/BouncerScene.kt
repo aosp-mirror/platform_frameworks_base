@@ -40,22 +40,17 @@ import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** The bouncer scene displays authentication challenges like PIN, password, or pattern. */
-@SysUISingleton
-class BouncerScene
-@Inject
-constructor(
-    private val viewModelFactory: BouncerViewModel.Factory,
+class BouncerScene(
+    private val viewModel: BouncerViewModel,
 ) : ComposableScene {
     override val key = SceneKey.Bouncer
 
@@ -73,7 +68,7 @@ constructor(
     override fun Content(
         containerName: String,
         modifier: Modifier,
-    ) = BouncerScene(viewModelFactory.create(containerName), modifier)
+    ) = BouncerScene(viewModel, modifier)
 }
 
 @Composable
