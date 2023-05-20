@@ -19,9 +19,12 @@ package com.android.systemui.biometrics.ui;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Insets;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -44,6 +47,8 @@ public class BiometricPromptLayout extends LinearLayout {
 
     private static final String TAG = "BiometricPromptLayout";
 
+    @NonNull
+    private final WindowManager mWindowManager;
     @Nullable
     private AuthController.ScaleFactorProvider mScaleFactorProvider;
     @Nullable
@@ -59,6 +64,8 @@ public class BiometricPromptLayout extends LinearLayout {
 
     public BiometricPromptLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        mWindowManager = context.getSystemService(WindowManager.class);
 
         mUseCustomBpSize = getResources().getBoolean(R.bool.use_custom_bp_size);
         mCustomBpWidth = getResources().getDimensionPixelSize(R.dimen.biometric_dialog_width);
@@ -144,8 +151,13 @@ public class BiometricPromptLayout extends LinearLayout {
             width = Math.min(width, height);
         }
 
+        // add nav bar insets since the parent AuthContainerView
+        // uses LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        final Insets insets = mWindowManager.getMaximumWindowMetrics().getWindowInsets()
+                .getInsets(WindowInsets.Type.navigationBars());
         final AuthDialog.LayoutParams params = onMeasureInternal(width, height);
-        setMeasuredDimension(params.mMediumWidth, params.mMediumHeight);
+        setMeasuredDimension(params.mMediumWidth + insets.left + insets.right,
+                params.mMediumHeight + insets.bottom);
     }
 
     @Override
