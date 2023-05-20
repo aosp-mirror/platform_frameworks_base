@@ -641,8 +641,8 @@
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Մոտեցրեք հեռախոսը։"</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Բարձրացրեք հեռախոսը։"</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Իջեցրեք հեռախոսը։"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Տեղափոխեք հեռախոսը ձախ:"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Տեղափոխեք հեռախոսը աջ:"</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"Հեռախոսը շարժեք դեպի ձախ:"</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Հեռախոսը շարժեք դեպի աջ:"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Նայեք ուղիղ էկրանին։"</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Պահեք ձեր դեմքն անմիջապես հեռախոսի էկրանի դիմաց:"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
@@ -1358,7 +1358,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Հայտնաբերված է անալոգային աուդիո լրասարք"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Կցված սարքը համատեղելի չէ այս հեռախոսի հետ: Հպեք` ավելին իմանալու համար:"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-ով վրիպազերծումը միացված է"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Հպեք՝ USB-ով վրիպազերծումն անջատելու համար"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Հպեք՝ անջատելու համար"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Սեղմեք՝ USB-ով վրիպազերծումն անջատելու համար:"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Անլար վրիպազերծումը միացված է"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Հպեք՝ անլար վրիպազերծումն անջատելու համար"</string>
