@@ -19,11 +19,15 @@ package com.android.systemui.bouncer.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,13 +44,12 @@ class BouncerViewModelTest : SysuiTestCase() {
         utils.authenticationInteractor(
             repository = utils.authenticationRepository(),
         )
-    private val underTest =
-        utils.bouncerViewModel(
-            utils.bouncerInteractor(
-                authenticationInteractor = authenticationInteractor,
-                sceneInteractor = utils.sceneInteractor(),
-            )
+    private val bouncerInteractor =
+        utils.bouncerInteractor(
+            authenticationInteractor = authenticationInteractor,
+            sceneInteractor = utils.sceneInteractor(),
         )
+    private val underTest = utils.bouncerViewModel(bouncerInteractor)
 
     @Test
     fun authMethod_nonNullForSecureMethods_nullForNotSecureMethods() =
@@ -88,6 +91,65 @@ class BouncerViewModelTest : SysuiTestCase() {
         assertThat(authMethodsToTest().map { it::class }.toSet())
             .isEqualTo(AuthenticationMethodModel::class.sealedSubclasses.toSet())
     }
+
+    @Test
+    fun isMessageUpdateAnimationsEnabled() =
+        testScope.runTest {
+            val isMessageUpdateAnimationsEnabled by
+                collectLastValue(underTest.isMessageUpdateAnimationsEnabled)
+            val throttling by collectLastValue(bouncerInteractor.throttling)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            assertThat(isMessageUpdateAnimationsEnabled).isTrue()
+
+            repeat(BouncerInteractor.THROTTLE_EVERY) {
+                // Wrong PIN.
+                bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
+            }
+            assertThat(isMessageUpdateAnimationsEnabled).isFalse()
+
+            throttling?.totalDurationSec?.let { seconds -> advanceTimeBy(seconds * 1000L) }
+            assertThat(isMessageUpdateAnimationsEnabled).isTrue()
+        }
+
+    @Test
+    fun isInputEnabled() =
+        testScope.runTest {
+            val isInputEnabled by
+                collectLastValue(
+                    underTest.authMethod.flatMapLatest { authViewModel ->
+                        authViewModel?.isInputEnabled ?: emptyFlow()
+                    }
+                )
+            val throttling by collectLastValue(bouncerInteractor.throttling)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            assertThat(isInputEnabled).isTrue()
+
+            repeat(BouncerInteractor.THROTTLE_EVERY) {
+                // Wrong PIN.
+                bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
+            }
+            assertThat(isInputEnabled).isFalse()
+
+            throttling?.totalDurationSec?.let { seconds -> advanceTimeBy(seconds * 1000L) }
+            assertThat(isInputEnabled).isTrue()
+        }
+
+    @Test
+    fun throttlingDialogMessage() =
+        testScope.runTest {
+            val throttlingDialogMessage by collectLastValue(underTest.throttlingDialogMessage)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+
+            repeat(BouncerInteractor.THROTTLE_EVERY) {
+                // Wrong PIN.
+                assertThat(throttlingDialogMessage).isNull()
+                bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
+            }
+            assertThat(throttlingDialogMessage).isNotEmpty()
+
+            underTest.onThrottlingDialogDismissed()
+            assertThat(throttlingDialogMessage).isNull()
+        }
 
     private fun authMethodsToTest(): List<AuthenticationMethodModel> {
         return listOf(
