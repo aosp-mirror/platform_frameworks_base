@@ -65,9 +65,18 @@ public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithmInterfac
         }
         Rect pipBounds = new Rect(startingBounds);
 
-        // move PiP towards corner if user hasn't moved it manually or the flag is on
-        if (mKeepClearAreaGravityEnabled
-                || (!pipBoundsState.hasUserMovedPip() && !pipBoundsState.hasUserResizedPip())) {
+        boolean shouldApplyGravity = false;
+        // if PiP is outside of screen insets, reposition using gravity
+        if (!insets.contains(pipBounds)) {
+            shouldApplyGravity = true;
+        }
+        // if user has not interacted with PiP, reposition using gravity
+        if (!pipBoundsState.hasUserMovedPip() && !pipBoundsState.hasUserResizedPip()) {
+            shouldApplyGravity = true;
+        }
+
+        // apply gravity that will position PiP in bottom left or bottom right corner within insets
+        if (mKeepClearAreaGravityEnabled || shouldApplyGravity) {
             float snapFraction = pipBoundsAlgorithm.getSnapFraction(startingBounds);
             int verticalGravity = Gravity.BOTTOM;
             int horizontalGravity;
