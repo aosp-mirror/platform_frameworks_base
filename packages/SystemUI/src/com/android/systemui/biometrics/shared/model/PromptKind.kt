@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.page
+package com.android.systemui.biometrics.shared.model
 
-import com.android.systemui.scene.shared.model.Scene
-import dagger.Module
-import dagger.multibindings.Multibinds
+import com.android.systemui.biometrics.Utils
+import com.android.systemui.biometrics.domain.model.BiometricModalities
 
-@Module
-interface SceneModule {
-    @Multibinds fun scenes(): Set<Scene>
+// TODO(b/251476085): this should eventually replace Utils.CredentialType
+/** Credential options for biometric prompt. Shadows [Utils.CredentialType]. */
+sealed interface PromptKind {
+    data class Biometric(
+        val activeModalities: BiometricModalities = BiometricModalities(),
+    ) : PromptKind
+
+    object Pin : PromptKind
+    object Pattern : PromptKind
+    object Password : PromptKind
 }

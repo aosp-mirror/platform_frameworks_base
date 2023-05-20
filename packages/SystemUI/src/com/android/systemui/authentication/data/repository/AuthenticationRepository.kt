@@ -51,6 +51,12 @@ interface AuthenticationRepository {
      */
     val isBypassEnabled: StateFlow<Boolean>
 
+    /**
+     * Number of consecutively failed authentication attempts. This resets to `0` when
+     * authentication succeeds.
+     */
+    val failedAuthenticationAttempts: StateFlow<Int>
+
     /** See [isUnlocked]. */
     fun setUnlocked(isUnlocked: Boolean)
 
@@ -59,6 +65,9 @@ interface AuthenticationRepository {
 
     /** See [isBypassEnabled]. */
     fun setBypassEnabled(isBypassEnabled: Boolean)
+
+    /** See [failedAuthenticationAttempts]. */
+    fun setFailedAuthenticationAttempts(failedAuthenticationAttempts: Int)
 }
 
 class AuthenticationRepositoryImpl @Inject constructor() : AuthenticationRepository {
@@ -75,6 +84,10 @@ class AuthenticationRepositoryImpl @Inject constructor() : AuthenticationReposit
     private val _isBypassEnabled = MutableStateFlow(false)
     override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled.asStateFlow()
 
+    private val _failedAuthenticationAttempts = MutableStateFlow(0)
+    override val failedAuthenticationAttempts: StateFlow<Int> =
+        _failedAuthenticationAttempts.asStateFlow()
+
     override fun setUnlocked(isUnlocked: Boolean) {
         _isUnlocked.value = isUnlocked
     }
@@ -85,6 +98,10 @@ class AuthenticationRepositoryImpl @Inject constructor() : AuthenticationReposit
 
     override fun setAuthenticationMethod(authenticationMethod: AuthenticationMethodModel) {
         _authenticationMethod.value = authenticationMethod
+    }
+
+    override fun setFailedAuthenticationAttempts(failedAuthenticationAttempts: Int) {
+        _failedAuthenticationAttempts.value = failedAuthenticationAttempts
     }
 }
 

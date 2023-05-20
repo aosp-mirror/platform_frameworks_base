@@ -493,6 +493,9 @@ public final class TransitionInfo implements Parcelable {
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
         }
+        if ((flags & FLAG_MOVED_TO_TOP) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("MOVE_TO_TOP");
+        }
         return sb.toString();
     }
 

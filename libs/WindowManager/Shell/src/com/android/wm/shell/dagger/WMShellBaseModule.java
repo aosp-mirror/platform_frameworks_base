@@ -732,10 +732,11 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ShellController provideShellController(ShellInit shellInit,
+    static ShellController provideShellController(Context context,
+            ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellController(shellInit, shellCommandHandler, mainExecutor);
+        return new ShellController(context, shellInit, shellCommandHandler, mainExecutor);
     }
 
     //

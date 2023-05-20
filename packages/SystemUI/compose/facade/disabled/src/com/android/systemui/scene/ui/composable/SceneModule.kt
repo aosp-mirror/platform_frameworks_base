@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.data.model
+package com.android.systemui.scene.ui.composable
 
-import com.android.systemui.biometrics.Utils
+import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.shared.model.SceneContainerNames
+import dagger.Module
+import dagger.multibindings.Multibinds
+import javax.inject.Named
 
-// TODO(b/251476085): this should eventually replace Utils.CredentialType
-/** Credential options for biometric prompt. Shadows [Utils.CredentialType]. */
-enum class PromptKind {
-    ANY_BIOMETRIC,
-    PIN,
-    PATTERN,
-    PASSWORD,
+@Module
+interface SceneModule {
+    @Multibinds @Named(SceneContainerNames.SYSTEM_UI_DEFAULT) fun scenes(): Set<Scene>
 }

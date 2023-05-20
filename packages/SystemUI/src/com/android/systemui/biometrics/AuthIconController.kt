@@ -84,9 +84,6 @@ abstract class AuthIconController(
         }
     }
 
-    /** If the icon should act as a "retry" button in the [currentState]. */
-    fun iconTapSendsRetryWhen(@BiometricState currentState: Int): Boolean = false
-
     /** Call during [updateState] if the controller is not [deactivated]. */
     abstract fun updateIcon(@BiometricState lastState: Int, @BiometricState newState: Int)
 

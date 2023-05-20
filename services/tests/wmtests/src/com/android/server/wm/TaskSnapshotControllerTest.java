@@ -75,7 +75,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();
-        mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        getClosingTasks(closingApps, closingTasks);
         assertEquals(1, closingTasks.size());
         assertEquals(closingWindow.mActivityRecord.getTask(), closingTasks.valueAt(0));
     }
@@ -93,7 +93,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();
-        mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
     }
 
@@ -108,8 +108,21 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<Task> closingTasks = new ArraySet<>();
         mWm.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(
                 Sets.newArraySet(closingWindow.mActivityRecord.getTask()));
-        mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
+    }
+
+    /** Retrieves all closing tasks based on the list of closing apps during an app transition. */
+    private void getClosingTasks(ArraySet<ActivityRecord> closingApps,
+            ArraySet<Task> outClosingTasks) {
+        outClosingTasks.clear();
+        for (int i = closingApps.size() - 1; i >= 0; i--) {
+            final ActivityRecord activity = closingApps.valueAt(i);
+            final Task task = activity.getTask();
+            if (task == null) continue;
+
+            mWm.mTaskSnapshotController.getClosingTasksInner(task, outClosingTasks);
+        }
     }
 
     @Test

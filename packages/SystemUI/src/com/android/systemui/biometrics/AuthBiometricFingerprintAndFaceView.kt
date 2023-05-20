@@ -40,10 +40,10 @@ class AuthBiometricFingerprintAndFaceView(
     override fun ignoreUnsuccessfulEventsFrom(@Modality modality: Int, unsuccessfulReason: String) =
         modality == TYPE_FACE && !(isFaceClass3 && isLockoutErrorString(unsuccessfulReason))
 
-    override fun onPointerDown(failedModalities: Set<Int>) = failedModalities.contains(TYPE_FACE)
-
     override fun createIconController(): AuthIconController =
         AuthBiometricFingerprintAndFaceIconController(mContext, mIconView, mIconViewOverlay)
+
+    override fun isCoex() = true
 
     private fun isLockoutErrorString(unsuccessfulReason: String) =
         unsuccessfulReason == FaceManager.getErrorString(

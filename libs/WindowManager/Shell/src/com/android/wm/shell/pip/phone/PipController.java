@@ -1017,6 +1017,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay);
     }
 
+    private void abortSwipePipToHome(int taskId, ComponentName componentName) {
+        mPipTaskOrganizer.abortSwipePipToHome(taskId, componentName);
+    }
+
     private String getTransitionTag(int direction) {
         switch (direction) {
             case TRANSITION_DIRECTION_TO_PIP:
@@ -1310,6 +1314,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> controller.stopSwipePipToHome(
                             taskId, componentName, destinationBounds, overlay));
+        }
+
+        @Override
+        public void abortSwipePipToHome(int taskId, ComponentName componentName) {
+            executeRemoteCallWithTaskPermission(mController, "abortSwipePipToHome",
+                    (controller) -> controller.abortSwipePipToHome(taskId, componentName));
         }
 
         @Override

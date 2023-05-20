@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
+<!-- TODO(b/251476085): inline in biometric_prompt_layout after Biometric*Views are un-flagged -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView

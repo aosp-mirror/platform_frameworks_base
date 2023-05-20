@@ -20,6 +20,8 @@ import android.content.Context
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.qualifiers.Application
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,7 +36,7 @@ constructor(
     @Application private val applicationContext: Context,
     @Application private val applicationScope: CoroutineScope,
     interactorFactory: BouncerInteractor.Factory,
-    containerName: String,
+    @Assisted containerName: String,
 ) {
     private val interactor: BouncerInteractor = interactorFactory.create(containerName)
 
@@ -93,5 +95,12 @@ constructor(
             is AuthenticationMethodModel.Pattern -> pattern
             else -> null
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            containerName: String,
+        ): BouncerViewModel
     }
 }

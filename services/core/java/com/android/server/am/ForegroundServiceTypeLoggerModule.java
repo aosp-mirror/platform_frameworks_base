@@ -451,6 +451,10 @@ public class ForegroundServiceTypeLoggerModule {
             @ForegroundServiceApiType int apiType, long timestamp) {
         final long apiDurationBeforeFgsStart = r.mFgsEnterTime - timestamp;
         final long apiDurationAfterFgsEnd = timestamp - r.mFgsExitTime;
+        final int[] apiTypes = new int[1];
+        apiTypes[0] = apiType;
+        final long[] timeStamps = new long[1];
+        timeStamps[0] = timestamp;
         FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                 r.appInfo.uid,
                 r.shortInstanceName,
@@ -475,8 +479,8 @@ public class ForegroundServiceTypeLoggerModule {
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mDelegationService
                         : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
                 apiState,
-                apiType,
-                timestamp,
+                apiTypes,
+                timeStamps,
                 ActivityManager.PROCESS_STATE_UNKNOWN,
                 ActivityManager.PROCESS_CAPABILITY_NONE,
                 ActivityManager.PROCESS_STATE_UNKNOWN,
@@ -500,6 +504,10 @@ public class ForegroundServiceTypeLoggerModule {
                 apiDurationAfterFgsEnd = timestamp - uidState.mLastFgsTimeStamp.get(apiType);
             }
         }
+        final int[] apiTypes = new int[1];
+        apiTypes[0] = apiType;
+        final long[] timeStamps = new long[1];
+        timeStamps[0] = timestamp;
         FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                 uid,
                 null,
@@ -522,8 +530,8 @@ public class ForegroundServiceTypeLoggerModule {
                 0,
                 0,
                 apiState,
-                apiType,
-                timestamp,
+                apiTypes,
+                timeStamps,
                 ActivityManager.PROCESS_STATE_UNKNOWN,
                 ActivityManager.PROCESS_CAPABILITY_NONE,
                 ActivityManager.PROCESS_STATE_UNKNOWN,

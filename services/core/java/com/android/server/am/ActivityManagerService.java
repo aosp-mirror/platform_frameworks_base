@@ -18341,16 +18341,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean hasRunningForegroundService(int uid, int foregroundServicetype) {
             synchronized (ActivityManagerService.this) {
-                return mProcessList.searchEachLruProcessesLOSP(true, app -> {
-                    if (app.uid != uid) {
-                        return null;
-                    }
-
+                final UidRecord uidRec = mProcessList.mActiveUids.get(uid);
+                if (uidRec == null) {
+                    return false;
+                }
+                for (int i = uidRec.getNumOfProcs() - 1; i >= 0; i--) {
+                    final ProcessRecord app = uidRec.getProcessRecordByIndex(i);
                     if ((app.mServices.containsAnyForegroundServiceTypes(foregroundServicetype))) {
-                        return Boolean.TRUE;
+                        return true;
                     }
-                    return null;
-                }) != null;
+                }
+                return false;
             }
         }
 

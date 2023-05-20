@@ -716,6 +716,48 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testOnNotificationAdded_emptyMetadata_usesNotificationTitle() {
+        // When the app sets the metadata title fields to empty strings, but does include a
+        // non-blank notification title
+        val mockPackageManager = mock(PackageManager::class.java)
+        context.setMockPackageManager(mockPackageManager)
+        whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
+        whenever(mediaFlags.isMediaTitleRequired(any(), any())).thenReturn(true)
+        whenever(controller.metadata)
+            .thenReturn(
+                metadataBuilder
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_EMPTY_TITLE)
+                    .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, SESSION_EMPTY_TITLE)
+                    .build()
+            )
+        mediaNotification =
+            SbnBuilder().run {
+                setPkg(PACKAGE_NAME)
+                modifyNotification(context).also {
+                    it.setSmallIcon(android.R.drawable.ic_media_pause)
+                    it.setContentTitle(SESSION_TITLE)
+                    it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+                }
+                build()
+            }
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        // Then the media control is added using the notification's title
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        assertThat(mediaDataCaptor.value.song).isEqualTo(SESSION_TITLE)
+    }
+
+    @Test
     fun testOnNotificationRemoved_emptyTitle_notConverted() {
         // GIVEN that the manager has a notification with a resume action and empty title.
         addNotificationAndLoad()

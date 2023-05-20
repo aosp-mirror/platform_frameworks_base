@@ -56,43 +56,42 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Contains the Biometric views (title, subtitle, icon, buttons, etc.) and its controllers.
  */
-public abstract class AuthBiometricView extends LinearLayout {
+public abstract class AuthBiometricView extends LinearLayout implements AuthBiometricViewAdapter {
 
     private static final String TAG = "AuthBiometricView";
 
     /**
      * Authentication hardware idle.
      */
-    protected static final int STATE_IDLE = 0;
+    public static final int STATE_IDLE = 0;
     /**
      * UI animating in, authentication hardware active.
      */
-    protected static final int STATE_AUTHENTICATING_ANIMATING_IN = 1;
+    public static final int STATE_AUTHENTICATING_ANIMATING_IN = 1;
     /**
      * UI animated in, authentication hardware active.
      */
-    protected static final int STATE_AUTHENTICATING = 2;
+    public static final int STATE_AUTHENTICATING = 2;
     /**
      * UI animated in, authentication hardware active.
      */
-    protected static final int STATE_HELP = 3;
+    public static final int STATE_HELP = 3;
     /**
      * Hard error, e.g. ERROR_TIMEOUT. Authentication hardware idle.
      */
-    protected static final int STATE_ERROR = 4;
+    public static final int STATE_ERROR = 4;
     /**
      * Authenticated, waiting for user confirmation. Authentication hardware idle.
      */
-    protected static final int STATE_PENDING_CONFIRMATION = 5;
+    public static final int STATE_PENDING_CONFIRMATION = 5;
     /**
      * Authenticated, dialog animating away soon.
      */
-    protected static final int STATE_AUTHENTICATED = 6;
+    public static final int STATE_AUTHENTICATED = 6;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATE_IDLE, STATE_AUTHENTICATING_ANIMATING_IN, STATE_AUTHENTICATING, STATE_HELP,
@@ -102,13 +101,14 @@ public abstract class AuthBiometricView extends LinearLayout {
     /**
      * Callback to the parent when a user action has occurred.
      */
-    interface Callback {
+    public interface Callback {
         int ACTION_AUTHENTICATED = 1;
         int ACTION_USER_CANCELED = 2;
         int ACTION_BUTTON_NEGATIVE = 3;
         int ACTION_BUTTON_TRY_AGAIN = 4;
         int ACTION_ERROR = 5;
         int ACTION_USE_DEVICE_CREDENTIAL = 6;
+        int ACTION_START_DELAYED_FINGERPRINT_SENSOR = 7;
 
         /**
          * When an action has occurred. The caller will only invoke this when the callback should
@@ -268,6 +268,27 @@ public abstract class AuthBiometricView extends LinearLayout {
     /** Create the controller for managing the icons transitions during the prompt.*/
     @NonNull
     protected abstract AuthIconController createIconController();
+
+    @Override
+    public AuthIconController getLegacyIconController() {
+        return mIconController;
+    }
+
+    @Override
+    public void cancelAnimation() {
+        animate().cancel();
+    }
+
+    @Override
+    public View asView() {
+        return this;
+    }
+
+    @Override
+    public boolean isCoex() {
+        return false;
+    }
+
     void setPanelController(AuthPanelController panelController) {
         mPanelController = panelController;
     }
@@ -544,12 +565,12 @@ public abstract class AuthBiometricView extends LinearLayout {
         mState = newState;
     }
 
-    void onOrientationChanged() {
+    public void onOrientationChanged() {
         // Update padding and AuthPanel outline by calling updateSize when the orientation changed.
         updateSize(mSize);
     }
 
-    public void onDialogAnimatedIn() {
+    public void onDialogAnimatedIn(boolean fingerprintWasStarted) {
         updateState(STATE_AUTHENTICATING);
     }
 
@@ -594,18 +615,6 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_ERROR),
                 mAnimationDurationHideDialog);
-    }
-
-    /**
-     * Fingerprint pointer down event. This does nothing by default and will not be called if the
-     * device does not have an appropriate sensor (UDFPS), but it may be used as an alternative
-     * to the "retry" button when fingerprint is used with other modalities.
-     *
-     * @param failedModalities the set of modalities that have failed
-     * @return true if a retry was initiated as a result of this event
-     */
-    public boolean onPointerDown(Set<Integer> failedModalities) {
-        return false;
     }
 
     /**
@@ -752,7 +761,8 @@ public abstract class AuthBiometricView extends LinearLayout {
     /**
      * Kicks off the animation process and invokes the callback.
      */
-    void startTransitionToCredentialUI() {
+    @Override
+    public void startTransitionToCredentialUI() {
         updateSize(AuthDialog.SIZE_LARGE);
         mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
     }

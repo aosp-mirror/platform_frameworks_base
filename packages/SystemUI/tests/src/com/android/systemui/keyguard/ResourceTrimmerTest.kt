@@ -1,6 +1,7 @@
 package com.android.systemui.keyguard
 
 import android.content.ComponentCallbacks2
+import android.graphics.HardwareRenderer
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -9,7 +10,11 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
@@ -25,6 +30,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
@@ -37,6 +43,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
     private val testScope = TestScope(testDispatcher)
     private val keyguardRepository = FakeKeyguardRepository()
     private val featureFlags = FakeFeatureFlags()
+    private val keyguardTransitionRepository = FakeKeyguardTransitionRepository()
 
     @Mock private lateinit var globalWindowManager: GlobalWindowManager
     private lateinit var resourceTrimmer: ResourceTrimmer
@@ -45,13 +52,15 @@ class ResourceTrimmerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         featureFlags.set(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK, true)
+        featureFlags.set(Flags.TRIM_FONT_CACHES_AT_UNLOCK, true)
         featureFlags.set(Flags.FACE_AUTH_REFACTOR, false)
         keyguardRepository.setWakefulnessModel(
             WakefulnessModel(WakefulnessState.AWAKE, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
         )
         keyguardRepository.setDozeAmount(0f)
+        keyguardRepository.setKeyguardGoingAway(false)
 
-        val interactor =
+        val keyguardInteractor =
             KeyguardInteractor(
                 keyguardRepository,
                 FakeCommandQueue(),
@@ -60,7 +69,8 @@ class ResourceTrimmerTest : SysuiTestCase() {
             )
         resourceTrimmer =
             ResourceTrimmer(
-                interactor,
+                keyguardInteractor,
+                KeyguardTransitionInteractor(keyguardTransitionRepository),
                 globalWindowManager,
                 testScope.backgroundScope,
                 testDispatcher,
@@ -191,4 +201,26 @@ class ResourceTrimmerTest : SysuiTestCase() {
             verifyZeroInteractions(globalWindowManager)
         }
     }
+
+    @Test
+    fun keyguardTransitionsToGone_trimsFontCache() =
+        testScope.runTest {
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+            )
+            verify(globalWindowManager, times(1))
+                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            verify(globalWindowManager, times(1)).trimCaches(HardwareRenderer.CACHE_TRIM_FONT)
+            verifyNoMoreInteractions(globalWindowManager)
+        }
+
+    @Test
+    fun keyguardTransitionsToGone_flagDisabled_doesNotTrimFontCache() =
+        testScope.runTest {
+            featureFlags.set(Flags.TRIM_FONT_CACHES_AT_UNLOCK, false)
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+            )
+            verifyNoMoreInteractions(globalWindowManager)
+        }
 }
