@@ -536,7 +536,7 @@ status_t IncidentService::onTransact(uint32_t code, const Parcel& data, Parcel* 
                 fflush(fout);
                 fclose(fout);
             }
-            if (fout != NULL) {
+            if (ferr != NULL) {
                 fflush(ferr);
                 fclose(ferr);
             }
