@@ -241,7 +241,7 @@ object Flags {
     /** Whether to delay showing bouncer UI when face auth or active unlock are enrolled. */
     // TODO(b/279794160): Tracking bug.
     @JvmField
-    val DELAY_BOUNCER = releasedFlag(235, "delay_bouncer")
+    val DELAY_BOUNCER = unreleasedFlag(235, "delay_bouncer")
 
     /** Migrate the indication area to the new keyguard root view. */
     // TODO(b/280067944): Tracking bug.
