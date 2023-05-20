@@ -29,6 +29,9 @@ interface IDesktopMode {
     /** Stash apps on the desktop to allow launching another app from home screen */
     void stashDesktopApps(int displayId);
 
+    /** Hide apps that may be stashed */
+    void hideStashedDesktopApps(int displayId);
+
     /** Get count of visible desktop tasks on the given display */
     int getVisibleTaskCount(int displayId);
 

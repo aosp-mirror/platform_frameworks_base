@@ -791,4 +791,6 @@ interface IPackageManager {
     void setKeepUninstalledPackages(in List<String> packageList);
 
     boolean[] canPackageQuery(String sourcePackageName, in String[] targetPackageNames, int userId);
+
+    boolean waitForHandler(long timeoutMillis, boolean forBackgroundHandler);
 }

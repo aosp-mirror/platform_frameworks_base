@@ -1570,6 +1570,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             // When media is visible, it overlaps with the large clock. Use small clock instead.
             return SMALL;
         }
+        // To prevent the weather clock from overlapping with the notification shelf on AOD, we use
+        // the small clock here
+        if (mKeyguardStatusViewController.isLargeClockBlockingNotificationShelf()
+                && hasVisibleNotifications() && isOnAod()) {
+            return SMALL;
+        }
         return LARGE;
     }
 

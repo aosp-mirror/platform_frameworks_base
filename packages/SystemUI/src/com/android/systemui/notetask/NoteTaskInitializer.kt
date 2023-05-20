@@ -15,7 +15,10 @@
  */
 package com.android.systemui.notetask
 
+import android.app.role.OnRoleHoldersChangedListener
 import android.app.role.RoleManager
+import android.content.Context
+import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_N
@@ -54,6 +57,7 @@ constructor(
         initializeHandleSystemKey()
         initializeOnRoleHoldersChanged()
         initializeOnUserUnlocked()
+        initializeUserTracker()
     }
 
     /**
@@ -79,7 +83,7 @@ constructor(
     private fun initializeOnRoleHoldersChanged() {
         roleManager.addOnRoleHoldersChangedListenerAsUser(
             backgroundExecutor,
-            controller::onRoleHoldersChanged,
+            callbacks,
             UserHandle.ALL,
         )
     }
@@ -93,18 +97,41 @@ constructor(
      */
     private fun initializeOnUserUnlocked() {
         if (keyguardUpdateMonitor.isUserUnlocked(userTracker.userId)) {
-            controller.setNoteTaskShortcutEnabled(true, userTracker.userHandle)
-        } else {
-            keyguardUpdateMonitor.registerCallback(onUserUnlockedCallback)
+            controller.updateNoteTaskForCurrentUserAndManagedProfiles()
         }
+        keyguardUpdateMonitor.registerCallback(callbacks)
     }
 
-    // KeyguardUpdateMonitor.registerCallback uses a weak reference, so we need a hard reference.
-    private val onUserUnlockedCallback =
-        object : KeyguardUpdateMonitorCallback() {
+    private fun initializeUserTracker() {
+        userTracker.addCallback(callbacks, backgroundExecutor)
+    }
+
+    // Some callbacks use a weak reference, so we play safe and keep a hard reference to them all.
+    private val callbacks =
+        object :
+            KeyguardUpdateMonitorCallback(),
+            CommandQueue.Callbacks,
+            UserTracker.Callback,
+            OnRoleHoldersChangedListener {
+
+            override fun handleSystemKey(key: KeyEvent) {
+                key.toNoteTaskEntryPointOrNull()?.let(controller::showNoteTask)
+            }
+
+            override fun onRoleHoldersChanged(roleName: String, user: UserHandle) {
+                controller.onRoleHoldersChanged(roleName, user)
+            }
+
             override fun onUserUnlocked() {
-                controller.setNoteTaskShortcutEnabled(true, userTracker.userHandle)
-                keyguardUpdateMonitor.removeCallback(this)
+                controller.updateNoteTaskForCurrentUserAndManagedProfiles()
+            }
+
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                controller.updateNoteTaskForCurrentUserAndManagedProfiles()
+            }
+
+            override fun onProfilesChanged(profiles: List<UserInfo>) {
+                controller.updateNoteTaskForCurrentUserAndManagedProfiles()
             }
         }
 }

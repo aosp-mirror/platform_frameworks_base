@@ -109,7 +109,10 @@ StreamManager::StreamManager(
         int32_t streams, size_t threads, const audio_attributes_t& attributes,
         std::string opPackageName)
     : StreamMap(streams)
-    , mAttributes(attributes)
+    , mAttributes([attributes](){
+        audio_attributes_t attr = attributes;
+        attr.flags = static_cast<audio_flags_mask_t>(attr.flags | AUDIO_FLAG_LOW_LATENCY);
+        return attr; }())
     , mOpPackageName(std::move(opPackageName))
     , mLockStreamManagerStop(streams == 1 || kForceLockStreamManagerStop)
 {

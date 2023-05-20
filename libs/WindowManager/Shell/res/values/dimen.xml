@@ -229,7 +229,11 @@
     <!-- Size of the bubble bar (height), should match transient_taskbar_size in Launcher. -->
     <dimen name="bubblebar_size">72dp</dimen>
     <!-- The size of the drag handle / menu shown along with a bubble bar expanded view. -->
-    <dimen name="bubblebar_expanded_view_menu_size">16dp</dimen>
+    <dimen name="bubble_bar_expanded_view_handle_size">40dp</dimen>
+    <!-- The width of the drag handle shown along with a bubble bar expanded view. -->
+    <dimen name="bubble_bar_expanded_view_handle_width">128dp</dimen>
+    <!-- The height of the drag handle shown along with a bubble bar expanded view. -->
+    <dimen name="bubble_bar_expanded_view_handle_height">4dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">24dp</dimen>

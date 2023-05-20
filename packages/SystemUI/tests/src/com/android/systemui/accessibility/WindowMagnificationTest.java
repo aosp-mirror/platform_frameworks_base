@@ -110,7 +110,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
             mWindowMagnification.mMagnificationSettingsControllerCallback
                     .onSettingsPanelVisibilityChanged(TEST_DISPLAY, /* shown= */ true);
             return null;
-        }).when(mMagnificationSettingsController).showMagnificationSettings();
+        }).when(mMagnificationSettingsController).toggleSettingsPanelVisibility();
         doAnswer(invocation -> {
             mWindowMagnification.mMagnificationSettingsControllerCallback
                     .onSettingsPanelVisibilityChanged(TEST_DISPLAY, /* shown= */ false);
@@ -198,7 +198,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mWindowMagnification.mWindowMagnifierCallback.onClickSettingsButton(TEST_DISPLAY);
         waitForIdleSync();
 
-        verify(mMagnificationSettingsController).showMagnificationSettings();
+        verify(mMagnificationSettingsController).toggleSettingsPanelVisibility();
         verify(mA11yLogger).log(
                 eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED));
     }

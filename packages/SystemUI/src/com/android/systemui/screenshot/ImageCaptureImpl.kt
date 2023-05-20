@@ -48,7 +48,9 @@ open class ImageCaptureImpl @Inject constructor(
     }
 
     override suspend fun captureTask(taskId: Int): Bitmap? {
-        val snapshot = withContext(bgContext) { atmService.takeTaskSnapshot(taskId) } ?: return null
+        val snapshot = withContext(bgContext) {
+            atmService.takeTaskSnapshot(taskId, false /* updateCache */)
+        } ?: return null
         return Bitmap.wrapHardwareBuffer(snapshot.hardwareBuffer, snapshot.colorSpace)
     }
 }

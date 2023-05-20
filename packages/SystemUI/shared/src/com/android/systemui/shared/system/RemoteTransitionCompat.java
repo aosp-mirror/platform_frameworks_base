@@ -352,7 +352,8 @@ public class RemoteTransitionCompat {
 
         @Override public TaskSnapshot screenshotTask(int taskId) {
             try {
-                return ActivityTaskManager.getService().takeTaskSnapshot(taskId);
+                return ActivityTaskManager.getService().takeTaskSnapshot(taskId,
+                        true /* updateCache */);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to screenshot task", e);
             }

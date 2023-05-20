@@ -43,6 +43,7 @@ import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.text.TextUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,6 +66,7 @@ import java.util.Map;
 @Config(shadows = {UtilsTest.ShadowSecure.class, UtilsTest.ShadowLocationManager.class})
 public class UtilsTest {
     private static final double[] TEST_PERCENTAGES = {0, 0.4, 0.5, 0.6, 49, 49.3, 49.8, 50, 100};
+    private static final String TAG = "UtilsTest";
     private static final String PERCENTAGE_0 = "0%";
     private static final String PERCENTAGE_1 = "1%";
     private static final String PERCENTAGE_49 = "49%";
@@ -94,6 +96,12 @@ public class UtilsTest {
         when(mContext.getSystemService(UsbManager.class)).thenReturn(mUsbManager);
         ShadowSecure.reset();
         mAudioManager = mContext.getSystemService(AudioManager.class);
+    }
+
+    @After
+    public void reset() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Utils.INCOMPATIBLE_CHARGER_WARNING_DISABLED, 0);
     }
 
     @Test
@@ -427,13 +435,13 @@ public class UtilsTest {
     @Test
     public void containsIncompatibleChargers_nullPorts_returnFalse() {
         when(mUsbManager.getPorts()).thenReturn(null);
-        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
     }
 
     @Test
     public void containsIncompatibleChargers_emptyPorts_returnFalse() {
         when(mUsbManager.getPorts()).thenReturn(new ArrayList<>());
-        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
     }
 
     @Test
@@ -443,13 +451,13 @@ public class UtilsTest {
         when(mUsbManager.getPorts()).thenReturn(usbPorts);
         when(mUsbPort.getStatus()).thenReturn(null);
 
-        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
     }
 
     @Test
     public void containsIncompatibleChargers_returnTrue() {
         setupIncompatibleCharging();
-        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isTrue();
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isTrue();
     }
 
     @Test
@@ -457,7 +465,7 @@ public class UtilsTest {
         setupIncompatibleCharging();
         when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[1]);
 
-        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
     }
 
     @Test
@@ -465,7 +473,7 @@ public class UtilsTest {
         setupIncompatibleCharging();
         when(mUsbPort.supportsComplianceWarnings()).thenReturn(false);
 
-        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
     }
 
     @Test
@@ -473,7 +481,16 @@ public class UtilsTest {
         setupIncompatibleCharging();
         when(mUsbPortStatus.isConnected()).thenReturn(false);
 
-        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_disableWarning_returnFalse() {
+        setupIncompatibleCharging();
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Utils.INCOMPATIBLE_CHARGER_WARNING_DISABLED, 1);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
     }
 
     private void setupIncompatibleCharging() {

@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
@@ -189,6 +190,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         assertThat(mLargeClockFrame.getAlpha()).isEqualTo(1);
         assertThat(mLargeClockFrame.getVisibility()).isEqualTo(VISIBLE);
         assertThat(mSmallClockFrame.getAlpha()).isEqualTo(0);
+        assertThat(mSmallClockFrame.getVisibility()).isEqualTo(INVISIBLE);
     }
 
     @Test
@@ -198,6 +200,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         assertThat(mLargeClockFrame.getAlpha()).isEqualTo(1);
         assertThat(mLargeClockFrame.getVisibility()).isEqualTo(VISIBLE);
         assertThat(mSmallClockFrame.getAlpha()).isEqualTo(0);
+        assertThat(mSmallClockFrame.getVisibility()).isEqualTo(INVISIBLE);
     }
 
     @Test
@@ -212,6 +215,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         // only big clock is removed at switch
         assertThat(mLargeClockFrame.getParent()).isNull();
         assertThat(mLargeClockFrame.getAlpha()).isEqualTo(0);
+        assertThat(mLargeClockFrame.getVisibility()).isEqualTo(INVISIBLE);
     }
 
     @Test
@@ -223,6 +227,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         // only big clock is removed at switch
         assertThat(mLargeClockFrame.getParent()).isNull();
         assertThat(mLargeClockFrame.getAlpha()).isEqualTo(0);
+        assertThat(mLargeClockFrame.getVisibility()).isEqualTo(INVISIBLE);
     }
 
     @Test

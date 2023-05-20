@@ -845,11 +845,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
                 final Task task = wc != null ? wc.asTask() : null;
-                if (task != null) {
+                if (task == null) {
+                    throw new IllegalArgumentException("Cannot set non-task as launch root: " + wc);
+                } else if (task.getTaskDisplayArea() == null) {
+                    throw new IllegalArgumentException("Cannot set a task without display area as "
+                            + "launch root: " + wc);
+                } else {
                     task.getDisplayArea().setLaunchRootTask(task,
                             hop.getWindowingModes(), hop.getActivityTypes());
-                } else {
-                    throw new IllegalArgumentException("Cannot set non-task as launch root: " + wc);
                 }
                 break;
             }

@@ -2,6 +2,7 @@ package com.android.systemui.biometrics.domain.model
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
 import com.android.systemui.biometrics.promptInfo
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -21,11 +22,13 @@ class BiometricPromptRequestTest : SysuiTestCase() {
         val subtitle = "a"
         val description = "request"
 
+        val fpPros = fingerprintSensorPropertiesInternal().first()
         val request =
             BiometricPromptRequest.Biometric(
                 promptInfo(title = title, subtitle = subtitle, description = description),
                 BiometricUserInfo(USER_ID),
-                BiometricOperationInfo(OPERATION_ID)
+                BiometricOperationInfo(OPERATION_ID),
+                BiometricModalities(fingerprintProperties = fpPros),
             )
 
         assertThat(request.title).isEqualTo(title)
@@ -33,6 +36,8 @@ class BiometricPromptRequestTest : SysuiTestCase() {
         assertThat(request.description).isEqualTo(description)
         assertThat(request.userInfo).isEqualTo(BiometricUserInfo(USER_ID))
         assertThat(request.operationInfo).isEqualTo(BiometricOperationInfo(OPERATION_ID))
+        assertThat(request.modalities)
+            .isEqualTo(BiometricModalities(fingerprintProperties = fpPros))
     }
 
     @Test
@@ -51,19 +56,19 @@ class BiometricPromptRequestTest : SysuiTestCase() {
                         description = description,
                         credentialTitle = null,
                         credentialSubtitle = null,
-                        credentialDescription = null
+                        credentialDescription = null,
                     ),
                     BiometricUserInfo(USER_ID),
-                    BiometricOperationInfo(OPERATION_ID)
+                    BiometricOperationInfo(OPERATION_ID),
                 ),
                 BiometricPromptRequest.Credential.Password(
                     promptInfo(
                         credentialTitle = title,
                         credentialSubtitle = subtitle,
-                        credentialDescription = description
+                        credentialDescription = description,
                     ),
                     BiometricUserInfo(USER_ID),
-                    BiometricOperationInfo(OPERATION_ID)
+                    BiometricOperationInfo(OPERATION_ID),
                 ),
                 BiometricPromptRequest.Credential.Pattern(
                     promptInfo(
@@ -71,11 +76,11 @@ class BiometricPromptRequestTest : SysuiTestCase() {
                         description = description,
                         credentialTitle = title,
                         credentialSubtitle = null,
-                        credentialDescription = null
+                        credentialDescription = null,
                     ),
                     BiometricUserInfo(USER_ID),
                     BiometricOperationInfo(OPERATION_ID),
-                    stealth
+                    stealth,
                 )
             )
 

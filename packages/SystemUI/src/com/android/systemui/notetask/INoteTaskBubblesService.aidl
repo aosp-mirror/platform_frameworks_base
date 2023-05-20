@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.page
+package com.android.systemui.notetask;
 
-import com.android.systemui.scene.shared.model.Scene
-import dagger.Module
-import dagger.multibindings.Multibinds
+import android.content.Intent;
+import android.graphics.drawable.Icon;
+import android.os.UserHandle;
 
-@Module
-interface SceneModule {
-    @Multibinds fun scenes(): Set<Scene>
+/** A service to help with controlling the state of notes app bubble through the system user. */
+interface INoteTaskBubblesService {
+
+    boolean areBubblesAvailable();
+
+    void showOrHideAppBubble(in Intent intent, in UserHandle userHandle, in Icon icon);
 }

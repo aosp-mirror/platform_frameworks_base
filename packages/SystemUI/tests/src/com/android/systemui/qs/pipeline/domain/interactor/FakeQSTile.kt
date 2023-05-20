@@ -29,6 +29,7 @@ class FakeQSTile(
     private var tileSpec: String? = null
     var destroyed = false
     private val state = QSTile.State()
+    val callbacks = mutableListOf<QSTile.Callback>()
 
     override fun getTileSpec(): String? {
         return tileSpec
@@ -45,11 +46,17 @@ class FakeQSTile(
 
     override fun refreshState() {}
 
-    override fun addCallback(callback: QSTile.Callback?) {}
+    override fun addCallback(callback: QSTile.Callback) {
+        callbacks.add(callback)
+    }
 
-    override fun removeCallback(callback: QSTile.Callback?) {}
+    override fun removeCallback(callback: QSTile.Callback) {
+        callbacks.remove(callback)
+    }
 
-    override fun removeCallbacks() {}
+    override fun removeCallbacks() {
+        callbacks.clear()
+    }
 
     override fun createTileView(context: Context?): QSIconView? {
         return null

@@ -311,6 +311,14 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mCallback.onSettingsPanelVisibilityChanged(/* shown= */ false);
     }
 
+    public void toggleSettingsPanelVisibility() {
+        if (!mIsVisible) {
+            showSettingPanel();
+        } else {
+            hideSettingPanel();
+        }
+    }
+
     public void showSettingPanel() {
         showSettingPanel(true);
     }

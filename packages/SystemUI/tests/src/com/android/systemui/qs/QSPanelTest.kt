@@ -27,6 +27,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.qs.QSTileView
+import com.android.systemui.qs.QSPanelControllerBase.TileRecord
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
@@ -190,6 +192,18 @@ class QSPanelTest : SysuiTestCase() {
 
         val actionCollapse = AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE
         verify(accessibilityInfo, never()).addAction(actionCollapse)
+    }
+
+    @Test
+    fun addTile_callbackAdded() {
+        val tile = mock(QSTile::class.java)
+        val tileView = mock(QSTileView::class.java)
+
+        val record = TileRecord(tile, tileView)
+
+        qsPanel.addTile(record)
+
+        verify(tile).addCallback(record.callback)
     }
 
     private infix fun View.isLeftOf(other: View): Boolean {

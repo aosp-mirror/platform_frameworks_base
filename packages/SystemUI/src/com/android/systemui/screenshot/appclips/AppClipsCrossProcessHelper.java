@@ -19,7 +19,7 @@ package com.android.systemui.screenshot.appclips;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.UserManager;
+import android.os.UserHandle;
 
 import androidx.annotation.Nullable;
 
@@ -39,15 +39,14 @@ class AppClipsCrossProcessHelper {
     private final DisplayTracker mDisplayTracker;
 
     @Inject
-    AppClipsCrossProcessHelper(@Application Context context, UserManager userManager,
-            DisplayTracker displayTracker) {
+    AppClipsCrossProcessHelper(@Application Context context, DisplayTracker displayTracker) {
         // Start a service as main user so that even if the app clips activity is running as work
         // profile user the service is able to use correct instance of Bubbles to grab a screenshot
         // excluding the bubble layer.
         mProxyConnector = new ServiceConnector.Impl<>(context,
                 new Intent(context, AppClipsScreenshotHelperService.class),
                 Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY
-                        | Context.BIND_NOT_VISIBLE, userManager.getMainUser().getIdentifier(),
+                        | Context.BIND_NOT_VISIBLE, UserHandle.USER_SYSTEM,
                 IAppClipsScreenshotHelperService.Stub::asInterface);
         mDisplayTracker = displayTracker;
     }

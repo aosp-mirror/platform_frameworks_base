@@ -587,6 +587,17 @@ class DesktopTasksControllerTest : ShellTestCase() {
         assertThat(desktopModeTaskRepository.isStashed(SECOND_DISPLAY)).isFalse()
     }
 
+    @Test
+    fun hideStashedDesktopApps_stateUpdates() {
+        desktopModeTaskRepository.setStashed(DEFAULT_DISPLAY, true)
+        desktopModeTaskRepository.setStashed(SECOND_DISPLAY, true)
+        controller.hideStashedDesktopApps(DEFAULT_DISPLAY)
+
+        assertThat(desktopModeTaskRepository.isStashed(DEFAULT_DISPLAY)).isFalse()
+        // Check that second display is not affected
+        assertThat(desktopModeTaskRepository.isStashed(SECOND_DISPLAY)).isTrue()
+    }
+
     private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFreeformTask(displayId)
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)

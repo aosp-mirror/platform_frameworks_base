@@ -64,4 +64,9 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
 
     /** Check whether we allow remote media to generate resume controls */
     fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
+
+    /** Check whether app is required to provide a non-empty media title */
+    fun isMediaTitleRequired(packageName: String, user: UserHandle): Boolean {
+        return StatusBarManager.isMediaTitleRequiredForApp(packageName, user)
+    }
 }

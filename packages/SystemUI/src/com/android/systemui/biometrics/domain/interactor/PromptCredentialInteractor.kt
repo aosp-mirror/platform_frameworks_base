@@ -1,14 +1,30 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.biometrics.domain.interactor
 
 import android.hardware.biometrics.PromptInfo
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
 import com.android.systemui.biometrics.Utils
-import com.android.systemui.biometrics.data.model.PromptKind
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.domain.model.BiometricOperationInfo
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
 import com.android.systemui.biometrics.domain.model.BiometricUserInfo
+import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -24,8 +40,16 @@ import kotlinx.coroutines.withContext
 /**
  * Business logic for BiometricPrompt's CredentialViews, which primarily includes checking a users
  * PIN, pattern, or password credential instead of a biometric.
+ *
+ * This is used to cache the calling app's options that were given to the underlying authenticate
+ * APIs and should be set before any UI is shown to the user.
+ *
+ * There can be at most one request active at a given time. Use [resetPrompt] when no request is
+ * active to clear the cache.
+ *
+ * Views that use any biometric should use [PromptSelectorInteractor] instead.
  */
-class BiometricPromptCredentialInteractor
+class PromptCredentialInteractor
 @Inject
 constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
@@ -36,7 +60,7 @@ constructor(
     val isShowing: Flow<Boolean> = biometricPromptRepository.isShowing
 
     /** Metadata about the current credential prompt, including app-supplied preferences. */
-    val prompt: Flow<BiometricPromptRequest?> =
+    val prompt: Flow<BiometricPromptRequest.Credential?> =
         combine(
                 biometricPromptRepository.promptInfo,
                 biometricPromptRepository.challenge,
@@ -48,20 +72,20 @@ constructor(
                 }
 
                 when (kind) {
-                    PromptKind.PIN ->
+                    PromptKind.Pin ->
                         BiometricPromptRequest.Credential.Pin(
                             info = promptInfo,
                             userInfo = userInfo(userId),
                             operationInfo = operationInfo(challenge)
                         )
-                    PromptKind.PATTERN ->
+                    PromptKind.Pattern ->
                         BiometricPromptRequest.Credential.Pattern(
                             info = promptInfo,
                             userInfo = userInfo(userId),
                             operationInfo = operationInfo(challenge),
                             stealthMode = credentialInteractor.isStealthModeActive(userId)
                         )
-                    PromptKind.PASSWORD ->
+                    PromptKind.Password ->
                         BiometricPromptRequest.Credential.Password(
                             info = promptInfo,
                             userInfo = userInfo(userId),
@@ -182,8 +206,8 @@ constructor(
 /** Convert a [Utils.CredentialType] to the corresponding [PromptKind]. */
 private fun @receiver:Utils.CredentialType Int.asBiometricPromptCredential(): PromptKind =
     when (this) {
-        Utils.CREDENTIAL_PIN -> PromptKind.PIN
-        Utils.CREDENTIAL_PASSWORD -> PromptKind.PASSWORD
-        Utils.CREDENTIAL_PATTERN -> PromptKind.PATTERN
-        else -> PromptKind.ANY_BIOMETRIC
+        Utils.CREDENTIAL_PIN -> PromptKind.Pin
+        Utils.CREDENTIAL_PASSWORD -> PromptKind.Password
+        Utils.CREDENTIAL_PATTERN -> PromptKind.Pattern
+        else -> PromptKind.Biometric()
     }

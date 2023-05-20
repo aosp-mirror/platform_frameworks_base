@@ -171,7 +171,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
 
         mModeSwitchesController.setClickListenerDelegate(
                 displayId -> mHandler.post(() -> {
-                    showMagnificationSettingsPanel(displayId);
+                    toggleSettingsPanelVisibility(displayId);
                 }));
     }
 
@@ -254,11 +254,11 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
     }
 
     @MainThread
-    void showMagnificationSettingsPanel(int displayId) {
+    void toggleSettingsPanelVisibility(int displayId) {
         final MagnificationSettingsController magnificationSettingsController =
                 mMagnificationSettingsSupplier.get(displayId);
         if (magnificationSettingsController != null) {
-            magnificationSettingsController.showMagnificationSettings();
+            magnificationSettingsController.toggleSettingsPanelVisibility();
         }
     }
 
@@ -335,7 +335,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         @Override
         public void onClickSettingsButton(int displayId) {
             mHandler.post(() -> {
-                showMagnificationSettingsPanel(displayId);
+                toggleSettingsPanelVisibility(displayId);
             });
         }
     };

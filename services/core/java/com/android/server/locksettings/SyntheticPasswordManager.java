@@ -152,9 +152,6 @@ class SyntheticPasswordManager {
     // The security strength of the synthetic password, in bytes
     private static final int SYNTHETIC_PASSWORD_SECURITY_STRENGTH = 256 / 8;
 
-    public static final short PASSWORD_DATA_V1 = 1;
-    public static final short PASSWORD_DATA_V2 = 2;
-
     private static final int PASSWORD_SCRYPT_LOG_N = 11;
     private static final int PASSWORD_SCRYPT_LOG_R = 3;
     private static final int PASSWORD_SCRYPT_LOG_P = 1;
@@ -379,21 +376,18 @@ class SyntheticPasswordManager {
             buffer.put(data, 0, data.length);
             buffer.flip();
 
-          /*
-           * Originally this file did not contain a version number. However, its first field was
-           * 'credentialType' as an 'int'. Since 'credentialType' could only be in the range
-           * [-1, 4] and this file uses big endian byte order, the first two bytes were redundant,
-           * and when interpreted as a 'short' could only contain -1 or 0. Therefore, we've now
-           * reclaimed these two bytes for a 'short' version number and shrunk 'credentialType'
-           * to a 'short'.
-           */
-            short version = buffer.getShort();
-            if (version == ((short) 0) || version == (short) -1) {
-                version = PASSWORD_DATA_V1;
-            } else if (version != PASSWORD_DATA_V2) {
-                throw new IllegalArgumentException("Unknown PasswordData version: " + version);
-            }
-            result.credentialType = buffer.getShort();
+            /*
+             * The serialized PasswordData is supposed to begin with credentialType as an int.
+             * However, all credentialType values fit in a short and the byte order is big endian,
+             * so the first two bytes don't convey any non-redundant information.  For this reason,
+             * temporarily during development of Android 14, the first two bytes were "stolen" from
+             * credentialType to use for a data format version number.
+             *
+             * However, this change was reverted as it was a non-forwards-compatible change.  (See
+             * toBytes() for why this data format needs to be forwards-compatible.)  Therefore,
+             * recover from this misstep by ignoring the first two bytes.
+             */
+            result.credentialType = (short) buffer.getInt();
             result.scryptLogN = buffer.get();
             result.scryptLogR = buffer.get();
             result.scryptLogP = buffer.get();
@@ -407,7 +401,7 @@ class SyntheticPasswordManager {
             } else {
                 result.passwordHandle = null;
             }
-            if (version == PASSWORD_DATA_V2) {
+            if (buffer.remaining() >= Integer.BYTES) {
                 result.pinLength = buffer.getInt();
             } else {
                 result.pinLength = PIN_LENGTH_UNAVAILABLE;
@@ -415,16 +409,25 @@ class SyntheticPasswordManager {
             return result;
         }
 
+        /**
+         * Serializes this PasswordData into a byte array.
+         * <p>
+         * Careful: all changes to the format of the serialized PasswordData must be forwards
+         * compatible.  I.e., older versions of Android must still accept the latest PasswordData.
+         * This is because a serialized PasswordData is stored in the Factory Reset Protection (FRP)
+         * persistent data block.  It's possible that a device has FRP set up on a newer version of
+         * Android, is factory reset, and then is set up with an older version of Android.
+         */
         public byte[] toBytes() {
 
-            ByteBuffer buffer = ByteBuffer.allocate(2 * Short.BYTES + 3 * Byte.BYTES
+            ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + 3 * Byte.BYTES
                     + Integer.BYTES + salt.length + Integer.BYTES +
                     (passwordHandle != null ? passwordHandle.length : 0) + Integer.BYTES);
+            // credentialType must fit in a short.  For an explanation, see fromBytes().
             if (credentialType < Short.MIN_VALUE || credentialType > Short.MAX_VALUE) {
                 throw new IllegalArgumentException("Unknown credential type: " + credentialType);
             }
-            buffer.putShort(PASSWORD_DATA_V2);
-            buffer.putShort((short) credentialType);
+            buffer.putInt(credentialType);
             buffer.put(scryptLogN);
             buffer.put(scryptLogR);
             buffer.put(scryptLogP);

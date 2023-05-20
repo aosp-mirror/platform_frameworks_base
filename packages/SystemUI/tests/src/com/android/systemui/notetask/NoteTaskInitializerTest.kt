@@ -32,9 +32,12 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.wm.shell.bubbles.Bubbles
+import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
@@ -71,19 +74,19 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     }
 
     private fun createUnderTest(
-        isEnabled: Boolean,
-        bubbles: Bubbles?,
+            isEnabled: Boolean,
+            bubbles: Bubbles?,
     ): NoteTaskInitializer =
-        NoteTaskInitializer(
-            controller = controller,
-            commandQueue = commandQueue,
-            optionalBubbles = Optional.ofNullable(bubbles),
-            isEnabled = isEnabled,
-            roleManager = roleManager,
-            userTracker = userTracker,
-            keyguardUpdateMonitor = keyguardMonitor,
-            backgroundExecutor = executor,
-        )
+            NoteTaskInitializer(
+                    controller = controller,
+                    commandQueue = commandQueue,
+                    optionalBubbles = Optional.ofNullable(bubbles),
+                    isEnabled = isEnabled,
+                    roleManager = roleManager,
+                    userTracker = userTracker,
+                    keyguardUpdateMonitor = keyguardMonitor,
+                    backgroundExecutor = executor,
+            )
 
     @Test
     fun initialize_withUserUnlocked() {
@@ -93,8 +96,8 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
         verify(commandQueue).addCallback(any())
         verify(roleManager).addOnRoleHoldersChangedListenerAsUser(any(), any(), any())
-        verify(controller).setNoteTaskShortcutEnabled(any(), any())
-        verify(keyguardMonitor, never()).registerCallback(any())
+        verify(controller).updateNoteTaskForCurrentUserAndManagedProfiles()
+        verify(keyguardMonitor).registerCallback(any())
     }
 
     @Test
@@ -107,6 +110,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
         verify(roleManager).addOnRoleHoldersChangedListenerAsUser(any(), any(), any())
         verify(controller, never()).setNoteTaskShortcutEnabled(any(), any())
         verify(keyguardMonitor).registerCallback(any())
+        assertThat(userTracker.callbacks).isNotEmpty()
     }
 
     @Test
@@ -116,12 +120,12 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
         underTest.initialize()
 
         verifyZeroInteractions(
-            commandQueue,
-            bubbles,
-            controller,
-            roleManager,
-            userManager,
-            keyguardMonitor,
+                commandQueue,
+                bubbles,
+                controller,
+                roleManager,
+                userManager,
+                keyguardMonitor,
         )
     }
 
@@ -132,12 +136,12 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
         underTest.initialize()
 
         verifyZeroInteractions(
-            commandQueue,
-            bubbles,
-            controller,
-            roleManager,
-            userManager,
-            keyguardMonitor,
+                commandQueue,
+                bubbles,
+                controller,
+                roleManager,
+                userManager,
+                keyguardMonitor,
         )
     }
 
@@ -146,7 +150,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
         val expectedKeyEvent = KeyEvent(ACTION_DOWN, KEYCODE_STYLUS_BUTTON_TAIL)
         val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
         underTest.initialize()
-        val callback = captureArgument { verify(commandQueue).addCallback(capture()) }
+        val callback = withArgCaptor { verify(commandQueue).addCallback(capture()) }
 
         callback.handleSystemKey(expectedKeyEvent)
 
@@ -154,31 +158,49 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     }
 
     @Test
-    fun initialize_userUnlocked() {
+    fun initialize_userUnlocked_shouldUpdateNoteTask() {
         whenever(keyguardMonitor.isUserUnlocked(userTracker.userId)).thenReturn(false)
         val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
         underTest.initialize()
-        val callback = captureArgument { verify(keyguardMonitor).registerCallback(capture()) }
+        val callback = withArgCaptor { verify(keyguardMonitor).registerCallback(capture()) }
         whenever(keyguardMonitor.isUserUnlocked(userTracker.userId)).thenReturn(true)
 
         callback.onUserUnlocked()
-        verify(controller).setNoteTaskShortcutEnabled(any(), any())
+
+        verify(controller).updateNoteTaskForCurrentUserAndManagedProfiles()
     }
 
     @Test
-    fun initialize_onRoleHoldersChanged() {
+    fun initialize_onRoleHoldersChanged_shouldRunOnRoleHoldersChanged() {
         val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
         underTest.initialize()
-        val callback = captureArgument {
+        val callback = withArgCaptor {
             verify(roleManager)
-                .addOnRoleHoldersChangedListenerAsUser(any(), capture(), eq(UserHandle.ALL))
+                    .addOnRoleHoldersChangedListenerAsUser(any(), capture(), eq(UserHandle.ALL))
         }
 
         callback.onRoleHoldersChanged(ROLE_NOTES, userTracker.userHandle)
 
         verify(controller).onRoleHoldersChanged(ROLE_NOTES, userTracker.userHandle)
     }
-}
 
-private inline fun <reified T : Any> captureArgument(block: ArgumentCaptor<T>.() -> Unit) =
-    argumentCaptor<T>().apply(block).value
+    @Test
+    fun initialize_onProfilesChanged_shouldUpdateNoteTask() {
+        val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
+        underTest.initialize()
+
+        userTracker.callbacks.first().onProfilesChanged(emptyList())
+
+        verify(controller, times(2)).updateNoteTaskForCurrentUserAndManagedProfiles()
+    }
+
+    @Test
+    fun initialize_onUserChanged_shouldUpdateNoteTask() {
+        val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
+        underTest.initialize()
+
+        userTracker.callbacks.first().onUserChanged(0, mock())
+
+        verify(controller, times(2)).updateNoteTaskForCurrentUserAndManagedProfiles()
+    }
+}

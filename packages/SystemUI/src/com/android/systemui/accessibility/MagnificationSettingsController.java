@@ -87,14 +87,15 @@ public class MagnificationSettingsController implements ComponentCallbacks {
     }
 
     /**
-     * Shows magnification settings panel {@link WindowMagnificationSettings}.
+     * Toggles the visibility of magnification settings panel {@link WindowMagnificationSettings}.
+     * We show the panel if it is not visible. Otherwise, hide the panel.
      */
-    void showMagnificationSettings() {
+    void toggleSettingsPanelVisibility() {
         if (!mWindowMagnificationSettings.isSettingPanelShowing()) {
             onConfigurationChanged(mContext.getResources().getConfiguration());
             mContext.registerComponentCallbacks(this);
         }
-        mWindowMagnificationSettings.showSettingPanel();
+        mWindowMagnificationSettings.toggleSettingsPanelVisibility();
     }
 
     void closeMagnificationSettings() {

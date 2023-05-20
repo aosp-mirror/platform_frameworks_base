@@ -73,9 +73,9 @@ public class MagnificationSettingsControllerTest extends SysuiTestCase {
 
     @Test
     public void testShowSettingsPanel() {
-        mMagnificationSettingsController.showMagnificationSettings();
+        mMagnificationSettingsController.toggleSettingsPanelVisibility();
 
-        verify(mWindowMagnificationSettings).showSettingPanel();
+        verify(mWindowMagnificationSettings).toggleSettingsPanelVisibility();
     }
 
     @Test

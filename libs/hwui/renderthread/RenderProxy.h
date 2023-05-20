@@ -105,6 +105,7 @@ public:
 
     void destroyHardwareResources();
     static void trimMemory(int level);
+    static void trimCaches(int level);
     static void purgeCaches();
     static void overrideProperty(const char* name, const char* value);
 

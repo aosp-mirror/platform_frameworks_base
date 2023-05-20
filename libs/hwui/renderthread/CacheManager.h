@@ -48,6 +48,7 @@ public:
     void configureContext(GrContextOptions* context, const void* identity, ssize_t size);
 #endif
     void trimMemory(TrimLevel mode);
+    void trimCaches(CacheTrimLevel mode);
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
     void getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage);

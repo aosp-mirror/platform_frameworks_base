@@ -451,12 +451,14 @@
             android:noHistory="true" />
 
         <service android:name=".screenshot.appclips.AppClipsScreenshotHelperService"
-            android:permission="com.android.systemui.permission.SELF"
-            android:exported="false" />
+            android:exported="false"
+            android:singleUser="true"
+            android:permission="com.android.systemui.permission.SELF" />
 
         <service android:name=".screenshot.appclips.AppClipsService"
-            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE"
-            android:exported="true" />
+            android:exported="true"
+            android:singleUser="true"
+            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE" />
 
         <service android:name=".screenrecord.RecordingService"
                  android:foregroundServiceType="systemExempted"/>
@@ -990,6 +992,11 @@
 
         <service android:name=".notetask.NoteTaskControllerUpdateService" />
 
+        <service android:name=".notetask.NoteTaskBubblesController$NoteTaskBubblesService"
+            android:exported="false"
+            android:singleUser="true"
+            android:permission="com.android.systemui.permission.SELF" />
+
         <activity
             android:name=".notetask.shortcut.LaunchNoteTaskActivity"
             android:exported="true"
@@ -1002,16 +1009,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <!-- LaunchNoteTaskManagedProfileProxyActivity MUST NOT be exported because it allows caller
-             to specify an Android user when launching the default notes app. -->
-        <activity
-            android:name=".notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
-            android:exported="false"
-            android:enabled="true"
-            android:excludeFromRecents="true"
-            android:resizeableActivity="false"
-            android:theme="@android:style/Theme.NoDisplay" />
 
         <activity
             android:name=".notetask.LaunchNotesRoleSettingsTrampolineActivity"

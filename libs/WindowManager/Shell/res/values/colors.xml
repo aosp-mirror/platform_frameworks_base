@@ -30,6 +30,8 @@
     <color name="bubbles_light">#FFFFFF</color>
     <color name="bubbles_dark">@color/GM2_grey_800</color>
     <color name="bubbles_icon_tint">@color/GM2_grey_700</color>
+    <color name="bubble_bar_expanded_view_handle_light">#EBffffff</color>
+    <color name="bubble_bar_expanded_view_handle_dark">#99000000</color>
 
     <!-- PiP -->
     <color name="pip_custom_close_bg">#D93025</color>

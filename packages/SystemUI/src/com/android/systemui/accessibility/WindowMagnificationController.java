@@ -221,6 +221,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     private boolean mAllowDiagonalScrolling = false;
     private boolean mEditSizeEnable = false;
+    private boolean mSettingsPanelVisibility = false;
 
     @Nullable
     private final MirrorWindowControl mMirrorWindowControl;
@@ -1399,6 +1400,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return;
         }
 
+        mSettingsPanelVisibility = settingsPanelIsShown;
+
         mDragView.setBackground(mContext.getResources().getDrawable(settingsPanelIsShown
                 ? R.drawable.accessibility_window_magnification_drag_handle_background_change
                 : R.drawable.accessibility_window_magnification_drag_handle_background));
@@ -1439,12 +1442,19 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     private class MirrorWindowA11yDelegate extends View.AccessibilityDelegate {
 
+        private CharSequence getClickAccessibilityActionLabel() {
+            return mSettingsPanelVisibility
+                    ? mContext.getResources().getString(
+                            R.string.magnification_close_settings_click_label)
+                    : mContext.getResources().getString(
+                            R.string.magnification_open_settings_click_label);
+        }
+
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
             final AccessibilityAction clickAction = new AccessibilityAction(
-                    AccessibilityAction.ACTION_CLICK.getId(), mContext.getResources().getString(
-                    R.string.magnification_open_settings_click_label));
+                    AccessibilityAction.ACTION_CLICK.getId(), getClickAccessibilityActionLabel());
             info.addAction(clickAction);
             info.setClickable(true);
             info.addAction(

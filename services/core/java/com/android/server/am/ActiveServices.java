@@ -8297,8 +8297,8 @@ public final class ActiveServices {
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mDelegationService
                         : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
                 0 /* api_sate */,
-                0 /* api_type */,
-                0 /* api_timestamp */,
+                null /* api_type */,
+                null /* api_timestamp */,
                 mAm.getUidStateLocked(r.appInfo.uid),
                 mAm.getUidProcessCapabilityLocked(r.appInfo.uid),
                 mAm.getUidStateLocked(r.mRecentCallingUid),
