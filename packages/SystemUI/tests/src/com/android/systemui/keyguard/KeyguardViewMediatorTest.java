@@ -16,11 +16,16 @@
 
 package com.android.systemui.keyguard;
 
+import static android.os.PowerManager.WAKE_REASON_WAKE_MOTION;
+import static android.provider.Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
+import static com.android.systemui.keyguard.KeyguardViewMediator.DELAYED_KEYGUARD_ACTION;
+import static com.android.systemui.keyguard.KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -40,10 +45,13 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.Context;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
@@ -101,6 +109,8 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
@@ -166,21 +176,27 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock CentralSurfaces mCentralSurfaces;
     private @Mock UiEventLogger mUiEventLogger;
     private @Mock SessionTracker mSessionTracker;
+    private @Mock SystemSettings mSystemSettings;
+    private @Mock SecureSettings mSecureSettings;
+    private @Mock AlarmManager mAlarmManager;
+    private FakeSystemClock mSystemClock;
 
     /** Most recent value passed to {@link KeyguardStateController#notifyKeyguardGoingAway}. */
     private boolean mKeyguardGoingAway = false;
 
     private FakeFeatureFlags mFeatureFlags;
+    private int mInitialUserId;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mFalsingCollector = new FalsingCollectorFake();
-
+        mSystemClock = new FakeSystemClock();
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
         when(mInteractionJankMonitor.begin(any(), anyInt())).thenReturn(true);
         when(mInteractionJankMonitor.end(anyInt())).thenReturn(true);
+        mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
         final ViewRootImpl testViewRoot = mock(ViewRootImpl.class);
         when(testViewRoot.getView()).thenReturn(mock(View.class));
         when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(testViewRoot);
@@ -204,6 +220,12 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         }).when(mKeyguardStateController).notifyKeyguardGoingAway(anyBoolean());
 
         createAndStartViewMediator();
+        mInitialUserId = KeyguardUpdateMonitor.getCurrentUser();
+    }
+
+    @After
+    public void teardown() {
+        KeyguardUpdateMonitor.setCurrentUser(mInitialUserId);
     }
 
     /**
@@ -408,6 +430,49 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT
         assertEquals(KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT,
                 mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    @Test
+    public void lockAfterScreenTimeoutUsesValueFromSettings() {
+        int currentUserId = 99;
+        int userSpecificTimeout = 5999;
+        KeyguardUpdateMonitor.setCurrentUser(currentUserId);
+
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(false);
+        when(mDevicePolicyManager.getMaximumTimeToLock(null, currentUserId)).thenReturn(0L);
+        when(mSecureSettings.getIntForUser(LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT, currentUserId)).thenReturn(userSpecificTimeout);
+        mSystemClock.setElapsedRealtime(0L);
+        ArgumentCaptor<PendingIntent> pendingIntent = ArgumentCaptor.forClass(PendingIntent.class);
+
+        mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_TIMEOUT);
+
+        verify(mAlarmManager).setExactAndAllowWhileIdle(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
+                eq(Long.valueOf(userSpecificTimeout)), pendingIntent.capture());
+        assertEquals(DELAYED_KEYGUARD_ACTION, pendingIntent.getValue().getIntent().getAction());
+    }
+
+    @Test
+    public void lockAfterSpecifiedAfterDreamStarted() {
+        int currentUserId = 99;
+        int userSpecificTimeout = 5999;
+        KeyguardUpdateMonitor.setCurrentUser(currentUserId);
+
+        // set mDeviceInteractive to true
+        mViewMediator.onStartedWakingUp(WAKE_REASON_WAKE_MOTION, false);
+        mFeatureFlags.set(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING, false);
+        when(mLockPatternUtils.isSecure(currentUserId)).thenReturn(true);
+        when(mDevicePolicyManager.getMaximumTimeToLock(null, currentUserId)).thenReturn(0L);
+        when(mSecureSettings.getIntForUser(LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT, currentUserId)).thenReturn(userSpecificTimeout);
+        mSystemClock.setElapsedRealtime(0L);
+        ArgumentCaptor<PendingIntent> pendingIntent = ArgumentCaptor.forClass(PendingIntent.class);
+
+        mViewMediator.onDreamingStarted();
+
+        verify(mAlarmManager).setExactAndAllowWhileIdle(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
+                eq(Long.valueOf(userSpecificTimeout)), pendingIntent.capture());
+        assertEquals(DELAYED_KEYGUARD_ACTION, pendingIntent.getValue().getIntent().getAction());
     }
 
     @Test
@@ -742,7 +807,10 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mActivityLaunchAnimator,
                 () -> mScrimController,
                 mActivityTaskManagerService,
-                mFeatureFlags);
+                mFeatureFlags,
+                mSecureSettings,
+                mSystemSettings,
+                mSystemClock);
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
