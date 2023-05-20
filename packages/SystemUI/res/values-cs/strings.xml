@@ -356,7 +356,7 @@
       <item quantity="other">Lze přidat až <xliff:g id="COUNT">%d</xliff:g> uživatelů.</item>
       <item quantity="one">Lze vytvořit jen jednoho uživatele.</item>
     </plurals>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"Odstranit uživatele?"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"Odebrat uživatele?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Veškeré aplikace a data tohoto uživatele budou smazána."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Odstranit"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mít přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze za řízení při nahrávání nebo odesílání. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
@@ -964,7 +964,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Náhled obrázku"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"upravit"</string>
     <string name="add" msgid="81036585205287996">"Přidat"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Správa uživatelů"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Spravovat uživatele"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Toto oznámení nepodporuje přetažení na rozdělenou obrazovku."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Síť Wi‑Fi není k dispozici"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritní režim"</string>
