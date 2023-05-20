@@ -27,6 +27,8 @@ import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -60,6 +62,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             applicationContext = context,
             applicationScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
+            isInputEnabled = MutableStateFlow(true).asStateFlow(),
         )
 
     @Before
