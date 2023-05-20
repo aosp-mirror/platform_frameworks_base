@@ -26,6 +26,8 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -57,6 +59,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     private val underTest =
         PasswordBouncerViewModel(
             interactor = bouncerInteractor,
+            isInputEnabled = MutableStateFlow(true).asStateFlow(),
         )
 
     @Before
