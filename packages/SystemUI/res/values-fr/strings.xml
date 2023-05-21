@@ -923,7 +923,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Recherche de réseaux…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Échec de la connexion au réseau"</string>
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Connexion automatique au Wi-Fi désactivée pour le moment"</string>
-    <string name="see_all_networks" msgid="3773666844913168122">"Tout afficher"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Tout voir"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pour changer de réseau, déconnectez l\'Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Pour améliorer l\'expérience sur l\'appareil, les applis et les services peuvent continuer de rechercher les réseaux Wi-Fi, même si le Wi-Fi est désactivé. Vous pouvez modifier cela dans les paramètres de recherche Wi-Fi. "<annotation id="link">"Modifier"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Désactiver le mode Avion"</string>

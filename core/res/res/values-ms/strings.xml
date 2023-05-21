@@ -585,11 +585,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ralat semasa membuat pengesahan"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gunakan kunci skrin"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Masukkan kunci skrin untuk teruskan"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tekan dengan kuat pada penderia"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tekan penderia dengan kuat"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Tidak dapat memproses cap jari. Sila cuba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Bersihkan penderia cap jari dan cuba lagi"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Bersihkan penderia dan cuba lagi"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tekan dengan kuat pada penderia"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tekan penderia dengan kuat"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Jari digerakkan terlalu perlahan. Sila cuba lagi."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Cuba cap jari lain"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
@@ -1383,7 +1383,7 @@
     <string name="show_ime" msgid="6406112007347443383">"Pastikannya pada skrin, semasa papan kekunci fizikal aktif"</string>
     <string name="hardware" msgid="1800597768237606953">"Tunjukkan papan kekunci maya"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurasikan papan kekunci fizikal"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Ketik untuk memilih bahasa dan susun atur"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Ketik untuk memilih bahasa dan reka letak"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Paparkan di atas apl lain"</string>

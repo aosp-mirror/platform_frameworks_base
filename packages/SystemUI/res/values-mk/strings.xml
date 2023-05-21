@@ -912,7 +912,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Нема други достапни мрежи"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Нема достапни мрежи"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Допрете на мрежа за да се поврзете"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Допрете мрежа за да се поврзете"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Отклучете за да се прикажат мрежите"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Се пребаруваат мрежи…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Не успеа да се поврзе на мрежата"</string>
