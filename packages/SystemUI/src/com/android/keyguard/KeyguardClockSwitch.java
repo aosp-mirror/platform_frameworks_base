@@ -1,5 +1,8 @@
 package com.android.keyguard;
 
+import static android.view.View.ALPHA;
+import static android.view.View.TRANSLATION_Y;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -35,11 +38,12 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private static final String TAG = "KeyguardClockSwitch";
 
-    private static final long CLOCK_OUT_MILLIS = 150;
-    private static final long CLOCK_IN_MILLIS = 200;
-    public static final long CLOCK_IN_START_DELAY_MILLIS = CLOCK_OUT_MILLIS / 2;
-    private static final long STATUS_AREA_START_DELAY_MILLIS = 50;
-    private static final long STATUS_AREA_MOVE_MILLIS = 350;
+    private static final long CLOCK_OUT_MILLIS = 133;
+    private static final long CLOCK_IN_MILLIS = 167;
+    public static final long CLOCK_IN_START_DELAY_MILLIS = 133;
+    private static final long STATUS_AREA_START_DELAY_MILLIS = 0;
+    private static final long STATUS_AREA_MOVE_UP_MILLIS = 967;
+    private static final long STATUS_AREA_MOVE_DOWN_MILLIS = 467;
 
     @IntDef({LARGE, SMALL})
     @Retention(RetentionPolicy.SOURCE)
@@ -90,7 +94,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     @VisibleForTesting AnimatorSet mClockInAnim = null;
     @VisibleForTesting AnimatorSet mClockOutAnim = null;
-    private ObjectAnimator mStatusAreaAnim = null;
+    private AnimatorSet mStatusAreaAnim = null;
 
     private int mClockSwitchYAmount;
     @VisibleForTesting boolean mChildrenAreLaidOut = false;
@@ -220,28 +224,34 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mStatusAreaAnim = null;
 
         View in, out;
-        int direction = 1;
-        float statusAreaYTranslation;
+        float statusAreaYTranslation, clockInYTranslation, clockOutYTranslation;
         if (useLargeClock) {
             out = mSmallClockFrame;
             in = mLargeClockFrame;
             if (indexOfChild(in) == -1) addView(in, 0);
-            direction = -1;
             statusAreaYTranslation = mSmallClockFrame.getTop() - mStatusArea.getTop()
                     + mSmartspaceTopOffset;
+            clockInYTranslation = 0;
+            clockOutYTranslation = 0; // Small clock translation is handled with statusArea
         } else {
             in = mSmallClockFrame;
             out = mLargeClockFrame;
             statusAreaYTranslation = 0f;
+            clockInYTranslation = 0f;
+            clockOutYTranslation = mClockSwitchYAmount * -1f;
 
-            // Must remove in order for notifications to appear in the proper place
+            // Must remove in order for notifications to appear in the proper place, ideally this
+            // would happen after the out animation runs, but we can't guarantee that the
+            // nofications won't enter only after the out animation runs.
             removeView(out);
         }
 
         if (!animate) {
             out.setAlpha(0f);
+            out.setTranslationY(clockOutYTranslation);
             out.setVisibility(INVISIBLE);
             in.setAlpha(1f);
+            in.setTranslationY(clockInYTranslation);
             in.setVisibility(VISIBLE);
             mStatusArea.setTranslationY(statusAreaYTranslation);
             return;
@@ -249,11 +259,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
         mClockOutAnim = new AnimatorSet();
         mClockOutAnim.setDuration(CLOCK_OUT_MILLIS);
-        mClockOutAnim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+        mClockOutAnim.setInterpolator(Interpolators.LINEAR);
         mClockOutAnim.playTogether(
-                ObjectAnimator.ofFloat(out, View.ALPHA, 0f),
-                ObjectAnimator.ofFloat(out, View.TRANSLATION_Y, 0,
-                        direction * -mClockSwitchYAmount));
+                ObjectAnimator.ofFloat(out, ALPHA, 0f),
+                ObjectAnimator.ofFloat(out, TRANSLATION_Y, clockOutYTranslation));
         mClockOutAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
                 if (mClockOutAnim == animation) {
@@ -268,8 +277,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockInAnim = new AnimatorSet();
         mClockInAnim.setDuration(CLOCK_IN_MILLIS);
         mClockInAnim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        mClockInAnim.playTogether(ObjectAnimator.ofFloat(in, View.ALPHA, 1f),
-                ObjectAnimator.ofFloat(in, View.TRANSLATION_Y, direction * mClockSwitchYAmount, 0));
+        mClockInAnim.playTogether(
+                ObjectAnimator.ofFloat(in, ALPHA, 1f),
+                ObjectAnimator.ofFloat(in, TRANSLATION_Y, clockInYTranslation));
         mClockInAnim.setStartDelay(CLOCK_IN_START_DELAY_MILLIS);
         mClockInAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
@@ -279,14 +289,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
             }
         });
 
-        mClockInAnim.start();
-        mClockOutAnim.start();
-
-        mStatusAreaAnim = ObjectAnimator.ofFloat(mStatusArea, View.TRANSLATION_Y,
-                statusAreaYTranslation);
-        mStatusAreaAnim.setStartDelay(useLargeClock ? STATUS_AREA_START_DELAY_MILLIS : 0L);
-        mStatusAreaAnim.setDuration(STATUS_AREA_MOVE_MILLIS);
-        mStatusAreaAnim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mStatusAreaAnim = new AnimatorSet();
+        mStatusAreaAnim.setStartDelay(STATUS_AREA_START_DELAY_MILLIS);
+        mStatusAreaAnim.setDuration(
+                useLargeClock ? STATUS_AREA_MOVE_UP_MILLIS : STATUS_AREA_MOVE_DOWN_MILLIS);
+        mStatusAreaAnim.setInterpolator(Interpolators.EMPHASIZED);
+        mStatusAreaAnim.playTogether(
+                ObjectAnimator.ofFloat(mStatusArea, TRANSLATION_Y, statusAreaYTranslation),
+                ObjectAnimator.ofFloat(mSmallClockFrame, TRANSLATION_Y, statusAreaYTranslation));
         mStatusAreaAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
                 if (mStatusAreaAnim == animation) {
@@ -294,6 +304,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 }
             }
         });
+
+        mClockInAnim.start();
+        mClockOutAnim.start();
         mStatusAreaAnim.start();
     }
 
