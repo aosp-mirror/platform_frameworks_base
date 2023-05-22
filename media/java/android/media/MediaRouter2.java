@@ -1091,6 +1091,12 @@ public final class MediaRouter2 {
         }
     }
 
+    private void notifyRequestFailed(int reason) {
+        for (TransferCallbackRecord record : mTransferCallbackRecords) {
+            record.mExecutor.execute(() -> record.mTransferCallback.onRequestFailed(reason));
+        }
+    }
+
     private void notifyStop(RoutingController controller) {
         for (TransferCallbackRecord record : mTransferCallbackRecords) {
             record.mExecutor.execute(() -> record.mTransferCallback.onStop(controller));
@@ -1191,6 +1197,15 @@ public final class MediaRouter2 {
          * @param controller the controller that controlled the stopped media routing
          */
         public void onStop(@NonNull RoutingController controller) {}
+
+        /**
+         * Called when a routing request fails.
+         *
+         * @param reason Reason for failure as per {@link
+         *     android.media.MediaRoute2ProviderService.Reason}
+         * @hide
+         */
+        public void onRequestFailed(int reason) {}
     }
 
     /**
@@ -2572,7 +2587,7 @@ public final class MediaRouter2 {
                 mTransferRequests.remove(matchingRequest);
                 onTransferFailed(matchingRequest.mOldSessionInfo, matchingRequest.mTargetRoute);
             } else {
-                // Does nothing.
+                notifyRequestFailed(reason);
             }
         }
 
