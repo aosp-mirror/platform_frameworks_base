@@ -178,6 +178,44 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
     }
 
+    @Test
+    public void testChooseNavigationBackgroundWindow() {
+        final WindowState drawBarWin = createOpaqueFullscreen(false);
+        final WindowState nonDrawBarWin = createDimmingDialogWindow(true);
+
+        final WindowState visibleIme = createInputMethodWindow(true, true, false);
+        final WindowState invisibleIme = createInputMethodWindow(false, true, false);
+        final WindowState nonDrawBarIme = createInputMethodWindow(true, false, false);
+
+        assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
+                drawBarWin, null, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                null, null, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                nonDrawBarWin, null, NAV_BAR_BOTTOM));
+
+        assertEquals(visibleIme, DisplayPolicy.chooseNavigationBackgroundWindow(
+                drawBarWin, visibleIme, NAV_BAR_BOTTOM));
+        assertEquals(visibleIme, DisplayPolicy.chooseNavigationBackgroundWindow(
+                null, visibleIme, NAV_BAR_BOTTOM));
+        assertEquals(visibleIme, DisplayPolicy.chooseNavigationBackgroundWindow(
+                nonDrawBarWin, visibleIme, NAV_BAR_BOTTOM));
+
+        assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
+                drawBarWin, invisibleIme, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                null, invisibleIme, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                nonDrawBarWin, invisibleIme, NAV_BAR_BOTTOM));
+
+        assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
+                drawBarWin, nonDrawBarIme, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                null, nonDrawBarIme, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                nonDrawBarWin, nonDrawBarIme, NAV_BAR_BOTTOM));
+    }
+
     @SetupWindows(addWindows = W_NAVIGATION_BAR)
     @Test
     public void testUpdateLightNavigationBarLw() {
