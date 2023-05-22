@@ -91,7 +91,7 @@ fun PeopleScreen(
 
     // Make sure to use the Android colors and not the default Material3 colors to have the exact
     // same colors as the View implementation.
-    val androidColors = LocalAndroidColorScheme.current
+    val androidColors = LocalAndroidColorScheme.current.deprecated
     Surface(
         color = androidColors.colorBackground,
         contentColor = androidColors.textColorPrimary,
@@ -170,7 +170,7 @@ private fun LazyListScope.ConversationList(
             stringResource(headerTextResource),
             Modifier.padding(start = 16.dp),
             style = MaterialTheme.typography.labelLarge,
-            color = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+            color = LocalAndroidColorScheme.current.deprecated.colorAccentPrimaryVariant,
         )
 
         Spacer(Modifier.height(10.dp))
@@ -180,7 +180,7 @@ private fun LazyListScope.ConversationList(
         if (index > 0) {
             item {
                 Divider(
-                    color = LocalAndroidColorScheme.current.colorBackground,
+                    color = LocalAndroidColorScheme.current.deprecated.colorBackground,
                     thickness = 2.dp,
                 )
             }
@@ -204,7 +204,7 @@ private fun Tile(
     withTopCornerRadius: Boolean,
     withBottomCornerRadius: Boolean,
 ) {
-    val androidColors = LocalAndroidColorScheme.current
+    val androidColors = LocalAndroidColorScheme.current.deprecated
     val cornerRadius = dimensionResource(R.dimen.people_space_widget_radius)
     val topCornerRadius = if (withTopCornerRadius) cornerRadius else 0.dp
     val bottomCornerRadius = if (withBottomCornerRadius) cornerRadius else 0.dp
