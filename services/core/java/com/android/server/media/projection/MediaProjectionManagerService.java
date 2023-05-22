@@ -72,6 +72,7 @@ import android.util.Slog;
 import android.view.ContentRecordingSession;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -111,7 +112,11 @@ public final class MediaProjectionManagerService extends SystemService
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long MEDIA_PROJECTION_PREVENTS_REUSING_CONSENT = 266201607L; // buganizer id
 
-    private final Object mLock = new Object(); // Protects the list of media projections
+    // Protects access to state at service level & IMediaProjection level.
+    // Invocation order while holding locks must follow below to avoid deadlock:
+    // WindowManagerService -> MediaProjectionManagerService -> DisplayManagerService
+    // See mediaprojection.md
+    private final Object mLock = new Object();
     private final Map<IBinder, IBinder.DeathRecipient> mDeathEaters;
     private final CallbackDelegate mCallbackDelegate;
 
@@ -127,7 +132,9 @@ public final class MediaProjectionManagerService extends SystemService
     private final MediaRouterCallback mMediaRouterCallback;
     private MediaRouter.RouteInfo mMediaRouteInfo;
 
+    @GuardedBy("mLock")
     private IBinder mProjectionToken;
+    @GuardedBy("mLock")
     private MediaProjection mProjectionGrant;
 
     public MediaProjectionManagerService(Context context) {
@@ -314,9 +321,11 @@ public final class MediaProjectionManagerService extends SystemService
      */
     @VisibleForTesting
     boolean setContentRecordingSession(@Nullable ContentRecordingSession incomingSession) {
+        // NEVER lock while calling into WindowManagerService, since WindowManagerService is
+        // ALWAYS locked when it invokes MediaProjectionManagerService.
+        final boolean setSessionSucceeded = mWmInternal.setContentRecordingSession(incomingSession);
         synchronized (mLock) {
-            if (!mWmInternal.setContentRecordingSession(
-                    incomingSession)) {
+            if (!setSessionSucceeded) {
                 // Unable to start mirroring, so tear down this projection.
                 if (mProjectionGrant != null) {
                     mProjectionGrant.stop();
@@ -359,13 +368,20 @@ public final class MediaProjectionManagerService extends SystemService
      */
     @VisibleForTesting
     void requestConsentForInvalidProjection() {
+        Intent reviewConsentIntent;
+        int uid;
         synchronized (mLock) {
-            Slog.v(TAG, "Reusing token: Reshow dialog for due to invalid projection.");
-            // Trigger the permission dialog again in SysUI
-            // Do not handle the result; SysUI will update us when the user has consented.
-            mContext.startActivityAsUser(buildReviewGrantedConsentIntent(),
-                    UserHandle.getUserHandleForUid(mProjectionGrant.uid));
+            reviewConsentIntent = buildReviewGrantedConsentIntentLocked();
+            uid = mProjectionGrant.uid;
         }
+        // NEVER lock while calling into a method that eventually acquires the WindowManagerService
+        // lock, since WindowManagerService is ALWAYS locked when it invokes
+        // MediaProjectionManagerService.
+        Slog.v(TAG, "Reusing token: Reshow dialog for due to invalid projection.");
+        // Trigger the permission dialog again in SysUI
+        // Do not handle the result; SysUI will update us when the user has consented.
+        mContext.startActivityAsUser(reviewConsentIntent,
+                UserHandle.getUserHandleForUid(uid));
     }
 
     /**
@@ -375,7 +391,7 @@ public final class MediaProjectionManagerService extends SystemService
      * <p>Consent dialog result handled in
      * {@link BinderService#setUserReviewGrantedConsentResult(int)}.
      */
-    private Intent buildReviewGrantedConsentIntent() {
+    private Intent buildReviewGrantedConsentIntentLocked() {
         final String permissionDialogString = mContext.getResources().getString(
                 R.string.config_mediaProjectionPermissionDialogComponent);
         final ComponentName mediaProjectionPermissionDialogComponent =
@@ -388,7 +404,8 @@ public final class MediaProjectionManagerService extends SystemService
     }
 
     /**
-     * Handles result of dialog shown from {@link BinderService#buildReviewGrantedConsentIntent()}.
+     * Handles result of dialog shown from
+     * {@link BinderService#buildReviewGrantedConsentIntentLocked()}.
      *
      * <p>Tears down session if user did not consent, or starts mirroring if user did consent.
      */
@@ -490,23 +507,26 @@ public final class MediaProjectionManagerService extends SystemService
     MediaProjection getProjectionInternal(int uid, String packageName) {
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            // Supposedly the package has re-used the user's consent; confirm the provided details
-            // against the current projection token before re-using the current projection.
-            if (mProjectionGrant == null || mProjectionGrant.mSession == null
-                    || !mProjectionGrant.mSession.isWaitingForConsent()) {
-                Slog.e(TAG, "Reusing token: Not possible to reuse the current projection "
-                        + "instance");
-                return null;
-            }
+            synchronized (mLock) {
+                // Supposedly the package has re-used the user's consent; confirm the provided
+                // details against the current projection token before re-using the current
+                // projection.
+                if (mProjectionGrant == null || mProjectionGrant.mSession == null
+                        || !mProjectionGrant.mSession.isWaitingForConsent()) {
+                    Slog.e(TAG, "Reusing token: Not possible to reuse the current projection "
+                            + "instance");
+                    return null;
+                }
                 // The package matches, go ahead and re-use the token for this request.
-            if (mProjectionGrant.uid == uid
-                    && Objects.equals(mProjectionGrant.packageName, packageName)) {
-                Slog.v(TAG, "Reusing token: getProjection can reuse the current projection");
-                return mProjectionGrant;
-            } else {
-                Slog.e(TAG, "Reusing token: Not possible to reuse the current projection "
-                        + "instance due to package details mismatching");
-                return null;
+                if (mProjectionGrant.uid == uid
+                        && Objects.equals(mProjectionGrant.packageName, packageName)) {
+                    Slog.v(TAG, "Reusing token: getProjection can reuse the current projection");
+                    return mProjectionGrant;
+                } else {
+                    Slog.e(TAG, "Reusing token: Not possible to reuse the current projection "
+                            + "instance due to package details mismatching");
+                    return null;
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(callingToken);
@@ -626,8 +646,10 @@ public final class MediaProjectionManagerService extends SystemService
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                if (mProjectionGrant != null) {
-                    mProjectionGrant.stop();
+                synchronized (mLock) {
+                    if (mProjectionGrant != null) {
+                        mProjectionGrant.stop();
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -641,13 +663,17 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to notify "
                         + "on captured content resize");
             }
-            if (!isCurrentProjection(mProjectionGrant)) {
-                return;
+            synchronized (mLock) {
+                if (!isCurrentProjection(mProjectionGrant)) {
+                    return;
+                }
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                if (mProjectionGrant != null && mCallbackDelegate != null) {
-                    mCallbackDelegate.dispatchResize(mProjectionGrant, width, height);
+                synchronized (mLock) {
+                    if (mProjectionGrant != null && mCallbackDelegate != null) {
+                        mCallbackDelegate.dispatchResize(mProjectionGrant, width, height);
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -661,13 +687,17 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to notify "
                         + "on captured content visibility changed");
             }
-            if (!isCurrentProjection(mProjectionGrant)) {
-                return;
+            synchronized (mLock) {
+                if (!isCurrentProjection(mProjectionGrant)) {
+                    return;
+                }
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                if (mProjectionGrant != null && mCallbackDelegate != null) {
-                    mCallbackDelegate.dispatchVisibilityChanged(mProjectionGrant, isVisible);
+                synchronized (mLock) {
+                    if (mProjectionGrant != null && mCallbackDelegate != null) {
+                        mCallbackDelegate.dispatchVisibilityChanged(mProjectionGrant, isVisible);
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -712,9 +742,11 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to set session "
                         + "details.");
             }
-            if (!isCurrentProjection(projection)) {
-                throw new SecurityException("Unable to set ContentRecordingSession on "
-                        + "non-current MediaProjection");
+            synchronized (mLock) {
+                if (!isCurrentProjection(projection)) {
+                    throw new SecurityException("Unable to set ContentRecordingSession on "
+                            + "non-current MediaProjection");
+                }
             }
             final long origId = Binder.clearCallingIdentity();
             try {
@@ -732,10 +764,12 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to check if the given"
                         + "projection is valid.");
             }
-            if (!isCurrentProjection(projection)) {
-                Slog.v(TAG, "Reusing token: Won't request consent again for a token that "
-                        + "isn't current");
-                return;
+            synchronized (mLock) {
+                if (!isCurrentProjection(projection)) {
+                    Slog.v(TAG, "Reusing token: Won't request consent again for a token that "
+                            + "isn't current");
+                    return;
+                }
             }
 
             // Remove calling app identity before performing any privileged operations.
