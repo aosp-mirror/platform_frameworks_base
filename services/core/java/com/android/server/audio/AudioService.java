@@ -45,7 +45,6 @@ import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
@@ -167,7 +166,6 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.service.notification.ZenModeConfig;
@@ -187,10 +185,8 @@ import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -252,7 +248,6 @@ public class AudioService extends IAudioService.Stub
             AudioSystemAdapter.OnVolRangeInitRequestListener {
 
     private static final String TAG = "AS.AudioService";
-    private static final boolean CONFIG_DEFAULT_VAL = false;
 
     private final AudioSystemAdapter mAudioSystem;
     private final SystemServerAdapter mSystemServer;
@@ -309,7 +304,7 @@ public class AudioService extends IAudioService.Stub
      * indicates whether STREAM_NOTIFICATION is aliased to STREAM_RING
      *     not final due to test method, see {@link #setNotifAliasRingForTest(boolean)}.
      */
-    private boolean mNotifAliasRing;
+    private boolean mNotifAliasRing = false;
 
     /**
      * Test method to temporarily override whether STREAM_NOTIFICATION is aliased to STREAM_RING,
@@ -1057,13 +1052,6 @@ public class AudioService extends IAudioService.Stub
         mUseVolumeGroupAliases = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_handleVolumeAliasesUsingVolumeGroups);
 
-        mNotifAliasRing = !DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, false);
-
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
-                ActivityThread.currentApplication().getMainExecutor(),
-                this::onDeviceConfigChange);
-
         // Initialize volume
         // Priority 1 - Android Property
         // Priority 2 - Audio Policy Service
@@ -1272,22 +1260,6 @@ public class AudioService extends IAudioService.Stub
                         && sVolumeGroupStates.indexOfKey(groupId) >= 0) {
                     streamState.setVolumeGroupState(sVolumeGroupStates.get(groupId));
                 }
-            }
-        }
-    }
-
-    /**
-     * Separating notification volume from ring is NOT of aliasing the corresponding streams
-     * @param properties
-     */
-    private void onDeviceConfigChange(DeviceConfig.Properties properties) {
-        Set<String> changeSet = properties.getKeyset();
-        if (changeSet.contains(SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION)) {
-            boolean newNotifAliasRing = !properties.getBoolean(
-                    SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, CONFIG_DEFAULT_VAL);
-            if (mNotifAliasRing != newNotifAliasRing) {
-                mNotifAliasRing = newNotifAliasRing;
-                updateStreamVolumeAlias(true, TAG);
             }
         }
     }
