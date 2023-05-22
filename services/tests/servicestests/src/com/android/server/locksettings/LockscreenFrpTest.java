@@ -23,6 +23,8 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
@@ -38,8 +40,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.nio.ByteBuffer;
 
-/** Test setting a lockscreen credential and then verify it under USER_FRP */
+/** Tests that involve the Factory Reset Protection (FRP) credential. */
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -147,5 +150,69 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
         assertEquals(VerifyCredentialResponse.RESPONSE_OK,
                 mService.verifyCredential(newPin("1234"), USER_FRP, 0 /* flags */)
                         .getResponseCode());
+    }
+
+    // The FRP block that gets written by the current version of Android must still be accepted by
+    // old versions of Android.  This test tries to detect non-forward-compatible changes in
+    // PasswordData#toBytes(), which would break that.
+    @Test
+    public void testFrpBlock_isForwardsCompatible() {
+        mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID);
+        PersistentData data = mStorage.readPersistentDataBlock();
+        ByteBuffer buffer = ByteBuffer.wrap(data.payload);
+
+        final int credentialType = buffer.getInt();
+        assertEquals(CREDENTIAL_TYPE_PIN, credentialType);
+
+        final byte scryptLogN = buffer.get();
+        assertTrue(scryptLogN >= 0);
+
+        final byte scryptLogR = buffer.get();
+        assertTrue(scryptLogR >= 0);
+
+        final byte scryptLogP = buffer.get();
+        assertTrue(scryptLogP >= 0);
+
+        final int saltLength = buffer.getInt();
+        assertTrue(saltLength > 0);
+        final byte[] salt = new byte[saltLength];
+        buffer.get(salt);
+
+        final int passwordHandleLength = buffer.getInt();
+        assertTrue(passwordHandleLength > 0);
+        final byte[] passwordHandle = new byte[passwordHandleLength];
+        buffer.get(passwordHandle);
+    }
+
+    @Test
+    public void testFrpBlock_inBadAndroid14FormatIsAutomaticallyFixed() {
+        mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID);
+
+        // Write a "bad" FRP block with PasswordData beginning with the bytes [0, 2].
+        byte[] badPasswordData = new byte[] {
+                0, 2, /* version 2 */
+                0, 3, /* CREDENTIAL_TYPE_PIN */
+                11, /* scryptLogN */
+                22, /* scryptLogR */
+                33, /* scryptLogP */
+                0, 0, 0, 5, /* salt.length */
+                1, 2, -1, -2, 55, /* salt */
+                0, 0, 0, 6, /* passwordHandle.length */
+                2, 3, -2, -3, 44, 1, /* passwordHandle */
+                0, 0, 0, 6, /* pinLength */
+        };
+        mStorage.writePersistentDataBlock(PersistentData.TYPE_SP_GATEKEEPER, PRIMARY_USER_ID, 0,
+                badPasswordData);
+
+        // Execute the code that should fix the FRP block.
+        assertFalse(mStorage.getBoolean("migrated_frp2", false, 0));
+        mService.migrateOldDataAfterSystemReady();
+        assertTrue(mStorage.getBoolean("migrated_frp2", false, 0));
+
+        // Verify that the FRP block has been fixed.
+        PersistentData data = mStorage.readPersistentDataBlock();
+        assertEquals(PersistentData.TYPE_SP_GATEKEEPER, data.type);
+        ByteBuffer buffer = ByteBuffer.wrap(data.payload);
+        assertEquals(CREDENTIAL_TYPE_PIN, buffer.getInt());
     }
 }
