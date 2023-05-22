@@ -70,9 +70,11 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
 
                 // Set mStopUserClient to null when StopUserClient fails. Otherwise it's possible
                 // for that the queue will wait indefinitely until the field is cleared.
-                if (clientMonitor instanceof StopUserClient<?> && !success) {
-                    Slog.w(getTag(),
-                            "StopUserClient failed(), is the HAL stuck? Clearing mStopUserClient");
+                if (clientMonitor instanceof StopUserClient<?>) {
+                    if (!success) {
+                        Slog.w(getTag(), "StopUserClient failed(), is the HAL stuck? "
+                                + "Clearing mStopUserClient");
+                    }
                     mStopUserClient = null;
                 }
                 if (mCurrentOperation != null && mCurrentOperation.isFor(mOwner)) {
