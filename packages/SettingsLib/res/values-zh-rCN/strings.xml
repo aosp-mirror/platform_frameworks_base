@@ -121,7 +121,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"用于共享联系人"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"共享互联网连接"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"短信"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM 卡存取权限"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM 卡访问权限"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 音频：<xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 音频"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"助听器"</string>
