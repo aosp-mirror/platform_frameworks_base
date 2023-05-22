@@ -673,6 +673,10 @@ object Flags {
     val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
             unreleasedFlag(2401, "trim_resources_with_background_trim_on_lock")
 
+    // TODO:(b/283203305): Tracking bug
+    @JvmField
+    val TRIM_FONT_CACHES_AT_UNLOCK = releasedFlag(2402, "trim_font_caches_on_unlock")
+
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
     @Keep

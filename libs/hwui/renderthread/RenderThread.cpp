@@ -521,6 +521,11 @@ void RenderThread::trimMemory(TrimLevel level) {
     cacheManager().trimMemory(level);
 }
 
+void RenderThread::trimCaches(CacheTrimLevel level) {
+    ATRACE_CALL();
+    cacheManager().trimCaches(level);
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
