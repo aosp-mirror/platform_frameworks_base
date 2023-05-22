@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.activityembedding;
 
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
@@ -109,6 +110,11 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
             return false;
         }
         if (containsNonEmbeddedChange && !handleNonEmbeddedChanges(changes)) {
+            return false;
+        }
+        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+        if (options != null && options.getType() == ANIM_SCENE_TRANSITION) {
+            // Scene-transition will be handled by app side.
             return false;
         }
 
