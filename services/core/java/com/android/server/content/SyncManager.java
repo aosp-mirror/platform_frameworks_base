@@ -104,6 +104,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.config.appcloning.AppCloningDeviceConfigHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
@@ -255,6 +256,8 @@ public class SyncManager {
     protected final SyncAdaptersCache mSyncAdapters;
 
     private final SyncLogger mLogger;
+
+    private final AppCloningDeviceConfigHelper mAppCloningDeviceConfigHelper;
 
     private boolean isJobIdInUseLockedH(int jobId, List<JobInfo> pendingJobs) {
         for (int i = 0, size = pendingJobs.size(); i < size; i++) {
@@ -681,6 +684,7 @@ public class SyncManager {
         }, mSyncHandler);
 
         mConstants = new SyncManagerConstants(context);
+        mAppCloningDeviceConfigHelper = AppCloningDeviceConfigHelper.getInstance(context);
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(mConnectivityIntentReceiver, intentFilter);
@@ -888,7 +892,8 @@ public class SyncManager {
      * @return true/false if contact sharing is enabled/disabled
      */
     protected boolean isContactSharingAllowedForCloneProfile() {
-        return mContext.getResources().getBoolean(R.bool.config_enableAppCloningBuildingBlocks);
+        return mContext.getResources().getBoolean(R.bool.config_enableAppCloningBuildingBlocks)
+                && mAppCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks();
     }
 
     /**
