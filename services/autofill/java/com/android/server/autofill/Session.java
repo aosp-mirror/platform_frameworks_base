@@ -224,6 +224,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private static final String EXTRA_REQUEST_ID = "android.service.autofill.extra.REQUEST_ID";
 
     private static final String PCC_HINTS_DELIMITER = ",";
+    public static final String EXTRA_KEY_DETECTIONS = "detections";
 
     final Object mLock;
 
@@ -3646,6 +3647,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final ArrayList<FillContext> contexts = mergePreviousSessionLocked( /* forSave= */ true);
 
+        FieldClassificationResponse fieldClassificationResponse =
+                mClassificationState.mLastFieldClassificationResponse;
+        if (mService.isPccClassificationEnabled()
+                && fieldClassificationResponse != null
+                && !fieldClassificationResponse.getClassifications().isEmpty()) {
+            if (mClientState == null) {
+                mClientState = new Bundle();
+            }
+            mClientState.putParcelableArrayList(EXTRA_KEY_DETECTIONS, new ArrayList<>(
+                    fieldClassificationResponse.getClassifications()));
+        }
         final SaveRequest saveRequest =
                 new SaveRequest(contexts, mClientState, mSelectedDatasetIds);
         mRemoteFillService.onSaveRequest(saveRequest);
