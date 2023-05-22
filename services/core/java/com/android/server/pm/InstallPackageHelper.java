@@ -2140,7 +2140,7 @@ final class InstallPackageHelper {
 
     private void updateSettingsInternalLI(AndroidPackage pkg,
             int[] allUsers, InstallRequest installRequest) {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettingsInternal");
 
         final String pkgName = pkg.getPackageName();
         final int[] installedForUsers = installRequest.getOriginUsers();
