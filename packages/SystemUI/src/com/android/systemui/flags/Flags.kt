@@ -727,4 +727,12 @@ object Flags {
     @JvmField
     val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION =
             unreleasedFlag(2805, "split_shade_subpixel_optimization", teamfood = true)
+
+    // TODO(b/278761837): Tracking Bug
+    @JvmField
+    val USE_NEW_ACTIVITY_STARTER = releasedFlag(2801, name = "use_new_activity_starter")
+
+    // TODO(b/283084712): Tracking Bug
+    @JvmField
+    val IMPROVED_HUN_ANIMATIONS = unreleasedFlag(283084712, "improved_hun_animations")
 }
