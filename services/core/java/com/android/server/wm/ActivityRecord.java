@@ -3570,6 +3570,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                 // Tell window manager to prepare for this one to be removed.
                 setVisibility(false);
+                // Propagate the last IME visibility in the same task, so the IME can show
+                // automatically if the next activity has a focused editable view.
+                if (mLastImeShown && mTransitionController.isShellTransitionsEnabled()) {
+                    final ActivityRecord nextRunning = task.topRunningActivity();
+                    if (nextRunning != null) {
+                        nextRunning.mLastImeShown = true;
+                    }
+                }
 
                 if (getTaskFragment().getPausingActivity() == null) {
                     ProtoLog.v(WM_DEBUG_STATES, "Finish needs to pause: %s", this);
