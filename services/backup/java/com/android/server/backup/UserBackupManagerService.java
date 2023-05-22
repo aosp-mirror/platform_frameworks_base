@@ -2863,8 +2863,7 @@ public class UserBackupManagerService {
             if (DEBUG) {
                 Slog.d(
                         TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Starting backup confirmation UI, token=" + token));
+                        addUserIdToLogMessage(mUserId, "Starting backup confirmation UI"));
             }
             if (!startConfirmationUi(token, FullBackup.FULL_BACKUP_INTENT_ACTION)) {
                 Slog.e(
