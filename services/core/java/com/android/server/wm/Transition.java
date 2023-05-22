@@ -680,7 +680,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // All windows are synced already.
             return;
         }
-        if (!isInTransition(wc)) return;
+        if (wc.mDisplayContent == null || !isInTransition(wc)) return;
+        if (!wc.mDisplayContent.getDisplayPolicy().isScreenOnFully()
+                || wc.mDisplayContent.getDisplayInfo().state == Display.STATE_OFF) {
+            mFlags |= WindowManager.TRANSIT_FLAG_INVISIBLE;
+        }
 
         if (mContainerFreezer == null) {
             mContainerFreezer = new ScreenshotFreezer();
