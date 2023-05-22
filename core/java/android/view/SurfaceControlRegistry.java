@@ -62,7 +62,6 @@ public class SurfaceControlRegistry {
     private static class DefaultReporter implements Reporter {
         public void onMaxLayersExceeded(WeakHashMap<SurfaceControl, Long> surfaceControls,
                 int limit, PrintWriter pw) {
-            final int size = Math.min(surfaceControls.size(), limit);
             final long now = SystemClock.elapsedRealtime();
             final ArrayList<Map.Entry<SurfaceControl, Long>> entries = new ArrayList<>();
             for (Map.Entry<SurfaceControl, Long> entry : surfaceControls.entrySet()) {
@@ -71,6 +70,7 @@ public class SurfaceControlRegistry {
             // Sort entries by time registered when dumping
             // TODO: Or should it sort by name?
             entries.sort((o1, o2) -> (int) (o1.getValue() - o2.getValue()));
+            final int size = Math.min(entries.size(), limit);
 
             pw.println("SurfaceControlRegistry");
             pw.println("----------------------");
