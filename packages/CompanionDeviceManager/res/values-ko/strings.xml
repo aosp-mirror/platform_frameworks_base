@@ -19,7 +19,7 @@
     <string name="app_label" msgid="4470785958457506021">"부속 기기 관리자"</string>
     <string name="confirmation_title" msgid="4593465730772390351">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;에서 &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;에 액세스하도록 허용하시겠습니까?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"시계"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;에서 관리할 <xliff:g id="PROFILE_NAME">%1$s</xliff:g>을(를) 선택"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;에서 관리할 <xliff:g id="PROFILE_NAME">%1$s</xliff:g>를 선택"</string>
     <string name="summary_watch" msgid="898569637110705523">"이 앱은 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 기기를 관리하는 데 필요합니다. <xliff:g id="APP_NAME">%2$s</xliff:g>에서 정보(예: 발신자 이름)를 동기화하고, 알림과 상호작용하고, 전화, SMS, 연락처, 캘린더, 통화 기록 및 근처 기기에 액세스할 수 있게 됩니다."</string>
     <string name="summary_watch_single_device" msgid="3173948915947011333">"이 앱이 정보(예: 발신자 이름)를 동기화하고 <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>에서 이러한 권한에 액세스할 수 있게 됩니다."</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;에서 &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;? 기기를 관리하도록 허용"</string>
