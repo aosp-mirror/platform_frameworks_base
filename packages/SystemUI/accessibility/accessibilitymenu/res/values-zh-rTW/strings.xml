@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_menu_service_name" msgid="730136711554740131">"無障礙選單"</string>
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"無障礙工具選單"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"無障礙工具選單是螢幕上的大型選單，可用來操控裝置，方便你鎖定裝置、控制音量和亮度、擷取螢幕畫面，以及執行其他功能。"</string>
     <string name="assistant_label" msgid="6796392082252272356">"Google 助理"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Google 助理"</string>
