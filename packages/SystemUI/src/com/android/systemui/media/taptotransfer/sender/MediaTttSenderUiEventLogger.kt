@@ -17,7 +17,6 @@
 package com.android.systemui.media.taptotransfer.sender
 
 import android.util.Log
-import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
@@ -27,8 +26,8 @@ import javax.inject.Inject
 @SysUISingleton
 class MediaTttSenderUiEventLogger @Inject constructor(private val logger: UiEventLogger) {
     /** Logs that the sender chip has changed states. */
-    fun logSenderStateChange(chipState: ChipStateSender, instanceId: InstanceId) {
-        logger.log(chipState.uiEvent, instanceId)
+    fun logSenderStateChange(chipState: ChipStateSender) {
+        logger.log(chipState.uiEvent)
     }
 
     /**
@@ -36,11 +35,10 @@ class MediaTttSenderUiEventLogger @Inject constructor(private val logger: UiEven
      *
      * @param undoUiEvent the uiEvent specific to which undo button was clicked.
      */
-    fun logUndoClicked(undoUiEvent: UiEventLogger.UiEventEnum, instanceId: InstanceId) {
+    fun logUndoClicked(undoUiEvent: UiEventLogger.UiEventEnum) {
         val isUndoEvent =
-            undoUiEvent ==
-                    MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_RECEIVER_CLICKED ||
-                    undoUiEvent ==
+            undoUiEvent == MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_RECEIVER_CLICKED
+                    || undoUiEvent ==
                     MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_THIS_DEVICE_CLICKED
         if (!isUndoEvent) {
             Log.w(
@@ -49,7 +47,7 @@ class MediaTttSenderUiEventLogger @Inject constructor(private val logger: UiEven
             )
             return
         }
-        logger.log(undoUiEvent, instanceId)
+        logger.log(undoUiEvent)
     }
 }
 

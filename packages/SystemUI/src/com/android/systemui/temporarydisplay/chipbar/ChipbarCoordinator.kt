@@ -52,7 +52,6 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
-import com.android.systemui.temporarydisplay.TemporaryViewUiEventLogger
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.view.ViewUtil
@@ -93,7 +92,6 @@ constructor(
     private val vibratorHelper: VibratorHelper,
     wakeLockBuilder: WakeLock.Builder,
     systemClock: SystemClock,
-    tempViewUiEventLogger: TemporaryViewUiEventLogger,
 ) :
     TemporaryViewDisplayController<ChipbarInfo, ChipbarLogger>(
         context,
@@ -107,7 +105,6 @@ constructor(
         R.layout.chipbar,
         wakeLockBuilder,
         systemClock,
-        tempViewUiEventLogger,
     ) {
 
     private lateinit var parent: ChipbarRootView
@@ -318,7 +315,6 @@ constructor(
             )
             return
         }
-        tempViewUiEventLogger.logViewManuallyDismissed(currentDisplayInfo.info.instanceId)
         removeView(currentDisplayInfo.info.id, SWIPE_UP_GESTURE_REASON)
         updateGestureListening()
     }
