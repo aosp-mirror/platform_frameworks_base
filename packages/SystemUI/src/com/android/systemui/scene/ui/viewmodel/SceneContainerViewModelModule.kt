@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.ui.composable
+package com.android.systemui.scene.ui.viewmodel
 
-import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneContainerNames
 import dagger.Module
-import dagger.multibindings.Multibinds
+import dagger.Provides
 import javax.inject.Named
 
 @Module
-interface SceneModule {
-    @Multibinds @Named(SceneContainerNames.SYSTEM_UI_DEFAULT) fun scenes(): Set<Scene>
+object SceneContainerViewModelModule {
+
+    @Provides
+    @SysUISingleton
+    @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
+    fun defaultSceneContainerViewModel(
+        interactor: SceneInteractor,
+    ): SceneContainerViewModel {
+        return SceneContainerViewModel(
+            interactor = interactor,
+            containerName = SceneContainerNames.SYSTEM_UI_DEFAULT,
+        )
+    }
 }

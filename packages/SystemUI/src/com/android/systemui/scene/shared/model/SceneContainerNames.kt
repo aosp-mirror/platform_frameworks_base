@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.ui.composable
+package com.android.systemui.scene.shared.model
 
-import com.android.systemui.scene.shared.model.Scene
-import com.android.systemui.scene.shared.model.SceneContainerNames
-import dagger.Module
-import dagger.multibindings.Multibinds
-import javax.inject.Named
-
-@Module
-interface SceneModule {
-    @Multibinds @Named(SceneContainerNames.SYSTEM_UI_DEFAULT) fun scenes(): Set<Scene>
+object SceneContainerNames {
+    const val SYSTEM_UI_DEFAULT = "system_ui"
 }

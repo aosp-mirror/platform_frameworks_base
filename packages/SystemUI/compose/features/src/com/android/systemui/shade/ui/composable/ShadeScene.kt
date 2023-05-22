@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
@@ -35,7 +34,6 @@ import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,29 +41,22 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** The shade scene shows scrolling list of notifications and some of the quick setting tiles. */
-@SysUISingleton
-class ShadeScene
-@Inject
-constructor(
+class ShadeScene(
     @Application private val applicationScope: CoroutineScope,
-    private val viewModelFactory: ShadeSceneViewModel.Factory,
+    private val viewModel: ShadeSceneViewModel,
 ) : ComposableScene {
     override val key = SceneKey.Shade
-
-    private var unsafeViewModel: ShadeSceneViewModel? = null
 
     override fun destinationScenes(
         containerName: String,
     ): StateFlow<Map<UserAction, SceneModel>> =
-        getOrCreateViewModelSingleton(containerName).let { viewModel ->
-            viewModel.upDestinationSceneKey
-                .map { sceneKey -> destinationScenes(up = sceneKey) }
-                .stateIn(
-                    scope = applicationScope,
-                    started = SharingStarted.Eagerly,
-                    initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value),
-                )
-        }
+        viewModel.upDestinationSceneKey
+            .map { sceneKey -> destinationScenes(up = sceneKey) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value),
+            )
 
     @Composable
     override fun Content(
@@ -73,7 +64,7 @@ constructor(
         modifier: Modifier,
     ) {
         ShadeScene(
-            viewModel = getOrCreateViewModelSingleton(containerName),
+            viewModel = viewModel,
             modifier = modifier,
         )
     }
@@ -85,13 +76,6 @@ constructor(
             UserAction.Swipe(Direction.UP) to SceneModel(up),
             UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.QuickSettings),
         )
-    }
-
-    private fun getOrCreateViewModelSingleton(
-        containerName: String,
-    ): ShadeSceneViewModel {
-        return unsafeViewModel
-            ?: viewModelFactory.create(containerName).also { unsafeViewModel = it }
     }
 }
 
