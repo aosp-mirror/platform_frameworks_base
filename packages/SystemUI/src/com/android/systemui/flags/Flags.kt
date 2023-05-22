@@ -217,6 +217,7 @@ object Flags {
             )
 
     /** Whether to use a new data source for intents to run on keyguard dismissal. */
+    // TODO(b/275069969): Tracking bug.
     @JvmField
     val REFACTOR_KEYGUARD_DISMISS_INTENT = unreleasedFlag(231, "refactor_keyguard_dismiss_intent")
 
@@ -246,6 +247,11 @@ object Flags {
     // TODO(b/280067944): Tracking bug.
     @JvmField
     val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area")
+
+    /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
+    // TODO(b/283260512): Tracking bug.
+    @JvmField
+    val FP_LISTEN_OCCLUDING_APPS = unreleasedFlag(237, "fp_listen_occluding_apps")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
