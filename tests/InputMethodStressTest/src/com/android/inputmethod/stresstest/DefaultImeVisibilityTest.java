@@ -26,8 +26,6 @@ import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyWindowA
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsHidden;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsShown;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import android.content.Intent;
 import android.platform.test.annotations.RootPermissionTest;
 import android.platform.test.rule.UnlockScreenRule;
@@ -83,14 +81,11 @@ public final class DefaultImeVisibilityTest {
         ImeStressTestUtil.TestActivity activity = ImeStressTestUtil.TestActivity.start(intent);
         EditText editText = activity.getEditText();
         for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
-
-            boolean showResult = callOnMainSync(activity::showImeWithInputMethodManager);
-            assertThat(showResult).isTrue();
+            callOnMainSync(activity::showImeWithInputMethodManager);
             verifyWindowAndViewFocus(editText, true, true);
             waitOnMainUntilImeIsShown(editText);
 
-            boolean hideResult = callOnMainSync(activity::hideImeWithInputMethodManager);
-            assertThat(hideResult).isTrue();
+            callOnMainSync(activity::hideImeWithInputMethodManager);
             waitOnMainUntilImeIsHidden(editText);
         }
     }

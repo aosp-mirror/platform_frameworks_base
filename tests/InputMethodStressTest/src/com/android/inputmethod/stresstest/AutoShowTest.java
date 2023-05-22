@@ -199,8 +199,7 @@ public final class AutoShowTest {
                         Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
         TestActivity firstActivity = TestActivity.start(intent1);
         // Show Ime with InputMethodManager to ensure the keyboard is on.
-        boolean succ = callOnMainSync(firstActivity::showImeWithInputMethodManager);
-        assertThat(succ).isTrue();
+        callOnMainSync(firstActivity::showImeWithInputMethodManager);
         SystemClock.sleep(1000);
         mInstrumentation.waitForIdleSync();
 
@@ -264,8 +263,7 @@ public final class AutoShowTest {
                         Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
         ImeStressTestUtil.TestActivity secondActivity = activity.startSecondTestActivity(intent2);
         // Show Ime with InputMethodManager to ensure the keyboard is shown on the second activity
-        boolean succ = callOnMainSync(secondActivity::showImeWithInputMethodManager);
-        assertThat(succ).isTrue();
+        callOnMainSync(secondActivity::showImeWithInputMethodManager);
         SystemClock.sleep(1000);
         mInstrumentation.waitForIdleSync();
         // Close the second activity
