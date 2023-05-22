@@ -606,6 +606,11 @@ class LockSettingsStorage {
             this.payload = payload;
         }
 
+        public boolean isBadFormatFromAndroid14Beta() {
+            return (this.type == TYPE_SP_GATEKEEPER || this.type == TYPE_SP_WEAVER)
+                && SyntheticPasswordManager.PasswordData.isBadFormatFromAndroid14Beta(this.payload);
+        }
+
         public static PersistentData fromBytes(byte[] frpData) {
             if (frpData == null || frpData.length == 0) {
                 return NONE;
