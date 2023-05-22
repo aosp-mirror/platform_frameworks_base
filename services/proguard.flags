@@ -42,19 +42,6 @@
 -keep,allowoptimization,allowaccessmodification class * extends android.os.IInterface
 -keep,allowoptimization,allowaccessmodification class * extends android.os.IHwInterface
 
-# Global entities normally kept through explicit Manifest entries
-# TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/AndroidManifest.xml,
-# by including that manifest with the library rule that triggers optimization.
--keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.Activity
--keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.Service
--keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.backup.BackupAgent
--keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.content.BroadcastReceiver
--keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.content.ContentProvider
--keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.preference.Preference
--keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.view.View {
-  public <init>(...);
-}
-
 # Various classes subclassed in or referenced via JNI in ethernet-service
 -keep public class android.net.** { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.net.module.util.* { *; }
