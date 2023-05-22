@@ -653,15 +653,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             DELEGATION_CERT_SELECTION,
     });
 
-    /**
-     * System property whose value indicates whether the device is fully owned by an organization:
-     * it can be either a device owner device, or a device with an organization-owned managed
-     * profile.
-     *
-     * <p>The state is stored as a Boolean string.
-     */
-    private static final String PROPERTY_ORGANIZATION_OWNED = "ro.organization_owned";
-
     private static final int STATUS_BAR_DISABLE_MASK =
             StatusBarManager.DISABLE_EXPAND |
             StatusBarManager.DISABLE_NOTIFICATION_ICONS |
@@ -2320,7 +2311,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void loadOwners() {
         synchronized (getLockObject()) {
             mOwners.load();
-            setDeviceOwnershipSystemPropertyLocked();
             if (mOwners.hasDeviceOwner()) {
                 setGlobalSettingDeviceOwnerType(
                         mOwners.getDeviceOwnerType(mOwners.getDeviceOwnerPackageName()));
@@ -2681,27 +2671,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         admin.defaultEnabledRestrictionsAlreadySet.addAll(defaultRestrictions);
         Slogf.i(LOG_TAG, "Enabled the following restrictions by default: "
                 + defaultRestrictions);
-    }
-
-    private void setDeviceOwnershipSystemPropertyLocked() {
-        final boolean deviceProvisioned =
-                mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0;
-        final boolean hasDeviceOwner = mOwners.hasDeviceOwner();
-        final boolean hasOrgOwnedProfile = isOrganizationOwnedDeviceWithManagedProfile();
-        // If the device is not provisioned and there is currently no management, do not set the
-        // read-only system property yet, since device owner / org-owned profile may still be
-        // provisioned.
-        if (!hasDeviceOwner && !hasOrgOwnedProfile && !deviceProvisioned) {
-            return;
-        }
-        final String value = Boolean.toString(hasDeviceOwner || hasOrgOwnedProfile);
-        final String currentVal = mInjector.systemPropertiesGet(PROPERTY_ORGANIZATION_OWNED, null);
-        if (TextUtils.isEmpty(currentVal)) {
-            Slogf.i(LOG_TAG, "Set ro.organization_owned property to " + value);
-            mInjector.systemPropertiesSet(PROPERTY_ORGANIZATION_OWNED, value);
-        } else if (!value.equals(currentVal)) {
-            Slogf.w(LOG_TAG, "Cannot change existing ro.organization_owned to " + value);
-        }
     }
 
     private void maybeStartSecurityLogMonitorOnActivityManagerReady() {
@@ -9413,7 +9382,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             mOwners.setDeviceOwner(admin, userId);
             mOwners.writeDeviceOwner();
-            setDeviceOwnershipSystemPropertyLocked();
 
             //TODO(b/180371154): when provisionFullyManagedDevice is used in tests, remove this
             // hard-coded default value setting.
@@ -15126,8 +15094,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private class SetupContentObserver extends ContentObserver {
         private final Uri mUserSetupComplete = Settings.Secure.getUriFor(
                 Settings.Secure.USER_SETUP_COMPLETE);
-        private final Uri mDeviceProvisioned = Settings.Global.getUriFor(
-                Settings.Global.DEVICE_PROVISIONED);
         private final Uri mPaired = Settings.Secure.getUriFor(Settings.Secure.DEVICE_PAIRED);
         private final Uri mDefaultImeChanged = Settings.Secure.getUriFor(
                 Settings.Secure.DEFAULT_INPUT_METHOD);
@@ -15141,7 +15107,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         void register() {
             mInjector.registerContentObserver(mUserSetupComplete, false, this, UserHandle.USER_ALL);
-            mInjector.registerContentObserver(mDeviceProvisioned, false, this, UserHandle.USER_ALL);
             if (mIsWatch) {
                 mInjector.registerContentObserver(mPaired, false, this, UserHandle.USER_ALL);
             }
@@ -15157,12 +15122,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         public void onChange(boolean selfChange, Uri uri, int userId) {
             if (mUserSetupComplete.equals(uri) || (mIsWatch && mPaired.equals(uri))) {
                 updateUserSetupCompleteAndPaired();
-            } else if (mDeviceProvisioned.equals(uri)) {
-                synchronized (getLockObject()) {
-                    // Set PROPERTY_DEVICE_OWNER_PRESENT, for the SUW case where setting the property
-                    // is delayed until device is marked as provisioned.
-                    setDeviceOwnershipSystemPropertyLocked();
-                }
             } else if (mDefaultImeChanged.equals(uri)) {
                 synchronized (getLockObject()) {
                     if (mUserIdsWithPendingChangesByOwner.contains(userId)) {
