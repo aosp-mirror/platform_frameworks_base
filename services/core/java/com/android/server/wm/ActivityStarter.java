@@ -1709,7 +1709,8 @@ class ActivityStarter {
         // If Activity's launching into PiP, move the mStartActivity immediately to pinned mode.
         // Note that mStartActivity and source should be in the same Task at this point.
         if (mOptions != null && mOptions.isLaunchIntoPip()
-                && sourceRecord != null && sourceRecord.getTask() == mStartActivity.getTask()) {
+                && sourceRecord != null && sourceRecord.getTask() == mStartActivity.getTask()
+                && balCode != BAL_BLOCK) {
             mRootWindowContainer.moveActivityToPinnedRootTask(mStartActivity,
                     sourceRecord, "launch-into-pip");
         }
