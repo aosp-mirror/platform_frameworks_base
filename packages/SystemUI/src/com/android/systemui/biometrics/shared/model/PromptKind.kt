@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.data.model
+package com.android.systemui.biometrics.shared.model
 
 import com.android.systemui.biometrics.Utils
+import com.android.systemui.biometrics.domain.model.BiometricModalities
 
 // TODO(b/251476085): this should eventually replace Utils.CredentialType
 /** Credential options for biometric prompt. Shadows [Utils.CredentialType]. */
-enum class PromptKind {
-    ANY_BIOMETRIC,
-    PIN,
-    PATTERN,
-    PASSWORD,
+sealed interface PromptKind {
+    data class Biometric(
+        val activeModalities: BiometricModalities = BiometricModalities(),
+    ) : PromptKind
+
+    object Pin : PromptKind
+    object Pattern : PromptKind
+    object Password : PromptKind
 }

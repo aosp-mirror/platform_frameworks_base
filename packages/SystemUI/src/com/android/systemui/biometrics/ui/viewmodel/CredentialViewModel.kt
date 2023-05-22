@@ -7,8 +7,8 @@ import android.text.InputType
 import com.android.internal.widget.LockPatternView
 import com.android.systemui.R
 import com.android.systemui.biometrics.Utils
-import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.CredentialStatus
+import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
@@ -27,11 +27,11 @@ class CredentialViewModel
 @Inject
 constructor(
     @Application private val applicationContext: Context,
-    private val credentialInteractor: BiometricPromptCredentialInteractor,
+    private val credentialInteractor: PromptCredentialInteractor,
 ) {
 
     /** Top level information about the prompt. */
-    val header: Flow<HeaderViewModel> =
+    val header: Flow<CredentialHeaderViewModel> =
         credentialInteractor.prompt.filterIsInstance<BiometricPromptRequest.Credential>().map {
             request ->
             BiometricPromptHeaderViewModelImpl(
@@ -109,12 +109,14 @@ constructor(
     }
 
     /** Check a PIN or password and update [validatedAttestation] or [remainingAttempts]. */
-    suspend fun checkCredential(text: CharSequence, header: HeaderViewModel) =
+    suspend fun checkCredential(text: CharSequence, header: CredentialHeaderViewModel) =
         checkCredential(credentialInteractor.checkCredential(header.asRequest(), text = text))
 
     /** Check a pattern and update [validatedAttestation] or [remainingAttempts]. */
-    suspend fun checkCredential(pattern: List<LockPatternView.Cell>, header: HeaderViewModel) =
-        checkCredential(credentialInteractor.checkCredential(header.asRequest(), pattern = pattern))
+    suspend fun checkCredential(
+        pattern: List<LockPatternView.Cell>,
+        header: CredentialHeaderViewModel
+    ) = checkCredential(credentialInteractor.checkCredential(header.asRequest(), pattern = pattern))
 
     private suspend fun checkCredential(result: CredentialStatus) {
         when (result) {
@@ -172,7 +174,7 @@ private class BiometricPromptHeaderViewModelImpl(
     override val subtitle: String,
     override val description: String,
     override val icon: Drawable,
-) : HeaderViewModel
+) : CredentialHeaderViewModel
 
-private fun HeaderViewModel.asRequest(): BiometricPromptRequest.Credential =
+private fun CredentialHeaderViewModel.asRequest(): BiometricPromptRequest.Credential =
     (this as BiometricPromptHeaderViewModelImpl).request

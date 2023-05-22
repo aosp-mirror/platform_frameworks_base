@@ -231,7 +231,14 @@ public class AuthSessionTest {
     public void testMultiAuth_singleSensor_fingerprintSensorStartsAfterDialogAnimationCompletes()
             throws Exception {
         setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
-        testMultiAuth_fingerprintSensorStartsAfterUINotifies();
+        testMultiAuth_fingerprintSensorStartsAfterUINotifies(true /* startFingerprintNow */);
+    }
+
+    @Test
+    public void testMultiAuth_singleSensor_fingerprintSensorDoesNotStartAfterDialogAnimationCompletes()
+            throws Exception {
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
+        testMultiAuth_fingerprintSensorStartsAfterUINotifies(false /* startFingerprintNow */);
     }
 
     @Test
@@ -239,10 +246,18 @@ public class AuthSessionTest {
             throws Exception {
         setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
         setupFace(1 /* id */, false, mock(IBiometricAuthenticator.class));
-        testMultiAuth_fingerprintSensorStartsAfterUINotifies();
+        testMultiAuth_fingerprintSensorStartsAfterUINotifies(true /* startFingerprintNow */);
     }
 
-    public void testMultiAuth_fingerprintSensorStartsAfterUINotifies()
+    @Test
+    public void testMultiAuth_fingerprintSensorDoesNotStartAfterDialogAnimationCompletes()
+            throws Exception {
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
+        setupFace(1 /* id */, false, mock(IBiometricAuthenticator.class));
+        testMultiAuth_fingerprintSensorStartsAfterUINotifies(false /* startFingerprintNow */);
+    }
+
+    public void testMultiAuth_fingerprintSensorStartsAfterUINotifies(boolean startFingerprintNow)
             throws Exception {
         final long operationId = 123;
         final int userId = 10;
@@ -282,13 +297,21 @@ public class AuthSessionTest {
         // fingerprint sensor does not start even if all cookies are received
         assertEquals(STATE_AUTH_STARTED, session.getState());
         verify(mStatusBarService).showAuthenticationDialog(any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyInt(), anyLong(), any(), anyLong(), anyInt());
+                anyBoolean(), anyBoolean(), anyInt(), anyLong(), any(), anyLong());
 
         // Notify AuthSession that the UI is shown. Then, fingerprint sensor should be started.
-        session.onDialogAnimatedIn();
+        session.onDialogAnimatedIn(startFingerprintNow);
         assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
-        assertEquals(BiometricSensor.STATE_AUTHENTICATING,
+        assertEquals(startFingerprintNow ? BiometricSensor.STATE_AUTHENTICATING
+                        : BiometricSensor.STATE_COOKIE_RETURNED,
                 session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
+
+        // start fingerprint sensor if it was delayed
+        if (!startFingerprintNow) {
+            session.onStartFingerprint();
+            assertEquals(BiometricSensor.STATE_AUTHENTICATING,
+                    session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
+        }
     }
 
     @Test
@@ -316,14 +339,14 @@ public class AuthSessionTest {
         verify(impl, never()).startPreparedClient(anyInt());
 
         // First invocation should start the client monitor.
-        session.onDialogAnimatedIn();
+        session.onDialogAnimatedIn(true /* startFingerprintNow */);
         assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
         verify(impl).startPreparedClient(anyInt());
 
         // Subsequent invocations should not start the client monitor again.
-        session.onDialogAnimatedIn();
-        session.onDialogAnimatedIn();
-        session.onDialogAnimatedIn();
+        session.onDialogAnimatedIn(true /* startFingerprintNow */);
+        session.onDialogAnimatedIn(false /* startFingerprintNow */);
+        session.onDialogAnimatedIn(true /* startFingerprintNow */);
         assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
         verify(impl, times(1)).startPreparedClient(anyInt());
     }
