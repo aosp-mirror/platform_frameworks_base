@@ -817,7 +817,8 @@
         <service
             android:name=".dreams.DreamOverlayService"
             android:enabled="false"
-            android:exported="true" />
+            android:exported="true"
+            android:singleUser="true" />
 
         <activity android:name=".keyguard.WorkLockActivity"
                   android:label="@string/accessibility_desc_work_lock"

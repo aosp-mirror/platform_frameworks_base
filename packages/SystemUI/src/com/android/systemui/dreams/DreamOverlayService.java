@@ -283,6 +283,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mWindow.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        mWindow.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         // Hide all insets when the dream is showing
         mWindow.getDecorView().getWindowInsetsController().hide(WindowInsets.Type.systemBars());
