@@ -812,8 +812,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
             // Translate up from the bottom.
             surfaceBehindMatrix.setTranslate(
-                    surfaceBehindRemoteAnimationTarget.localBounds.left.toFloat(),
-                    surfaceBehindRemoteAnimationTarget.localBounds.top.toFloat() +
+                    surfaceBehindRemoteAnimationTarget.screenSpaceBounds.left.toFloat(),
+                    surfaceBehindRemoteAnimationTarget.screenSpaceBounds.top.toFloat() +
                             surfaceHeight * SURFACE_BEHIND_START_TRANSLATION_Y * (1f - amount)
             )
 
