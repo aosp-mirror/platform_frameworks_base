@@ -80,13 +80,13 @@ cc_library {
                 enabled: false,
             },
             static_libs: [
+                "libidmap2_policies",
                 "libidmap2_protos",
             ],
             shared_libs: [
                 "libandroidfw",
                 "libbase",
                 "libcutils",
-                "libidmap2_policies",
                 "libprotobuf-cpp-lite",
                 "libutils",
                 "libz",
@@ -125,7 +125,7 @@ cc_library {
     },
 }
 
-cc_library {
+cc_library_static {
     name: "libidmap2_policies",
     defaults: [
         "idmap2_defaults",
@@ -142,9 +142,6 @@ cc_library {
             ],
         },
         host: {
-            shared: {
-                enabled: false,
-            },
             static_libs: [
                 "libandroidfw",
             ],
@@ -191,13 +188,15 @@ cc_test {
                 "libandroidfw",
                 "libbase",
                 "libidmap2",
-                "libidmap2_policies",
                 "liblog",
                 "libprotobuf-cpp-lite",
                 "libutils",
                 "libz",
                 "libz",
                 "libziparchive",
+            ],
+            static_libs: [
+                "libidmap2_policies",
             ],
         },
         host: {
@@ -255,11 +254,13 @@ cc_binary {
                 "libbase",
                 "libcutils",
                 "libidmap2",
-                "libidmap2_policies",
                 "libprotobuf-cpp-lite",
                 "libutils",
                 "libz",
                 "libziparchive",
+            ],
+            static_libs: [
+                "libidmap2_policies",
             ],
         },
         host: {
@@ -298,13 +299,13 @@ cc_binary {
         "libbinder",
         "libcutils",
         "libidmap2",
-        "libidmap2_policies",
         "libprotobuf-cpp-lite",
         "libutils",
         "libziparchive",
     ],
     static_libs: [
         "libc++fs",
+        "libidmap2_policies",
         "libidmap2_protos",
         "libidmap2daidl",
     ],
