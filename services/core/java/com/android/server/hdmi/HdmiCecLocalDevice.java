@@ -1125,6 +1125,16 @@ abstract class HdmiCecLocalDevice {
         removeActionExcept(clazz, null);
     }
 
+    // Remove all running actions.
+    @ServiceThreadOnly
+    void removeAllActions() {
+        assertRunOnServiceThread();
+        for (HdmiCecFeatureAction action : mActions) {
+            action.finish(false);
+        }
+        mActions.clear();
+    }
+
     // Remove all actions matched with the given Class type besides |exception|.
     @ServiceThreadOnly
     <T extends HdmiCecFeatureAction> void removeActionExcept(
