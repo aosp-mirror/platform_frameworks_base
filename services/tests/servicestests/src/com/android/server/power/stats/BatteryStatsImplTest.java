@@ -23,6 +23,7 @@ import static android.os.BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -55,6 +56,7 @@ import com.android.internal.os.LongArrayMultiStateCounter;
 import com.android.internal.os.PowerProfile;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.LongSubject;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,6 +79,9 @@ public class BatteryStatsImplTest {
     private KernelSingleUidTimeReader mKernelSingleUidTimeReader;
     @Mock
     private PowerProfile mPowerProfile;
+    @Mock
+    private KernelWakelockReader mKernelWakelockReader;
+    private KernelWakelockStats mKernelWakelockStats = new KernelWakelockStats();
 
     private final MockClock mMockClock = new MockClock();
     private MockBatteryStatsImpl mBatteryStatsImpl;
@@ -89,10 +94,13 @@ public class BatteryStatsImplTest {
         when(mKernelUidCpuFreqTimeReader.readFreqs(any())).thenReturn(CPU_FREQS);
         when(mKernelUidCpuFreqTimeReader.allUidTimesAvailable()).thenReturn(true);
         when(mKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
+        when(mKernelWakelockReader.readKernelWakelockStats(
+                any(KernelWakelockStats.class))).thenReturn(mKernelWakelockStats);
         mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock)
                 .setPowerProfile(mPowerProfile)
                 .setKernelCpuUidFreqTimeReader(mKernelUidCpuFreqTimeReader)
-                .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader);
+                .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader)
+                .setKernelWakelockReader(mKernelWakelockReader);
     }
 
     @Test
@@ -556,6 +564,48 @@ public class BatteryStatsImplTest {
         assertThat(wakeLock2.timesAcquired).isEqualTo(2);
         assertThat(wakeLock2.timeHeldMs).isEqualTo(3000);  // 9000-6000
         assertThat(wakeLock2.totalTimeHeldMs).isEqualTo(4000); // (5000-4000) + (9000-6000)
+    }
+
+    @Test
+    public void kernelWakelocks() {
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        mKernelWakelockStats.put("lock1", new KernelWakelockStats.Entry(42, 1000, 314, 0));
+        mKernelWakelockStats.put("lock2", new KernelWakelockStats.Entry(6, 2000, 0, 0));
+
+        mMockClock.realtime = 5000;
+
+        // The fist call makes a snapshot of the initial state of the wakelocks
+        mBatteryStatsImpl.updateKernelWakelocksLocked(mMockClock.realtime * 1000);
+
+        assertThat(mBatteryStatsImpl.getKernelWakelockStats()).hasSize(2);
+
+        mMockClock.realtime += 2000;
+
+        assertThatKernelWakelockTotalTime("lock1").isEqualTo(314);  // active
+        assertThatKernelWakelockTotalTime("lock2").isEqualTo(0);        // inactive
+
+        mKernelWakelockStats.put("lock1", new KernelWakelockStats.Entry(43, 1100, 414, 0));
+        mKernelWakelockStats.put("lock2", new KernelWakelockStats.Entry(6, 2222, 0, 0));
+
+        mMockClock.realtime += 3000;
+
+        // Compute delta from the initial snapshot
+        mBatteryStatsImpl.updateKernelWakelocksLocked(mMockClock.realtime * 1000);
+
+        mMockClock.realtime += 4000;
+
+        assertThatKernelWakelockTotalTime("lock1").isEqualTo(414);
+
+        // Wake lock not active. Expect relative total time as reported by Kernel:
+        // 2_222 - 2_000 = 222
+        assertThatKernelWakelockTotalTime("lock2").isEqualTo(222);
+    }
+
+    private LongSubject assertThatKernelWakelockTotalTime(String name) {
+        return assertWithMessage("Kernel wakelock " + name + " at " + mMockClock.realtime)
+                .that(mBatteryStatsImpl.getKernelWakelockStats().get(name)
+                        .getTotalTimeLocked(mMockClock.realtime * 1000, 0));
     }
 
     @Test

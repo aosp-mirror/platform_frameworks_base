@@ -1733,7 +1733,7 @@ public class StatsPullAtomService extends SystemService {
             String name = ent.getKey();
             KernelWakelockStats.Entry kws = ent.getValue();
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                    atomTag, name, kws.mCount, kws.mVersion, kws.mTotalTime));
+                    atomTag, name, kws.count, kws.version, kws.totalTimeUs));
         }
         return StatsManager.PULL_SUCCESS;
     }
