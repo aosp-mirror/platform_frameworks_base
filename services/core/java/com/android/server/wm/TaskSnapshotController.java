@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Slog;
 import android.view.Display;
 import android.window.ScreenCapture;
@@ -36,8 +37,6 @@ import android.window.TaskSnapshot;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
-
-import com.google.android.collect.Sets;
 
 import java.util.Set;
 
@@ -58,7 +57,7 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     static final String SNAPSHOTS_DIRNAME = "snapshots";
 
     private final TaskSnapshotPersister mPersister;
-    private final ArraySet<Task> mSkipClosingAppSnapshotTasks = new ArraySet<>();
+    private final IntArray mSkipClosingAppSnapshotTasks = new IntArray();
     private final ArraySet<Task> mTmpTasks = new ArraySet<>();
     private final Handler mHandler = new Handler();
 
@@ -135,26 +134,6 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     }
 
     /**
-     * Called when the visibility of an app changes outside of the regular app transition flow.
-     */
-    void notifyAppVisibilityChanged(ActivityRecord appWindowToken, boolean visible) {
-        if (!visible) {
-            handleClosingApps(Sets.newArraySet(appWindowToken));
-        }
-    }
-
-    private void handleClosingApps(ArraySet<ActivityRecord> closingApps) {
-        if (shouldDisableSnapshots()) {
-            return;
-        }
-        // We need to take a snapshot of the task if and only if all activities of the task are
-        // either closing or hidden.
-        getClosingTasks(closingApps, mTmpTasks);
-        snapshotTasks(mTmpTasks);
-        mSkipClosingAppSnapshotTasks.clear();
-    }
-
-    /**
      * Adds the given {@param tasks} to the list of tasks which should not have their snapshots
      * taken upon the next processing of the set of closing apps. The caller is responsible for
      * calling {@link #snapshotTasks} to ensure that the task has an up-to-date snapshot.
@@ -164,7 +143,9 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         if (shouldDisableSnapshots()) {
             return;
         }
-        mSkipClosingAppSnapshotTasks.addAll(tasks);
+        for (Task task : tasks) {
+            mSkipClosingAppSnapshotTasks.add(task.mTaskId);
+        }
     }
 
     void snapshotTasks(ArraySet<Task> tasks) {
@@ -272,31 +253,16 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         return source.getTaskDescription();
     }
 
-    /**
-     * Retrieves all closing tasks based on the list of closing apps during an app transition.
-     */
-    @VisibleForTesting
-    void getClosingTasks(ArraySet<ActivityRecord> closingApps, ArraySet<Task> outClosingTasks) {
-        outClosingTasks.clear();
-        for (int i = closingApps.size() - 1; i >= 0; i--) {
-            final ActivityRecord activity = closingApps.valueAt(i);
-            final Task task = activity.getTask();
-            if (task == null) continue;
-
-            getClosingTasksInner(task, outClosingTasks);
-        }
-    }
-
     void getClosingTasksInner(Task task, ArraySet<Task> outClosingTasks) {
         // Since RecentsAnimation will handle task snapshot while switching apps with the
         // best capture timing (e.g. IME window capture),
         // No need additional task capture while task is controlled by RecentsAnimation.
         if (isAnimatingByRecents(task)) {
-            mSkipClosingAppSnapshotTasks.add(task);
+            mSkipClosingAppSnapshotTasks.add(task.mTaskId);
         }
         // If the task of the app is not visible anymore, it means no other app in that task
         // is opening. Thus, the task is closing.
-        if (!task.isVisible() && !mSkipClosingAppSnapshotTasks.contains(task)) {
+        if (!task.isVisible() && mSkipClosingAppSnapshotTasks.indexOf(task.mTaskId) < 0) {
             outClosingTasks.add(task);
         }
     }
