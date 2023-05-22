@@ -2,7 +2,7 @@
 <!--
  * Copyright 2018 Google Inc. All Rights Reserved.
  -->
-<configuration description="Runs WindowManager Flicker Tests">
+<configuration description="Runs WindowManager {MODULE}">
     <option name="test-tag" value="FlickerTests" />
     <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
         <!-- keeps the screen on during tests -->
@@ -36,11 +36,11 @@
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true"/>
-        <option name="test-file-name" value="FlickerTests.apk"/>
+        <option name="test-file-name" value="{MODULE}.apk"/>
         <option name="test-file-name" value="FlickerTestApp.apk" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
-        <option name="package" value="com.android.server.wm.flicker"/>
+        <option name="package" value="{PACKAGE}"/>
         <option name="shell-timeout" value="6600s" />
         <option name="test-timeout" value="6600s" />
         <option name="hidden-api-checks" value="false" />
