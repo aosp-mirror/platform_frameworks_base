@@ -2165,20 +2165,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"অফিসের <xliff:g id="APP">%s</xliff:g> খুলবেন?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ব্যক্তিগত <xliff:g id="APP">%s</xliff:g>-এ খুলবেন?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"অফিসের <xliff:g id="APP">%s</xliff:g>-এ খুলবেন?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"অফিসের অ্যাপ থেকে কল করবেন?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"অফিসের অ্যাপে পরিবর্তন করবেন?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"আপনার সংস্থা শুধু অফিসের অ্যাপ থেকেই আপনাকে কল করার অনুমতি দেয়"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"আপনার সংস্থা শুধু অফিসের অ্যাপ থেকেই আপনাকে মেসেজ পাঠানোর অনুমতি দেয়"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ব্যক্তিগত ব্রাউজার ব্যবহার করুন"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"অফিস ব্রাউজার ব্যবহার করুন"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"কল করুন"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"পরিবর্তন করুন"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"সিম নেটওয়ার্ক আনলক পিন"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"সিম নেটওয়ার্ক সাবসেট আনলক পিন"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"কর্পোরেট সিম আনলক পিন"</string>
