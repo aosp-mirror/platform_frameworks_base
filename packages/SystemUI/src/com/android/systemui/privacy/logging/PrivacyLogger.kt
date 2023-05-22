@@ -23,6 +23,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.LogMessage
 import com.android.systemui.privacy.PrivacyDialog
+import com.android.systemui.privacy.PrivacyDialogV2
 import com.android.systemui.privacy.PrivacyItem
 import java.util.Locale
 import javax.inject.Inject
@@ -119,6 +120,14 @@ class PrivacyLogger @Inject constructor(
     }
 
     fun logShowDialogContents(contents: List<PrivacyDialog.PrivacyElement>) {
+        log(LogLevel.INFO, {
+            str1 = contents.toString()
+        }, {
+            "Privacy dialog shown. Contents: $str1"
+        })
+    }
+
+    fun logShowDialogV2Contents(contents: List<PrivacyDialogV2.PrivacyElement>) {
         log(LogLevel.INFO, {
             str1 = contents.toString()
         }, {
