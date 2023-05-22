@@ -1145,6 +1145,11 @@ public class AudioService extends IAudioService.Stub
                         MAX_STREAM_VOLUME[AudioSystem.STREAM_SYSTEM];
         }
 
+        int minAssistantVolume = SystemProperties.getInt("ro.config.assistant_vol_min", -1);
+        if (minAssistantVolume != -1) {
+            MIN_STREAM_VOLUME[AudioSystem.STREAM_ASSISTANT] = minAssistantVolume;
+        }
+
         // Read following properties to configure max volume (number of steps) and default volume
         //   for STREAM_NOTIFICATION and STREAM_RING:
         //      config_audio_notif_vol_default
