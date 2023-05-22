@@ -677,7 +677,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 });
 
         mTabletopModeController.registerOnTabletopModeChangedListener((isInTabletopMode) -> {
-            if (!mTabletopModeController.enableMoveFloatingWindowInTabletop()) return;
             final String tag = "tabletop-mode";
             if (!isInTabletopMode) {
                 mPipBoundsState.removeNamedUnrestrictedKeepClearArea(tag);
