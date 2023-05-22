@@ -53,6 +53,7 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
     private static final int PHONE_ID = 0;
 
     @Mock PendingIntent mPendingIntent;
+    @Mock PendingIntent mSuccessfulIntent;
     @Mock PendingIntent mCanceledIntent;
     @Mock CarrierConfigManager mCarrierConfigManager;
     @Mock NotificationManager mNotificationManager;
@@ -107,20 +108,18 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
         doReturn(true).when(mCanceledIntent).isBroadcast();
         doReturn(mCanceledIntent).when(spiedIntent).getParcelableExtra(
                 eq(SlicePurchaseController.EXTRA_INTENT_CANCELED), eq(PendingIntent.class));
+        doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(mSuccessfulIntent).getCreatorPackage();
+        doReturn(true).when(mSuccessfulIntent).isBroadcast();
+        doReturn(mSuccessfulIntent).when(spiedIntent).getParcelableExtra(
+                eq(SlicePurchaseController.EXTRA_INTENT_SUCCESS), eq(PendingIntent.class));
 
         mSlicePurchaseActivity = startActivity(spiedIntent, null, null);
     }
 
     @Test
     public void testOnPurchaseSuccessful() throws Exception {
-        int duration = 5 * 60 * 1000; // 5 minutes
-        int invalidDuration = -1;
-        mSlicePurchaseActivity.onPurchaseSuccessful(duration);
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mPendingIntent).send(eq(mContext), eq(0), intentCaptor.capture());
-        Intent intent = intentCaptor.getValue();
-        assertEquals(duration, intent.getLongExtra(
-                SlicePurchaseController.EXTRA_PURCHASE_DURATION, invalidDuration));
+        mSlicePurchaseActivity.onPurchaseSuccessful();
+        verify(mSuccessfulIntent).send();
     }
 
     @Test
