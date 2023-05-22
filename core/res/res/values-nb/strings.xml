@@ -2165,20 +2165,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Vil du åpne <xliff:g id="APP">%s</xliff:g> for jobb?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Vil du åpne i <xliff:g id="APP">%s</xliff:g> for personlig bruk?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Vil du åpne i <xliff:g id="APP">%s</xliff:g> for jobb?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Vil du ringe fra en jobbapp?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vil du bytte til en jobbapp?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Organisasjonen din tillater bare at du ringer fra jobbapper"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organisasjonen din tillater bare at du sender meldinger fra jobbapper"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Bruk den personlige nettleseren"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Bruk jobbnettleseren"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Ring"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Bytt"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-kode for å fjerne operatørlåser"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-kode for å fjerne bestemte operatørlåser"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-kode for å låse opp SIM-kort for bedrifter"</string>

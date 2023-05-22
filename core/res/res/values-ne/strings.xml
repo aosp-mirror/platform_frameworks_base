@@ -179,7 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"भण्डारण भरिएको छ हेर्नुहोस्। ठाउँ खाली गर्न केही फाइलहरू मेटाउनुहोस्।"</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android टिभी डिभाइसको भण्डारण भरिएको छ। ठाउँ खाली गर्न केही फाइलहरू मेट्नुहोस्।"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"फोन भण्डारण भरिएको छ! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{प्रमाणपत्र जारी गर्ने निकाय इन्स्टल गरियो}other{प्रमाणपत्र जारी गर्ने निकायहरू इन्स्टल गरियो}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{प्रमाणपत्र जारी गर्ने निकायको प्रमाणपत्र इन्स्टल गरियो}other{प्रमाणपत्र जारी गर्ने निकायका प्रमाणपत्रहरू इन्स्टल गरिए}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"अज्ञात तेस्रो पक्ष द्वारा"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"तपाईंको कार्य प्रोफाइलका प्रशासकद्वारा"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> द्वारा"</string>
@@ -2165,20 +2165,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"कामसम्बन्धी <xliff:g id="APP">%s</xliff:g> खोल्ने हो?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"व्यक्तिगत <xliff:g id="APP">%s</xliff:g> मा खोल्ने हो?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"कामसम्बन्धी <xliff:g id="APP">%s</xliff:g> मा खोल्ने हो?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"कामसम्बन्धी एपबाट कल गर्ने हो?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"कामसम्बन्धी एप प्रयोग गर्ने हो?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र कल गर्ने अनुमति दिन्छ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र म्यासेज पठाउने अनुमति दिन्छ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"व्यक्तिगत ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउजर प्रयोग गर्नुहोस्"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"कल गर्नुहोस्"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"बदल्नुहोस्"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM को नेटवर्क अनलक गर्ने PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM को नेटवर्कको सबसेट अनलक गर्ने PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM को कर्पोरेट लक खोल्ने PIN"</string>
