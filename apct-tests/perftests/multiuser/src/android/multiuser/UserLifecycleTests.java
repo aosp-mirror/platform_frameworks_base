@@ -1541,7 +1541,8 @@ public class UserLifecycleTests {
 
     private void waitForBroadcastIdle() {
         try {
-            ShellHelper.runShellCommandWithTimeout("am wait-for-broadcast-idle", TIMEOUT_IN_SECOND);
+            ShellHelper.runShellCommandWithTimeout(
+                    "am wait-for-broadcast-idle --flush-broadcast-loopers", TIMEOUT_IN_SECOND);
         } catch (TimeoutException e) {
             Log.e(TAG, "Ending waitForBroadcastIdle because it is taking too long", e);
         }
