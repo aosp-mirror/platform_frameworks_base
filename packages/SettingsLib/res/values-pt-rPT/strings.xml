@@ -115,8 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Áudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Áudio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparelhos auditivos"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (1725521360076451751) -->
-    <skip />
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Ligado a aparelhos auditivos"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ligado a LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Ligado ao áudio de multimédia"</string>
@@ -142,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A sincronização concede acesso aos seus contactos e ao histórico de chamadas quando tem uma ligação estabelecida."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> devido a PIN ou token de acesso incorreto."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: PIN ou chave de acesso errado."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Não é possível comunicar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Emparelhamento rejeitado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computador"</string>
@@ -216,8 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Escolher perfil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Pessoal"</string>
     <string name="category_work" msgid="4014193632325996115">"Trabalho"</string>
-    <!-- no translation found for category_clone (1554511758987195974) -->
-    <skip />
+    <string name="category_clone" msgid="1554511758987195974">"Clone"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opções de programador"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Ativar as opções de programador"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Definir opções de desenvolvimento da aplicação"</string>
@@ -518,7 +516,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registado"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é aleatório."</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 dispositivo ligados}=1{1 dispositivo ligado}other{# dispositivos ligados}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 dispositivo ligado}=1{1 dispositivo ligado}other{# dispositivos ligados}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menos tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
