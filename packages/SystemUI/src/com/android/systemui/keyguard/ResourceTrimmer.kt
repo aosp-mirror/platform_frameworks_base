@@ -139,7 +139,8 @@ constructor(
         if (dozeDisabledAndScreenOff || dozeEnabledAndDozeAnimationCompleted) {
             Trace.beginSection("ResourceTrimmer#trimMemory")
             Log.d(LOG_TAG, "SysUI asleep, trimming memory.")
-            globalWindowManager.trimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+            globalWindowManager.trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            globalWindowManager.trimCaches(HardwareRenderer.CACHE_TRIM_ALL)
             Trace.endSection()
         }
     }
