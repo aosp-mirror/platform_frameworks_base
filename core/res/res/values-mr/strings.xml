@@ -1078,7 +1078,7 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"स्पेस"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"एंटर"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"हटवा"</string>
-    <string name="search_go" msgid="2141477624421347086">"शोध"</string>
+    <string name="search_go" msgid="2141477624421347086">"शोधा"</string>
     <string name="search_hint" msgid="455364685740251925">"शोधा…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"शोधा"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"शोध क्वेरी"</string>

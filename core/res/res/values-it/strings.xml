@@ -649,7 +649,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta il telefono verso sinistra"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta il telefono verso destra"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Guarda più direttamente verso il dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Impossibile vedere il volto. Tieni il telefono all\'altezza degli occhi"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Volto non visible. Tieni lo smartphone all\'altezza degli occhi."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Troppo movimento. Tieni fermo il telefono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ripeti l\'acquisizione del volto."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossibile riconoscere il volto. Riprova."</string>
