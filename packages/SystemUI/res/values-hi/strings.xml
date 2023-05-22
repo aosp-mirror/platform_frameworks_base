@@ -113,7 +113,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"शुरू करें"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रीन को रिकॉर्ड किया जा रहा है"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"स्क्रीन और ऑडियो, दोनों रिकॉर्ड हो रहे हैं"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रीन को कहां छुआ गया, ये दिखाएं"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रीन को कहां-कहां छुआ गया, यह दिखाएं"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"रोकें"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"शेयर करें"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"स्क्रीन रिकॉर्डिंग सेव की गई"</string>

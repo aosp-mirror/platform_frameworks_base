@@ -102,7 +102,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"Durant la gravació, el sistema Android pot capturar qualsevol informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu. Això inclou contrasenyes, informació de pagament, fotos, missatges i àudio."</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Grava la pantalla completa"</string>
     <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Grava una sola aplicació"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Mentre graves contingut, Android pot accedir a tot el que es veu a la pantalla o que es reprodueix al dispositiu. Per això cal que vagis amb compte amb les contrasenyes, les dades de pagament, els missatges o qualsevol altra informació sensible."</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Mentre graves, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
     <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Mentre graves una aplicació, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
     <string name="screenrecord_start_recording" msgid="348286842544768740">"Inicia la gravació"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grava l\'àudio"</string>

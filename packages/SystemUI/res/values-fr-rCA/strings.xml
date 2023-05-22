@@ -818,7 +818,7 @@
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Choisissez les commandes à inclure dans le menu Paramètres rapides"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Faites glisser les commandes pour les réorganiser"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été supprimées"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été retirées"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modifications non enregistrées"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Afficher autres applications"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Impossible de charger les commandes. Vérifiez l\'application <xliff:g id="APP">%s</xliff:g> pour vous assurer que les paramètres de l\'application n\'ont pas changé."</string>
@@ -1039,7 +1039,7 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Charge restante de la pile : <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connectez votre stylet à un chargeur"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Pile du stylet faible"</string>
-    <string name="video_camera" msgid="7654002575156149298">"Mode vidéo"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Caméra"</string>
     <string name="call_from_work_profile_title" msgid="6991157106804289643">"Impossible de passer un appel à partir de ce profil"</string>
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Votre politique de l\'entreprise vous autorise à passer des appels téléphoniques uniquement à partir de votre profil professionnel"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Passer au profil professionnel"</string>

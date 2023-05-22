@@ -102,8 +102,8 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"録画中に機密情報が画面に表示されたりデバイスで再生されたりした場合、Android システムでキャプチャされることがあります。これには、パスワード、お支払い情報、写真、メッセージ、音声などが含まれます。"</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"画面全体を録画する"</string>
     <string name="screenrecord_option_single_app" msgid="5954863081500035825">"1 つのアプリを録画する"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"録画中は、画面に表示されている内容やデバイスで再生されている内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"アプリの録画中は、そのアプリで表示されている内容や再生されている内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"録画中は、表示や再生されている内容に Android がアクセスできます。パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"アプリの録画中は、そのアプリで表示されている内容や再生されている内容に Android がアクセスできます。パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
     <string name="screenrecord_start_recording" msgid="348286842544768740">"録画を開始"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"録音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"デバイスの音声"</string>
@@ -372,7 +372,7 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"ユーザーを削除しますか？"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"このユーザーのアプリとデータがすべて削除されます。"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"削除"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面上で表示または再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示される情報、またはキャスト先に転送される情報すべてにアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
