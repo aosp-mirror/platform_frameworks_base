@@ -89,7 +89,7 @@ public class Sensor {
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
     @NonNull private final Supplier<AidlSession> mLazySession;
-    @Nullable private AidlSession mCurrentSession;
+    @Nullable AidlSession mCurrentSession;
 
     @VisibleForTesting
     public static class HalSessionCallback extends ISessionCallback.Stub {
@@ -486,7 +486,7 @@ public class Sensor {
     Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricContext biometricContext, AidlSession session) {
         mTag = tag;
         mProvider = provider;
         mContext = context;
@@ -549,6 +549,14 @@ public class Sensor {
         mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
     }
 
+    Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull BiometricContext biometricContext) {
+        this(tag, provider, context, handler, sensorProperties, lockoutResetDispatcher,
+                biometricContext, null);
+    }
+
     @NonNull Supplier<AidlSession> getLazySession() {
         return mLazySession;
     }
@@ -557,7 +565,7 @@ public class Sensor {
         return mSensorProperties;
     }
 
-    @Nullable AidlSession getSessionForUser(int userId) {
+    @VisibleForTesting @Nullable AidlSession getSessionForUser(int userId) {
         if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
@@ -641,6 +649,8 @@ public class Sensor {
                     BiometricsProtoEnums.MODALITY_FACE,
                     BiometricsProtoEnums.ISSUE_HAL_DEATH,
                     -1 /* sensorId */);
+        } else if (client != null) {
+            client.cancel();
         }
 
         mScheduler.recordCrashState();
