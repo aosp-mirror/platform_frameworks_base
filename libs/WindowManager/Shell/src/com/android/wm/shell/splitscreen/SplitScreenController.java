@@ -723,7 +723,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 // in the background with priority.
                 final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional
                         .map(recentTasks -> recentTasks.findTaskInBackground(
-                                intent.getIntent().getComponent()))
+                                intent.getIntent().getComponent(), userId1))
                         .orElse(null);
                 if (taskInfo != null) {
                     startTask(taskInfo.taskId, position, options);
