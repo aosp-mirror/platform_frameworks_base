@@ -22,7 +22,7 @@ import android.os.Message
 import android.os.SystemClock
 import android.os.UserHandle
 import android.util.AtomicFile
-import android.util.Log
+import android.util.Slog
 import android.util.SparseLongArray
 import com.android.internal.annotations.GuardedBy
 import com.android.internal.os.BackgroundThread
@@ -98,7 +98,7 @@ class AccessPersistence(
             AtomicFile(this).readWithReserveCopy { it.parseBinaryXml(block) }
             true
         } catch (e: FileNotFoundException) {
-            Log.i(LOG_TAG, "$this not found")
+            Slog.i(LOG_TAG, "$this not found")
             false
         } catch (e: Exception) {
             throw IllegalStateException("Failed to read $this", e)
@@ -176,7 +176,7 @@ class AccessPersistence(
         try {
             AtomicFile(this).writeWithReserveCopy { it.serializeBinaryXml(block) }
         } catch (e: Exception) {
-            Log.e(LOG_TAG, "Failed to serialize $this", e)
+            Slog.e(LOG_TAG, "Failed to serialize $this", e)
         }
     }
 

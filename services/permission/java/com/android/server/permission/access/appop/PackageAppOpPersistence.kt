@@ -16,7 +16,7 @@
 
 package com.android.server.permission.access.appop
 
-import android.util.Log
+import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
@@ -46,12 +46,12 @@ class PackageAppOpPersistence : BaseAppOpPersistence() {
         forEachTag {
             when (tagName) {
                 TAG_PACKAGE -> parsePackage(packageAppOpModes)
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
             }
         }
         packageAppOpModes.forEachReversedIndexed { packageNameIndex, packageName, _ ->
             if (packageName !in state.externalState.packageStates) {
-                Log.w(LOG_TAG, "Dropping unknown package $packageName when parsing app-op state")
+                Slog.w(LOG_TAG, "Dropping unknown package $packageName when parsing app-op state")
                 packageAppOpModes.removeAt(packageNameIndex)
                 userState.requestWriteMode(WriteMode.ASYNCHRONOUS)
             }

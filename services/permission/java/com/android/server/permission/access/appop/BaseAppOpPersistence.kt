@@ -16,7 +16,7 @@
 
 package com.android.server.permission.access.appop
 
-import android.util.Log
+import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
@@ -40,7 +40,7 @@ abstract class BaseAppOpPersistence {
         forEachTag {
             when (tagName) {
                 TAG_APP_OP -> parseAppOp(appOpModes)
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
             }
         }
     }

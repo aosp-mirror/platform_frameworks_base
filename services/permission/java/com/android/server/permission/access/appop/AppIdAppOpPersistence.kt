@@ -17,7 +17,7 @@
 package com.android.server.permission.access.appop
 
 import android.os.Process
-import android.util.Log
+import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
@@ -46,14 +46,14 @@ class AppIdAppOpPersistence : BaseAppOpPersistence() {
         forEachTag {
             when (tagName) {
                 TAG_APP_ID -> parseAppId(appIdAppOpModes)
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
             }
         }
         userState.appIdAppOpModes.forEachReversedIndexed { appIdIndex, appId, _ ->
             // Non-application UIDs may not have an Android package but may still have app op state.
             if (appId !in state.externalState.appIdPackageNames &&
                 appId >= Process.FIRST_APPLICATION_UID) {
-                Log.w(LOG_TAG, "Dropping unknown app ID $appId when parsing app-op state")
+                Slog.w(LOG_TAG, "Dropping unknown app ID $appId when parsing app-op state")
                 appIdAppOpModes.removeAt(appIdIndex)
                 userState.requestWriteMode(WriteMode.ASYNCHRONOUS)
             }

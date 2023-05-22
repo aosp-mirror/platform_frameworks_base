@@ -16,7 +16,7 @@
 
 package com.android.server.permission.access
 
-import android.util.Log
+import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.SystemConfig
@@ -326,7 +326,7 @@ class AccessPolicy private constructor(
                     VERSION_LATEST
             }
             version == VERSION_LATEST -> {}
-            else -> Log.w(
+            else -> Slog.w(
                 LOG_TAG, "Unexpected version $version for package $packageName," +
                     "latest version is $VERSION_LATEST"
             )
@@ -343,7 +343,7 @@ class AccessPolicy private constructor(
                         }
                     }
                 }
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $tagName when parsing system state")
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $tagName when parsing system state")
             }
         }
     }
@@ -372,7 +372,7 @@ class AccessPolicy private constructor(
                     }
                 }
                 else -> {
-                    Log.w(
+                    Slog.w(
                         LOG_TAG,
                         "Ignoring unknown tag $tagName when parsing user state for user $userId"
                     )
@@ -387,12 +387,12 @@ class AccessPolicy private constructor(
         forEachTag {
             when (tagName) {
                 TAG_PACKAGE -> parsePackageVersion(packageVersions)
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing package versions")
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $name when parsing package versions")
             }
         }
         packageVersions.forEachReversedIndexed { packageVersionIndex, packageName, _ ->
             if (packageName !in state.externalState.packageStates) {
-                Log.w(LOG_TAG, "Dropping unknown $packageName when parsing package versions")
+                Slog.w(LOG_TAG, "Dropping unknown $packageName when parsing package versions")
                 packageVersions.removeAt(packageVersionIndex)
                 userState.requestWriteMode(WriteMode.ASYNCHRONOUS)
             }

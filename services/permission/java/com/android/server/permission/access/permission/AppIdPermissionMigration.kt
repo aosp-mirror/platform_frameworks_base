@@ -16,7 +16,7 @@
 
 package com.android.server.permission.access.permission
 
-import android.util.Log
+import android.util.Slog
 import com.android.server.LocalServices
 import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
@@ -51,7 +51,7 @@ class AppIdPermissionMigration {
             )
             permissions[permission.name] = permission
             if (DEBUG_MIGRATION) {
-                Log.v(LOG_TAG, "Migrated permission: ${permission.name}, type: " +
+                Slog.v(LOG_TAG, "Migrated permission: ${permission.name}, type: " +
                     "${permission.type}, appId: ${permission.appId}, protectionLevel: " +
                     "${permission.protectionLevel}, tree: $isPermissionTree"
                 )
@@ -75,7 +75,7 @@ class AppIdPermissionMigration {
         legacyAppIdPermissionStates.forEach { (appId, legacyPermissionStates) ->
             val packageNames = state.externalState.appIdPackageNames[appId]
             if (packageNames == null) {
-                Log.w(LOG_TAG, "Dropping unknown app ID $appId when migrating permission state")
+                Slog.w(LOG_TAG, "Dropping unknown app ID $appId when migrating permission state")
                 return@forEach
             }
 
@@ -85,7 +85,7 @@ class AppIdPermissionMigration {
                 (permissionName, legacyPermissionState) ->
                 val permission = state.systemState.permissions[permissionName]
                 if (permission == null) {
-                    Log.w(
+                    Slog.w(
                         LOG_TAG, "Dropping unknown permission $permissionName for app ID $appId" +
                             " when migrating permission state"
                     )
@@ -138,7 +138,7 @@ class AppIdPermissionMigration {
             val oldGrantState = legacyPermissionState.isGranted
             val newGrantState = PermissionFlags.isPermissionGranted(flags)
             val flagsMismatch = legacyPermissionState.flags != PermissionFlags.toApiFlags(flags)
-            Log.v(
+            Slog.v(
                 LOG_TAG, "Migrated appId: $appId, permission: " +
                     "${permission.name}, user: $userId, oldGrantState: $oldGrantState" +
                     ", oldFlags: $oldFlagString, newFlags: $newFlagString, grantMismatch: " +

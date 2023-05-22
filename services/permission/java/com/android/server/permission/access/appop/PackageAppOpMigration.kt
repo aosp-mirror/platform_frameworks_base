@@ -16,7 +16,7 @@
 
 package com.android.server.permission.access.appop
 
-import android.util.Log
+import android.util.Slog
 import com.android.server.LocalServices
 import com.android.server.appop.AppOpMigrationHelper
 import com.android.server.permission.access.MutableAccessState
@@ -38,7 +38,7 @@ class PackageAppOpMigration {
         val packageAppOpModes = userState.mutatePackageAppOpModes()
         legacyPackageAppOpModes.forEach { (packageName, legacyAppOpModes) ->
             if (packageName !in state.externalState.packageStates) {
-                Log.w(LOG_TAG, "Dropping unknown package $packageName when migrating app op state")
+                Slog.w(LOG_TAG, "Dropping unknown package $packageName when migrating app op state")
                 return@forEach
             }
 

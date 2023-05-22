@@ -18,7 +18,7 @@ package com.android.server.permission.access.util
 
 import android.os.FileUtils
 import android.util.AtomicFile
-import android.util.Log
+import android.util.Slog
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -35,12 +35,12 @@ inline fun AtomicFile.readWithReserveCopy(block: (FileInputStream) -> Unit) {
     } catch (e: FileNotFoundException) {
         throw e
     } catch (e: Exception) {
-        Log.wtf("AccessPersistence", "Failed to read $this", e)
+        Slog.wtf("AccessPersistence", "Failed to read $this", e)
         val reserveFile = File(baseFile.parentFile, baseFile.name + ".reservecopy")
         try {
             AtomicFile(reserveFile).openRead().use(block)
         } catch (e2: Exception) {
-            Log.e("AccessPersistence", "Failed to read $reserveFile", e2)
+            Slog.e("AccessPersistence", "Failed to read $reserveFile", e2)
             throw e
         }
     }
@@ -62,7 +62,7 @@ inline fun AtomicFile.writeWithReserveCopy(block: (FileOutputStream) -> Unit) {
             }
         }
     } catch (e: Exception) {
-        Log.e("AccessPersistence", "Failed to write $reserveFile", e)
+        Slog.e("AccessPersistence", "Failed to write $reserveFile", e)
     }
 }
 
