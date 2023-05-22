@@ -716,7 +716,7 @@
     <!-- Minimum margin between clock and status bar -->
     <dimen name="keyguard_clock_top_margin">18dp</dimen>
     <!-- The amount to shift the clocks during a small/large transition -->
-    <dimen name="keyguard_clock_switch_y_shift">10dp</dimen>
+    <dimen name="keyguard_clock_switch_y_shift">14dp</dimen>
     <!-- When large clock is showing, offset the smartspace by this amount -->
     <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
     <!-- With the large clock, move up slightly from the center -->
