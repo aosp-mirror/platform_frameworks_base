@@ -2165,20 +2165,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Kas avada töörakendus <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Kas avada isiklikus rakenduses <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Kas avada töörakenduses <xliff:g id="APP">%s</xliff:g>?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Kas helistada töörakendusest?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Kas lülituda töörakendusele?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Teie organisatsioon lubab helistada ainult töörakendustest"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Teie organisatsioon lubab sõnumeid saata ainult töörakendustest."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kasuta isiklikku brauserit"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Kasuta tööbrauserit"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Helistage"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Lülitu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kaardi võrgu avamise PIN-kood"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM-kaardi võrgu alamhulga avamise PIN-kood"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM-kaardi ettevõtte avamise PIN-kood"</string>
