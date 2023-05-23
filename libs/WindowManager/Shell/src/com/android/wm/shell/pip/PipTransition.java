@@ -249,11 +249,6 @@ public class PipTransition extends PipTransitionController {
                     finishTransaction);
         }
 
-        // Fade in the fadeout PIP when the fixed rotation is finished.
-        if (mPipTransitionState.isInPip() && !mInFixedRotation && mHasFadeOut) {
-            fadeExistingPip(true /* show */);
-        }
-
         return false;
     }
 
@@ -1056,6 +1051,12 @@ public class PipTransition extends PipTransitionController {
                 .crop(finishTransaction, leash, destBounds)
                 .round(finishTransaction, leash, isInPip)
                 .shadow(finishTransaction, leash, isInPip);
+        // Make sure the PiP keeps invisible if it was faded out. If it needs to fade in, that will
+        // be handled by onFixedRotationFinished().
+        if (isInPip && mHasFadeOut) {
+            startTransaction.setAlpha(leash, 0f);
+            finishTransaction.setAlpha(leash, 0f);
+        }
     }
 
     /** Hides and shows the existing PIP during fixed rotation transition of other activities. */
