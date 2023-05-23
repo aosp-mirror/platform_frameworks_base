@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -31,11 +32,13 @@ public class PackageInfo implements Parcelable {
      * The name of this package.  From the &lt;manifest&gt; tag's "name"
      * attribute.
      */
+    @NonNull
     public String packageName;
 
     /**
      * The names of any installed split APKs for this package.
      */
+    @NonNull
     public String[] splitNames;
 
     /**
@@ -110,6 +113,7 @@ public class PackageInfo implements Parcelable {
      * {@link android.R.styleable#AndroidManifest_revisionCode revisionCode}
      * attribute. Indexes are a 1:1 mapping against {@link #splitNames}.
      */
+    @NonNull
     public int[] splitRevisionCodes;
 
     /**
@@ -117,6 +121,7 @@ public class PackageInfo implements Parcelable {
      * tag's {@link android.R.styleable#AndroidManifest_sharedUserId sharedUserId}
      * attribute.
      */
+    @Nullable
     public String sharedUserId;
 
     /**
@@ -149,6 +154,7 @@ public class PackageInfo implements Parcelable {
      * All kernel group-IDs that have been assigned to this package.
      * This is only filled in if the flag {@link PackageManager#GET_GIDS} was set.
      */
+    @Nullable
     public int[] gids;
 
     /**
@@ -157,6 +163,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_ACTIVITIES} was set.
      */
+    @Nullable
     public ActivityInfo[] activities;
 
     /**
@@ -165,6 +172,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_RECEIVERS} was set.
      */
+    @Nullable
     public ActivityInfo[] receivers;
 
     /**
@@ -173,6 +181,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_SERVICES} was set.
      */
+    @Nullable
     public ServiceInfo[] services;
 
     /**
@@ -181,6 +190,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_PROVIDERS} was set.
      */
+    @Nullable
     public ProviderInfo[] providers;
 
     /**
@@ -189,6 +199,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_INSTRUMENTATION} was set.
      */
+    @Nullable
     public InstrumentationInfo[] instrumentation;
 
     /**
@@ -197,6 +208,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_PERMISSIONS} was set.
      */
+    @Nullable
     public PermissionInfo[] permissions;
 
     /**
@@ -207,6 +219,7 @@ public class PackageInfo implements Parcelable {
      * all permissions requested, even those that were not granted or known
      * by the system at install time.
      */
+    @Nullable
     public String[] requestedPermissions;
 
     /**
@@ -218,6 +231,7 @@ public class PackageInfo implements Parcelable {
      * the flags {@link #REQUESTED_PERMISSION_GRANTED} and
      * {@link #REQUESTED_PERMISSION_NEVER_FOR_LOCATION} set as appropriate.
      */
+    @Nullable
     public int[] requestedPermissionsFlags;
 
     /**
@@ -226,7 +240,8 @@ public class PackageInfo implements Parcelable {
      * is only filled if the flag {@link PackageManager#GET_ATTRIBUTIONS_LONG} was set.
      */
     @SuppressWarnings({"ArrayReturn", "NullableCollection"})
-    public @Nullable Attribution[] attributions;
+    @Nullable
+    public Attribution[] attributions;
 
     /**
      * Flag for {@link #requestedPermissionsFlags}: the requested permission
@@ -283,6 +298,7 @@ public class PackageInfo implements Parcelable {
      * @deprecated use {@code signingInfo} instead
      */
     @Deprecated
+    @Nullable
     public Signature[] signatures;
 
     /**
@@ -294,6 +310,7 @@ public class PackageInfo implements Parcelable {
      * Use this field instead of the deprecated {@code signatures} field.
      * See {@link SigningInfo} for more information on its contents.
      */
+    @Nullable
     public SigningInfo signingInfo;
 
     /**
@@ -303,6 +320,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none. This is only filled in if the flag
      * {@link PackageManager#GET_CONFIGURATIONS} was set.
      */
+    @Nullable
     public ConfigurationInfo[] configPreferences;
 
     /**
@@ -310,6 +328,7 @@ public class PackageInfo implements Parcelable {
      *
      * @see FeatureInfo#FLAG_REQUIRED
      */
+    @Nullable
     public FeatureInfo[] reqFeatures;
 
     /**
@@ -320,6 +339,7 @@ public class PackageInfo implements Parcelable {
      *
      * @see FeatureInfo#FLAG_REQUIRED
      */
+    @Nullable
     public FeatureGroupInfo[] featureGroups;
 
     /**
@@ -388,12 +408,14 @@ public class PackageInfo implements Parcelable {
      * The restricted account authenticator type that is used by this application.
      * @hide
      */
+    @Nullable
     public String restrictedAccountType;
 
     /**
      * The required account type without which this application will not function.
      * @hide
      */
+    @Nullable
     public String requiredAccountType;
 
     /**
@@ -403,6 +425,7 @@ public class PackageInfo implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
+    @Nullable
     public String overlayTarget;
 
     /**
@@ -411,6 +434,7 @@ public class PackageInfo implements Parcelable {
      * Overlayable name defined within the target package, or null.
      * @hide
      */
+    @Nullable
     public String targetOverlayableName;
 
     /**
@@ -418,6 +442,7 @@ public class PackageInfo implements Parcelable {
      *
      * @hide
      */
+    @Nullable
     public String overlayCategory;
 
     /** @hide */
