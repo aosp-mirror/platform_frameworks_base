@@ -917,7 +917,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Hálózatok keresése…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Nem sikerült hálózathoz csatlakozni."</string>
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"A Wi-Fi-re történő csatlakozás jelenleg nem automatikus"</string>
-    <string name="see_all_networks" msgid="3773666844913168122">"Megtekintés"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Összes megtekintése"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Hálózatváltáshoz válassza le az ethernetet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Az eszközhasználati élmény javítása érdekében az alkalmazások és a szolgáltatások továbbra is bármikor kereshetnek Wi-Fi-hálózatokat, még akkor is, ha a Wi-Fi ki van kapcsolva. A funkciót a Wi-Fi-keresési beállításoknál módosíthatja. "<annotation id="link">"Módosítás"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Repülős üzemmód kikapcsolása"</string>

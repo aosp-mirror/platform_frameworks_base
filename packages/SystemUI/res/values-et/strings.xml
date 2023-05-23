@@ -94,7 +94,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Kas alustada salvestamist?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Salvestamise ajal võib Androidi süsteem jäädvustada tundlikku teavet, mis on ekraanikuval nähtav või mida seadmes esitatakse. See hõlmab paroole, makseteavet, fotosid, sõnumeid ja heli."</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Heli salvestamine"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Salvesta heli"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Seadme heli"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Seadmest pärinev heli, nt muusika, kõned ja helinad"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>

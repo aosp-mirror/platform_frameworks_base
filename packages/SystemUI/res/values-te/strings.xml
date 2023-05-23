@@ -94,7 +94,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"రికార్డింగ్‌ను ప్రారంభించాలా?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నయినా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో కూడా ఉంటాయి."</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"ఆడియోను రికార్డ్ చేయి"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"ఆడియోను రికార్డ్ చేయండి"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"పరికరం ఆడియో"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే మ్యూజిక్, కాల్స్‌, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"మైక్రోఫోన్"</string>
@@ -102,7 +102,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"ప్రారంభించండి"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"స్క్రీన్ రికార్డింగ్ చేయబడుతోంది"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"స్క్రీన్, ఆడియో రికార్డింగ్ చేయబడుతున్నాయి"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"స్క్రీన్‌పై తాకే స్థానాలను చూపు"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"స్క్రీన్‌పై తాకే స్థానాలను చూపండి"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ఆపివేయి"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"షేర్ చేయి"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"స్క్రీన్ రికార్డింగ్ సేవ్ చేయబడింది"</string>
@@ -931,7 +931,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"కొత్త సమాచారం"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"యాక్టివ్‌గా ఉన్న యాప్‌లు"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"మీరు వాటిని ఉపయోగించనప్పటికీ, ఈ యాప్‌లు యాక్టివ్‌గా ఉంటాయి, రన్ అవుతాయి. ఇది వాటి ఫంక్షనాలిటీని మెరుగుపరుస్తుంది, అయితే ఇది బ్యాటరీ జీవితకాలాన్ని కూడా ప్రభావితం చేయవచ్చు."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"మీరు ఈ యాప్‌లను ఉపయోగించపోయినా కూడా అవి యాక్టివ్‌గా ఉండి, రన్ అవుతూ ఉంటాయి. దీని వల్ల వాటి ఫంక్షనాలిటీ మెరుగవుతుంది. అయితే ఇది బ్యాటరీ లైఫ్‌ను కూడా ప్రభావితం చేయవచ్చు."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ఆపివేయండి"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ఆపివేయబడింది"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"పూర్తయింది"</string>
