@@ -33,6 +33,7 @@ import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_DE
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Region;
 import android.net.Uri;
@@ -411,6 +412,25 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         wct.reorder(triggerTask.token, true /* onTop */);
 
         return wct;
+    }
+
+    /**
+     * Applies the proper surface states (rounded corners) to tasks when desktop mode is active.
+     * This is intended to be used when desktop mode is part of another animation but isn't, itself,
+     * animating.
+     */
+    public void syncSurfaceState(@NonNull TransitionInfo info,
+            SurfaceControl.Transaction finishTransaction) {
+        // Add rounded corners to freeform windows
+        final TypedArray ta = mContext.obtainStyledAttributes(
+                new int[]{android.R.attr.dialogCornerRadius});
+        final int cornerRadius = ta.getDimensionPixelSize(0, 0);
+        ta.recycle();
+        for (TransitionInfo.Change change: info.getChanges()) {
+            if (change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+                finishTransaction.setCornerRadius(change.getLeash(), cornerRadius);
+            }
+        }
     }
 
     /**
