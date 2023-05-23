@@ -204,7 +204,15 @@ class Owners {
 
     @GuardedBy("mData")
     Set<Integer> getProfileOwnerUidsLocked() {
-        return mData.mProfileOwners.keySet();
+        Set<Integer> uids = new ArraySet<>();
+        for (int i = 0; i < mData.mProfileOwners.size(); i++) {
+            int userId = mData.mProfileOwners.keyAt(i);
+            OwnerInfo info = mData.mProfileOwners.valueAt(i);
+            uids.add(mPackageManagerInternal.getPackageUid(info.packageName,
+                    PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
+                    userId));
+        }
+        return uids;
     }
 
     String getDeviceOwnerPackageName() {
