@@ -3267,6 +3267,12 @@ public final class SystemServer implements Dumpable {
                 Slog.d(TAG, "ContentCaptureService disabled because resource is not overlaid");
                 return;
             }
+            if (!deviceHasConfigString(context, R.string.config_defaultContentProtectionService)) {
+                Slog.d(
+                        TAG,
+                        "ContentProtectionService disabled because resource is not overlaid,"
+                            + " ContentCaptureService still enabled");
+            }
         }
 
         t.traceBegin("StartContentCaptureService");
