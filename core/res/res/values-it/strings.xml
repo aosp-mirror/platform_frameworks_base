@@ -687,7 +687,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta il telefono verso sinistra"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta il telefono verso destra"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Guarda più direttamente verso il dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Impossibile vedere il volto. Tieni il telefono all\'altezza degli occhi"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Volto non visible. Tieni lo smartphone all\'altezza degli occhi."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Troppo movimento. Tieni fermo il telefono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ripeti l\'acquisizione del volto."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossibile riconoscere il volto. Riprova."</string>
@@ -2166,20 +2166,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Aprire l\'app <xliff:g id="APP">%s</xliff:g> di lavoro?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Aprire nell\'app <xliff:g id="APP">%s</xliff:g> personale?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Aprire nell\'app <xliff:g id="APP">%s</xliff:g> di lavoro?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Chiamare dall\'app di lavoro?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vuoi passare all\'app di lavoro?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"La tua organizzazione consente di fare chiamate solo dalle app di lavoro"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"La tua organizzazione consente di inviare messaggi solo dalle app di lavoro"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usa il browser personale"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usa il browser di lavoro"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Chiama"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Passa"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN di sblocco rete SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN di sblocco sottoinsieme rete SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN sblocco aziendale SIM"</string>

@@ -2167,20 +2167,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Відкрити робочий додаток <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Відкрити в особистому додатку <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Відкрити в робочому додатку <xliff:g id="APP">%s</xliff:g>?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Телефонувати з робочого додатка?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Перейти в робочий додаток?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Ваша організація дозволяє телефонувати лише з робочих додатків"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Ваша організація дозволяє надсилати повідомлення лише з робочих додатків"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використати особистий веб-переглядач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використати робочий веб-переглядач"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Телефонувати"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Перейти"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-код розблокування підгрупи мереж SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-код розблокування корпоративної SIM-карти"</string>
