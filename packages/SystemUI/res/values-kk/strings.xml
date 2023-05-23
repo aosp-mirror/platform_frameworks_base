@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Бөлісу"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Экран жазбасы сақталды."</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Көру үшін түртіңіз."</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Экран бейне жазбасын жою кезінде қате кетті"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Экран жазбасын сақтау кезінде қате шықты."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Экрандағы бейнені жазу кезінде қате шықты."</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Артқа"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Үй"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Бет танылды."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Расталды"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Аяқтау үшін \"Растау\" түймесін түртіңіз."</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Бет үлгісі арқылы ашылды. Жалғастыру үшін құлыпты ашу белгішесін басыңыз."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Бетпен ашылды. Жалғастыру үшін басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Бет танылды. Жалғастыру үшін басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Бет танылды. Жалғастыру үшін құлыпты ашу белгішесін басыңыз."</string>
@@ -943,8 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Параметрлер"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> қолданбасында <xliff:g id="ARTIST_NAME">%2$s</xliff:g> орындайтын \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" әні ойнатылуда."</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>/<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> қосулы тұр"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Ойнату"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Кідірту"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Алдыңғы трек"</string>
@@ -1144,15 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Стилусты зарядтағышқа жалғаңыз."</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Стилус батареясының заряды аз"</string>
     <string name="video_camera" msgid="7654002575156149298">"Бейнекамера"</string>
-    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
-    <skip />
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Жеке қолданбадан қоңырау шалу мүмкін емес"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Ұйымыңыз тек жұмыс қолданбаларынан қоңырау шалуға рұқсат етеді."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Жұмыс профиліне ауысу"</string>
-    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
-    <skip />
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Жұмысқа арналған телефон қолданбасын орнату"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Бас тарту"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Құлып экранын бейімдеу"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Құлып экранын бейімдеу үшін құлыпты ашыңыз"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi қолжетімсіз."</string>

@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Ndaj"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Regjistrimi i ekranit u ruajt"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Trokit për të parë"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Gabim gjatë fshirjes së regjistrimit të ekranit"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Gabim gjatë ruajtjes së regjistrimit të ekranit"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Gabim gjatë nisjes së regjistrimit të ekranit"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Prapa"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Faqja bazë"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Fytyra u vërtetua"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Konfirmuar"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Trokit \"Konfirmo\" për ta përfunduar"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"U shkyç me fytyrë. Shtyp ikonën e shkyçjes për të vazhduar."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"U shkyç me fytyrë. Shtyp për të vazhduar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Fytyra u njoh. Shtyp për të vazhduar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Fytyra u njoh. Shtyp ikonën e shkyçjes për të vazhduar."</string>
@@ -906,7 +907,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Zhvendose te pozicioni <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrollet"</string>
     <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Zgjidh kontrollet e pajisjes për të pasur qasje me shpejtësi"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mbaje të shtypur dhe zvarrit për të risistemuar kontrollet"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mbaje shtypur dhe zvarrit për të riorganizuar kontrollet"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Të gjitha kontrollet u hoqën"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ndryshimet nuk u ruajtën"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Shiko aplikacionet e tjera"</string>
@@ -943,8 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Cilësimet"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> nga <xliff:g id="ARTIST_NAME">%2$s</xliff:g> po luhet nga <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> nga <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> po ekzekutohet"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Luaj"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Vendos në pauzë"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Pjesa muzikore e mëparshme"</string>
