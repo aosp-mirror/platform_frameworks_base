@@ -264,21 +264,18 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         void cancel(String reason) {
             // restoring (to-home = false) involves submitting more WM changes, so by default, use
             // toHome = true when canceling.
-            cancel(true /* toHome */, reason);
+            cancel(true /* toHome */, false /* withScreenshots */, reason);
         }
 
-        void cancel(boolean toHome, String reason) {
+        void cancel(boolean toHome, boolean withScreenshots, String reason) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "[%d] RecentsController.cancel: toHome=%b reason=%s",
                     mInstanceId, toHome, reason);
             if (mListener != null) {
-                try {
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                            "[%d] RecentsController.cancel: calling onAnimationCanceled",
-                            mInstanceId);
-                    mListener.onAnimationCanceled(null, null);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error canceling recents animation", e);
+                if (withScreenshots) {
+                    sendCancelWithSnapshots();
+                } else {
+                    sendCancel(null, null);
                 }
             }
             if (mFinishCB != null) {
@@ -300,24 +297,34 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 snapshots = new TaskSnapshot[mPausingTasks.size()];
                 try {
                     for (int i = 0; i < mPausingTasks.size(); ++i) {
+                        TaskState state = mPausingTasks.get(0);
                         snapshots[i] = ActivityTaskManager.getService().takeTaskSnapshot(
-                                mPausingTasks.get(0).mTaskInfo.taskId, false /* updateCache */);
+                                state.mTaskInfo.taskId, true /* updateCache */);
                     }
                 } catch (RemoteException e) {
                     taskIds = null;
                     snapshots = null;
                 }
             }
+            return sendCancel(taskIds, snapshots);
+        }
+
+        /**
+         * Sends a cancel message to the recents animation.
+         */
+        private boolean sendCancel(@Nullable int[] taskIds,
+                @Nullable TaskSnapshot[] taskSnapshots) {
             try {
+                final String cancelDetails = taskSnapshots != null ? " with snapshots" : "";
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                        "[%d] RecentsController.cancel: calling onAnimationCanceled with snapshots",
-                        mInstanceId);
-                mListener.onAnimationCanceled(taskIds, snapshots);
+                        "[%d] RecentsController.cancel: calling onAnimationCanceled %s",
+                        mInstanceId, cancelDetails);
+                mListener.onAnimationCanceled(taskIds, taskSnapshots);
+                return true;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error canceling recents animation", e);
                 return false;
             }
-            return true;
         }
 
         void cleanUp() {
@@ -519,7 +526,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     // Finish recents animation if the display is changed, so the default
                     // transition handler can play the animation such as rotation effect.
                     if (change.hasFlags(TransitionInfo.FLAG_IS_DISPLAY)) {
-                        cancel(mWillFinishToHome, "display change");
+                        cancel(mWillFinishToHome, true /* withScreenshots */, "display change");
                         return;
                     }
                     // Don't consider order-only changes as changing apps.
@@ -633,7 +640,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         + foundRecentsClosing);
                 if (foundRecentsClosing) {
                     mWillFinishToHome = false;
-                    cancel(false /* toHome */, "didn't merge");
+                    cancel(false /* toHome */, false /* withScreenshots */, "didn't merge");
                 }
                 return;
             }
