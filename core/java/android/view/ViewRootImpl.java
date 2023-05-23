@@ -6967,7 +6967,7 @@ public final class ViewRootImpl implements ViewParent,
 
             int groupNavigationDirection = 0;
 
-            if (event.getAction() == KeyEvent.ACTION_DOWN
+            if (event.getAction() == KeyEvent.ACTION_DOWN && event.isCtrlPressed()
                     && event.getKeyCode() == KeyEvent.KEYCODE_TAB) {
                 if (KeyEvent.metaStateHasModifiers(event.getMetaState(), KeyEvent.META_CTRL_ON)) {
                     groupNavigationDirection = View.FOCUS_FORWARD;
