@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -33,6 +34,7 @@ import android.util.Slog;
 
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Information that is returned from resolving an intent
@@ -224,10 +226,17 @@ public class ResolveInfo implements Parcelable {
      * @return Returns a CharSequence containing the resolutions's label.  If the
      * item does not have a label, its name is returned.
      */
-    public CharSequence loadLabel(PackageManager pm) {
+    @NonNull
+    public CharSequence loadLabel(@NonNull PackageManager pm) {
         if (nonLocalizedLabel != null) {
             return nonLocalizedLabel;
         }
+
+        // In order to not change the original behavior. To add null check here to support backward
+        // compatible. If nonLocalizedLabel is not null, we also return nonLocalizedLabel even if pm
+        // is null.
+        Objects.requireNonNull(pm);
+
         CharSequence label;
         if (resolvePackageName != null && labelRes != 0) {
             label = pm.getText(resolvePackageName, labelRes, null);
