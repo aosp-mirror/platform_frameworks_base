@@ -815,7 +815,9 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        @EnforcePermission(MANAGE_COMPANION_DEVICES)
         public void enableSecureTransport(boolean enabled) {
+            enableSecureTransport_enforcePermission();
             mTransportManager.enableSecureTransport(enabled);
         }
 
