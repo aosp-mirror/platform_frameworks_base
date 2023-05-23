@@ -565,7 +565,6 @@ interface IDevicePolicyManager {
 
     void setUsbDataSignalingEnabled(String callerPackage, boolean enabled);
     boolean isUsbDataSignalingEnabled(String callerPackage);
-    boolean isUsbDataSignalingEnabledForUser(int userId);
     boolean canUsbDataSignalingBeDisabled();
 
     void setMinimumRequiredWifiSecurityLevel(String callerPackageName, int level);

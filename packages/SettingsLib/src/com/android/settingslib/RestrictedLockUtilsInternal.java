@@ -409,7 +409,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
      */
     public static EnforcedAdmin checkIfUsbDataSignalingIsDisabled(Context context, int userId) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        if (dpm == null || dpm.isUsbDataSignalingEnabledForUser(userId)) {
+        if (dpm == null || dpm.isUsbDataSignalingEnabled()) {
             return null;
         } else {
             EnforcedAdmin admin = getProfileOrDeviceOwner(context, getUserHandleOf(userId));

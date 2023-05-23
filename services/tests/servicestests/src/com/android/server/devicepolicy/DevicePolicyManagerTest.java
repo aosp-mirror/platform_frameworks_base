@@ -8125,14 +8125,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    public void testIsUsbDataSignalingEnabledForUser_systemUser() throws Exception {
+    public void testIsUsbDataSignalingEnabledForUser() throws Exception {
         when(getServices().usbManager.enableUsbDataSignal(false)).thenReturn(true);
         when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
         setDeviceOwner();
         dpm.setUsbDataSignalingEnabled(false);
-        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
 
-        assertThat(dpm.isUsbDataSignalingEnabledForUser(UserHandle.myUserId())).isFalse();
+        assertThat(dpm.isUsbDataSignalingEnabled()).isFalse();
     }
 
     @Test

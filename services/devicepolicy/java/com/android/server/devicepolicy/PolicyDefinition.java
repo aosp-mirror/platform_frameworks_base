@@ -332,6 +332,14 @@ final class PolicyDefinition<V> {
             PolicyEnforcerCallbacks::setPersonalAppsSuspended,
             new BooleanPolicySerializer());
 
+    static PolicyDefinition<Boolean> USB_DATA_SIGNALING = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.USB_DATA_SIGNALING_POLICY),
+            // usb data signaling is enabled by default, hence disabling it is more restrictive.
+            FALSE_MORE_RESTRICTIVE,
+            POLICY_FLAG_GLOBAL_ONLY_POLICY,
+            (Boolean value, Context context, Integer userId, PolicyKey policyKey) ->
+                PolicyEnforcerCallbacks.setUsbDataSignalingEnabled(value, context),
+            new BooleanPolicySerializer());
 
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
@@ -364,6 +372,8 @@ final class PolicyDefinition<V> {
                 SCREEN_CAPTURE_DISABLED);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY,
                 PERSONAL_APPS_SUSPENDED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.USB_DATA_SIGNALING_POLICY,
+                USB_DATA_SIGNALING);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);

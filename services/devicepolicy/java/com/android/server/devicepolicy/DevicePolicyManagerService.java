@@ -3467,8 +3467,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             revertTransferOwnershipIfNecessaryLocked();
+            if (!isPolicyEngineForFinanceFlagEnabled()) {
+                updateUsbDataSignal(mContext, isUsbDataSignalingEnabledInternalLocked());
+            }
         }
-        updateUsbDataSignal();
 
         // In case flag value has changed, we apply it during boot to avoid doing it concurrently
         // with user toggling quiet mode.
@@ -22352,7 +22354,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setUsbDataSignalingEnabled(String packageName, boolean enabled) {
         Objects.requireNonNull(packageName, "Admin package name must be provided");
         final CallerIdentity caller = getCallerIdentity(packageName);
-        if (!isPermissionCheckFlagEnabled()) {
+        if (!isPolicyEngineForFinanceFlagEnabled()) {
             Preconditions.checkCallAuthorization(
                     isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
                     "USB data signaling can only be controlled by a device owner or "
@@ -22361,22 +22363,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     "USB data signaling cannot be disabled.");
         }
 
-
         synchronized (getLockObject()) {
-            ActiveAdmin admin;
-            if (isPermissionCheckFlagEnabled()) {
-                admin = enforcePermissionAndGetEnforcingAdmin(
+            if (isPolicyEngineForFinanceFlagEnabled()) {
+                EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                         /* admin= */ null, MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING,
                         caller.getPackageName(),
-                        caller.getUserId()).getActiveAdmin();
+                        caller.getUserId());
+                Preconditions.checkState(canUsbDataSignalingBeDisabled(),
+                        "USB data signaling cannot be disabled.");
+                mDevicePolicyEngine.setGlobalPolicy(
+                        PolicyDefinition.USB_DATA_SIGNALING,
+                        enforcingAdmin,
+                        new BooleanPolicyValue(enabled));
             } else {
-                admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
-            }
-
-            if (admin.mUsbDataSignalingEnabled != enabled) {
-                admin.mUsbDataSignalingEnabled = enabled;
-                saveSettingsLocked(caller.getUserId());
-                updateUsbDataSignal();
+                ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+                if (admin.mUsbDataSignalingEnabled != enabled) {
+                    admin.mUsbDataSignalingEnabled = enabled;
+                    saveSettingsLocked(caller.getUserId());
+                    updateUsbDataSignal(mContext, isUsbDataSignalingEnabledInternalLocked());
+                }
             }
         }
         DevicePolicyEventLogger
@@ -22386,16 +22391,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .write();
     }
 
-    private void updateUsbDataSignal() {
-        if (!canUsbDataSignalingBeDisabled()) {
+    static void updateUsbDataSignal(Context context, boolean value) {
+        if (!canUsbDataSignalingBeDisabledInternal(context)) {
             return;
         }
-        final boolean usbEnabled;
-        synchronized (getLockObject()) {
-            usbEnabled = isUsbDataSignalingEnabledInternalLocked();
-        }
-        if (!mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getUsbManager().enableUsbDataSignal(usbEnabled))) {
+        if (!Binder.withCleanCallingIdentity(
+                () -> context.getSystemService(UsbManager.class).enableUsbDataSignal(value))) {
             Slogf.w(LOG_TAG, "Failed to set usb data signaling state");
         }
     }
@@ -22403,25 +22404,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean isUsbDataSignalingEnabled(String packageName) {
         final CallerIdentity caller = getCallerIdentity(packageName);
-        synchronized (getLockObject()) {
-            // If the caller is an admin, return the policy set by itself. Otherwise
-            // return the device-wide policy.
-            if (isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)) {
-                return getProfileOwnerOrDeviceOwnerLocked(
-                        caller.getUserId()).mUsbDataSignalingEnabled;
-            } else {
-                return isUsbDataSignalingEnabledInternalLocked();
+        if (isPolicyEngineForFinanceFlagEnabled()) {
+            Boolean enabled = mDevicePolicyEngine.getResolvedPolicy(
+                    PolicyDefinition.USB_DATA_SIGNALING,
+                    caller.getUserId());
+            return enabled == null || enabled;
+        } else {
+            synchronized (getLockObject()) {
+                // If the caller is an admin, return the policy set by itself. Otherwise
+                // return the device-wide policy.
+                if (isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(
+                        caller)) {
+                    return getProfileOwnerOrDeviceOwnerLocked(
+                            caller.getUserId()).mUsbDataSignalingEnabled;
+                } else {
+                    return isUsbDataSignalingEnabledInternalLocked();
+                }
             }
-        }
-    }
-
-    @Override
-    public boolean isUsbDataSignalingEnabledForUser(int userId) {
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isSystemUid(caller));
-
-        synchronized (getLockObject()) {
-            return isUsbDataSignalingEnabledInternalLocked();
         }
     }
 
@@ -22439,9 +22438,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean canUsbDataSignalingBeDisabled() {
-        return mInjector.binderWithCleanCallingIdentity(() ->
-                mInjector.getUsbManager() != null
-                        && mInjector.getUsbManager().getUsbHalVersion() >= UsbManager.USB_HAL_V1_3
+        return canUsbDataSignalingBeDisabledInternal(mContext);
+    }
+
+    private static boolean canUsbDataSignalingBeDisabledInternal(Context context) {
+        return Binder.withCleanCallingIdentity(() ->
+            context.getSystemService(UsbManager.class) != null
+                  && context.getSystemService(UsbManager.class).getUsbHalVersion()
+                  >= UsbManager.USB_HAL_V1_3
         );
     }
 

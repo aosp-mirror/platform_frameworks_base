@@ -251,6 +251,8 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.roleManager;
             case Context.TELEPHONY_SUBSCRIPTION_SERVICE:
                 return mMockSystemServices.subscriptionManager;
+            case Context.USB_SERVICE:
+                return mMockSystemServices.usbManager;
         }
         throw new UnsupportedOperationException();
     }
