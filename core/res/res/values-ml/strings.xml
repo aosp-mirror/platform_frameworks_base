@@ -2167,20 +2167,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"ഔദ്യോഗിക <xliff:g id="APP">%s</xliff:g> തുറക്കണോ?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"സ്വകാര്യ <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"ഔദ്യോഗിക <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"ഔദ്യോഗിക ആപ്പിൽ നിന്ന് കോൾ ചെയ്യണോ?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ഔദ്യോഗിക ആപ്പിലേക്ക് മാറണോ?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"സ്ഥാപനം ഔദ്യോഗിക ആപ്പുകളിൽ നിന്ന് കോളുകൾ ചെയ്യാൻ മാത്രമേ നിങ്ങളെ അനുവദിക്കുന്നുള്ളൂ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"സ്ഥാപനം ഔദ്യോഗിക ആപ്പുകളിൽ നിന്ന് സന്ദേശമയയ്ക്കാൻ മാത്രമേ നിങ്ങളെ അനുവദിക്കുന്നുള്ളൂ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"വ്യക്തിപരമായ ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ഔദ്യോഗിക ബ്രൗസർ ഉപയോഗിക്കുക"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"കോൾ ചെയ്യുക"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"മാറുക"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"സിം നെറ്റ്‌വർക്ക് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"സിം നെറ്റ്‌വർക്ക് സബ്സെറ്റ് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"സിം കോർപ്പറേറ്റ് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>

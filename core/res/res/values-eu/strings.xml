@@ -459,7 +459,7 @@
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Aplikazioak deien historia irakur dezake."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"idatzi deien erregistroan"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tabletaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Asmo txarreko aplikazioek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Android TV gailuko deien erregistroa aldatzeko baimena ematen die aplikazioei, jasotako eta egindako deiei buruzko datuak barne. Baliteke asmo txarreko aplikazioek deien erregistroa ezabatzea edo aldatzea."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Android TV gailuko deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Baliteke asmo txarreko aplikazioek deien erregistroa ezabatzea edo aldatzea."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Telefonoaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Asmo txarreko aplikazioek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Atzitu gorputz-sentsoreen datuak (esaterako, bihotz-maiztasuna) aplikazioa erabili bitartean"</string>
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Aplikazioak erabiltzen diren bitartean, gorputz-sentsoreen datuak (besteak beste, bihotz-maiztasuna, tenperatura eta odolean dagoen oxigenoaren ehunekoa) erabiltzeko baimena ematen die aplikazio horiei."</string>
@@ -981,7 +981,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Gehitu SIM bat."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIMa falta da, edo ezin da irakurri. Gehitu SIM bat."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Ezin da erabili SIMa."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Betiko desaktibatu da SIMa.\n Jarri harremanetan operadorearekin beste SIM bat eskuratzeko."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Betiko desaktibatu da SIMa.\n Jarri operadorearekin harremanetan beste SIM bat eskuratzeko."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Aurreko pista"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Hurrengo pista"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausatu"</string>
@@ -1928,9 +1928,9 @@
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Bideoa"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Baztertu"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Amaitu deia"</string>
-    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Jasotako deia"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Sarrerako deia"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Deia abian da"</string>
-    <string name="call_notification_screening_text" msgid="8396931408268940208">"Jasotako dei bat bistaratzen"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Sarrerako dei bat bistaratzen"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Kategoriarik gabea"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Zuk ezarri duzu jakinarazpen hauen garrantzia."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Garrantzitsua da eragiten dien pertsonengatik."</string>
@@ -2167,20 +2167,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Laneko <xliff:g id="APP">%s</xliff:g> aplikazioan ireki nahi duzu?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"<xliff:g id="APP">%s</xliff:g> pertsonalean ireki nahi duzu?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Laneko <xliff:g id="APP">%s</xliff:g> aplikazioan ireki nahi duzu?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Laneko aplikaziotik deitu nahi duzu?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Laneko aplikaziora aldatu nahi duzu?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Laneko aplikazioetatik soilik deitzeko baimena ematen du zure erakundeak"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Mezuak laneko aplikazioetatik soilik bidaltzeko baimena ematen du zure erakundeak"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Erabili arakatzaile pertsonala"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Erabili laneko arakatzailea"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Deitu"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Aldatu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIMaren sarearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIMaren sareko azpimultzoaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Enpresaren SIMaren bidez desblokeatzeko PINa"</string>
