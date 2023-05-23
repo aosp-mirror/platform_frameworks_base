@@ -59,9 +59,9 @@
     <item msgid="6421717003037072581">"सधैँ HDCP जाँच प्रयोग गर्नुहोस्"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"असक्षम पारिएको छ"</item>
-    <item msgid="6336372935919715515">"फिल्टर सक्षम पारियो"</item>
-    <item msgid="2779123106632690576">"सक्षम पारिएको छ"</item>
+    <item msgid="695678520785580527">"अफ गरिएको छ"</item>
+    <item msgid="6336372935919715515">"फिल्टर अफ पारियो"</item>
+    <item msgid="2779123106632690576">"अन गरिएको छ"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
     <item msgid="195768089203590086">"ACL हेडर मात्र छाड्नुहोस्"</item>
