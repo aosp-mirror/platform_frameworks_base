@@ -36,7 +36,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Sécurité accrue du compte"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Chaque clé est exclusivement liée à l\'application ou au site Web pour lequel elle a été créée, de sorte que vous ne pourrez jamais vous connecter par erreur à une application ou à un site Web frauduleux. En outre, comme les serveurs ne conservent que les clés publiques, le piratage informatique est beaucoup plus difficile."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transition fluide"</string>
-    <string name="seamless_transition_detail" msgid="4475509237171739843">"À mesure que nous nous dirigeons vers un avenir sans mot de passe, les mots de passe seront toujours utilisés parallèlement aux clés d\'accès."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"À mesure que nous nous dirigeons vers un avenir sans mot de passe, ils resteront toujours utilisés parallèlement aux clés d\'accès."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Choisir où enregistrer vos <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Sélectionnez un gestionnaire de mots de passe pour enregistrer vos renseignements et vous connecter plus rapidement la prochaine fois"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Créer une clé d\'accès pour <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

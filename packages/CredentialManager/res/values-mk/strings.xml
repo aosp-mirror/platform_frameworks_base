@@ -59,7 +59,7 @@
     <string name="use_once" msgid="9027366575315399714">"Употребете еднаш"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Лозинки: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Криптографски клучеви: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> лозинки"</string>
-    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> криптографски клучеви"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Криптографски клучеви: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"Акредитиви: <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Криптографски клуч"</string>
     <string name="another_device" msgid="5147276802037801217">"Друг уред"</string>

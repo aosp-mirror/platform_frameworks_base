@@ -44,7 +44,7 @@
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> үшін кіру мәліметін сақтау керек пе?"</string>
     <string name="passkey" msgid="632353688396759522">"Кіру кілті"</string>
     <string name="password" msgid="6738570945182936667">"құпия сөз"</string>
-    <string name="passkeys" msgid="5733880786866559847">"Кіру кілттері"</string>
+    <string name="passkeys" msgid="5733880786866559847">"кіру кілттері"</string>
     <string name="passwords" msgid="5419394230391253816">"Құпия сөздер"</string>
     <string name="sign_ins" msgid="4710739369149469208">"кіру әрекеттері"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"кіру мәліметі"</string>
