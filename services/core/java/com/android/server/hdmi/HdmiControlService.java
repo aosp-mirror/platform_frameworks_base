@@ -63,10 +63,12 @@ import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioAttributes;
+import android.media.AudioDescriptor;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioDeviceVolumeManager;
 import android.media.AudioManager;
+import android.media.AudioProfile;
 import android.media.VolumeInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -4727,7 +4729,20 @@ public class HdmiControlService extends SystemService {
         // reported connection state changes, but even if it did, it won't take effect.
         if (mEarcLocalDevice != null) {
             mEarcLocalDevice.handleEarcStateChange(status);
+        } else if (status == HDMI_EARC_STATUS_ARC_PENDING) {
+            // If the local device is null we notify the Audio Service that eARC connection
+            // is disabled.
+            notifyEarcStatusToAudioService(false, new ArrayList<>());
+            startArcAction(true, null);
         }
+    }
+
+    protected void notifyEarcStatusToAudioService(
+            boolean enabled, List<AudioDescriptor> audioDescriptors) {
+        AudioDeviceAttributes attributes = new AudioDeviceAttributes(
+                AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_HDMI_EARC, "", "",
+                new ArrayList<AudioProfile>(), audioDescriptors);
+        getAudioManager().setWiredDeviceConnectionState(attributes, enabled ? 1 : 0);
     }
 
     @ServiceThreadOnly
