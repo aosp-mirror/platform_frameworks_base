@@ -232,6 +232,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int NIGHT_MODE_REFLECTION_ACTION_TAG = 30;
     private static final int SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG = 31;
     private static final int ATTRIBUTE_REFLECTION_ACTION_TAG = 32;
+    private static final int SET_REMOTE_ADAPTER_TAG = 33;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -955,6 +956,11 @@ public class RemoteViews implements Parcelable, Filter {
             return SET_REMOTE_VIEW_ADAPTER_LIST_TAG;
         }
 
+        @Override
+        public String getUniqueKey() {
+            return (SET_REMOTE_ADAPTER_TAG + "_" + viewId);
+        }
+
         int viewTypeCount;
         ArrayList<RemoteViews> list;
     }
@@ -1076,6 +1082,11 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG;
+        }
+
+        @Override
+        public String getUniqueKey() {
+            return (SET_REMOTE_ADAPTER_TAG + "_" + viewId);
         }
     }
 
