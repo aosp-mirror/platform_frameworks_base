@@ -1086,12 +1086,23 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     if (commitVisibility) {
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "  Commit activity becoming invisible: %s", ar);
+                        final SnapshotController snapController = mController.mSnapshotController;
                         if (mTransientLaunches != null && !task.isVisibleRequested()) {
+                            final long startTimeNs = mLogger.mSendTimeNs;
+                            final long lastSnapshotTimeNs = snapController.mTaskSnapshotController
+                                    .getSnapshotCaptureTime(task.mTaskId);
                             // If transition is transient, then snapshots are taken at end of
-                            // transition.
-                            mController.mSnapshotController.mTaskSnapshotController
-                                    .recordSnapshot(task, false /* allowSnapshotHome */);
-                            mController.mSnapshotController.mActivitySnapshotController
+                            // transition only if a snapshot was not already captured by request
+                            // during the transition
+                            if (lastSnapshotTimeNs < startTimeNs) {
+                                snapController.mTaskSnapshotController
+                                        .recordSnapshot(task, false /* allowSnapshotHome */);
+                            } else {
+                                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                                        "  Skipping post-transition snapshot for task %d",
+                                        task.mTaskId);
+                            }
+                            snapController.mActivitySnapshotController
                                     .notifyAppVisibilityChanged(ar, false /* visible */);
                         }
                         ar.commitVisibility(false /* visible */, false /* performLayout */,
