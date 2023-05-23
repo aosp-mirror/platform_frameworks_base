@@ -43,7 +43,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <service android:name="android.view.cts.surfacevalidator.LocalMediaProjectionService"
+        <service android:name="com.android.test.LocalMediaProjectionService"
                  android:foregroundServiceType="mediaProjection"
                  android:enabled="true">
         </service>

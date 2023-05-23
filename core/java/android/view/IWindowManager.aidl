@@ -1044,4 +1044,13 @@ interface IWindowManager
      * @return List of ComponentNames corresponding to the activities that were notified.
     */
     List<ComponentName> notifyScreenshotListeners(int displayId);
+
+    /**
+     * Replace the content of the displayId with the SurfaceControl passed in. This can be used for
+     * tests when creating a VirtualDisplay, but only want to capture specific content and not
+     * mirror the entire display.
+     */
+     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+             + ".permission.ACCESS_SURFACE_FLINGER)")
+    boolean replaceContentOnDisplay(int displayId, in SurfaceControl sc);
 }
