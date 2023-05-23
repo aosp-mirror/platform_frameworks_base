@@ -303,7 +303,7 @@ public:
     static bool enableRTAnimations;
 
     // Used for testing only to change the render pipeline.
-    static void overrideRenderPipelineType(RenderPipelineType, bool inUnitTest = false);
+    static void overrideRenderPipelineType(RenderPipelineType);
 
     static bool runningInEmulator;
 
