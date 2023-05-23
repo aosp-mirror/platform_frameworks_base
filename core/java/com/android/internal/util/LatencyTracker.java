@@ -367,28 +367,42 @@ public class LatencyTracker {
      * using a single static object.
      */
     @VisibleForTesting
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public void startListeningForLatencyTrackerConfigChanges() {
         final Context context = ActivityThread.currentApplication();
-        if (context != null
-                && context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) == PERMISSION_GRANTED) {
-            // Post initialization to the background in case we're running on the main thread.
-            BackgroundThread.getHandler().post(() -> this.updateProperties(
-                    DeviceConfig.getProperties(NAMESPACE_LATENCY_TRACKER)));
-            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_LATENCY_TRACKER,
-                    BackgroundThread.getExecutor(), mOnPropertiesChangedListener);
-        } else {
+        if (context == null) {
             if (DEBUG) {
-                if (context == null) {
-                    Log.d(TAG, "No application for " + ActivityThread.currentActivityThread());
-                } else {
-                    synchronized (mLock) {
-                        Log.d(TAG, "Initialized the LatencyTracker."
-                                + " (No READ_DEVICE_CONFIG permission to change configs)"
-                                + " enabled=" + mEnabled + ", package=" + context.getPackageName());
-                    }
+                Log.d(TAG, "No application for package: " + ActivityThread.currentPackageName());
+            }
+            return;
+        }
+        if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) != PERMISSION_GRANTED) {
+            if (DEBUG) {
+                synchronized (mLock) {
+                    Log.d(TAG, "Initialized the LatencyTracker."
+                            + " (No READ_DEVICE_CONFIG permission to change configs)"
+                            + " enabled=" + mEnabled + ", package=" + context.getPackageName());
                 }
             }
+            return;
         }
+
+        // Post initialization to the background in case we're running on the main thread.
+        BackgroundThread.getHandler().post(() -> {
+            try {
+                this.updateProperties(
+                        DeviceConfig.getProperties(NAMESPACE_LATENCY_TRACKER));
+                DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_LATENCY_TRACKER,
+                        BackgroundThread.getExecutor(), mOnPropertiesChangedListener);
+            } catch (SecurityException ex) {
+                // In case of running tests that the main thread passes the check,
+                // but the background thread doesn't have necessary permissions.
+                // Swallow it since it's ok to ignore device config changes in the tests.
+                Log.d(TAG, "Can't get properties: READ_DEVICE_CONFIG granted="
+                        + context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
+                        + ", package=" + context.getPackageName());
+            }
+        });
     }
 
     /**
