@@ -17,7 +17,7 @@
 package com.android.server.permission.access.appop
 
 import android.os.Process
-import android.util.Log
+import android.util.Slog
 import com.android.server.LocalServices
 import com.android.server.appop.AppOpMigrationHelper
 import com.android.server.permission.access.MutableAccessState
@@ -40,7 +40,7 @@ class AppIdAppOpMigration {
             val packageNames = state.externalState.appIdPackageNames[appId]
             // Non-application UIDs may not have an Android package but may still have app op state.
             if (packageNames == null && appId >= Process.FIRST_APPLICATION_UID) {
-                Log.w(LOG_TAG, "Dropping unknown app ID $appId when migrating app op state")
+                Slog.w(LOG_TAG, "Dropping unknown app ID $appId when migrating app op state")
                 return@forEach
             }
 

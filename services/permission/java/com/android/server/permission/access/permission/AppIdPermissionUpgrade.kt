@@ -18,7 +18,7 @@ package com.android.server.permission.access.permission
 
 import android.Manifest
 import android.os.Build
-import android.util.Log
+import android.util.Slog
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
@@ -42,7 +42,7 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
     ) {
         val packageName = packageState.packageName
         if (version <= 3) {
-            Log.v(
+            Slog.v(
                 LOG_TAG, "Allowlisting and upgrading background location permission for " +
                     "package: $packageName, version: $version, user:$userId"
             )
@@ -50,7 +50,7 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
             upgradeBackgroundLocationPermission(packageState, userId)
         }
         if (version <= 10) {
-            Log.v(
+            Slog.v(
                 LOG_TAG, "Upgrading access media location permission for package: $packageName" +
                     ", version: $version, user: $userId"
             )
@@ -58,7 +58,7 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
         }
         // Enable isAtLeastT check, when moving subsystem to mainline.
         if (version <= 12 /*&& SdkLevel.isAtLeastT()*/) {
-            Log.v(
+            Slog.v(
                 LOG_TAG, "Upgrading scoped permissions for package: $packageName" +
                     ", version: $version, user: $userId"
             )
@@ -159,7 +159,7 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
         userId: Int,
         permissionName: String
     ) {
-        Log.v(
+        Slog.v(
             LOG_TAG, "Granting runtime permission for package: ${packageState.packageName}, " +
                 "permission: $permissionName, userId: $userId"
         )
@@ -171,7 +171,7 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
         val appId = packageState.appId
         var flags = with(policy) { getPermissionFlags(appId, userId, permissionName) }
         if (flags.hasAnyBit(MASK_ANY_FIXED)) {
-            Log.v(
+            Slog.v(
                 LOG_TAG,
                 "Not allowed to grant $permissionName to package ${packageState.packageName}"
             )

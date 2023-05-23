@@ -50,7 +50,7 @@ import android.util.ArraySet
 import android.util.DebugUtils
 import android.util.IndentingPrintWriter
 import android.util.IntArray as GrowingIntArray
-import android.util.Log
+import android.util.Slog
 import android.util.SparseBooleanArray
 import com.android.internal.compat.IPlatformCompat
 import com.android.internal.logging.MetricsLogger
@@ -470,7 +470,7 @@ class PermissionService(
             val packageState =
                 packageManagerInternal.getPackageStateInternal(androidPackage.packageName)
             if (packageState == null) {
-                Log.e(
+                Slog.e(
                     LOG_TAG, "checkUidPermission: PackageState not found for AndroidPackage" +
                         " $androidPackage"
                 )
@@ -587,7 +587,7 @@ class PermissionService(
         val packageState = packageManagerLocal.withUnfilteredSnapshot()
             .use { it.getPackageState(packageName) }
         if (packageState == null) {
-            Log.w(LOG_TAG, "getGrantedPermissions: Unknown package $packageName")
+            Slog.w(LOG_TAG, "getGrantedPermissions: Unknown package $packageName")
             return emptySet()
         }
 
@@ -682,7 +682,7 @@ class PermissionService(
         if (isDebugEnabled &&
             PermissionManager.shouldTraceGrant(packageName, permissionName, userId)) {
             val callingUidName = packageManagerInternal.getNameForUid(callingUid)
-            Log.i(
+            Slog.i(
                 LOG_TAG, "$methodName(packageName = $packageName," +
                     " permissionName = $permissionName" +
                     (if (isGranted) "" else "skipKillUid = $skipKillUid, reason = $revokeReason") +
@@ -692,7 +692,7 @@ class PermissionService(
         }
 
         if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "$methodName: Unknown user $userId")
+            Slog.w(LOG_TAG, "$methodName: Unknown user $userId")
             return
         }
 
@@ -722,7 +722,7 @@ class PermissionService(
         // throws when package exists but isn't visible, we now return in both cases to avoid
         // leaking the package existence.
         if (androidPackage == null) {
-            Log.w(LOG_TAG, "$methodName: Unknown package $packageName")
+            Slog.w(LOG_TAG, "$methodName: Unknown package $packageName")
             return
         }
 
@@ -760,7 +760,7 @@ class PermissionService(
                     PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED,
                     PackageInstaller.SessionParams.PERMISSION_STATE_DENIED -> {}
                     else -> {
-                        Log.w(
+                        Slog.w(
                             LOG_TAG, "setRequestedPermissionStates: Unknown permission state" +
                             " $permissionState for permission $permissionName"
                         )
@@ -879,7 +879,7 @@ class PermissionService(
 
         if (oldFlags.hasBits(PermissionFlags.SYSTEM_FIXED)) {
             if (reportError) {
-                Log.e(
+                Slog.e(
                     LOG_TAG, "$methodName: Cannot change system fixed permission $permissionName" +
                         " for package $packageName"
                 )
@@ -889,7 +889,7 @@ class PermissionService(
 
         if (oldFlags.hasBits(PermissionFlags.POLICY_FIXED) && !overridePolicyFixed) {
             if (reportError) {
-                Log.e(
+                Slog.e(
                     LOG_TAG, "$methodName: Cannot change policy fixed permission $permissionName" +
                         " for package $packageName"
                 )
@@ -899,7 +899,7 @@ class PermissionService(
 
         if (isGranted && oldFlags.hasBits(PermissionFlags.RESTRICTION_REVOKED)) {
             if (reportError) {
-                Log.e(
+                Slog.e(
                     LOG_TAG, "$methodName: Cannot grant hard-restricted non-exempt permission" +
                         " $permissionName to package $packageName"
                 )
@@ -915,7 +915,7 @@ class PermissionService(
             )
             if (!softRestrictedPermissionPolicy.mayGrantPermission()) {
                 if (reportError) {
-                    Log.e(
+                    Slog.e(
                         LOG_TAG, "$methodName: Cannot grant soft-restricted non-exempt permission" +
                             " $permissionName to package $packageName"
                     )
@@ -960,7 +960,7 @@ class PermissionService(
 
     override fun getPermissionFlags(packageName: String, permissionName: String, userId: Int): Int {
         if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "getPermissionFlags: Unknown user $userId")
+            Slog.w(LOG_TAG, "getPermissionFlags: Unknown user $userId")
             return 0
         }
 
@@ -977,14 +977,14 @@ class PermissionService(
         val packageState = packageManagerLocal.withFilteredSnapshot()
             .use { it.getPackageState(packageName) }
         if (packageState == null) {
-            Log.w(LOG_TAG, "getPermissionFlags: Unknown package $packageName")
+            Slog.w(LOG_TAG, "getPermissionFlags: Unknown package $packageName")
             return 0
         }
 
         service.getState {
             val permission = with(policy) { getPermissions()[permissionName] }
             if (permission == null) {
-                Log.w(LOG_TAG, "getPermissionFlags: Unknown permission $permissionName")
+                Slog.w(LOG_TAG, "getPermissionFlags: Unknown permission $permissionName")
                 return 0
             }
 
@@ -1000,7 +1000,7 @@ class PermissionService(
         userId: Int
     ): Boolean {
         if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "isPermissionRevokedByPolicy: Unknown user $userId")
+            Slog.w(LOG_TAG, "isPermissionRevokedByPolicy: Unknown user $userId")
             return false
         }
 
@@ -1044,7 +1044,7 @@ class PermissionService(
         userId: Int
     ): Boolean {
         if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "shouldShowRequestPermissionRationale: Unknown user $userId")
+            Slog.w(LOG_TAG, "shouldShowRequestPermissionRationale: Unknown user $userId")
             return false
         }
 
@@ -1080,7 +1080,7 @@ class PermissionService(
                         BACKGROUND_RATIONALE_CHANGE_ID, packageName, userId
                     )
                 } catch (e: RemoteException) {
-                    Log.e(LOG_TAG, "shouldShowRequestPermissionRationale: Unable to check if" +
+                    Slog.e(LOG_TAG, "shouldShowRequestPermissionRationale: Unable to check if" +
                         " compatibility change is enabled", e)
                     false
                 }
@@ -1111,7 +1111,7 @@ class PermissionService(
                 PackageManager::class.java, "FLAG_PERMISSION_", flagValues.toLong()
             )
             val callingUidName = packageManagerInternal.getNameForUid(callingUid)
-            Log.i(
+            Slog.i(
                 LOG_TAG, "updatePermissionFlags(packageName = $packageName," +
                     " permissionName = $permissionName, flagMask = $flagMaskString," +
                     " flagValues = $flagValuesString, userId = $userId," +
@@ -1120,7 +1120,7 @@ class PermissionService(
         }
 
         if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "updatePermissionFlags: Unknown user $userId")
+            Slog.w(LOG_TAG, "updatePermissionFlags: Unknown user $userId")
             return
         }
 
@@ -1168,7 +1168,7 @@ class PermissionService(
         // leaking the package existence.
         if (androidPackage == null ||
             packageManagerInternal.filterAppAccess(packageName, callingUid, userId, false)) {
-            Log.w(LOG_TAG, "updatePermissionFlags: Unknown package $packageName")
+            Slog.w(LOG_TAG, "updatePermissionFlags: Unknown package $packageName")
             return
         }
 
@@ -1211,7 +1211,7 @@ class PermissionService(
                 PackageManager::class.java, "FLAG_PERMISSION_", flagValues.toLong()
             )
             val callingUidName = packageManagerInternal.getNameForUid(callingUid)
-            Log.i(
+            Slog.i(
                 LOG_TAG, "updatePermissionFlagsForAllApps(flagMask = $flagMaskString," +
                     " flagValues = $flagValuesString, userId = $userId," +
                     " callingUid = $callingUidName ($callingUid))", RuntimeException()
@@ -1219,7 +1219,7 @@ class PermissionService(
         }
 
         if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "updatePermissionFlagsForAllApps: Unknown user $userId")
+            Slog.w(LOG_TAG, "updatePermissionFlagsForAllApps: Unknown user $userId")
             return
         }
 
@@ -1295,7 +1295,7 @@ class PermissionService(
 
         val oldFlags = with(policy) { getPermissionFlags(appId, userId, permissionName) }
         if (!isPermissionRequested && oldFlags == 0) {
-            Log.w(
+            Slog.w(
                 LOG_TAG, "$methodName: Permission $permissionName isn't requested by package" +
                     " $packageName"
             )
@@ -1316,7 +1316,7 @@ class PermissionService(
         Preconditions.checkArgumentNonnegative(userId, "userId cannot be null")
 
         if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "AllowlistedRestrictedPermission api: Unknown user $userId")
+            Slog.w(LOG_TAG, "AllowlistedRestrictedPermission api: Unknown user $userId")
             return null
         }
 
@@ -1456,7 +1456,7 @@ class PermissionService(
     private fun enforceRestrictedPermission(permissionName: String): Boolean {
         val permission = service.getState { with(policy) { getPermissions()[permissionName] } }
         if (permission == null) {
-            Log.w(LOG_TAG, "permission definition for $permissionName does not exist")
+            Slog.w(LOG_TAG, "permission definition for $permissionName does not exist")
             return false
         }
 
@@ -1712,7 +1712,7 @@ class PermissionService(
         } catch (e: Exception) {
             when (e) {
                 is TimeoutException, is InterruptedException, is ExecutionException -> {
-                    Log.e(LOG_TAG, "Cannot create permission backup for user $userId", e)
+                    Slog.e(LOG_TAG, "Cannot create permission backup for user $userId", e)
                     null
                 }
                 else -> throw e
@@ -2389,7 +2389,7 @@ class PermissionService(
                 ) == Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED
                 isInSetup || isInDeferredSetup
             } catch (e: Settings.SettingNotFoundException) {
-                Log.w(LOG_TAG, "Failed to check if the user is in restore: $e")
+                Slog.w(LOG_TAG, "Failed to check if the user is in restore: $e")
                 false
             }
         }
@@ -2412,7 +2412,7 @@ class PermissionService(
                 try {
                     listener.onPermissionsChanged(uid)
                 } catch (e: RemoteException) {
-                    Log.e(LOG_TAG, "Error when calling OnPermissionsChangeListener", e)
+                    Slog.e(LOG_TAG, "Error when calling OnPermissionsChangeListener", e)
                 }
             }
         }

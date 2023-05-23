@@ -22,7 +22,7 @@ import android.content.pm.PermissionGroupInfo
 import android.content.pm.PermissionInfo
 import android.content.pm.SigningDetails
 import android.os.Build
-import android.util.Log
+import android.util.Slog
 import com.android.internal.os.RoSystemProperties
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
@@ -339,14 +339,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
         val originalPackageState = newState.externalState.packageStates[originalPackageName]
             ?: return false
         if (!originalPackageState.isSystem) {
-            Log.w(
+            Slog.w(
                 LOG_TAG, "Unable to adopt permissions from $originalPackageName to $packageName:" +
                     " original package not in system partition"
             )
             return false
         }
         if (originalPackageState.androidPackage != null) {
-            Log.w(
+            Slog.w(
                 LOG_TAG, "Unable to adopt permissions from $originalPackageName to $packageName:" +
                     " original package still exists"
             )
@@ -361,7 +361,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         // app is non-instant in at least one user.
         val isInstantApp = packageState.userStates.allIndexed { _, _, it -> it.isInstantApp }
         if (isInstantApp) {
-            Log.w(
+            Slog.w(
                 LOG_TAG, "Ignoring permission groups declared in package" +
                     " ${packageState.packageName}: instant apps cannot declare permission groups"
             )
@@ -383,7 +383,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 // non-system apps, we now allow system apps to override permission groups similar
                 // to permissions so that we no longer need to rely on the scan order.
                 if (!packageState.isSystem) {
-                    Log.w(
+                    Slog.w(
                         LOG_TAG, "Ignoring permission group $permissionGroupName declared in" +
                             " package $newPackageName: already declared in another" +
                             " package $oldPackageName"
@@ -391,14 +391,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     return@forEachIndexed
                 }
                 if (newState.externalState.packageStates[oldPackageName]?.isSystem == true) {
-                    Log.w(
+                    Slog.w(
                         LOG_TAG, "Ignoring permission group $permissionGroupName declared in" +
                             " system package $newPackageName: already declared in another" +
                             " system package $oldPackageName"
                     )
                     return@forEachIndexed
                 }
-                Log.w(
+                Slog.w(
                     LOG_TAG, "Overriding permission group $permissionGroupName with" +
                         " new declaration in system package $newPackageName: originally" +
                         " declared in another package $oldPackageName"
@@ -429,7 +429,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
             val permissionTree = findPermissionTree(permissionName)
             val newPackageName = newPermissionInfo.packageName
             if (permissionTree != null && newPackageName != permissionTree.packageName) {
-                Log.w(
+                Slog.w(
                     LOG_TAG, "Ignoring permission $permissionName declared in package" +
                         " $newPackageName: base permission tree ${permissionTree.name} is" +
                         " declared in another package ${permissionTree.packageName}"
@@ -441,7 +441,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 val oldPackageName = oldPermission.packageName
                 // Only allow system apps to redefine non-system permissions.
                 if (!packageState.isSystem) {
-                    Log.w(
+                    Slog.w(
                         LOG_TAG, "Ignoring permission $permissionName declared in package" +
                             " $newPackageName: already declared in another package" +
                             " $oldPackageName"
@@ -455,7 +455,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         appId = packageState.appId
                     )
                 } else if (newState.externalState.packageStates[oldPackageName]?.isSystem != true) {
-                    Log.w(
+                    Slog.w(
                         LOG_TAG, "Overriding permission $permissionName with new declaration in" +
                             " system package $newPackageName: originally declared in another" +
                             " package $oldPackageName"
@@ -474,7 +474,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         oldPermission.gids, oldPermission.areGidsPerUser
                     )
                 } else {
-                    Log.w(
+                    Slog.w(
                         LOG_TAG, "Ignoring permission $permissionName declared in system package" +
                             " $newPackageName: already declared in another system package" +
                             " $oldPackageName"
@@ -498,7 +498,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                                     // the group is already granted. Hence if the group of
                                     // a granted permission changes we need to revoke it to
                                     // avoid having permissions of the new group auto-granted.
-                                    Log.w(
+                                    Slog.w(
                                         LOG_TAG, "Revoking runtime permission $permissionName for" +
                                             " appId $appId and userId $userId as the permission" +
                                             " group changed from ${oldPermission.groupName}" +
@@ -506,7 +506,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                                     )
                                 }
                                 if (isPermissionTypeChanged) {
-                                    Log.w(
+                                    Slog.w(
                                         LOG_TAG, "Revoking permission $permissionName for" +
                                             " appId $appId and userId $userId as the permission" +
                                             " type changed."
@@ -660,7 +660,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     !oldIsRequestLegacyExternalStorage && newIsRequestLegacyExternalStorage
                 if ((isNewlyRequestingLegacyExternalStorage || isTargetSdkVersionDowngraded) &&
                     oldFlags.hasBits(PermissionFlags.RUNTIME_GRANTED)) {
-                    Log.v(LOG_TAG, "Revoking storage permission: $permissionName for appId: " +
+                    Slog.v(LOG_TAG, "Revoking storage permission: $permissionName for appId: " +
                             " $appId and user: $userId")
                     val newFlags = oldFlags andInv (
                         PermissionFlags.RUNTIME_GRANTED or USER_SETTABLE_MASK
@@ -927,7 +927,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
             }
             setPermissionFlags(appId, userId, permissionName, newFlags)
         } else {
-            Log.e(LOG_TAG, "Unknown protection level ${permission.protectionLevel}" +
+            Slog.e(LOG_TAG, "Unknown protection level ${permission.protectionLevel}" +
                 "for permission ${permission.name} while evaluating permission state" +
                 "for appId $appId and userId $userId")
         }
@@ -987,7 +987,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         for (compatibilityPermission in CompatibilityPermissionInfo.COMPAT_PERMS) {
             if (compatibilityPermission.name == permissionName &&
                 androidPackage.targetSdkVersion < compatibilityPermission.sdkVersion) {
-                Log.i(
+                Slog.i(
                     LOG_TAG, "Auto-granting $permissionName to old package" +
                     " ${androidPackage.packageName}"
                 )
@@ -1051,7 +1051,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         if (!newState.externalState.isSystemReady) {
             // Apps that are in updated apex's do not need to be allowlisted
             if (!packageState.isApkInUpdatedApex) {
-                Log.w(
+                Slog.w(
                     LOG_TAG, "Privileged permission ${permission.name} for package" +
                     " ${packageState.packageName} (${packageState.path}) not in" +
                     " privileged permission allowlist"
@@ -1094,7 +1094,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 if (nonApexAllowlistState != null) {
                     // TODO(andreionea): Remove check as soon as all apk-in-apex
                     // permission allowlists are migrated.
-                    Log.w(
+                    Slog.w(
                         LOG_TAG, "Package $packageName is an APK in APEX but has permission" +
                             " allowlist on the system image, please bundle the allowlist in the" +
                             " $apexModuleName APEX instead"
@@ -1284,7 +1284,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     // if the permission's protectionLevel does not have the extra vendorPrivileged
                     // flag.
                     if (packageState.isVendor && !permission.isVendorPrivileged) {
-                        Log.w(
+                        Slog.w(
                             LOG_TAG, "Permission $permissionName cannot be granted to privileged" +
                             " vendor app $packageName because it isn't a vendorPrivileged" +
                             " permission"

@@ -17,7 +17,7 @@
 package com.android.server.permission.access.permission
 
 import android.content.pm.PermissionInfo
-import android.util.Log
+import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
@@ -65,7 +65,7 @@ class AppIdPermissionPersistence {
         forEachTag {
             when (val tagName = tagName) {
                 TAG_PERMISSION -> parsePermission(permissions)
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $tagName when parsing permissions")
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $tagName when parsing permissions")
             }
         }
         permissions.forEachReversedIndexed { permissionIndex, _, permission ->
@@ -73,7 +73,7 @@ class AppIdPermissionPersistence {
             val externalState = state.externalState
             if (packageName !in externalState.packageStates &&
                 packageName !in externalState.disabledSystemPackageStates) {
-                Log.w(
+                Slog.w(
                     LOG_TAG,
                     "Dropping permission with unknown package $packageName when parsing permissions"
                 )
@@ -97,7 +97,7 @@ class AppIdPermissionPersistence {
         when (type) {
             Permission.TYPE_MANIFEST -> {}
             Permission.TYPE_CONFIG -> {
-                Log.w(LOG_TAG, "Ignoring unexpected config permission $name")
+                Slog.w(LOG_TAG, "Ignoring unexpected config permission $name")
                 return
             }
             Permission.TYPE_DYNAMIC -> {
@@ -107,7 +107,7 @@ class AppIdPermissionPersistence {
                 }
             }
             else -> {
-                Log.w(LOG_TAG, "Ignoring permission $name with unknown type $type")
+                Slog.w(LOG_TAG, "Ignoring permission $name with unknown type $type")
                 return
             }
         }
@@ -136,7 +136,7 @@ class AppIdPermissionPersistence {
             Permission.TYPE_MANIFEST, Permission.TYPE_DYNAMIC -> {}
             Permission.TYPE_CONFIG -> return
             else -> {
-                Log.w(LOG_TAG, "Skipping serializing permission $name with unknown type $type")
+                Slog.w(LOG_TAG, "Skipping serializing permission $name with unknown type $type")
                 return
             }
         }
@@ -166,12 +166,12 @@ class AppIdPermissionPersistence {
         forEachTag {
             when (tagName) {
                 TAG_APP_ID -> parseAppId(appIdPermissionFlags)
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing permission state")
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $name when parsing permission state")
             }
         }
         appIdPermissionFlags.forEachReversedIndexed { appIdIndex, appId, _ ->
             if (appId !in state.externalState.appIdPackageNames) {
-                Log.w(LOG_TAG, "Dropping unknown app ID $appId when parsing permission state")
+                Slog.w(LOG_TAG, "Dropping unknown app ID $appId when parsing permission state")
                 appIdPermissionFlags.removeAt(appIdIndex)
                 userState.requestWriteMode(WriteMode.ASYNCHRONOUS)
             }
@@ -185,7 +185,7 @@ class AppIdPermissionPersistence {
         forEachTag {
             when (tagName) {
                 TAG_PERMISSION -> parseAppIdPermission(permissionFlags)
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing permission state")
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $name when parsing permission state")
             }
         }
     }
