@@ -269,7 +269,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"ಲಾಕ್‌ಡೌನ್‌"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
-    <string name="notification_hidden_text" msgid="2835519769868187223">"ಹೊಸ ಅಧಿಸೂಚನೆ"</string>
+    <string name="notification_hidden_text" msgid="2835519769868187223">"ಹೊಸ ನೋಟಿಫಿಕೇಶನ್‍"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"ವರ್ಚುಯಲ್ ಕೀಬೋರ್ಡ್"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್‌"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"ಭದ್ರತೆ"</string>
@@ -437,7 +437,7 @@
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಸಂಗ್ರಹವಾಗಿರುವ ಎಲ್ಲಾ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಓದಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು ಅಥವಾ ಉಳಿಸಬಹುದು."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"ಮಾಲೀಕರ ಗಮನಕ್ಕೆ ತರದೆಯೇ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ ಅಥವಾ ಮಾರ್ಪಡಿಸಿ ಮತ್ತು ಅತಿಥಿಗಳಿಗೆ ಇಮೇಲ್ ಕಳುಹಿಸಿ"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಸೇರಿಸಬಹುದು, ತೆಗೆದುಹಾಕಬಹುದು ಅಥವಾ ಬದಲಾಯಿಸಬಹುದು. ಈ ಅಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಲೆಂಡರ್‌ನ ಮಾಲೀಕರಿಂದ ಬಂದಿರಬಹುದಾದ ಕಾಣಿಸಿಕೊಳ್ಳುವ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಬಹುದು ಅಥವಾ ಅವರ ಮಾಲೀಕರಿಗೆ ತಿಳಿಸದಂತೆ ಘಟನೆಗಳು ಬದಲಾಯಿಸುವುದು."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಸೇರಿಸಬಹುದು, ತೆಗೆದುಹಾಕಬಹುದು ಅಥವಾ ಬದಲಾಯಿಸಬಹುದು. ಈ ಅಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಲೆಂಡರ್‌ನ ಮಾಲೀಕರಿಂದ ಬರುವಂತೆ ಕಾಣುವ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಬಹುದು ಅಥವಾ ಅದರ ಮಾಲೀಕರಿಗೆ ಅಧಿಸೂಚನೆ ನೀಡದೆ ಈವೆಂಟ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಬಹುದು."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಸೇರಿಸಬಹುದು, ತೆಗೆದುಹಾಕಬಹುದು ಅಥವಾ ಬದಲಾಯಿಸಬಹುದು. ಈ ಅಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಲೆಂಡರ್‌ನ ಮಾಲೀಕರಿಂದ ಬರುವಂತೆ ಕಾಣುವ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಬಹುದು ಅಥವಾ ಅದರ ಮಾಲೀಕರಿಗೆ ನೋಟಿಫಿಕೇಶನ್ ನೀಡದೆ ಈವೆಂಟ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಬಹುದು."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಸೇರಿಸಬಹುದು, ತೆಗೆದುಹಾಕಬಹುದು ಅಥವಾ ಬದಲಾಯಿಸಬಹುದು. ಈ ಅಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಲೆಂಡರ್‌ನ ಮಾಲೀಕರಿಂದ ಬಂದಿರಬಹುದಾದ ಕಾಣಿಸಿಕೊಳ್ಳುವ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಬಹುದು ಅಥವಾ ಅವರ ಮಾಲೀಕರಿಗೆ ತಿಳಿಸದಂತೆ ಘಟನೆಗಳು ಬದಲಾಯಿಸುವುದು."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"ಹೆಚ್ಚುವರಿ ಸ್ಥಳ ಪೂರೈಕೆದಾರರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ಹೆಚ್ಚಿನ ಸ್ಥಳ ಪೂರೈಕೆದಾರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು GPS ಅಥವಾ ಇತರ ಸ್ಥಳ ಮೂಲಗಳ ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ಮಧ್ಯ ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸಬಹುದು."</string>
@@ -726,8 +726,8 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳಿಗೆ ವಿರುದ್ಧವಾಗಿ ನೆಟ್‍‍ವರ್ಕ್ ಬಳಕೆಯನ್ನು ಹೇಗೆ ಲೆಕ್ಕಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳಲ್ಲಿ ಬಳಸಲಾಗುವುದಿಲ್ಲ."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"ಅಧಿಸೂಚನೆಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಮೂಲಕ ಪೋಸ್ಟ್ ಮಾಡಿರುವ ಅಧಿಸೂಚನೆಗಳೂ ಸೇರಿದಂತೆ, ಅಂತಹ ಅಧಿಸೂಚನೆಗಳನ್ನು ಹಿಂಪಡೆದುಕೊಳ್ಳಲು, ಪರೀಕ್ಷಿಸಲು ಮತ್ತು ತೆರವುಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"ಅಧಿಸೂಚನೆ ಕೇಳುಗರ ಸೇವೆಗೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ಅಧಿಸೂಚನೆ ಕೇಳುಗ ಸೇವೆಯ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"ನೋಟಿಫಿಕೇಶನ್ ಕೇಳುಗರ ಸೇವೆಗೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ನೋಟಿಫಿಕೇಶನ್ ಕೇಳುಗ ಸೇವೆಯ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="permlab_bindConditionProviderService" msgid="5245421224814878483">"ಕಂಡೀಶನ್‌‌ ಪೂರೈಕೆದಾರರ ಸೇವೆಯನ್ನು ಪ್ರತಿಬಂಧಿಸು"</string>
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"ಕಂಡೀಶನ್‌ ಪೂರೈಕೆದಾರರ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"ಕನಸಿನ ಸೇವೆಗೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
@@ -1293,7 +1293,7 @@
     <string name="ringtone_silent" msgid="397111123930141876">"ಯಾವುದೂ ಇಲ್ಲ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"ರಿಂಗ್‌ಟೋನ್‌ಗಳು"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"ಅಲಾರಮ್ ಧ್ವನಿಗಳು"</string>
-    <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"ಅಧಿಸೂಚನೆ ಧ್ವನಿಗಳು"</string>
+    <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"ನೋಟಿಫಿಕೇಶನ್ ಧ್ವನಿಗಳು"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"ಅಪರಿಚಿತ"</string>
     <string name="wifi_available_sign_in" msgid="381054692557675237">"ವೈ-ಫೈ ನೆಟ್‍ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
@@ -1487,10 +1487,10 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"ವಾಲ್‌ಪೇಪರ್"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"ವಾಲ್‌ಪೇಪರ್ ಬದಲಿಸಿ"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"ಅಧಿಸೂಚನೆ ಕೇಳುಗ"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"ನೋಟಿಫಿಕೇಶನ್‍ ಕೇಳುಗ"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR ಕೇಳುವಿಕೆ"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"ಕಂಡೀಶನ್ ಪೂರೈಕೆದಾರರು"</string>
-    <string name="notification_ranker_binding_label" msgid="432708245635563763">"ಅಧಿಸೂಚನೆ ಶ್ರೇಣಿಯ ಸೇವೆ"</string>
+    <string name="notification_ranker_binding_label" msgid="432708245635563763">"ನೋಟಿಫಿಕೇಶನ್ ರ‍್ಯಾಂಕರ್ ಸೇವೆ"</string>
     <string name="vpn_title" msgid="5906991595291514182">"VPN ಸಕ್ರಿಯಗೊಂಡಿದೆ"</string>
     <string name="vpn_title_long" msgid="6834144390504619998">"<xliff:g id="APP">%s</xliff:g> ಮೂಲಕ VPN ಸಕ್ರಿಯಗೊಂಡಿದೆ"</string>
     <string name="vpn_text" msgid="2275388920267251078">"ನೆಟ್‍ವರ್ಕ್ ನಿರ್ವಹಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
@@ -2087,7 +2087,7 @@
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ವರ್ಧಿತ ನೋಟಿಫಿಕೇಶನ್‌ಗಳು Android 12 ರಲ್ಲಿ Android ಅಡಾಪ್ಟಿವ್ ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿವೆ. ಈ ವೈಶಿಷ್ಟ್ಯವು ಸೂಚಿಸಿದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಯೋಜಿಸುತ್ತದೆ.\n\nವರ್ಧಿತ ನೋಟಿಫಿಕೇಶನ್‌ಗಳು ಸಂಪರ್ಕ ಹೆಸರುಗಳು ಮತ್ತು ಸಂದೇಶಗಳಂತಹ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆ ವಿಷಯವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ಈ ವೈಶಿಷ್ಟ್ಯವು ಫೋನ್ ಕರೆಗಳಿಗೆ ಉತ್ತರಿಸುವುದು ಮತ್ತು \'ಅಡಚಣೆ ಮಾಡಬೇಡಿ\' ಅನ್ನು ನಿಯಂತ್ರಿಸುವಂತಹ ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ವಜಾಗೊಳಿಸಬಹುದು ಅಥವಾ ಪ್ರತಿಕ್ರಿಯಿಸಬಹುದು."</string>
-    <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ದೈನಂದಿನ ಸ್ಥಿತಿಯ ಮಾಹಿತಿಯ ಅಧಿಸೂಚನೆ"</string>
+    <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ದೈನಂದಿನ ಸ್ಥಿತಿಯ ಮಾಹಿತಿಯ ನೋಟಿಫಿಕೇಶನ್"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ಚಾರ್ಜ್‌ಗೆ ಮೊದಲೆ ಬ್ಯಾಟರಿ ಮುಗಿದು ಬಿಡಬಹುದು"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ಬ್ಯಾಟರಿ ಅವಧಿ ಹೆಚ್ಚಿಸಲು ಬ್ಯಾಟರಿ ಸೇವರ್ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ಬ್ಯಾಟರಿ ಸೇವರ್"</string>
