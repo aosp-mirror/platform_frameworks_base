@@ -658,6 +658,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /** Set of inset types which cannot be controlled by the user animation */
     private @InsetsType int mDisabledUserAnimationInsetsTypes;
 
+    /** Set of inset types which are existing */
+    private @InsetsType int mExistingTypes = 0;
+
     /** Set of inset types which are visible */
     private @InsetsType int mVisibleTypes = WindowInsets.Type.defaultVisible();
 
@@ -905,6 +908,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 mCompatSysUiVisibilityStaled = true;
             }
             mVisibleTypes = visibleTypes;
+        }
+        if (mExistingTypes != existingTypes) {
+            if (WindowInsets.Type.hasCompatSystemBars(mExistingTypes ^ existingTypes)) {
+                mCompatSysUiVisibilityStaled = true;
+            }
+            mExistingTypes = existingTypes;
         }
         InsetsState.traverse(mState, newState, mRemoveGoneSources);
 
@@ -1662,7 +1671,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (mCompatSysUiVisibilityStaled) {
             mCompatSysUiVisibilityStaled = false;
             mHost.updateCompatSysUiVisibility(
-                    mVisibleTypes, mRequestedVisibleTypes, mControllableTypes);
+                    // Treat non-existing types as controllable types for compatibility.
+                    mVisibleTypes, mRequestedVisibleTypes, mControllableTypes | ~mExistingTypes);
         }
     }
 
