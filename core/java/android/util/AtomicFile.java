@@ -135,10 +135,7 @@ public class AtomicFile {
     @Deprecated
     public FileOutputStream startWrite(long startTime) throws IOException {
         if (mCommitEventLogger != null) {
-            if (startTime != 0) {
-                mCommitEventLogger.setStartTime(startTime);
-            }
-
+            mCommitEventLogger.setStartTime(startTime);
             mCommitEventLogger.onStartWrite();
         }
 

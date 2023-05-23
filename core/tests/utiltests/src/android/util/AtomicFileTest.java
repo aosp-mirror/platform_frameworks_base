@@ -20,9 +20,12 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.longThat;
+import static org.mockito.Mockito.spy;
 
 import android.app.Instrumentation;
 import android.content.Context;
+import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -267,6 +271,29 @@ public class AtomicFileTest {
 
         assertThat(toString).contains("AtomicFile");
         assertThat(toString).contains(mBaseFile.getAbsolutePath());
+    }
+
+    @Test
+    public void testTimeLogging() throws Exception {
+        var logger = spy(new SystemConfigFileCommitEventLogger("name"));
+        var file = new AtomicFile(mBaseFile, logger);
+        var startTime1 = SystemClock.uptimeMillis();
+        try (var writer = file.startWrite()) {
+            file.finishWrite(writer);
+        }
+        var endTime1 = SystemClock.uptimeMillis();
+        SystemClock.sleep(10);
+        var startTime2 = SystemClock.uptimeMillis();
+        try (var writer = file.startWrite()) {
+            file.finishWrite(writer);
+        }
+        var endTime2 = SystemClock.uptimeMillis();
+
+        var inOrder = Mockito.inOrder(logger);
+        inOrder.verify(logger).writeLogRecord(longThat(
+                l -> l <= endTime1 - startTime1));
+        inOrder.verify(logger).writeLogRecord(longThat(
+                l -> l <= endTime2 - startTime2 && l < endTime2 - startTime1));
     }
 
     private static void writeBytes(@NonNull File file, @NonNull byte[] bytes) throws IOException {
