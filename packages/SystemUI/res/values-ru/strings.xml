@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Поделиться"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Видео с экрана сохранено"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Нажмите, чтобы посмотреть."</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Не удалось удалить запись видео с экрана"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Не удалось сохранить запись видео с экрана."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Не удалось начать запись видео с экрана."</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Назад"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Главный экран"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Лицо распознано"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Подтверждено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Нажмите \"Подтвердить\""</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Сканирование выполнено. Нажмите на значок разблокировки."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Разблокировано сканированием лица. Нажмите, чтобы продолжить."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лицо распознано. Нажмите, чтобы продолжить."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицо распознано. Нажмите на значок разблокировки."</string>
@@ -859,6 +860,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Увеличение всего экрана"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увеличить часть экрана"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Открыть настройки увеличения"</string>
+    <!-- no translation found for magnification_close_settings_click_label (4642477260651704517) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Потяните за угол, чтобы изменить размер"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Разрешить прокручивать по диагонали"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Изменить размер"</string>
@@ -905,7 +908,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"удалить из избранного"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Переместить на позицию <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Элементы управления"</string>
-    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Выберите виджеты управления устройствами для быстрого доступа"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Выберите виджеты управления устройствами для быстрого доступа."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Чтобы изменить порядок виджетов, перетащите их."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Все виджеты управления удалены."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Изменения не сохранены."</string>
@@ -943,8 +946,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Настройки"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Воспроизводится медиафайл \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" (исполнитель: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) из приложения \"<xliff:g id="APP_LABEL">%3$s</xliff:g>\"."</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> из <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" запущено"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Воспроизвести"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Приостановить"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Предыдущий трек"</string>

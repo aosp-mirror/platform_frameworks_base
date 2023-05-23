@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"सेयर गर्नुहोस्"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"स्क्रिन रेकर्डिङ सेभ गरियो"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"हेर्नका लागि ट्याप गर्नुहोस्"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रिनको रेकर्डिङ मेट्ने क्रममा त्रुटि"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"स्क्रिन रेकर्डिङ सेभ गर्ने क्रममा त्रुटि भयो"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रिन रेकर्ड गर्न थाल्ने क्रममा त्रुटि भयो"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"पछाडि"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"गृह"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"अनुहार प्रमाणीकरण गरियो"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"पुष्टि भयो"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"पूरा गर्नका लागि पुष्टि गर्नुहोस् नामक विकल्पमा ट्याप गर्नुहोस्"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"अनुहार प्रयोग गरी अनलक गरियो। जारी राख्न अनलक आइकनमा थिच्नुहोस्।"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"अनुहार प्रयोग गरी अनलक गरियो। जारी राख्न थिच्नुहोस्।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"अनुहार पहिचान गरियो। जारी राख्न थिच्नुहोस्।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"अनुहार पहिचान गरियो। जारी राख्न अनलक आइकनमा थिच्नुहोस्।"</string>
@@ -859,6 +860,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"पूरै स्क्रिन जुम इन गर्नुहोस्"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रिनको केही भाग म्याग्निफाइ गर्नुहोस्"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"जुम इनसम्बन्धी सेटिङ खोल्नुहोस्"</string>
+    <!-- no translation found for magnification_close_settings_click_label (4642477260651704517) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"आकार बदल्न कुनाबाट ड्र्याग गर्नुहोस्"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"डायगोनल तरिकाले स्क्रोल गर्ने अनुमति दिनुहोस्"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"आकार बदल्नुहोस्"</string>
@@ -911,7 +914,7 @@
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"परिवर्तनहरू सुरक्षित गरिएका छैनन्"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"अन्य एपहरू हेर्नुहोस्"</string>
     <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"पुनः मिलाउनुहोस्"</string>
-    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"कन्ट्रोलहरू थप्नुहोस्"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"कन्ट्रोलहरू हाल्नुहोस्"</string>
     <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"सम्पादन गर्ने स्क्रिनमा फर्कनुहोस्"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"नियन्त्रण सुविधाहरू लोड गर्न सकिएन। <xliff:g id="APP">%s</xliff:g> एपका सेटिङ परिवर्तन गरिएका छैनन् भन्ने कुरा सुनिश्चित गर्न उक्त एप जाँच्नुहोस्।"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"मिल्दा नियन्त्रण सुविधाहरू उपलब्ध छैनन्"</string>
@@ -943,8 +946,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिङ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> को <xliff:g id="SONG_NAME">%1$s</xliff:g> बोलको गीत <xliff:g id="APP_LABEL">%3$s</xliff:g> मा बज्दै छ"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g> मध्ये <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> चलिरहेको छ"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"प्ले गर्नुहोस्"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"पज गर्नुहोस्"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"अघिल्लो ट्रयाक"</string>
@@ -1144,15 +1146,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"आफ्नो स्टाइलस चार्जरमा कनेक्ट गर्नुहोस्"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"स्टाइलसको ब्याट्री लो छ"</string>
     <string name="video_camera" msgid="7654002575156149298">"भिडियो क्यामेरा"</string>
-    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
-    <skip />
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"व्यक्तिगत एपमार्फत कल गर्न मिल्दैन"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र कल गर्ने अनुमति दिन्छ"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"कार्य प्रोफाइल प्रयोग गर्नुहोस्"</string>
-    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
-    <skip />
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"कामसम्बन्धी फोन एप इन्स्टल गर्नुहोस्"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"रद्द गर्नुहोस्"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"लक स्क्रिन कस्टमाइज गर्नुहोस्"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"लक स्क्रिन कस्टमाइज गर्न अनलक गर्नुहोस्"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi उपलब्ध छैन"</string>

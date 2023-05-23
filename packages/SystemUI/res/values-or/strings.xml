@@ -105,7 +105,7 @@
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ରେକର୍ଡିଂ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ଡିଭାଇସ୍ ଅଡିଓ"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ଆପଣଙ୍କ ଡିଭାଇସରୁ ସାଉଣ୍ଡ, ଯେପରିକି ସଙ୍ଗୀତ, କଲ୍ ଏବଂ ରିଂଟୋନଗୁଡ଼ିକ"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ମ୍ୟୁଜିକ, କଲ ଏବଂ ରିଂଟୋନଗୁଡ଼ିକ ପରି ଆପଣଙ୍କ ଡିଭାଇସରୁ ସାଉଣ୍ଡ"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"ମାଇକ୍ରୋଫୋନ"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"ଡିଭାଇସ୍ ଅଡିଓ ଏବଂ ମାଇକ୍ରୋଫୋନ୍"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ସେୟାର୍‍ କରନ୍ତୁ"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"ସ୍କ୍ରିନ୍ ରେକର୍ଡିଂ ସେଭ୍ କରାଯାଇଛି"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ଦେଖିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ଡିଲିଟ୍‍ କରିବାରେ ତ୍ରୁଟି"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"ସ୍କ୍ରିନ ରେକର୍ଡିଂ ସେଭ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ସ୍କ୍ରିନ୍ ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"ଫେରନ୍ତୁ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ହୋମ"</string>
@@ -134,7 +134,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ଫେସ୍ ସ୍କାନିଙ୍ଗ କରାଯାଉଛି"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ପଠାନ୍ତୁ"</string>
     <string name="cancel" msgid="1089011503403416730">"ବାତିଲ କରନ୍ତୁ"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ନିଶ୍ଚିତ କରନ୍ତୁ"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ପ୍ରାମାଣିକତା ବାତିଲ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ମୁହଁ ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ସୁନିଶ୍ଚିତ କରାଯାଇଛି"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ ସୁନିଶ୍ଚିତ କରନ୍ତୁରେ ଟାପ୍ କରନ୍ତୁ"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"ଫେସ ମାଧ୍ୟମରେ ଅନଲକ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଅନଲକ ଆଇକନ ଦବାନ୍ତୁ।"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ଫେସ ମାଧ୍ୟମରେ ଅନଲକ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଦବାନ୍ତୁ।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ଫେସ ଚିହ୍ନଟ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଦବାନ୍ତୁ।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ଫେସ ଚିହ୍ନଟ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ଅନଲକ ଆଇକନ ଦବାନ୍ତୁ।"</string>
@@ -626,7 +627,7 @@
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"ଫାଷ୍ଟ ଫର୍‌ୱାର୍ଡ"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"ଉପର ପୃଷ୍ଠା"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"ତଳ ପୃଷ୍ଠା"</string>
-    <string name="keyboard_key_forward_del" msgid="5325501825762733459">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
+    <string name="keyboard_key_forward_del" msgid="5325501825762733459">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"ହୋମ"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"ସମାପ୍ତ"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"ଇନ୍‌ସର୍ଟ"</string>
@@ -859,6 +860,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନକୁ ମ୍ୟାଗ୍ନିଫାଏ କରନ୍ତୁ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ସ୍କ୍ରିନର ଅଂଶ ମାଗ୍ନିଫାଏ କରନ୍ତୁ"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"ମାଗ୍ନିଫିକେସନ ସେଟିଂସ ଖୋଲନ୍ତୁ"</string>
+    <!-- no translation found for magnification_close_settings_click_label (4642477260651704517) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"ରିସାଇଜ କରିବା ପାଇଁ କୋଣକୁ ଡ୍ରାଗ କରନ୍ତୁ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ଡାଏଗୋନାଲ ସ୍କ୍ରୋଲିଂକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"ରିସାଇଜ କରନ୍ତୁ"</string>
@@ -943,8 +946,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ସେଟିଂସ୍"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ରୁ <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ଙ୍କ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>ରୁ <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"ଚଲାନ୍ତୁ"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ବିରତ କରନ୍ତୁ"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ପୂର୍ବବର୍ତ୍ତୀ ଟ୍ରାକ"</string>
@@ -1057,7 +1059,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ସଂଯୋଗ କରାଯାଇଛି"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"ଅସ୍ଥାୟୀ ରୂପେ କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"ଦୁର୍ବଳ କନେକ୍ସନ"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"ମୋବାଇଲ ଡାଟା ସ୍ୱତଃ-ସଂଯୋଗ ହେବ ନାହିଁ"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"ମୋବାଇଲ ଡାଟା ସ୍ୱତଃ-କନେକ୍ଟ ହେବ ନାହିଁ"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"ସଂଯୋଗ ନାହିଁ"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"ଅନ୍ୟ କୌଣସି ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"କୌଣସି ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -1144,15 +1146,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ଏକ ଚାର୍ଜର ସହ ଆପଣଙ୍କ ଷ୍ଟାଇଲସକୁ କନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ଷ୍ଟାଇଲସ ବେଟେରୀର ଚାର୍ଜ କମ ଅଛି"</string>
     <string name="video_camera" msgid="7654002575156149298">"ଭିଡିଓ କେମେରା"</string>
-    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
-    <skip />
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"ଏକ ବ୍ୟକ୍ତିଗତ ଆପରୁ କଲ କରିପାରିବେ ନାହିଁ"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"ଆପଣଙ୍କ ସଂସ୍ଥା ଆପଣଙ୍କୁ କେବଳ ୱାର୍କ ଆପ୍ସରୁ କଲ କରିବାକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ୱାର୍କ ପ୍ରୋଫାଇଲକୁ ସ୍ୱିଚ କରନ୍ତୁ"</string>
-    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
-    <skip />
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"ଏକ ୱାର୍କ ଫୋନ ଆପ ଇନଷ୍ଟଲ କରନ୍ତୁ"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"ଲକ ସ୍କ୍ରିନକୁ କଷ୍ଟମାଇଜ କରନ୍ତୁ"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ଲକ ସ୍କ୍ରିନକୁ କଷ୍ଟମାଇଜ କରିବା ପାଇଁ ଅନଲକ କରନ୍ତୁ"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ୱାଇ-ଫାଇ ଉପଲବ୍ଧ ନାହିଁ"</string>
