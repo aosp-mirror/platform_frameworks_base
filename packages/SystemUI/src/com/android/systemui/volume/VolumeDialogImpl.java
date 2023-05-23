@@ -404,6 +404,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
     @Override
     public void destroy() {
+        Log.d(TAG, "destroy() called");
         mController.removeCallback(mControllerCallbackH);
         mHandler.removeCallbacksAndMessages(null);
         mConfigurationController.removeCallback(this);
@@ -465,6 +466,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     private void initDialog(int lockTaskModeState) {
+        Log.d(TAG, "initDialog: called!");
         mDialog = new CustomDialog(mContext);
         initDimens();
 
@@ -1269,7 +1271,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     protected void tryToRemoveCaptionsTooltip() {
-        if (mHasSeenODICaptionsTooltip && mODICaptionsTooltipView != null) {
+        if (mHasSeenODICaptionsTooltip && mODICaptionsTooltipView != null && mDialog != null) {
             ViewGroup container = mDialog.findViewById(R.id.volume_dialog_container);
             container.removeView(mODICaptionsTooltipView);
             mODICaptionsTooltipView = null;
@@ -1476,8 +1478,16 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
-        if (mIsAnimatingDismiss) {
-            Log.d(TAG, "dismissH: isAnimatingDismiss");
+
+        boolean showingStateInconsistent = !mShowing && mDialog != null && mDialog.isShowing();
+        // If incorrectly assuming dialog is not showing, continue and make the state consistent.
+        if (showingStateInconsistent) {
+            Log.d(TAG, "dismissH: volume dialog possible in inconsistent state:"
+                    + "mShowing=" + mShowing + ", mDialog==null?" + (mDialog == null));
+        }
+        if (mIsAnimatingDismiss && !showingStateInconsistent) {
+            Log.d(TAG, "dismissH: skipping dismiss because isAnimatingDismiss is true"
+                    + " and showingStateInconsistent is false");
             Trace.endSection();
             return;
         }
@@ -1495,8 +1505,12 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 .setDuration(mDialogHideAnimationDurationMs)
                 .setInterpolator(new SystemUIInterpolators.LogAccelerateInterpolator())
                 .withEndAction(() -> mHandler.postDelayed(() -> {
-                    mController.notifyVisible(false);
-                    mDialog.dismiss();
+                    if (mController != null) {
+                        mController.notifyVisible(false);
+                    }
+                    if (mDialog != null) {
+                        mDialog.dismiss();
+                    }
                     tryToRemoveCaptionsTooltip();
                     mIsAnimatingDismiss = false;
 
