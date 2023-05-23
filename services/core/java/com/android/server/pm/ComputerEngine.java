@@ -2342,6 +2342,11 @@ public class ComputerEngine implements Computer {
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
             boolean skipPackageCheck, @PackageManager.ResolveInfoFlagsBits long flags) {
         final int count = (resolvedActivities == null ? 0 : resolvedActivities.size());
+        var debug = (intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0;
+        if (debug) {
+            Slog.d(TAG, "Checking if instant app resolution allowed, resolvedActivities = "
+                    + resolvedActivities);
+        }
         for (int n = 0; n < count; n++) {
             final ResolveInfo info = resolvedActivities.get(n);
             final String packageName = info.activityInfo.packageName;
@@ -2365,6 +2370,8 @@ public class ComputerEngine implements Computer {
                     }
                     return false;
                 }
+            } else if (debug) {
+                Slog.d(TAG, "Could not find package " + packageName);
             }
         }
         // We've exhausted all ways to deny ephemeral application; let the system look for them.
