@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Sdílet"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Nahrávka obrazovky se uložila"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Klepnutím nahrávku zobrazíte"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Při mazání záznamu obrazovky došlo k chybě"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Při ukládání záznamu obrazovky došlo k chybě"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Při spouštění nahrávání obrazovky došlo k chybě"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Zpět"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Domů"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Obličej byl ověřen"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrzeno"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Ověření dokončíte klepnutím na Potvrdit"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Odemknuto obličejem. Klepněte na ikonu odemknutí."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odemknuto obličejem. Pokračujte stisknutím."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Obličej rozpoznán. Pokračujte stisknutím."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Obličej rozpoznán. Klepněte na ikonu odemknutí."</string>
@@ -859,6 +860,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zvětšit celou obrazovku"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zvětšit část obrazovky"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Otevřít nastavení zvětšení"</string>
+    <!-- no translation found for magnification_close_settings_click_label (4642477260651704517) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Velikost změníte přetažením rohu"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Povolit diagonální posouvání"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Změnit velikost"</string>
@@ -943,8 +946,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Nastavení"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Skladba <xliff:g id="SONG_NAME">%1$s</xliff:g> od interpreta <xliff:g id="ARTIST_NAME">%2$s</xliff:g> hrajte z aplikace <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> z <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> je spuštěna"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Přehrát"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pozastavit"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Předchozí skladba"</string>
