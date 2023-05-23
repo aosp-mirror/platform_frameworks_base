@@ -4429,6 +4429,14 @@
     -->
     <string name="config_defaultContentCaptureService" translatable="false"></string>
 
+    <!-- The package name for the system's content protection service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         If no service with the specified name exists on the device, content protection will be
+         disabled.
+         Example: "com.android.contentprotection/.ContentProtectionService"
+    -->
+    <string name="config_defaultContentProtectionService" translatable="false"></string>
+
     <!-- The package name for the system's augmented autofill service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          If no service with the specified name exists on the device, augmented autofill wil be
