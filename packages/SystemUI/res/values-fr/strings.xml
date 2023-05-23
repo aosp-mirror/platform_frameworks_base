@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Partager"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Enregistrement sauvegardé"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Appuyez pour afficher"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Erreur lors de la suppression de l\'enregistrement de l\'écran"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Erreur lors de l\'enregistrement de l\'écran"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Erreur lors du démarrage de l\'enregistrement de l\'écran"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Retour"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Accueil"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Visage authentifié"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmé"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Appuyez sur \"Confirmer\" pour terminer"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Déverrouillage par visage. Appuyez sur l\'icône de déverrouillage pour continuer."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Déverrouillé par visage. Appuyez pour continuer."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Visage reconnu. Appuyez pour continuer."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Visage reconnu. Appuyez sur l\'icône de déverrouillage pour continuer."</string>
@@ -943,8 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Paramètres"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> par <xliff:g id="ARTIST_NAME">%2$s</xliff:g> est en cours de lecture depuis <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> sur <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> est en cours d\'exécution"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Lecture"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pause"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Titre précédent"</string>
