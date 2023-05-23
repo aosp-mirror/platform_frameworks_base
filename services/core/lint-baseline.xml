@@ -137,4 +137,12 @@
             line="1448"/>
     </issue>
 
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="IWindowManager permission check should be converted to @EnforcePermission annotation">
+        <location
+            file="out/.intermediates/frameworks/base/services/core/services.core.protologsrc/gen/services.core.protolog.srcjar!/frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java"
+            line="7158"/>
+    </issue>
+
 </issues>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.1.0-dev" type="baseline" client="" dependencies="true" name="" variant="all" version="8.1.0-dev">
+
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="ISystemConfig permission check should be converted to @EnforcePermission annotation"
+        errorLine1="            mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_CARRIER_APP_INFO,"
+        errorLine2="            ^">
+        <location
+            file="frameworks/base/services/java/com/android/server/SystemConfigService.java"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="ISystemConfig permission check should be converted to @EnforcePermission annotation"
+        errorLine1="            mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_CARRIER_APP_INFO,"
+        errorLine2="            ^">
+        <location
+            file="frameworks/base/services/java/com/android/server/SystemConfigService.java"
+            line="54"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="ISystemConfig permission check should be converted to @EnforcePermission annotation"
+        errorLine1="            mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_CARRIER_APP_INFO,"
+        errorLine2="            ^">
+        <location
+            file="frameworks/base/services/java/com/android/server/SystemConfigService.java"
+            line="67"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="ISystemConfig permission check should be converted to @EnforcePermission annotation"
+        errorLine1="            mContext.enforceCallingOrSelfPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS,"
+        errorLine2="            ^">
+        <location
+            file="frameworks/base/services/java/com/android/server/SystemConfigService.java"
+            line="76"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="ISystemConfig permission check should be converted to @EnforcePermission annotation"
+        errorLine1="            getContext().enforceCallingOrSelfPermission(Manifest.permission.QUERY_ALL_PACKAGES,"
+        errorLine2="            ^">
+        <location
+            file="frameworks/base/services/java/com/android/server/SystemConfigService.java"
+            line="107"
+            column="13"/>
+    </issue>
+
+</issues>

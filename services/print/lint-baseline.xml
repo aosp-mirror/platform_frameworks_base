@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.1.0-dev" type="baseline" client="" dependencies="true" name="" variant="all" version="8.1.0-dev">
+
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="IPrintManager permission check should be converted to @EnforcePermission annotation"
+        errorLine1="            mContext.enforceCallingOrSelfPermission("
+        errorLine2="            ^">
+        <location
+            file="frameworks/base/services/print/java/com/android/server/print/PrintManagerService.java"
+            line="401"
+            column="13"/>
+    </issue>
+
+</issues>
