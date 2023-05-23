@@ -6454,7 +6454,7 @@ public class Editor {
     @VisibleForTesting
     public int getCurrentLineAdjustedForSlop(Layout layout, int prevLine, float y) {
         final int trueLine = mTextView.getLineAtCoordinate(y);
-        if (layout == null || prevLine > layout.getLineCount()
+        if (layout == null || prevLine >= layout.getLineCount()
                 || layout.getLineCount() <= 0 || prevLine < 0) {
             // Invalid parameters, just return whatever line is at y.
             return trueLine;
