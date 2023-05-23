@@ -55,7 +55,7 @@ class TaskContainer {
 
     /** Active split pairs in this Task. */
     @NonNull
-    final List<SplitContainer> mSplitContainers = new ArrayList<>();
+    private final List<SplitContainer> mSplitContainers = new ArrayList<>();
 
     @NonNull
     private final Configuration mConfiguration;
@@ -205,6 +205,19 @@ class TaskContainer {
             }
         }
         return false;
+    }
+
+    @NonNull
+    List<SplitContainer> getSplitContainers() {
+        return new ArrayList<>(mSplitContainers);
+    }
+
+    void addSplitContainer(@NonNull SplitContainer splitContainer) {
+        mSplitContainers.add(splitContainer);
+    }
+
+    void removeSplitContainers(@NonNull List<SplitContainer> containers) {
+        mSplitContainers.removeAll(containers);
     }
 
     /** Adds the descriptors of split states in this Task to {@code outSplitStates}. */

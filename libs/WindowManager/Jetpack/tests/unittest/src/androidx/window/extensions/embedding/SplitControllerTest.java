@@ -320,11 +320,11 @@ public class SplitControllerTest {
         doReturn(tf).when(splitContainer).getSecondaryContainer();
         doReturn(createTestTaskContainer()).when(splitContainer).getTaskContainer();
         doReturn(createSplitRule(mActivity, mActivity)).when(splitContainer).getSplitRule();
-        final List<SplitContainer> splitContainers =
-                mSplitController.getTaskContainer(TASK_ID).mSplitContainers;
-        splitContainers.add(splitContainer);
+        final TaskContainer taskContainer = mSplitController.getTaskContainer(TASK_ID);
+        taskContainer.addSplitContainer(splitContainer);
         // Add a mock SplitContainer on top of splitContainer
-        splitContainers.add(1, mock(SplitContainer.class));
+        final SplitContainer splitContainer2 = mock(SplitContainer.class);
+        taskContainer.addSplitContainer(splitContainer2);
 
         mSplitController.updateContainer(mTransaction, tf);
 
@@ -332,7 +332,9 @@ public class SplitControllerTest {
 
         // Verify if one or both containers in the top SplitContainer are finished,
         // dismissPlaceholder() won't be called.
-        splitContainers.remove(1);
+        final ArrayList<SplitContainer> splitContainersToRemove = new ArrayList<>();
+        splitContainersToRemove.add(splitContainer2);
+        taskContainer.removeSplitContainers(splitContainersToRemove);
         doReturn(true).when(tf).isFinished();
 
         mSplitController.updateContainer(mTransaction, tf);
@@ -377,7 +379,7 @@ public class SplitControllerTest {
         doReturn(true).when(taskContainer).isVisible();
         mSplitController.updateContainer(mTransaction, taskFragmentContainer);
 
-        verify(mSplitPresenter).updateSplitContainer(taskContainer.mSplitContainers.get(0),
+        verify(mSplitPresenter).updateSplitContainer(taskContainer.getSplitContainers().get(0),
                 mTransaction);
     }
 
@@ -1091,7 +1093,7 @@ public class SplitControllerTest {
         verify(mTransaction).finishActivity(secondaryActivity0.getActivityToken());
         verify(mTransaction).finishActivity(secondaryActivity1.getActivityToken());
         assertTrue(taskContainer.mContainers.isEmpty());
-        assertTrue(taskContainer.mSplitContainers.isEmpty());
+        assertTrue(taskContainer.getSplitContainers().isEmpty());
     }
 
     @Test
