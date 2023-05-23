@@ -1069,10 +1069,28 @@ public class PipTransition extends PipTransitionController {
         }
         final float alphaStart = show ? 0 : 1;
         final float alphaEnd = show ? 1 : 0;
+        final PipAnimationController.PipTransactionHandler transactionHandler =
+                new PipAnimationController.PipTransactionHandler() {
+            @Override
+            public boolean handlePipTransaction(SurfaceControl leash,
+                    SurfaceControl.Transaction tx, Rect destinationBounds, float alpha) {
+                if (alpha == 0) {
+                    if (show) {
+                        tx.setPosition(leash, destinationBounds.left, destinationBounds.top);
+                    } else {
+                        // Put PiP out of the display so it won't block touch when it is hidden.
+                        final Rect displayBounds = mPipDisplayLayoutState.getDisplayBounds();
+                        final int max = Math.max(displayBounds.width(), displayBounds.height());
+                        tx.setPosition(leash, max, max);
+                    }
+                }
+                return false;
+            }
+        };
         mPipAnimationController
                 .getAnimator(taskInfo, leash, mPipBoundsState.getBounds(), alphaStart, alphaEnd)
                 .setTransitionDirection(TRANSITION_DIRECTION_SAME)
-                .setPipAnimationCallback(mPipAnimationCallback)
+                .setPipTransactionHandler(transactionHandler)
                 .setDuration(mEnterExitAnimationDuration)
                 .start();
         mHasFadeOut = !show;
