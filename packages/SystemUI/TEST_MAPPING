@@ -90,63 +90,6 @@
   //
   // If you don't use @Postsubmit, your new test will immediately
   // block presubmit, which is probably not what you want!
-  "sysui-platinum-postsubmit": [
-    {
-      "name": "PlatformScenarioTests",
-      "options": [
-        {
-            "include-filter": "android.platform.test.scenario.sysui"
-        },
-        {
-            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
-        },
-        {
-            "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-        }
-      ]
-    }
-  ],
-  "sysui-staged-platinum-postsubmit": [
-    {
-      "name": "PlatformScenarioTests",
-      "options": [
-        {
-            "include-filter": "android.platform.test.scenario.sysui"
-        },
-        {
-            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
-        },
-        {
-            "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
-    }
-  ],
-  "ironwood-postsubmit": [
-    {
-      "name": "PlatformScenarioTests",
-      "options": [
-        {
-            "include-annotation": "android.platform.test.annotations.IwTest"
-        },
-        {
-            "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "include-filter": "android.platform.test.scenario.sysui"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-        }
-      ]
-    }
-  ],
   "auto-end-to-end-postsubmit": [
     {
       "name": "AndroidAutomotiveHomeTests",
