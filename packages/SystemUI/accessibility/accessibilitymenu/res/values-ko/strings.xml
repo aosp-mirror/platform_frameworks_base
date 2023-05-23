@@ -9,7 +9,7 @@
     <string name="power_label" msgid="7699720321491287839">"전원"</string>
     <string name="power_utterance" msgid="7444296686402104807">"전원 옵션"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"최근 앱"</string>
-    <string name="lockscreen_label" msgid="648347953557887087">"잠금 화면"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"화면 잠금"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"빠른 설정"</string>
     <string name="notifications_label" msgid="6829741046963013567">"알림"</string>
     <string name="screenshot_label" msgid="863978141223970162">"스크린샷"</string>

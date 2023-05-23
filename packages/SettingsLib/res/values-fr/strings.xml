@@ -111,11 +111,11 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"À utiliser pour partage des contacts/historique des appels"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accès à la carte SIM"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accès à la SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD : <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Appareils auditifs"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
+    <!-- no translation found for bluetooth_profile_le_audio (1725521360076451751) -->
     <skip />
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connexion établie avec les appareils auditifs"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connecté à LE Audio"</string>
@@ -216,6 +216,8 @@
     <string name="choose_profile" msgid="343803890897657450">"Sélectionner un profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Perso"</string>
     <string name="category_work" msgid="4014193632325996115">"Pro"</string>
+    <!-- no translation found for category_clone (1554511758987195974) -->
+    <skip />
     <string name="development_settings_title" msgid="140296922921597393">"Options pour les développeurs"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les développeurs"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Définir les options pour le développement de l\'application"</string>
@@ -672,7 +674,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Par défaut"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activer l\'écran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Autoriser l\'activation de l\'écran"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autoriser une appli à activer l\'écran. Si l\'autorisation est accordée, l\'appli peut activer l\'écran à tout moment sans votre intention explicite."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autoriser une appli à activer l\'écran. Si elle y est autorisée, l\'appli pourra activer l\'écran à tout moment sans que vous le lui demandiez."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou que vous modifiez le résultat, votre annonce actuelle s\'arrêtera"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

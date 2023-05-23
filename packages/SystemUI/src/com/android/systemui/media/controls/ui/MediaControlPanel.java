@@ -244,9 +244,10 @@ public class MediaControlPanel {
     private MultiRippleController mMultiRippleController;
     private TurbulenceNoiseController mTurbulenceNoiseController;
     private final FeatureFlags mFeatureFlags;
+
+    // TODO(b/281032715): Consider making this as a final variable. For now having a null check
+    //  due to unit test failure. (Perhaps missing some setup)
     private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig;
-    @VisibleForTesting
-    MultiRippleController.Companion.RipplesFinishedListener mRipplesFinishedListener;
 
     /**
      * Initialize a new control panel
@@ -433,18 +434,6 @@ public class MediaControlPanel {
         MultiRippleView multiRippleView = vh.getMultiRippleView();
         mMultiRippleController = new MultiRippleController(multiRippleView);
         mTurbulenceNoiseController = new TurbulenceNoiseController(vh.getTurbulenceNoiseView());
-        if (mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE)) {
-            mRipplesFinishedListener = () -> {
-                if (mTurbulenceNoiseAnimationConfig == null) {
-                    mTurbulenceNoiseAnimationConfig = createTurbulenceNoiseAnimation();
-                }
-                // Color will be correctly updated in ColorSchemeTransition.
-                mTurbulenceNoiseController.play(mTurbulenceNoiseAnimationConfig);
-                mMainExecutor.executeDelayed(
-                        mTurbulenceNoiseController::finish, TURBULENCE_NOISE_PLAY_DURATION);
-            };
-            mMultiRippleController.addRipplesFinishedListener(mRipplesFinishedListener);
-        }
 
         mColorSchemeTransition = new ColorSchemeTransition(
                 mContext, mMediaViewHolder, mMultiRippleController, mTurbulenceNoiseController);
@@ -628,10 +617,7 @@ public class MediaControlPanel {
         seamlessView.setContentDescription(deviceString);
         seamlessView.setOnClickListener(
                 v -> {
-                    if (mFalsingManager.isFalseTap(
-                            mFeatureFlags.isEnabled(Flags.MEDIA_FALSING_PENALTY)
-                                    ? FalsingManager.MODERATE_PENALTY :
-                                    FalsingManager.LOW_PENALTY)) {
+                    if (mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
                         return;
                     }
 
@@ -1141,15 +1127,24 @@ public class MediaControlPanel {
             } else {
                 button.setEnabled(true);
                 button.setOnClickListener(v -> {
-                    if (!mFalsingManager.isFalseTap(
-                            mFeatureFlags.isEnabled(Flags.MEDIA_FALSING_PENALTY)
-                                    ? FalsingManager.MODERATE_PENALTY :
-                                    FalsingManager.LOW_PENALTY)) {
+                    if (!mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
                         mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
                         logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
                         action.run();
                         if (mFeatureFlags.isEnabled(Flags.UMO_SURFACE_RIPPLE)) {
                             mMultiRippleController.play(createTouchRippleAnimation(button));
+                            if (mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE)) {
+                                if (mTurbulenceNoiseAnimationConfig == null) {
+                                    mTurbulenceNoiseAnimationConfig =
+                                            createTurbulenceNoiseAnimation();
+                                }
+                                // Color will be correctly updated in ColorSchemeTransition.
+                                mTurbulenceNoiseController.play(mTurbulenceNoiseAnimationConfig);
+                                mMainExecutor.executeDelayed(
+                                        mTurbulenceNoiseController::finish,
+                                        TURBULENCE_NOISE_PLAY_DURATION
+                                );
+                            }
                         }
 
                         if (icon instanceof Animatable) {
@@ -1203,10 +1198,8 @@ public class MediaControlPanel {
                 /* width= */ mMediaViewHolder.getMultiRippleView().getWidth(),
                 /* height= */ mMediaViewHolder.getMultiRippleView().getHeight(),
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,
-                /* easeInDuration= */
-                TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS,
-                /* easeOutDuration= */
-                TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS,
+                /* easeInDuration= */ 2500f,
+                /* easeOutDuration= */ 2500f,
                 this.getContext().getResources().getDisplayMetrics().density,
                 BlendMode.PLUS,
                 /* onAnimationEnd= */ null

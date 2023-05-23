@@ -48,6 +48,12 @@ public class TransitionTracer {
 
     private static final int ALWAYS_ON_TRACING_CAPACITY = 15 * 1024; // 15 KB
     private static final int ACTIVE_TRACING_BUFFER_CAPACITY = 5000 * 1024; // 5 MB
+
+    // This will be the size the proto output streams are initialized to.
+    // Ideally this should fit most or all the proto objects we will create and be no bigger than
+    // that to ensure to don't use excessive amounts of memory.
+    private static final int CHUNK_SIZE = 64;
+
     static final String WINSCOPE_EXT = ".winscope";
     private static final String TRACE_FILE =
             "/data/misc/wmtrace/wm_transition_trace" + WINSCOPE_EXT;
@@ -71,7 +77,7 @@ public class TransitionTracer {
      */
     public void logSentTransition(Transition transition, ArrayList<ChangeInfo> targets) {
         try {
-            final ProtoOutputStream outputStream = new ProtoOutputStream();
+            final ProtoOutputStream outputStream = new ProtoOutputStream(CHUNK_SIZE);
             final long protoToken = outputStream
                     .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
             outputStream.write(com.android.server.wm.shell.Transition.ID, transition.getSyncId());
@@ -101,7 +107,7 @@ public class TransitionTracer {
      */
     public void logFinishedTransition(Transition transition) {
         try {
-            final ProtoOutputStream outputStream = new ProtoOutputStream();
+            final ProtoOutputStream outputStream = new ProtoOutputStream(CHUNK_SIZE);
             final long protoToken = outputStream
                     .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
             outputStream.write(com.android.server.wm.shell.Transition.ID, transition.getSyncId());
@@ -124,7 +130,7 @@ public class TransitionTracer {
      */
     public void logAbortedTransition(Transition transition) {
         try {
-            final ProtoOutputStream outputStream = new ProtoOutputStream();
+            final ProtoOutputStream outputStream = new ProtoOutputStream(CHUNK_SIZE);
             final long protoToken = outputStream
                     .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
             outputStream.write(com.android.server.wm.shell.Transition.ID, transition.getSyncId());
@@ -252,7 +258,7 @@ public class TransitionTracer {
     private void writeTraceToFileLocked(@Nullable PrintWriter pw, File file) {
         Trace.beginSection("TransitionTracer#writeTraceToFileLocked");
         try {
-            ProtoOutputStream proto = new ProtoOutputStream();
+            ProtoOutputStream proto = new ProtoOutputStream(CHUNK_SIZE);
             proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
             long timeOffsetNs =
                     TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis())

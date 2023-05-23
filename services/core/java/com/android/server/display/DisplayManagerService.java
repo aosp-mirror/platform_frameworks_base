@@ -141,6 +141,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
@@ -737,6 +738,20 @@ public final class DisplayManagerService extends SystemService {
         return mDisplayDeviceRepo;
     }
 
+    @VisibleForTesting
+    boolean isMinimalPostProcessingAllowed() {
+        synchronized (mSyncRoot) {
+            return mMinimalPostProcessingAllowed;
+        }
+    }
+
+    @VisibleForTesting
+    void setMinimalPostProcessingAllowed(boolean allowed) {
+        synchronized (mSyncRoot) {
+            mMinimalPostProcessingAllowed = allowed;
+        }
+    }
+
     private void loadStableDisplayValuesLocked() {
         final Point size = mPersistentDataStore.getStableDisplaySize();
         if (size.x > 0 && size.y > 0) {
@@ -937,8 +952,9 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void updateSettingsLocked() {
-        mMinimalPostProcessingAllowed = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED, 1, UserHandle.USER_CURRENT) != 0;
+        setMinimalPostProcessingAllowed(Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED,
+                1, UserHandle.USER_CURRENT) != 0);
     }
 
     private void updateUserDisabledHdrTypesFromSettingsLocked() {
@@ -2166,6 +2182,17 @@ public final class DisplayManagerService extends SystemService {
         return autoHdrOutputTypesArray.toArray();
     }
 
+    @GuardedBy("mSyncRoot")
+    private boolean hdrConversionIntroducesLatencyLocked() {
+        final int preferredHdrOutputType =
+                getHdrConversionModeSettingInternal().getPreferredHdrOutputType();
+        if (preferredHdrOutputType != Display.HdrCapabilities.HDR_TYPE_INVALID) {
+            int[] hdrTypesWithLatency = mInjector.getHdrOutputTypesWithLatency();
+            return ArrayUtils.contains(hdrTypesWithLatency, preferredHdrOutputType);
+        }
+        return false;
+    }
+
     Display.Mode getUserPreferredDisplayModeInternal(int displayId) {
         synchronized (mSyncRoot) {
             if (displayId == Display.INVALID_DISPLAY) {
@@ -2243,7 +2270,7 @@ public final class DisplayManagerService extends SystemService {
         return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM);
     }
 
-    private HdrConversionMode getHdrConversionModeInternal() {
+    HdrConversionMode getHdrConversionModeInternal() {
         if (!mInjector.getHdrOutputConversionSupport()) {
             return HDR_CONVERSION_MODE_UNSUPPORTED;
         }
@@ -2400,7 +2427,7 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void setDisplayPropertiesInternal(int displayId, boolean hasContent,
+    void setDisplayPropertiesInternal(int displayId, boolean hasContent,
             float requestedRefreshRate, int requestedModeId, float requestedMinRefreshRate,
             float requestedMaxRefreshRate, boolean preferMinimalPostProcessing,
             boolean disableHdrConversion, boolean inTraversal) {
@@ -2438,11 +2465,17 @@ public final class DisplayManagerService extends SystemService {
 
             // TODO(b/202378408) set minimal post-processing only if it's supported once we have a
             // separate API for disabling on-device processing.
-            boolean mppRequest = mMinimalPostProcessingAllowed && preferMinimalPostProcessing;
+            boolean mppRequest = isMinimalPostProcessingAllowed() && preferMinimalPostProcessing;
+            boolean disableHdrConversionForLatency = false;
 
             if (display.getRequestedMinimalPostProcessingLocked() != mppRequest) {
                 display.setRequestedMinimalPostProcessingLocked(mppRequest);
                 shouldScheduleTraversal = true;
+                // If HDR conversion introduces latency, disable that in case minimal
+                // post-processing is requested
+                if (mppRequest) {
+                    disableHdrConversionForLatency = hdrConversionIntroducesLatencyLocked();
+                }
             }
 
             if (shouldScheduleTraversal) {
@@ -2452,12 +2485,17 @@ public final class DisplayManagerService extends SystemService {
             if (mHdrConversionMode == null) {
                 return;
             }
-            if (mOverrideHdrConversionMode == null && disableHdrConversion) {
+            // HDR conversion is disabled in two cases:
+            // - HDR conversion introduces latency and minimal post-processing is requested
+            // - app requests to disable HDR conversion
+            if (mOverrideHdrConversionMode == null && (disableHdrConversion
+                    || disableHdrConversionForLatency)) {
                 mOverrideHdrConversionMode =
                             new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_PASSTHROUGH);
                 setHdrConversionModeInternal(mHdrConversionMode);
                 handleLogicalDisplayChangedLocked(display);
-            } else if (mOverrideHdrConversionMode != null && !disableHdrConversion) {
+            } else if (mOverrideHdrConversionMode != null && !disableHdrConversion
+                    && !disableHdrConversionForLatency) {
                 mOverrideHdrConversionMode = null;
                 setHdrConversionModeInternal(mHdrConversionMode);
                 handleLogicalDisplayChangedLocked(display);
@@ -3042,6 +3080,10 @@ public final class DisplayManagerService extends SystemService {
 
         int[] getSupportedHdrOutputTypes() {
             return DisplayControl.getSupportedHdrOutputTypes();
+        }
+
+        int[] getHdrOutputTypesWithLatency() {
+            return DisplayControl.getHdrOutputTypesWithLatency();
         }
 
         boolean getHdrOutputConversionSupport() {

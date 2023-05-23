@@ -188,13 +188,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 .thenReturn(mNotificationRoundnessManager);
         mStackScroller.setController(mStackScrollLayoutController);
 
-        // Stub out functionality that isn't necessary to test.
-        doNothing().when(mCentralSurfaces)
-                .executeRunnableDismissingKeyguard(any(Runnable.class),
-                        any(Runnable.class),
-                        anyBoolean(),
-                        anyBoolean(),
-                        anyBoolean());
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(mNotificationShelf).setAnimationsEnabled(anyBoolean());

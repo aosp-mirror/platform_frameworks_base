@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ta bort"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vill du höja volymen över den rekommenderade nivån?\n\nAtt lyssna med stark volym långa stunder åt gången kan skada hörseln."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Varning!\nDu har överskridit den säkra mängden höga ljudsignaler man kan lyssna på i hörlurar under en vecka.\n\nDin hörsel skadas permanent om du överskrider gränsen."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Varning!\nDu har lyssnat på över fem gånger den säkra mängden höga ljudsignaler man kan lyssna på i hörlurar under en vecka.\n\nVolymen har sänkts för att skydda din hörsel."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Du lyssnar på media med en volym som kan leda till hörselskador om den bibehålls under lång tid.\n\nDin hörsel kan skadas om du fortsätter att spela upp på den här nivån under lång tid."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Varning!\nDu lyssnar just nu på innehåll med farligt hög volym.\n\nDin hörsel skadas permanent om du fortsätter att lyssna med den här volymen."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Vill du fortsätta lyssna på hög volym?\n\nVolymen i hörlurarna har varit hög längre än vad som rekommenderas, vilket kan skada hörseln"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Högt ljud har upptäckts\n\nVolymen i hörlurarna har varit högre än vad som rekommenderas, vilket kan skada hörseln"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vill du använda Aktivera tillgänglighet snabbt?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"När kortkommandot har aktiverats startar du en tillgänglighetsfunktion genom att trycka ned båda volymknapparna i tre sekunder."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vill du aktivera genvägen till tillgänglighetsfunktioner?"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Återuppta"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Inga jobbappar"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Inga privata appar"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Vill du öppna <xliff:g id="APP">%s</xliff:g> med din jobbprofil?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Vill du öppna med din privata profil i <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Vill du öppna med din jobbprofil i <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Vill du ringa med jobbappen?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vill du byta till jobbappen?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Organisationen tillåter endast att du ringer samtal med jobbappar"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organisationen tillåter endast att du skickar meddelanden med jobbappar"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Använd privat webbläsare"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Använd jobbwebbläsare"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Ring"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Byt"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkod för upplåsning av nätverk för SIM-kort"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Pinkod för upplåsning av delnätverk för SIM-kort"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Pinkod för upplåsning av företag för SIM-kort"</string>

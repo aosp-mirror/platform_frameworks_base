@@ -108,7 +108,7 @@ int JTvInputHal::addOrUpdateStream(int deviceId, int streamId, const sp<Surface>
                   status.getServiceSpecificError());
             return UNKNOWN_ERROR;
         }
-        connection.mSourceHandle = NativeHandle::create(makeFromAidl(sidebandStream), true);
+        connection.mSourceHandle = NativeHandle::create(dupFromAidl(sidebandStream), true);
     }
     connection.mSurface = surface;
     if (connection.mSurface != nullptr) {

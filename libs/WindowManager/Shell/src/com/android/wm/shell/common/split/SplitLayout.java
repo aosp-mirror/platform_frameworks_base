@@ -709,7 +709,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return context.getSystemService(WindowManager.class)
                 .getMaximumWindowMetrics()
                 .getWindowInsets()
-                .getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout())
+                .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()
+                        | WindowInsets.Type.displayCutout())
                 .toRect();
     }
 

@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ਆਡੀਓ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ਆਡੀਓ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ਸੁਣਨ ਦੇ ਸਾਧਨ"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
+    <!-- no translation found for bluetooth_profile_le_audio (1725521360076451751) -->
     <skip />
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ਸੁਣਨ ਦੇ ਸਾਧਨਾਂ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ਆਡੀਓ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
@@ -216,6 +216,8 @@
     <string name="choose_profile" msgid="343803890897657450">"ਪ੍ਰੋਫਾਈਲ ਚੁਣੋ"</string>
     <string name="category_personal" msgid="6236798763159385225">"ਨਿੱਜੀ"</string>
     <string name="category_work" msgid="4014193632325996115">"ਕੰਮ ਸੰਬੰਧੀ"</string>
+    <!-- no translation found for category_clone (1554511758987195974) -->
+    <skip />
     <string name="development_settings_title" msgid="140296922921597393">"ਵਿਕਾਸਕਾਰ ਚੋਣਾਂ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ਵਿਕਾਸਕਾਰ ਵਿਕਲਪਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ਐਪ ਵਿਕਾਸ ਲਈ ਚੋਣਾਂ ਸੈੱਟ ਕਰੋ"</string>

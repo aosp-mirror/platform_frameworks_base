@@ -36,7 +36,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Підвищена безпека облікового запису"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Кожен ключ зв’язано виключно з додатком або веб-сайтом, для якого його створено, тому ви ніколи не зможете помилково ввійти в шахрайський додаток чи на шахрайський веб-сайт. Крім того, коли на серверах зберігаються лише відкриті ключі, зламати захист набагато складніше."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Плавний перехід"</string>
-    <string name="seamless_transition_detail" msgid="4475509237171739843">"На шляху до безпарольного майбутнього паролі й надалі будуть використовуватися паралельно з ключами."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"На шляху до безпарольного майбутнього паролі й надалі будуть використовуватися паралельно з ключами доступу."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Виберіть, де зберігати <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Виберіть менеджер паролів, щоб зберігати свої дані й надалі входити в облікові записи швидше"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Створити ключ доступу для додатка <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

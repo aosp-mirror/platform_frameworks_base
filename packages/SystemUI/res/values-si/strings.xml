@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"අබල කරන්න"</string>
     <string name="sound_settings" msgid="8874581353127418308">"ශබ්ද සහ කම්පනය"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"සැකසීම්"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"සුරක්ෂිත පරිමාවකට අඩු කරන ලදි"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"නිර්දේශිත ප්‍රමාණයට වඩා වැඩි කාලයක් පරිමාව ඉහළ මට්ටමක පවතී"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"හඬ පරිමාව සුරක්ෂිත මට්ටමට අඩු කරන ලදි"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"නිර්දේශිත ප්‍රමාණයට වඩා වැඩි කාලයක් හෙඩ්ෆෝන් හඬ පරිමාව ඉහළ මට්ටමක පවතී"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"හෙඩ්ෆෝන් හඬ පරිමාව මෙම සතිය සඳහා සුරක්ෂිත සීමාව ඉක්මවා ඇත"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"දිගටම සවන් දෙන්න"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"හඬ පරිමාව අඩු කරන්න"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"යෙදුම අමුණා ඇත"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර ආපසු අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
@@ -940,6 +943,8 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"සැකසීම්"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g>ගේ <xliff:g id="SONG_NAME">%1$s</xliff:g> ගීතය <xliff:g id="APP_LABEL">%3$s</xliff:g> වෙතින් ධාවනය වෙමින් පවතී"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>කින් <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
+    <skip />
     <string name="controls_media_button_play" msgid="2705068099607410633">"වාදනය කරන්න"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"විරාම ගන්වන්න"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"පෙර ඛණ්ඩය"</string>
@@ -985,10 +990,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ස්පීකර් සහ සංදර්ශක"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"යෝජිත උපාංග"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"මාධ්‍ය වෙනත් උපාංගයකට ගෙන යාමට ඔබේ බෙදා ගත් සැසිය නවත්වන්න"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"නවත්වන්න"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"විකාශනය ක්‍රියා කරන ආකාරය"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"විකාශනය"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ගැළපෙන බ්ලූටූත් උපාංග සහිත ඔබ අවට සිටින පුද්ගලයින්ට ඔබ විකාශනය කරන මාධ්‍යයට සවන් දිය හැකිය"</string>
@@ -1141,10 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ඔබේ පන්හිඳ චාජරයකට සම්බන්ධ කරන්න"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"පන්හිඳ බැටරිය අඩුයි"</string>
     <string name="video_camera" msgid="7654002575156149298">"වීඩියෝ කැමරාව"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"මෙම පැතිකඩෙන් ඇමතීමට නොහැක"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"ඔබේ වැඩ ප්‍රතිපත්තිය ඔබට කාර්යාල පැතිකඩෙන් පමණක් දුරකථන ඇමතුම් ලබා ගැනීමට ඉඩ සලසයි"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"පෞද්ගලික යෙදුමකින් ඇමතිය නොහැක"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"ඔබේ සංවිධානය ඔබට කාර්යාල යෙදුම්වලින් ඇමතුම් කිරීමට පමණක් ඉඩ දෙයි"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"කාර්යාල පැතිකඩ වෙත මාරු වන්න"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"වසන්න"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"කාර්යාල දුරකථන යෙදුමක් ස්ථාපනය කරන්න"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"අවලංගු කරන්න"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"අගුළු තිරය අභිරුචිකරණය කරන්න"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"අගුළු තිරය අභිරුචිකරණය කිරීමට අගුළු හරින්න"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi ලද නොහැක"</string>

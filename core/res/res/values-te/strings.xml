@@ -1396,7 +1396,7 @@
     <string name="hardware" msgid="1800597768237606953">"వర్చువల్ కీబోర్డ్‌ను చూపు"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>‌ను కాన్ఫిగర్ చేయండి"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ఫిజికల్ కీబోర్డ్‌లను కాన్ఫిగ‌ర్ చేయండి"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"భాష మరియు లేఅవుట్‌ను ఎంచుకోవడానికి నొక్కండి"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"భాషను, లేఅవుట్‌ను ఎంచుకోవడానికి ట్యాప్ చేయండి"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"ఇతర యాప్‌ల ఎగువన ప్రదర్శన"</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"తీసివేయండి"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"హెచ్చరిక,\nమీరు ఒక వారంలో హెడ్‌ఫోన్స్ ద్వారా సురక్షితంగా వినగలిగే భారీ సౌండ్ సిగ్నల్స్ పరిమాణాన్ని మించిపోయారు.\n\nఈ పరిమితిని మించిపోవడం వల్ల మీ వినికిడి శాశ్వతంగా దెబ్బతింటుంది."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"హెచ్చరిక,\nమీరు ఒక వారంలో హెడ్‌ఫోన్స్ ద్వారా సురక్షితంగా వినగలిగే భారీ సౌండ్ సిగ్నల్స్ కంటే 5 రెట్లు మించిపోయారు.\n\nమీ వినికిడిని రక్షించడానికి వాల్యూమ్ తగ్గించబడింది."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"మీరు ప్రస్తుతం వింటున్న వాల్యూమ్‌లో మీడియాను వినడం కొనసాగిస్తే, మీ వినికిడి దెబ్బతినవచ్చు.\n\nఎక్కువ సమయం పాటు ఈ స్థాయిలో మీడియాను ప్లే చేయడం వల్ల మీ వినికిడి దెబ్బతినవచ్చు."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"హెచ్చరిక,\nమీరు ప్రస్తుతం బిగ్గరగా వినిపించే కంటెంట్‌ను అసురక్షిత వాల్యూమ్ స్థాయిలో వింటున్నారు.\n\nఇంత బిగ్గరగా వినడం కొనసాగించడం వల్ల మీ వినికిడి శాశ్వతంగా దెబ్బతింటుంది."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"అధిక వాల్యూమ్‌లో వినడం కొనసాగించాలనుకుంటున్నారా?\n\nహెడ్‌ఫోన్ వాల్యూమ్, సిఫార్సు చేసిన సమయం కంటే ఎక్కువసేపు అధిక వాల్యూమ్‌లో ఉంది, ఇది మీ వినికిడిని దెబ్బతీయవచ్చు"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"అధిక సౌండ్‌ను గుర్తించడం జరిగింది\n\nహెడ్‌ఫోన్ వాల్యూమ్, సిఫార్సు చేసిన సమయం కంటే ఎక్కువసేపు అధిక వాల్యూమ్‌లో ఉంది, ఇది మీ వినికిడిని దెబ్బతీయవచ్చు"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"యాక్సెస్ సామర్థ్యం షార్ట్‌కట్‌ను ఉపయోగించాలా?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"షార్ట్‌కట్ ఆన్ చేసి ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కి ఉంచితే యాక్సెస్ సౌలభ్య ఫీచర్ ప్రారంభం అవుతుంది."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"యాక్సెస్ సౌలభ్య ఫీచర్‌ల కోసం షార్ట్‌కట్‌ను ఆన్ చేయాలా?"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"అన్‌పాజ్ చేయండి"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"వర్క్ యాప్‌లు లేవు"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"వర్క్ <xliff:g id="APP">%s</xliff:g> యాప్‌ను తెరవాలా?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"వ్యక్తిగత <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"వర్క్ <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"వర్క్ యాప్ నుండి కాల్ చేయాలా?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"వర్క్ యాప్‌నకు మారాలా?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"మీ సంస్థ, వర్క్ యాప్‌ల నుండి మాత్రమే కాల్స్ చేయడానికి మిమ్మల్ని అనుమతిస్తుంది"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"మీ సంస్థ, వర్క్ యాప్‌ల నుండి మాత్రమే మెసేజ్‌లను పంపడానికి మిమ్మల్ని అనుమతిస్తుంది"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"వ్యక్తిగత బ్రౌజర్‌ను ఉపయోగించండి"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"వర్క్ బ్రౌజర్‌ను ఉపయోగించండి"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"కాల్ చేయండి"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"మారండి"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM నెట్‌వర్క్ అన్‌లాక్ పిన్‌"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM నెట్‌వర్క్ సబ్‌సెట్ అన్‌లాక్ పిన్"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM కార్పొరేట్ అన్‌లాక్ పిన్"</string>

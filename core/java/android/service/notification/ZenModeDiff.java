@@ -205,12 +205,24 @@ public class ZenModeDiff {
         private final ArrayMap<String, RuleDiff> mAutomaticRulesDiff = new ArrayMap<>();
         private RuleDiff mManualRuleDiff;
 
-        // Helpers for string generation
-        private static final String ALLOW_CALLS_FROM_FIELD = "allowCallsFrom";
-        private static final String ALLOW_MESSAGES_FROM_FIELD = "allowMessagesFrom";
-        private static final String ALLOW_CONVERSATIONS_FROM_FIELD = "allowConversationsFrom";
+        // Field name constants
+        public static final String FIELD_USER = "user";
+        public static final String FIELD_ALLOW_ALARMS = "allowAlarms";
+        public static final String FIELD_ALLOW_MEDIA = "allowMedia";
+        public static final String FIELD_ALLOW_SYSTEM = "allowSystem";
+        public static final String FIELD_ALLOW_CALLS = "allowCalls";
+        public static final String FIELD_ALLOW_REMINDERS = "allowReminders";
+        public static final String FIELD_ALLOW_EVENTS = "allowEvents";
+        public static final String FIELD_ALLOW_REPEAT_CALLERS = "allowRepeatCallers";
+        public static final String FIELD_ALLOW_MESSAGES = "allowMessages";
+        public static final String FIELD_ALLOW_CONVERSATIONS = "allowConversations";
+        public static final String FIELD_ALLOW_CALLS_FROM = "allowCallsFrom";
+        public static final String FIELD_ALLOW_MESSAGES_FROM = "allowMessagesFrom";
+        public static final String FIELD_ALLOW_CONVERSATIONS_FROM = "allowConversationsFrom";
+        public static final String FIELD_SUPPRESSED_VISUAL_EFFECTS = "suppressedVisualEffects";
+        public static final String FIELD_ARE_CHANNELS_BYPASSING_DND = "areChannelsBypassingDnd";
         private static final Set<String> PEOPLE_TYPE_FIELDS =
-                Set.of(ALLOW_CALLS_FROM_FIELD, ALLOW_MESSAGES_FROM_FIELD);
+                Set.of(FIELD_ALLOW_CALLS_FROM, FIELD_ALLOW_MESSAGES_FROM);
 
         /**
          * Create a diff that contains diffs between the "from" and "to" ZenModeConfigs.
@@ -232,57 +244,57 @@ public class ZenModeDiff {
 
             // Now we compare all the fields, knowing there's a diff and that neither is null
             if (from.user != to.user) {
-                addField("user", new FieldDiff<>(from.user, to.user));
+                addField(FIELD_USER, new FieldDiff<>(from.user, to.user));
             }
             if (from.allowAlarms != to.allowAlarms) {
-                addField("allowAlarms", new FieldDiff<>(from.allowAlarms, to.allowAlarms));
+                addField(FIELD_ALLOW_ALARMS, new FieldDiff<>(from.allowAlarms, to.allowAlarms));
             }
             if (from.allowMedia != to.allowMedia) {
-                addField("allowMedia", new FieldDiff<>(from.allowMedia, to.allowMedia));
+                addField(FIELD_ALLOW_MEDIA, new FieldDiff<>(from.allowMedia, to.allowMedia));
             }
             if (from.allowSystem != to.allowSystem) {
-                addField("allowSystem", new FieldDiff<>(from.allowSystem, to.allowSystem));
+                addField(FIELD_ALLOW_SYSTEM, new FieldDiff<>(from.allowSystem, to.allowSystem));
             }
             if (from.allowCalls != to.allowCalls) {
-                addField("allowCalls", new FieldDiff<>(from.allowCalls, to.allowCalls));
+                addField(FIELD_ALLOW_CALLS, new FieldDiff<>(from.allowCalls, to.allowCalls));
             }
             if (from.allowReminders != to.allowReminders) {
-                addField("allowReminders",
+                addField(FIELD_ALLOW_REMINDERS,
                         new FieldDiff<>(from.allowReminders, to.allowReminders));
             }
             if (from.allowEvents != to.allowEvents) {
-                addField("allowEvents", new FieldDiff<>(from.allowEvents, to.allowEvents));
+                addField(FIELD_ALLOW_EVENTS, new FieldDiff<>(from.allowEvents, to.allowEvents));
             }
             if (from.allowRepeatCallers != to.allowRepeatCallers) {
-                addField("allowRepeatCallers",
+                addField(FIELD_ALLOW_REPEAT_CALLERS,
                         new FieldDiff<>(from.allowRepeatCallers, to.allowRepeatCallers));
             }
             if (from.allowMessages != to.allowMessages) {
-                addField("allowMessages",
+                addField(FIELD_ALLOW_MESSAGES,
                         new FieldDiff<>(from.allowMessages, to.allowMessages));
             }
             if (from.allowConversations != to.allowConversations) {
-                addField("allowConversations",
+                addField(FIELD_ALLOW_CONVERSATIONS,
                         new FieldDiff<>(from.allowConversations, to.allowConversations));
             }
             if (from.allowCallsFrom != to.allowCallsFrom) {
-                addField("allowCallsFrom",
+                addField(FIELD_ALLOW_CALLS_FROM,
                         new FieldDiff<>(from.allowCallsFrom, to.allowCallsFrom));
             }
             if (from.allowMessagesFrom != to.allowMessagesFrom) {
-                addField("allowMessagesFrom",
+                addField(FIELD_ALLOW_MESSAGES_FROM,
                         new FieldDiff<>(from.allowMessagesFrom, to.allowMessagesFrom));
             }
             if (from.allowConversationsFrom != to.allowConversationsFrom) {
-                addField("allowConversationsFrom",
+                addField(FIELD_ALLOW_CONVERSATIONS_FROM,
                         new FieldDiff<>(from.allowConversationsFrom, to.allowConversationsFrom));
             }
             if (from.suppressedVisualEffects != to.suppressedVisualEffects) {
-                addField("suppressedVisualEffects",
+                addField(FIELD_SUPPRESSED_VISUAL_EFFECTS,
                         new FieldDiff<>(from.suppressedVisualEffects, to.suppressedVisualEffects));
             }
             if (from.areChannelsBypassingDnd != to.areChannelsBypassingDnd) {
-                addField("areChannelsBypassingDnd",
+                addField(FIELD_ARE_CHANNELS_BYPASSING_DND,
                         new FieldDiff<>(from.areChannelsBypassingDnd, to.areChannelsBypassingDnd));
             }
 
@@ -366,7 +378,7 @@ public class ZenModeDiff {
                     sb.append(ZenModeConfig.sourceToString((int) diff.from()));
                     sb.append("->");
                     sb.append(ZenModeConfig.sourceToString((int) diff.to()));
-                } else if (key.equals(ALLOW_CONVERSATIONS_FROM_FIELD)) {
+                } else if (key.equals(FIELD_ALLOW_CONVERSATIONS_FROM)) {
                     sb.append(key);
                     sb.append(":");
                     sb.append(ZenPolicy.conversationTypeToString((int) diff.from()));
@@ -428,6 +440,24 @@ public class ZenModeDiff {
      * Diff class representing a change between two ZenRules.
      */
     public static class RuleDiff extends BaseDiff {
+        public static final String FIELD_ENABLED = "enabled";
+        public static final String FIELD_SNOOZING = "snoozing";
+        public static final String FIELD_NAME = "name";
+        public static final String FIELD_ZEN_MODE = "zenMode";
+        public static final String FIELD_CONDITION_ID = "conditionId";
+        public static final String FIELD_CONDITION = "condition";
+        public static final String FIELD_COMPONENT = "component";
+        public static final String FIELD_CONFIGURATION_ACTIVITY = "configurationActivity";
+        public static final String FIELD_ID = "id";
+        public static final String FIELD_CREATION_TIME = "creationTime";
+        public static final String FIELD_ENABLER = "enabler";
+        public static final String FIELD_ZEN_POLICY = "zenPolicy";
+        public static final String FIELD_MODIFIED = "modified";
+        public static final String FIELD_PKG = "pkg";
+
+        // Special field to track whether this rule became active or inactive
+        FieldDiff<Boolean> mActiveDiff;
+
         /**
          * Create a RuleDiff representing the difference between two ZenRule objects.
          * @param from previous ZenRule
@@ -440,54 +470,64 @@ public class ZenModeDiff {
             if (from == null && to == null) {
                 return;
             }
+
+            // Even if added or removed, there may be a change in whether or not it was active.
+            // This only applies to automatic rules.
+            boolean fromActive = from != null ? from.isAutomaticActive() : false;
+            boolean toActive = to != null ? to.isAutomaticActive() : false;
+            if (fromActive != toActive) {
+                mActiveDiff = new FieldDiff<>(fromActive, toActive);
+            }
+
             // Return if the diff was added or removed
             if (hasExistenceChange()) {
                 return;
             }
 
             if (from.enabled != to.enabled) {
-                addField("enabled", new FieldDiff<>(from.enabled, to.enabled));
+                addField(FIELD_ENABLED, new FieldDiff<>(from.enabled, to.enabled));
             }
             if (from.snoozing != to.snoozing) {
-                addField("snoozing", new FieldDiff<>(from.snoozing, to.snoozing));
+                addField(FIELD_SNOOZING, new FieldDiff<>(from.snoozing, to.snoozing));
             }
             if (!Objects.equals(from.name, to.name)) {
-                addField("name", new FieldDiff<>(from.name, to.name));
+                addField(FIELD_NAME, new FieldDiff<>(from.name, to.name));
             }
             if (from.zenMode != to.zenMode) {
-                addField("zenMode", new FieldDiff<>(from.zenMode, to.zenMode));
+                addField(FIELD_ZEN_MODE, new FieldDiff<>(from.zenMode, to.zenMode));
             }
             if (!Objects.equals(from.conditionId, to.conditionId)) {
-                addField("conditionId", new FieldDiff<>(from.conditionId, to.conditionId));
+                addField(FIELD_CONDITION_ID, new FieldDiff<>(from.conditionId,
+                        to.conditionId));
             }
             if (!Objects.equals(from.condition, to.condition)) {
-                addField("condition", new FieldDiff<>(from.condition, to.condition));
+                addField(FIELD_CONDITION, new FieldDiff<>(from.condition, to.condition));
             }
             if (!Objects.equals(from.component, to.component)) {
-                addField("component", new FieldDiff<>(from.component, to.component));
+                addField(FIELD_COMPONENT, new FieldDiff<>(from.component, to.component));
             }
             if (!Objects.equals(from.configurationActivity, to.configurationActivity)) {
-                addField("configurationActivity", new FieldDiff<>(
+                addField(FIELD_CONFIGURATION_ACTIVITY, new FieldDiff<>(
                         from.configurationActivity, to.configurationActivity));
             }
             if (!Objects.equals(from.id, to.id)) {
-                addField("id", new FieldDiff<>(from.id, to.id));
+                addField(FIELD_ID, new FieldDiff<>(from.id, to.id));
             }
             if (from.creationTime != to.creationTime) {
-                addField("creationTime",
+                addField(FIELD_CREATION_TIME,
                         new FieldDiff<>(from.creationTime, to.creationTime));
             }
             if (!Objects.equals(from.enabler, to.enabler)) {
-                addField("enabler", new FieldDiff<>(from.enabler, to.enabler));
+                addField(FIELD_ENABLER, new FieldDiff<>(from.enabler, to.enabler));
             }
             if (!Objects.equals(from.zenPolicy, to.zenPolicy)) {
-                addField("zenPolicy", new FieldDiff<>(from.zenPolicy, to.zenPolicy));
+                addField(FIELD_ZEN_POLICY, new FieldDiff<>(from.zenPolicy, to.zenPolicy));
             }
             if (from.modified != to.modified) {
-                addField("modified", new FieldDiff<>(from.modified, to.modified));
+                addField(FIELD_MODIFIED, new FieldDiff<>(from.modified, to.modified));
             }
             if (!Objects.equals(from.pkg, to.pkg)) {
-                addField("pkg", new FieldDiff<>(from.pkg, to.pkg));
+                addField(FIELD_PKG, new FieldDiff<>(from.pkg, to.pkg));
             }
         }
 
@@ -536,7 +576,35 @@ public class ZenModeDiff {
                 sb.append(diff);
             }
 
+            if (becameActive()) {
+                if (!first) {
+                    sb.append(", ");
+                }
+                sb.append("(->active)");
+            } else if (becameInactive()) {
+                if (!first) {
+                    sb.append(", ");
+                }
+                sb.append("(->inactive)");
+            }
+
             return sb.append("}").toString();
+        }
+
+        /**
+         * Returns whether this diff indicates that this (automatic) rule became active.
+         */
+        public boolean becameActive() {
+            // if the "to" side is true, then it became active
+            return mActiveDiff != null && mActiveDiff.to();
+        }
+
+        /**
+         * Returns whether this diff indicates that this (automatic) rule became inactive.
+         */
+        public boolean becameInactive() {
+            // if the "to" side is false, then it became inactive
+            return mActiveDiff != null && !mActiveDiff.to();
         }
     }
 }

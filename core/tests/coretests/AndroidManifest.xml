@@ -78,6 +78,7 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />

@@ -284,16 +284,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         assertFalse(mBluetoothControllerImpl.isBluetoothAudioActive());
         assertFalse(mBluetoothControllerImpl.isBluetoothAudioProfileOnly());
 
-        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
-        mDevices.add(device);
-        when(device.isActiveDevice(BluetoothProfile.HEADSET)).thenReturn(true);
-
-        List<LocalBluetoothProfile> profiles = new ArrayList<>();
-        LocalBluetoothProfile profile = mock(LocalBluetoothProfile.class);
-        profiles.add(profile);
-        when(profile.getProfileId()).thenReturn(BluetoothProfile.HEADSET);
-        when(device.getProfiles()).thenReturn(profiles);
-        when(device.isConnectedProfile(profile)).thenReturn(true);
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.HEADSET, /* isConnected= */ true, /* isActive= */ true);
 
         mBluetoothControllerImpl.onAclConnectionStateChanged(device,
                 BluetoothProfile.STATE_CONNECTED);
@@ -301,6 +293,149 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
         assertTrue(mBluetoothControllerImpl.isBluetoothAudioActive());
         assertTrue(mBluetoothControllerImpl.isBluetoothAudioProfileOnly());
+    }
+
+    @Test
+    public void isBluetoothAudioActive_headsetIsActive_true() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.HEADSET, /* isConnected= */ true, /* isActive= */ true);
+
+        mBluetoothControllerImpl.onActiveDeviceChanged(device, BluetoothProfile.HEADSET);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioActive()).isTrue();
+    }
+
+    @Test
+    public void isBluetoothAudioActive_a2dpIsActive_true() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.A2DP, /* isConnected= */ true, /* isActive= */ true);
+
+        mBluetoothControllerImpl.onActiveDeviceChanged(device, BluetoothProfile.A2DP);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioActive()).isTrue();
+    }
+
+    @Test
+    public void isBluetoothAudioActive_hearingAidIsActive_true() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.HEARING_AID, /* isConnected= */ true, /* isActive= */ true);
+
+        mBluetoothControllerImpl.onActiveDeviceChanged(device, BluetoothProfile.HEARING_AID);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioActive()).isTrue();
+    }
+
+    @Test
+    public void isBluetoothAudioActive_leAudioIsActive_true() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.LE_AUDIO, /* isConnected= */ true, /* isActive= */ true);
+
+        mBluetoothControllerImpl.onActiveDeviceChanged(device, BluetoothProfile.LE_AUDIO);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioActive()).isTrue();
+    }
+
+    @Test
+    public void isBluetoothAudioActive_otherProfile_false() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.PAN, /* isConnected= */ true, /* isActive= */ true);
+
+        mBluetoothControllerImpl.onActiveDeviceChanged(device, BluetoothProfile.PAN);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioActive()).isFalse();
+    }
+
+    @Test
+    public void isBluetoothAudioActive_leAudio_butNotActive_false() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.LE_AUDIO, /* isConnected= */ true, /* isActive= */ false);
+
+        mBluetoothControllerImpl.onActiveDeviceChanged(device, BluetoothProfile.LE_AUDIO);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioActive()).isFalse();
+    }
+
+    @Test
+    public void isBluetoothAudioProfileOnly_noneConnected_false() {
+        CachedBluetoothDevice device1 = createBluetoothDevice(
+                BluetoothProfile.LE_AUDIO, /* isConnected= */ false, /* isActive= */ false);
+        CachedBluetoothDevice device2 = createBluetoothDevice(
+                BluetoothProfile.HEADSET, /* isConnected= */ false, /* isActive= */ false);
+
+        mBluetoothControllerImpl.onDeviceAdded(device1);
+        mBluetoothControllerImpl.onDeviceAdded(device2);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isFalse();
+    }
+
+    /** Regression test for b/278982782. */
+    @Test
+    public void isBluetoothAudioProfileOnly_onlyLeAudioConnected_true() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.LE_AUDIO, /* isConnected= */ true, /* isActive= */ false);
+
+        mBluetoothControllerImpl.onDeviceAdded(device);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
+    }
+
+    @Test
+    public void isBluetoothAudioProfileOnly_onlyHeadsetConnected_true() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.HEADSET, /* isConnected= */ true, /* isActive= */ false);
+
+        mBluetoothControllerImpl.onDeviceAdded(device);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
+    }
+
+    @Test
+    public void isBluetoothAudioProfileOnly_onlyA2dpConnected_true() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.A2DP, /* isConnected= */ true, /* isActive= */ false);
+
+        mBluetoothControllerImpl.onDeviceAdded(device);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
+    }
+
+    @Test
+    public void isBluetoothAudioProfileOnly_onlyHearingAidConnected_true() {
+        CachedBluetoothDevice device = createBluetoothDevice(
+                BluetoothProfile.HEARING_AID, /* isConnected= */ true, /* isActive= */ false);
+
+        mBluetoothControllerImpl.onDeviceAdded(device);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
+    }
+
+    @Test
+    public void isBluetoothAudioProfileOnly_multipleAudioOnlyProfilesConnected_true() {
+        CachedBluetoothDevice device1 = createBluetoothDevice(
+                BluetoothProfile.LE_AUDIO, /* isConnected= */ true, /* isActive= */ false);
+        CachedBluetoothDevice device2 = createBluetoothDevice(
+                BluetoothProfile.A2DP, /* isConnected= */ true, /* isActive= */ false);
+        CachedBluetoothDevice device3 = createBluetoothDevice(
+                BluetoothProfile.HEADSET, /* isConnected= */ true, /* isActive= */ false);
+
+        mBluetoothControllerImpl.onDeviceAdded(device1);
+        mBluetoothControllerImpl.onDeviceAdded(device2);
+        mBluetoothControllerImpl.onDeviceAdded(device3);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
+    }
+
+    @Test
+    public void isBluetoothAudioProfileOnly_leAudioAndOtherProfileConnected_false() {
+        CachedBluetoothDevice device1 = createBluetoothDevice(
+                BluetoothProfile.LE_AUDIO, /* isConnected= */ true, /* isActive= */ false);
+        CachedBluetoothDevice device2 = createBluetoothDevice(
+                BluetoothProfile.PAN, /* isConnected= */ true, /* isActive= */ false);
+
+        mBluetoothControllerImpl.onDeviceAdded(device1);
+        mBluetoothControllerImpl.onDeviceAdded(device2);
+
+        assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isFalse();
     }
 
     @Test
@@ -335,5 +470,22 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     public void testOnActiveDeviceChanged_null_noCrash() {
         mBluetoothControllerImpl.onActiveDeviceChanged(null, BluetoothProfile.HEADSET);
         // No assert, just need no crash.
+    }
+
+    private CachedBluetoothDevice createBluetoothDevice(
+            int profile, boolean isConnected, boolean isActive) {
+        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        mDevices.add(device);
+        when(device.isActiveDevice(profile)).thenReturn(isActive);
+
+        List<LocalBluetoothProfile> localBluetoothProfiles = new ArrayList<>();
+        LocalBluetoothProfile localBluetoothProfile = mock(LocalBluetoothProfile.class);
+        localBluetoothProfiles.add(localBluetoothProfile);
+        when(device.getProfiles()).thenReturn(localBluetoothProfiles);
+
+        when(localBluetoothProfile.getProfileId()).thenReturn(profile);
+        when(device.isConnectedProfile(localBluetoothProfile)).thenReturn(isConnected);
+
+        return device;
     }
 }

@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
@@ -119,6 +120,22 @@ public class SyncEngineTests extends WindowTestsBase {
         assertTrue(mockWC.onSyncFinishedDrawing());
         bse.onSurfacePlacement();
         verify(listener, times(1)).onTransactionReady(eq(id), notNull());
+
+        // The sync is not finished for a relaunching activity.
+        id = startSyncSet(bse, listener);
+        final ActivityRecord r = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final WindowState w = mock(WindowState.class);
+        doReturn(true).when(w).isVisibleRequested();
+        doReturn(true).when(w).fillsParent();
+        doReturn(true).when(w).isSyncFinished(any());
+        r.mChildren.add(w);
+        bse.addToSyncSet(id, r);
+        r.onSyncFinishedDrawing();
+        assertTrue(r.isSyncFinished(r.getSyncGroup()));
+        r.startRelaunching();
+        assertFalse(r.isSyncFinished(r.getSyncGroup()));
+        r.finishRelaunching();
+        assertTrue(r.isSyncFinished(r.getSyncGroup()));
     }
 
     @Test

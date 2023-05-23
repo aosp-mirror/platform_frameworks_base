@@ -146,8 +146,11 @@ public class KeyguardStatusView extends GridLayout {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        int restoreTo = KeyguardClockFrame.saveCanvasAlpha(this, canvas, mDrawAlpha);
-        super.dispatchDraw(canvas);
-        canvas.restoreToCount(restoreTo);
+        KeyguardClockFrame.saveCanvasAlpha(
+                this, canvas, mDrawAlpha,
+                c -> {
+                    super.dispatchDraw(c);
+                    return kotlin.Unit.INSTANCE;
+                });
     }
 }

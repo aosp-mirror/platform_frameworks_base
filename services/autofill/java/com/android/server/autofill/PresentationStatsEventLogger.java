@@ -16,8 +16,6 @@
 
 package com.android.server.autofill;
 
-import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_ONLY;
-import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_DIALOG;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
@@ -27,6 +25,9 @@ import static android.view.autofill.AutofillManager.COMMIT_REASON_VIEW_CHANGED;
 import static android.view.autofill.AutofillManager.COMMIT_REASON_VIEW_CLICKED;
 import static android.view.autofill.AutofillManager.COMMIT_REASON_VIEW_COMMITTED;
 
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_AUTOFILL_PROVIDER;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_PCC;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_UNKONWN;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_FAILURE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_RESULT_UNKNOWN;
@@ -140,6 +141,19 @@ public final class PresentationStatsEventLogger {
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatasetPickedReason {}
 
+    /**
+     * The type of detection that was preferred. These are wrappers around
+     * {@link com.android.os.AtomsProto.AutofillPresentationEventReported.DetectionPreference}.
+     */
+    @IntDef(prefix = {"DETECTION_PREFER"}, value = {
+            DETECTION_PREFER_UNKNOWN,
+            DETECTION_PREFER_AUTOFILL_PROVIDER,
+            DETECTION_PREFER_PCC
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DetectionPreference {
+    }
+
     public static final int NOT_SHOWN_REASON_ANY_SHOWN =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__ANY_SHOWN;
     public static final int NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED =
@@ -187,6 +201,15 @@ public final class PresentationStatsEventLogger {
             AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PCC_DETECTION_ONLY;
     public static final int PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
+
+
+    // Values for AutofillFillResponseReported.detection_preference
+    public static final int DETECTION_PREFER_UNKNOWN =
+            AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_UNKONWN;
+    public static final int DETECTION_PREFER_AUTOFILL_PROVIDER =
+            AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_AUTOFILL_PROVIDER;
+    public static final int DETECTION_PREFER_PCC =
+            AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_PCC;
     private final int mSessionId;
     private Optional<PresentationStatsEventInternal> mEventInternal;
 
@@ -463,6 +486,15 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    /**
+     * Set detection_pref
+     */
+    public void maybeSetDetectionPreference(@DetectionPreference int detectionPreference) {
+        mEventInternal.ifPresent(event -> {
+            event.mDetectionPreference = detectionPreference;
+        });
+    }
+
     private int convertDatasetPickReason(@Dataset.DatasetEligibleReason int val) {
         switch (val) {
             case 0:
@@ -514,7 +546,8 @@ public final class PresentationStatsEventLogger {
                     + " mLatencyDatasetDisplayMillis=" + event.mLatencyDatasetDisplayMillis
                     + " mAvailablePccCount=" + event.mAvailablePccCount
                     + " mAvailablePccOnlyCount=" + event.mAvailablePccOnlyCount
-                    + " mSelectedDatasetPickedReason=" + event.mSelectedDatasetPickedReason);
+                    + " mSelectedDatasetPickedReason=" + event.mSelectedDatasetPickedReason
+                    + " mDetectionPreference=" + event.mDetectionPreference);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -550,7 +583,8 @@ public final class PresentationStatsEventLogger {
                 event.mLatencyDatasetDisplayMillis,
                 event.mAvailablePccCount,
                 event.mAvailablePccOnlyCount,
-                event.mSelectedDatasetPickedReason);
+                event.mSelectedDatasetPickedReason,
+                event.mDetectionPreference);
         mEventInternal = Optional.empty();
     }
 
@@ -582,6 +616,7 @@ public final class PresentationStatsEventLogger {
         int mAvailablePccCount = -1;
         int mAvailablePccOnlyCount = -1;
         @DatasetPickedReason int mSelectedDatasetPickedReason = PICK_REASON_UNKNOWN;
+        @DetectionPreference int mDetectionPreference = DETECTION_PREFER_UNKNOWN;
 
         PresentationStatsEventInternal() {}
     }

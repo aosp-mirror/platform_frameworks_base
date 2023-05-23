@@ -712,7 +712,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * when running ANIM_SCENE_TRANSITION.
      * @see WindowContainer#providesOrientation()
      */
-    private final boolean mStyleFillsParent;
+    final boolean mStyleFillsParent;
 
     // The input dispatching timeout for this application token in milliseconds.
     long mInputDispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
@@ -10608,6 +10608,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         if (!isVisibleRequested()) return true;
+        if (mPendingRelaunchCount > 0) return false;
         // Wait for attach. That is the earliest time where we know if there will be an associated
         // display rotation. If we don't wait, the starting-window can finishDrawing first and
         // cause the display rotation to end-up in a following transition.

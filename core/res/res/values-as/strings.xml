@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"আঁতৰাওক"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"অনুমোদিত স্তৰতকৈ ওপৰলৈ ভলিউম বঢ়াব নেকি?\n\nদীৰ্ঘ সময়ৰ বাবে উচ্চ ভলিউমত শুনাৰ ফলত শ্ৰৱণ ক্ষমতাৰ ক্ষতি হ\'ব পাৰে।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"সকীয়নি,\nএগৰাকী ব্যক্তিয়ে এসপ্তাহত হেডফ’নৰ জৰিয়তে সুৰক্ষিতভাৱে শুনিব পৰা ডাঙৰ ধ্বনিৰ ছিগনেলৰ পৰিমাণ আপুনি অতিক্ৰম কৰিছে।\n\nএই সীমা অতিক্ৰম কৰাটোৱে আপোনাৰ শ্ৰৱণ শক্তি স্থায়ীভাৱে নষ্ট কৰিব পাৰে।"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"সকীয়নি,\nএগৰাকী ব্যক্তিয়ে এসপ্তাহত হেডফ’নৰ জৰিয়তে সুৰক্ষিতভাৱে শুনিব পৰা ডাঙৰ ধ্বনিৰ ছিগনেলৰ পৰিমাণৰ ৫ গুণ আপুনি অতিক্ৰম কৰিছে।\n\nআপোনাৰ শ্ৰৱণ শক্তি সুৰক্ষিত কৰিবলৈ ভলিউম কমোৱা হৈছে।"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"আপুনি যিটো স্তৰত মিডিয়া শুনি আছে, দীঘলীয়া সময় ধৰি সেইটো স্তৰত শুনি থাকিলে আপোনাৰ শ্ৰৱণ শক্তি নষ্ট হ’ব পাৰে।\n\nএইটো স্তৰত দীঘলীয়া সময়ৰ বাবে প্লে’ কৰি থাকিলে আপোনাৰ শ্ৰৱণ শক্তি নষ্ট হ’ব পাৰে।"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"সকীয়নি,\nআপুনি বৰ্তমান অসুৰক্ষিত স্তৰ এটাত ডাঙৰ ধ্বনিৰ সমল প্লে’ কৰি শুনি আছে।\n\nএই ডাঙৰ ধ্বনিৰ সমলটো শুনি থাকিলে আপোনাৰ শ্ৰৱণ শক্তি নষ্ট হ’ব পাৰে।"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"উচ্চ ভলিউমত শুনি থাকিব নেকি?\n\nহেডফ’নৰ ভলিউম চুপাৰিছ কৰাতকৈ বেছি সময় ধৰি উচ্চ হৈ আছে, যিয়ে আপোনাৰ শ্ৰৱণ ইন্দ্ৰিয় ক্ষতিগ্ৰস্ত কৰিব পাৰে"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"উচ্চ ধ্বনি চিনাক্ত কৰা হৈছে\n\nহেডফ’নৰ ভলিউম চুপাৰিছ কৰাতকৈ বেছি সময় ধৰি উচ্চ হৈ আছে, যিয়ে আপোনাৰ শ্ৰৱণ ইন্দ্ৰিয় ক্ষতিগ্ৰস্ত কৰিব পাৰে"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাট ব্যৱহাৰ কৰেনে?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"শ্বৰ্টকাটটো অন হৈ থকাৰ সময়ত দুয়োটা ভলিউম বুটাম ৩ ছেকেণ্ডৰ বাবে হেঁচি ধৰি ৰাখিলে এটা সাধ্য সুবিধা আৰম্ভ হ’ব।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"সাধ্য সুবিধাসমূহৰ বাবে শ্বৰ্টকাট অন কৰিবনে?"</string>
@@ -2164,14 +2162,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"আনপজ কৰক"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"কোনো কৰ্মস্থানৰ এপ্‌ নাই"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"কোনো ব্যক্তিগত এপ্‌ নাই"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"কৰ্মস্থানৰ <xliff:g id="APP">%s</xliff:g>ত খুলিবনে?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ব্যক্তিগত <xliff:g id="APP">%s</xliff:g>ত খুলিবনে?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"কৰ্মস্থানৰ <xliff:g id="APP">%s</xliff:g>ত খুলিবনে?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ব্যক্তিগত ব্ৰাউজাৰ ব্যৱহাৰ কৰক"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"কৰ্মস্থানৰ ব্ৰাউজাৰ ব্যৱহাৰ কৰক"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ছিম নেটৱৰ্ক আনলক কৰা পিন"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"ছিম নেটৱৰ্ক আনলক কৰা পিন"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"ছিম কৰ্পৰে\'ট আনলক কৰা পিন"</string>

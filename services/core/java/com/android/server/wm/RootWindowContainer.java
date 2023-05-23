@@ -438,7 +438,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor = mService.mTaskSupervisor;
         mTaskSupervisor.mRootWindowContainer = this;
         mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl(DISPLAY_OFF_SLEEP_TOKEN_TAG);
-        mDeviceStateController = new DeviceStateController(service.mContext, service.mH);
+        mDeviceStateController = new DeviceStateController(service.mContext, service.mH,
+                service.mGlobalLock);
         mDisplayRotationCoordinator = new DisplayRotationCoordinator();
     }
 

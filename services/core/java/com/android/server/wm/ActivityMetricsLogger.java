@@ -294,6 +294,8 @@ class ActivityMetricsLogger {
         final int mProcessState;
         /** The oom adj score of the launching activity prior to the launch */
         final int mProcessOomAdj;
+        /** Whether the activity is launched above a visible activity in the same task. */
+        final boolean mIsInTaskActivityStart;
         /** Whether the last launched activity has reported drawn. */
         boolean mIsDrawn;
         /** The latest activity to have been launched. */
@@ -330,7 +332,7 @@ class ActivityMetricsLogger {
         static TransitionInfo create(@NonNull ActivityRecord r,
                 @NonNull LaunchingState launchingState, @Nullable ActivityOptions options,
                 boolean processRunning, boolean processSwitch, int processState, int processOomAdj,
-                boolean newActivityCreated, int startResult) {
+                boolean newActivityCreated, boolean isInTaskActivityStart, int startResult) {
             if (startResult != START_SUCCESS && startResult != START_TASK_TO_FRONT) {
                 return null;
             }
@@ -345,19 +347,21 @@ class ActivityMetricsLogger {
                 transitionType = TYPE_TRANSITION_COLD_LAUNCH;
             }
             return new TransitionInfo(r, launchingState, options, transitionType, processRunning,
-                    processSwitch, processState, processOomAdj);
+                    processSwitch, processState, processOomAdj, isInTaskActivityStart);
         }
 
         /** Use {@link TransitionInfo#create} instead to ensure the transition type is valid. */
         private TransitionInfo(ActivityRecord r, LaunchingState launchingState,
                 ActivityOptions options, int transitionType, boolean processRunning,
-                boolean processSwitch, int processState, int processOomAdj) {
+                boolean processSwitch, int processState, int processOomAdj,
+                boolean isInTaskActivityStart) {
             mLaunchingState = launchingState;
             mTransitionType = transitionType;
             mProcessRunning = processRunning;
             mProcessSwitch = processSwitch;
             mProcessState = processState;
             mProcessOomAdj = processOomAdj;
+            mIsInTaskActivityStart = isInTaskActivityStart;
             setLatestLaunchedActivity(r);
             // The launching state can be reused by consecutive launch. Its original association
             // shouldn't be changed by a separated transition.
@@ -515,7 +519,7 @@ class ActivityMetricsLogger {
             }
         }
 
-        boolean isIntresetedToEventLog() {
+        boolean isInterestedToEventLog() {
             return type == TYPE_TRANSITION_WARM_LAUNCH || type == TYPE_TRANSITION_COLD_LAUNCH;
         }
 
@@ -728,9 +732,10 @@ class ActivityMetricsLogger {
             return;
         }
 
+        final boolean isInTaskActivityStart = launchedActivity.getTask().isVisible();
         final TransitionInfo newInfo = TransitionInfo.create(launchedActivity, launchingState,
                 options, processRunning, processSwitch, processState, processOomAdj,
-                newActivityCreated, resultCode);
+                newActivityCreated, isInTaskActivityStart, resultCode);
         if (newInfo == null) {
             abort(launchingState, "unrecognized launch");
             return;
@@ -1042,18 +1047,23 @@ class ActivityMetricsLogger {
         // Take a snapshot of the transition info before sending it to the handler for logging.
         // This will avoid any races with other operations that modify the ActivityRecord.
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
-        if (info.isInterestingToLoggerAndObserver()) {
-            final long uptimeNs = info.mLaunchingState.mStartUptimeNs;
-            final int transitionDelay = info.mCurrentTransitionDelayMs;
-            final int processState = info.mProcessState;
-            final int processOomAdj = info.mProcessOomAdj;
-            mLoggerHandler.post(() -> logAppTransition(
-                    uptimeNs, transitionDelay, infoSnapshot, isHibernating,
-                    processState, processOomAdj));
-        }
-        if (infoSnapshot.isIntresetedToEventLog()) {
-            mLoggerHandler.post(() -> logAppDisplayed(infoSnapshot));
-        }
+        final boolean isOpaque = info.mLastLaunchedActivity.mStyleFillsParent;
+        final long uptimeNs = info.mLaunchingState.mStartUptimeNs;
+        final int transitionDelay = info.mCurrentTransitionDelayMs;
+        final int processState = info.mProcessState;
+        final int processOomAdj = info.mProcessOomAdj;
+        mLoggerHandler.post(() -> {
+            if (info.isInterestingToLoggerAndObserver()) {
+                logAppTransition(uptimeNs, transitionDelay, infoSnapshot, isHibernating,
+                        processState, processOomAdj);
+            }
+            if (info.mIsInTaskActivityStart) {
+                logInTaskActivityStart(infoSnapshot, isOpaque, transitionDelay);
+            }
+            if (infoSnapshot.isInterestedToEventLog()) {
+                logAppDisplayed(infoSnapshot);
+            }
+        });
         if (info.mPendingFullyDrawn != null) {
             info.mPendingFullyDrawn.run();
         }
@@ -1158,6 +1168,22 @@ class ActivityMetricsLogger {
         return info != null && info.isLoading();
     }
 
+    @VisibleForTesting
+    void logInTaskActivityStart(TransitionInfoSnapshot info, boolean isOpaque,
+            int transitionDelayMs) {
+        if (DEBUG_METRICS) {
+            Slog.i(TAG, "IN_TASK_ACTIVITY_STARTED " + info.launchedActivityName
+                    + " transitionDelayMs=" + transitionDelayMs + "ms");
+        }
+        FrameworkStatsLog.write(FrameworkStatsLog.IN_TASK_ACTIVITY_STARTED,
+                info.applicationInfo.uid,
+                getAppStartTransitionType(info.type, info.relaunched),
+                isOpaque,
+                transitionDelayMs,
+                info.windowsDrawnDelayMs,
+                TimeUnit.NANOSECONDS.toMillis(info.timestampNs));
+    }
+
     private void logAppDisplayed(TransitionInfoSnapshot info) {
         EventLog.writeEvent(WM_ACTIVITY_LAUNCH_TIME,
                 info.userId, info.activityRecordIdHashCode, info.launchedActivityShortComponentName,
@@ -1228,7 +1254,7 @@ class ActivityMetricsLogger {
                         currentTimestampNs - info.mLaunchingState.mStartUptimeNs);
         final TransitionInfoSnapshot infoSnapshot =
                 new TransitionInfoSnapshot(info, r, (int) startupTimeMs);
-        if (infoSnapshot.isIntresetedToEventLog()) {
+        if (infoSnapshot.isInterestedToEventLog()) {
             mLoggerHandler.post(() -> logAppFullyDrawn(infoSnapshot));
         }
         mLastTransitionInfo.remove(r);

@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD အသံ- <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD အသံ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"နားကြားကိရိယာ"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
+    <!-- no translation found for bluetooth_profile_le_audio (1725521360076451751) -->
     <skip />
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"နားကြားကိရိယာနှင့် ချိတ်ဆက်ပြီးပါပြီ"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE အသံနှင့် ချိတ်ဆက်ထားသည်"</string>
@@ -216,6 +216,8 @@
     <string name="choose_profile" msgid="343803890897657450">"ပရိုဖိုင်ကို ရွေးရန်"</string>
     <string name="category_personal" msgid="6236798763159385225">"ကိုယ်ရေး"</string>
     <string name="category_work" msgid="4014193632325996115">"အလုပ်"</string>
+    <!-- no translation found for category_clone (1554511758987195974) -->
+    <skip />
     <string name="development_settings_title" msgid="140296922921597393">"ဆော့ဝဲလ်ရေးသူ ရွေးစရာများ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ဆော့ဖ်ဝဲရေးသူအတွက် ရွေးစရာများကို ဖွင့်ပါ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"အပလီကေးရှင်းတိုးတက်မှုအတွက် ရွေးချယ်မှုကိုသတ်မှတ်သည်"</string>
@@ -672,7 +674,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"မူရင်း"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ဖန်သားပြင် ဖွင့်ခြင်း"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ဖန်သားပြင် ဖွင့်ခွင့်ပြုရန်"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"အက်ပ်ကို ဖန်သားပြင် ဖွင့်ခွင့်ပြုနိုင်သည်။ ခွင့်ပြုထားပါက အက်ပ်သည် သင့်ထံမှ တိကျသောရည်ရွယ်ချက်မလိုဘဲ ဖန်သားပြင်ကို အချိန်မရွေး ဖွင့်နိုင်မည်။"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"အက်ပ်ကို ဖန်သားပြင် ဖွင့်ခွင့်ပြုနိုင်သည်။ ခွင့်ပြုထားပါက သင်က တစ်စုံတစ်ခု လုပ်ဆောင်ရန် မရည်ရွယ်သော်လည်း အက်ပ်သည် ဖန်သားပြင်ကို အချိန်မရွေး ဖွင့်နိုင်မည်။"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ထုတ်လွှင့်ခြင်းကို ရပ်မလား။"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ကို ထုတ်လွှင့်သောအခါ (သို့) အထွက်ကို ပြောင်းသောအခါ သင့်လက်ရှိထုတ်လွှင့်ခြင်း ရပ်သွားမည်"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ထုတ်လွှင့်ခြင်း"</string>

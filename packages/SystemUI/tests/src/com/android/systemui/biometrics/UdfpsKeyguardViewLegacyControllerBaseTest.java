@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -100,6 +101,8 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
         when(mResourceContext.getString(anyInt())).thenReturn("test string");
         when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
         when(mView.getUnpausedAlpha()).thenReturn(255);
+        when(mShadeExpansionStateManager.addExpansionListener(any())).thenReturn(
+                new ShadeExpansionChangeEvent(0, false, false, 0));
         mController = createUdfpsKeyguardViewController();
     }
 

@@ -51,6 +51,7 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
@@ -217,7 +218,7 @@ public class PreferencesHelper implements RankingConfig {
         updateBadgingEnabled();
         updateBubblesEnabled();
         updateMediaNotificationFilteringEnabled();
-        syncChannelsBypassingDnd();
+        syncChannelsBypassingDnd(Process.SYSTEM_UID, true);  // init comes from system
     }
 
     public void readXml(TypedXmlPullParser parser, boolean forRestore, int userId)
@@ -834,7 +835,7 @@ public class PreferencesHelper implements RankingConfig {
 
     @Override
     public void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
-            boolean fromTargetApp) {
+            boolean fromTargetApp, int callingUid, boolean fromSystemOrSystemUi) {
         Objects.requireNonNull(pkg);
         Objects.requireNonNull(group);
         Objects.requireNonNull(group.getId());
@@ -880,13 +881,14 @@ public class PreferencesHelper implements RankingConfig {
             r.groups.put(group.getId(), group);
         }
         if (needsDndChange) {
-            updateChannelsBypassingDnd();
+            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
     }
 
     @Override
     public boolean createNotificationChannel(String pkg, int uid, NotificationChannel channel,
-            boolean fromTargetApp, boolean hasDndAccess) {
+            boolean fromTargetApp, boolean hasDndAccess, int callingUid,
+            boolean fromSystemOrSystemUi) {
         Objects.requireNonNull(pkg);
         Objects.requireNonNull(channel);
         Objects.requireNonNull(channel.getId());
@@ -1027,7 +1029,7 @@ public class PreferencesHelper implements RankingConfig {
         }
 
         if (needsDndChange) {
-            updateChannelsBypassingDnd();
+            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
 
         return needsPolicyFileChange;
@@ -1056,7 +1058,7 @@ public class PreferencesHelper implements RankingConfig {
 
     @Override
     public void updateNotificationChannel(String pkg, int uid, NotificationChannel updatedChannel,
-            boolean fromUser) {
+            boolean fromUser, int callingUid, boolean fromSystemOrSystemUi) {
         Objects.requireNonNull(updatedChannel);
         Objects.requireNonNull(updatedChannel.getId());
         boolean changed = false;
@@ -1112,7 +1114,7 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         if (needsDndChange) {
-            updateChannelsBypassingDnd();
+            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
         if (changed) {
             updateConfig();
@@ -1188,7 +1190,8 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     @Override
-    public boolean deleteNotificationChannel(String pkg, int uid, String channelId) {
+    public boolean deleteNotificationChannel(String pkg, int uid, String channelId,
+            int callingUid, boolean fromSystemOrSystemUi) {
         boolean deletedChannel = false;
         boolean channelBypassedDnd = false;
         synchronized (mPackagePreferences) {
@@ -1203,7 +1206,7 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         if (channelBypassedDnd) {
-            updateChannelsBypassingDnd();
+            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
         return deletedChannel;
     }
@@ -1394,7 +1397,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public List<NotificationChannel> deleteNotificationChannelGroup(String pkg, int uid,
-            String groupId) {
+            String groupId, int callingUid, boolean fromSystemOrSystemUi) {
         List<NotificationChannel> deletedChannels = new ArrayList<>();
         boolean groupBypassedDnd = false;
         synchronized (mPackagePreferences) {
@@ -1420,7 +1423,7 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         if (groupBypassedDnd) {
-            updateChannelsBypassingDnd();
+            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
         return deletedChannels;
     }
@@ -1543,7 +1546,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public @NonNull List<String> deleteConversations(String pkg, int uid,
-            Set<String> conversationIds) {
+            Set<String> conversationIds, int callingUid, boolean fromSystemOrSystemUi) {
         List<String> deletedChannelIds = new ArrayList<>();
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
@@ -1568,7 +1571,7 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         if (!deletedChannelIds.isEmpty() && mAreChannelsBypassingDnd) {
-            updateChannelsBypassingDnd();
+            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
         return deletedChannelIds;
     }
@@ -1673,18 +1676,18 @@ public class PreferencesHelper implements RankingConfig {
      * Syncs {@link #mAreChannelsBypassingDnd} with the current user's notification policy before
      * updating
      */
-    private void syncChannelsBypassingDnd() {
+    private void syncChannelsBypassingDnd(int callingUid, boolean fromSystemOrSystemUi) {
         mAreChannelsBypassingDnd = (mZenModeHelper.getNotificationPolicy().state
                 & NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND) == 1;
 
-        updateChannelsBypassingDnd();
+        updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
     }
 
     /**
      * Updates the user's NotificationPolicy based on whether the current userId
      * has channels bypassing DND
      */
-    private void updateChannelsBypassingDnd() {
+    private void updateChannelsBypassingDnd(int callingUid, boolean fromSystemOrSystemUi) {
         ArraySet<Pair<String, Integer>> candidatePkgs = new ArraySet<>();
 
         final int currentUserId = getCurrentUser();
@@ -1714,7 +1717,7 @@ public class PreferencesHelper implements RankingConfig {
         boolean haveBypassingApps = candidatePkgs.size() > 0;
         if (mAreChannelsBypassingDnd != haveBypassingApps) {
             mAreChannelsBypassingDnd = haveBypassingApps;
-            updateZenPolicy(mAreChannelsBypassingDnd);
+            updateZenPolicy(mAreChannelsBypassingDnd, callingUid, fromSystemOrSystemUi);
         }
     }
 
@@ -1739,14 +1742,15 @@ public class PreferencesHelper implements RankingConfig {
         return true;
     }
 
-    public void updateZenPolicy(boolean areChannelsBypassingDnd) {
+    public void updateZenPolicy(boolean areChannelsBypassingDnd, int callingUid,
+            boolean fromSystemOrSystemUi) {
         NotificationManager.Policy policy = mZenModeHelper.getNotificationPolicy();
         mZenModeHelper.setNotificationPolicy(new NotificationManager.Policy(
                 policy.priorityCategories, policy.priorityCallSenders,
                 policy.priorityMessageSenders, policy.suppressedVisualEffects,
                 (areChannelsBypassingDnd ? NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND
                         : 0),
-                policy.priorityConversationSenders));
+                policy.priorityConversationSenders), callingUid, fromSystemOrSystemUi);
     }
 
     public boolean areChannelsBypassingDnd() {

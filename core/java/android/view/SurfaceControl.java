@@ -461,6 +461,7 @@ public final class SurfaceControl implements Parcelable {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
+    private String mCallsite;
 
      /**
      * Note: do not rename, this field is used by native code.
@@ -774,7 +775,6 @@ public final class SurfaceControl implements Parcelable {
             release();
         }
         if (nativeObject != 0) {
-            mCloseGuard.openWithCallSite("release", callsite);
             mFreeNativeResources =
                     sRegistry.registerNativeAllocation(this, nativeObject);
         }
@@ -785,6 +785,8 @@ public final class SurfaceControl implements Parcelable {
         } else {
             mReleaseStack = null;
         }
+        setUnreleasedWarningCallSite(callsite);
+        addToRegistry();
     }
 
     /**
@@ -1322,6 +1324,23 @@ public final class SurfaceControl implements Parcelable {
             return;
         }
         mCloseGuard.openWithCallSite("release", callsite);
+        mCallsite = callsite;
+    }
+
+    /**
+     * Returns the last provided call site when this SurfaceControl was created.
+     * @hide
+     */
+    @Nullable String getCallsite() {
+        return mCallsite;
+    }
+
+    /**
+     * Returns the name of this SurfaceControl, mainly for debugging purposes.
+     * @hide
+     */
+    @NonNull String getName() {
+        return mName;
     }
 
     /**
@@ -1435,6 +1454,7 @@ public final class SurfaceControl implements Parcelable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
+            removeFromRegistry();
         } finally {
             super.finalize();
         }
@@ -1465,6 +1485,7 @@ public final class SurfaceControl implements Parcelable {
                     mChoreographer = null;
                 }
             }
+            removeFromRegistry();
         }
     }
 
@@ -4302,6 +4323,26 @@ public final class SurfaceControl implements Parcelable {
         }
 
         return -1;
+    }
+
+    /**
+     * Adds this surface control to the registry for this process if it is created.
+     */
+    private void addToRegistry() {
+        final SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
+        if (registry != null) {
+            registry.add(this);
+        }
+    }
+
+    /**
+     * Removes this surface control from the registry for this process.
+     */
+    private void removeFromRegistry() {
+        final SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
+        if (registry != null) {
+            registry.remove(this);
+        }
     }
 
     // Called by native

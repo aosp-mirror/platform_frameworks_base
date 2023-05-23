@@ -460,7 +460,7 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Bu cihazda sertifikat səlahiyyəti quraşdırıldı. Təhlükəsiz şəbəkə ötürülməsinə nəzarət edilə və ya dəyişdirilə bilər."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Admin cihazda şəbəkə ötürülməsinə nəzarət edən şəbəkə qeydlərini aktiv etdi."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Admininiz şəxsi profilinizdəki deyil, iş profilinizdəki trafikə nəzarət edən şəbəkə qeydiyyatını aktiv edib."</string>
-    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Bu cihaz <xliff:g id="VPN_APP">%1$s</xliff:g> ilə internetə qoşulub. VPN provayderi e-məktub və baxış datası daxil olmaqla şəbəkə fəaliyyətini görür."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Bu cihaz <xliff:g id="VPN_APP">%1$s</xliff:g> ilə internetə qoşulub. VPN provayderi sizin e-məktub və baxış datanız daxil olmaqla şəbəkə fəaliyyətinizi görür."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Bu cihaz <xliff:g id="VPN_APP">%1$s</xliff:g> ilə internetə qoşulub. IT admini e-məktub və baxış datası daxil olmaqla şəbəkə fəaliyyətini görür."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Bu cihaz <xliff:g id="VPN_APP_0">%1$s</xliff:g> və <xliff:g id="VPN_APP_1">%2$s</xliff:g> vasitəsilə internetə qoşulub. E-məktublar və baxış datası daxil olmaqla, iş tətbiqlərindəki şəbəkə fəaliyyətiniz İT admininiz görünür."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"İş tətbiqləriniz <xliff:g id="VPN_APP">%1$s</xliff:g> vasitəsilə internetə qoşulub. E-məktublar və baxış datası daxil olmaqla, iş tətbiqlərindəki şəbəkə fəaliyyətiniz İT admininiz və VPN provayderinizə görünür."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktiv edin"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Səs və vibrasiya"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Ayarlar"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Təhlükəsiz səs səviyyəsinə azaldıldı"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Səs səviyyəsi tövsiyə ediləndən uzun müddət yüksək olub"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Səs təhlükəsiz səviyyəyə azaldıldı"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Qulaqlığın səsi tövsiyə ediləndən uzun müddət yüksək olub"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Bu həftə qulaqlığın səsi təhlükəsiz limiti keçib"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Dinləməyə davam edin"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Səsi azaldın"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Tətbiq bərkidilib"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri və İcmal düymələrinə basıb saxlayın."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"\"Geri\" və \"Əsas ekran\" düymələrinin davamlı basılması ilə çıxarılana qədər tətbiq göz önündə qalır."</string>
@@ -940,6 +943,8 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ayarlar"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> tərəfindən <xliff:g id="SONG_NAME">%1$s</xliff:g> <xliff:g id="APP_LABEL">%3$s</xliff:g> tətbiqindən oxudulur"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>/<xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
+    <skip />
     <string name="controls_media_button_play" msgid="2705068099607410633">"Oxudun"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Durdurun"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Əvvəlki trek"</string>
@@ -985,10 +990,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Dinamiklər &amp; Displeylər"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Təklif olunan Cihazlar"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Medianı başqa cihaza köçürmək üçün paylaşılan sessiyanı dayandırın"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Dayandırın"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Yayım necə işləyir"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Yayım"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Uyğun Bluetooth cihazları olan yaxınlığınızdakı insanlar yayımladığınız medianı dinləyə bilər"</string>
@@ -1141,10 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Qələmi adapterə qoşun"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Qələm enerjisi azdır"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Bu profildən zəng etmək mümkün deyil"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"İş siyasətiniz yalnız iş profilindən telefon zəngləri etməyə imkan verir"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Şəxsi tətbiqdən zəng etmək olmur"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Təşkilat yalnız iş tətbiqindən zəng etməyə icazə verir"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"İş profilinə keçin"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Bağlayın"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"İş üçün telefon tətbiqi quraşdırın"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Ləğv edin"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Kilid ekranını fərdiləşdirin"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Kilid ekranını fərdiləşdirmək üçün kiliddən çıxarın"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi əlçatan deyil"</string>

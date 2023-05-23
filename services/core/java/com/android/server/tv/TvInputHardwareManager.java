@@ -269,6 +269,10 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     @Override
     public void onTvMessage(int deviceId, int type, Bundle data) {
         synchronized (mLock) {
+            String inputId = mHardwareInputIdMap.get(deviceId);
+            if (inputId == null) {
+                return;
+            }
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = mHardwareInputIdMap.get(deviceId);
             args.arg2 = data;

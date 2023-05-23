@@ -67,7 +67,8 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
                         }
                     }
 
-                shadeExpansionStateManager.addExpansionListener(callback)
+                val currentState = shadeExpansionStateManager.addExpansionListener(callback)
+                callback.onPanelExpansionChanged(currentState)
                 trySendWithFailureLogging(ShadeModel(), TAG, "initial shade expansion info")
 
                 awaitClose { shadeExpansionStateManager.removeExpansionListener(callback) }

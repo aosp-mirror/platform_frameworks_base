@@ -50,6 +50,7 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -127,7 +128,7 @@ public class FontScaleConverterActivityTest {
         });
     }
 
-    private static void setSystemFontScale(float fontScale) {
+    private void setSystemFontScale(float fontScale) {
         ShellIdentityUtils.invokeWithShellPermissions(() -> {
             Settings.System.putFloat(
                     InstrumentationRegistry.getInstrumentation().getContext().getContentResolver(),
@@ -136,14 +137,22 @@ public class FontScaleConverterActivityTest {
             );
         });
 
-        PollingCheck.waitFor(/* timeout= */ 5000, () ->
-                InstrumentationRegistry
+        PollingCheck.waitFor(/* timeout= */ 5000, () -> {
+            AtomicBoolean isActivityAtCorrectScale = new AtomicBoolean(false);
+            rule.getScenario().onActivity(activity ->
+                    isActivityAtCorrectScale.set(
+                            activity.getResources()
+                                .getConfiguration()
+                                .fontScale == fontScale
+                    )
+            );
+            return isActivityAtCorrectScale.get() && InstrumentationRegistry
                     .getInstrumentation()
                     .getContext()
                     .getResources()
                     .getConfiguration()
-                    .fontScale == fontScale
-        );
+                    .fontScale == fontScale;
+        });
     }
 
     private static void restoreSystemFontScaleToDefault() {

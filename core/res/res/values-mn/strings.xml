@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Устгах"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Дууг санал болгосноос чанга болгож өсгөх үү?\n\nУрт хугацаанд чанга хөгжим сонсох нь таны сонсголыг муутгаж болно."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Сануулга,\nТа чихэвчээр долоо хоногийн турш аюулгүйгээр сонсож болох чанга дууны дохионы хэмжээг хэтрүүлсэн байна.\n\nЭнэ хязгаарыг давах нь таны сонсголыг бүрмөсөн гэмтээнэ."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Сануулга,\nТа чихэвчээр долоо хоногийн турш аюулгүйгээр сонсож болох чанга дууны дохионы хэмжээг 5 дахин хэтрүүлсэн байна.\n\nТаны сонсголыг хамгаалахын тулд дууны түвшнийг багасгасан."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Та удаан хугацааны туршид медиаг тасралтгүй энэ түвшинд сонссоор байвал сонсголыг гэмтээж болзошгүй.\n\nЭнэ түвшинд удаан хугацаанд үргэлжлүүлэн тоглуулах нь таны сонсголыг гэмтээж болно."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Сануулга,\nТа одоогоор аюултай түвшинд тоглуулж буй маш чанга контентыг сонсож байна.\n\nЭнэ чанга дууг үргэлжлүүлэн сонсох нь таны сонсголыг бүрмөсөн гэмтээнэ."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Өндөр дууны түвшинд сонссоор байх уу?\n\nЧихэвчийн дууны түвшин санал болгосноос удаан хугацааны турш өндөр байгаа бөгөөд таны сонсголыг гэмтээх боломжтой"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Чанга дуу чимээ илэрлээ\n\nЧихэвчийн дууны түвшин санал болгосноос өндөр байгаа нь таны сонсголыг гэмтээх боломжтой"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Хүртээмжийн товчлолыг ашиглах уу?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Товчлол асаалттай үед дууны түвшний хоёр товчлуурыг хамтад нь 3 секунд дарснаар хандалтын онцлогийг эхлүүлнэ."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Хандалтын онцлогуудын товчлолыг асаах уу?"</string>
@@ -2164,14 +2162,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Үргэлжлүүлэх"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ямар ч ажлын апп байхгүй байна"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ямар ч хувийн апп байхгүй байна"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Ажлын <xliff:g id="APP">%s</xliff:g>-г нээх үү?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Хувийн <xliff:g id="APP">%s</xliff:g>-д нээх үү?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Ажлын <xliff:g id="APP">%s</xliff:g>-д нээх үү?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Хувийн хөтөч ашиглах"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Ажлын хөтөч ашиглах"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Сүлжээний SIM-н түгжээг тайлах ПИН"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Сүлжээний дэд олонлогийн SIM-н түгжээг тайлах ПИН"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Байгууллагын SIM-н түгжээг тайлах ПИН"</string>

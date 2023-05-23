@@ -140,19 +140,19 @@ public class DropboxRateLimiterTest {
         // Repeated crashes after the last reset being rate limited should be restricted faster.
         assertTrue(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
 
-        // We now need to wait 61 minutes for the buffer should be empty again.
-        mClock.setOffsetMillis(83 * 60 * 1000);
+        // We now need to wait 21 minutes for the buffer should be empty again.
+        mClock.setOffsetMillis(43 * 60 * 1000);
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
 
-        // After yet another 61 minutes, this time without triggering rate limiting, the strict
+        // After yet another 21 minutes, this time without triggering rate limiting, the strict
         // limiting should be turnd off.
-        mClock.setOffsetMillis(144 * 60 * 1000);
+        mClock.setOffsetMillis(64 * 60 * 1000);
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
 
         // As rate limiting was not triggered in the last reset, after another 11 minutes the
         // buffer should still act as normal.
-        mClock.setOffsetMillis(155 * 60 * 1000);
+        mClock.setOffsetMillis(75 * 60 * 1000);
         // The first 6 entries should not be rate limited.
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());

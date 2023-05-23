@@ -166,21 +166,19 @@ open class UserTrackerImpl internal constructor(
             }
 
             override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
-                backgroundHandler.run {
-                    handleUserSwitching(newUserId)
-                    reply?.sendResult(null)
-                }
+                handleUserSwitching(newUserId)
+                reply?.sendResult(null)
             }
 
             override fun onUserSwitchComplete(newUserId: Int) {
-                backgroundHandler.run {
-                    handleUserSwitchComplete(newUserId)
-                }
+                handleUserSwitchComplete(newUserId)
             }
         }, TAG)
     }
 
+    @WorkerThread
     protected open fun handleBeforeUserSwitching(newUserId: Int) {
+        Assert.isNotMainThread()
         setUserIdInternal(newUserId)
     }
 

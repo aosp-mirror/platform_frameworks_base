@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Alisin"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Babala,\nLumagpas ka na sa dami ng malalakas na signal ng tunog na ligtas na mapapakinggan ng isang tao sa isang linggo gamit ang headphones.\n\nPermanenteng makakapinsala sa iyong pandinig ang paglagpas sa limitasyong ito."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Babala,\nLumagpas ka na sa 5 beses ng dami ng malalakas na signal ng tunog na ligtas na mapapakinggan ng isang tao sa isang linggo gamit ang headphones.\n\nHininaan ang volume para protektahan ang iyong pandinig."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Puwedeng magresulta sa pinsala sa pandinig ang level ng pakikinig mo sa media kapag nagtagal pa ito nang mahabang panahon.\n\nPosibleng makapinsala sa iyong pandinig ang patuloy na pagpe-play sa level na ito sa loob ng mahabang panahon."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Babala,\nKasalukuyan kang nakikinig sa malakas na content na pine-play sa hindi ligtas na level.\n\nPosibleng permanenteng makapinsala sa iyong pandinig ang patuloy na pakikinig nang ganito kalakas."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Magpatuloy sa pakikinig nang may malakas na volume?\n\nNaging malakas ang volume nang mas matagal na sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Naka-detect ng malakas na tunog\n\nMas malakas ang volume kaysa sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Accessibility?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"I-on ang shortcut para sa mga feature ng pagiging naa-access?"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"I-unpause"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Walang app para sa trabaho"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Walang personal na app"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Buksan ang <xliff:g id="APP">%s</xliff:g> na para sa trabaho?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Buksan sa personal na <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Buksan sa <xliff:g id="APP">%s</xliff:g> na para sa trabaho?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Tumawag mula sa app para sa trabaho?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Lumipat sa app para sa trabaho?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Pinapayagan ka lang ng iyong organisasyon na tumawag mula sa mga app para sa trabaho"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Pinapayagan ka lang ng iyong organisasyon na magpadala ng mga mensahe mula sa mga app para sa trabaho"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gamitin ang personal na browser"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gamitin ang browser sa trabaho"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Tumawag"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Lumipat"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para sa pag-unlock ng network ng SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN para sa pag-unlock ng subset ng network ng SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN para sa pangkumpanyang pag-unlock ng SIM"</string>

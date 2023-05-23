@@ -637,7 +637,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Zbyt jasno"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Wykryto naciśnięcie przycisku zasilania"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Popraw"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Za każdym razem lekko zmieniaj ułożenie palca"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Za każdym razem lekko zmieniaj ułożenie palca"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Nie rozpoznano odcisku palca"</string>
@@ -1398,7 +1398,7 @@
     <string name="hardware" msgid="1800597768237606953">"Pokaż klawiaturę wirtualną"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Skonfiguruj urządzenie <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Skonfiguruj klawiatury fizyczne"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Kliknij, by wybrać język i układ"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Kliknij, aby wybrać język i układ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Wyświetlanie nad innymi aplikacjami"</string>
@@ -1684,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Usuń"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zwiększyć głośność ponad zalecany poziom?\n\nSłuchanie głośno przez długi czas może uszkodzić Twój słuch."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Ostrzeżenie\nLimit głośnych dźwięków, jakich przez tydzień możesz bezpiecznie słuchać przez słuchawki, został przekroczony.\n\nPrzekroczenie limitu spowoduje trwałe uszkodzenie słuchu."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Ostrzeżenie\nLimit głośnych dźwięków, jakich przez tydzień możesz bezpiecznie słuchać przez słuchawki, został 5-krotnie przekroczony.\n\nGłośność została zmniejszona, aby chronić Twój słuch."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Poziom głośności, na jakim słuchasz multimediów, może spowodować uszkodzenie słuchu, jeśli będzie się utrzymywał przez dłuższy czas.\n\nDalsze odtwarzanie na tym poziomie głośności przez dłuższy czas może uszkodzić Twój słuch."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Ostrzeżenie\nSłuchasz obecnie treści odtwarzanych na niebezpiecznym poziomie głośności.\n\nDalsze słuchanie przy takiej głośności trwale uszkodzi Twój słuch."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Słuchać dalej z wysokim poziomem głośności?\n\nGłośność na słuchawkach jest zbyt duża przez czas dłuższy niż zalecany, co może doprowadzić do uszkodzenia słuchu"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Wykryto głośny dźwięk\n\nGłośność na słuchawkach przekracza zalecane wartości, co może doprowadzić do uszkodzenia słuchu"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Użyć skrótu ułatwień dostępu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Gdy skrót jest włączony, jednoczesne naciskanie przez trzy sekundy obu przycisków głośności uruchamia funkcję ułatwień dostępu."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Włączyć skrót ułatwień dostępu?"</string>
@@ -2166,14 +2164,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Cofnij wstrzymanie"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Brak aplikacji służbowych"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Brak aplikacji osobistych"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Otworzyć aplikację służbową <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Otworzyć w osobistej aplikacji <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Otworzyć w służbowej aplikacji <xliff:g id="APP">%s</xliff:g>?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Użyj przeglądarki osobistej"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Użyj przeglądarki służbowej"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kod PIN do karty SIM odblokowujący sieć"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Kod PIN odblokowujący podzbiór sieci na karcie SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Kod PIN odblokowujący dane korporacyjne na karcie SIM"</string>

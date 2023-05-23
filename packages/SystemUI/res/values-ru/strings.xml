@@ -460,7 +460,7 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На устройстве установлен сертификат ЦС. Ваш защищенный сетевой трафик могут отслеживать и изменять."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик на вашем устройстве."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик в вашем рабочем профиле (информация из личного профиля не собирается)."</string>
-    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Это устройство подключено к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны поставщику услуг VPN."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Это устройство подключено к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши действия в сети, включая электронные письма и контент в браузере, видны поставщику услуг VPN."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Это устройство подключено к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны вашему системному администратору."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Это устройство подключено к интернету через сервисы \"<xliff:g id="VPN_APP_0">%1$s</xliff:g>\" и \"<xliff:g id="VPN_APP_1">%2$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны вашему системному администратору."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Рабочие приложения подключены к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши сетевые действия в этих приложениях, включая данные о работе с электронной почтой и в браузере, видны вашему системному администратору и поставщику услуг VPN."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"отключить"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Звук и вибрация"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Открыть настройки"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Громкость уменьшена до безопасного уровня"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Громкость была высокой дольше рекомендованного периода."</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Громкость уменьшена до безопасного уровня"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Вы используете наушники при высоком уровне громкости дольше, чем рекомендуется."</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Превышен безопасный лимит громкости наушников на этой неделе."</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Слушать дальше"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Убавить звук"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Приложение закреплено"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопки \"Назад\" и \"Обзор\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопки \"Назад\" и \"Главный экран\"."</string>
@@ -940,6 +943,8 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Настройки"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Воспроизводится медиафайл \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" (исполнитель: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) из приложения \"<xliff:g id="APP_LABEL">%3$s</xliff:g>\"."</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> из <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
+    <skip />
     <string name="controls_media_button_play" msgid="2705068099607410633">"Воспроизвести"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Приостановить"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Предыдущий трек"</string>
@@ -985,10 +990,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Колонки и дисплеи"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Рекомендуемые устройства"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Чтобы перенести медиафайлы на другое устройство, закройте доступ."</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Закрыть"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Как работают трансляции"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляция"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Находящиеся рядом с вами люди с совместимыми устройствами Bluetooth могут слушать медиафайлы, которые вы транслируете."</string>
@@ -1141,10 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Поставьте стилус на зарядку."</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Низкий заряд батареи стилуса"</string>
     <string name="video_camera" msgid="7654002575156149298">"Видеокамера"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Невозможно совершить звонок из этого профиля"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Согласно правилам вашей организации вы можете совершать телефонные звонки только из рабочего профиля."</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Нельзя звонить из личного приложения"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"В вашей организации разрешено звонить только из рабочих приложений."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Перейти в рабочий профиль"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Закрыть"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Установить рабочее приложение для звонков"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Отмена"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Настройки заблок. экрана"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Разблокируйте устройство, чтобы настроить заблокированный экран"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Функция Wi-Fi недоступна"</string>

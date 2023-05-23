@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Kendu"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bolumena gomendatutako mailatik gora igo nahi duzu?\n\nMusika bolumen handian eta denbora luzez entzuteak entzumena kalte diezazuke."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Abisua:\nEntzungailuen bidez astebetean segurtasun osoz entzun daitekeen soinu ozenen kopurua gainditu duzu.\n\nSoinu ozen gehiago entzuten jarraituz gero, entzumena kaltetuko duzu."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Abisua:\nEntzungailuen bidez astebetean segurtasun osoz entzun daitekeen soinu ozenen kopurua bost aldiz gainditu duzu.\n\nEntzumena babesteko, bolumena jaitsi da."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Multimedia-edukia entzuteko bolumena denbora luzez erabiliz gero, baliteke entzumena kaltetzea.\n\nMultimedia-edukia denbora luzez bolumen horretan entzuten jarraitzen baduzu, baliteke entzumena kaltetzea."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Abisua:\nSegurua ez den maila batean entzuten ari zara eduki ozena.\n\nEdukia bolumen horretan entzuten jarraitzen baduzu, baliteke entzumena kaltetzea."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Bolumen altuan entzuten jarraitu nahi duzu?\n\nEntzungailuen bolumena gomendatutako denboran baino gehiagoan eduki da ozen, eta baliteke horrek entzumena kaltetzea"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Soinu ozen bat hauteman da\n\nEntzungailuen bolumena gomendatutakoa baino ozenago eduki da, eta baliteke horrek entzumena kaltetzea"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erabilerraztasun-lasterbidea erabili nahi duzu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Lasterbidea aktibatuta dagoenean, bi bolumen-botoiak hiru segundoz sakatuta abiaraziko da erabilerraztasun-eginbidea."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Erabilerraztasun-eginbideetarako lasterbidea aktibatu nahi duzu?"</string>
@@ -2164,14 +2162,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Berraktibatu"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ez dago laneko aplikaziorik"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ez dago aplikazio pertsonalik"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Laneko <xliff:g id="APP">%s</xliff:g> aplikazioan ireki nahi duzu?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"<xliff:g id="APP">%s</xliff:g> pertsonalean ireki nahi duzu?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Laneko <xliff:g id="APP">%s</xliff:g> aplikazioan ireki nahi duzu?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Erabili arakatzaile pertsonala"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Erabili laneko arakatzailea"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIMaren sarearen bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIMaren sareko azpimultzoaren bidez desblokeatzeko PINa"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Enpresaren SIMaren bidez desblokeatzeko PINa"</string>
@@ -2331,9 +2338,9 @@
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Joan Ezarpenak atalera"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desaktibatu"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Konfiguratu da <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
-    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Ezarri da <xliff:g id="LAYOUT_1">%s</xliff:g> gisa teklatuaren diseinua. Diseinu hori aldatzeko, sakatu hau."</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Ezarri da <xliff:g id="LAYOUT_1">%1$s</xliff:g> eta <xliff:g id="LAYOUT_2">%2$s</xliff:g> gisa teklatuaren diseinua. Diseinu hori aldatzeko, sakatu hau."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Ezarri da <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> eta <xliff:g id="LAYOUT_3">%3$s</xliff:g> gisa teklatuaren diseinua. Diseinu hori aldatzeko, sakatu hau."</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Ezarri da <xliff:g id="LAYOUT_1">%s</xliff:g>. Diseinu hori aldatzeko, sakatu hau."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Ezarri dira <xliff:g id="LAYOUT_1">%1$s</xliff:g> eta <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Diseinu horiek aldatzeko, sakatu hau."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Ezarri dira <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> eta <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Diseinu horiek aldatzeko, sakatu hau."</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Ezarri da <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> eta <xliff:g id="LAYOUT_3">%3$s</xliff:g> gisa teklatuaren diseinua… Diseinu hori aldatzeko, sakatu hau."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Konfiguratu dira teklatu fisikoak"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Sakatu hau teklatuak ikusteko"</string>

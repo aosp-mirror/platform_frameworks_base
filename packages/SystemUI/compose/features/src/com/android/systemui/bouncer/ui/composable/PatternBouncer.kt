@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.ui.composable
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -32,14 +33,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.android.internal.R
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
 import kotlin.math.min
@@ -82,17 +84,26 @@ internal fun PatternBouncer(
     val selectedDots: List<PatternDotViewModel> by viewModel.selectedDots.collectAsState()
 
     // Map of animatables for the scale of each dot, keyed by dot.
-    val scales = remember(dots) { dots.associateWith { Animatable(1f) } }
+    val dotScalingAnimatables = remember(dots) { dots.associateWith { Animatable(1f) } }
     // Map of animatables for the lines that connect between selected dots, keyed by the destination
     // dot of the line.
-    val lines = remember(dots) { dots.associateWith { Animatable(1f) } }
+    val lineFadeOutAnimatables = remember(dots) { dots.associateWith { Animatable(1f) } }
+    val lineFadeOutAnimationDurationMs =
+        integerResource(R.integer.lock_pattern_line_fade_out_duration)
+    val lineFadeOutAnimationDelayMs = integerResource(R.integer.lock_pattern_line_fade_out_delay)
 
     val scope = rememberCoroutineScope()
+    val view = LocalView.current
 
     // When the current dot is changed, we need to update our animations.
     LaunchedEffect(currentDot) {
+        view.performHapticFeedback(
+            HapticFeedbackConstants.VIRTUAL_KEY,
+            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
+        )
+
         // Make sure that the current dot is scaled up while the other dots are scaled back down.
-        scales.entries.forEach { (dot, animatable) ->
+        dotScalingAnimatables.entries.forEach { (dot, animatable) ->
             val isSelected = dot == currentDot
             launch {
                 animatable.animateTo(if (isSelected) 2f else 1f)
@@ -102,15 +113,26 @@ internal fun PatternBouncer(
             }
         }
 
-        // Make sure that all dot-connecting lines are decaying, if they're not already animating.
-        selectedDots.forEach {
-            lines[it]?.let { line ->
+        selectedDots.forEach { dot ->
+            lineFadeOutAnimatables[dot]?.let { line ->
                 if (!line.isRunning) {
                     scope.launch {
-                        line.animateTo(
-                            targetValue = 0f,
-                            animationSpec = tween(durationMillis = 500),
-                        )
+                        if (dot == currentDot) {
+                            // Reset the fade-out animation for the current dot. When the current
+                            // dot is switched, this entire code block runs again for the newly
+                            // selected dot.
+                            line.snapTo(1f)
+                        } else {
+                            // For all non-current dots, make sure that the lines are fading out.
+                            line.animateTo(
+                                targetValue = 0f,
+                                animationSpec =
+                                    tween(
+                                        durationMillis = lineFadeOutAnimationDurationMs,
+                                        delayMillis = lineFadeOutAnimationDelayMs,
+                                    ),
+                            )
+                        }
                     }
                 }
             }
@@ -134,7 +156,7 @@ internal fun PatternBouncer(
                     },
                     onDragEnd = {
                         inputPosition = null
-                        lines.values.forEach { animatable ->
+                        lineFadeOutAnimatables.values.forEach { animatable ->
                             scope.launch { animatable.animateTo(1f) }
                         }
                         viewModel.onDragEnd()
@@ -154,14 +176,22 @@ internal fun PatternBouncer(
         selectedDots.forEachIndexed { index, dot ->
             if (index > 0) {
                 val previousDot = selectedDots[index - 1]
+                val lineFadeOutAnimationProgress = lineFadeOutAnimatables[previousDot]!!.value
+                val startLerp = 1 - lineFadeOutAnimationProgress
+                val from = pixelOffset(previousDot, spacing, verticalOffset)
+                val to = pixelOffset(dot, spacing, verticalOffset)
+                val lerpedFrom =
+                    Offset(
+                        x = from.x + (to.x - from.x) * startLerp,
+                        y = from.y + (to.y - from.y) * startLerp,
+                    )
                 drawLine(
-                    from = previousDot,
-                    to = dot,
-                    alpha = { distance -> lineAlpha(spacing, distance) },
-                    spacing = spacing,
-                    verticalOffset = verticalOffset,
-                    lineColor = lineColor,
-                    lineStrokeWidth = lineStrokeWidth,
+                    start = lerpedFrom,
+                    end = to,
+                    cap = StrokeCap.Round,
+                    alpha = lineFadeOutAnimationProgress * lineAlpha(spacing),
+                    color = lineColor,
+                    strokeWidth = lineStrokeWidth,
                 )
             }
         }
@@ -169,93 +199,31 @@ internal fun PatternBouncer(
         // Draw the line between the most recently-selected dot and the input pointer position.
         inputPosition?.let { lineEnd ->
             currentDot?.let { dot ->
+                val from = pixelOffset(dot, spacing, verticalOffset)
+                val lineLength = sqrt((from.y - lineEnd.y).pow(2) + (from.x - lineEnd.x).pow(2))
                 drawLine(
-                    from = dot,
-                    to = lineEnd,
-                    alpha = { distance -> lineAlpha(spacing, distance) },
-                    spacing = spacing,
-                    verticalOffset = verticalOffset,
-                    lineColor = lineColor,
-                    lineStrokeWidth = lineStrokeWidth,
+                    start = from,
+                    end = lineEnd,
+                    cap = StrokeCap.Round,
+                    alpha = lineAlpha(spacing, lineLength),
+                    color = lineColor,
+                    strokeWidth = lineStrokeWidth,
                 )
             }
         }
 
         // Draw each dot on the grid.
         dots.forEach { dot ->
-            drawDot(
-                dot = dot,
-                scaleFactor = { scales[dot]?.value ?: 1f },
-                spacing = spacing,
-                verticalOffset = verticalOffset,
-                dotColor = dotColor,
-                dotRadius = dotRadius,
+            drawCircle(
+                center = pixelOffset(dot, spacing, verticalOffset),
+                color = dotColor,
+                radius = dotRadius * (dotScalingAnimatables[dot]?.value ?: 1f),
             )
         }
     }
 }
 
-/** Draws the given [dot]. */
-private fun DrawScope.drawDot(
-    dot: PatternDotViewModel,
-    scaleFactor: () -> Float,
-    spacing: Float,
-    verticalOffset: Float,
-    dotColor: Color,
-    dotRadius: Float,
-) {
-    drawCircle(
-        color = dotColor,
-        radius = dotRadius * scaleFactor.invoke(),
-        center = pixelOffset(dot, spacing, verticalOffset),
-    )
-}
-
-/** Draws a line from the [from] origin dot to the [to] destination dot. */
-private fun DrawScope.drawLine(
-    from: PatternDotViewModel,
-    to: PatternDotViewModel,
-    alpha: (distance: Float) -> Float,
-    spacing: Float,
-    verticalOffset: Float,
-    lineColor: Color,
-    lineStrokeWidth: Float,
-) {
-    drawLine(
-        from = from,
-        to = pixelOffset(to, spacing, verticalOffset),
-        alpha = alpha,
-        spacing = spacing,
-        verticalOffset = verticalOffset,
-        lineColor = lineColor,
-        lineStrokeWidth = lineStrokeWidth,
-    )
-}
-
-/** Draws a line from the [from] origin dot to the [to] destination. */
-private fun DrawScope.drawLine(
-    from: PatternDotViewModel,
-    to: Offset,
-    alpha: (distance: Float) -> Float,
-    spacing: Float,
-    verticalOffset: Float,
-    lineColor: Color,
-    lineStrokeWidth: Float,
-) {
-    val fromAsOffset = pixelOffset(from, spacing, verticalOffset)
-    val distance = sqrt((to.y - fromAsOffset.y).pow(2) + (to.x - fromAsOffset.x).pow(2))
-
-    drawLine(
-        color = lineColor,
-        start = fromAsOffset,
-        end = to,
-        strokeWidth = lineStrokeWidth,
-        cap = StrokeCap.Round,
-        alpha = alpha.invoke(distance),
-    )
-}
-
-/** Returns an [Offset] representation of the given [dot] in pixel coordinates. */
+/** Returns an [Offset] representation of the given [dot], in pixel coordinates. */
 private fun pixelOffset(
     dot: PatternDotViewModel,
     spacing: Float,
@@ -268,14 +236,14 @@ private fun pixelOffset(
 }
 
 /**
- * Returns the alpha for a line between dots where dots are [spacing] apart from each other on the
- * dot grid and the line ends [distance] away from the origin dot.
+ * Returns the alpha for a line between dots where dots are normally [gridSpacing] apart from each
+ * other on the dot grid and the line ends [lineLength] away from the origin dot.
  *
- * The reason [distance] can be different from [spacing] is that all lines originate in dots but one
- * line might end where the user input pointer is, which isn't always a dot position.
+ * The reason [lineLength] can be different from [gridSpacing] is that all lines originate in dots
+ * but one line might end where the user input pointer is, which isn't always a dot position.
  */
-private fun lineAlpha(spacing: Float, distance: Float): Float {
+private fun lineAlpha(gridSpacing: Float, lineLength: Float = gridSpacing): Float {
     // Custom curve for the alpha of a line as a function of its distance from its source dot. The
     // farther the user input pointer goes from the line, the more opaque the line gets.
-    return ((distance / spacing - 0.3f) * 4f).coerceIn(0f, 1f)
+    return ((lineLength / gridSpacing - 0.3f) * 4f).coerceIn(0f, 1f)
 }

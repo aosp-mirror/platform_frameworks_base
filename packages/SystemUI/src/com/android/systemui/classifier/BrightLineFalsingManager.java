@@ -232,8 +232,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
         // check for false tap if it is a seekbar interaction
         if (interactionType == MEDIA_SEEKBAR) {
-            localResult[0] &= isFalseTap(mFeatureFlags.isEnabled(Flags.MEDIA_FALSING_PENALTY)
-                    ? FalsingManager.MODERATE_PENALTY : FalsingManager.LOW_PENALTY);
+            localResult[0] &= isFalseTap(FalsingManager.MODERATE_PENALTY);
         }
 
         logDebug("False Gesture (type: " + interactionType + "): " + localResult[0]);

@@ -220,6 +220,11 @@ public class DisplayManagerServiceTest {
             return new int[]{};
         }
 
+        @Override
+        int[] getHdrOutputTypesWithLatency() {
+            return new int[]{Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION};
+        }
+
         boolean getHdrOutputConversionSupport() {
             return true;
         }
@@ -1860,6 +1865,44 @@ public class DisplayManagerServiceTest {
         assertEquals(mode, displayManager.getHdrConversionModeSettingInternal());
         assertEquals(mode.getConversionMode(), mHdrConversionMode);
         assertEquals(mode.getPreferredHdrOutputType(), mPreferredHdrOutputType);
+    }
+
+    @Test
+    public void testHdrConversionMode_withMinimalPostProcessing() {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager,
+                new float[]{60f, 30f, 20f});
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+
+        final HdrConversionMode mode = new HdrConversionMode(
+                HdrConversionMode.HDR_CONVERSION_FORCE,
+                Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION);
+        displayManager.setHdrConversionModeInternal(mode);
+        assertEquals(mode, displayManager.getHdrConversionModeSettingInternal());
+
+        displayManager.setMinimalPostProcessingAllowed(true);
+        displayManager.setDisplayPropertiesInternal(displayId, false /* hasContent */,
+                30.0f /* requestedRefreshRate */,
+                displayDevice.getDisplayDeviceInfoLocked().modeId /* requestedModeId */,
+                30.0f /* requestedMinRefreshRate */, 120.0f /* requestedMaxRefreshRate */,
+                true /* preferMinimalPostProcessing */, false /* disableHdrConversion */,
+                true /* inTraversal */);
+
+        assertEquals(new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_PASSTHROUGH),
+                displayManager.getHdrConversionModeInternal());
+
+        displayManager.setDisplayPropertiesInternal(displayId, false /* hasContent */,
+                30.0f /* requestedRefreshRate */,
+                displayDevice.getDisplayDeviceInfoLocked().modeId /* requestedModeId */,
+                30.0f /* requestedMinRefreshRate */, 120.0f /* requestedMaxRefreshRate */,
+                false /* preferMinimalPostProcessing */, false /* disableHdrConversion */,
+                true /* inTraversal */);
+        assertEquals(mode, displayManager.getHdrConversionModeInternal());
     }
 
     private void testDisplayInfoFrameRateOverrideModeCompat(boolean compatChangeEnabled)

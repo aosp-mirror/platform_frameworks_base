@@ -157,11 +157,20 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     private String getDeviceString(CachedBluetoothDevice device) {
         return device.getName()
+                + " profiles=" + getDeviceProfilesString(device)
                 + " connected=" + device.isConnected()
                 + " active[A2DP]=" + device.isActiveDevice(BluetoothProfile.A2DP)
                 + " active[HEADSET]=" + device.isActiveDevice(BluetoothProfile.HEADSET)
                 + " active[HEARING_AID]=" + device.isActiveDevice(BluetoothProfile.HEARING_AID)
                 + " active[LE_AUDIO]=" + device.isActiveDevice(BluetoothProfile.LE_AUDIO);
+    }
+
+    private String getDeviceProfilesString(CachedBluetoothDevice device) {
+        List<String> profileIds = new ArrayList<>();
+        for (LocalBluetoothProfile profile : device.getProfiles()) {
+            profileIds.add(String.valueOf(profile.getProfileId()));
+        }
+        return "[" + String.join(",", profileIds) + "]";
     }
 
     @Override
@@ -296,7 +305,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         for (CachedBluetoothDevice device : getDevices()) {
             isActive |= device.isActiveDevice(BluetoothProfile.HEADSET)
                     || device.isActiveDevice(BluetoothProfile.A2DP)
-                    || device.isActiveDevice(BluetoothProfile.HEARING_AID);
+                    || device.isActiveDevice(BluetoothProfile.HEARING_AID)
+                    || device.isActiveDevice(BluetoothProfile.LE_AUDIO);
         }
 
         if (mIsActive != isActive) {
@@ -315,7 +325,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
                 boolean isConnected = device.isConnectedProfile(profile);
                 if (profileId == BluetoothProfile.HEADSET
                         || profileId == BluetoothProfile.A2DP
-                        || profileId == BluetoothProfile.HEARING_AID) {
+                        || profileId == BluetoothProfile.HEARING_AID
+                        || profileId == BluetoothProfile.LE_AUDIO) {
                     audioProfileConnected |= isConnected;
                 } else {
                     otherProfileConnected |= isConnected;

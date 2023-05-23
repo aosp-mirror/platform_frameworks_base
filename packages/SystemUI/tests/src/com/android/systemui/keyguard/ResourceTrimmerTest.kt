@@ -4,7 +4,8 @@ import android.content.ComponentCallbacks2
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -35,14 +36,16 @@ class ResourceTrimmerTest : SysuiTestCase() {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private val keyguardRepository = FakeKeyguardRepository()
+    private val featureFlags = FakeFeatureFlags()
 
     @Mock private lateinit var globalWindowManager: GlobalWindowManager
-    @Mock private lateinit var featureFlags: FeatureFlags
     private lateinit var resourceTrimmer: ResourceTrimmer
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        featureFlags.set(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK, true)
+        featureFlags.set(Flags.FACE_AUTH_REFACTOR, false)
         keyguardRepository.setWakefulnessModel(
             WakefulnessModel(WakefulnessState.AWAKE, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
         )
@@ -60,7 +63,8 @@ class ResourceTrimmerTest : SysuiTestCase() {
                 interactor,
                 globalWindowManager,
                 testScope.backgroundScope,
-                testDispatcher
+                testDispatcher,
+                featureFlags
             )
         resourceTrimmer.start()
     }

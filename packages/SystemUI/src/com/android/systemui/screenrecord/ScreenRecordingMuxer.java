@@ -52,9 +52,8 @@ public class ScreenRecordingMuxer {
     /**
      * RUN IN THE BACKGROUND THREAD!
      */
-    public void mux() throws IOException {
-        MediaMuxer muxer = null;
-        muxer = new MediaMuxer(mOutFile, mFormat);
+    public void mux() throws IOException, IllegalStateException {
+        MediaMuxer muxer = new MediaMuxer(mOutFile, mFormat);
         // Add extractors
         for (String file: mFiles) {
             MediaExtractor extractor = new MediaExtractor();
@@ -74,7 +73,10 @@ public class ScreenRecordingMuxer {
             }
         }
 
+        // This may throw IllegalStateException if no tracks were added above
+        // Let the error propagate up so we can notify the user.
         muxer.start();
+
         for (Pair<MediaExtractor, Integer> pair: mExtractorIndexToMuxerIndex.keySet()) {
             MediaExtractor extractor = pair.first;
             extractor.selectTrack(pair.second);

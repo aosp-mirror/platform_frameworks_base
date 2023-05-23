@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ลบ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"นี่เป็นการเพิ่มระดับเสียงเกินระดับที่แนะนำ\n\nการฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"คำเตือน\nคุณฟังสัญญาณเสียงดังเกินระดับที่ปลอดภัยเมื่อฟังผ่านหูฟังสำหรับ 1 สัปดาห์แล้ว\n\nการฟังที่เกินขีดจำกัดนี้จะทำให้การได้ยินของคุณบกพร่องอย่างถาวรได้"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"คำเตือน\nคุณฟังสัญญาณเสียงดังเกินระดับที่ปลอดภัยเมื่อฟังผ่านหูฟังสำหรับ 1 สัปดาห์ไป 5 เท่าแล้ว\n\nระบบได้ลดระดับเสียงลงเพื่อปกป้องการได้ยินของคุณ"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"ระดับที่คุณฟังสื่ออาจทำให้การได้ยินบกพร่องเมื่อฟังไปในระยะยาว\n\nการเล่นสื่อในระดับนี้ต่อไปเป็นเวลานานๆ อาจทำให้การได้ยินของคุณบกพร่องได้"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"คำเตือน\nขณะนี้คุณฟังเนื้อหาเสียงดังซึ่งเล่นในระดับที่ไม่ปลอดภัย\n\nการฟังเสียงดังระดับนี้ต่อไปจะทำให้การได้ยินของคุณบกพร่องอย่างถาวรได้"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ต้องการฟังเสียงดังต่อไปไหม\n\nเสียงของหูฟังอยู่ในระดับที่ดังเป็นระยะเวลานานกว่าที่แนะนำ ซึ่งอาจทำให้เกิดความเสียหายต่อระบบการได้ยินของคุณ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"การตรวจจับเสียงดัง\n\nเสียงของหูฟังอยู่ในระดับที่ดังกว่าที่แนะนำ ซึ่งอาจทำให้เกิดความเสียหายต่อระบบการได้ยินของคุณ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ใช้ทางลัดการช่วยเหลือพิเศษไหม"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มนาน 3 วินาทีจะเริ่มฟีเจอร์การช่วยเหลือพิเศษ"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"เปิดใช้ทางลัดสำหรับฟีเจอร์การช่วยเหลือพิเศษใช่ไหม"</string>
@@ -2164,14 +2162,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ยกเลิกการหยุดชั่วคราว"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ไม่มีแอปงาน"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ไม่มีแอปส่วนตัว"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"เปิด <xliff:g id="APP">%s</xliff:g> งานไหม"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"เปิดใน <xliff:g id="APP">%s</xliff:g> ส่วนตัวไหม"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"เปิดใน <xliff:g id="APP">%s</xliff:g> งานไหม"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"โทรออกจากแอปงานไหม"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"เปลี่ยนไปใช้แอปงานไหม"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"องค์กรอนุญาตให้คุณโทรออกได้จากแอปงานเท่านั้น"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"องค์กรอนุญาตให้คุณส่งข้อความได้จากแอปงานเท่านั้น"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ใช้เบราว์เซอร์ส่วนตัว"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ใช้เบราว์เซอร์งาน"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"โทร"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"เปลี่ยน"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ปลดล็อกเครือข่ายที่ใช้กับ SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN ปลดล็อกเครือข่ายย่อยที่ใช้กับ SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN ปลดล็อกองค์กรที่ใช้กับ SIM"</string>

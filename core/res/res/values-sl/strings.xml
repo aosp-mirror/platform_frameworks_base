@@ -1684,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Odstrani"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ali želite povečati glasnost nad priporočeno raven?\n\nDolgotrajno poslušanje pri veliki glasnosti lahko poškoduje sluh."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Opozorilo!\nPrekoračili ste količino glasnih zvočnih signalov, ki je še varna pri poslušanju prek slušalk v enem tednu.\n\nPrekoračenje te omejitve vam bo povzročilo trajne poškodbe sluha."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Opozorilo!\nZa petkrat ste prekoračili količino glasnih zvočnih signalov, ki je še varna pri poslušanju prek slušalk v enem tednu.\n\nZaradi zaščite sluha je bila glasnost zmanjšana."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Raven glasnosti, pri kateri poslušate predstavnost, lahko ob dolgotrajnejši izpostavljenosti povzroči poškodbe sluha.\n\nNadaljnje dolgotrajno poslušanje pri takšni glasnosti vam lahko poškoduje sluh."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Opozorilo!\nTrenutno poslušate glasno vsebino pri ravni glasnosti, ki ni varna.\n\nNadaljnje poslušanje pri takšni glasnosti vam bo povzročilo trajne poškodbe sluha."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Želite še naprej poslušati pri visoki glasnosti?\n\nGlasnost v slušalkah je bila visoka dalj časa, kot je priporočeno, kar vam lahko poškoduje sluh."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Zaznan je bil glasen zvok\n\nGlasnost v slušalkah je višja od priporočene, kar vam lahko poškoduje sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite uporabljati bližnjico za dostopnost?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ko je bližnjica vklopljena, pritisnite gumba za glasnost in ju pridržite tri sekunde, če želite zagnati funkcijo dostopnosti."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Želite vklopiti bližnjico za funkcije za dostopnost?"</string>
@@ -2166,14 +2164,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Znova aktiviraj"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nobena delovna aplikacija ni na voljo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nobena osebna aplikacija"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Želite odpreti delovno aplikacijo <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Želite odpreti v osebni aplikaciji <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Želite odpreti v delovni aplikaciji <xliff:g id="APP">%s</xliff:g>?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Uporabi osebni brskalnik"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Uporabi delovni brskalnik"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Koda PIN za odklepanje omrežja kartice SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Koda PIN za odklepanje podnabora omrežja kartice SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Koda PIN za odklepanje kartice SIM za podjetje"</string>

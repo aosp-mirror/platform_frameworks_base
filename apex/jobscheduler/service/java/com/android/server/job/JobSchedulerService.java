@@ -2595,6 +2595,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         // or the user stopped the job somehow.
         if (internalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH
                 || internalStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT
+                || internalStopReason == JobParameters.INTERNAL_STOP_REASON_ANR
                 || stopReason == JobParameters.STOP_REASON_USER) {
             numFailures++;
         } else {

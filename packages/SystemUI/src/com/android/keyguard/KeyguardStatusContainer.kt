@@ -17,8 +17,6 @@ class KeyguardStatusContainer(
     }
 
     protected override fun dispatchDraw(canvas: Canvas) {
-        val restoreTo = KeyguardClockFrame.saveCanvasAlpha(this, canvas, drawAlpha)
-        super.dispatchDraw(canvas)
-        canvas.restoreToCount(restoreTo)
+        KeyguardClockFrame.saveCanvasAlpha(this, canvas, drawAlpha) { super.dispatchDraw(canvas) }
     }
 }

@@ -318,7 +318,6 @@ constructor(
             // We have a handful of different cases
             qsTile !is CustomTile -> {
                 // The tile is not a custom tile. Make sure they are reset to the correct user
-                qsTile.removeCallbacks()
                 if (userChanged) {
                     qsTile.userSwitch(user)
                     logger.logTileUserChanged(tileSpec, user)
@@ -327,7 +326,6 @@ constructor(
             }
             qsTile.user == user -> {
                 // The tile is a custom tile for the same user, just return it
-                qsTile.removeCallbacks()
                 qsTile
             }
             else -> {

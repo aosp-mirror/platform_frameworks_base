@@ -21,10 +21,17 @@ import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyboard.backlight.ui.view.KeyboardBacklightDialog
+import com.android.systemui.keyboard.backlight.ui.viewmodel.BacklightDialogContentViewModel
 import com.android.systemui.keyboard.backlight.ui.viewmodel.BacklightDialogViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+private fun defaultCreateDialog(context: Context): (Int, Int) -> KeyboardBacklightDialog {
+    return { currentLevel: Int, maxLevel: Int ->
+        KeyboardBacklightDialog(context, currentLevel, maxLevel)
+    }
+}
 
 /**
  * Based on the state produced from [BacklightDialogViewModel] shows or hides keyboard backlight
@@ -32,35 +39,42 @@ import kotlinx.coroutines.launch
  */
 @SysUISingleton
 class KeyboardBacklightDialogCoordinator
-@Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val context: Context,
     private val viewModel: BacklightDialogViewModel,
+    private val createDialog: (Int, Int) -> KeyboardBacklightDialog
 ) {
+
+    @Inject
+    constructor(
+        @Application applicationScope: CoroutineScope,
+        context: Context,
+        viewModel: BacklightDialogViewModel
+    ) : this(applicationScope, viewModel, defaultCreateDialog(context))
 
     var dialog: KeyboardBacklightDialog? = null
 
     fun startListening() {
         applicationScope.launch {
-            viewModel.dialogContent.collect { dialogViewModel ->
-                if (dialogViewModel != null) {
-                    if (dialog == null) {
-                        dialog =
-                            KeyboardBacklightDialog(
-                                context,
-                                initialCurrentLevel = dialogViewModel.currentValue,
-                                initialMaxLevel = dialogViewModel.maxValue
-                            )
-                        dialog?.show()
-                    } else {
-                        dialog?.updateState(dialogViewModel.currentValue, dialogViewModel.maxValue)
-                    }
+            viewModel.dialogContent.collect { contentModel ->
+                if (contentModel != null) {
+                    showDialog(contentModel)
                 } else {
                     dialog?.dismiss()
                     dialog = null
                 }
             }
         }
+    }
+
+    private fun showDialog(model: BacklightDialogContentViewModel) {
+        if (dialog == null) {
+            dialog = createDialog(model.currentValue, model.maxValue)
+        } else {
+            dialog?.updateState(model.currentValue, model.maxValue)
+        }
+        // let's always show dialog - even if we're just updating it, it might have been dismissed
+        // externally by tapping finger outside of it
+        dialog?.show()
     }
 }

@@ -1932,7 +1932,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final ActivityRecord atoken = mActivityRecord;
         if (atoken != null) {
             return ((!isParentWindowHidden() && atoken.isVisible())
-                    || isAnimating(TRANSITION | PARENTS));
+                    || isAnimationRunningSelfOrParent());
         }
         final WallpaperWindowToken wtoken = mToken.asWallpaperToken();
         if (wtoken != null) {

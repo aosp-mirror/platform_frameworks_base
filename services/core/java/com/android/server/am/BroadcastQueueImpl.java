@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_APP_FREEZING_DELAYED;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 import static android.text.TextUtils.formatSimple;
@@ -383,6 +384,16 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         // Tell the application to launch this receiver.
         maybeReportBroadcastDispatchedEventLocked(r, r.curReceiver.applicationInfo.uid);
         r.intent.setComponent(r.curComponent);
+
+        // See if we need to delay the freezer based on BroadcastOptions
+        if (r.options != null
+                && r.options.getTemporaryAppAllowlistDuration() > 0
+                && r.options.getTemporaryAppAllowlistType()
+                    == TEMPORARY_ALLOW_LIST_TYPE_APP_FREEZING_DELAYED) {
+            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
+                    CachedAppOptimizer.UNFREEZE_REASON_START_RECEIVER,
+                    r.options.getTemporaryAppAllowlistDuration());
+        }
 
         boolean started = false;
         try {
@@ -930,8 +941,13 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             Slog.v(TAG, "Broadcast temp allowlist uid=" + uid + " duration=" + duration
                     + " type=" + type + " : " + b.toString());
         }
-        mService.tempAllowlistUidLocked(uid, duration, reasonCode, b.toString(), type,
-                r.callingUid);
+
+        // Only add to temp allowlist if it's not the APP_FREEZING_DELAYED type. That will be
+        // handled when the broadcast is actually being scheduled on the app thread.
+        if (type != TEMPORARY_ALLOW_LIST_TYPE_APP_FREEZING_DELAYED) {
+            mService.tempAllowlistUidLocked(uid, duration, reasonCode, b.toString(), type,
+                    r.callingUid);
+        }
     }
 
     private void processNextBroadcast(boolean fromMsg) {

@@ -19037,8 +19037,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             long delayedDurationMs) {
         Objects.requireNonNull(targetPackage);
         Preconditions.checkArgumentNonnegative(delayedDurationMs);
-        Preconditions.checkState(mEnableModernQueue, "Not valid in legacy queue");
         enforceCallingPermission(permission.DUMP, "forceDelayBroadcastDelivery()");
+        // Ignore request if modern queue is not enabled
+        if (!mEnableModernQueue) {
+            return;
+        }
 
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.forceDelayBroadcastDelivery(targetPackage, delayedDurationMs);

@@ -79,7 +79,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Balão"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gerir"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balão ignorado."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Toque para reiniciar esta app e ficar com uma melhor visão."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Toque para reiniciar esta app e ver melhor."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemas com a câmara?\nToque aqui para reajustar"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Não foi corrigido?\nToque para reverter"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nenhum problema com a câmara? Toque para ignorar."</string>

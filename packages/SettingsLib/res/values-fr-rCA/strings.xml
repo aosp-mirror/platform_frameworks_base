@@ -37,7 +37,7 @@
     <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
     <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
     <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
-    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personnel"</string>
     <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
     <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
     <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
@@ -115,8 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD : <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Prothèses auditives"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
-    <skip />
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connecté aux prothèses auditives"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connecté par LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connecté aux paramètres audio du média"</string>
@@ -216,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Sélectionnez un profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personnel"</string>
     <string name="category_work" msgid="4014193632325996115">"Professionnel"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Cloner"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Options pour les développeurs"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les développeurs"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Définir les options pour le développement de l\'application"</string>
@@ -670,9 +670,9 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Clavier physique"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Sélectionner disposition du clavier"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Par défaut"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activation de l\'écran"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activer l\'écran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Autoriser l\'activation de l\'écran"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autorisez une application à activer l\'écran. Lorsque vous accordez cette autorisation, l\'application peut activer l\'écran à tout moment sans votre volonté explicite."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autorisez une application à activer l\'écran. Lorsque vous accordez cette autorisation, l\'application peut activer l\'écran à tout moment sans que vous lui demandiez."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou changez la sortie, votre diffusion actuelle s\'arrêtera"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

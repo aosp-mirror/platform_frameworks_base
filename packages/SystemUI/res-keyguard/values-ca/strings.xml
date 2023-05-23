@@ -61,7 +61,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"El PIN no és correcte"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN incorrecte. Torna-hi."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"O desbloqueja amb l\'empremta digital"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"L\'empremta no es reconeix"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"L\'empremta no s\'ha reconegut"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"No s\'ha reconegut la cara"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Torna-ho a provar o introdueix el PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Torna-ho a provar o introdueix la contrasenya"</string>

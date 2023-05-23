@@ -188,6 +188,7 @@ import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
@@ -1182,7 +1183,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mDisplaySwitchTransitionLauncher.foldStateChanged(newFoldState);
                     mDisplayRotation.foldStateChanged(newFoldState);
                 };
-        mDeviceStateController.registerDeviceStateCallback(mDeviceStateConsumer);
+        mDeviceStateController.registerDeviceStateCallback(mDeviceStateConsumer,
+                new HandlerExecutor(mWmService.mH));
 
         mCloseToSquareMaxAspectRatio = mWmService.mContext.getResources().getFloat(
                 R.dimen.config_closeToSquareDisplayMaxAspectRatio);

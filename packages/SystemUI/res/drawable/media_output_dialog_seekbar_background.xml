@@ -18,8 +18,8 @@
     <item android:id="@android:id/background">
         <shape>
             <corners
-                     android:bottomRightRadius="28dp"
-                     android:topRightRadius="28dp"
+                     android:bottomRightRadius="@dimen/media_output_dialog_active_background_radius"
+                     android:topRightRadius="@dimen/media_output_dialog_active_background_radius"
             />
             <solid android:color="@android:color/transparent" />
             <size

@@ -1684,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Pašalinti"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Padidinti garsą daugiau nei rekomenduojamas lygis?\n\nIlgai klausydami dideliu garsu galite pažeisti klausą."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Įspėjimas.\nViršijote savaitės garsių garso signalų kiekį, kurio būtų saugu klausytis per ausines.\n\nViršijus šį apribojimą bus negrįžtamai pažeista jūsų klausa."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Įspėjimas.\nViršijote savaitės garsių garso signalų kiekį (penki kartai), kurio būtų saugu klausytis per ausines.\n\nGarsumas sumažintas apsaugant jūsų klausą."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Garsumas, kuriuo klausotės medijos, klausantis ilgai gali pakenkti jūsų klausai.\n\nToliau ilgai leidžiant šiuo garsumu gali būti pakenkta jūsų klausai."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Įspėjimas.\nŠiuo metu klausotės nesaugiu garsumu leidžiamo turinio.\n\nToliau klausantis tokiu garsumu leidžiamo turinio bus negrįžtamai pakenkta jūsų klausai."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Toliau klausytis nustačius aukštą garsumo lygį?\n\nAusinių garsumo lygis yra aukštas ilgiau, nei rekomenduojama, o tai gali pakenkti klausai"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Aptiktas garsus garsas\n\nAusinių garsumo lygis yra aukštesnis, nei rekomenduojama, o tai gali pakenkti klausai"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Naudoti spartųjį pritaikymo neįgaliesiems klavišą?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kai spartusis klavišas įjungtas, paspaudus abu garsumo mygtukus ir palaikius 3 sekundes bus įjungta pritaikymo neįgaliesiems funkcija."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Įjungti pritaikymo neįgaliesiems funkcijų spartųjį klavišą?"</string>
@@ -2166,14 +2164,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Atšaukti pristabdymą"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nėra darbo programų"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nėra asmeninių programų"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Atidaryti darbo programą „<xliff:g id="APP">%s</xliff:g>“?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Atidaryti asmeninėje programoje „<xliff:g id="APP">%s</xliff:g>“?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Atidaryti darbo programoje „<xliff:g id="APP">%s</xliff:g>“?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Skambinti iš darbo programos?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Perjungti į darbo programą?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Jūsų organizacija leidžia skambinti tik iš darbo programų"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Jūsų organizacija leidžia siųsti pranešimus tik iš darbo programų"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Naudoti asmeninę naršyklę"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Naudoti darbo naršyklę"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Skambinti"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Perjungti"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM tinklo operatoriaus pasirinkimo ribojimo panaikinimo PIN kodas"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM tinklo poaibio operatoriaus pasirinkimo ribojimo panaikinimo PIN kodas"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM bendrojo operatoriaus pasirinkimo ribojimo panaikinimo PIN kodas"</string>

@@ -703,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Não é possível criar o seu modelo de rosto. Tente novamente."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Óculos escuros detetados. O seu rosto tem de estar completamente visível."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Cobertura facial detetada. Todo o rosto tem de estar visível."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máscara detetada. Todo o rosto tem de estar visível."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Não pode validar o rosto. Hardware não disponível."</string>
@@ -1683,10 +1683,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Remover"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Aumentar o volume acima do nível recomendado?\n\nOuvir com um volume elevado durante longos períodos poderá ser prejudicial para a sua audição."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Aviso,\nExcedeu a quantidade de sinais sonoros altos que uma pessoa pode ouvir em segurança numa semana através de auscultadores.\n\nUltrapassar este limite prejudica permanentemente a sua audição."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Aviso,\nExcedeu 5 vezes a quantidade de sinais sonoros altos que uma pessoa pode ouvir em segurança numa semana através de auscultadores.\n\nO volume foi reduzido para proteger a sua audição."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"O nível ao qual está a ouvir conteúdo multimédia pode resultar em danos auditivos se o fizer durante longos períodos.\n\nContinuar a ouvir a este nível durante longos períodos pode ser prejudicial para a sua audição."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Aviso,\nEstá a ouvir conteúdo reproduzido com um volume alto e inseguro.\n\nContinuar a ouvir a este volume vai prejudicar permanentemente a sua audição."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Quer continuar a ouvir com um volume elevado?\n\nO volume dos auscultadores está elevado há mais tempo do que o recomendado, o que pode ser prejudicial para a sua audição"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Som alto detetado\n\nO volume dos auscultadores tem estado mais elevado do que o recomendado, o que pode ser prejudicial para a sua audição"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Pretende utilizar o atalho de acessibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando o atalho está ativado, premir ambos os botões de volume durante 3 segundos inicia uma funcionalidade de acessibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Ativar o atalho das funcionalidades de acessibilidade?"</string>
@@ -2165,14 +2163,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Retomar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Sem apps de trabalho"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Sem apps pessoais"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Abrir a app <xliff:g id="APP">%s</xliff:g> de trabalho?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Abrir na app <xliff:g id="APP">%s</xliff:g> pessoal?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Abrir na app <xliff:g id="APP">%s</xliff:g> de trabalho?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Ligar a partir da app de trabalho?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Mudar para a app de trabalho?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"A sua organização só lhe permite fazer chamadas a partir de apps de trabalho"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"A sua organização só lhe permite enviar mensagens a partir de apps de trabalho"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar navegador pessoal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar navegador de trabalho"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Ligar"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Mudar"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para desbloqueio de rede do cartão SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN para desbloqueio do subconjunto da rede do cartão SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN para desbloqueio empresarial do cartão SIM"</string>

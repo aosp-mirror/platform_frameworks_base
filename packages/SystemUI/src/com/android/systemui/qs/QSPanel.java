@@ -522,7 +522,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         return mExpanded;
     }
 
-    void addTile(QSPanelControllerBase.TileRecord tileRecord) {
+    final void addTile(QSPanelControllerBase.TileRecord tileRecord) {
         final QSTile.Callback callback = new QSTile.Callback() {
             @Override
             public void onStateChanged(QSTile.State state) {

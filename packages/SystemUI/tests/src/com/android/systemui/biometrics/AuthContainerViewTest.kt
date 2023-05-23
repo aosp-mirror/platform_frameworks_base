@@ -504,6 +504,21 @@ class AuthContainerViewTest : SysuiTestCase() {
         waitForIdleSync()
         assertThat(isAttachedToWindow()).isTrue()
     }
+
+    @Test
+    fun testLayoutParams_hasCutoutModeAlwaysFlag() {
+        val layoutParams = AuthContainerView.getLayoutParams(windowToken, "")
+        val lpFlags = layoutParams.flags
+
+        assertThat((lpFlags and WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS)
+                != 0).isTrue()
+    }
+
+    @Test
+    fun testLayoutParams_excludesSystemBarInsets() {
+        val layoutParams = AuthContainerView.getLayoutParams(windowToken, "")
+        assertThat((layoutParams.fitInsetsTypes and WindowInsets.Type.systemBars()) == 0).isTrue()
+    }
 }
 
 private fun AuthContainerView.hasBiometricPrompt() =

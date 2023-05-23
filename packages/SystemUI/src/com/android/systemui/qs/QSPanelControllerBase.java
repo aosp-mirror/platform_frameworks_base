@@ -199,7 +199,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mMediaHost.removeVisibilityChangeListener(mMediaHostVisibilityListener);
 
         for (TileRecord record : mRecords) {
-            record.tile.removeCallbacks();
+            record.tile.removeCallback(record.callback);
         }
         mRecords.clear();
         mDumpManager.unregisterDumpable(mView.getDumpableTag());

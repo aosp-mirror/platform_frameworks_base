@@ -24,6 +24,8 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.utils.GlobalWindowManager
@@ -51,10 +53,15 @@ constructor(
     private val globalWindowManager: GlobalWindowManager,
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
+    private val featureFlags: FeatureFlags,
 ) : CoreStartable, WakefulnessLifecycle.Observer {
 
     override fun start() {
         Log.d(LOG_TAG, "Resource trimmer registered.")
+        if (!featureFlags.isEnabled(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK)) {
+            return
+        }
+
         applicationScope.launch(bgDispatcher) {
             // We need to wait for the AoD transition (and animation) to complete.
             // This means we're waiting for isDreaming (== implies isDoze) and dozeAmount == 1f
@@ -79,6 +86,10 @@ constructor(
         isDreaming: Boolean,
         isDozingFully: Boolean
     ) {
+        if (!featureFlags.isEnabled(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK)) {
+            return
+        }
+
         if (DEBUG) {
             Log.d(
                 LOG_TAG,

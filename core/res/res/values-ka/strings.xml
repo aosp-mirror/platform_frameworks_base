@@ -635,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ზედმეტად ნათელია"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"აღმოჩენილია Ძლიერი დაჭერა"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ცადეთ დარეგულირება"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ თითის დაჭერის ადგილი ყოველ ჯერზე"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ დაჭერის ადგილი ყოველ ჯერზე"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
@@ -686,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"გაწიეთ ტელეფონი თქვენგან მარცხნივ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"გაწიეთ ტელეფონი თქვენგან მარჯვნივ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"გთხოვთ, უფრო პირდაპირ შეხედოთ თქვენს მოწყობილობას."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"თქვენი სახე არ ჩანს. დაიჭირეთ ტელეფონი თვალის დონეზე."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"სახე არ ჩანს. დაიჭირეთ ტელ. თვალის დონეზე."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"მეტისმეტად მოძრაობთ. მყარად დაიჭირეთ ტელეფონი."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"გთხოვთ, ხელახლა დაარეგისტრიროთ თქვენი სახე."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"სახის ამოცნობა ვერ ხერხდება. ცადეთ ხელახლა."</string>
@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"თქვენი სახის მოდელი ვერ იქმნება. ცადეთ ხელახლა."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"აღმოჩენილია მუქი სათვალე. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"აღმოჩენილია სახის დაფარვა. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"სახე დაფარულია. ის მთლიანად უნდა ჩანდეს."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"სახე ვერ დასტურდება. აპარატი მიუწვდომელია."</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ამოშლა"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"გსურთ ხმის რეკომენდებულ დონეზე მაღლა აწევა?\n\nხანგრძლივად ხმამაღლა მოსმენით შესაძლოა სმენადობა დაიზიანოთ."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"გაფრთხილება,\nთქვენ გადააჭარბეთ ყურსასმენებით ერთ კვირაში ხმამაღალი სიგნალების უსაფრთხოდ მოსმენის დასაშვებ რაოდენობას.\n\nმოცემულ ზღვარს თუ გადააჭარბებთ, ეს სამუდამოდ დაგიზიანებთ სმენას."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"გაფრთხილება,\nთქვენ 5-ჯერ გადააჭარბეთ ყურსასმენებით ერთ კვირაში ხმამაღალი სიგნალების უსაფრთხოდ მოსმენის დასაშვებ რაოდენობას.\n\nხმა დაწეულია თქვენი სმენის დასაცავად."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"ხმის დონეს, რომელზეც მედიას უსმენთ, შეიძლება შედეგად მოყვეს სმენის დაზიანება თუ ამას ხანგრძლივად გააგრძელებთ.\n\nთუ გააგრძელებთ ხანგრძლივად დაკვრას ხმის მოცემულ დონეზე, ამან შეიძლება დააზიანოს თქვენი სმენა."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"გაფრთხილება,\nამჟამად უსმენთ ხმამაღალ კონტენტს, რომლის დაკვრის ხმის დონე არ არის უსაფრთხო.\n\nასეთი ხმამაღალი კონტენტის დაკვრა სამუდამოდ დაგიზიანებთ სმენას."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"განაგრძობთ მაღალ ხმაზე მოსმენას?\n\nყურსასმენების ხმა მაღალი იყო რეკომენდებულზე დიდხანს, რამაც შესაძლოა თქვენი სმენა დააზიანოს"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"მაღალი ხმაა ამოცნობილი\n\nყურსასმენების ხმა რეკომენდებულზე მაღალი იყო, რამაც შესაძლოა თქვენი სმენა დააზიანოს"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"გსურთ მარტივი წვდომის მალსახმობის გამოყენება?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"თუ მალსახმობი ჩართულია, ხმის ორივე ღილაკზე 3 წამის განმავლობაში დაჭერით მარტივი წვდომის ფუნქცია ჩაირთვება."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ჩაირთოს მარტივი წვდომის ფუნქციების მალსახმობი?"</string>
@@ -2164,14 +2162,23 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"პაუზის გაუქმება"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"სამსახურის აპები არ არის"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"პირადი აპები არ არის"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"გსურთ, სამსახურის <xliff:g id="APP">%s</xliff:g>-ის გახსნა?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"გსურთ, პირად <xliff:g id="APP">%s</xliff:g>-ში გახსნა?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"გსურთ, სამსახურის <xliff:g id="APP">%s</xliff:g>-ში გახსნა?"</string>
+    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
     <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
+    <skip />
+    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
     <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"პირადი ბრაუზერის გამოყენება"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"სამსახურის ბრაუზერის გამოყენება"</string>
+    <!-- no translation found for miniresolver_call (6386870060423480765) -->
+    <skip />
+    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ქსელის განბლოკვის PIN-კოდი"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM ქსელის ქვედანაყოფის განბლოკვის PIN-კოდი"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM-ის კორპორატიული განბლოკვის PIN-კოდი"</string>

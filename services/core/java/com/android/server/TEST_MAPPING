@@ -71,6 +71,11 @@
                     "exclude-annotation": "org.junit.Ignore"
                 }
             ]
+        },
+        {
+            // GWP-ASan's CTS test ensures that recoverable tombstones work,
+            // which is emitted by the NativeTombstoneManager.
+            "name": "CtsGwpAsanTestCases"
         }
     ],
     "presubmit-large": [

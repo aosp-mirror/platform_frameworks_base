@@ -57,7 +57,7 @@
     <string name="set_as_default" msgid="4415328591568654603">"កំណត់ជាលំនាំដើម"</string>
     <string name="settings" msgid="6536394145760913145">"ការកំណត់"</string>
     <string name="use_once" msgid="9027366575315399714">"ប្រើម្ដង"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"ពាក្យសម្ងាត់ <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • កូដសម្ងាត់<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"ពាក្យសម្ងាត់ <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • កូដសម្ងាត់ <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"ពាក្យសម្ងាត់ <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"កូដសម្ងាត់ <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"ព័ត៌មានផ្ទៀងផ្ទាត់ <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>

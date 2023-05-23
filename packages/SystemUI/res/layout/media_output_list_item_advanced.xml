@@ -50,12 +50,16 @@
             android:id="@+id/icon_area"
             android:layout_width="64dp"
             android:layout_height="64dp"
+            android:focusable="false"
+            android:importantForAccessibility="no"
             android:background="@drawable/media_output_title_icon_area"
             android:layout_gravity="center_vertical|start">
             <ImageView
                 android:id="@+id/title_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:focusable="false"
+                android:importantForAccessibility="no"
                 android:animateLayoutChanges="true"
                 android:layout_gravity="center"/>
             <TextView

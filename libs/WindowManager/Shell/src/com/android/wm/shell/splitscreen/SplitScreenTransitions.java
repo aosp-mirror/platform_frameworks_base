@@ -20,8 +20,9 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
+import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.FADE_DURATION;
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
@@ -86,6 +87,7 @@ class SplitScreenTransitions {
         mStageCoordinator = stageCoordinator;
     }
 
+    /** Play animation for enter transition or dismiss transition. */
     void playAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
@@ -116,6 +118,7 @@ class SplitScreenTransitions {
         playInternalAnimation(transition, info, startTransaction, mainRoot, sideRoot, topRoot);
     }
 
+    /** Internal funcation of playAnimation. */
     private void playInternalAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull WindowContainerToken mainRoot,
             @NonNull WindowContainerToken sideRoot, @NonNull WindowContainerToken topRoot) {
@@ -126,8 +129,8 @@ class SplitScreenTransitions {
             final SurfaceControl leash = change.getLeash();
             final int mode = info.getChanges().get(i).getMode();
 
+            final int rootIdx = TransitionUtil.rootIndexFor(change, info);
             if (mode == TRANSIT_CHANGE) {
-                final int rootIdx = TransitionUtil.rootIndexFor(change, info);
                 if (change.getParent() != null) {
                     // This is probably reparented, so we want the parent to be immediately visible
                     final TransitionInfo.Change parentChange = info.getChange(change.getParent());
@@ -155,7 +158,7 @@ class SplitScreenTransitions {
                 mFinishTransaction.setPosition(leash,
                         change.getEndRelOffset().x, change.getEndRelOffset().y);
                 mFinishTransaction.setCrop(leash, null);
-            } else if (isEnter && isTopRoot) {
+            } else if (isTopRoot) {
                 // Ensure top root is visible at start.
                 t.setAlpha(leash, 1.f);
                 t.show(leash);
@@ -168,40 +171,56 @@ class SplitScreenTransitions {
                 t.setLayer(leash, Integer.MAX_VALUE);
                 t.show(leash);
             }
-            // These container changes we don't want to animate them.
-            // We should only animate stage root, divider and child tasks are not under stage root.
-            if (isTopRoot || isMainChild || isSideChild || change.getTaskInfo() == null) {
+
+            // We want to use child tasks to animate so ignore split root container and non task
+            // except divider change.
+            if (isTopRoot || isMainRoot || isSideRoot
+                    || (change.getTaskInfo() == null && !isDivider)) {
                 continue;
             }
-
             if (isEnter && mPendingEnter.mResizeAnim) {
                 // We will run animation in next transition so skip anim here
                 continue;
-            } else if (isEnter && isMainRoot) {
-                // Main stage already on top so skip fade in animation to reduce flicker.
+            } else if (isPendingDismiss(transition)
+                    && mPendingDismiss.mReason == EXIT_REASON_DRAG_DIVIDER) {
+                // TODO(b/280020345): need to refine animation for this but just skip anim now.
                 continue;
             }
 
+            // Because cross fade might be looked more flicker during animation
+            // (surface become black in middle of animation), we only do fade-out
+            // and show opening surface directly.
             boolean isOpening = TransitionUtil.isOpeningType(info.getType());
-            if (isOpening && (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT)) {
-                // fade in
-                startFadeAnimation(leash, true /* show */);
-            } else if (!isOpening && (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK)) {
+            if (!isOpening && (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK)) {
                 // fade out
-                if (info.getType() == TRANSIT_SPLIT_DISMISS_SNAP) {
-                    // Dismissing via snap-to-top/bottom means that the dismissed task is already
-                    // not-visible (usually cropped to oblivion) so immediately set its alpha to 0
-                    // and don't animate it so it doesn't pop-in when reparented.
-                    t.setAlpha(leash, 0.f);
+                if (change.getSnapshot() != null) {
+                    // This case is happened if task is going to reparent to TDA, the origin leash
+                    // doesn't rendor so we use snapshot to replace it animating.
+                    t.reparent(change.getSnapshot(), info.getRoot(rootIdx).getLeash());
+                    // Use origin leash layer.
+                    t.setLayer(change.getSnapshot(), info.getChanges().size() - i);
+                    t.setPosition(change.getSnapshot(), change.getStartAbsBounds().left,
+                            change.getStartAbsBounds().top);
+                    t.show(change.getSnapshot());
+                    startFadeAnimation(change.getSnapshot(), false /* show */);
                 } else {
                     startFadeAnimation(leash, false /* show */);
                 }
+            } else if (mode == TRANSIT_CHANGE && change.getSnapshot() != null) {
+                t.reparent(change.getSnapshot(), info.getRoot(rootIdx).getLeash());
+                // Ensure snapshot it on the top of all transition surfaces
+                t.setLayer(change.getSnapshot(), info.getChanges().size() + 1);
+                t.setPosition(change.getSnapshot(), change.getStartAbsBounds().left,
+                        change.getStartAbsBounds().top);
+                t.show(change.getSnapshot());
+                startFadeAnimation(change.getSnapshot(), false /* show */);
             }
         }
         t.apply();
         onFinish(null /* wct */, null /* wctCB */);
     }
 
+    /** Play animation for resize transition. */
     void playResizeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
@@ -437,6 +456,7 @@ class SplitScreenTransitions {
         final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
         final ValueAnimator va = ValueAnimator.ofFloat(start, end);
         va.setDuration(FADE_DURATION);
+        va.setInterpolator(show ? ALPHA_IN : ALPHA_OUT);
         va.addUpdateListener(animation -> {
             float fraction = animation.getAnimatedFraction();
             transaction.setAlpha(leash, start * (1.f - fraction) + end * fraction);
