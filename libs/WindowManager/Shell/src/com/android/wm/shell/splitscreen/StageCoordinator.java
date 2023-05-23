@@ -1328,8 +1328,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mIsExiting = true;
             childrenToTop.resetBounds(wct);
             wct.reorder(childrenToTop.mRootTaskInfo.token, true);
-            wct.setSmallestScreenWidthDp(childrenToTop.mRootTaskInfo.token,
-                    SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
         }
         wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
                 false /* reparentLeafTaskIfRelaunch */);
@@ -1517,6 +1515,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     void finishEnterSplitScreen(SurfaceControl.Transaction t) {
         mSplitLayout.update(t);
+        mMainStage.getSplitDecorManager().inflate(mContext, mMainStage.mRootLeash,
+                getMainStageBounds());
+        mSideStage.getSplitDecorManager().inflate(mContext, mSideStage.mRootLeash,
+                getSideStageBounds());
         setDividerVisibility(true, t);
         // Ensure divider surface are re-parented back into the hierarchy at the end of the
         // transition. See Transition#buildFinishTransaction for more detail.
@@ -1989,13 +1991,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final boolean mainStageToTop =
                 bottomOrRight ? mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
                         : mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT;
+        final StageTaskListener toTopStage = mainStageToTop ? mMainStage : mSideStage;
         if (!ENABLE_SHELL_TRANSITIONS) {
-            exitSplitScreen(mainStageToTop ? mMainStage : mSideStage, reason);
+            exitSplitScreen(toTopStage, reason);
             return;
         }
 
         final int dismissTop = mainStageToTop ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        toTopStage.resetBounds(wct);
         prepareExitSplitScreen(dismissTop, wct);
         if (mRootTaskInfo != null) {
             wct.setDoNotPip(mRootTaskInfo.token);
@@ -2531,8 +2535,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             shouldAnimate = startPendingEnterAnimation(
                     mSplitTransitions.mPendingEnter, info, startTransaction, finishTransaction);
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
+            final SplitScreenTransitions.DismissSession dismiss = mSplitTransitions.mPendingDismiss;
             shouldAnimate = startPendingDismissAnimation(
-                    mSplitTransitions.mPendingDismiss, info, startTransaction, finishTransaction);
+                    dismiss, info, startTransaction, finishTransaction);
+            if (shouldAnimate && dismiss.mReason == EXIT_REASON_DRAG_DIVIDER) {
+                final StageTaskListener toTopStage =
+                        dismiss.mDismissTop == STAGE_TYPE_MAIN ? mMainStage : mSideStage;
+                mSplitTransitions.playDragDismissAnimation(transition, info, startTransaction,
+                        finishTransaction, finishCallback, toTopStage.mRootTaskInfo.token,
+                        toTopStage.getSplitDecorManager(), mRootTaskInfo.token);
+                return true;
+            }
         } else if (mSplitTransitions.isPendingResize(transition)) {
             mSplitTransitions.playResizeAnimation(transition, info, startTransaction,
                     finishTransaction, finishCallback, mMainStage.mRootTaskInfo.token,
@@ -2787,6 +2800,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitTransitions.mPendingDismiss = null;
             return false;
         }
+        dismissTransition.setFinishedCallback((callbackWct, callbackT) -> {
+            mMainStage.getSplitDecorManager().release(callbackT);
+            mSideStage.getSplitDecorManager().release(callbackT);
+        });
 
         addDividerBarToTransition(info, false /* show */);
         return true;
