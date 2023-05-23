@@ -19,17 +19,12 @@
     <string name="app_label" msgid="4470785958457506021">"부속 기기 관리자"</string>
     <string name="confirmation_title" msgid="4593465730772390351">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;에서 &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;에 액세스하도록 허용하시겠습니까?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"시계"</string>
-    <!-- no translation found for chooser_title_non_profile (6035023914517087400) -->
-    <skip />
-    <!-- no translation found for chooser_title (2235819929238267637) -->
-    <skip />
-    <!-- no translation found for summary_watch (7962014927042971830) -->
-    <skip />
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;에서 관리할 기기 선택"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"설정할 <xliff:g id="PROFILE_NAME">%1$s</xliff:g> 선택"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"이 앱이 정보(예: 발신자 이름)를 동기화하고 <xliff:g id="DEVICE_NAME">%1$s</xliff:g>에서 이러한 권한에 액세스할 수 있게 됩니다."</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;에서 &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;? 기기를 관리하도록 허용"</string>
-    <!-- no translation found for profile_name_glasses (3506504967216601277) -->
-    <skip />
-    <!-- no translation found for summary_glasses (2872254734959842579) -->
-    <skip />
+    <string name="profile_name_glasses" msgid="3506504967216601277">"기기"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"앱이 <xliff:g id="DEVICE_NAME">%1$s</xliff:g>에서 이러한 권한에 액세스할 수 있게 됩니다."</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;이 휴대전화의 이 정보에 액세스하도록 허용합니다."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"교차 기기 서비스"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 대신 기기 간에 앱을 스트리밍할 수 있는 권한을 요청하고 있습니다."</string>
@@ -45,8 +40,7 @@
     <string name="summary_generic" msgid="1761976003668044801">"이 앱에서 휴대전화와 선택한 기기 간에 정보(예: 발신자 이름)를 동기화할 수 있게 됩니다."</string>
     <string name="consent_yes" msgid="8344487259618762872">"허용"</string>
     <string name="consent_no" msgid="2640796915611404382">"허용 안함"</string>
-    <!-- no translation found for consent_cancel (5655005528379285841) -->
-    <skip />
+    <string name="consent_cancel" msgid="5655005528379285841">"취소"</string>
     <string name="consent_back" msgid="2560683030046918882">"뒤로"</string>
     <string name="permission_expand" msgid="893185038020887411">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> 펼치기"</string>
     <string name="permission_collapse" msgid="3320833884220844084">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> 접기"</string>
