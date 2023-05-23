@@ -49,10 +49,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -1136,6 +1138,40 @@ public class RecentTasksTest extends WindowTestsBase {
         TaskChangeNotificationController controller =
                 mAtm.getTaskChangeNotificationController();
         verify(controller, times(2)).notifyTaskListUpdated();
+    }
+
+    @Test
+    public void addTask_taskAlreadyInRecentsMovedToTop_callsTaskNotificationController() {
+        final Task firstTask = createTaskBuilder(".Task").build();
+        final Task secondTask = createTaskBuilder(".Task2").build();
+
+        mRecentTasks.add(firstTask);
+        mRecentTasks.add(secondTask);
+
+        TaskChangeNotificationController controller =
+                mAtm.getTaskChangeNotificationController();
+        clearInvocations(controller);
+
+        // Add firstTask back to top
+        mRecentTasks.add(firstTask);
+        verify(controller).notifyTaskListUpdated();
+    }
+
+    @Test
+    public void addTask_taskAlreadyInRecentsOnTop_doesNotNotify() {
+        final Task firstTask = createTaskBuilder(".Task").build();
+        final Task secondTask = createTaskBuilder(".Task2").build();
+
+        mRecentTasks.add(firstTask);
+        mRecentTasks.add(secondTask);
+
+        TaskChangeNotificationController controller =
+                mAtm.getTaskChangeNotificationController();
+        clearInvocations(controller);
+
+        // Add secondTask to top again
+        mRecentTasks.add(secondTask);
+        verifyZeroInteractions(controller);
     }
 
     @Test

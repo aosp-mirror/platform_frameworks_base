@@ -1702,6 +1702,9 @@ public class ActivityStarterTests extends WindowTestsBase {
 
     @Test
     public void testRecordActivityMovementBeforeDeliverToTop() {
+        // Mock recents as task is only marked to be in recents
+        mAtm.mTaskSupervisor.setRecentTasks(mock(RecentTasks.class));
+
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
         final ActivityRecord activityBot = new ActivityBuilder(mAtm).setTask(task).build();
         final ActivityRecord activityTop = new ActivityBuilder(mAtm).setTask(task).build();
