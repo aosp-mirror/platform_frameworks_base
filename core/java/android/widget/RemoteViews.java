@@ -709,6 +709,11 @@ public class RemoteViews implements Parcelable, Filter {
                 mActions.get(i).visitUris(visitor);
             }
         }
+        if (mSizedRemoteViews != null) {
+            for (int i = 0; i < mSizedRemoteViews.size(); i++) {
+                mSizedRemoteViews.get(i).visitUris(visitor);
+            }
+        }
         if (mLandscape != null) {
             mLandscape.visitUris(visitor);
         }
