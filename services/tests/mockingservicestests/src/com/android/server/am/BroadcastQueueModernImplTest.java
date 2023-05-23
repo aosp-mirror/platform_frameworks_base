@@ -88,7 +88,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.ExtendedMockitoRule;
+import com.android.modules.utils.testing.ExtendedMockitoRule;
 
 import org.junit.After;
 import org.junit.Before;
