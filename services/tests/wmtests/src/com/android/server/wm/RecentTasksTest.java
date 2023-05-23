@@ -1322,7 +1322,7 @@ public class RecentTasksTest extends WindowTestsBase {
             doReturn(bufferSize.x).when(buffer).getWidth();
             doReturn(bufferSize.y).when(buffer).getHeight();
         }
-        return new TaskSnapshot(1, new ComponentName("", ""), buffer,
+        return new TaskSnapshot(1, 0 /* captureTime */, new ComponentName("", ""), buffer,
                 ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                 Surface.ROTATION_0, taskSize, new Rect() /* contentInsets */,
                 new Rect() /* letterboxInsets*/, false /* isLowResolution */,
