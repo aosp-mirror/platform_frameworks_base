@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Kopīgot"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Ekrāna ieraksts ir saglabāts"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Pieskarieties, lai skatītu"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Dzēšot ekrāna ierakstu, radās kļūda."</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Saglabājot ekrāna ierakstu, radās kļūda."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Sākot ierakstīt ekrāna saturu, radās kļūda."</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atpakaļ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Sākums"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Seja autentificēta"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Apstiprināts"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Lai pabeigtu, pieskarieties Apstiprināt"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Atbloķēta ar seju. Turpināt: nospiediet atbloķēšanas ikonu."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ierīce atbloķēta ar seju. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Seja atpazīta. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Seja atpazīta. Lai turpinātu, nospiediet atbloķēšanas ikonu."</string>
@@ -943,8 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Iestatījumi"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Tiek atskaņots fails “<xliff:g id="SONG_NAME">%1$s</xliff:g>” (izpildītājs: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) no lietotnes <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> no <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> darbojas"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Atskaņot"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Apturēt"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Iepriekšējais ieraksts"</string>
@@ -1144,15 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Pievienojiet skārienekrāna pildspalvu lādētājam"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Zems skārienekrāna pildspalvas akumulatora līmenis"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
-    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
-    <skip />
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Nevar zvanīt no personīgās lietotnes"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Jūsu organizācija ļauj jums veikt zvanus tikai no darba lietotnēm."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Pārslēgties uz darba profilu"</string>
-    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
-    <skip />
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalēt darba lietotni Tālrunis"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Atcelt"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Pielāgot bloķēšanas ekrānu"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Bloķēšanas ekrāna pielāgošana pēc atbloķēšanas"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi nav pieejams"</string>

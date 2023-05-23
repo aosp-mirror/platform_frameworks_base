@@ -111,12 +111,12 @@
     <string name="screenrecord_continue" msgid="4055347133700593164">"शुरू करें"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रीन को रिकॉर्ड किया जा रहा है"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"स्क्रीन और ऑडियो, दोनों रिकॉर्ड हो रहे हैं"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रीन को कहां छुआ गया, ये दिखाएं"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रीन को कहां-कहां छुआ गया, यह दिखाएं"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"रोकें"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"शेयर करें"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"स्क्रीन रिकॉर्डिंग सेव की गई"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"देखने के लिए टैप करें"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रीन रिकॉर्डिंग मिटाने में गड़बड़ी हुई"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"स्क्रीन रिकॉर्डिंग सेव करते समय गड़बड़ी हुई"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन को रिकॉर्ड करने में गड़बड़ी आ रही है"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"वापस जाएं"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"होम"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"चेहरे की पुष्टि हो गई"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"पुष्टि हो गई"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"\'पुष्टि करें\' पर टैप करके पूरा करें"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"चेहरे से अनलॉक किया. जारी रखने के लिए, अनलॉक आइकॉन को दबाएं."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"चेहरे से अनलॉक किया गया. जारी रखने के लिए टैप करें."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"चेहरे की पहचान हो गई. जारी रखने के लिए टैप करें."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"चेहरे की पहचान हो गई. जारी रखने के लिए अनलॉक आइकॉन को टैप करें."</string>
@@ -289,7 +290,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> उपयोग किया गया"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी"</string>
-    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"वर्क ऐप्लिकेशन"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"नाइट लाइट"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"शाम को चालू की जाएगी"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सुबह तक चालू रहेगी"</string>
@@ -943,8 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> पर, <xliff:g id="ARTIST_NAME">%2$s</xliff:g> का <xliff:g id="SONG_NAME">%1$s</xliff:g> चल रहा है"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g> में से <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> चालू है"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"चलाएं"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"रोकें"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"पिछला ट्रैक"</string>
