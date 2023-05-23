@@ -180,6 +180,18 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     }
 
     /**
+     * Returns the elapsed real time (in nanoseconds) at which a snapshot for the given task was
+     * last taken, or -1 if no such snapshot exists for that task.
+     */
+    long getSnapshotCaptureTime(int taskId) {
+        final TaskSnapshot snapshot = mCache.getSnapshot(taskId);
+        if (snapshot != null) {
+            return snapshot.getCaptureTime();
+        }
+        return -1;
+    }
+
+    /**
      * @see WindowManagerInternal#clearSnapshotCache
      */
     public void clearSnapshotCache() {

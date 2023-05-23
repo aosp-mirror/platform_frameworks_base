@@ -28,6 +28,7 @@ import android.graphics.BitmapFactory.Options;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.window.TaskSnapshot;
 
@@ -195,8 +196,9 @@ class AppSnapshotLoader {
                 taskSize = new Point(proto.taskWidth, proto.taskHeight);
             }
 
-            return new TaskSnapshot(proto.id, topActivityComponent, buffer,
-                    hwBitmap.getColorSpace(), proto.orientation, proto.rotation, taskSize,
+            return new TaskSnapshot(proto.id, SystemClock.elapsedRealtimeNanos(),
+                    topActivityComponent, buffer, hwBitmap.getColorSpace(),
+                    proto.orientation, proto.rotation, taskSize,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
                     new Rect(proto.letterboxInsetLeft, proto.letterboxInsetTop,
                             proto.letterboxInsetRight, proto.letterboxInsetBottom),
