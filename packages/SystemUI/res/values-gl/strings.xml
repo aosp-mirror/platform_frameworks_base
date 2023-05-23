@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Compartir"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Gravación da pantalla gardada"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Toca para ver o contido"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Produciuse un erro ao eliminar a gravación de pantalla"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Produciuse un erro ao gardar a gravación da pantalla"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Produciuse un erro ao iniciar a gravación da pantalla"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Volver"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inicio"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Autenticouse a cara"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmada"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toca Confirmar para completar o proceso"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Usouse o desbloqueo facial. Preme a icona de desbloquear."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Usouse o desbloqueo facial. Preme para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Recoñeceuse a cara. Preme para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Recoñeceuse a cara. Preme a icona de desbloquear."</string>
@@ -859,6 +860,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ampliar pantalla completa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Amplía parte da pantalla"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Abrir configuración da ampliación"</string>
+    <!-- no translation found for magnification_close_settings_click_label (4642477260651704517) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Arrastrar a esquina para cambiar o tamaño"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permitir desprazamento diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Cambiar tamaño"</string>
@@ -943,6 +946,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Configuración"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Estase reproducindo <xliff:g id="SONG_NAME">%1$s</xliff:g>, de <xliff:g id="ARTIST_NAME">%2$s</xliff:g>, en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> de <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> estase executando"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Reproducir"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pór en pausa"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Pista anterior"</string>
@@ -1142,15 +1146,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conecta o lapis óptico a un cargador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"O lapis óptico ten pouca batería"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videocámara"</string>
-    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
-    <skip />
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Non se pode chamar desde aplicacións persoais"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"A túa organización só che permite chamar desde aplicacións do traballo"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Cambiar ao perfil de traballo"</string>
-    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
-    <skip />
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalar unha aplicación para teléfonos do traballo"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Cancelar"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizar pantalla de bloqueo"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Para personalizar a pantalla de bloqueo, primeiro desbloquea o dispositivo"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wifi non dispoñible"</string>
