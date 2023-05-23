@@ -796,6 +796,7 @@ public class BrightnessTracker {
                 pw.print(", isUserSetBrightness=" + events[i].isUserSetBrightness);
                 pw.print(", powerBrightnessFactor=" + events[i].powerBrightnessFactor);
                 pw.print(", isDefaultBrightnessConfig=" + events[i].isDefaultBrightnessConfig);
+                pw.print(", recent lux values=");
                 pw.print(" {");
                 for (int j = 0; j < events[i].luxValues.length; ++j){
                     if (j != 0) {
