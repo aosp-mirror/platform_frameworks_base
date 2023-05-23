@@ -88,7 +88,6 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     private static final Multimap<Class<?>, String> KNOWN_BAD =
             ImmutableMultimap.<Class<?>, String>builder()
                     .put(Notification.Builder.class, "setPublicVersion") // b/276294099
-                    .putAll(RemoteViews.class, "addView", "addStableView") // b/277740082
                     .put(RemoteViews.class, "setIcon") // b/281018094
                     .put(Notification.WearableExtender.class, "addAction") // TODO: b/281044385
                     .put(Person.Builder.class, "setUri") // TODO: b/281044385
