@@ -77,6 +77,7 @@ import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.DropBoxManager;
 import android.os.HandlerThread;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.TestLooperManager;
 import android.os.UserHandle;
@@ -327,6 +328,20 @@ public final class BroadcastQueueModernImplTest {
     }
 
     @Test
+    public void testRunnableList_sameRunnableAt() {
+        doReturn(2L).when(mQueue1).getRunnableAt();
+        doReturn(2L).when(mQueue2).getRunnableAt();
+        doReturn(2L).when(mQueue3).getRunnableAt();
+        doReturn(2L).when(mQueue4).getRunnableAt();
+
+        mHead = insertIntoRunnableList(mHead, mQueue1);
+        mHead = insertIntoRunnableList(mHead, mQueue2);
+        mHead = insertIntoRunnableList(mHead, mQueue3);
+        mHead = insertIntoRunnableList(mHead, mQueue4);
+        assertRunnableList(List.of(mQueue1, mQueue2, mQueue3, mQueue4), mHead);
+    }
+
+    @Test
     public void testProcessQueue_Complex() {
         BroadcastProcessQueue red = mImpl.getOrCreateProcessQueue(PACKAGE_RED, TEST_UID);
         BroadcastProcessQueue green = mImpl.getOrCreateProcessQueue(PACKAGE_GREEN, TEST_UID);
@@ -559,6 +574,20 @@ public final class BroadcastQueueModernImplTest {
         queue.setProcessAndUidState(mProcess, false, false);
         assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
         assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+    }
+
+    @Test
+    public void testRunnableAt_coreUid() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                "com.android.bluetooth", Process.BLUETOOTH_UID);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver()));
+        enqueueOrReplaceBroadcast(queue, timeTickRecord, 0);
+
+        assertThat(queue.getRunnableAt()).isEqualTo(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_CORE_UID, queue.getRunnableAtReason());
     }
 
     /**
