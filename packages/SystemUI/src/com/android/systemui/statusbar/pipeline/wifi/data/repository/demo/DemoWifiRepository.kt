@@ -96,7 +96,7 @@ constructor(
             networkId = DEMO_NET_ID,
             isValidated = validated ?: true,
             level = level ?: 0,
-            ssid = ssid,
+            ssid = ssid ?: DEMO_NET_SSID,
 
             // These fields below aren't supported in demo mode, since they aren't needed to satisfy
             // the interface.
@@ -115,5 +115,6 @@ constructor(
 
     companion object {
         private const val DEMO_NET_ID = 1234
+        private const val DEMO_NET_SSID = "Demo SSID"
     }
 }
