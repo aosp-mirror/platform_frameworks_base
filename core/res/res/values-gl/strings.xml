@@ -312,7 +312,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"acceder a ficheiros no teu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música e audio do dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"fotos e vídeos"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"acceder a fotos e vídeos do dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar audio"</string>
@@ -2165,20 +2165,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Queres abrir a aplicación <xliff:g id="APP">%s</xliff:g> do traballo?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Queres abrir o contido na aplicación <xliff:g id="APP">%s</xliff:g> persoal?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Queres abrir o contido na aplicación <xliff:g id="APP">%s</xliff:g> do traballo?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Queres chamar desde a aplicación do traballo?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Queres cambiar á aplicación do traballo?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"A túa organización só che permite chamar desde aplicacións do traballo"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"A túa organización só che permite enviar mensaxes desde aplicacións do traballo"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utilizar navegador persoal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utilizar navegador de traballo"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Chamar"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Cambiar"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueo da rede SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN de desbloqueo do subconxunto da rede SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN de desbloqueo corporativo da SIM"</string>
