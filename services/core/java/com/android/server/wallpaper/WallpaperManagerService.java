@@ -82,6 +82,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -2514,6 +2515,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      * Propagate a wake event to the wallpaper engine(s).
      */
     public void notifyWakingUp(int x, int y, @NonNull Bundle extras) {
+        checkCallerIsSystemOrSystemUi();
         synchronized (mLock) {
             if (mIsLockscreenLiveWallpaperEnabled) {
                 for (WallpaperData data : getActiveWallpapers()) {
@@ -2551,6 +2553,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      * Propagate a sleep event to the wallpaper engine(s).
      */
     public void notifyGoingToSleep(int x, int y, @NonNull Bundle extras) {
+        checkCallerIsSystemOrSystemUi();
         synchronized (mLock) {
             if (mIsLockscreenLiveWallpaperEnabled) {
                 for (WallpaperData data : getActiveWallpapers()) {
@@ -3682,6 +3685,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private boolean isFromForegroundApp(String callingPackage) {
         return Binder.withCleanCallingIdentity(() ->
                 mActivityManager.getPackageImportance(callingPackage) == IMPORTANCE_FOREGROUND);
+    }
+
+    /** Check that the caller is either system_server or systemui */
+    private void checkCallerIsSystemOrSystemUi() {
+        if (Binder.getCallingUid() != Process.myUid() && mContext.checkCallingPermission(
+                android.Manifest.permission.STATUS_BAR_SERVICE) != PERMISSION_GRANTED) {
+            throw new SecurityException("Access denied: only system processes can call this");
+        }
     }
 
     /**
