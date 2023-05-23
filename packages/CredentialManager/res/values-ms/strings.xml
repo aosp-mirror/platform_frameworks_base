@@ -36,7 +36,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Keselamatan akaun yang dipertingkatkan"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Setiap kunci dipautkan secara eksklusif dengan apl atau laman web kunci dicipta, jadi anda tidak boleh log masuk ke apl atau laman web penipuan secara tidak sengaja. Selain itu, dengan pelayan yang hanya menyimpan kunci awam, penggodaman menjadi jauh lebih sukar."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Peralihan yang lancar"</string>
-    <string name="seamless_transition_detail" msgid="4475509237171739843">"Semasa kita bergerak menuju ke arah masa depan tanpa kata laluan, kata laluan masih akan tersedia bersama dengan kunci laluan."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Meskipun masa depan kita nanti tidak memerlukan kata laluan, kata laluan masih akan tersedia bersama dengan kunci laluan."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pilih tempat untuk menyimpan <xliff:g id="CREATETYPES">%1$s</xliff:g> anda"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pilih Password Manager untuk menyimpan maklumat anda dan log masuk lebih pantas pada kali seterusnya"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Cipta kunci laluan untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -59,7 +59,7 @@
     <string name="use_once" msgid="9027366575315399714">"Gunakan sekali"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> kata laluan • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> kunci laluan"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Kata laluan <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
-    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Kunci laluan <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> kunci laluan"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> bukti kelayakan"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Kunci laluan"</string>
     <string name="another_device" msgid="5147276802037801217">"Peranti lain"</string>
