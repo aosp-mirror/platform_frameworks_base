@@ -3157,6 +3157,8 @@
   <java-symbol type="string" name="deprecated_target_sdk_message" />
   <java-symbol type="string" name="deprecated_target_sdk_app_store" />
 
+  <java-symbol type="string" name="deprecated_abi_message" />
+
   <!-- New SMS notification while phone is locked. -->
   <java-symbol type="string" name="new_sms_notification_title" />
   <java-symbol type="string" name="new_sms_notification_content" />
