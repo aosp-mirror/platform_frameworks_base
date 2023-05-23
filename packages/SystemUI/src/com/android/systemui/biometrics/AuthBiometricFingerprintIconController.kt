@@ -122,7 +122,9 @@ open class AuthBiometricFingerprintIconController(
         if (shouldAnimateIconViewForTransition(lastState, newState)) {
             iconView.playAnimation()
         }
-        LottieColorUtils.applyDynamicColors(context, iconView)
+        if (isSideFps) {
+            LottieColorUtils.applyDynamicColors(context, iconView)
+        }
     }
 
     override fun updateIcon(@BiometricState lastState: Int, @BiometricState newState: Int) {
