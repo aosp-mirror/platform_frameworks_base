@@ -1135,6 +1135,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
+    "-1060529098": {
+      "message": "  Skipping post-transition snapshot for task %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-1060365734": {
       "message": "Attempted to add QS dialog window with bad token %s.  Aborting.",
       "level": "WARN",
