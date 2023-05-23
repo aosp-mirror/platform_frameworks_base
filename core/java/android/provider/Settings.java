@@ -295,6 +295,19 @@ public final class Settings {
             "android.settings.AIRPLANE_MODE_SETTINGS";
 
     /**
+     * Activity Action: Show enabled eSim profile in Settings
+     * <p>
+     * This opens the Settings page for the currently enabled eSim profile
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    public static final String ACTION_SHOW_ENABLED_ESIM_PROFILE =
+            "android.settings.SHOW_ENABLED_ESIM_PROFILE";
+
+    /**
      * Activity Action: Show mobile data usage list.
      * <p>
      * Input: {@link EXTRA_NETWORK_TEMPLATE} and {@link EXTRA_SUB_ID} should be included to specify
