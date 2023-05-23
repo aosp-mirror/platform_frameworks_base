@@ -54,14 +54,6 @@ public class TabletopModeController implements
         DevicePostureController.OnDevicePostureChangedListener,
         DisplayController.OnDisplaysChangedListener {
     /**
-     * When {@code true}, floating windows like PiP would auto move to the position
-     * specified by {@link #PREFER_TOP_HALF_IN_TABLETOP} when in tabletop mode.
-     */
-    private static final boolean ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP =
-            SystemProperties.getBoolean(
-                    "persist.wm.debug.enable_move_floating_window_in_tabletop", true);
-
-    /**
      * Prefer the {@link #PREFERRED_TABLETOP_HALF_TOP} if this flag is enabled,
      * {@link #PREFERRED_TABLETOP_HALF_BOTTOM} otherwise.
      * See also {@link #getPreferredHalfInTabletopMode()}.
@@ -160,14 +152,6 @@ public class TabletopModeController implements
                     break;
             }
         }
-    }
-
-    /**
-     * @return {@code true} if floating windows like PiP would auto move to the position
-     * specified by {@link #getPreferredHalfInTabletopMode()} when in tabletop mode.
-     */
-    public boolean enableMoveFloatingWindowInTabletop() {
-        return ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP;
     }
 
     /** @return Preferred half for floating windows like PiP when in tabletop mode. */

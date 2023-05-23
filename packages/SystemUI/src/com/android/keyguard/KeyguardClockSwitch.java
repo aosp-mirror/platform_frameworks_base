@@ -66,6 +66,17 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 top + targetHeight);
     }
 
+    /** Returns a region for the small clock to position itself, based on the given parent. */
+    public static Rect getSmallClockRegion(ViewGroup parent) {
+        int targetHeight = parent.getResources()
+                .getDimensionPixelSize(R.dimen.small_clock_text_size);
+        return new Rect(
+                parent.getLeft(),
+                parent.getTop(),
+                parent.getRight(),
+                parent.getTop() + targetHeight);
+    }
+
     /**
      * Frame for small/large clocks
      */
@@ -172,13 +183,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
     void updateClockTargetRegions() {
         if (mClock != null) {
             if (mSmallClockFrame.isLaidOut()) {
-                int targetHeight =  getResources()
-                        .getDimensionPixelSize(R.dimen.small_clock_text_size);
-                mClock.getSmallClock().getEvents().onTargetRegionChanged(new Rect(
-                        mSmallClockFrame.getLeft(),
-                        mSmallClockFrame.getTop(),
-                        mSmallClockFrame.getRight(),
-                        mSmallClockFrame.getTop() + targetHeight));
+                Rect targetRegion = getSmallClockRegion(mSmallClockFrame);
+                mClock.getSmallClock().getEvents().onTargetRegionChanged(targetRegion);
             }
 
             if (mLargeClockFrame.isLaidOut()) {
