@@ -58,9 +58,20 @@ public class InsetsSource implements Parcelable {
      */
     public static final int FLAG_SUPPRESS_SCRIM = 1;
 
+    /**
+     * Controls whether the insets frame will be used to move {@link RoundedCorner} inward with the
+     * insets frame size when calculating the rounded corner insets to other windows.
+     *
+     * For example, task bar will draw fake rounded corners above itself, so we need to move the
+     * rounded corner up by the task bar insets size to make other windows see a rounded corner
+     * above the task bar.
+     */
+    public static final int FLAG_INSETS_ROUNDED_CORNER = 1 << 1;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = "FLAG_", value = {
             FLAG_SUPPRESS_SCRIM,
+            FLAG_INSETS_ROUNDED_CORNER,
     })
     public @interface Flags {}
 
@@ -78,7 +89,6 @@ public class InsetsSource implements Parcelable {
     private @Nullable Rect mVisibleFrame;
 
     private boolean mVisible;
-    private boolean mInsetsRoundedCornerFrame;
 
     private final Rect mTmpFrame = new Rect();
 
@@ -98,7 +108,6 @@ public class InsetsSource implements Parcelable {
                 ? new Rect(other.mVisibleFrame)
                 : null;
         mFlags = other.mFlags;
-        mInsetsRoundedCornerFrame = other.mInsetsRoundedCornerFrame;
     }
 
     public void set(InsetsSource other) {
@@ -108,7 +117,6 @@ public class InsetsSource implements Parcelable {
                 ? new Rect(other.mVisibleFrame)
                 : null;
         mFlags = other.mFlags;
-        mInsetsRoundedCornerFrame = other.mInsetsRoundedCornerFrame;
     }
 
     public InsetsSource setFrame(int left, int top, int right, int bottom) {
@@ -136,6 +144,11 @@ public class InsetsSource implements Parcelable {
         return this;
     }
 
+    public InsetsSource setFlags(@Flags int flags, @Flags int mask) {
+        mFlags = (mFlags & ~mask) | (flags & mask);
+        return this;
+    }
+
     public int getId() {
         return mId;
     }
@@ -160,18 +173,13 @@ public class InsetsSource implements Parcelable {
         return mFlags;
     }
 
+    public boolean hasFlags(int flags) {
+        return (mFlags & flags) == flags;
+    }
+
     boolean isUserControllable() {
         // If mVisibleFrame is null, it will be the same area as mFrame.
         return mVisibleFrame == null || !mVisibleFrame.isEmpty();
-    }
-
-    public boolean insetsRoundedCornerFrame() {
-        return mInsetsRoundedCornerFrame;
-    }
-
-    public InsetsSource setInsetsRoundedCornerFrame(boolean insetsRoundedCornerFrame) {
-        mInsetsRoundedCornerFrame = insetsRoundedCornerFrame;
-        return this;
     }
 
     /**
@@ -317,6 +325,9 @@ public class InsetsSource implements Parcelable {
         if ((flags & FLAG_SUPPRESS_SCRIM) != 0) {
             joiner.add("SUPPRESS_SCRIM");
         }
+        if ((flags & FLAG_INSETS_ROUNDED_CORNER) != 0) {
+            joiner.add("INSETS_ROUNDED_CORNER");
+        }
         return joiner.toString();
     }
 
@@ -347,7 +358,6 @@ public class InsetsSource implements Parcelable {
         }
         pw.print(" visible="); pw.print(mVisible);
         pw.print(" flags="); pw.print(flagsToString(mFlags));
-        pw.print(" insetsRoundedCornerFrame="); pw.print(mInsetsRoundedCornerFrame);
         pw.println();
     }
 
@@ -372,14 +382,12 @@ public class InsetsSource implements Parcelable {
         if (mFlags != that.mFlags) return false;
         if (excludeInvisibleImeFrames && !mVisible && mType == WindowInsets.Type.ime()) return true;
         if (!Objects.equals(mVisibleFrame, that.mVisibleFrame)) return false;
-        if (mInsetsRoundedCornerFrame != that.mInsetsRoundedCornerFrame) return false;
         return mFrame.equals(that.mFrame);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mType, mFrame, mVisibleFrame, mVisible, mFlags,
-                mInsetsRoundedCornerFrame);
+        return Objects.hash(mId, mType, mFrame, mVisibleFrame, mVisible, mFlags);
     }
 
     public InsetsSource(Parcel in) {
@@ -393,7 +401,6 @@ public class InsetsSource implements Parcelable {
         }
         mVisible = in.readBoolean();
         mFlags = in.readInt();
-        mInsetsRoundedCornerFrame = in.readBoolean();
     }
 
     @Override
@@ -414,7 +421,6 @@ public class InsetsSource implements Parcelable {
         }
         dest.writeBoolean(mVisible);
         dest.writeInt(mFlags);
-        dest.writeBoolean(mInsetsRoundedCornerFrame);
     }
 
     @Override
@@ -424,7 +430,6 @@ public class InsetsSource implements Parcelable {
                 + " mFrame=" + mFrame.toShortString()
                 + " mVisible=" + mVisible
                 + " mFlags=[" + flagsToString(mFlags) + "]"
-                + (mInsetsRoundedCornerFrame ? " insetsRoundedCornerFrame" : "")
                 + "}";
     }
 

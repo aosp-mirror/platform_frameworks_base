@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
 import static android.view.InsetsStateProto.DISPLAY_FRAME;
 import static android.view.InsetsStateProto.SOURCES;
@@ -219,7 +220,7 @@ public class InsetsState implements Parcelable {
         final Rect roundedCornerFrame = new Rect(mRoundedCornerFrame);
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
-            if (source.insetsRoundedCornerFrame()) {
+            if (source.hasFlags(FLAG_INSETS_ROUNDED_CORNER)) {
                 final Insets insets = source.calculateInsets(roundedCornerFrame, false);
                 roundedCornerFrame.inset(insets);
             }
