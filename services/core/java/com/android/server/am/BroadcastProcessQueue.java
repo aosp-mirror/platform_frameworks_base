@@ -1015,6 +1015,7 @@ class BroadcastProcessQueue {
     static final int REASON_CONTAINS_INSTRUMENTED = 16;
     static final int REASON_CONTAINS_MANIFEST = 17;
     static final int REASON_FOREGROUND = 18;
+    static final int REASON_CORE_UID = 19;
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
@@ -1035,6 +1036,7 @@ class BroadcastProcessQueue {
             REASON_CONTAINS_INSTRUMENTED,
             REASON_CONTAINS_MANIFEST,
             REASON_FOREGROUND,
+            REASON_CORE_UID,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -1059,6 +1061,7 @@ class BroadcastProcessQueue {
             case REASON_CONTAINS_INSTRUMENTED: return "CONTAINS_INSTRUMENTED";
             case REASON_CONTAINS_MANIFEST: return "CONTAINS_MANIFEST";
             case REASON_FOREGROUND: return "FOREGROUND";
+            case REASON_CORE_UID: return "CORE_UID";
             default: return Integer.toString(reason);
         }
     }
@@ -1103,6 +1106,9 @@ class BroadcastProcessQueue {
             } else if (mProcessPersistent) {
                 mRunnableAt = runnableAt + constants.DELAY_PERSISTENT_PROC_MILLIS;
                 mRunnableAtReason = REASON_PERSISTENT;
+            } else if (UserHandle.isCore(uid)) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_CORE_UID;
             } else if (mCountOrdered > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_ORDERED;
@@ -1257,7 +1263,7 @@ class BroadcastProcessQueue {
         BroadcastProcessQueue test = head;
         BroadcastProcessQueue tail = null;
         while (test != null) {
-            if (test.getRunnableAt() >= itemRunnableAt) {
+            if (test.getRunnableAt() > itemRunnableAt) {
                 item.runnableAtNext = test;
                 item.runnableAtPrev = test.runnableAtPrev;
                 if (item.runnableAtNext != null) {
