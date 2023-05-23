@@ -59,7 +59,7 @@
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Возможно, вы указали неверный пароль. Повторите попытку."</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Недоступна"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Подключение не будет выполняться автоматически"</string>
-    <string name="wifi_no_internet" msgid="1774198889176926299">"Без доступа к Интернету"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"Без доступа к интернету"</string>
     <string name="saved_network" msgid="7143698034077223645">"Сохранено: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Автоматически подключено к %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Автоматически подключено через автора рейтинга сетей"</string>
@@ -115,8 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD Audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD Audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слуховые аппараты"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (1725521360076451751) -->
-    <skip />
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Слуховой аппарат подключен"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Подключено к LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Подключено к мультимедийному аудиоустройству"</string>
@@ -142,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Отмена"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Установление соединения обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Устройство \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" не подключено: неверный PIN-код или пароль."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"\"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" не подключается: неверный PIN-код или пароль."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не удается установить соединение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает подключение."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -216,8 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Выбор профиля"</string>
     <string name="category_personal" msgid="6236798763159385225">"Личный профиль"</string>
     <string name="category_work" msgid="4014193632325996115">"Рабочий профиль"</string>
-    <!-- no translation found for category_clone (1554511758987195974) -->
-    <skip />
+    <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Для разработчиков"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Включить параметры для разработчиков"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Настройка параметров для разработчиков"</string>
