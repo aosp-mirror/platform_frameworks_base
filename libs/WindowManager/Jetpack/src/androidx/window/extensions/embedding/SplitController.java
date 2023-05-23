@@ -1418,7 +1418,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (splitRule instanceof SplitPairRule && ((SplitPairRule) splitRule).shouldClearTop()) {
             removeExistingSecondaryContainers(wct, primaryContainer);
         }
-        primaryContainer.getTaskContainer().mSplitContainers.add(splitContainer);
+        primaryContainer.getTaskContainer().addSplitContainer(splitContainer);
     }
 
     /** Cleanups all the dependencies when the TaskFragment is entering PIP. */
@@ -1430,8 +1430,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
         final List<SplitContainer> splitsToRemove = new ArrayList<>();
+        final List<SplitContainer> splitContainers = taskContainer.getSplitContainers();
         final Set<TaskFragmentContainer> containersToUpdate = new ArraySet<>();
-        for (SplitContainer splitContainer : taskContainer.mSplitContainers) {
+        for (SplitContainer splitContainer : splitContainers) {
             if (splitContainer.getPrimaryContainer() != container
                     && splitContainer.getSecondaryContainer() != container) {
                 continue;
@@ -1449,7 +1450,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
         container.resetDependencies();
-        taskContainer.mSplitContainers.removeAll(splitsToRemove);
+        taskContainer.removeSplitContainers(splitsToRemove);
         // If there is any TaskFragment split with the PIP TaskFragment, update their presentations
         // since the split is dismissed.
         // We don't want to close any of them even if they are dependencies of the PIP TaskFragment.
@@ -1481,7 +1482,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // Cleanup any split references.
         final List<SplitContainer> containersToRemove = new ArrayList<>();
-        for (SplitContainer splitContainer : taskContainer.mSplitContainers) {
+        final List<SplitContainer> splitContainers = taskContainer.getSplitContainers();
+        for (SplitContainer splitContainer : splitContainers) {
             if (containersToRemove.contains(splitContainer)) {
                 // Don't need to check because it has been in the remove list.
                 continue;
@@ -1492,7 +1494,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 containersToRemove.add(splitContainer);
             }
         }
-        taskContainer.mSplitContainers.removeAll(containersToRemove);
+        taskContainer.removeSplitContainers(containersToRemove);
 
         // Cleanup any dependent references.
         for (TaskFragmentContainer containerToUpdate : taskContainer.mContainers) {
@@ -1629,7 +1631,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /** Whether the given split is the topmost split in the Task. */
     private boolean isTopMostSplit(@NonNull SplitContainer splitContainer) {
         final List<SplitContainer> splitContainers = splitContainer.getPrimaryContainer()
-                .getTaskContainer().mSplitContainers;
+                .getTaskContainer().getSplitContainers();
         return splitContainer == splitContainers.get(splitContainers.size() - 1);
     }
 
@@ -1641,7 +1643,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (container == null) {
             return null;
         }
-        final List<SplitContainer> splitContainers = container.getTaskContainer().mSplitContainers;
+        final List<SplitContainer> splitContainers =
+                container.getTaskContainer().getSplitContainers();
         if (splitContainers.isEmpty()) {
             return null;
         }
@@ -1665,7 +1668,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             @NonNull TaskFragmentContainer firstContainer,
             @NonNull TaskFragmentContainer secondContainer) {
         final List<SplitContainer> splitContainers = firstContainer.getTaskContainer()
-                .mSplitContainers;
+                .getSplitContainers();
         for (int i = splitContainers.size() - 1; i >= 0; i--) {
             final SplitContainer splitContainer = splitContainers.get(i);
             final TaskFragmentContainer primary = splitContainer.getPrimaryContainer();
@@ -1945,7 +1948,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     SplitContainer getSplitContainer(@NonNull IBinder token) {
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
-            final List<SplitContainer> containers = mTaskContainers.valueAt(i).mSplitContainers;
+            final List<SplitContainer> containers = mTaskContainers.valueAt(i).getSplitContainers();
             for (SplitContainer container : containers) {
                 if (container.getToken().equals(token)) {
                     return container;
