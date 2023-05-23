@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Chia sẻ"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Đã lưu bản ghi màn hình"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Nhấn để xem"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Lỗi khi xóa bản ghi màn hình"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Có lỗi xảy ra khi lưu video ghi màn hình"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Lỗi khi bắt đầu ghi màn hình"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Quay lại"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Trang chủ"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Đã xác thực khuôn mặt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Ðã xác nhận"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Nhấn vào Xác nhận để hoàn tất"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Đã mở khoá bằng khuôn mặt. Nhấn vào biểu tượng mở khoá để tiếp tục."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Đã mở khoá bằng khuôn mặt. Hãy nhấn để tiếp tục."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Đã nhận diện khuôn mặt. Hãy nhấn để tiếp tục."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Đã nhận diện khuôn mặt. Nhấn biểu tượng mở khoá để tiếp tục."</string>
@@ -943,6 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Cài đặt"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Đang phát <xliff:g id="SONG_NAME">%1$s</xliff:g> của <xliff:g id="ARTIST_NAME">%2$s</xliff:g> trên <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>/<xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang chạy"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Phát"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Tạm dừng"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Bản nhạc trước"</string>
