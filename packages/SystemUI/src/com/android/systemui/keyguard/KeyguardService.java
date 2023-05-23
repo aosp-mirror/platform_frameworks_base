@@ -295,46 +295,6 @@ public class KeyguardService extends Service {
         }
     }
 
-    final IRemoteTransition mOccludeAnimation = new IRemoteTransition.Stub() {
-        @Override
-        public void startAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
-                    throws RemoteException {
-            t.apply();
-            mBinder.setOccluded(true /* isOccluded */, true /* animate */);
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
-            info.releaseAllSurfaces();
-        }
-
-        @Override
-        public void mergeAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IBinder mergeTarget,
-                IRemoteTransitionFinishedCallback finishCallback) {
-            t.close();
-            info.releaseAllSurfaces();
-        }
-    };
-
-    final IRemoteTransition mUnoccludeAnimation = new IRemoteTransition.Stub() {
-        @Override
-        public void startAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
-                throws RemoteException {
-            t.apply();
-            mBinder.setOccluded(false /* isOccluded */, true /* animate */);
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
-            info.releaseAllSurfaces();
-        }
-
-        @Override
-        public void mergeAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IBinder mergeTarget,
-                IRemoteTransitionFinishedCallback finishCallback) {
-            t.close();
-            info.releaseAllSurfaces();
-        }
-    };
-
     private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
         private static final String TRACK_NAME = "IKeyguardService";
 
