@@ -1272,6 +1272,10 @@ class Task extends TaskFragment {
         if (isPersistable) {
             mLastTimeMoved = System.currentTimeMillis();
         }
+        if (toTop && inRecents) {
+            // If task is in recents, ensure it is at the top
+            mTaskSupervisor.mRecentTasks.add(this);
+        }
     }
 
     // Close up recents linked list.
