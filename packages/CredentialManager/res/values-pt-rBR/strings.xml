@@ -26,7 +26,7 @@
     <string name="content_description_hide_password" msgid="6841375971631767996">"Ocultar senha"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Mais segurança com as chaves de acesso"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Com as chaves de acesso, você não precisa criar nem se lembrar de senhas complexas"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"As chaves de acesso são chaves digitais criptografadas que você cria usando a impressão digital, o rosto ou o bloqueio de tela"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"As chaves de acesso são chaves digitais criptografadas que você cria usando a impressão digital, o rosto ou o bloqueio de tela."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Elas são salvas em um gerenciador de senhas para que você possa fazer login em outros dispositivos"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Saiba mais sobre chaves de acesso"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnologia sem senha"</string>
