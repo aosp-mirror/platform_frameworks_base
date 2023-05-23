@@ -24,19 +24,19 @@
     <string name="string_learn_more" msgid="4541600451688392447">"Sužinokite daugiau"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Rodyti slaptažodį"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Slėpti slaptažodį"</string>
-    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Saugiau naudojant slaptažodžius"</string>
-    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Naudojant „passkey“ nereikės kurti ir prisiminti sudėtingų slaptažodžių"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"„Passkey“ šifruojami skaitiniais raktais, kuriuos sukuriate naudodami piršto atspaudą, veidą ar ekrano užraktą"</string>
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Saugiau naudojant prieigos raktus"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Naudojant prieigos raktus nereikės kurti ir prisiminti sudėtingų slaptažodžių"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Prieigos raktai šifruojami skaitiniais raktais, kuriuos sukuriate naudodami piršto atspaudą, veidą ar ekrano užraktą"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Jie saugomi slaptažodžių tvarkyklėje, kad galėtumėte prisijungti kituose įrenginiuose"</string>
-    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Daugiau apie slaptuosius raktus („passkey“)"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Daugiau apie prieigos raktus („passkey“)"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Technologijos be slaptažodžių"</string>
-    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Naudodami slaptuosius raktus galite prisijungti be slaptažodžių. Tiesiog naudokite piršto atspaudą, atpažinimą pagal veidą, PIN kodą arba perbraukiamą atrakinimo piešinį, kad patvirtintumėte tapatybę ir sukurtumėte slaptąjį raktą."</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Naudodami prieigos raktus galite prisijungti be slaptažodžių. Tiesiog naudokite piršto atspaudą, atpažinimą pagal veidą, PIN kodą arba perbraukiamą atrakinimo piešinį, kad patvirtintumėte tapatybę ir sukurtumėte prieigos raktą."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Viešojo rakto kriptografija"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Pagal FIDO aljansą (kuriam priklauso „Google“, „Apple“, „Microsoft“ ir kt.) bei W3C standartus, slaptiesiems raktams naudojamos kriptografinių raktų poros. Priešingai nei naudotojo vardas ir eilutė simbolių, naudojamų slaptažodžiams, privataus ir viešojo raktų pora sukuriama programai ar svetainei. Tapatybę patvirtinantis privatusis raktas saugomas įrenginyje ar Slaptažodžių tvarkyklėje. Viešasis raktas bendrinamas su programos ar svetainės serveriu. Naudodami atitinkamus raktus galite akimirksniu užsiregistruoti ir prisijungti."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Pagal FIDO aljansą (kuriam priklauso „Google“, „Apple“, „Microsoft“ ir kt.) bei W3C standartus, prieigos raktams naudojamos kriptografinių raktų poros. Priešingai nei naudotojo vardas ir eilutė simbolių, naudojamų slaptažodžiams, privataus ir viešojo raktų pora sukuriama programai ar svetainei. Tapatybę patvirtinantis privatusis raktas saugomas įrenginyje ar Slaptažodžių tvarkyklėje. Viešasis raktas bendrinamas su programos ar svetainės serveriu. Naudodami atitinkamus raktus galite akimirksniu užsiregistruoti ir prisijungti."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Geresnė paskyros sauga"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Kiekvienas raktas išskirtinai susietas su programa ar svetaine, kuriai buvo sukurtas, todėl niekada per klaidą neprisijungsite prie apgavikiškos programos ar svetainės. Be to, viešieji raktai laikomi tik serveriuose, todėl įsilaužti tampa gerokai sudėtingiau."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Sklandus perėjimas"</string>
-    <string name="seamless_transition_detail" msgid="4475509237171739843">"Kol stengiamės padaryti, kad ateityje nereikėtų naudoti slaptažodžių, jie vis dar bus pasiekiami kartu su slaptaisiais raktais."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Kol stengiamės padaryti, kad ateityje nereikėtų naudoti slaptažodžių, jie vis dar bus pasiekiami kartu su prieigos raktais."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pasirinkite, kur išsaugoti „<xliff:g id="CREATETYPES">%1$s</xliff:g>“"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pasirinkite slaptažodžių tvarkyklę, kurią naudodami galėsite išsaugoti informaciją ir kitą kartą prisijungti greičiau"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Sukurti „passkey“, skirtą „<xliff:g id="APPNAME">%1$s</xliff:g>“?"</string>
@@ -44,7 +44,7 @@
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Išsaugoti prisijungimo prie „<xliff:g id="APPNAME">%1$s</xliff:g>“ informaciją?"</string>
     <string name="passkey" msgid="632353688396759522">"„passkey“"</string>
     <string name="password" msgid="6738570945182936667">"slaptažodis"</string>
-    <string name="passkeys" msgid="5733880786866559847">"passkey"</string>
+    <string name="passkeys" msgid="5733880786866559847">"prieigos raktas"</string>
     <string name="passwords" msgid="5419394230391253816">"slaptažodžiai"</string>
     <string name="sign_ins" msgid="4710739369149469208">"prisijungimo informacija"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"prisijungimo informaciją"</string>
@@ -53,13 +53,13 @@
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Išsaugoti slaptažodį kitame įrenginyje?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Išsaugoti prisijungimo duomenis kitame įrenginyje?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Naudoti <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> visada prisijungiant?"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Šioje <xliff:g id="USERNAME">%1$s</xliff:g> Slaptažodžių tvarkyklėje bus saugomi jūsų slaptažodžiai ir „passkey“, kad galėtumėte lengvai prisijungti"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Šioje <xliff:g id="USERNAME">%1$s</xliff:g> Slaptažodžių tvarkyklėje bus saugomi jūsų slaptažodžiai ir prieigos raktai, kad galėtumėte lengvai prisijungti"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Nustatyti kaip numatytąjį"</string>
     <string name="settings" msgid="6536394145760913145">"Nustatymai"</string>
     <string name="use_once" msgid="9027366575315399714">"Naudoti vieną kartą"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Slaptažodžių: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • „Passkey“: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Slaptažodžių: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Prieigos raktų: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"slaptažodžių: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
-    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"„passkey“: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Prieigos raktai: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"Prisijungimo duomenų: <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Slaptažodis"</string>
     <string name="another_device" msgid="5147276802037801217">"Kitas įrenginys"</string>
