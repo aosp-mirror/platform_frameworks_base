@@ -961,12 +961,6 @@ public class DisplayPolicy {
         if (!win.mSession.mCanSetUnrestrictedGestureExclusion) {
             attrs.privateFlags &= ~PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
         }
-
-        final InsetsSourceProvider provider = win.getControllableInsetProvider();
-        if (provider != null && provider.getSource().insetsRoundedCornerFrame()
-                != attrs.insetsRoundedCornerFrame) {
-            provider.getSource().setInsetsRoundedCornerFrame(attrs.insetsRoundedCornerFrame);
-        }
     }
 
     /**
@@ -1104,9 +1098,11 @@ public class DisplayPolicy {
                 } else {
                     overrideProviders = null;
                 }
-                mDisplayContent.getInsetsStateController().getOrCreateSourceProvider(
-                        provider.getId(), provider.getType()).setWindowContainer(
-                                win, frameProvider, overrideProviders);
+                final InsetsSourceProvider sourceProvider = mDisplayContent
+                        .getInsetsStateController().getOrCreateSourceProvider(provider.getId(),
+                                provider.getType());
+                sourceProvider.getSource().setFlags(provider.getFlags());
+                sourceProvider.setWindowContainer(win, frameProvider, overrideProviders);
                 mInsetsSourceWindowsExceptIme.add(win);
             }
         }

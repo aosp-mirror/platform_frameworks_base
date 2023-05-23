@@ -38,6 +38,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCA
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
@@ -461,7 +462,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testGetCropBoundsIfNeeded_handleCropForTransparentActivityBasedOnOpaqueBounds() {
         final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
                  WindowInsets.Type.navigationBars());
-        taskbar.setInsetsRoundedCornerFrame(true);
+        taskbar.setFlags(FLAG_INSETS_ROUNDED_CORNER, FLAG_INSETS_ROUNDED_CORNER);
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
         final Rect opaqueBounds = new Rect(0, 0, 500, 300);
         doReturn(opaqueBounds).when(mActivity).getBounds();
@@ -505,7 +506,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testGetCropBoundsIfNeeded_appliesCrop() {
         final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
                 WindowInsets.Type.navigationBars());
-        taskbar.setInsetsRoundedCornerFrame(true);
+        taskbar.setFlags(FLAG_INSETS_ROUNDED_CORNER, FLAG_INSETS_ROUNDED_CORNER);
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
 
         // Apply crop if taskbar is expanded
@@ -528,7 +529,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testGetCropBoundsIfNeeded_appliesCropWithSizeCompatScaling() {
         final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
                 WindowInsets.Type.navigationBars());
-        taskbar.setInsetsRoundedCornerFrame(true);
+        taskbar.setFlags(FLAG_INSETS_ROUNDED_CORNER, FLAG_INSETS_ROUNDED_CORNER);
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
         final float scaling = 2.0f;
 
