@@ -23,8 +23,6 @@ import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_IDLE;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioDescriptor;
-import android.media.AudioDeviceAttributes;
-import android.media.AudioDeviceInfo;
 import android.media.AudioProfile;
 import android.os.Handler;
 import android.util.IndentingPrintWriter;
@@ -88,10 +86,10 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
 
         mReportCapsHandler.removeCallbacksAndMessages(null);
         if (status == HDMI_EARC_STATUS_IDLE) {
-            notifyEarcStatusToAudioService(false, new ArrayList<>());
+            mService.notifyEarcStatusToAudioService(false, new ArrayList<>());
             mService.startArcAction(false, null);
         } else if (status == HDMI_EARC_STATUS_ARC_PENDING) {
-            notifyEarcStatusToAudioService(false, new ArrayList<>());
+            mService.notifyEarcStatusToAudioService(false, new ArrayList<>());
             mService.startArcAction(true, null);
         } else if (status == HDMI_EARC_STATUS_EARC_PENDING
                 && oldEarcStatus == HDMI_EARC_STATUS_ARC_PENDING) {
@@ -110,17 +108,9 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
                     && mReportCapsHandler.hasCallbacks(mReportCapsRunnable)) {
                 mReportCapsHandler.removeCallbacksAndMessages(null);
                 List<AudioDescriptor> audioDescriptors = parseCapabilities(rawCapabilities);
-                notifyEarcStatusToAudioService(true, audioDescriptors);
+                mService.notifyEarcStatusToAudioService(true, audioDescriptors);
             }
         }
-    }
-
-    private void notifyEarcStatusToAudioService(
-            boolean enabled, List<AudioDescriptor> audioDescriptors) {
-        AudioDeviceAttributes attributes = new AudioDeviceAttributes(
-                AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_HDMI_EARC, "", "",
-                new ArrayList<AudioProfile>(), audioDescriptors);
-        mService.getAudioManager().setWiredDeviceConnectionState(attributes, enabled ? 1 : 0);
     }
 
     /**
@@ -134,7 +124,7 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
         public void run() {
             synchronized (mLock) {
                 if (mEarcStatus == HDMI_EARC_STATUS_EARC_CONNECTED) {
-                    notifyEarcStatusToAudioService(true, new ArrayList<>());
+                    mService.notifyEarcStatusToAudioService(true, new ArrayList<>());
                 }
             }
         }
