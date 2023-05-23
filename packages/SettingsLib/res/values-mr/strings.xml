@@ -548,10 +548,10 @@
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"हा फोन"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"या डिव्हाइसवर प्ले करू शकत नाही"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"स्विच करण्यासाठी खाते अपग्रेड करा"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"येथे डाउनलोड प्ले केले जाऊ शकत नाही"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"येथे डाउनलोड प्ले केले जाऊ शकत नाहीत"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"जाहिरातीनंतर पुन्हा प्रयत्न करा"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"येथे प्ले करण्यासाठी डिव्हाइस सुरू करा"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"प्ले करण्यासाठी डिव्हाइस हे मंजुरी दिलेले नाही"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"डिव्हाइसला प्ले करण्यासाठी मंजुरी नाही"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"हा मीडिया येथे प्ले करू शकत नाही"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्‍ट करण्‍यात समस्‍या आली. डिव्हाइस बंद करा आणि नंतर सुरू करा"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर असलेले ऑडिओ डिव्हाइस"</string>
@@ -576,7 +576,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबंधित प्रोफाईल"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"नवीन वापरकर्ता जोडायचा?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"अतिरिक्त वापरकर्ते तयार करून तुम्ही इतर लोकांसोबत हे डिव्हाइस शेअर करू शकता. प्रत्येक वापरकर्त्यास त्यांची स्वतःची स्पेस असते, जी ते अ‍ॅप्स, वॉलपेपर आणि यासारख्या गोष्टींनी कस्टमाइझ करू शकतात. वापरकर्ते प्रत्येकाला प्रभावित करणाऱ्या वाय-फाय सारख्या डिव्हाइस सेटिंग्ज अ‍ॅडजस्ट देखील करू शकतात.\n\nतुम्ही एक नवीन वापरकर्ता जोडता, तेव्हा त्या व्यक्तीला त्याची स्पेस सेट अप करण्याची आवश्यकता असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो. अ‍ॅक्सेसिबिलिटी सेटिंग्ज आणि सेवा नवीन वापरकर्त्याला कदाचित ट्रान्सफर होणार नाहीत."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"तुम्ही एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीस त्यांचे स्थान सेट करण्याची आवश्यकता असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"तुम्ही एक नवीन वापरकर्ता जोडता, तेव्हा त्या व्यक्तीस त्यांची स्पेस सेट करण्याची आवश्यकता असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"या वापरकर्त्याला ॲडमिन करायचे का?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"ॲडमिनकडे खास विशेषाधिकार आहेत जे इतर वापरकर्त्यांकडे नसतात. ॲडमिन सर्व वापरकर्ते व्यवस्थापित करू शकतो, हे डिव्हाइस अपडेट करू शकतो किंवा रीसेट करू शकतो, सेटिंग्जमध्ये सुधारणा करू शकतो, सर्व इंस्टॉल केलेली अ‍ॅप्स पाहू शकतो आणि इतरांसाठी ॲडमिनचे विशेषाधिकार मंजूर करू शकतो किंवा रद्द करू शकतो."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"ॲडमिन करा"</string>
