@@ -248,6 +248,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight + params.mCaptionY;
             wct.addInsetsSource(mTaskInfo.token,
                     mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect);
+            wct.addInsetsSource(mTaskInfo.token,
+                    mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures(),
+                    mCaptionInsetsRect);
         } else {
             startT.hide(mCaptionContainerSurface);
         }
@@ -345,6 +348,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
         wct.removeInsetsSource(mTaskInfo.token,
                 mOwner, 0 /* index */, WindowInsets.Type.captionBar());
+        wct.removeInsetsSource(mTaskInfo.token,
+                mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures());
         mTaskOrganizer.applyTransaction(wct);
     }
 
