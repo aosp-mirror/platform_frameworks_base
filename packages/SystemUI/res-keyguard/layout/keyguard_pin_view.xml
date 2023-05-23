@@ -82,7 +82,7 @@
             androidprv:layout_constraintGuide_percent="0"
             android:orientation="horizontal" />
 
-        <androidx.constraintlayout.helper.widget.Flow
+        <com.android.keyguard.KeyguardPinFlowView
             android:id="@+id/flow1"
             android:layout_width="0dp"
             android:layout_height="0dp"
