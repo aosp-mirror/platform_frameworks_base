@@ -506,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet à l\'application de gérer le vibreur de l\'appareil."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet à l\'application d\'accéder au mode vibration."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"appeler directement des numéros de téléphone"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Autorisez l\'application à appeler des numéros de téléphone sans votre intervention. Cela peut entraîner des frais ou des appels imprévus. Notez aussi que cela ne permet pas à l\'application d\'appeler des numéros d\'urgence. Des applications malveillantes peuvent engendrer des frais en passant des appels sans votre confirmation ou en composant des codes de fournisseurs de service qui transfèrent automatiquement des appels entrants vers un autre numéro."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accéder au service d\'appel IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permet à l\'application d\'utiliser le service IMS pour faire des appels sans votre intervention."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"voir l\'état et l\'identité du téléphone"</string>
@@ -2162,29 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Impossible d\'ouvrir ce contenu avec des applications professionnelles"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Impossible de partager ce contenu avec des applications personnelles"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Impossible d\'ouvrir ce contenu avec des applications personnelles"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Les applications professionnelles sont interrompues"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Réactiver"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Aucune application professionnelle"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Aucune application personnelle"</string>
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Ouvrir le profil professionnel de <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans le profil personnel?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans le profil professionnel?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Appeler à partir de l\'application professionnelle?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Passer à l\'application professionnelle?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Votre organisation vous autorise à passer des appels uniquement à partir d\'applications professionnelles"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Votre organisation vous autorise à envoyer des messages uniquement à partir d\'applications professionnelles"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utiliser le navigateur du profil personnel"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utiliser le navigateur du profil professionnel"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Appeler"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Changer"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"NIP de déverrouillage du réseau associé au module SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"NIP de déverrouillage du sous-ensemble du réseau associé au module SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"NIP de déverrouillage du module SIM professionnel"</string>

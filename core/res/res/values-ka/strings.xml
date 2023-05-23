@@ -1952,8 +1952,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ამჟამად მიუწვდომელია. ის იმართება <xliff:g id="APP_NAME_1">%2$s</xliff:g>-ის მიერ."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"შეიტყვეთ მეტი"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"აპის დაპაუზების გაუქმება"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"გაუქმდეს სამსახურის აპების დაპაუზება?"</string>
-    <string name="work_mode_turn_on" msgid="5316648862401307800">"პაუზის გაუქმება"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"კვლავ გააქტიურდეს სამსახურის აპები?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"გააქტიურება"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"საგანგებო სიტუაცია"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"აპი მიუწვდომელია"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ამჟამად მიუწვდომელია."</string>
@@ -2167,20 +2167,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"გსურთ, სამსახურის <xliff:g id="APP">%s</xliff:g>-ის გახსნა?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"გსურთ, პირად <xliff:g id="APP">%s</xliff:g>-ში გახსნა?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"გსურთ, სამსახურის <xliff:g id="APP">%s</xliff:g>-ში გახსნა?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"სამსახურის აპიდან დარეკავთ?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"გადაერთვებით სამუშაო აპზე?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"თქვენი ორგანიზაცია ნებას გრთავთ, რომ დარეკოთ მხოლოდ სამსახურის აპებიდან"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"თქვენი ორგანიზაცია ნებას გრთავთ, მხოლოდ სამსახურის აპებიდან გაგზავნოთ შეტყობინებები"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"პირადი ბრაუზერის გამოყენება"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"სამსახურის ბრაუზერის გამოყენება"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"ზარი"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"გადართვა"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ქსელის განბლოკვის PIN-კოდი"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM ქსელის ქვედანაყოფის განბლოკვის PIN-კოდი"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM-ის კორპორატიული განბლოკვის PIN-კოდი"</string>

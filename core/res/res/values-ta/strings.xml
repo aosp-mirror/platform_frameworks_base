@@ -1632,7 +1632,7 @@
     <string name="media_route_chooser_title" msgid="6646594924991269208">"சாதனத்துடன் இணைக்கவும்"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ஸ்கிரீனை சாதனத்தில் திரையிடு"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"சாதனங்களைத் தேடுகிறது..."</string>
-    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"அமைப்பு"</string>
+    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"அமைப்புகள்"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"துண்டி"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ஸ்கேன் செய்கிறது..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"இணைக்கிறது..."</string>
@@ -2167,20 +2167,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"பணிக் கணக்கில் உள்நுழைந்துள்ள <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"தனிப்பட்ட கணக்கில் <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"பணிக் கணக்கில் <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"பணி ஆப்ஸிலிருந்து அழைக்கவா?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"பணி ஆப்ஸுக்கு மாற வேண்டுமா?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"உங்கள் நிறுவனம் பணி ஆப்ஸில் இருந்து மட்டுமே அழைக்க உங்களை அனுமதிக்கிறது"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"உங்கள் நிறுவனம் பணி ஆப்ஸில் இருந்து மட்டுமே மெசேஜ்களை அனுப்ப உங்களை அனுமதிக்கிறது"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"தனிப்பட்ட உலாவியைப் பயன்படுத்து"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"பணி உலாவியைப் பயன்படுத்து"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"அழை"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"மாற்று"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"சிம் நெட்வொர்க் அன்லாக் பின்"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"சிம் நெட்வொர்க் சப்செட் அன்லாக் பின்"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"கார்ப்பரேட் அன்லாக் பின்"</string>

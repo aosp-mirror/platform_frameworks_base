@@ -1084,7 +1084,7 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"स्पेस"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"एंटर"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"हटवा"</string>
-    <string name="search_go" msgid="2141477624421347086">"शोध"</string>
+    <string name="search_go" msgid="2141477624421347086">"शोधा"</string>
     <string name="search_hint" msgid="455364685740251925">"शोधा…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"शोधा"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"शोध क्वेरी"</string>
@@ -2167,20 +2167,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"ऑफिसची प्रोफाइल <xliff:g id="APP">%s</xliff:g> उघडायची आहे का?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"वैयक्तिक प्रोफाइल <xliff:g id="APP">%s</xliff:g> मध्ये उघडायची आहे का?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"ऑफिसची प्रोफाइल <xliff:g id="APP">%s</xliff:g> मध्ये उघडायची आहे का?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"work app मधून कॉल करायचा आहे का?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"work app वर स्विच करायचे आहे का?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"तुमची संस्था तुम्हाला फक्त work app वरून कॉल करण्याची अनुमती देते"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"तुमची संस्था तुम्हाला फक्त work app वरून मेसेज पाठवण्याची अनुमती देते"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"वैयक्तिक ब्राउझर वापरा"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउझर वापरा"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"कॉल करा"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"स्विच करा"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क अनलॉक पिन"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM नेटवर्क सबसेट अनलॉक पिन"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM कॉर्पोरेट अनलॉक पिन"</string>
