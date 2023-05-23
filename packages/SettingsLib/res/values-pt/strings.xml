@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"O pareamento dá acesso a seus contatos e ao histórico de ligações quando estiver conectado."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Não foi possível parear com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível parear com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> por causa de um PIN ou senha incorretos."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível parear com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: PIN ou senha incorretos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Não é possível se comunicar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Pareamento rejeitado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computador"</string>
