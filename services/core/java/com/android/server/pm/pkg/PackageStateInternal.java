@@ -35,7 +35,7 @@ import java.util.UUID;
  */
 public interface PackageStateInternal extends PackageState {
 
-    @NonNull
+    @Nullable
     AndroidPackageInternal getPkg();
 
     // TODO: Remove in favor of exposing APIs directly?
