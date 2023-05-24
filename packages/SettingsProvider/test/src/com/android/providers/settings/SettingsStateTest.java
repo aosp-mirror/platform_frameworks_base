@@ -31,21 +31,21 @@ import java.io.PrintStream;
 public class SettingsStateTest extends AndroidTestCase {
     public static final String CRAZY_STRING =
             "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\n\u000b\u000c\r" +
-            "\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a" +
-            "\u001b\u001c\u001d\u001e\u001f\u0020" +
-            "fake_setting_value_1" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "\u1000 \u2000 \u5000 \u8000 \uc000 \ue000" +
-            "\ud800\udc00\udbff\udfff" + // surrogate pairs
-            "\uD800ab\uDC00 " + // broken surrogate pairs
-            "日本語";
+                    "\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a" +
+                    "\u001b\u001c\u001d\u001e\u001f\u0020" +
+                    "fake_setting_value_1" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "\u1000 \u2000 \u5000 \u8000 \uc000 \ue000" +
+                    "\ud800\udc00\udbff\udfff" + // surrogate pairs
+                    "\uD800ab\uDC00 " + // broken surrogate pairs
+                    "日本語";
 
     private static final String TEST_PACKAGE = "package";
     private static final String SYSTEM_PACKAGE = "android";
@@ -170,11 +170,11 @@ public class SettingsStateTest extends AndroidTestCase {
         final PrintStream os = new PrintStream(new FileOutputStream(file));
         os.print(
                 "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>" +
-                "<settings version=\"120\">" +
-                "  <setting id=\"0\" name=\"k0\" value=\"null\" package=\"null\" />" +
-                "  <setting id=\"1\" name=\"k1\" value=\"\" package=\"\" />" +
-                "  <setting id=\"2\" name=\"k2\" value=\"v2\" package=\"p2\" />" +
-                "</settings>");
+                        "<settings version=\"120\">" +
+                        "  <setting id=\"0\" name=\"k0\" value=\"null\" package=\"null\" />" +
+                        "  <setting id=\"1\" name=\"k1\" value=\"\" package=\"\" />" +
+                        "  <setting id=\"2\" name=\"k2\" value=\"v2\" package=\"p2\" />" +
+                        "</settings>");
         os.close();
 
         final SettingsState ss = new SettingsState(getContext(), lock, file, 1,
@@ -407,5 +407,51 @@ public class SettingsStateTest extends AndroidTestCase {
             assertTrue(ex.getMessage().contains("You are adding too many system settings"));
         }
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
+    }
+
+    public void testLargeSettingKey() {
+        SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
+        final String largeKey = Strings.repeat("A", SettingsState.MAX_LENGTH_PER_STRING + 1);
+        final String testValue = "testValue";
+        synchronized (mLock) {
+            // Test system package
+            try {
+                settingsState.insertSettingLocked(largeKey, testValue, null, true, SYSTEM_PACKAGE);
+                fail("Should throw because it exceeded max string length");
+            } catch (IllegalArgumentException ex) {
+                assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
+            }
+            // Test non system package
+            try {
+                settingsState.insertSettingLocked(largeKey, testValue, null, true, TEST_PACKAGE);
+                fail("Should throw because it exceeded max string length");
+            } catch (IllegalArgumentException ex) {
+                assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
+            }
+        }
+    }
+
+    public void testLargeSettingValue() {
+        SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        final String testKey = "testKey";
+        final String largeValue = Strings.repeat("A", SettingsState.MAX_LENGTH_PER_STRING + 1);
+        synchronized (mLock) {
+            // Test system package
+            try {
+                settingsState.insertSettingLocked(testKey, largeValue, null, true, SYSTEM_PACKAGE);
+                fail("Should throw because it exceeded max string length");
+            } catch (IllegalArgumentException ex) {
+                assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
+            }
+            // Test non system package
+            try {
+                settingsState.insertSettingLocked(testKey, largeValue, null, true, TEST_PACKAGE);
+                fail("Should throw because it exceeded max string length");
+            } catch (IllegalArgumentException ex) {
+                assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
+            }
+        }
     }
 }
