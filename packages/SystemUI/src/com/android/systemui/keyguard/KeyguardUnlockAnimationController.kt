@@ -637,7 +637,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * Unlock to the launcher, using in-window animations, and the smartspace shared element
      * transition if possible.
      */
-    private fun unlockToLauncherWithInWindowAnimations() {
+
+    @VisibleForTesting
+    fun unlockToLauncherWithInWindowAnimations() {
         setSurfaceBehindAppearAmount(1f, wallpapers = false)
 
         try {
@@ -662,7 +664,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // Now that the Launcher surface (with its smartspace positioned identically to ours) is
         // visible, hide our smartspace.
-        lockscreenSmartspace?.visibility = View.INVISIBLE
+        if (lockscreenSmartspace?.visibility == View.VISIBLE) {
+            lockscreenSmartspace?.visibility = View.INVISIBLE
+        }
 
         // Start an animation for the wallpaper, which will finish keyguard exit when it completes.
         fadeInWallpaper()
@@ -914,7 +918,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
         willUnlockWithSmartspaceTransition = false
 
         // The lockscreen surface is gone, so it is now safe to re-show the smartspace.
-        lockscreenSmartspace?.visibility = View.VISIBLE
+        if (lockscreenSmartspace?.visibility == View.INVISIBLE) {
+            lockscreenSmartspace?.visibility = View.VISIBLE
+        }
 
         listeners.forEach { it.onUnlockAnimationFinished() }
     }
