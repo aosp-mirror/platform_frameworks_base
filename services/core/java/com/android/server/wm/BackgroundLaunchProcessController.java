@@ -190,6 +190,11 @@ class BackgroundLaunchProcessController {
                 return false;
             }
             List<IBinder> binderTokens = getOriginatingTokensThatAllowBal();
+            if (binderTokens.isEmpty()) {
+                // no tokens to allow anything
+                return false;
+            }
+
             // The callback will decide.
             return mBackgroundActivityStartCallback.isActivityStartAllowed(
                     binderTokens, uid, packageName);
