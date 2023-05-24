@@ -3409,7 +3409,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     @Nullable
-    private String getDevicePolicyManagementRoleHolderPackageName(int userId) {
+    public String getDevicePolicyManagementRoleHolderPackageName(int userId) {
         return Binder.withCleanCallingIdentity(() -> {
             RoleManager roleManager = mContext.getSystemService(RoleManager.class);
             List<String> roleHolders =

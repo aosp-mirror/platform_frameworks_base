@@ -280,6 +280,10 @@ class ActivityStartInterceptor {
             return false;
         }
 
+        if (isKeepProfilesRunningEnabled() && !isPackageSuspended()) {
+            return false;
+        }
+
         IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT);
 
@@ -322,8 +326,7 @@ class ActivityStartInterceptor {
 
     private boolean interceptSuspendedPackageIfNeeded() {
         // Do not intercept if the package is not suspended
-        if (mAInfo == null || mAInfo.applicationInfo == null ||
-                (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) == 0) {
+        if (!isPackageSuspended()) {
             return false;
         }
         final PackageManagerInternal pmi = mService.getPackageManagerInternalLocked();
@@ -465,6 +468,17 @@ class ActivityStartInterceptor {
                 mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
+    }
+
+    private boolean isPackageSuspended() {
+        return mAInfo != null && mAInfo.applicationInfo != null
+                && (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) != 0;
+    }
+
+    private static boolean isKeepProfilesRunningEnabled() {
+        DevicePolicyManagerInternal dpmi =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
+        return dpmi == null || dpmi.isKeepProfilesRunningEnabled();
     }
 
     /**

@@ -128,13 +128,14 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     fun setPackagesSuspended_forQuietMode() {
         val knownPackages = arrayOf(DEVICE_ADMIN_PACKAGE, DEFAULT_HOME_PACKAGE, DIALER_PACKAGE,
                 INSTALLER_PACKAGE, UNINSTALLER_PACKAGE, VERIFIER_PACKAGE,
-                PERMISSION_CONTROLLER_PACKAGE)
+                PERMISSION_CONTROLLER_PACKAGE, MGMT_ROLE_HOLDER_PACKAGE)
         val failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
                 knownPackages, true /* suspended */, null /* appExtras */,
                 null /* launcherExtras */, null /* dialogInfo */, DEVICE_OWNER_PACKAGE,
                 TEST_USER_ID, deviceOwnerUid, true /* forQuietMode */)!!
 
-        assertThat(failedNames.size).isEqualTo(0)
+        assertThat(failedNames.size).isEqualTo(1)
+        assertThat(failedNames[0]).isEqualTo(MGMT_ROLE_HOLDER_PACKAGE)
     }
 
     @Test
