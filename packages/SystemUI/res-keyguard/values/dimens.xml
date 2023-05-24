@@ -148,4 +148,9 @@
     <dimen name="default_dot_diameter">34dp</dimen>
     <dimen name="default_dot_spacing">0dp</dimen>
 
+    <!-- Weather clock smartspace scaling to apply for the weather clock -->
+    <item name="weather_clock_smartspace_scale" type="dimen" format="float">1.0</item>
+    <dimen name="weather_clock_smartspace_translateX">0dp</dimen>
+    <dimen name="weather_clock_smartspace_translateY">0dp</dimen>
+
 </resources>

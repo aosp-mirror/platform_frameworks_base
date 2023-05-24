@@ -16,5 +16,5 @@
   -->
 <resources>
      <!-- Invisibility to use for the date & weather view when it is disabled by a clock -->
-    <integer name="keyguard_date_weather_view_invisibility">8</integer>
+    <integer name="keyguard_date_weather_view_invisibility">4</integer>
 </resources>
