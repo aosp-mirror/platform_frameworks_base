@@ -26,7 +26,7 @@
     <string name="content_description_hide_password" msgid="6841375971631767996">"Fshih fjalëkalimin"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Më e sigurt me çelësat e kalimit"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Me çelësat e kalimit, nuk ka nevojë të krijosh ose të mbash mend fjalëkalime të ndërlikuara"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Çelësat e kalimit kanë çelësa dixhitalë të enkriptuar që ti i krijon duke përdorur gjurmën e gishtit, fytyrën ose kyçjen e ekranit"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Çelësat e kalimit janë çelësa dixhitalë të enkriptuar që ti i krijon duke përdorur gjurmën e gishtit, fytyrën ose kyçjen e ekranit"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ata ruhen te një menaxher fjalëkalimesh, në mënyrë që të mund të identifikohesh në pajisje të tjera"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Më shumë rreth çelësave të kalimit"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Teknologji pa fjalëkalime"</string>

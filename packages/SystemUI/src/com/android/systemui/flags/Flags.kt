@@ -719,11 +719,6 @@ object Flags {
     val LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION =
             releasedFlag(2602, "large_shade_granular_alpha_interpolation")
 
-    // TODO(b/272805037): Tracking Bug
-    @JvmField
-    val ADVANCED_VPN_ENABLED = releasedFlag(2800, name = "AdvancedVpn__enable_feature",
-            namespace = "vpn")
-
     // TODO(b/277201412): Tracking Bug
     @JvmField
     val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION =
@@ -736,4 +731,9 @@ object Flags {
     // TODO(b/283084712): Tracking Bug
     @JvmField
     val IMPROVED_HUN_ANIMATIONS = unreleasedFlag(283084712, "improved_hun_animations")
+
+    // TODO(b/283447257): Tracking bug
+    @JvmField
+    val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
+            unreleasedFlag(283447257, "bigpicture_notification_lazy_loading")
 }

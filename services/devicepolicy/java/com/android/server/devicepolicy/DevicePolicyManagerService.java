@@ -2191,7 +2191,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void suspendAppsForQuietProfiles(boolean toSuspend) {
         PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
-        List<UserInfo> users = mUserManager.getUsers();
+        List<UserInfo> users = mUserManagerInternal.getUsers(true /* excludeDying */);
         for (UserInfo user : users) {
             if (user.isManagedProfile() && user.isQuietModeEnabled()) {
                 pmi.setPackagesSuspendedForQuietMode(user.id, toSuspend);
@@ -10117,6 +10117,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();
 
+        updateAdminCanGrantSensorsPermissionCache(userId);
         clearDeviceOwnerUserRestriction(UserHandle.of(userId));
         mInjector.securityLogSetLoggingEnabledProperty(false);
         mSecurityLogMonitor.stop();
