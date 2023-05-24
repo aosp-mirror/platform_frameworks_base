@@ -76,6 +76,9 @@ public class DividerHandleView extends View {
     private int mCurrentHeight;
     private AnimatorSet mAnimator;
     private boolean mTouching;
+    private boolean mHovering;
+    private final int mHoveringWidth;
+    private final int mHoveringHeight;
 
     public DividerHandleView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -87,6 +90,8 @@ public class DividerHandleView extends View {
         mCurrentHeight = mHeight;
         mTouchingWidth = mWidth > mHeight ? mWidth / 2 : mWidth;
         mTouchingHeight = mHeight > mWidth ? mHeight / 2 : mHeight;
+        mHoveringWidth = mWidth > mHeight ? ((int) (mWidth * 1.5f)) : mWidth;
+        mHoveringHeight = mHeight > mWidth ? ((int) (mHeight * 1.5f)) : mHeight;
     }
 
     /** Sets touching state for this handle view. */
@@ -94,24 +99,32 @@ public class DividerHandleView extends View {
         if (touching == mTouching) {
             return;
         }
+        setInputState(touching, animate, mTouchingWidth, mTouchingHeight);
+        mTouching = touching;
+    }
+
+    /** Sets hovering state for this handle view. */
+    public void setHovering(boolean hovering, boolean animate) {
+        if (hovering == mHovering) {
+            return;
+        }
+        setInputState(hovering, animate, mHoveringWidth, mHoveringHeight);
+        mHovering = hovering;
+    }
+
+    private void setInputState(boolean stateOn, boolean animate, int stateWidth, int stateHeight) {
         if (mAnimator != null) {
             mAnimator.cancel();
             mAnimator = null;
         }
         if (!animate) {
-            if (touching) {
-                mCurrentWidth = mTouchingWidth;
-                mCurrentHeight = mTouchingHeight;
-            } else {
-                mCurrentWidth = mWidth;
-                mCurrentHeight = mHeight;
-            }
+            mCurrentWidth = stateOn ? stateWidth : mWidth;
+            mCurrentHeight = stateOn ? stateHeight : mHeight;
             invalidate();
         } else {
-            animateToTarget(touching ? mTouchingWidth : mWidth,
-                    touching ? mTouchingHeight : mHeight, touching);
+            animateToTarget(stateOn ? stateWidth : mWidth,
+                    stateOn ? stateHeight : mHeight, stateOn);
         }
-        mTouching = touching;
     }
 
     private void animateToTarget(int targetWidth, int targetHeight, boolean touching) {
