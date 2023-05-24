@@ -638,6 +638,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 2, 3, -2, -3, 44, 1, /* passwordHandle */
                 0, 0, 0, 6, /* pinLength */
         };
+        assertFalse(PasswordData.isBadFormatFromAndroid14Beta(serialized));
         PasswordData deserialized = PasswordData.fromBytes(serialized);
 
         assertEquals(11, deserialized.scryptLogN);
@@ -690,6 +691,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 2, 3, -2, -3, 44, 1, /* passwordHandle */
                 0, 0, 0, 6, /* pinLength */
         };
+        assertTrue(PasswordData.isBadFormatFromAndroid14Beta(serialized));
         PasswordData deserialized = PasswordData.fromBytes(serialized);
 
         assertEquals(11, deserialized.scryptLogN);

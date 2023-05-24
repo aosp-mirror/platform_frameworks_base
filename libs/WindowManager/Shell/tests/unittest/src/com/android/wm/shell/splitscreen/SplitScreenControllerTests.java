@@ -223,7 +223,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
         doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
         // Put the same component into a task in the background
         ActivityManager.RecentTaskInfo sameTaskInfo = new ActivityManager.RecentTaskInfo();
-        doReturn(sameTaskInfo).when(mRecentTasks).findTaskInBackground(any());
+        doReturn(sameTaskInfo).when(mRecentTasks).findTaskInBackground(any(), anyInt());
 
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
                 SPLIT_POSITION_TOP_OR_LEFT, null);
@@ -247,7 +247,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 SPLIT_POSITION_BOTTOM_OR_RIGHT);
         // Put the same component into a task in the background
         doReturn(new ActivityManager.RecentTaskInfo()).when(mRecentTasks)
-                .findTaskInBackground(any());
+                .findTaskInBackground(any(), anyInt());
 
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
                 SPLIT_POSITION_TOP_OR_LEFT, null);

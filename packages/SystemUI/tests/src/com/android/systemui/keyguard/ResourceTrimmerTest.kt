@@ -98,7 +98,8 @@ class ResourceTrimmerTest : SysuiTestCase() {
             )
             testScope.runCurrent()
             verify(globalWindowManager, times(1))
-                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            verify(globalWindowManager, times(1)).trimCaches(HardwareRenderer.CACHE_TRIM_ALL)
         }
 
     @Test
@@ -115,7 +116,8 @@ class ResourceTrimmerTest : SysuiTestCase() {
             )
             testScope.runCurrent()
             verify(globalWindowManager, times(1))
-                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            verify(globalWindowManager, times(1)).trimCaches(HardwareRenderer.CACHE_TRIM_ALL)
         }
 
     @Test
@@ -161,7 +163,8 @@ class ResourceTrimmerTest : SysuiTestCase() {
             keyguardRepository.setDozeAmount(1f)
             testScope.runCurrent()
             verify(globalWindowManager, times(1))
-                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            verify(globalWindowManager, times(1)).trimCaches(HardwareRenderer.CACHE_TRIM_ALL)
         }
     }
 
