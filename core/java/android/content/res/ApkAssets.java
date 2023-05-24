@@ -78,6 +78,11 @@ public final class ApkAssets {
      */
     public static final int PROPERTY_DISABLE_INCREMENTAL_HARDENING = 1 << 4;
 
+    /**
+     * The apk assets only contain the overlayable declarations information.
+     */
+    public static final int PROPERTY_ONLY_OVERLAYABLES = 1 << 5;
+
     /** Flags that change the behavior of loaded apk assets. */
     @IntDef(prefix = { "PROPERTY_" }, value = {
             PROPERTY_SYSTEM,
