@@ -18,6 +18,7 @@ package com.android.systemui.dump
 
 import com.android.systemui.Dumpable
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.table.TableLogBuffer
 
 /**
  * A DumpsysEntry is a named, registered entry tracked by [DumpManager] which can be addressed and
@@ -44,6 +45,18 @@ sealed interface DumpsysEntry {
     data class LogBufferEntry(
         val buffer: LogBuffer,
         override val name: String,
-        override val priority: DumpPriority,
-    ) : DumpsysEntry
+    ) : DumpsysEntry {
+        // All buffers must be priority NORMAL, not CRITICAL, because they often contain a lot of
+        // data.
+        override val priority: DumpPriority = DumpPriority.NORMAL
+    }
+
+    data class TableLogBufferEntry(
+        val table: TableLogBuffer,
+        override val name: String,
+    ) : DumpsysEntry {
+        // All buffers must be priority NORMAL, not CRITICAL, because they often contain a lot of
+        // data.
+        override val priority: DumpPriority = DumpPriority.NORMAL
+    }
 }

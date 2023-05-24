@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Dumpable
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.table.TableLogBuffer
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -36,6 +37,9 @@ class DumpManagerTest : SysuiTestCase() {
 
     @Mock private lateinit var buffer1: LogBuffer
     @Mock private lateinit var buffer2: LogBuffer
+
+    @Mock private lateinit var table1: TableLogBuffer
+    @Mock private lateinit var table2: TableLogBuffer
 
     private val dumpManager = DumpManager()
 
@@ -82,10 +86,24 @@ class DumpManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testRegister_tableLogBuffers() {
+        // GIVEN a set of registered buffers
+        dumpManager.registerTableLogBuffer("table1", table1)
+        dumpManager.registerTableLogBuffer("table2", table2)
+
+        // WHEN the collection is requested
+        val tables = dumpManager.getTableLogBuffers().map { it.table }
+
+        // THEN it contains the registered entries
+        assertThat(tables).containsExactly(table1, table2)
+    }
+
+    @Test
     fun registerDumpable_throwsWhenNameCannotBeAssigned() {
-        // GIVEN dumpable1 and buffer1 are registered
+        // GIVEN dumpable1 and buffer1 and table1 are registered
         dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
         dumpManager.registerBuffer("buffer1", buffer1)
+        dumpManager.registerTableLogBuffer("table1", table1)
 
         // THEN an exception is thrown when trying to re-register a new dumpable under the same key
         assertThrows(IllegalArgumentException::class.java) {
@@ -93,6 +111,9 @@ class DumpManagerTest : SysuiTestCase() {
         }
         assertThrows(IllegalArgumentException::class.java) {
             dumpManager.registerBuffer("buffer1", buffer2)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            dumpManager.registerTableLogBuffer("table1", table2)
         }
     }
 
@@ -148,5 +169,24 @@ class DumpManagerTest : SysuiTestCase() {
 
         // AND the previous collection is unchanged
         assertThat(buffers).hasSize(2)
+    }
+
+    @Test
+    fun getTableBuffers_returnsSafeCollection() {
+        // GIVEN a set of registered buffers
+        dumpManager.registerTableLogBuffer("table1", table1)
+        dumpManager.registerTableLogBuffer("table2", table2)
+
+        // WHEN the collection is requested
+        val tables = dumpManager.getTableLogBuffers()
+
+        // WHEN the collection changes
+        dumpManager.registerTableLogBuffer("table3", table1)
+
+        // THEN the new entry is represented
+        assertThat(dumpManager.getTableLogBuffers()).hasSize(3)
+
+        // AND the previous collection is unchanged
+        assertThat(tables).hasSize(2)
     }
 }

@@ -20,7 +20,9 @@ import com.android.systemui.Dumpable
 import com.android.systemui.ProtoDumpable
 import com.android.systemui.dump.DumpsysEntry.DumpableEntry
 import com.android.systemui.dump.DumpsysEntry.LogBufferEntry
+import com.android.systemui.dump.DumpsysEntry.TableLogBufferEntry
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.table.TableLogBuffer
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,6 +41,7 @@ open class DumpManager @Inject constructor() {
     // NOTE: Using TreeMap ensures that iteration is in a predictable & alphabetical order.
     private val dumpables: MutableMap<String, DumpableEntry> = TreeMap()
     private val buffers: MutableMap<String, LogBufferEntry> = TreeMap()
+    private val tableLogBuffers: MutableMap<String, TableLogBufferEntry> = TreeMap()
 
     /** See [registerCriticalDumpable]. */
     fun registerCriticalDumpable(module: Dumpable) {
@@ -123,14 +126,27 @@ open class DumpManager @Inject constructor() {
             throw IllegalArgumentException("'$name' is already registered")
         }
 
+        buffers[name] = LogBufferEntry(buffer, name)
+    }
+
+    /** Register a [TableLogBuffer] to be dumped during a bugreport */
+    @Synchronized
+    fun registerTableLogBuffer(name: String, buffer: TableLogBuffer) {
+        if (!canAssignToNameLocked(name, buffer)) {
+            throw IllegalArgumentException("'$name' is already registered")
+        }
+
         // All buffers must be priority NORMAL, not CRITICAL, because they often contain a lot of
         // data.
-        buffers[name] = LogBufferEntry(buffer, name, DumpPriority.NORMAL)
+        tableLogBuffers[name] = TableLogBufferEntry(buffer, name)
     }
 
     @Synchronized fun getDumpables(): Collection<DumpableEntry> = dumpables.values.toList()
 
     @Synchronized fun getLogBuffers(): Collection<LogBufferEntry> = buffers.values.toList()
+
+    @Synchronized
+    fun getTableLogBuffers(): Collection<TableLogBufferEntry> = tableLogBuffers.values.toList()
 
     @Synchronized
     fun freezeBuffers() {
@@ -147,7 +163,8 @@ open class DumpManager @Inject constructor() {
     }
 
     private fun canAssignToNameLocked(name: String, newDumpable: Any): Boolean {
-        val existingDumpable = dumpables[name]?.dumpable ?: buffers[name]?.buffer
+        val existingDumpable =
+            dumpables[name]?.dumpable ?: buffers[name]?.buffer ?: tableLogBuffers[name]?.table
         return existingDumpable == null || newDumpable == existingDumpable
     }
 }

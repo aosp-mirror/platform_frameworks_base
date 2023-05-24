@@ -73,8 +73,8 @@ class LogEulogizerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        logBufferEntry1 = DumpsysEntry.LogBufferEntry(logBuffer1, "logbuffer1", DumpPriority.NORMAL)
-        logBufferEntry2 = DumpsysEntry.LogBufferEntry(logBuffer2, "logbuffer2", DumpPriority.NORMAL)
+        logBufferEntry1 = DumpsysEntry.LogBufferEntry(logBuffer1, "logbuffer1")
+        logBufferEntry2 = DumpsysEntry.LogBufferEntry(logBuffer2, "logbuffer2")
 
         eulogizer = LogBufferEulogizer(dumpManager, clock, files, path, MIN_WRITE_GAP, MAX_READ_AGE)
 
