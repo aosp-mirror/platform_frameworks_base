@@ -20,6 +20,7 @@ import android.app.StatusBarManager
 import android.content.Context
 import android.media.MediaRoute2Info
 import android.view.View
+import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.CoreStartable
@@ -59,8 +60,8 @@ constructor(
     // Since the media transfer display is similar to a heads-up notification, use the same timeout.
     private val defaultTimeout = context.resources.getInteger(R.integer.heads_up_notification_decay)
 
-    // A map to store current chip state per id.
-    private var stateMap: MutableMap<String, ChipStateSender> = mutableMapOf()
+    // A map to store instance id and current chip state per id.
+    private var stateMap: MutableMap<String, Pair<InstanceId, ChipStateSender>> = mutableMapOf()
 
     private val commandQueueCallbacks =
         object : CommandQueue.Callbacks {
@@ -98,7 +99,10 @@ constructor(
             return
         }
 
-        val currentStateForId: ChipStateSender? = stateMap[routeInfo.id]
+        val currentStateForId: ChipStateSender? = stateMap[routeInfo.id]?.second
+        val instanceId: InstanceId =
+            stateMap[routeInfo.id]?.first
+                ?: chipbarCoordinator.tempViewUiEventLogger.getNewInstanceId()
         if (!ChipStateSender.isValidStateTransition(currentStateForId, chipState)) {
             // ChipStateSender.FAR_FROM_RECEIVER is the default state when there is no state.
             logger.logInvalidStateTransitionError(
@@ -107,7 +111,7 @@ constructor(
             )
             return
         }
-        uiEventLogger.logSenderStateChange(chipState)
+        uiEventLogger.logSenderStateChange(chipState, instanceId)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
             // Return early if we're not displaying a chip for this ID anyway
@@ -131,7 +135,7 @@ constructor(
             removeIdFromStore(routeInfo.id, reason = removalReason)
             chipbarCoordinator.removeView(routeInfo.id, removalReason)
         } else {
-            stateMap[routeInfo.id] = chipState
+            stateMap[routeInfo.id] = Pair(instanceId, chipState)
             logger.logStateMap(stateMap)
             chipbarCoordinator.registerListener(displayListener)
             chipbarCoordinator.displayView(
@@ -141,6 +145,7 @@ constructor(
                     undoCallback,
                     context,
                     logger,
+                    instanceId,
                 )
             )
         }
@@ -155,6 +160,7 @@ constructor(
         undoCallback: IUndoMediaTransferCallback?,
         context: Context,
         logger: MediaTttSenderLogger,
+        instanceId: InstanceId,
     ): ChipbarInfo {
         val packageName = routeInfo.clientPackageName
         val otherDeviceName =
@@ -190,6 +196,7 @@ constructor(
                                 chipStateSender.endItem.uiEventOnClick,
                                 chipStateSender.endItem.newState,
                                 routeInfo,
+                                instanceId,
                             )
                         } else {
                             null
@@ -203,6 +210,7 @@ constructor(
             timeoutMs = timeout,
             id = routeInfo.id,
             priority = ViewPriority.NORMAL,
+            instanceId = instanceId,
         )
     }
 
@@ -217,10 +225,11 @@ constructor(
         uiEvent: UiEventLogger.UiEventEnum,
         @StatusBarManager.MediaTransferSenderState newState: Int,
         routeInfo: MediaRoute2Info,
+        instanceId: InstanceId,
     ): ChipbarEndItem.Button {
         val onClickListener =
             View.OnClickListener {
-                uiEventLogger.logUndoClicked(uiEvent)
+                uiEventLogger.logUndoClicked(uiEvent, instanceId)
                 undoCallback.onUndoTriggered()
 
                 // The external service should eventually send us a new TransferTriggered state, but
