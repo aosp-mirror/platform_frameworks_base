@@ -571,6 +571,11 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String COMBINED_BROADCAST_ENABLED = "combined_broadcast_enabled";
 
+    /**
+     * (boolean) Whether to allow cursor hover states for certain elements.
+     */
+    public static final String CURSOR_HOVER_STATES_ENABLED = "cursor_hover_states_enabled";
+
     private SystemUiDeviceConfigFlags() {
     }
 }
