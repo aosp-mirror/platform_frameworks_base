@@ -1092,6 +1092,24 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    boolean containsReceiver(@NonNull Object receiver) {
+        for (int i = receivers.size() - 1; i >= 0; --i) {
+            if (isReceiverEquals(receiver, receivers.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean containsAllReceivers(@NonNull List<Object> otherReceivers) {
+        for (int i = otherReceivers.size() - 1; i >= 0; --i) {
+            if (!containsReceiver(otherReceivers.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     boolean matchesDeliveryGroup(@NonNull BroadcastRecord other) {
         return matchesDeliveryGroup(this, other);
     }
