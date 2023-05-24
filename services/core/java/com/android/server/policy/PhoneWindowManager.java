@@ -125,6 +125,7 @@ import android.hardware.hdmi.HdmiAudioSystemClient;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
+import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
@@ -207,6 +208,7 @@ import com.android.internal.policy.PhoneWindow;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.ExtconStateObserver;
@@ -217,6 +219,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.UiThread;
 import com.android.server.display.BrightnessUtils;
 import com.android.server.input.InputManagerInternal;
+import com.android.server.input.KeyboardMetricsCollector;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.KeyCombinationManager.TwoKeysCombinationRule;
@@ -680,6 +683,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_LAUNCH_ASSIST = 23;
     private static final int MSG_RINGER_TOGGLE_CHORD = 24;
     private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 25;
+    private static final int MSG_LOG_KEYBOARD_SYSTEM_EVENT = 26;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -752,6 +756,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_SWITCH_KEYBOARD_LAYOUT:
                     handleSwitchKeyboardLayout(msg.arg1, msg.arg2);
+                    break;
+                case MSG_LOG_KEYBOARD_SYSTEM_EVENT:
+                    handleKeyboardSystemEvent(msg.arg2, (KeyEvent) msg.obj);
                     break;
             }
         }
@@ -2333,6 +2340,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             cancelPendingScreenshotChordAction();
                         }
                     });
+
             if (mHasFeatureWatch) {
                 mKeyCombinationManager.addRule(
                         new TwoKeysCombinationRule(KEYCODE_POWER, KEYCODE_STEM_PRIMARY) {
@@ -2944,7 +2952,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
         };
 
+    /**
+     * Log the keyboard shortcuts without blocking the current thread.
+     *
+     * We won't log keyboard events when the input device is null
+     * or when it is virtual.
+     */
+    private void handleKeyboardSystemEvent(int keyboardSystemEvent, KeyEvent event) {
+        final InputManager inputManager = mContext.getSystemService(InputManager.class);
+        final InputDevice inputDevice = inputManager != null
+                ? inputManager.getInputDevice(event.getDeviceId()) : null;
+        if (inputDevice != null && !inputDevice.isVirtual()) {
+            KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(
+                    inputDevice, keyboardSystemEvent,
+                    new int[]{event.getKeyCode()}, event.getMetaState());
+        }
+    }
+
+    private void logKeyboardSystemsEvent(KeyEvent event, int keyboardSystemEvent) {
+        mHandler.obtainMessage(MSG_LOG_KEYBOARD_SYSTEM_EVENT, 0, keyboardSystemEvent, event)
+                .sendToTarget();
+    }
+
     // TODO(b/117479243): handle it in InputPolicy
+    // TODO (b/283241997): Add the remaining keyboard shortcut logging after refactoring
     /** {@inheritDoc} */
     @Override
     public long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event,
@@ -2998,6 +3029,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         switch(keyCode) {
             case KeyEvent.KEYCODE_HOME:
+                logKeyboardSystemsEvent(event, FrameworkStatsLog
+                        .KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__HOME);
                 return handleHomeShortcuts(displayId, focusedToken, event);
             case KeyEvent.KEYCODE_MENU:
                 // Hijack modified menu keys for debugging features
@@ -3015,6 +3048,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_RECENT_APPS:
                 if (down && repeatCount == 0) {
                     showRecentApps(false /* triggeredFromAltTab */);
+                    logKeyboardSystemsEvent(event, FrameworkStatsLog
+                            .KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__RECENT_APPS);
                 }
                 return key_consumed;
             case KeyEvent.KEYCODE_APP_SWITCH:
