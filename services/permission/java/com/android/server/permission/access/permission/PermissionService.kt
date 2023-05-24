@@ -52,6 +52,7 @@ import android.util.IndentingPrintWriter
 import android.util.IntArray as GrowingIntArray
 import android.util.Slog
 import android.util.SparseBooleanArray
+import com.android.internal.annotations.GuardedBy
 import com.android.internal.compat.IPlatformCompat
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.nano.MetricsProto
@@ -123,7 +124,11 @@ class PermissionService(
     private lateinit var onPermissionsChangeListeners: OnPermissionsChangeListeners
     private lateinit var onPermissionFlagsChangedListener: OnPermissionFlagsChangedListener
 
+    private val storageVolumeLock = Any()
+    @GuardedBy("storageVolumeLock")
     private val mountedStorageVolumes = ArraySet<String?>()
+    @GuardedBy("storageVolumeLock")
+    private val storageVolumePackageNames = ArrayMap<String?, MutableList<String>>()
 
     private lateinit var permissionControllerManager: PermissionControllerManager
 
@@ -2003,10 +2008,14 @@ class PermissionService(
     }
 
     override fun onStorageVolumeMounted(volumeUuid: String, fingerprintChanged: Boolean) {
-        service.onStorageVolumeMounted(volumeUuid, fingerprintChanged)
-        synchronized(mountedStorageVolumes) {
+        val packageNames: List<String>
+        synchronized(storageVolumeLock) {
+            // Removing the storageVolumePackageNames entry because we expect onPackageAdded()
+            // to always be called before onStorageVolumeMounted().
+            packageNames = storageVolumePackageNames.remove(volumeUuid) ?: emptyList()
             mountedStorageVolumes += volumeUuid
         }
+        service.onStorageVolumeMounted(volumeUuid, packageNames, fingerprintChanged)
     }
 
     override fun onPackageAdded(
@@ -2014,7 +2023,14 @@ class PermissionService(
         isInstantApp: Boolean,
         oldPackage: AndroidPackage?
     ) {
-        synchronized(mountedStorageVolumes) {
+        synchronized(storageVolumeLock) {
+            // Accumulating the package names here because we want to maintain the same call order
+            // of onPackageAdded() and reuse this order in onStorageVolumeAdded(). We need the
+            // packages to be iterated in onStorageVolumeAdded() in the same order so that the
+            // ownership of permissions is consistent.
+            storageVolumePackageNames.getOrPut(packageState.volumeUuid) {
+                mutableListOf()
+            } += packageState.packageName
             if (packageState.volumeUuid !in mountedStorageVolumes) {
                 // Wait for the storage volume to be mounted and batch the state mutation there.
                 return
@@ -2046,7 +2062,7 @@ class PermissionService(
             return
         }
 
-        synchronized(mountedStorageVolumes) {
+        synchronized(storageVolumeLock) {
             if (androidPackage.volumeUuid !in mountedStorageVolumes) {
                 // Wait for the storage volume to be mounted and batch the state mutation there.
                 // PackageInstalledParams won't exist when packages are being scanned instead of

@@ -132,6 +132,7 @@ class AccessPolicy private constructor(
         disabledSystemPackageStates: Map<String, PackageState>,
         knownPackages: IntMap<Array<String>>,
         volumeUuid: String?,
+        packageNames: List<String>,
         isSystemUpdated: Boolean
     ) {
         val addedAppIds = MutableIntSet()
@@ -140,6 +141,10 @@ class AccessPolicy private constructor(
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (packageName, packageState) ->
                 if (packageState.volumeUuid == volumeUuid) {
+                    check(packageNames.contains(packageName)) {
+                        "Package $packageName on storage volume $volumeUuid didn't receive" +
+                            " onPackageAdded() before onStorageVolumeMounted()"
+                    }
                     val appId = packageState.appId
                     mutateAppIdPackageNames().mutateOrPut(appId) {
                         addedAppIds += appId
@@ -155,7 +160,7 @@ class AccessPolicy private constructor(
             }
         }
         forEachSchemePolicy {
-            with(it) { onStorageVolumeMounted(volumeUuid, isSystemUpdated) }
+            with(it) { onStorageVolumeMounted(volumeUuid, packageNames, isSystemUpdated) }
         }
         packageStates.forEach { (_, packageState) ->
             if (packageState.volumeUuid == volumeUuid) {
@@ -481,7 +486,8 @@ abstract class SchemePolicy {
 
     open fun MutateStateScope.onStorageVolumeMounted(
         volumeUuid: String?,
-        isSystemUpdated: Boolean
+        packageNames: List<String>,
+        isSystemUpdated: Boolean,
     ) {}
 
     open fun MutateStateScope.onPackageAdded(packageState: PackageState) {}

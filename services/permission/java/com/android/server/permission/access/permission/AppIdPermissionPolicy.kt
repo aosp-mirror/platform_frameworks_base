@@ -138,14 +138,12 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     override fun MutateStateScope.onStorageVolumeMounted(
         volumeUuid: String?,
+        packageNames: List<String>,
         isSystemUpdated: Boolean
     ) {
         val changedPermissionNames = MutableIndexedSet<String>()
-        newState.externalState.packageStates.forEach { (_, packageState) ->
-            val androidPackage = packageState.androidPackage
-            if (androidPackage == null || androidPackage.volumeUuid != volumeUuid) {
-                return@forEach
-            }
+        packageNames.forEachIndexed { _, packageName ->
+            val packageState = newState.externalState.packageStates[packageName]!!
             adoptPermissions(packageState, changedPermissionNames)
             addPermissionGroups(packageState)
             addPermissions(packageState, changedPermissionNames)

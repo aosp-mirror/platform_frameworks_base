@@ -153,14 +153,18 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         }
     }
 
-    internal fun onStorageVolumeMounted(volumeUuid: String?, isSystemUpdated: Boolean) {
+    internal fun onStorageVolumeMounted(
+        volumeUuid: String?,
+        packageNames: List<String>,
+        isSystemUpdated: Boolean
+    ) {
         val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
         val knownPackages = packageManagerInternal.getKnownPackages(packageStates)
         mutateState {
             with(policy) {
                 onStorageVolumeMounted(
                     packageStates, disabledSystemPackageStates, knownPackages, volumeUuid,
-                    isSystemUpdated
+                    packageNames, isSystemUpdated
                 )
             }
         }
