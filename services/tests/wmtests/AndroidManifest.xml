@@ -90,7 +90,7 @@
 
         <activity android:name="com.android.server.wm.SurfaceControlViewHostTests$TestActivity" />
 
-        <activity android:name="android.server.wm.scvh.SurfaceSyncGroupActivity"
+        <activity android:name="com.android.server.wm.SurfaceSyncGroupTests$TestActivity"
             android:screenOrientation="locked"
             android:turnScreenOn="true"
             android:theme="@style/WhiteBackgroundTheme"
