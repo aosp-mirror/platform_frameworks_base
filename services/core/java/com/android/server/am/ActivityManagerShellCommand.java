@@ -229,6 +229,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         try {
             switch (cmd) {
+                case "help":
+                    onHelp();
+                    return 0;
                 case "start":
                 case "start-activity":
                     return runStartActivity(pw);
