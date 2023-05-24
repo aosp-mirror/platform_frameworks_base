@@ -21,6 +21,8 @@ java_library_host {
     srcs: ["java/**/*.java"],
 
     static_libs: [
+        "annotations",
+        "framework-annotations-lib",
         "//external/error_prone:error_prone_core",
     ],
 
