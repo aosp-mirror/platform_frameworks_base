@@ -70,6 +70,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
@@ -722,6 +723,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void onPackageUninstalled(@NonNull String packageName, int appId,
                 @NonNull PackageState packageState, @Nullable AndroidPackage pkg,
                 @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId) {
+            if (userId != UserHandle.USER_ALL) {
+                final int[] userIds = getAllUserIds();
+                if (!ArrayUtils.contains(userIds, userId)) {
+                    // This may happen due to DeletePackageHelper.removeUnusedPackagesLPw() calling
+                    // deletePackageX() asynchronously.
+                    Slog.w(LOG_TAG, "Skipping onPackageUninstalled() for non-existent user "
+                            + userId);
+                    return;
+                }
+            }
             mPermissionManagerServiceImpl.onPackageUninstalled(packageName, appId, packageState,
                     pkg, sharedUserPkgs, userId);
         }
