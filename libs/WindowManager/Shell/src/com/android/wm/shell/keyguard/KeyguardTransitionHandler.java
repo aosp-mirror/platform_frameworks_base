@@ -121,21 +121,21 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
         }
 
         boolean hasOpeningOcclude = false;
+        boolean hasClosingOcclude = false;
         boolean hasOpeningDream = false;
         boolean hasClosingApp = false;
 
         // Check for occluding/dream/closing apps
         for (int i = info.getChanges().size() - 1; i >= 0; i--) {
             final TransitionInfo.Change change = info.getChanges().get(i);
-            if (isOpeningType(change.getMode())) {
-                if (change.hasFlags(FLAG_OCCLUDES_KEYGUARD)) {
-                    hasOpeningOcclude = true;
-                }
-                if (change.getTaskInfo() != null
-                        && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_DREAM) {
-                    hasOpeningDream = true;
-                }
+            if ((change.getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0) {
+                continue;
+            } else if (isOpeningType(change.getMode())) {
+                hasOpeningOcclude |= change.hasFlags(FLAG_OCCLUDES_KEYGUARD);
+                hasOpeningDream |= (change.getTaskInfo() != null
+                        && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_DREAM);
             } else if (isClosingType(change.getMode())) {
+                hasClosingOcclude |= change.hasFlags(FLAG_OCCLUDES_KEYGUARD);
                 hasClosingApp = true;
             }
         }
@@ -147,6 +147,11 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                     transition, info, startTransaction, finishTransaction, finishCallback);
         }
         if (hasOpeningOcclude || info.getType() == TRANSIT_KEYGUARD_OCCLUDE) {
+            if (hasClosingOcclude) {
+                // Transitions between apps on top of the keyguard can use the default handler.
+                // WM sends a final occlude status update after the transition is finished.
+                return false;
+            }
             if (hasOpeningDream) {
                 return startAnimation(mOccludeByDreamTransition,
                         "occlude-by-dream",
