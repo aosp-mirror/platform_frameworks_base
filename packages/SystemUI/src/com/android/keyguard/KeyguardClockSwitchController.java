@@ -86,6 +86,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private int mKeyguardSmallClockTopMargin = 0;
     private int mKeyguardLargeClockTopMargin = 0;
+    private int mKeyguardDateWeatherViewInvisibility = View.INVISIBLE;
     private final ClockRegistry.ClockChangeListener mClockChangedListener;
 
     private ViewGroup mStatusArea;
@@ -201,6 +202,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
         mKeyguardLargeClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
+        mKeyguardDateWeatherViewInvisibility =
+                mView.getResources().getInteger(R.integer.keyguard_date_weather_view_invisibility);
 
         if (mOnlyClock) {
             View ksv = mView.findViewById(R.id.keyguard_slice_view);
@@ -335,7 +338,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
         mKeyguardLargeClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
+        mKeyguardDateWeatherViewInvisibility =
+                mView.getResources().getInteger(R.integer.keyguard_date_weather_view_invisibility);
         mView.updateClockTargetRegions();
+        setDateWeatherVisibility();
     }
 
 
@@ -489,8 +495,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private void setDateWeatherVisibility() {
         if (mDateWeatherView != null) {
             mUiExecutor.execute(() -> {
-                mDateWeatherView.setVisibility(
-                        clockHasCustomWeatherDataDisplay() ? View.INVISIBLE : View.VISIBLE);
+                mDateWeatherView.setVisibility(clockHasCustomWeatherDataDisplay()
+                        ? mKeyguardDateWeatherViewInvisibility
+                        : View.VISIBLE);
             });
         }
     }
