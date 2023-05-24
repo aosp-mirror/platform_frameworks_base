@@ -106,7 +106,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
     private final Transitions mTransitions;
 
-    private Optional<SplitScreenController> mSplitScreenController;
+    private SplitScreenController mSplitScreenController;
 
     private ValueAnimator mDragToDesktopValueAnimator;
     private final Rect mDragToDesktopAnimationStartBounds = new Rect();
@@ -121,8 +121,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
-            Optional<DesktopTasksController> desktopTasksController,
-            Optional<SplitScreenController> splitScreenController) {
+            Optional<DesktopTasksController> desktopTasksController) {
         this(
                 context,
                 mainHandler,
@@ -133,7 +132,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 transitions,
                 desktopModeController,
                 desktopTasksController,
-                splitScreenController,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new);
@@ -150,7 +148,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
-            Optional<SplitScreenController> splitScreenController,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory) {
@@ -160,7 +157,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mTaskOrganizer = taskOrganizer;
         mDisplayController = displayController;
-        mSplitScreenController = splitScreenController;
         mSyncQueue = syncQueue;
         mTransitions = transitions;
         mDesktopModeController = desktopModeController;
@@ -174,6 +170,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     @Override
     public void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter) {
         mTaskOperations = new TaskOperations(transitionStarter, mContext, mSyncQueue);
+    }
+
+    @Override
+    public void setSplitScreenController(SplitScreenController splitScreenController) {
+        mSplitScreenController = splitScreenController;
     }
 
     @Override
@@ -238,7 +239,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
-
         if (!shouldShowWindowDecor(taskInfo)) {
             if (decoration != null) {
                 destroyWindowDecoration(taskInfo);
@@ -303,14 +303,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             final int id = v.getId();
             if (id == R.id.close_window || id == R.id.close_button) {
                 mTaskOperations.closeTask(mTaskToken);
-                if (mSplitScreenController.isPresent()
-                        && mSplitScreenController.get().isSplitScreenVisible()) {
-                    int remainingTaskPosition = mTaskId == mSplitScreenController.get()
+                if (mSplitScreenController != null
+                        && mSplitScreenController.isSplitScreenVisible()) {
+                    int remainingTaskPosition = mTaskId == mSplitScreenController
                             .getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT).taskId
                             ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT;
-                    ActivityManager.RunningTaskInfo remainingTask = mSplitScreenController.get()
+                    ActivityManager.RunningTaskInfo remainingTask = mSplitScreenController
                             .getTaskInfo(remainingTaskPosition);
-                    mSplitScreenController.get().moveTaskToFullscreen(remainingTask.taskId);
+                    mSplitScreenController.moveTaskToFullscreen(remainingTask.taskId);
                 }
             } else if (id == R.id.back_button) {
                 mTaskOperations.injectBackKey();
@@ -707,8 +707,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     @Nullable
     private DesktopModeWindowDecoration getRelevantWindowDecor(MotionEvent ev) {
-        if (mSplitScreenController.isPresent()
-                && mSplitScreenController.get().isSplitScreenVisible()) {
+        if (mSplitScreenController != null && mSplitScreenController.isSplitScreenVisible()) {
             // We can't look at focused task here as only one task will have focus.
             return getSplitScreenDecor(ev);
         } else {
@@ -719,9 +718,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     @Nullable
     private DesktopModeWindowDecoration getSplitScreenDecor(MotionEvent ev) {
         ActivityManager.RunningTaskInfo topOrLeftTask =
-                mSplitScreenController.get().getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT);
+                mSplitScreenController.getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT);
         ActivityManager.RunningTaskInfo bottomOrRightTask =
-                mSplitScreenController.get().getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
+                mSplitScreenController.getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
         if (topOrLeftTask != null && topOrLeftTask.getConfiguration()
                 .windowConfiguration.getBounds().contains((int) ev.getX(), (int) ev.getY())) {
             return mWindowDecorByTaskId.get(topOrLeftTask.taskId);
@@ -773,8 +772,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
-        if (mSplitScreenController.isPresent()
-                && mSplitScreenController.get().isTaskRootOrStageRoot(taskInfo.taskId)) {
+        if (mSplitScreenController != null
+                && mSplitScreenController.isTaskRootOrStageRoot(taskInfo.taskId)) {
             return false;
         }
         return DesktopModeStatus.isProto2Enabled()
