@@ -72,6 +72,8 @@ public class AccessibilityCache {
 
     private final AccessibilityNodeRefresher mAccessibilityNodeRefresher;
 
+    private OnNodeAddedListener mOnNodeAddedListener;
+
     private long mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
     private long mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
     /**
@@ -542,6 +544,10 @@ public class AccessibilityCache {
                 mInputFocus = sourceId;
                 mInputFocusWindow = windowId;
             }
+
+            if (mOnNodeAddedListener != null) {
+                mOnNodeAddedListener.onNodeAdded(clone);
+            }
         }
     }
 
@@ -881,6 +887,26 @@ public class AccessibilityCache {
         }
     }
 
+    /**
+     * Registers a listener to receive callbacks whenever nodes are added to cache.
+     *
+     * @param listener the listener to be registered.
+     */
+    public void registerOnNodeAddedListener(OnNodeAddedListener listener) {
+        synchronized (mLock) {
+            mOnNodeAddedListener = listener;
+        }
+    }
+
+    /**
+     * Clears the current reference to an OnNodeAddedListener, if one exists.
+     */
+    public void clearOnNodeAddedListener() {
+        synchronized (mLock) {
+            mOnNodeAddedListener = null;
+        }
+    }
+
     // Layer of indirection included to break dependency chain for testing
     public static class AccessibilityNodeRefresher {
         /** Refresh the given AccessibilityNodeInfo object. */
@@ -892,5 +918,13 @@ public class AccessibilityCache {
         public boolean refreshWindow(AccessibilityWindowInfo info) {
             return info.refresh();
         }
+    }
+
+    /**
+     * Listener interface that receives callbacks when nodes are added to cache.
+     */
+    public interface OnNodeAddedListener {
+        /** Called when a node is added to cache. */
+        void onNodeAdded(AccessibilityNodeInfo node);
     }
 }
