@@ -720,6 +720,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     // supplied, then ignore the delivery group policy.
                     return;
                 }
+                // TODO: Don't merge with the same BroadcastRecord more than once.
                 broadcastConsumer = (record, recordIndex) -> {
                     r.intent.mergeExtras(record.intent, extrasMerger);
                     mBroadcastConsumerSkipAndCanceled.accept(record, recordIndex);
@@ -730,10 +731,31 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return;
         }
         forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
+            // If the receiver is already in a terminal state, then ignore it.
+            if (isDeliveryStateTerminal(testRecord.getDeliveryState(testIndex))) {
+                return false;
+            }
             // We only allow caller to remove broadcasts they enqueued
-            return (r.callingUid == testRecord.callingUid)
-                    && (r.userId == testRecord.userId)
-                    && r.matchesDeliveryGroup(testRecord);
+            if ((r.callingUid != testRecord.callingUid)
+                    || (r.userId != testRecord.userId)
+                    || !r.matchesDeliveryGroup(testRecord)) {
+                return false;
+            }
+            // TODO: If a process is in a deferred state, we can always apply the policy as long
+            // as it is one of the receivers for the new broadcast.
+
+            // For ordered broadcast, check if the receivers for the new broadcast is a superset
+            // of those for the previous one as skipping and removing only one of them could result
+            // in an inconsistent state.
+            if (testRecord.ordered || testRecord.resultTo != null) {
+                // TODO: Cache this result in some way so that we don't have to perform the
+                // same check for all the broadcast receivers.
+                return r.containsAllReceivers(testRecord.receivers);
+            } else if (testRecord.prioritized) {
+                return r.containsAllReceivers(testRecord.receivers);
+            } else {
+                return r.containsReceiver(testRecord.receivers.get(testIndex));
+            }
         }, broadcastConsumer, true);
     }
 
