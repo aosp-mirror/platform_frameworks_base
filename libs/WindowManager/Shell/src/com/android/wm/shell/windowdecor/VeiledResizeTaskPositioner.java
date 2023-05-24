@@ -55,7 +55,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
     private final Rect mRepositionTaskBounds = new Rect();
     // If a task move (not resize) finishes in this region, the positioner will not attempt to
     // finalize the bounds there using WCT#setBounds
-    private final Rect mDisallowedAreaForEndBounds = new Rect();
+    private final Rect mDisallowedAreaForEndBounds;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
     private int mCtrlType;
 
@@ -77,7 +77,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         mDesktopWindowDecoration = windowDecoration;
         mDisplayController = displayController;
         mDragStartListener = dragStartListener;
-        mDisallowedAreaForEndBounds.set(disallowedAreaForEndBounds);
+        mDisallowedAreaForEndBounds = new Rect(disallowedAreaForEndBounds);
         mTransactionSupplier = supplier;
         mTransitions = transitions;
     }
