@@ -10,6 +10,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SyncRtSurfaceTransactionApplier
+import android.view.View
 import android.view.ViewRootImpl
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
@@ -32,6 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
@@ -372,6 +374,83 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
                 1f, captorWp.getLastValue().alpha)
 
         verifyNoMoreInteractions(surfaceTransactionApplier)
+    }
+
+    @Test
+    fun unlockToLauncherWithInWindowAnimations_ssViewIsVisible() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.VISIBLE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.unlockToLauncherWithInWindowAnimations()
+
+        verify(mockLockscreenSmartspaceView).visibility = View.INVISIBLE
+    }
+
+    @Test
+    fun unlockToLauncherWithInWindowAnimations_ssViewIsInvisible() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.INVISIBLE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.unlockToLauncherWithInWindowAnimations()
+
+        verify(mockLockscreenSmartspaceView, never()).visibility = View.INVISIBLE
+    }
+
+    @Test
+    fun unlockToLauncherWithInWindowAnimations_ssViewIsGone() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.GONE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.unlockToLauncherWithInWindowAnimations()
+
+        verify(mockLockscreenSmartspaceView, never()).visibility = View.INVISIBLE
+    }
+
+    @Test
+    fun notifyFinishedKeyguardExitAnimation_ssViewIsInvisibleAndCancelledIsTrue() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.INVISIBLE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(true)
+
+        verify(mockLockscreenSmartspaceView).visibility = View.VISIBLE
+    }
+
+    @Test
+    fun notifyFinishedKeyguardExitAnimation_ssViewIsGoneAndCancelledIsTrue() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.GONE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(true)
+
+        verify(mockLockscreenSmartspaceView, never()).visibility = View.VISIBLE
+    }
+
+    @Test
+    fun notifyFinishedKeyguardExitAnimation_ssViewIsInvisibleAndCancelledIsFalse() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.INVISIBLE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(false)
+
+        verify(mockLockscreenSmartspaceView).visibility = View.VISIBLE
+    }
+
+    @Test
+    fun notifyFinishedKeyguardExitAnimation_ssViewIsGoneAndCancelledIsFalse() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.GONE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(false)
+
+        verify(mockLockscreenSmartspaceView, never()).visibility = View.VISIBLE
     }
 
     private class ArgThatCaptor<T> {
