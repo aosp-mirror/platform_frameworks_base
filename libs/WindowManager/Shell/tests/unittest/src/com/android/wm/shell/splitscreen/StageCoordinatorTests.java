@@ -159,7 +159,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
         verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), eq(false));
         verify(mMainStage).reparentTopTask(eq(wct));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
@@ -177,7 +177,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
         verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), eq(false));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getSideStagePosition());
     }
@@ -189,7 +189,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
         verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), eq(false));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
     }
 
