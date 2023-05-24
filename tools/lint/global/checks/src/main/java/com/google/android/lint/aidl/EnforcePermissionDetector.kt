@@ -40,6 +40,8 @@ import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 
+import java.util.EnumSet
+
 /**
  * Lint Detector that ensures that any method overriding a method annotated
  * with @EnforcePermission is also annotated with the exact same annotation.
@@ -206,7 +208,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             severity = Severity.ERROR,
             implementation = Implementation(
                     EnforcePermissionDetector::class.java,
-                    Scope.JAVA_FILE_SCOPE
+                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
             )
         )
 
@@ -219,7 +221,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             severity = Severity.ERROR,
             implementation = Implementation(
                     EnforcePermissionDetector::class.java,
-                    Scope.JAVA_FILE_SCOPE
+                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
             )
         )
     }
