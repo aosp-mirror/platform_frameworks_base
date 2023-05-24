@@ -126,7 +126,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                     }
             };
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
-        mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
+        mNotificationShadeWindowController.setWindowRootView(mNotificationShadeWindowView);
 
         mNotificationShadeWindowController.attach();
         verify(mWindowManager).addView(eq(mNotificationShadeWindowView), any());

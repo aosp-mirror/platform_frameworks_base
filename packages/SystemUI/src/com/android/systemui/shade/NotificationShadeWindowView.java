@@ -59,11 +59,14 @@ import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 import com.android.systemui.R;
 import com.android.systemui.compose.ComposeFacade;
+import com.android.systemui.scene.ui.view.WindowRootView;
 
 /**
- * Combined keyguard and notification panel view. Also holding backdrop and scrims.
+ * Combined keyguard and notification panel view. Also holding backdrop and scrims. This view can
+ * serve as the root view of the main SysUI window, but because other views can also serve that
+ * purpose, users of this class cannot assume it is the root.
  */
-public class NotificationShadeWindowView extends FrameLayout {
+public class NotificationShadeWindowView extends WindowRootView {
     public static final String TAG = "NotificationShadeWindowView";
 
     private int mRightInset = 0;

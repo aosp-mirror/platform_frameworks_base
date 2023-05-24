@@ -1658,12 +1658,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 CollapsedStatusBarFragment.class,
                 mCentralSurfacesComponent::createCollapsedStatusBarFragment);
 
+        ViewGroup windowRootView = mCentralSurfacesComponent.getWindowRootView();
         mNotificationShadeWindowView = mCentralSurfacesComponent.getNotificationShadeWindowView();
         mNotificationShadeWindowViewController = mCentralSurfacesComponent
                 .getNotificationShadeWindowViewController();
         // TODO(b/277762009): Inject [NotificationShadeWindowView] directly into the controller.
         //  (Right now, there's a circular dependency.)
-        mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
+        mNotificationShadeWindowController.setWindowRootView(windowRootView);
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
         NotificationPanelViewController npvc =
                 mCentralSurfacesComponent.getNotificationPanelViewController();
