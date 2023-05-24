@@ -27,4 +27,7 @@
 
          0x50 = bottom, 0x01 = center_horizontal -->
     <integer name="keyguard_host_view_one_handed_gravity">0x51</integer>
+
+     <!-- Invisibility to use for the date & weather view when it is disabled by a clock -->
+    <integer name="keyguard_date_weather_view_invisibility">4</integer>
 </resources>
