@@ -141,8 +141,8 @@ public class KeyguardService extends Service {
             return apps.length == 0 ? TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                     : TRANSIT_OLD_KEYGUARD_GOING_AWAY;
         } else if (type == TRANSIT_KEYGUARD_OCCLUDE) {
-            boolean isOccludeByDream = apps.length > 0 && apps[0].taskInfo.topActivityType
-                    == WindowConfiguration.ACTIVITY_TYPE_DREAM;
+            boolean isOccludeByDream = apps.length > 0 && apps[0].taskInfo != null
+                    && apps[0].taskInfo.topActivityType == WindowConfiguration.ACTIVITY_TYPE_DREAM;
             if (isOccludeByDream) return TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
             return TRANSIT_OLD_KEYGUARD_OCCLUDE;
         } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
