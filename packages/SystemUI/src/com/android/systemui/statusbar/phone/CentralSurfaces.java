@@ -28,6 +28,7 @@ import android.os.PowerManager;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -266,7 +267,20 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isPanelExpanded();
 
+    /**
+     * Used to dispatch initial touch events before crossing the threshold to pull down the
+     * notification shade. After that, since the launcher window is set to slippery, input
+     * frameworks take care of routing the events to the notification shade.
+     */
     void onInputFocusTransfer(boolean start, boolean cancel, float velocity);
+
+    /**
+     * Dispatches status bar motion event to the notification shade. This is different from
+     * {@link #onInputFocusTransfer(boolean, boolean, float)} as it doesn't rely on setting the
+     * launcher window slippery to allow the frameworks to route those events after passing the
+     * initial threshold.
+     */
+    default void onStatusBarTrackpadEvent(MotionEvent event) {}
 
     void animateCollapseQuickSettings();
 
