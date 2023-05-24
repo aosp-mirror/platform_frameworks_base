@@ -51,6 +51,7 @@ public class AnimationUtils {
         boolean animationClockLocked;
         long currentVsyncTimeMillis;
         long lastReportedTimeMillis;
+        long mExpectedPresentationTimeNanos;
     };
 
     private static ThreadLocal<AnimationState> sAnimationState
@@ -62,7 +63,8 @@ public class AnimationUtils {
     };
 
     /**
-     * Locks AnimationUtils{@link #currentAnimationTimeMillis()} to a fixed value for the current
+     * Locks AnimationUtils{@link #currentAnimationTimeMillis()} and
+     * AnimationUtils{@link #expectedPresentationTimeNanos()} to a fixed value for the current
      * thread. This is used by {@link android.view.Choreographer} to ensure that all accesses
      * during a vsync update are synchronized to the timestamp of the vsync.
      *
@@ -74,8 +76,9 @@ public class AnimationUtils {
      * Note that time is not allowed to "rewind" and must perpetually flow forward. So the
      * lock may fail if the time is in the past from a previously returned value, however
      * time will be frozen for the duration of the lock. The clock is a thread-local, so
-     * ensure that {@link #lockAnimationClock(long)}, {@link #unlockAnimationClock()}, and
-     * {@link #currentAnimationTimeMillis()} are all called on the same thread.
+     * ensure that {@link #lockAnimationClock(long)}, {@link #unlockAnimationClock()},
+     * {@link #currentAnimationTimeMillis()}, and {@link #expectedPresentationTimeNanos()}
+     * are all called on the same thread.
      *
      * This is also not reference counted in any way. Any call to {@link #unlockAnimationClock()}
      * will unlock the clock for everyone on the same thread. It is therefore recommended
@@ -83,12 +86,13 @@ public class AnimationUtils {
      * {@link android.view.Choreographer} instance.
      *
      * @hide
-     * */
+     */
     @TestApi
-    public static void lockAnimationClock(long vsyncMillis) {
+    public static void lockAnimationClock(long vsyncMillis, long expectedPresentationTimeNanos) {
         AnimationState state = sAnimationState.get();
         state.animationClockLocked = true;
         state.currentVsyncTimeMillis = vsyncMillis;
+        state.mExpectedPresentationTimeNanos = expectedPresentationTimeNanos;
     }
 
     /**
@@ -121,6 +125,19 @@ public class AnimationUtils {
         }
         state.lastReportedTimeMillis = SystemClock.uptimeMillis();
         return state.lastReportedTimeMillis;
+    }
+
+    /**
+     * The expected presentation time of a frame in the {@link System#nanoTime()}.
+     * Developers should prefer using this method over {@link #currentAnimationTimeMillis()}
+     * because it offers a more accurate time for the calculating animation progress.
+     *
+     * @return the expected presentation time of a frame in the
+     *         {@link System#nanoTime()} time base.
+     */
+    public static long getExpectedPresentationTimeNanos() {
+        AnimationState state = sAnimationState.get();
+        return state.mExpectedPresentationTimeNanos;
     }
 
     /**

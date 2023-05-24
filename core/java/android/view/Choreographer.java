@@ -869,7 +869,8 @@ public final class Choreographer {
                 Trace.traceBegin(Trace.TRACE_TAG_VIEW, message);
             }
 
-            AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS);
+            AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS,
+                    timeline.mExpectedPresentationTimeNanos);
 
             mFrameInfo.markInputHandlingStart();
             doCallbacks(Choreographer.CALLBACK_INPUT, frameIntervalNanos);
