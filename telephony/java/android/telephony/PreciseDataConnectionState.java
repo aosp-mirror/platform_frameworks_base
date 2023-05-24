@@ -35,6 +35,7 @@ import android.telephony.Annotation.DataState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.data.ApnSetting;
 import android.telephony.data.DataCallResponse;
+import android.telephony.data.Qos;
 
 import com.android.internal.telephony.util.TelephonyUtils;
 
@@ -64,6 +65,7 @@ public final class PreciseDataConnectionState implements Parcelable {
     private final @DataFailureCause int mFailCause;
     private final LinkProperties mLinkProperties;
     private final ApnSetting mApnSetting;
+    private final Qos mDefaultQos;
 
     /**
      * Constructor
@@ -85,7 +87,7 @@ public final class PreciseDataConnectionState implements Parcelable {
                         .setApnTypeBitmask(apnTypes)
                         .setApnName(apn)
                         .setEntryName(apn)
-                        .build());
+                        .build(), null);
     }
 
 
@@ -101,11 +103,13 @@ public final class PreciseDataConnectionState implements Parcelable {
      *        code indicating the cause of the failure.
      * @param apnSetting If there is a valid APN for this Data Connection, then the APN Settings;
      *        if there is no valid APN setting for the specific type, then this will be null
+     * @param defaultQos If there is a valid QoS for the default bearer supporting this data call,
+     *        (supported for LTE and NR), then this is specified. Otherwise it should be null.
      */
     private PreciseDataConnectionState(@TransportType int transportType, int id,
             @DataState int state, @NetworkType int networkType,
             @Nullable LinkProperties linkProperties, @DataFailureCause int failCause,
-            @Nullable ApnSetting apnSetting) {
+            @Nullable ApnSetting apnSetting, @Nullable Qos defaultQos) {
         mTransportType = transportType;
         mId = id;
         mState = state;
@@ -113,6 +117,7 @@ public final class PreciseDataConnectionState implements Parcelable {
         mLinkProperties = linkProperties;
         mFailCause = failCause;
         mApnSetting = apnSetting;
+        mDefaultQos = defaultQos;
     }
 
     /**
@@ -125,9 +130,16 @@ public final class PreciseDataConnectionState implements Parcelable {
         mId = in.readInt();
         mState = in.readInt();
         mNetworkType = in.readInt();
-        mLinkProperties = in.readParcelable(LinkProperties.class.getClassLoader(), android.net.LinkProperties.class);
+        mLinkProperties = in.readParcelable(
+                LinkProperties.class.getClassLoader(),
+                android.net.LinkProperties.class);
         mFailCause = in.readInt();
-        mApnSetting = in.readParcelable(ApnSetting.class.getClassLoader(), android.telephony.data.ApnSetting.class);
+        mApnSetting = in.readParcelable(
+                ApnSetting.class.getClassLoader(),
+                android.telephony.data.ApnSetting.class);
+        mDefaultQos = in.readParcelable(
+                Qos.class.getClassLoader(),
+                android.telephony.data.Qos.class);
     }
 
     /**
@@ -263,6 +275,20 @@ public final class PreciseDataConnectionState implements Parcelable {
         return mApnSetting;
     }
 
+    /**
+     * Return the QoS for the default bearer of this data connection.
+     *
+     * @return the default QoS if known or {@code null} if it is unknown. If the value is reported
+     * for LTE, then it will be an {@link android.telephony.data.EpsQos EpsQos}. If the value is
+     * reported for 5G, then it will be an {@link android.telehpony.data.NrQos NrQos}. Otherwise it
+     * shall always be {@code null}.
+     *
+     * @hide
+     */
+    public @Nullable Qos getDefaultQos() {
+        return mDefaultQos;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -277,6 +303,7 @@ public final class PreciseDataConnectionState implements Parcelable {
         out.writeParcelable(mLinkProperties, flags);
         out.writeInt(mFailCause);
         out.writeParcelable(mApnSetting, flags);
+        out.writeParcelable(mDefaultQos, flags);
     }
 
     public static final @NonNull Parcelable.Creator<PreciseDataConnectionState> CREATOR
@@ -294,7 +321,7 @@ public final class PreciseDataConnectionState implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mTransportType, mId, mState, mNetworkType, mFailCause,
-                mLinkProperties, mApnSetting);
+                mLinkProperties, mApnSetting, mDefaultQos);
     }
 
 
@@ -309,7 +336,8 @@ public final class PreciseDataConnectionState implements Parcelable {
                 && mNetworkType == that.mNetworkType
                 && mFailCause == that.mFailCause
                 && Objects.equals(mLinkProperties, that.mLinkProperties)
-                && Objects.equals(mApnSetting, that.mApnSetting);
+                && Objects.equals(mApnSetting, that.mApnSetting)
+                && Objects.equals(mDefaultQos, that.mDefaultQos);
     }
 
     @NonNull
@@ -324,6 +352,7 @@ public final class PreciseDataConnectionState implements Parcelable {
         sb.append(", network type: " + TelephonyManager.getNetworkTypeName(mNetworkType));
         sb.append(", APN Setting: " + mApnSetting);
         sb.append(", link properties: " + mLinkProperties);
+        sb.append(", default QoS: " + mDefaultQos);
         sb.append(", fail cause: " + DataFailCause.toString(mFailCause));
 
         return sb.toString();
@@ -351,7 +380,7 @@ public final class PreciseDataConnectionState implements Parcelable {
         private @NetworkType int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
         /** If the data connection is connected, the properties of the connection */
-        private @Nullable LinkProperties mLinkProperties = null;
+        private @Nullable LinkProperties mLinkProperties;
 
         /**
          * In case a procedure related to this data connection fails, a non-zero error code
@@ -360,7 +389,10 @@ public final class PreciseDataConnectionState implements Parcelable {
         private @DataFailureCause int mFailCause = DataFailCause.NONE;
 
         /** The APN Setting for this data connection */
-        private @Nullable ApnSetting mApnSetting = null;
+        private @Nullable ApnSetting mApnSetting;
+
+        /** The Default QoS for this EPS/5GS bearer or null otherwise */
+        private @Nullable Qos mDefaultQos;
 
         /**
          * Set the transport type of the data connection.
@@ -441,13 +473,26 @@ public final class PreciseDataConnectionState implements Parcelable {
         }
 
         /**
+         * Set the default QoS for this data connection.
+         *
+         * @param qos The qos information, if any, associated with the default bearer of the
+         * data connection.
+         * @return The builder
+         * @hide
+         */
+        public @NonNull Builder setDefaultQos(@Nullable Qos qos) {
+            mDefaultQos = qos;
+            return this;
+        }
+
+        /**
          * Build the {@link PreciseDataConnectionState} instance.
          *
          * @return The {@link PreciseDataConnectionState} instance
          */
         public PreciseDataConnectionState build() {
             return new PreciseDataConnectionState(mTransportType, mId, mState, mNetworkType,
-                    mLinkProperties, mFailCause, mApnSetting);
+                    mLinkProperties, mFailCause, mApnSetting, mDefaultQos);
         }
     }
 }
