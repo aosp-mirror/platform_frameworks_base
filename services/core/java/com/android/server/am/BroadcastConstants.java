@@ -373,7 +373,7 @@ public class BroadcastConstants {
      * Return the {@link SystemProperty} name for the given key in our
      * {@link DeviceConfig} namespace.
      */
-    private @NonNull String propertyFor(@NonNull String key) {
+    private static @NonNull String propertyFor(@NonNull String key) {
         return "persist.device_config." + NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT + "." + key;
     }
 
@@ -382,11 +382,11 @@ public class BroadcastConstants {
      * {@link DeviceConfig} namespace, but with a different prefix that can be
      * used to locally override the {@link DeviceConfig} value.
      */
-    private @NonNull String propertyOverrideFor(@NonNull String key) {
+    private static @NonNull String propertyOverrideFor(@NonNull String key) {
         return "persist.sys." + NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT + "." + key;
     }
 
-    private boolean getDeviceConfigBoolean(@NonNull String key, boolean def) {
+    static boolean getDeviceConfigBoolean(@NonNull String key, boolean def) {
         return SystemProperties.getBoolean(propertyOverrideFor(key),
                 SystemProperties.getBoolean(propertyFor(key), def));
     }
