@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Bagikan"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Perekaman layar disimpan"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Ketuk untuk melihat"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Error saat menghapus rekaman layar"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Terjadi error saat menyimpan rekaman layar"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Terjadi error saat memulai perekaman layar"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Kembali"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Utama"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Wajah diautentikasi"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Dikonfirmasi"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Ketuk Konfirmasi untuk menyelesaikan"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Kunci dibuka dengan wajah. Tekan ikon buka kunci untuk melanjutkan."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Kunci dibuka dengan wajah. Tekan untuk melanjutkan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Wajah dikenali. Tekan untuk melanjutkan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Wajah dikenali. Tekan ikon buka kunci untuk melanjutkan."</string>
@@ -910,7 +911,7 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Semua kontrol dihapus"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Perubahan tidak disimpan"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Lihat aplikasi lainnya"</string>
-    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Atur ulang"</string>
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Tata ulang"</string>
     <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Tambahkan kontrol"</string>
     <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Kembali mengedit"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontrol tidak dapat dimuat. Periksa aplikasi <xliff:g id="APP">%s</xliff:g> untuk memastikan setelan aplikasi tidak berubah."</string>
@@ -943,6 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Setelan"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> oleh <xliff:g id="ARTIST_NAME">%2$s</xliff:g> sedang diputar dari <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> dari <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang berjalan"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Putar"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Jeda"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Lagu sebelumnya"</string>

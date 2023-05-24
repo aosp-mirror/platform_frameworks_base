@@ -788,7 +788,7 @@ public class DomainVerificationService extends SystemService
 
     /**
      * @param includeNegative See
-     * {@link #approvalLevelForDomain(PackageStateInternal, String, boolean, int, Object)}.
+     * {@link #approvalLevelForDomain(PackageStateInternal, String, boolean, int, boolean, Object)}.
      * @return Mapping of approval level to packages; packages are sorted by firstInstallTime. Null
      * if no owners were found.
      */
@@ -808,7 +808,7 @@ public class DomainVerificationService extends SystemService
                 }
 
                 int level = approvalLevelForDomain(pkgSetting, domain, includeNegative, userId,
-                        domain);
+                        DEBUG_APPROVAL, domain);
                 if (!includeNegative && level <= APPROVAL_LEVEL_NONE) {
                     continue;
                 }
@@ -1616,7 +1616,8 @@ public class DomainVerificationService extends SystemService
                 fillInfoMapForSamePackage(inputMap, packageName, APPROVAL_LEVEL_NONE);
                 continue;
             }
-            int approval = approvalLevelForDomain(pkgSetting, domain, false, userId, domain);
+            int approval = approvalLevelForDomain(pkgSetting, domain, false, userId, DEBUG_APPROVAL,
+                    domain);
             highestApproval = Math.max(highestApproval, approval);
             fillInfoMapForSamePackage(inputMap, packageName, approval);
         }
@@ -1726,15 +1727,21 @@ public class DomainVerificationService extends SystemService
             @NonNull Intent intent, @PackageManager.ResolveInfoFlagsBits long resolveInfoFlags,
             @UserIdInt int userId) {
         String packageName = pkgSetting.getPackageName();
+        var debug = DEBUG_APPROVAL || (intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0;
         if (!DomainVerificationUtils.isDomainVerificationIntent(intent, resolveInfoFlags)) {
-            if (DEBUG_APPROVAL) {
+            if (debug) {
                 debugApproval(packageName, intent, userId, false, "not valid intent");
             }
             return APPROVAL_LEVEL_NONE;
         }
 
-        return approvalLevelForDomain(pkgSetting, intent.getData().getHost(), false, userId,
-                intent);
+        var approvalLevel = approvalLevelForDomain(pkgSetting, intent.getData().getHost(), false,
+                userId, debug, intent);
+        if (debug) {
+            Slog.d(TAG + "Approval", "Final approval level for " + pkgSetting.getPackageName()
+                    + " for host " + intent.getData().getHost() + " is " + approvalLevel);
+        }
+        return approvalLevel;
     }
 
     /**
@@ -1744,10 +1751,10 @@ public class DomainVerificationService extends SystemService
      *                          {@link String} otherwise.
      */
     private int approvalLevelForDomain(@NonNull PackageStateInternal pkgSetting,
-            @NonNull String host, boolean includeNegative, @UserIdInt int userId,
+            @NonNull String host, boolean includeNegative, @UserIdInt int userId, boolean debug,
             @NonNull Object debugObject) {
         int approvalLevel = approvalLevelForDomainInternal(pkgSetting, host, includeNegative,
-                userId, debugObject);
+                userId, debug, debugObject);
         if (includeNegative && approvalLevel == APPROVAL_LEVEL_NONE) {
             PackageUserStateInternal pkgUserState = pkgSetting.getUserStateOrDefault(userId);
             if (!pkgUserState.isInstalled()) {
@@ -1768,13 +1775,13 @@ public class DomainVerificationService extends SystemService
     }
 
     private int approvalLevelForDomainInternal(@NonNull PackageStateInternal pkgSetting,
-            @NonNull String host, boolean includeNegative, @UserIdInt int userId,
+            @NonNull String host, boolean includeNegative, @UserIdInt int userId, boolean debug,
             @NonNull Object debugObject) {
         String packageName = pkgSetting.getPackageName();
         final AndroidPackage pkg = pkgSetting.getPkg();
 
         if (pkg != null && includeNegative && !mCollector.containsWebDomain(pkg, host)) {
-            if (DEBUG_APPROVAL) {
+            if (debug) {
                 debugApproval(packageName, debugObject, userId, false,
                         "domain not declared");
             }
@@ -1783,7 +1790,7 @@ public class DomainVerificationService extends SystemService
 
         final PackageUserStateInternal pkgUserState = pkgSetting.getUserStates().get(userId);
         if (pkgUserState == null) {
-            if (DEBUG_APPROVAL) {
+            if (debug) {
                 debugApproval(packageName, debugObject, userId, false,
                         "PackageUserState unavailable");
             }
@@ -1791,7 +1798,7 @@ public class DomainVerificationService extends SystemService
         }
 
         if (!pkgUserState.isInstalled()) {
-            if (DEBUG_APPROVAL) {
+            if (debug) {
                 debugApproval(packageName, debugObject, userId, false,
                         "package not installed for user");
             }
@@ -1799,7 +1806,7 @@ public class DomainVerificationService extends SystemService
         }
 
         if (!PackageUserStateUtils.isPackageEnabled(pkgUserState, pkg)) {
-            if (DEBUG_APPROVAL) {
+            if (debug) {
                 debugApproval(packageName, debugObject, userId, false,
                         "package not enabled for user");
             }
@@ -1807,7 +1814,7 @@ public class DomainVerificationService extends SystemService
         }
 
         if (pkgUserState.isSuspended()) {
-            if (DEBUG_APPROVAL) {
+            if (debug) {
                 debugApproval(packageName, debugObject, userId, false,
                         "package suspended for user");
             }
@@ -1834,7 +1841,7 @@ public class DomainVerificationService extends SystemService
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
             if (pkgState == null) {
-                if (DEBUG_APPROVAL) {
+                if (debug) {
                     debugApproval(packageName, debugObject, userId, false, "pkgState unavailable");
                 }
                 return APPROVAL_LEVEL_NONE;
@@ -1843,7 +1850,7 @@ public class DomainVerificationService extends SystemService
             DomainVerificationInternalUserState userState = pkgState.getUserState(userId);
 
             if (userState != null && !userState.isLinkHandlingAllowed()) {
-                if (DEBUG_APPROVAL) {
+                if (debug) {
                     debugApproval(packageName, debugObject, userId, false,
                             "link handling not allowed");
                 }
@@ -1865,7 +1872,7 @@ public class DomainVerificationService extends SystemService
             // Check if the exact host matches
             Integer state = stateMap.get(host);
             if (state != null && DomainVerificationState.isVerified(state)) {
-                if (DEBUG_APPROVAL) {
+                if (debug) {
                     debugApproval(packageName, debugObject, userId, true,
                             "host verified exactly");
                 }
@@ -1881,7 +1888,7 @@ public class DomainVerificationService extends SystemService
 
                 String domain = stateMap.keyAt(index);
                 if (domain.startsWith("*.") && host.endsWith(domain.substring(2))) {
-                    if (DEBUG_APPROVAL) {
+                    if (debug) {
                         debugApproval(packageName, debugObject, userId, true,
                                 "host verified by wildcard");
                     }
@@ -1891,7 +1898,7 @@ public class DomainVerificationService extends SystemService
 
             // Check user state if available
             if (userState == null) {
-                if (DEBUG_APPROVAL) {
+                if (debug) {
                     debugApproval(packageName, debugObject, userId, false, "userState unavailable");
                 }
                 return APPROVAL_LEVEL_NONE;
@@ -1900,7 +1907,7 @@ public class DomainVerificationService extends SystemService
             // See if the user has approved the exact host
             ArraySet<String> enabledHosts = userState.getEnabledHosts();
             if (enabledHosts.contains(host)) {
-                if (DEBUG_APPROVAL) {
+                if (debug) {
                     debugApproval(packageName, debugObject, userId, true,
                             "host enabled by user exactly");
                 }
@@ -1912,7 +1919,7 @@ public class DomainVerificationService extends SystemService
             for (int index = 0; index < enabledHostsSize; index++) {
                 String domain = enabledHosts.valueAt(index);
                 if (domain.startsWith("*.") && host.endsWith(domain.substring(2))) {
-                    if (DEBUG_APPROVAL) {
+                    if (debug) {
                         debugApproval(packageName, debugObject, userId, true,
                                 "host enabled by user through wildcard");
                     }
@@ -1920,7 +1927,7 @@ public class DomainVerificationService extends SystemService
                 }
             }
 
-            if (DEBUG_APPROVAL) {
+            if (debug) {
                 debugApproval(packageName, debugObject, userId, false, "not approved");
             }
             return APPROVAL_LEVEL_NONE;
@@ -1948,7 +1955,7 @@ public class DomainVerificationService extends SystemService
             }
 
             int level = approvalLevelForDomain(pkgSetting, domain, includeNegative, userId,
-                    domain);
+                    DEBUG_APPROVAL, domain);
             if (level < minimumApproval) {
                 continue;
             }

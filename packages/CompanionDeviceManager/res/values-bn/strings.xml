@@ -35,7 +35,7 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play পরিষেবা"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"আপনার ফোনের ফটো, মিডিয়া এবং তথ্য অ্যাক্সেস করার জন্য <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DISPLAY_NAME">%2$s</xliff:g>-এর হয়ে অনুমতি চাইছে"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;কে এই অ্যাকশন করতে দেবেন?"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;-কে এই কাজটি করতে দেবেন?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"আশেপাশের ডিভাইসে অ্যাপ ও অন্যান্য সিস্টেম ফিচার স্ট্রিম করার জন্য আপনার <xliff:g id="DEVICE_NAME">%2$s</xliff:g>-এর হয়ে <xliff:g id="APP_NAME">%1$s</xliff:g> অনুমতি চেয়ে অনুরোধ করছে"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ডিভাইস"</string>
     <string name="summary_generic_single_device" msgid="4181180669689590417">"এই অ্যাপ, আপনার ফোন এবং <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ডিভাইসের মধ্যে তথ্য সিঙ্ক করতে পারবে, যেমন কোনও কলারের নাম"</string>

@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Dijeli"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Snimak ekrana je sačuvan"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Dodirnite da vidite"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Greška prilikom brisanja snimka ekrana"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Greška prilikom pohranjivanja snimka ekrana"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Greška pri pokretanju snimanja ekrana"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Nazad"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Dugme za početnu stranicu"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Lice je provjereno"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrđeno"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Dodirnite Potvrdi da završite"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Otključano licem. Pritisnite ikonu za otklj. da nastavite."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Otključano licem. Pritisnite da nastavite."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice prepoznato. Pritisnite da nastavite."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice prepoznato. Pritisnite ikonu za otklj. da nastavite."</string>
@@ -943,6 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Postavke"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Pjesma <xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se reproducira pomoću aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> od <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je pokrenuta"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Reproduciranje"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pauziranje"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Prethodna numera"</string>
@@ -1142,11 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Priključite pisaljku na punjač"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Baterija pisaljke je slaba"</string>
     <string name="video_camera" msgid="7654002575156149298">"Video kamera"</string>
-    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Ne možete upućivati pozive iz osobne aplikacije"</string>
-    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Vaša organizacija dopušta upućivanje poziva samo iz poslovnih aplikacija"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Nije moguće pozvati iz lične aplikacije"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Vaša organizacija vam dozvoljava da upućujete pozive samo iz poslovnih aplikacija"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Pređite na radni profil"</string>
-    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instaliraj poslovnu aplikaciju telefona"</string>
-    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Odustani"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalirajte poslovnu aplikaciju za telefon"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Otkaži"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Prilagodi zaključavanje ekrana"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Otključajte da prilagodite zaključavanje ekrana"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"WiFi mreža nije dostupna"</string>

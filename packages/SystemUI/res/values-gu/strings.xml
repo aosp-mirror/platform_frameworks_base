@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"શેર કરો"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"સ્ક્રીન રેકોર્ડિંગ સાચવ્યું"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"જોવા માટે ટૅપ કરો"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"સ્ક્રીન રેકોર્ડિંગ ડિલીટ કરવામાં ભૂલ આવી"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"સ્ક્રીન રેકોર્ડિંગ સાચવવામાં ભૂલ આવી"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"સ્ક્રીનને રેકૉર્ડ કરવાનું શરૂ કરવામાં ભૂલ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"પાછળ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"હોમ"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ચહેરાનું પ્રમાણીકરણ થયું"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"પુષ્ટિ કરી"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"પરીક્ષણ પૂર્ણ કરવા કન્ફર્મ કરોને ટૅપ કરો"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"ચહેરા દ્વારા અનલૉક કર્યું. આગળ વધવા \'અનલૉક કરો\' આઇકન દબાવો."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ચહેરા દ્વારા અનલૉક કર્યું. આગળ વધવા માટે દબાવો."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ચહેરો ઓળખ્યો. આગળ વધવા માટે દબાવો."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ચહેરો ઓળખ્યો. આગળ વધવા \'અનલૉક કરો\' આઇકન દબાવો."</string>
@@ -943,6 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"સેટિંગ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> પર <xliff:g id="ARTIST_NAME">%2$s</xliff:g>નું <xliff:g id="SONG_NAME">%1$s</xliff:g> ગીત ચાલી રહ્યું છે"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>માંથી <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ચાલી રહી છે"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"ચલાવો"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"થોભાવો"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"પહેલાનો ટ્રૅક"</string>
@@ -1142,15 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"તમારા સ્ટાઇલસને ચાર્જર સાથે કનેક્ટ કરો"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"સ્ટાઇલસની બૅટરીમાં ચાર્જ ઓછો છે"</string>
     <string name="video_camera" msgid="7654002575156149298">"વીડિયો કૅમેરા"</string>
-    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
-    <skip />
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"કોઈ વ્યક્તિગત ઍપ પરથી કૉલ કરી શકાશે નહીં"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"તમારી સંસ્થા તમને માત્ર ઑફિસ માટેની ઍપ પરથી કૉલ કરવાની મંજૂરી આપે છે"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ઑફિસની પ્રોફાઇલ પર સ્વિચ કરો"</string>
-    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
-    <skip />
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"ઑફિસ માટેની કોઈ ફોન ઍપ ઇન્સ્ટૉલ કરો"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"રદ કરો"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"લૉક સ્ક્રીન કસ્ટમાઇઝ કરો"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"લૉક સ્ક્રીનને કસ્ટમાઇઝ કરવા માટે અનલૉક કરો"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"વાઇ-ફાઇ ઉપલબ્ધ નથી"</string>

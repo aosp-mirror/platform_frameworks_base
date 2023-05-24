@@ -177,7 +177,7 @@ object Flags {
      */
     // TODO(b/281655028): Tracking bug
     @JvmField
-    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = true)
+    val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = false)
 
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
@@ -718,11 +718,6 @@ object Flags {
     @JvmField
     val LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION =
             releasedFlag(2602, "large_shade_granular_alpha_interpolation")
-
-    // TODO(b/272805037): Tracking Bug
-    @JvmField
-    val ADVANCED_VPN_ENABLED = releasedFlag(2800, name = "AdvancedVpn__enable_feature",
-            namespace = "vpn")
 
     // TODO(b/277201412): Tracking Bug
     @JvmField

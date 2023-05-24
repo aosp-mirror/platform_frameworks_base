@@ -103,7 +103,7 @@
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Podczas nagrywania Android ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Podczas nagrywania treści z aplikacji Android ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Zacznij nagrywać"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nagraj dźwięk"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nagrywaj dźwięk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Dźwięki z urządzenia"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Dźwięki odtwarzane na urządzeniu, na przykład muzyka, połączenia i dzwonki"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Udostępnij"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Zapisano nagranie zawartości ekranu"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Kliknij, aby wyświetlić"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Błąd podczas usuwania nagrania zawartości ekranu"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Podczas zapisywania nagrania ekranu wystąpił błąd"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Błąd podczas rozpoczynania rejestracji zawartości ekranu"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Wróć"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Ekran główny"</string>
@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Twarz rozpoznana"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potwierdzono"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Aby zakończyć, kliknij Potwierdź"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Odblokowano skanem twarzy. Aby kontynuować, kliknij ikonę odblokowywania."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odblokowano rozpoznawaniem twarzy. Kliknij, aby kontynuować."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Twarz rozpoznana. Kliknij, aby kontynuować."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Twarz rozpoznana. Aby kontynuować, kliknij ikonę odblokowywania."</string>
@@ -943,6 +944,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ustawienia"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Aplikacja <xliff:g id="APP_LABEL">%3$s</xliff:g> odtwarza utwór <xliff:g id="SONG_NAME">%1$s</xliff:g> (<xliff:g id="ARTIST_NAME">%2$s</xliff:g>)"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> z <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest uruchomiona"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Odtwórz"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Wstrzymaj"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Poprzedni utwór"</string>
@@ -1118,7 +1120,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Zezwolić aplikacji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na dostęp do wszystkich dzienników urządzenia?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Zezwól na jednorazowy dostęp"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Nie zezwalaj"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie mogła korzystać z własnych. Producent urządzenia nadal będzie mógł używać niektórych dzienników na urządzeniu."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie mogła korzystać z własnych. Producent urządzenia nadal będzie mógł używać niektórych dzienników lub informacji na urządzeniu."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Więcej informacji"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Więcej informacji: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Otwórz: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
@@ -1142,15 +1144,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Podłącz rysik do ładowarki"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Słaba bateria w rysiku"</string>
     <string name="video_camera" msgid="7654002575156149298">"Kamera"</string>
-    <!-- no translation found for call_from_work_profile_title (5418253516453177114) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (2856337395968118274) -->
-    <skip />
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Nie można nawiązać połączenia z aplikacji osobistej"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Twoja organizacja zezwala na nawiązywanie połączeń tylko z aplikacji służbowych"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Przełącz na profil służbowy"</string>
-    <!-- no translation found for install_dialer_on_work_profile_action (2014659711597862506) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (5830072964434474143) -->
-    <skip />
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Zainstaluj służbową aplikację telefonu"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Anuluj"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Dostosuj ekran blokady"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Odblokuj, aby dostosować ekran blokady"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Sieć Wi-Fi jest niedostępna"</string>

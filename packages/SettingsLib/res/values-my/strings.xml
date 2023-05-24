@@ -115,8 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD အသံ- <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD အသံ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"နားကြားကိရိယာ"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (1725521360076451751) -->
-    <skip />
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"နားကြားကိရိယာနှင့် ချိတ်ဆက်ပြီးပါပြီ"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE အသံနှင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"မီဒီယာအသံအား ချိတ်ဆက်ရန်"</string>
@@ -214,10 +213,9 @@
     <item msgid="6946761421234586000">"၄၀၀%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ပရိုဖိုင်ကို ရွေးရန်"</string>
-    <string name="category_personal" msgid="6236798763159385225">"ကိုယ်ရေး"</string>
+    <string name="category_personal" msgid="6236798763159385225">"ကိုယ်ပိုင်"</string>
     <string name="category_work" msgid="4014193632325996115">"အလုပ်"</string>
-    <!-- no translation found for category_clone (1554511758987195974) -->
-    <skip />
+    <string name="category_clone" msgid="1554511758987195974">"ပုံတူပွားရန်"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ဆော့ဝဲလ်ရေးသူ ရွေးစရာများ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ဆော့ဖ်ဝဲရေးသူအတွက် ရွေးစရာများကို ဖွင့်ပါ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"အပလီကေးရှင်းတိုးတက်မှုအတွက် ရွေးချယ်မှုကိုသတ်မှတ်သည်"</string>
@@ -443,7 +441,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (အပြာ-အဝါ)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင် အမှန်ပြင်ခြင်း"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင်ပြင်ခြင်း"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုခြင်း&lt;/li&gt; &lt;li&gt;&amp;nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားခြင်း&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -471,7 +469,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"မကြာမီ စက်ပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> လိုသည်"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"အားပြည့်ရန် <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> လိုသည်"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားပြည့်ရန် <xliff:g id="TIME">%2$s</xliff:g> လိုသည်"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားသွင်းခြင်းကို အကောင်းဆုံးပြင်ဆင်ထားသည်"</string>
     <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားသွင်းခြင်းကို အကောင်းဆုံးပြင်ဆင်ထားသည်"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"မသိ"</string>

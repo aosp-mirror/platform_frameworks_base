@@ -53,6 +53,7 @@ import android.os.SystemProperties;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.TaskSnapshot;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
@@ -247,11 +248,6 @@ public class PipTransition extends PipTransitionController {
             }
             updatePipForUnhandledTransition(currentPipTaskChange, startTransaction,
                     finishTransaction);
-        }
-
-        // Fade in the fadeout PIP when the fixed rotation is finished.
-        if (mPipTransitionState.isInPip() && !mInFixedRotation && mHasFadeOut) {
-            fadeExistingPip(true /* show */);
         }
 
         return false;
@@ -880,6 +876,14 @@ public class PipTransition extends PipTransitionController {
                 } else {
                     animator.setColorContentOverlay(mContext);
                 }
+            } else {
+                final TaskSnapshot snapshot = PipUtils.getTaskSnapshot(
+                        taskInfo.launchIntoPipHostTaskId, false /* isLowResolution */);
+                if (snapshot != null) {
+                    // use the task snapshot during the animation, this is for
+                    // launch-into-pip aka. content-pip use case.
+                    animator.setSnapshotContentOverlay(snapshot, sourceHintRect);
+                }
             }
         } else if (enterAnimationType == ANIM_TYPE_ALPHA) {
             animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,
@@ -1056,6 +1060,12 @@ public class PipTransition extends PipTransitionController {
                 .crop(finishTransaction, leash, destBounds)
                 .round(finishTransaction, leash, isInPip)
                 .shadow(finishTransaction, leash, isInPip);
+        // Make sure the PiP keeps invisible if it was faded out. If it needs to fade in, that will
+        // be handled by onFixedRotationFinished().
+        if (isInPip && mHasFadeOut) {
+            startTransaction.setAlpha(leash, 0f);
+            finishTransaction.setAlpha(leash, 0f);
+        }
     }
 
     /** Hides and shows the existing PIP during fixed rotation transition of other activities. */
