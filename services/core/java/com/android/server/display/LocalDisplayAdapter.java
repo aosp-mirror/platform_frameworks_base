@@ -701,11 +701,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         maxDisplayMode == null ? mInfo.width : maxDisplayMode.getPhysicalWidth();
                 final int maxHeight =
                         maxDisplayMode == null ? mInfo.height : maxDisplayMode.getPhysicalHeight();
-                mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
-                        mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
 
-                mInfo.roundedCorners = RoundedCorners.fromResources(
-                        res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
+                // We cannot determine cutouts and rounded corners of external displays.
+                if (mStaticDisplayInfo.isInternal) {
+                    mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
+                            mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
+                    mInfo.roundedCorners = RoundedCorners.fromResources(
+                            res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
+                }
+
                 mInfo.installOrientation = mStaticDisplayInfo.installOrientation;
 
                 mInfo.displayShape = DisplayShape.fromResources(

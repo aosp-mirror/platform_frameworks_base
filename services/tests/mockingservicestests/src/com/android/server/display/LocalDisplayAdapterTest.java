@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1005,6 +1006,72 @@ public class LocalDisplayAdapterTest {
         final float expectedRatio = DISPLAY_RANGE_NITS[1] / DISPLAY_RANGE_NITS[0];
         assertEquals(expectedRatio, displayDevice.getDisplayDeviceInfoLocked().hdrSdrRatio,
                 0.001f);
+    }
+
+    @Test
+    public void test_getDisplayDeviceInfoLocked_internalDisplay_usesCutoutAndCorners()
+            throws Exception {
+        setupCutoutAndRoundedCorners();
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        display.info.isInternal = true;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        DisplayDevice displayDevice = mListener.addedDisplays.get(0);
+
+        // Turn on / initialize
+        Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
+                0);
+        changeStateRunnable.run();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        mListener.changedDisplays.clear();
+
+        DisplayDeviceInfo info = displayDevice.getDisplayDeviceInfoLocked();
+
+        assertThat(info.displayCutout).isNotNull();
+        assertThat(info.displayCutout.getBoundingRectTop()).isEqualTo(new Rect(507, 33, 573, 99));
+        assertThat(info.roundedCorners).isNotNull();
+        assertThat(info.roundedCorners.getRoundedCorner(0).getRadius()).isEqualTo(5);
+    }
+
+    @Test public void test_getDisplayDeviceInfoLocked_externalDisplay_doesNotUseCutoutOrCorners()
+            throws Exception {
+        setupCutoutAndRoundedCorners();
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        display.info.isInternal = false;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        DisplayDevice displayDevice = mListener.addedDisplays.get(0);
+
+        // Turn on / initialize
+        Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
+                0);
+        changeStateRunnable.run();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        mListener.changedDisplays.clear();
+
+        DisplayDeviceInfo info = displayDevice.getDisplayDeviceInfoLocked();
+
+        assertThat(info.displayCutout).isNull();
+        assertThat(info.roundedCorners).isNull();
+    }
+
+    private void setupCutoutAndRoundedCorners() {
+        String sampleCutout = "M 507,66\n"
+                + "a 33,33 0 1 0 66,0 33,33 0 1 0 -66,0\n"
+                + "Z\n"
+                + "@left\n";
+        // Setup some default cutout
+        when(mMockedResources.getString(
+                com.android.internal.R.string.config_mainBuiltInDisplayCutout))
+                .thenReturn(sampleCutout);
+        when(mMockedResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.rounded_corner_radius)).thenReturn(5);
     }
 
     private void assertDisplayDpi(DisplayDeviceInfo info, int expectedPort,
