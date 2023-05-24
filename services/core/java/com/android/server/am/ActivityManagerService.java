@@ -4854,7 +4854,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     checkTime(startTime, "finishAttachApplicationInner: "
                             + "after dispatching broadcasts");
-                } catch (Exception e) {
+                } catch (BroadcastDeliveryFailedException e) {
                     // If the app died trying to launch the receiver we declare it 'bad'
                     Slog.wtf(TAG, "Exception thrown dispatching broadcasts in " + app, e);
                     badApp = true;
