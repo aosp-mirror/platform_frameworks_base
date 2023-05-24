@@ -2262,7 +2262,7 @@ class ContextImpl extends Context {
             Log.v(TAG, "Treating renounced permission " + permission + " as denied");
             return PERMISSION_DENIED;
         }
-        return PermissionManager.checkPermission(permission, pid, uid);
+        return PermissionManager.checkPermission(permission, pid, uid, getDeviceId());
     }
 
     /** @hide */

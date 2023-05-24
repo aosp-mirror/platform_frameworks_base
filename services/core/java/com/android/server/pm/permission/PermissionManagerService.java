@@ -218,9 +218,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private int checkPermission(String pkgName, String permName, @UserIdInt int userId) {
+    @Override
+    @PackageManager.PermissionResult
+    public int checkPermission(String packageName, String permissionName, int deviceId,
+            @UserIdInt int userId) {
         // Not using Objects.requireNonNull() here for compatibility reasons.
-        if (pkgName == null || permName == null) {
+        if (packageName == null || permissionName == null) {
             return PackageManager.PERMISSION_DENIED;
         }
 
@@ -230,15 +233,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         if (checkPermissionDelegate == null) {
-            return mPermissionManagerServiceImpl.checkPermission(pkgName, permName, userId);
+            return mPermissionManagerServiceImpl.checkPermission(
+                    packageName, permissionName, userId);
         }
-        return checkPermissionDelegate.checkPermission(pkgName, permName, userId,
+        return checkPermissionDelegate.checkPermission(packageName, permissionName, userId,
                 mPermissionManagerServiceImpl::checkPermission);
     }
 
-    private int checkUidPermission(int uid, String permName) {
+    @Override
+    @PackageManager.PermissionResult
+    public int checkUidPermission(int uid, String permissionName, int deviceId) {
         // Not using Objects.requireNonNull() here for compatibility reasons.
-        if (permName == null) {
+        if (permissionName == null) {
             return PackageManager.PERMISSION_DENIED;
         }
 
@@ -248,9 +254,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         if (checkPermissionDelegate == null)  {
-            return mPermissionManagerServiceImpl.checkUidPermission(uid, permName);
+            return mPermissionManagerServiceImpl.checkUidPermission(uid, permissionName);
         }
-        return checkPermissionDelegate.checkUidPermission(uid, permName,
+        return checkPermissionDelegate.checkUidPermission(uid, permissionName,
                 mPermissionManagerServiceImpl::checkUidPermission);
     }
 
@@ -502,14 +508,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permissionName, int userId) {
+    public int getPermissionFlags(String packageName, String permissionName, int deviceId,
+            int userId) {
         return mPermissionManagerServiceImpl
                 .getPermissionFlags(packageName, permissionName, userId);
     }
 
     @Override
     public void updatePermissionFlags(String packageName, String permissionName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId) {
         mPermissionManagerServiceImpl.updatePermissionFlags(packageName, permissionName, flagMask,
                 flagValues, checkAdjustPolicyFlagPermission, userId);
     }
@@ -551,15 +558,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permissionName, int userId) {
+    public void grantRuntimePermission(String packageName, String permissionName, int deviceId,
+            int userId) {
         mPermissionManagerServiceImpl.grantRuntimePermission(packageName, permissionName, userId);
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permissionName, int userId,
-            String reason) {
-        mPermissionManagerServiceImpl.revokeRuntimePermission(packageName, permissionName, userId,
-                reason);
+    public void revokeRuntimePermission(String packageName, String permissionName, int deviceId,
+            int userId, String reason) {
+        mPermissionManagerServiceImpl.revokeRuntimePermission(packageName, permissionName,
+                userId, reason);
     }
 
     @Override
@@ -570,14 +578,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permissionName,
-            int userId) {
+            int deviceId, int userId) {
         return mPermissionManagerServiceImpl.shouldShowRequestPermissionRationale(packageName,
                 permissionName, userId);
     }
 
     @Override
     public boolean isPermissionRevokedByPolicy(String packageName, String permissionName,
-            int userId) {
+            int deviceId, int userId) {
         return mPermissionManagerServiceImpl
                 .isPermissionRevokedByPolicy(packageName, permissionName, userId);
     }
@@ -592,14 +600,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private class PermissionManagerServiceInternalImpl implements PermissionManagerServiceInternal {
         @Override
         public int checkPermission(@NonNull String packageName, @NonNull String permissionName,
-                @UserIdInt int userId) {
+                int deviceId, @UserIdInt int userId) {
             return PermissionManagerService.this.checkPermission(packageName, permissionName,
-                    userId);
+                    deviceId, userId);
         }
 
         @Override
-        public int checkUidPermission(int uid, @NonNull String permissionName) {
-            return PermissionManagerService.this.checkUidPermission(uid, permissionName);
+        public int checkUidPermission(int uid, @NonNull String permissionName, int deviceId) {
+            return PermissionManagerService.this.checkUidPermission(uid, permissionName, deviceId);
         }
 
         @Override
@@ -805,6 +813,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId) {
             mPermissionManagerServiceImpl.resetRuntimePermissions(pkg, userId);
         }
+
         @Override
         public void resetRuntimePermissionsForUser(@UserIdInt int userId) {
             mPermissionManagerServiceImpl.resetRuntimePermissionsForUser(userId);

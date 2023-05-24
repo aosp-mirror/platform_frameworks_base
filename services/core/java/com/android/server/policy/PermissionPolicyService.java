@@ -1421,8 +1421,8 @@ public final class PermissionPolicyService extends SystemService {
             }
             boolean hasCreatedNotificationChannels = mNotificationManager
                     .getNumNotificationChannelsForPackage(pkgName, uid, true) > 0;
-            boolean granted = mPermissionManagerInternal.checkUidPermission(uid, POST_NOTIFICATIONS)
-                    == PackageManager.PERMISSION_GRANTED;
+            boolean granted = mPermissionManagerInternal.checkUidPermission(uid, POST_NOTIFICATIONS,
+                    Context.DEVICE_ID_DEFAULT) == PackageManager.PERMISSION_GRANTED;
             int flags = mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName, user);
             boolean explicitlySet = (flags & PermissionManager.EXPLICIT_SET_FLAGS) != 0;
             return !granted && hasCreatedNotificationChannels && !explicitlySet;

@@ -4699,8 +4699,14 @@ public class ActivityManager {
     @UnsupportedAppUsage
     public static int checkComponentPermission(String permission, int uid,
             int owningUid, boolean exported) {
+        return checkComponentPermission(permission, uid, Context.DEVICE_ID_DEFAULT,
+                owningUid, exported);
+    }
+
+    /** @hide */
+    public static int checkComponentPermission(String permission, int uid, int deviceId,
+            int owningUid, boolean exported) {
         // Root, system server get to do everything.
-        final int appId = UserHandle.getAppId(uid);
         if (canAccessUnexportedComponents(uid)) {
             return PackageManager.PERMISSION_GRANTED;
         }
@@ -4727,8 +4733,7 @@ public class ActivityManager {
             return PackageManager.PERMISSION_GRANTED;
         }
         try {
-            return AppGlobals.getPackageManager()
-                    .checkUidPermission(permission, uid);
+            return AppGlobals.getPermissionManager().checkUidPermission(uid, permission, deviceId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4737,8 +4742,8 @@ public class ActivityManager {
     /** @hide */
     public static int checkUidPermission(String permission, int uid) {
         try {
-            return AppGlobals.getPackageManager()
-                    .checkUidPermission(permission, uid);
+            return AppGlobals.getPermissionManager().checkUidPermission(
+                    uid, permission, Context.DEVICE_ID_DEFAULT);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

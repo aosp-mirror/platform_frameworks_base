@@ -343,6 +343,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
     }
 
+    /**
+     * Grants permission for the {@link Context#DEVICE_ID_DEFAULT default device}
+     */
     @Override
     public void grantRuntimePermission(String packageName, String permission, int userId)
             throws RemoteException {
@@ -353,12 +356,16 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPermissionManager.grantRuntimePermission(packageName, permission, userId);
+            mPermissionManager.grantRuntimePermission(packageName, permission,
+                    Context.DEVICE_ID_DEFAULT, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
+    /**
+     * Revokes permission for the {@link Context#DEVICE_ID_DEFAULT default device}
+     */
     @Override
     public void revokeRuntimePermission(String packageName, String permission, int userId)
             throws RemoteException {
@@ -369,7 +376,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPermissionManager.revokeRuntimePermission(packageName, permission, userId, null);
+            mPermissionManager.revokeRuntimePermission(packageName, permission,
+                    Context.DEVICE_ID_DEFAULT, userId, null);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

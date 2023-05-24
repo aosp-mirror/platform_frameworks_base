@@ -2583,7 +2583,7 @@ public class ComputerEngine implements Computer {
 
     // NOTE: Can't remove without a major refactor. Keep around for now.
     public final int checkUidPermission(String permName, int uid) {
-        return mPermissionManager.checkUidPermission(uid, permName);
+        return mPermissionManager.checkUidPermission(uid, permName, Context.DEVICE_ID_DEFAULT);
     }
 
     public int getPackageUidInternal(String packageName,
@@ -4528,8 +4528,8 @@ public class ComputerEngine implements Computer {
         int numMatch = 0;
         for (int i=0; i<permissions.length; i++) {
             final String permission = permissions[i];
-            if (mPermissionManager.checkPermission(ps.getPackageName(), permission, userId)
-                    == PERMISSION_GRANTED) {
+            if (mPermissionManager.checkPermission(ps.getPackageName(), permission,
+                    Context.DEVICE_ID_DEFAULT, userId) == PERMISSION_GRANTED) {
                 tmp[i] = true;
                 numMatch++;
             } else {

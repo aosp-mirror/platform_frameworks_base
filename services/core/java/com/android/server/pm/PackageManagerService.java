@@ -2825,7 +2825,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     // NOTE: Can't remove due to unsupported app usage
     public int checkPermission(String permName, String pkgName, int userId) {
-        return mPermissionManager.checkPermission(pkgName, permName, userId);
+        return mPermissionManager.checkPermission(pkgName, permName, Context.DEVICE_ID_DEFAULT,
+                userId);
     }
 
     public String getSdkSandboxPackageName() {
