@@ -107,7 +107,7 @@
     <string name="screenrecord_start_recording" msgid="348286842544768740">"ରେକର୍ଡିଂ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ଡିଭାଇସ୍ ଅଡିଓ"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ଆପଣଙ୍କ ଡିଭାଇସରୁ ସାଉଣ୍ଡ, ଯେପରିକି ସଙ୍ଗୀତ, କଲ୍ ଏବଂ ରିଂଟୋନଗୁଡ଼ିକ"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ମ୍ୟୁଜିକ, କଲ ଏବଂ ରିଂଟୋନଗୁଡ଼ିକ ପରି ଆପଣଙ୍କ ଡିଭାଇସରୁ ସାଉଣ୍ଡ"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"ମାଇକ୍ରୋଫୋନ"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"ଡିଭାଇସ୍ ଅଡିଓ ଏବଂ ମାଇକ୍ରୋଫୋନ୍"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
@@ -136,7 +136,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ଫେସ୍ ସ୍କାନିଙ୍ଗ କରାଯାଉଛି"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ପଠାନ୍ତୁ"</string>
     <string name="cancel" msgid="1089011503403416730">"ବାତିଲ କରନ୍ତୁ"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ନିଶ୍ଚିତ କରନ୍ତୁ"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ପ୍ରାମାଣିକତା ବାତିଲ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
@@ -594,7 +594,7 @@
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"ଫାଷ୍ଟ ଫର୍‌ୱାର୍ଡ"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"ଉପର ପୃଷ୍ଠା"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"ତଳ ପୃଷ୍ଠା"</string>
-    <string name="keyboard_key_forward_del" msgid="5325501825762733459">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
+    <string name="keyboard_key_forward_del" msgid="5325501825762733459">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"ହୋମ"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"ସମାପ୍ତ"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"ଇନ୍‌ସର୍ଟ"</string>
@@ -962,7 +962,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ସଂଯୋଗ କରାଯାଇଛି"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"ଅସ୍ଥାୟୀ ରୂପେ କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"ଦୁର୍ବଳ କନେକ୍ସନ"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"ମୋବାଇଲ ଡାଟା ସ୍ୱତଃ-ସଂଯୋଗ ହେବ ନାହିଁ"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"ମୋବାଇଲ ଡାଟା ସ୍ୱତଃ-କନେକ୍ଟ ହେବ ନାହିଁ"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"ସଂଯୋଗ ନାହିଁ"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"ଅନ୍ୟ କୌଣସି ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"କୌଣସି ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>

@@ -97,7 +97,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ಹಾಗೂ ತೆರೆದಿರುವ ಇತರ ಆ್ಯಪ್‌ಗಳು ಈ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪತ್ತೆಹಚ್ಚಿವೆ."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡರ್"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಆಗುತ್ತಿದೆ"</string>
-    <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಅಧಿಸೂಚನೆ"</string>
+    <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ನೋಟಿಫಿಕೇಶನ್"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಬೇಕೆ?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"ರೆಕಾರ್ಡಿಂಗ್ ಸಮಯದಲ್ಲಿ, ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಗೋಚರಿಸುವ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲಾದ ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು Android ಸಿಸ್ಟಂ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಬಹುದು. ಇದು ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ಮಾಹಿತಿ, ಫೋಟೋಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಆಡಿಯೋವನ್ನು ಒಳಗೊಂಡಿದೆ."</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
@@ -472,7 +472,7 @@
     <string name="stream_ring" msgid="7550670036738697526">"ರಿಂಗ್"</string>
     <string name="stream_music" msgid="2188224742361847580">"ಮಾಧ್ಯಮ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"ಅಲಾರಮ್"</string>
-    <string name="stream_notification" msgid="7930294049046243939">"ಅಧಿಸೂಚನೆ"</string>
+    <string name="stream_notification" msgid="7930294049046243939">"ನೋಟಿಫಿಕೇಶನ್"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"ಬ್ಲೂಟೂತ್‌"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"ಡ್ಯುಯಲ್‌ ಬಹು ಟೋನ್ ಆವರ್ತನೆ"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ"</string>
@@ -524,9 +524,9 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"ಬ್ಲೂಟೂತ್ ಆನ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಅನ್ನು ಟ್ಯಾಬ್ಲೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು, ನೀವು ಮೊದಲು ಬ್ಲೂಟೂತ್ ಆನ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ಆನ್‌ ಮಾಡಿ"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ಪವರ್ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳು"</string>
+    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ಪವರ್ ನೋಟಿಫಿಕೇಶನ್ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ಆನ್ ಆಗಿದೆ - ಮುಖ-ಆಧಾರಿತ"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"ಪವರ್ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳ ಮೂಲಕ, ನೀವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಅಧಿಸೂಚನೆಗಳನ್ನು 0 ರಿಂದ 5 ರವರೆಗಿನ ಹಂತಗಳ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿಸಬಹುದು. \n\n"<b>"ಹಂತ 5"</b>" \n- ಮೇಲಿನ ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ಅನುಮತಿಸಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ \n\n"<b>"ಹಂತ 4"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ\n\n"<b>"ಹಂತ 3"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n\n"<b>"ಹಂತ 2"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n\n"<b>"ಹಂತ 1"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n- ಸ್ಥಿತಿ ಪಟ್ಟಿ ಮತ್ತು ಲಾಕ್ ಪರದೆಯಿಂದ ಮರೆಮಾಡಿ \n- ಕೆಳಗಿನ ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n\n"<b>"ಹಂತ 0"</b>" \n- ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ಬಂಧಿಸಿ"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"ಪವರ್ ನೋಟಿಫಿಕೇಶನ್ ನಿಯಂತ್ರಣಗಳ ಮೂಲಕ, ನೀವು ಆ್ಯಪ್‍ಗಳ ನೋಟಿಫಿಕೇಶನ್‍ಗಳನ್ನು 0 ರಿಂದ 5 ರವರೆಗಿನ ಹಂತಗಳ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿಸಬಹುದು. \n\n"<b>"ಹಂತ 5"</b>" \n- ಮೇಲಿನ ನೋಟಿಫಿಕೇಶನ್ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ಅನುಮತಿಸಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ \n\n"<b>"ಹಂತ 4"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ\n\n"<b>"ಹಂತ 3"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n\n"<b>"ಹಂತ 2"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n\n"<b>"ಹಂತ 1"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n- ಸ್ಥಿತಿ ಪಟ್ಟಿ ಮತ್ತು ಲಾಕ್ ಪರದೆಯಿಂದ ಮರೆಮಾಡಿ \n- ಕೆಳಗಿನ ನೋಟಿಫಿಕೇಶನ್ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n\n"<b>"ಹಂತ 0"</b>" \n- ಆ್ಯಪ್‍ನಿಂದ ಎಲ್ಲಾ ನೋಟಿಫಿಕೇಶನ್‍ಗಳನ್ನು ನಿರ್ಬಂಧಿಸಿ"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"ಅನ್ವಯಿಸಿ"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಿ"</string>
@@ -559,15 +559,15 @@
     <string name="feedback_promoted" msgid="2125562787759780807">"ಈ ಅಧಿಸೂಚನೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಮ್ಮ ಶೇಡ್‌ನಲ್ಲಿ &lt;b&gt;ಉನ್ನತ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ&lt;/b&gt;."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"ಈ ಅಧಿಸೂಚನೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಮ್ಮ ಶೇಡ್‌ನಲ್ಲಿ &lt;b&gt;ಕಡಿಮೆ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="3656728972307896379">"ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಡೆವಲಪರ್‌ಗೆ ತಿಳಿಸಿ. ಇದು ಸರಿಯಾಗಿತ್ತೇ?"</string>
-    <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆರೆಯಲಾಗಿದೆ"</string>
-    <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಮುಚ್ಚಲಾಗಿದೆ"</string>
+    <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ನೋಟಿಫಿಕೇಶನ್ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆರೆಯಲಾಗಿದೆ"</string>
+    <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ನೋಟಿಫಿಕೇಶನ್ ನಿಯಂತ್ರಣಗಳನ್ನು ಮುಚ್ಚಲಾಗಿದೆ"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"ಕಸ್ಟಮೈಜ್‌ ಮಾಡಿ"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"ಬಬಲ್ ತೋರಿಸಿ"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"ಬಬಲ್ಸ್‌ ಅನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="notification_menu_gear_description" msgid="6429668976593634862">"ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ಅಧಿಸೂಚನೆ ಸ್ನೂಜ್ ಆಯ್ಕೆಗಳು"</string>
+    <string name="notification_menu_gear_description" msgid="6429668976593634862">"ನೋಟಿಫಿಕೇಶನ್ ನಿಯಂತ್ರಣಗಳು"</string>
+    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ನೋಟಿಫಿಕೇಶನ್ ಸ್ನೂಜ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"ನನಗೆ ಜ್ಞಾಪಿಸಿ"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ಗೆ ಸ್ನೂಜ್ ಮಾಡಲಾಗಿದೆ"</string>
@@ -681,7 +681,7 @@
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ಟೈಲ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ಟೈಲ್ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳ ಎಡಿಟರ್."</string>
-    <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ಅಧಿಸೂಚನೆ: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
+    <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ನೋಟಿಫಿಕೇಶನ್: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮುಚ್ಚಿ."</string>

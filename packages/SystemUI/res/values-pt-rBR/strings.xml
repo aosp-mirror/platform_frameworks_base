@@ -388,7 +388,7 @@
     <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Quando você compartilha, grava ou transmite a tela, este app tem acesso a todas as informações visíveis nela ou reproduzidas no dispositivo. Tenha cuidado com senhas, detalhes de pagamento, mensagens e outras informações sensíveis."</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Ação bloqueada pelo administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"A captura de tela foi desativada pela política do dispositivo"</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"Limpar tudo"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"Remover tudo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gerenciar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Histórico"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Novas"</string>

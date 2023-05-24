@@ -105,7 +105,7 @@
     <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Podczas nagrywania Android ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Zachowaj ostrożność w przypadku haseł, danych do płatności, wiadomości i innych informacji poufnych."</string>
     <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Podczas nagrywania treści z aplikacji Android ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Zachowaj ostrożność w przypadku haseł, danych do płatności, wiadomości i innych informacji poufnych."</string>
     <string name="screenrecord_start_recording" msgid="348286842544768740">"Zacznij nagrywać"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nagraj dźwięk"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nagrywaj dźwięk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Dźwięki z urządzenia"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Dźwięki odtwarzane na urządzeniu, na przykład muzyka, połączenia i dzwonki"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>

@@ -105,7 +105,7 @@
     <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Salvestamise ajal on Androidil juurdepääs kõigele, mis on teie ekraanikuval nähtaval või mida teie seadmes esitatakse. Seega olge paroolide, makseteabe, sõnumite ja muu tundliku teabega ettevaatlik."</string>
     <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Rakenduse salvestamise ajal on Androidil juurdepääs kõigele, mis on selles rakenduses nähtaval või mida selles esitatakse. Seega olge paroolide, makseteabe, sõnumite ja muu tundliku teabega ettevaatlik."</string>
     <string name="screenrecord_start_recording" msgid="348286842544768740">"Alusta salvestamist"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Heli salvestamine"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Salvesta heli"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Seadme heli"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Seadmest pärinev heli, nt muusika, kõned ja helinad"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
