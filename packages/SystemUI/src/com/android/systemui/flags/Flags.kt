@@ -727,4 +727,9 @@ object Flags {
     // TODO(b/283084712): Tracking Bug
     @JvmField
     val IMPROVED_HUN_ANIMATIONS = unreleasedFlag(283084712, "improved_hun_animations")
+
+    // TODO(b/283447257): Tracking bug
+    @JvmField
+    val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
+            unreleasedFlag(283447257, "bigpicture_notification_lazy_loading")
 }
