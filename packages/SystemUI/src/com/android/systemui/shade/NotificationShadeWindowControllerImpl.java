@@ -103,7 +103,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final KeyguardBypassController mKeyguardBypassController;
     private final AuthController mAuthController;
-    private ViewGroup mNotificationShadeView;
+    private ViewGroup mWindowRootView;
     private LayoutParams mLp;
     private boolean mHasTopUi;
     private boolean mHasTopUiChanged;
@@ -262,7 +262,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mLp.privateFlags |= PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
         mLp.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
-        mWindowManager.addView(mNotificationShadeView, mLp);
+        mWindowManager.addView(mWindowRootView, mLp);
 
         mLpChanged.copyFrom(mLp);
         onThemeChanged();
@@ -274,13 +274,13 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
-    public void setNotificationShadeView(ViewGroup view) {
-        mNotificationShadeView = view;
+    public void setWindowRootView(ViewGroup view) {
+        mWindowRootView = view;
     }
 
     @Override
-    public ViewGroup getNotificationShadeView() {
-        return mNotificationShadeView;
+    public ViewGroup getWindowRootView() {
+        return mWindowRootView;
     }
 
     @Override
@@ -289,7 +289,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private void setKeyguardDark(boolean dark) {
-        int vis = mNotificationShadeView.getSystemUiVisibility();
+        int vis = mWindowRootView.getSystemUiVisibility();
         if (dark) {
             vis = vis | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             vis = vis | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
@@ -297,7 +297,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             vis = vis & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             vis = vis & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
         }
-        mNotificationShadeView.setSystemUiVisibility(vis);
+        mWindowRootView.setSystemUiVisibility(vis);
     }
 
     private void applyKeyguardFlags(NotificationShadeWindowState state) {
@@ -413,11 +413,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             visible = true;
             mLogger.d("Visibility forced to be true");
         }
-        if (mNotificationShadeView != null) {
+        if (mWindowRootView != null) {
             if (visible) {
-                mNotificationShadeView.setVisibility(View.VISIBLE);
+                mWindowRootView.setVisibility(View.VISIBLE);
             } else {
-                mNotificationShadeView.setVisibility(View.INVISIBLE);
+                mWindowRootView.setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -439,10 +439,10 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void applyFitsSystemWindows(NotificationShadeWindowState state) {
         boolean fitsSystemWindows = !state.isKeyguardShowingAndNotOccluded();
-        if (mNotificationShadeView != null
-                && mNotificationShadeView.getFitsSystemWindows() != fitsSystemWindows) {
-            mNotificationShadeView.setFitsSystemWindows(fitsSystemWindows);
-            mNotificationShadeView.requestApplyInsets();
+        if (mWindowRootView != null
+                && mWindowRootView.getFitsSystemWindows() != fitsSystemWindows) {
+            mWindowRootView.setFitsSystemWindows(fitsSystemWindows);
+            mWindowRootView.requestApplyInsets();
         }
     }
 
@@ -482,7 +482,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         if (mDeferWindowLayoutParams == 0 && mLp != null && mLp.copyFrom(mLpChanged) != 0) {
             mLogger.logApplyingWindowLayoutParams(mLp);
             Trace.beginSection("updateViewLayout");
-            mWindowManager.updateViewLayout(mNotificationShadeView, mLp);
+            mWindowManager.updateViewLayout(mWindowRootView, mLp);
             Trace.endSection();
         }
     }
@@ -608,7 +608,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         try {
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             session.updateTapExcludeRegion(
-                    IWindow.Stub.asInterface(getNotificationShadeView().getWindowToken()),
+                    IWindow.Stub.asInterface(getWindowRootView().getWindowToken()),
                     region);
         } catch (RemoteException e) {
             Log.e(TAG, "could not update the tap exclusion region:" + e);
@@ -847,8 +847,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         pw.println("  mKeyguardPreferredRefreshRate=" + mKeyguardPreferredRefreshRate);
         pw.println("  mDeferWindowLayoutParams=" + mDeferWindowLayoutParams);
         pw.println(mCurrentState);
-        if (mNotificationShadeView != null && mNotificationShadeView.getViewRootImpl() != null) {
-            mNotificationShadeView.getViewRootImpl().dump("  ", pw);
+        if (mWindowRootView != null && mWindowRootView.getViewRootImpl() != null) {
+            mWindowRootView.getViewRootImpl().dump("  ", pw);
         }
         new DumpsysTableLogger(
                 TAG,
@@ -864,7 +864,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Override
     public void onThemeChanged() {
-        if (mNotificationShadeView == null) {
+        if (mWindowRootView == null) {
             return;
         }
 
