@@ -1846,7 +1846,7 @@ public class BubbleController implements ConfigurationChangeListener,
             if (mStackView != null) {
                 mStackView.setVisibility(VISIBLE);
             }
-            if (mLayerView != null && isStackExpanded()) {
+            if (mLayerView != null) {
                 mLayerView.setVisibility(VISIBLE);
             }
         }

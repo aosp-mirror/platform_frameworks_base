@@ -370,6 +370,15 @@ class SyntheticPasswordManager {
             return result;
         }
 
+        /**
+         * Returns true if the given serialized PasswordData begins with the value 2 as a short.
+         * This detects the "bad" (non-forwards-compatible) PasswordData format that was temporarily
+         * used during development of Android 14.  For more details, see fromBytes() below.
+         */
+        public static boolean isBadFormatFromAndroid14Beta(byte[] data) {
+            return data != null && data.length >= 2 && data[0] == 0 && data[1] == 2;
+        }
+
         public static PasswordData fromBytes(byte[] data) {
             PasswordData result = new PasswordData();
             ByteBuffer buffer = ByteBuffer.allocate(data.length);

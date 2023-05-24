@@ -41,7 +41,6 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
-import com.android.internal.statusbar.IStatusBarService
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.R
@@ -133,7 +132,6 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var smartspaceManager: SmartspaceManager
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    @Mock lateinit var statusBarService: IStatusBarService
     lateinit var smartspaceMediaDataProvider: SmartspaceMediaDataProvider
     @Mock lateinit var mediaSmartspaceTarget: SmartspaceTarget
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
@@ -197,7 +195,6 @@ class MediaDataManagerTest : SysuiTestCase() {
                 logger = logger,
                 smartspaceManager = smartspaceManager,
                 keyguardUpdateMonitor = keyguardUpdateMonitor,
-                statusBarService = statusBarService,
             )
         verify(tunerService)
             .addTunable(capture(tunableCaptor), eq(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION))
@@ -522,143 +519,12 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnNotificationAdded_emptyTitle_isRequired_notLoaded() {
-        // When the manager has a notification with an empty title, and the app is required
-        // to include a non-empty title
-        whenever(mediaFlags.isMediaTitleRequired(any(), any())).thenReturn(true)
-        whenever(controller.metadata)
-            .thenReturn(
-                metadataBuilder
-                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_EMPTY_TITLE)
-                    .build()
-            )
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-
-        // Then the media control is not added and we report a notification error
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(statusBarService)
-            .onNotificationError(
-                eq(PACKAGE_NAME),
-                eq(mediaNotification.tag),
-                eq(mediaNotification.id),
-                eq(mediaNotification.uid),
-                eq(mediaNotification.initialPid),
-                eq(MEDIA_TITLE_ERROR_MESSAGE),
-                eq(mediaNotification.user.identifier)
-            )
-        verify(listener, never())
-            .onMediaDataLoaded(
-                eq(KEY),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
-        verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
-        verify(logger, never()).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), any())
-    }
-
-    @Test
-    fun testOnNotificationAdded_blankTitle_isRequired_notLoaded() {
-        // When the manager has a notification with a blank title, and the app is required
-        // to include a non-empty title
-        whenever(mediaFlags.isMediaTitleRequired(any(), any())).thenReturn(true)
-        whenever(controller.metadata)
-            .thenReturn(
-                metadataBuilder
-                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_BLANK_TITLE)
-                    .build()
-            )
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-
-        // Then the media control is not added and we report a notification error
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(statusBarService)
-            .onNotificationError(
-                eq(PACKAGE_NAME),
-                eq(mediaNotification.tag),
-                eq(mediaNotification.id),
-                eq(mediaNotification.uid),
-                eq(mediaNotification.initialPid),
-                eq(MEDIA_TITLE_ERROR_MESSAGE),
-                eq(mediaNotification.user.identifier)
-            )
-        verify(listener, never())
-            .onMediaDataLoaded(
-                eq(KEY),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
-        verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
-        verify(logger, never()).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), any())
-    }
-
-    @Test
-    fun testOnNotificationUpdated_invalidTitle_isRequired_logMediaRemoved() {
-        // When the app is required to provide a non-blank title, and updates a previously valid
-        // title to an empty one
-        whenever(mediaFlags.isMediaTitleRequired(any(), any())).thenReturn(true)
-        addNotificationAndLoad()
-        val data = mediaDataCaptor.value
-
-        verify(listener)
-            .onMediaDataLoaded(
-                eq(KEY),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
-
-        reset(listener)
-        whenever(controller.metadata)
-            .thenReturn(
-                metadataBuilder
-                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_BLANK_TITLE)
-                    .build()
-            )
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-
-        // Then the media control is removed
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(statusBarService)
-            .onNotificationError(
-                eq(PACKAGE_NAME),
-                eq(mediaNotification.tag),
-                eq(mediaNotification.id),
-                eq(mediaNotification.uid),
-                eq(mediaNotification.initialPid),
-                eq(MEDIA_TITLE_ERROR_MESSAGE),
-                eq(mediaNotification.user.identifier)
-            )
-        verify(listener, never())
-            .onMediaDataLoaded(
-                eq(KEY),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
-        verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
-    }
-
-    @Test
-    fun testOnNotificationAdded_emptyTitle_notRequired_hasPlaceholder() {
+    fun testOnNotificationAdded_emptyTitle_hasPlaceholder() {
         // When the manager has a notification with an empty title, and the app is not
         // required to include a non-empty title
         val mockPackageManager = mock(PackageManager::class.java)
         context.setMockPackageManager(mockPackageManager)
         whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
-        whenever(mediaFlags.isMediaTitleRequired(any(), any())).thenReturn(false)
         whenever(controller.metadata)
             .thenReturn(
                 metadataBuilder
@@ -684,13 +550,12 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnNotificationAdded_blankTitle_notRequired_hasPlaceholder() {
+    fun testOnNotificationAdded_blankTitle_hasPlaceholder() {
         // GIVEN that the manager has a notification with a blank title, and the app is not
         // required to include a non-empty title
         val mockPackageManager = mock(PackageManager::class.java)
         context.setMockPackageManager(mockPackageManager)
         whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
-        whenever(mediaFlags.isMediaTitleRequired(any(), any())).thenReturn(false)
         whenever(controller.metadata)
             .thenReturn(
                 metadataBuilder
@@ -722,7 +587,6 @@ class MediaDataManagerTest : SysuiTestCase() {
         val mockPackageManager = mock(PackageManager::class.java)
         context.setMockPackageManager(mockPackageManager)
         whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
-        whenever(mediaFlags.isMediaTitleRequired(any(), any())).thenReturn(true)
         whenever(controller.metadata)
             .thenReturn(
                 metadataBuilder

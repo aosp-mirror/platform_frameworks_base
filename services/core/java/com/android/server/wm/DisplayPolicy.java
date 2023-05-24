@@ -271,13 +271,13 @@ public class DisplayPolicy {
     private WindowState mSystemUiControllingWindow;
 
     // Candidate window to determine the color of navigation bar. The window needs to be top
-    // fullscreen-app windows or dim layers that are intersecting with the window frame of status
-    // bar.
+    // fullscreen-app windows or dim layers that are intersecting with the window frame of
+    // navigation bar.
     private WindowState mNavBarColorWindowCandidate;
 
-    // The window to determine opacity and background of translucent navigation bar. The window
-    // needs to be opaque.
-    private WindowState mNavBarBackgroundWindow;
+    // Candidate window to determine opacity and background of translucent navigation bar.
+    // The window frame must intersect the frame of navigation bar.
+    private WindowState mNavBarBackgroundWindowCandidate;
 
     /**
      * A collection of {@link AppearanceRegion} to indicate that which region of status bar applies
@@ -961,12 +961,6 @@ public class DisplayPolicy {
         if (!win.mSession.mCanSetUnrestrictedGestureExclusion) {
             attrs.privateFlags &= ~PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
         }
-
-        final InsetsSourceProvider provider = win.getControllableInsetProvider();
-        if (provider != null && provider.getSource().insetsRoundedCornerFrame()
-                != attrs.insetsRoundedCornerFrame) {
-            provider.getSource().setInsetsRoundedCornerFrame(attrs.insetsRoundedCornerFrame);
-        }
     }
 
     /**
@@ -1104,9 +1098,11 @@ public class DisplayPolicy {
                 } else {
                     overrideProviders = null;
                 }
-                mDisplayContent.getInsetsStateController().getOrCreateSourceProvider(
-                        provider.getId(), provider.getType()).setWindowContainer(
-                                win, frameProvider, overrideProviders);
+                final InsetsSourceProvider sourceProvider = mDisplayContent
+                        .getInsetsStateController().getOrCreateSourceProvider(provider.getId(),
+                                provider.getType());
+                sourceProvider.getSource().setFlags(provider.getFlags());
+                sourceProvider.setWindowContainer(win, frameProvider, overrideProviders);
                 mInsetsSourceWindowsExceptIme.add(win);
             }
         }
@@ -1387,7 +1383,7 @@ public class DisplayPolicy {
         mBottomGestureHost = null;
         mTopFullscreenOpaqueWindowState = null;
         mNavBarColorWindowCandidate = null;
-        mNavBarBackgroundWindow = null;
+        mNavBarBackgroundWindowCandidate = null;
         mStatusBarAppearanceRegionList.clear();
         mLetterboxDetails.clear();
         mStatusBarBackgroundWindows.clear();
@@ -1514,8 +1510,8 @@ public class DisplayPolicy {
                     mNavBarColorWindowCandidate = win;
                     addSystemBarColorApp(win);
                 }
-                if (mNavBarBackgroundWindow == null) {
-                    mNavBarBackgroundWindow = win;
+                if (mNavBarBackgroundWindowCandidate == null) {
+                    mNavBarBackgroundWindowCandidate = win;
                 }
             }
 
@@ -1539,12 +1535,19 @@ public class DisplayPolicy {
             }
             if (isOverlappingWithNavBar(win) && mNavBarColorWindowCandidate == null) {
                 mNavBarColorWindowCandidate = win;
+                addSystemBarColorApp(win);
             }
-        } else if (appWindow && attached == null && mNavBarColorWindowCandidate == null
+        } else if (appWindow && attached == null
+                && (mNavBarColorWindowCandidate == null || mNavBarBackgroundWindowCandidate == null)
                 && win.getFrame().contains(
                         getBarContentFrameForWindow(win, Type.navigationBars()))) {
-            mNavBarColorWindowCandidate = win;
-            addSystemBarColorApp(win);
+            if (mNavBarColorWindowCandidate == null) {
+                mNavBarColorWindowCandidate = win;
+                addSystemBarColorApp(win);
+            }
+            if (mNavBarBackgroundWindowCandidate == null) {
+                mNavBarBackgroundWindowCandidate = win;
+            }
         }
     }
 
@@ -2465,7 +2468,7 @@ public class DisplayPolicy {
         return win.isFullyTransparentBarAllowed(getBarContentFrameForWindow(win, type));
     }
 
-    private boolean drawsBarBackground(WindowState win) {
+    private static boolean drawsBarBackground(WindowState win) {
         if (win == null) {
             return true;
         }
@@ -2505,7 +2508,11 @@ public class DisplayPolicy {
      */
     private int configureNavBarOpacity(int appearance, boolean multiWindowTaskVisible,
             boolean freeformRootTaskVisible) {
-        final boolean drawBackground = drawsBarBackground(mNavBarBackgroundWindow);
+        final WindowState navBackgroundWin = chooseNavigationBackgroundWindow(
+                mNavBarBackgroundWindowCandidate,
+                mDisplayContent.mInputMethodWindow,
+                mNavigationBarPosition);
+        final boolean drawBackground = navBackgroundWin != null;
 
         if (mNavBarOpacityMode == NAV_BAR_FORCE_TRANSPARENT) {
             if (drawBackground) {
@@ -2525,7 +2532,7 @@ public class DisplayPolicy {
             }
         }
 
-        if (!isFullyTransparentAllowed(mNavBarBackgroundWindow, Type.navigationBars())) {
+        if (!isFullyTransparentAllowed(navBackgroundWin, Type.navigationBars())) {
             appearance |= APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
         }
 
@@ -2534,6 +2541,20 @@ public class DisplayPolicy {
 
     private int clearNavBarOpaqueFlag(int appearance) {
         return appearance & ~APPEARANCE_OPAQUE_NAVIGATION_BARS;
+    }
+
+    @VisibleForTesting
+    @Nullable
+    static WindowState chooseNavigationBackgroundWindow(WindowState candidate,
+            WindowState imeWindow, @NavigationBarPosition int navBarPosition) {
+        if (imeWindow != null && imeWindow.isVisible() && navBarPosition == NAV_BAR_BOTTOM
+                && drawsBarBackground(imeWindow)) {
+            return imeWindow;
+        }
+        if (drawsBarBackground(candidate)) {
+            return candidate;
+        }
+        return null;
     }
 
     private boolean isImmersiveMode(WindowState win) {
@@ -2708,9 +2729,9 @@ public class DisplayPolicy {
             pw.print(prefix); pw.print("mNavBarColorWindowCandidate=");
             pw.println(mNavBarColorWindowCandidate);
         }
-        if (mNavBarBackgroundWindow != null) {
-            pw.print(prefix); pw.print("mNavBarBackgroundWindow=");
-            pw.println(mNavBarBackgroundWindow);
+        if (mNavBarBackgroundWindowCandidate != null) {
+            pw.print(prefix); pw.print("mNavBarBackgroundWindowCandidate=");
+            pw.println(mNavBarBackgroundWindowCandidate);
         }
         if (mLastStatusBarAppearanceRegions != null) {
             pw.print(prefix); pw.println("mLastStatusBarAppearanceRegions=");

@@ -111,6 +111,9 @@ public class DreamBackend {
     public static final int COMPLICATION_TYPE_SMARTSPACE = 7;
     public static final int COMPLICATION_TYPE_MEDIA_ENTRY = 8;
 
+    private static final int SCREENSAVER_HOME_CONTROLS_ENABLED_DEFAULT = 1;
+    private static final int LOCKSCREEN_SHOW_CONTROLS_DEFAULT = 0;
+
     private final Context mContext;
     private final IDreamManager mDreamManager;
     private final DreamInfoComparator mComparator;
@@ -311,8 +314,14 @@ public class DreamBackend {
 
     /** Gets whether home controls button is enabled on the dream */
     private boolean getHomeControlsEnabled() {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED, 1) == 1;
+        return Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCKSCREEN_SHOW_CONTROLS,
+                LOCKSCREEN_SHOW_CONTROLS_DEFAULT) == 1
+                && Settings.Secure.getInt(
+                        mContext.getContentResolver(),
+                        Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED,
+                        SCREENSAVER_HOME_CONTROLS_ENABLED_DEFAULT) == 1;
     }
 
     /**
