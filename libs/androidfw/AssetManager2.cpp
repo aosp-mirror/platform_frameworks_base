@@ -1097,7 +1097,7 @@ base::expected<const std::vector<uint32_t>*, NullOrIOError> AssetManager2::GetBa
   auto [it, inserted] = cached_bag_resid_stacks_.try_emplace(resid);
   if (inserted) {
     // This is a new entry in the cache, need to populate it.
-    if (auto maybe_bag = GetBag(resid, it->second); !maybe_bag.ok()) {
+    if (auto maybe_bag = GetBag(resid, it->second); UNLIKELY(IsIOError(maybe_bag))) {
       cached_bag_resid_stacks_.erase(it);
       return base::unexpected(maybe_bag.error());
     }
@@ -1119,9 +1119,13 @@ base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::ResolveBag(
 }
 
 base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::GetBag(uint32_t resid) const {
-  std::vector<uint32_t> found_resids;
-  const auto bag = GetBag(resid, found_resids);
-  cached_bag_resid_stacks_.try_emplace(resid, std::move(found_resids));
+  auto [resid_stacks_it, _] = cached_bag_resid_stacks_.try_emplace(resid);
+  resid_stacks_it->second.clear();
+  const auto bag = GetBag(resid, resid_stacks_it->second);
+  if (UNLIKELY(IsIOError(bag))) {
+    cached_bag_resid_stacks_.erase(resid_stacks_it);
+    return base::unexpected(bag.error());
+  }
   return bag;
 }
 
