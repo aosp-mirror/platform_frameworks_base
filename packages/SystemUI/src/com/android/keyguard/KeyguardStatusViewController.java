@@ -24,6 +24,7 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CL
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.transition.ChangeBounds;
 import android.transition.Transition;
@@ -280,8 +281,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         @Override
-        public void onDensityOrFontScaleChanged() {
-            mKeyguardClockSwitchController.onDensityOrFontScaleChanged();
+        public void onConfigChanged(Configuration newConfig) {
+            mKeyguardClockSwitchController.onConfigChanged();
         }
     };
 
@@ -329,6 +330,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             boolean splitShadeEnabled,
             boolean shouldBeCentered,
             boolean animate) {
+        mKeyguardClockSwitchController.setSplitShadeCentered(splitShadeEnabled && shouldBeCentered);
         if (mStatusViewCentered == shouldBeCentered) {
             return;
         }
