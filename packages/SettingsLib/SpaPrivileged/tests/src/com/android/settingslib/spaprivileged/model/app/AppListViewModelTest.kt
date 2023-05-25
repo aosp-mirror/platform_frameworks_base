@@ -87,7 +87,7 @@ class AppListViewModelTest {
     private object FakeAppListRepository : AppListRepository {
         override suspend fun loadApps(
             userId: Int,
-            showInstantApps: Boolean,
+            loadInstantApps: Boolean,
             matchAnyUserForAdmin: Boolean,
         ) = listOf(APP)
 
@@ -97,6 +97,9 @@ class AppListViewModelTest {
         ): Flow<(app: ApplicationInfo) -> Boolean> = flowOf { true }
 
         override fun getSystemPackageNamesBlocking(userId: Int): Set<String> = emptySet()
+
+        override suspend fun loadAndFilterApps(userId: Int, isSystemApp: Boolean) =
+            emptyList<ApplicationInfo>()
     }
 
     private object FakeAppRepository : AppRepository {
