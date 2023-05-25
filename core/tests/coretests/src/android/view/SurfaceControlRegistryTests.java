@@ -104,6 +104,18 @@ public class SurfaceControlRegistryTests {
     }
 
     @Test
+    public void testInvalidSurfaceControlNotAddedToRegistry() {
+        int hash0 = SurfaceControlRegistry.getProcessInstance().hashCode();
+        // Verify no changes to the registry when dealing with invalid surface controls
+        SurfaceControl sc0 = new SurfaceControl();
+        SurfaceControl sc1 = new SurfaceControl(sc0, "test");
+        assertEquals(hash0, SurfaceControlRegistry.getProcessInstance().hashCode());
+        sc0.release();
+        sc1.release();
+        assertEquals(hash0, SurfaceControlRegistry.getProcessInstance().hashCode());
+    }
+
+    @Test
     public void testThresholds() {
         SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
         TestReporter reporter = new TestReporter();
