@@ -122,6 +122,10 @@ public class KeyguardService extends Service {
                 }
             }
 
+            // Avoid wrapping non-task and non-wallpaper changes as they don't need to animate
+            // for keyguard unlock animation.
+            if (taskId < 0 && !wallpapers) continue;
+
             final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
                     // wallpapers go into the "below" layer space
                     info.getChanges().size() - i,
@@ -302,46 +306,6 @@ public class KeyguardService extends Service {
                     + ", must have permission " + PERMISSION);
         }
     }
-
-    final IRemoteTransition mOccludeAnimation = new IRemoteTransition.Stub() {
-        @Override
-        public void startAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
-                    throws RemoteException {
-            t.apply();
-            mBinder.setOccluded(true /* isOccluded */, true /* animate */);
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
-            info.releaseAllSurfaces();
-        }
-
-        @Override
-        public void mergeAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IBinder mergeTarget,
-                IRemoteTransitionFinishedCallback finishCallback) {
-            t.close();
-            info.releaseAllSurfaces();
-        }
-    };
-
-    final IRemoteTransition mUnoccludeAnimation = new IRemoteTransition.Stub() {
-        @Override
-        public void startAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
-                throws RemoteException {
-            t.apply();
-            mBinder.setOccluded(false /* isOccluded */, true /* animate */);
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
-            info.releaseAllSurfaces();
-        }
-
-        @Override
-        public void mergeAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IBinder mergeTarget,
-                IRemoteTransitionFinishedCallback finishCallback) {
-            t.close();
-            info.releaseAllSurfaces();
-        }
-    };
 
     private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
         private static final String TRACK_NAME = "IKeyguardService";

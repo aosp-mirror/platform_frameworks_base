@@ -262,7 +262,15 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void setVr2dDisplayId(int vr2dDisplayId);
 
+    /**
+     * Registers a {@link ScreenObserver}.
+     */
     public abstract void registerScreenObserver(ScreenObserver observer);
+
+    /**
+     * Unregisters the given {@link ScreenObserver}.
+     */
+    public abstract void unregisterScreenObserver(ScreenObserver observer);
 
     /**
      * Returns is the caller has the same uid as the Recents component

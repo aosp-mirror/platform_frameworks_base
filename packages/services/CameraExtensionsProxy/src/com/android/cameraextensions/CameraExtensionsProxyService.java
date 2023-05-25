@@ -2057,7 +2057,11 @@ public class CameraExtensionsProxyService extends Service {
             mIsImageValid = false;
 
             if (mGraphicBuffer != null) {
-                ImageReader.unlockGraphicBuffer(mGraphicBuffer);
+                try {
+                    ImageReader.unlockGraphicBuffer(mGraphicBuffer);
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                }
                 mGraphicBuffer.destroy();
                 mGraphicBuffer = null;
             }
