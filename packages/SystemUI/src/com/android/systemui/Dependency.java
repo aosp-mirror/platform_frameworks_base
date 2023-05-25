@@ -49,7 +49,6 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentService;
-import com.android.systemui.hdmi.HdmiCecSetMenuLanguageHelper;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
@@ -242,7 +241,6 @@ public class Dependency {
     @Inject Lazy<LocationController> mLocationController;
     @Inject Lazy<RotationLockController> mRotationLockController;
     @Inject Lazy<ZenModeController> mZenModeController;
-    @Inject Lazy<HdmiCecSetMenuLanguageHelper> mHdmiCecSetMenuLanguageHelper;
     @Inject Lazy<HotspotController> mHotspotController;
     @Inject Lazy<CastController> mCastController;
     @Inject Lazy<FlashlightController> mFlashlightController;

@@ -549,42 +549,12 @@
         </activity>
 
         <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.tv.TvUsbConfirmActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.MANAGE_USB"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:excludeFromRecents="true">
-        </activity>
-
-        <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.tv.TvUsbPermissionActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.MANAGE_USB"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:excludeFromRecents="true">
-        </activity>
-
-        <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbResolverActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
-        </activity>
-
-        <!-- started from HdmiCecLocalDevicePlayback -->
-        <activity android:name=".hdmi.HdmiCecSetMenuLanguageActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.CHANGE_CONFIGURATION"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:excludeFromRecents="true">
         </activity>
 
         <!-- started from SensoryPrivacyService -->
@@ -596,27 +566,6 @@
                   android:finishOnCloseSystemDialogs="true"
                   android:showForAllUsers="true">
         </activity>
-
-        <!-- started from SensoryPrivacyService -->
-        <activity android:name=".sensorprivacy.television.TvUnblockSensorActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:showForAllUsers="true">
-        </activity>
-
-        <!-- started from SensoryPrivacyService -->
-        <activity android:name=".sensorprivacy.television.TvSensorPrivacyChangedActivity"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
-            android:theme="@style/BottomSheet"
-            android:finishOnCloseSystemDialogs="true"
-            android:showForAllUsers="true">
-        </activity>
-
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbAccessoryUriActivity"
@@ -702,14 +651,6 @@
             android:visibleToInstantApps="true"
             android:exported="false"
             android:permission="android.permission.MANAGE_MEDIA_PROJECTION"/>
-
-        <!-- started from TvNotificationPanel -->
-        <activity
-            android:name=".statusbar.tv.notifications.TvNotificationPanelActivity"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTask"
-            android:noHistory="true"
-            android:theme="@style/TvSidePanelTheme" />
 
         <!-- started from SliceProvider -->
         <activity android:name=".SlicePermissionActivity"
