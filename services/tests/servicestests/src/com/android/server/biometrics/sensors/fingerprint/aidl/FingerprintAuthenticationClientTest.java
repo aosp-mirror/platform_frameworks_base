@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -399,7 +401,9 @@ public class FingerprintAuthenticationClientTest {
 
         mLooper.moveTimeForward(10);
         mLooper.dispatchAll();
-        verify(mCancellationSignal).cancel();
+        verify(mCancellationSignal, never()).cancel();
+        verify(mClientMonitorCallbackConverter)
+                .onError(anyInt(), anyInt(), eq(BIOMETRIC_ERROR_CANCELED), anyInt());
     }
 
     private FingerprintAuthenticationClient createClient() throws RemoteException {
