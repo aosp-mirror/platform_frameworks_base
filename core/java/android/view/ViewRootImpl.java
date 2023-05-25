@@ -311,6 +311,16 @@ public final class ViewRootImpl implements ViewParent,
             SystemProperties.getBoolean("persist.wm.debug.client_transient", false);
 
     /**
+     * Whether the client (system UI) is handling the immersive confirmation window. If
+     * {@link CLIENT_TRANSIENT} is set to true, the immersive confirmation window will always be the
+     * client instance and this flag will be ignored. Otherwise, the immersive confirmation window
+     * can be switched freely by this flag.
+     * @hide
+     */
+    public static final boolean CLIENT_IMMERSIVE_CONFIRMATION =
+            SystemProperties.getBoolean("persist.wm.debug.client_immersive_confirmation", false);
+
+    /**
      * Whether the client should compute the window frame on its own.
      * @hide
      */

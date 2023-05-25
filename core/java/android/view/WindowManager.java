@@ -3098,6 +3098,16 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 1 << 16;
 
         /**
+         * Flag to indicate that this window is a immersive mode confirmation window. The window
+         * should be ignored when calculating insets control. This is used for prompt window
+         * triggered by insets visibility changes. If it can take over the insets control, the
+         * visibility will change unexpectedly and the window may dismiss itself. Power button panic
+         * handling will be disabled when this window exists.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW = 1 << 17;
+
+        /**
          * Flag to indicate that any window added by an application process that is of type
          * {@link #TYPE_TOAST} or that requires
          * {@link android.app.AppOpsManager#OP_SYSTEM_ALERT_WINDOW} permission should be hidden when
@@ -3241,6 +3251,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
                 PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS,
                 PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
+                PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                 PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
@@ -3324,6 +3335,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
                         equals = PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
                         name = "SUSTAINED_PERFORMANCE_MODE"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW,
+                        equals = PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW,
+                        name = "IMMERSIVE_CONFIRMATION_WINDOW"),
                 @ViewDebug.FlagToString(
                         mask = SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                         equals = SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,

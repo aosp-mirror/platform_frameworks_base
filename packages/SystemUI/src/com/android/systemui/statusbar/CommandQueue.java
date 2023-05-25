@@ -168,7 +168,10 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP = 71 << MSG_SHIFT;
     private static final int MSG_SHOW_MEDIA_OUTPUT_SWITCHER = 72 << MSG_SHIFT;
     private static final int MSG_TOGGLE_TASKBAR = 73 << MSG_SHIFT;
-
+    private static final int MSG_SETTING_CHANGED = 74 << MSG_SHIFT;
+    private static final int MSG_LOCK_TASK_MODE_CHANGED = 75 << MSG_SHIFT;
+    private static final int MSG_CONFIRM_IMMERSIVE_PROMPT = 77 << MSG_SHIFT;
+    private static final int MSG_IMMERSIVE_CHANGED = 78 << MSG_SHIFT;
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
     public static final int FLAG_EXCLUDE_RECENTS_PANEL = 1 << 1;
@@ -498,6 +501,16 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#showMediaOutputSwitcher
          */
         default void showMediaOutputSwitcher(String packageName) {}
+
+        /**
+         * @see IStatusBar#confirmImmersivePrompt
+         */
+        default void confirmImmersivePrompt() {}
+
+        /**
+         * @see IStatusBar#immersiveModeChanged
+         */
+        default void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode) {}
     }
 
     @VisibleForTesting
@@ -779,6 +792,23 @@ public class CommandQueue extends IStatusBar.Stub implements
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_SHOW_SCREEN_PIN_REQUEST, taskId, 0, null)
                     .sendToTarget();
+        }
+    }
+
+    @Override
+    public void confirmImmersivePrompt() {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_CONFIRM_IMMERSIVE_PROMPT).sendToTarget();
+        }
+    }
+
+    @Override
+    public void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode) {
+        synchronized (mLock) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = rootDisplayAreaId;
+            args.argi2 = isImmersiveMode ? 1 : 0;
+            mHandler.obtainMessage(MSG_IMMERSIVE_CHANGED, args).sendToTarget();
         }
     }
 
@@ -1808,6 +1838,19 @@ public class CommandQueue extends IStatusBar.Stub implements
                     String clientPackageName = (String) args.arg1;
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName);
+                    }
+                    break;
+                case MSG_CONFIRM_IMMERSIVE_PROMPT:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).confirmImmersivePrompt();
+                    }
+                    break;
+                case MSG_IMMERSIVE_CHANGED:
+                    args = (SomeArgs) msg.obj;
+                    int rootDisplayAreaId = args.argi1;
+                    boolean isImmersiveMode = args.argi2 != 0;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).immersiveModeChanged(rootDisplayAreaId, isImmersiveMode);
                     }
                     break;
             }

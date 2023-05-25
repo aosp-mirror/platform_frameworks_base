@@ -58,7 +58,7 @@
             android:paddingStart="48dp"
             android:paddingTop="40dp"
             android:text="@string/immersive_cling_title"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColorPrimaryInverse"
             android:textSize="24sp" />
 
     <TextView
@@ -70,7 +70,7 @@
             android:paddingStart="48dp"
             android:paddingTop="12.6dp"
             android:text="@string/immersive_cling_description"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColorPrimaryInverse"
             android:textSize="16sp" />
 
     <Button
@@ -85,7 +85,7 @@
             android:paddingEnd="8dp"
             android:paddingStart="8dp"
             android:text="@string/immersive_cling_positive"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColorPrimaryInverse"
             android:textSize="14sp" />
 
 </RelativeLayout>

@@ -48,6 +48,7 @@ import com.android.systemui.reardisplay.RearDisplayDialogController
 import com.android.systemui.recents.Recents
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
+import com.android.systemui.statusbar.ImmersiveModeConfirmation
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.phone.KeyguardLiftController
 import com.android.systemui.statusbar.phone.LockscreenWallpaper
@@ -158,6 +159,12 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(Recents::class)
     abstract fun bindRecents(sysui: Recents): CoreStartable
+
+    /** Inject into ImmersiveModeConfirmation.  */
+    @Binds
+    @IntoMap
+    @ClassKey(ImmersiveModeConfirmation::class)
+    abstract fun bindImmersiveModeConfirmation(sysui: ImmersiveModeConfirmation): CoreStartable
 
     /** Inject into RingtonePlayer.  */
     @Binds
