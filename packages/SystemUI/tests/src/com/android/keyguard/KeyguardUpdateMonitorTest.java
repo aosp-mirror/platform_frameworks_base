@@ -654,6 +654,24 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void serviceProvidersUpdated_broadcastTriggersInfoRefresh() {
+        // The callback is invoked once on init
+        verify(mTestCallback, times(1)).onRefreshCarrierInfo();
+
+        // WHEN the SERVICE_PROVIDERS_UPDATED broadcast is sent
+        Intent intent = new Intent(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED);
+        intent.putExtra(TelephonyManager.EXTRA_SPN, "spn");
+        intent.putExtra(TelephonyManager.EXTRA_PLMN, "plmn");
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, true));
+        mTestableLooper.processAllMessages();
+
+        // THEN verify keyguardUpdateMonitorCallback receives a refresh callback
+        // Note that we have times(2) here because it's been called once already
+        verify(mTestCallback, times(2)).onRefreshCarrierInfo();
+    }
+
+    @Test
     public void testTriesToAuthenticateFingerprint_whenKeyguard() {
         mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
         mTestableLooper.processAllMessages();
