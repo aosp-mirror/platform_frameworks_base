@@ -520,6 +520,7 @@
   <java-symbol type="dimen" name="config_viewConfigurationHandwritingSlop" />
   <java-symbol type="dimen" name="config_viewConfigurationHoverSlop" />
   <java-symbol type="dimen" name="config_ambiguousGestureMultiplier" />
+  <java-symbol type="dimen" name="config_autoKeyboardBrightnessSmoothingConstant" />
   <java-symbol type="dimen" name="config_viewMinFlingVelocity" />
   <java-symbol type="dimen" name="config_viewMaxFlingVelocity" />
   <java-symbol type="dimen" name="config_viewMinRotaryEncoderFlingVelocity" />
@@ -1888,11 +1889,13 @@
   <java-symbol type="anim" name="dream_activity_open_enter" />
   <java-symbol type="anim" name="dream_activity_close_exit" />
   <java-symbol type="array" name="config_autoBrightnessButtonBacklightValues" />
-  <java-symbol type="array" name="config_autoBrightnessKeyboardBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues_doze" />
   <java-symbol type="array" name="config_autoBrightnessLevels" />
   <java-symbol type="array" name="config_autoBrightnessLevelsIdle" />
+  <java-symbol type="array" name="config_autoKeyboardBacklightBrightnessValues" />
+  <java-symbol type="array" name="config_autoKeyboardBacklightDecreaseLuxThreshold" />
+  <java-symbol type="array" name="config_autoKeyboardBacklightIncreaseLuxThreshold" />
   <java-symbol type="array" name="config_ambientThresholdLevels" />
   <java-symbol type="array" name="config_ambientBrighteningThresholds" />
   <java-symbol type="array" name="config_ambientDarkeningThresholds" />

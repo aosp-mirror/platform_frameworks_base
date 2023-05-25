@@ -4628,6 +4628,22 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
+        public AmbientLightSensorData getAmbientLightSensorData(int displayId) {
+            synchronized (mSyncRoot) {
+                final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
+                if (display == null) {
+                    return null;
+                }
+                final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
+                if (device == null) {
+                    return null;
+                }
+                SensorData data = device.getDisplayDeviceConfig().getAmbientLightSensor();
+                return new AmbientLightSensorData(data.name, data.type);
+            }
+        }
+
+        @Override
         public IntArray getDisplayGroupIds() {
             Set<Integer> visitedIds = new ArraySet<>();
             IntArray displayGroupIds = new IntArray();
