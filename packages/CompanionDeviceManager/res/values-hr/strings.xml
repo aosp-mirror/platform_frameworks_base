@@ -35,7 +35,7 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Usluge za Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> zahtijeva dopuštenje u ime vašeg uređaja <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> za pristup fotografijama, medijskim sadržajima i obavijestima na telefonu"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Dopustiti &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; da izvede tu radnju?"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Želite li uređaju &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; dopustiti da izvrši tu radnju?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> zahtijeva dopuštenje u ime vašeg uređaja <xliff:g id="DEVICE_NAME">%2$s</xliff:g> za emitiranje aplikacija i drugih značajki sustava na uređajima u blizini"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"uređaj"</string>
     <string name="summary_generic_single_device" msgid="4181180669689590417">"Ta će aplikacija moći sinkronizirati podatke između vašeg telefona i uređaja <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, primjerice ime pozivatelja"</string>
@@ -69,7 +69,7 @@
     <string name="permission_notification_summary" msgid="884075314530071011">"Može čitati sve obavijesti, uključujući informacije kao što su kontakti, poruke i fotografije"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streaming aplikacija vašeg telefona"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Emitiranje aplikacija i drugih značajki sustava s vašeg telefona"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Emitirajte stream aplikacija i drugih značajki sustava s vašeg telefona"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefonu"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tabletu"</string>
 </resources>

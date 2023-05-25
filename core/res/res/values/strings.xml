@@ -5410,6 +5410,9 @@
     <!-- Title for button to see application detail in app store which it came from - it may allow user to update to newer version. [CHAR LIMIT=50] -->
     <string name="deprecated_target_sdk_app_store">Check for update</string>
 
+    <!-- Message displayed in dialog when app is 32 bit on a 64 bit system. [CHAR LIMIT=NONE] -->
+    <string name="deprecated_abi_message">This app isn\'t compatible with the latest version of Android. Check for an update or contact the app\'s developer.</string>
+
     <!-- Notification title shown when new SMS/MMS is received while the device is locked [CHAR LIMIT=NONE] -->
     <string name="new_sms_notification_title">You have new messages</string>
     <!-- Notification content shown when new SMS/MMS is received while the device is locked [CHAR LIMIT=NONE] -->

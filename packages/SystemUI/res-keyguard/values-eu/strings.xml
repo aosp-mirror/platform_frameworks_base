@@ -41,7 +41,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Gehitu SIM bat."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIMa falta da, edo ezin da irakurri. Gehitu SIM bat."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Ezin da erabili SIMa."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Betiko desaktibatu da SIMa.\n Jarri harremanetan operadorearekin beste SIM bat eskuratzeko."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Betiko desaktibatu da SIMa.\n Jarri operadorearekin harremanetan beste SIM bat eskuratzeko."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIMa blokeatuta dago."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIMa PUKaren bidez desblokeatu behar da."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIMa desblokeatzen…"</string>

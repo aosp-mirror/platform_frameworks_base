@@ -35,7 +35,7 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play Hizmetleri"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g>, telefonunuzdaki fotoğraf, medya ve bildirimlere erişmek için <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> cihazınız adına izin istiyor"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; cihazının bu işlem yapmasına izin verilsin mi?"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; cihazının bu işlemi yapmasına izin verilsin mi?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulaması <xliff:g id="DEVICE_NAME">%2$s</xliff:g> cihazınız adına uygulamaları ve diğer sistem özelliklerini yakındaki cihazlara aktarmak için izin istiyor"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"cihaz"</string>
     <string name="summary_generic_single_device" msgid="4181180669689590417">"Bu uygulama, arayan kişinin adı gibi bilgileri telefonunuz ve <xliff:g id="DEVICE_NAME">%1$s</xliff:g> adlı cihaz arasında senkronize edebilir"</string>
@@ -60,16 +60,16 @@
     <string name="permission_app_streaming" msgid="6009695219091526422">"Uygulamalar"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Yayınlama"</string>
     <string name="permission_phone_summary" msgid="6684396967861278044">"Telefon aramaları yapabilir ve telefon aramalarını yönetebilir"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Telefon arama kaydını okuma ve yazma"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Telefon arama kaydını okuyabilir ve yazabilir"</string>
     <string name="permission_sms_summary" msgid="3508442683678912017">"SMS mesajları gönderebilir ve görüntüleyebilir"</string>
     <string name="permission_contacts_summary" msgid="675861979475628708">"Kişilerinize erişebilir"</string>
     <string name="permission_calendar_summary" msgid="6460000922511766226">"Takviminize erişebilir"</string>
     <string name="permission_microphone_summary" msgid="3692091540613093394">"Ses kaydedebilir"</string>
     <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Yakındaki cihazları keşfedip bağlanabilir ve bu cihazların göreli konumunu belirleyebilir"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Kişiler, mesajlar ve fotoğraflar da dahil olmak üzere tüm bildirimleri okuyabilir"</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Telefonunuzun uygulamalarını yayınlama"</string>
+    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Telefonunuzun uygulamalarını yayınlayabilir"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Telefonunuzdan uygulamaları ve diğer sistem özelliklerini yayınlayın"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Telefonunuzdan uygulamaları ve diğer sistem özelliklerini yayınlayabilir"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

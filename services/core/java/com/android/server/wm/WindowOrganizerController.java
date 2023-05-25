@@ -960,20 +960,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         errorCallbackToken, organizer);
                 break;
             }
-            default: {
-                // The other operations may change task order so they are skipped while in lock
-                // task mode. The above operations are still allowed because they don't move
-                // tasks. And it may be necessary such as clearing launch root after entering
-                // lock task mode.
-                if (isInLockTaskMode) {
-                    Slog.w(TAG, "Skip applying hierarchy operation " + hop
-                            + " while in lock task mode");
-                    return effects;
-                }
-            }
-        }
-
-        switch (type) {
             case HIERARCHY_OP_TYPE_PENDING_INTENT: {
                 final Bundle launchOpts = hop.getLaunchOptions();
                 ActivityOptions activityOptions = launchOpts != null
@@ -1012,6 +998,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 break;
             }
+            default: {
+                // The other operations may change task order so they are skipped while in lock
+                // task mode. The above operations are still allowed because they don't move
+                // tasks. And it may be necessary such as clearing launch root after entering
+                // lock task mode.
+                if (isInLockTaskMode) {
+                    Slog.w(TAG, "Skip applying hierarchy operation " + hop
+                            + " while in lock task mode");
+                    return effects;
+                }
+            }
+        }
+
+        switch (type) {
             case HIERARCHY_OP_TYPE_START_SHORTCUT: {
                 final Bundle launchOpts = hop.getLaunchOptions();
                 final String callingPackage = launchOpts.getString(
