@@ -25,6 +25,7 @@ import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
@@ -38,6 +39,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.spy;
@@ -419,10 +421,10 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
     @Test
     public void testUpdateAboveInsetsState_zOrderChanged() {
-        final WindowState ime = createTestWindow("ime");
-        final WindowState app = createTestWindow("app");
-        final WindowState statusBar = createTestWindow("statusBar");
-        final WindowState navBar = createTestWindow("navBar");
+        final WindowState ime = createNonAppWindow("ime");
+        final WindowState app = createNonAppWindow("app");
+        final WindowState statusBar = createNonAppWindow("statusBar");
+        final WindowState navBar = createNonAppWindow("navBar");
 
         final InsetsSourceProvider imeSourceProvider =
                 getController().getOrCreateSourceProvider(ID_IME, ime());
@@ -430,7 +432,9 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         waitUntilHandlersIdle();
         clearInvocations(mDisplayContent);
+        imeSourceProvider.updateControlForTarget(app, false /* force */);
         imeSourceProvider.setClientVisible(true);
+        verify(mDisplayContent).assignWindowLayers(anyBoolean());
         waitUntilHandlersIdle();
         // The visibility change should trigger a traversal to notify the change.
         verify(mDisplayContent).notifyInsetsChanged(any());
@@ -546,8 +550,17 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 control2.getInsetsHint().bottom);
     }
 
+    /** Creates a window which is associated with ActivityRecord. */
     private WindowState createTestWindow(String name) {
         final WindowState win = createWindow(null, TYPE_APPLICATION, name);
+        win.setHasSurface(true);
+        spyOn(win);
+        return win;
+    }
+
+    /** Creates a non-activity window. */
+    private WindowState createNonAppWindow(String name) {
+        final WindowState win = createWindow(null, LAST_APPLICATION_WINDOW + 1, name);
         win.setHasSurface(true);
         spyOn(win);
         return win;
