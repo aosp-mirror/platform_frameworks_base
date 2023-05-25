@@ -53,6 +53,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.Pair as APair
 import androidx.media.utils.MediaConstants
+import com.android.internal.annotations.Keep
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Dumpable
@@ -219,7 +220,7 @@ class MediaDataManager(
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
     // There should ONLY be at most one Smartspace media recommendation.
     var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
-    private var smartspaceSession: SmartspaceSession? = null
+    @Keep private var smartspaceSession: SmartspaceSession? = null
     private var allowMediaRecommendations = allowMediaRecommendations(context)
 
     private val artworkWidth =
@@ -381,6 +382,8 @@ class MediaDataManager(
 
     fun destroy() {
         smartspaceMediaDataProvider.unregisterListener(this)
+        smartspaceSession?.close()
+        smartspaceSession = null
         context.unregisterReceiver(appChangeReceiver)
     }
 
