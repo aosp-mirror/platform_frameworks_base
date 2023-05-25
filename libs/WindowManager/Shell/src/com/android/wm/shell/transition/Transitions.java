@@ -567,8 +567,8 @@ public class Transitions implements RemoteCallable<Transitions>,
                     layer = zSplitLine + numChanges - i;
                 }
             } else { // CHANGE or other
-                if (isClosing) {
-                    // Put below CLOSE mode.
+                if (isClosing || TransitionUtil.isOrderOnly(change)) {
+                    // Put below CLOSE mode (in the "static" section).
                     layer = zSplitLine - i;
                 } else {
                     // Put above CLOSE mode.

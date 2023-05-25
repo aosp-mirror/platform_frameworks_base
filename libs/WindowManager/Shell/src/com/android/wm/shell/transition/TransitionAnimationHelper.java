@@ -102,10 +102,11 @@ public class TransitionAnimationHelper {
             // We will translucent open animation for translucent activities and tasks. Choose
             // WindowAnimation_activityOpenEnterAnimation and set translucent here, then
             // TransitionAnimation loads appropriate animation later.
-            if ((changeFlags & FLAG_TRANSLUCENT) != 0 && enter) {
-                translucent = true;
-            }
-            if (isTask && !translucent) {
+            translucent = (changeFlags & FLAG_TRANSLUCENT) != 0;
+            if (isTask && translucent && !enter) {
+                // For closing translucent tasks, use the activity close animation
+                animAttr = R.styleable.WindowAnimation_activityCloseExitAnimation;
+            } else if (isTask && !translucent) {
                 animAttr = enter
                         ? R.styleable.WindowAnimation_taskOpenEnterAnimation
                         : R.styleable.WindowAnimation_taskOpenExitAnimation;

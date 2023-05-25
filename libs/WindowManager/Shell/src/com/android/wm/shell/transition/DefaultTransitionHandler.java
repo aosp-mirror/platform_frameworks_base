@@ -326,6 +326,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int wallpaperTransit = getWallpaperTransitType(info);
         boolean isDisplayRotationAnimationStarted = false;
         final boolean isDreamTransition = isDreamTransition(info);
+        final boolean isOnlyTranslucent = isOnlyTranslucent(info);
 
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -451,6 +452,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             final int layer = zSplitLine + numChanges - i;
                             startTransaction.setLayer(change.getLeash(), layer);
                         }
+                    } else if (isOnlyTranslucent && TransitionUtil.isOpeningType(info.getType())
+                                && TransitionUtil.isClosingType(mode)) {
+                        // If there is a closing translucent task in an OPENING transition, we will
+                        // actually select a CLOSING animation, so move the closing task into
+                        // the animating part of the z-order.
+
+                        // See Transitions#setupAnimHierarchy for details about these variables.
+                        final int numChanges = info.getChanges().size();
+                        final int zSplitLine = numChanges + 1;
+                        final int layer = zSplitLine + numChanges - i;
+                        startTransaction.setLayer(change.getLeash(), layer);
                     }
                 }
 
@@ -540,6 +552,29 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
 
         return false;
+    }
+
+    /**
+     * Does `info` only contain translucent visibility changes (CHANGEs are ignored). We select
+     * different animations and z-orders for these
+     */
+    private static boolean isOnlyTranslucent(@NonNull TransitionInfo info) {
+        int translucentOpen = 0;
+        int translucentClose = 0;
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getMode() == TRANSIT_CHANGE) continue;
+            if (change.hasFlags(FLAG_TRANSLUCENT)) {
+                if (TransitionUtil.isOpeningType(change.getMode())) {
+                    translucentOpen += 1;
+                } else {
+                    translucentClose += 1;
+                }
+            } else {
+                return false;
+            }
+        }
+        return (translucentOpen + translucentClose) > 0;
     }
 
     @Override
