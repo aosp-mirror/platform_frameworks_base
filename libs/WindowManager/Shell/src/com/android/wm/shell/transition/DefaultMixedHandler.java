@@ -540,9 +540,12 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             mixed.mInFlightSubAnimations = 0;
             mActiveTransitions.remove(mixed);
             // If pair-to-pair switching, the post-recents clean-up isn't needed.
+            wct = wct != null ? wct : new WindowContainerTransaction();
             if (mixed.mAnimType != MixedTransition.ANIM_TYPE_PAIR_TO_PAIR) {
-                wct = wct != null ? wct : new WindowContainerTransaction();
-                mSplitHandler.onRecentsInSplitAnimationFinish(wct, finishTransaction, info);
+                mSplitHandler.onRecentsInSplitAnimationFinish(wct, finishTransaction);
+            } else {
+                // notify pair-to-pair recents animation finish
+                mSplitHandler.onRecentsPairToPairAnimationFinish(wct);
             }
             mSplitHandler.onTransitionAnimationComplete();
             finishCallback.onTransitionFinished(wct, wctCB);
@@ -552,6 +555,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         final boolean handled = mixed.mLeftoversHandler.startAnimation(mixed.mTransition, info,
                 startTransaction, finishTransaction, finishCB);
         if (!handled) {
+            mSplitHandler.onRecentsInSplitAnimationCanceled();
             mActiveTransitions.remove(mixed);
         }
         return handled;
