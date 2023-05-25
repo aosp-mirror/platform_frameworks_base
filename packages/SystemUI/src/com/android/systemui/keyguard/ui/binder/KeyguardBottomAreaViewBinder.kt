@@ -406,19 +406,21 @@ object KeyguardBottomAreaViewBinder {
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {
             if (viewModel.useLongPress) {
-                view.setOnTouchListener(
-                    KeyguardQuickAffordanceOnTouchListener(
-                        view,
-                        viewModel,
-                        messageDisplayer,
-                        vibratorHelper,
-                        falsingManager,
-                    )
+                val onTouchListener = KeyguardQuickAffordanceOnTouchListener(
+                    view,
+                    viewModel,
+                    messageDisplayer,
+                    vibratorHelper,
+                    falsingManager,
                 )
+                view.setOnTouchListener(onTouchListener)
+                view.onLongClickListener =
+                    OnLongClickListener(falsingManager, viewModel, vibratorHelper, onTouchListener)
             } else {
                 view.setOnClickListener(OnClickListener(viewModel, checkNotNull(falsingManager)))
             }
         } else {
+            view.onLongClickListener = null
             view.setOnClickListener(null)
             view.setOnTouchListener(null)
         }
@@ -452,6 +454,42 @@ object KeyguardBottomAreaViewBinder {
                 }
             }
             .start()
+    }
+
+    private class OnLongClickListener(
+        private val falsingManager: FalsingManager?,
+        private val viewModel: KeyguardQuickAffordanceViewModel,
+        private val vibratorHelper: VibratorHelper?,
+        private val onTouchListener: KeyguardQuickAffordanceOnTouchListener
+    ) : View.OnLongClickListener {
+        override fun onLongClick(view: View): Boolean {
+            if (falsingManager?.isFalseLongTap(FalsingManager.MODERATE_PENALTY) == true) {
+                return true
+            }
+
+            if (viewModel.configKey != null) {
+                viewModel.onClicked(
+                    KeyguardQuickAffordanceViewModel.OnClickedParameters(
+                        configKey = viewModel.configKey,
+                        expandable = Expandable.fromView(view),
+                        slotId = viewModel.slotId,
+                    )
+                )
+                vibratorHelper?.vibrate(
+                    if (viewModel.isActivated) {
+                        KeyguardBottomAreaVibrations.Activated
+                    } else {
+                        KeyguardBottomAreaVibrations.Deactivated
+                    }
+                )
+            }
+
+            onTouchListener.cancel()
+            return true
+        }
+
+        override fun onLongClickUseDefaultHapticFeedback(view: View?) = false
+
     }
 
     private class OnClickListener(
