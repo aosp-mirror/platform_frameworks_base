@@ -46,6 +46,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.TreeSet;
 
 /**
  * A thread-safe component of {@link InputManagerService} responsible for managing the keyboard
@@ -70,7 +71,9 @@ final class KeyboardBacklightController implements
     private static final int MSG_NOTIFY_USER_INACTIVITY = 5;
     private static final int MSG_INTERACTIVE_STATE_CHANGED = 6;
     private static final int MAX_BRIGHTNESS = 255;
-    private static final int NUM_BRIGHTNESS_CHANGE_STEPS = 10;
+    private static final int DEFAULT_NUM_BRIGHTNESS_CHANGE_STEPS = 10;
+    @VisibleForTesting
+    static final int MAX_BRIGHTNESS_CHANGE_STEPS = 10;
     private static final long TRANSITION_ANIMATION_DURATION_MILLIS =
             Duration.ofSeconds(1).toMillis();
 
@@ -80,7 +83,8 @@ final class KeyboardBacklightController implements
     static final long USER_INACTIVITY_THRESHOLD_MILLIS = Duration.ofSeconds(30).toMillis();
 
     @VisibleForTesting
-    static final int[] BRIGHTNESS_VALUE_FOR_LEVEL = new int[NUM_BRIGHTNESS_CHANGE_STEPS + 1];
+    static final int[] DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL =
+            new int[DEFAULT_NUM_BRIGHTNESS_CHANGE_STEPS + 1];
 
     private final Context mContext;
     private final NativeInputManagerService mNative;
@@ -104,10 +108,10 @@ final class KeyboardBacklightController implements
     static {
         // Fixed brightness levels to avoid issues when converting back and forth from the
         // device brightness range to [0-255]
-        // Levels are: 0, 25, 51, ..., 255
-        for (int i = 0; i <= NUM_BRIGHTNESS_CHANGE_STEPS; i++) {
-            BRIGHTNESS_VALUE_FOR_LEVEL[i] = (int) Math.floor(
-                    ((float) i * MAX_BRIGHTNESS) / NUM_BRIGHTNESS_CHANGE_STEPS);
+        // Levels are: 0, 51, ..., 255
+        for (int i = 0; i <= DEFAULT_NUM_BRIGHTNESS_CHANGE_STEPS; i++) {
+            DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL[i] = (int) Math.floor(
+                    ((float) i * MAX_BRIGHTNESS) / DEFAULT_NUM_BRIGHTNESS_CHANGE_STEPS);
         }
     }
 
@@ -184,7 +188,8 @@ final class KeyboardBacklightController implements
         final int currBrightnessLevel = state.mBrightnessLevel;
         final int newBrightnessLevel;
         if (direction == Direction.DIRECTION_UP) {
-            newBrightnessLevel = Math.min(currBrightnessLevel + 1, NUM_BRIGHTNESS_CHANGE_STEPS);
+            newBrightnessLevel = Math.min(currBrightnessLevel + 1,
+                    state.getNumBrightnessChangeSteps());
         } else {
             newBrightnessLevel = Math.max(currBrightnessLevel - 1, 0);
         }
@@ -194,7 +199,7 @@ final class KeyboardBacklightController implements
             try {
                 mDataStore.setKeyboardBacklightBrightness(inputDevice.getDescriptor(),
                         keyboardBacklight.getId(),
-                        BRIGHTNESS_VALUE_FOR_LEVEL[newBrightnessLevel]);
+                        state.mBrightnessValueForLevel[newBrightnessLevel]);
             } finally {
                 mDataStore.saveIfNeeded();
             }
@@ -202,6 +207,7 @@ final class KeyboardBacklightController implements
     }
 
     private void restoreBacklightBrightness(InputDevice inputDevice, Light keyboardBacklight) {
+        KeyboardBacklightState state = mKeyboardBacklights.get(inputDevice.getId());
         OptionalInt brightness;
         synchronized (mDataStore) {
             brightness = mDataStore.getKeyboardBacklightBrightness(
@@ -209,9 +215,9 @@ final class KeyboardBacklightController implements
         }
         if (brightness.isPresent()) {
             int brightnessValue = Math.max(0, Math.min(MAX_BRIGHTNESS, brightness.getAsInt()));
-            int index = Arrays.binarySearch(BRIGHTNESS_VALUE_FOR_LEVEL, brightnessValue);
+            int index = Arrays.binarySearch(state.mBrightnessValueForLevel, brightnessValue);
             if (index < 0) {
-                index = Math.min(NUM_BRIGHTNESS_CHANGE_STEPS, -(index + 1));
+                index = Math.min(state.getNumBrightnessChangeSteps(), -(index + 1));
             }
             updateBacklightState(inputDevice.getId(), index, false /* isTriggeredByKeyPress */);
             if (DEBUG) {
@@ -386,7 +392,7 @@ final class KeyboardBacklightController implements
             for (int i = 0; i < mKeyboardBacklightListenerRecords.size(); i++) {
                 IKeyboardBacklightState callbackState = new IKeyboardBacklightState();
                 callbackState.brightnessLevel = brightnessLevel;
-                callbackState.maxBrightnessLevel = NUM_BRIGHTNESS_CHANGE_STEPS;
+                callbackState.maxBrightnessLevel = state.getNumBrightnessChangeSteps();
                 mKeyboardBacklightListenerRecords.valueAt(i).notifyKeyboardBacklightChanged(
                         deviceId, callbackState, isTriggeredByKeyPress);
             }
@@ -443,10 +449,6 @@ final class KeyboardBacklightController implements
         ipw.decreaseIndent();
     }
 
-    private static boolean isAnimationEnabled() {
-        return InputFeatureFlagProvider.isKeyboardBacklightAnimationEnabled();
-    }
-
     // A record of a registered Keyboard backlight listener from one process.
     private class KeyboardBacklightListenerRecord implements IBinder.DeathRecipient {
         public final int mPid;
@@ -482,18 +484,52 @@ final class KeyboardBacklightController implements
         private final Light mLight;
         private int mBrightnessLevel;
         private ValueAnimator mAnimator;
+        private final int[] mBrightnessValueForLevel;
 
         KeyboardBacklightState(int deviceId, Light light) {
             mDeviceId = deviceId;
             mLight = light;
+            mBrightnessValueForLevel = setupBrightnessLevels();
+        }
+
+        private int[] setupBrightnessLevels() {
+            if (!InputFeatureFlagProvider.isKeyboardBacklightCustomLevelsEnabled()) {
+                return DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL;
+            }
+            int[] customLevels = mLight.getPreferredBrightnessLevels();
+            if (customLevels == null || customLevels.length == 0) {
+                return DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL;
+            }
+            TreeSet<Integer> brightnessLevels = new TreeSet<>();
+            brightnessLevels.add(0);
+            for (int level : customLevels) {
+                if (level > 0 && level < MAX_BRIGHTNESS) {
+                    brightnessLevels.add(level);
+                }
+            }
+            brightnessLevels.add(MAX_BRIGHTNESS);
+            int brightnessChangeSteps = brightnessLevels.size() - 1;
+            if (brightnessChangeSteps > MAX_BRIGHTNESS_CHANGE_STEPS) {
+                return DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL;
+            }
+            int[] result = new int[brightnessLevels.size()];
+            int index = 0;
+            for (int val : brightnessLevels) {
+                result[index++] = val;
+            }
+            return result;
+        }
+
+        private int getNumBrightnessChangeSteps() {
+            return mBrightnessValueForLevel.length - 1;
         }
 
         private void onBacklightStateChanged() {
-            setBacklightValue(mIsBacklightOn ? BRIGHTNESS_VALUE_FOR_LEVEL[mBrightnessLevel] : 0);
+            setBacklightValue(mIsBacklightOn ? mBrightnessValueForLevel[mBrightnessLevel] : 0);
         }
         private void setBrightnessLevel(int brightnessLevel) {
             if (mIsBacklightOn) {
-                setBacklightValue(BRIGHTNESS_VALUE_FOR_LEVEL[brightnessLevel]);
+                setBacklightValue(mBrightnessValueForLevel[brightnessLevel]);
             }
             mBrightnessLevel = brightnessLevel;
         }
@@ -509,7 +545,7 @@ final class KeyboardBacklightController implements
             if (fromValue == toValue) {
                 return;
             }
-            if (isAnimationEnabled()) {
+            if (InputFeatureFlagProvider.isKeyboardBacklightAnimationEnabled()) {
                 startAnimation(fromValue, toValue);
             } else {
                 mNative.setLightColor(mDeviceId, mLight.getId(), Color.argb(toValue, 0, 0, 0));
