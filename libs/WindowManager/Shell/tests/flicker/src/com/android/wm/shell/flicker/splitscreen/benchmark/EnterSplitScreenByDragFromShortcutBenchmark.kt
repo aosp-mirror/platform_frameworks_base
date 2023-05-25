@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
 import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -70,6 +71,7 @@ open class EnterSplitScreenByDragFromShortcutBenchmark(flicker: FlickerTest) :
             thisTransition(this)
         }
 
+    @PlatinumTest(focusArea = "sysui")
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
