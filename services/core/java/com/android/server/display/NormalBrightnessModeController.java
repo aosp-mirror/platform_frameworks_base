@@ -16,36 +16,79 @@
 
 package com.android.server.display;
 
+import android.annotation.NonNull;
 import android.os.PowerManager;
+
+import com.android.server.display.DisplayDeviceConfig.BrightnessLimitMapType;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Limits brightness for normal-brightness mode, based on ambient lux
+ **/
 class NormalBrightnessModeController {
-    private Map<Float, Float> mTransitionPoints = new HashMap<>();
+    @NonNull
+    private Map<BrightnessLimitMapType, Map<Float, Float>> mMaxBrightnessLimits = new HashMap<>();
+    private float mAmbientLux = Float.MAX_VALUE;
+    private boolean mAutoBrightnessEnabled = false;
 
     // brightness limit in normal brightness mode, based on ambient lux.
-    private float mVirtualTransitionPoint = PowerManager.BRIGHTNESS_MAX;
+    private float mMaxBrightness = PowerManager.BRIGHTNESS_MAX;
 
     boolean onAmbientLuxChange(float ambientLux) {
-        float currentAmbientBoundary = Float.MAX_VALUE;
-        float currentTransitionPoint = PowerManager.BRIGHTNESS_MAX;
-        for (Map.Entry<Float, Float> transitionPoint: mTransitionPoints.entrySet()) {
-            float ambientBoundary = transitionPoint.getKey();
-            // find ambient lux upper boundary closest to current ambient lux
-            if (ambientBoundary > ambientLux && ambientBoundary < currentAmbientBoundary) {
-                currentTransitionPoint = transitionPoint.getValue();
-                currentAmbientBoundary = ambientBoundary;
-            }
-        }
-        if (mVirtualTransitionPoint != currentTransitionPoint) {
-            mVirtualTransitionPoint = currentTransitionPoint;
-            return true;
+        mAmbientLux = ambientLux;
+        return recalculateMaxBrightness();
+    }
+
+    boolean setAutoBrightnessState(int state) {
+        boolean isEnabled = state == AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
+        if (isEnabled != mAutoBrightnessEnabled) {
+            mAutoBrightnessEnabled = isEnabled;
+            return recalculateMaxBrightness();
         }
         return false;
     }
 
     float getCurrentBrightnessMax() {
-        return mVirtualTransitionPoint;
+        return mMaxBrightness;
+    }
+
+    boolean resetNbmData(
+            @NonNull Map<BrightnessLimitMapType, Map<Float, Float>> maxBrightnessLimits) {
+        mMaxBrightnessLimits = maxBrightnessLimits;
+        return recalculateMaxBrightness();
+    }
+
+    private boolean recalculateMaxBrightness() {
+        float foundAmbientBoundary = Float.MAX_VALUE;
+        float foundMaxBrightness = PowerManager.BRIGHTNESS_MAX;
+
+        Map<Float, Float> maxBrightnessPoints = null;
+
+        if (mAutoBrightnessEnabled) {
+            maxBrightnessPoints = mMaxBrightnessLimits.get(BrightnessLimitMapType.ADAPTIVE);
+        }
+
+        if (maxBrightnessPoints == null) {
+            maxBrightnessPoints = mMaxBrightnessLimits.get(BrightnessLimitMapType.DEFAULT);
+        }
+
+        if (maxBrightnessPoints != null) {
+            for (Map.Entry<Float, Float> brightnessPoint : maxBrightnessPoints.entrySet()) {
+                float ambientBoundary = brightnessPoint.getKey();
+                // find ambient lux upper boundary closest to current ambient lux
+                if (ambientBoundary > mAmbientLux && ambientBoundary < foundAmbientBoundary) {
+                    foundMaxBrightness = brightnessPoint.getValue();
+                    foundAmbientBoundary = ambientBoundary;
+                }
+            }
+        }
+
+        if (mMaxBrightness != foundMaxBrightness) {
+            mMaxBrightness = foundMaxBrightness;
+            return true;
+        }
+        return false;
     }
 }
