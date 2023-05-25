@@ -841,8 +841,10 @@ public class GestureDetector {
         mHandler.removeMessages(SHOW_PRESS);
         mHandler.removeMessages(LONG_PRESS);
         mHandler.removeMessages(TAP);
-        mVelocityTracker.recycle();
-        mVelocityTracker = null;
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
         mIsDoubleTapping = false;
         mStillDown = false;
         mAlwaysInTapRegion = false;
