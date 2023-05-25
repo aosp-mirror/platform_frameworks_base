@@ -15,6 +15,7 @@
  */
 package com.android.systemui.unfold
 
+import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.testing.AndroidTestingRunner
@@ -54,7 +55,7 @@ class UnfoldHapticsPlayerTest : SysuiTestCase() {
         progressProvider.onTransitionProgress(0.5f)
         progressProvider.onTransitionFinishing()
 
-        verify(vibrator).vibrate(any<VibrationEffect>())
+        verify(vibrator).vibrate(any<VibrationEffect>(), any<VibrationAttributes>())
     }
 
     @Test
@@ -65,7 +66,7 @@ class UnfoldHapticsPlayerTest : SysuiTestCase() {
         progressProvider.onTransitionProgress(0.99f)
         progressProvider.onTransitionFinishing()
 
-        verify(vibrator, never()).vibrate(any<VibrationEffect>())
+        verify(vibrator, never()).vibrate(any<VibrationEffect>(), any<VibrationAttributes>())
     }
 
     @Test
@@ -85,7 +86,7 @@ class UnfoldHapticsPlayerTest : SysuiTestCase() {
         progressProvider.onTransitionFinished()
         testFoldProvider.onFoldUpdate(isFolded = true)
 
-        verify(vibrator, never()).vibrate(any<VibrationEffect>())
+        verify(vibrator, never()).vibrate(any<VibrationEffect>(), any<VibrationAttributes>())
     }
 
     @Test
@@ -113,7 +114,7 @@ class UnfoldHapticsPlayerTest : SysuiTestCase() {
         progressProvider.onTransitionFinishing()
         progressProvider.onTransitionFinished()
 
-        verify(vibrator).vibrate(any<VibrationEffect>())
+        verify(vibrator).vibrate(any<VibrationEffect>(), any<VibrationAttributes>())
     }
 
     private class TestFoldProvider : FoldProvider {
