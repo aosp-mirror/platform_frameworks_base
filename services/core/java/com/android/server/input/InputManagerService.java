@@ -493,8 +493,6 @@ public class InputManagerService extends IInputManager.Stub
 
         // Add ourselves to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
-
-        mSettingsObserver.registerAndUpdate();
     }
 
     // TODO(BT) Pass in parameter for bluetooth system
@@ -504,6 +502,8 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+
+        mSettingsObserver.registerAndUpdate();
 
         synchronized (mLidSwitchLock) {
             mSystemReady = true;
