@@ -6088,6 +6088,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    @WindowManagerFuncs.LidState
+    public int getLidState() {
+        return mDefaultDisplayPolicy.getLidState();
+    }
+
+    @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(ROTATION_MODE, mDefaultDisplayRotation.getUserRotationMode());

@@ -33,6 +33,7 @@ import static android.os.PowerManagerInternal.isInteractive;
 import static android.os.PowerManagerInternal.wakefulnessToString;
 
 import static com.android.internal.util.LatencyTracker.ACTION_TURN_ON_SCREEN;
+import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -5733,6 +5734,11 @@ public final class PowerManagerService extends SystemService
         @Override // Binder call
         public void wakeUp(long eventTime, @WakeReason int reason, String details,
                 String opPackageName) {
+            if (mPolicy.getLidState() == LID_CLOSED) {
+                Slog.d(TAG, "Ignoring wake up call due to the lid being closed");
+                return;
+            }
+
             final long now = mClock.uptimeMillis();
             if (eventTime > now) {
                 Slog.e(TAG, "Event time " + eventTime + " cannot be newer than " + now);
