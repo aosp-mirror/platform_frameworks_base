@@ -40,6 +40,7 @@ import android.app.GameModeInfo;
 import android.app.GameState;
 import android.app.IGameManagerService;
 import android.app.IGameModeListener;
+import android.app.IGameStateListener;
 import android.app.StatsManager;
 import android.app.UidObserver;
 import android.content.BroadcastReceiver;
@@ -148,6 +149,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final Object mLock = new Object();
     private final Object mDeviceConfigLock = new Object();
     private final Object mGameModeListenerLock = new Object();
+    private final Object mGameStateListenerLock = new Object();
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     final Handler mHandler;
     private final PackageManager mPackageManager;
@@ -164,6 +166,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
     // listener to caller uid map
     @GuardedBy("mGameModeListenerLock")
     private final ArrayMap<IGameModeListener, Integer> mGameModeListeners = new ArrayMap<>();
+    @GuardedBy("mGameStateListenerLock")
+    private final ArrayMap<IGameStateListener, Integer> mGameStateListeners = new ArrayMap<>();
     @Nullable
     private final GameServiceController mGameServiceController;
     private final Object mUidObserverLock = new Object();
@@ -350,6 +354,16 @@ public final class GameManagerService extends IGameManagerService.Stub {
                             mHandler.sendMessageDelayed(
                                     mHandler.obtainMessage(CANCEL_GAME_LOADING_MODE),
                                     loadingBoostDuration);
+                        }
+                    }
+                    synchronized (mGameStateListenerLock) {
+                        for (IGameStateListener listener : mGameStateListeners.keySet()) {
+                            try {
+                                listener.onGameStateChanged(packageName, gameState, userId);
+                            } catch (RemoteException ex) {
+                                Slog.w(TAG, "Cannot notify game state change for listener added by "
+                                        + mGameStateListeners.get(listener));
+                            }
                         }
                     }
                     break;
@@ -1470,6 +1484,43 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private void removeGameModeListenerUnchecked(IGameModeListener listener) {
         synchronized (mGameModeListenerLock) {
             mGameModeListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Adds a game state listener.
+     */
+    @Override
+    public void addGameStateListener(@NonNull IGameStateListener listener) {
+        try {
+            final IBinder listenerBinder = listener.asBinder();
+            listenerBinder.linkToDeath(new DeathRecipient() {
+                @Override public void binderDied() {
+                    removeGameStateListenerUnchecked(listener);
+                    listenerBinder.unlinkToDeath(this, 0 /*flags*/);
+                }
+            }, 0 /*flags*/);
+            synchronized (mGameStateListenerLock) {
+                mGameStateListeners.put(listener, Binder.getCallingUid());
+            }
+        } catch (RemoteException ex) {
+            Slog.e(TAG,
+                    "Failed to link death recipient for IGameStateListener from caller "
+                            + Binder.getCallingUid() + ", abandoned its listener registration", ex);
+        }
+    }
+
+    /**
+     * Removes a game state listener.
+     */
+    @Override
+    public void removeGameStateListener(@NonNull IGameStateListener listener) {
+        removeGameStateListenerUnchecked(listener);
+    }
+
+    private void removeGameStateListenerUnchecked(IGameStateListener listener) {
+        synchronized (mGameStateListenerLock) {
+            mGameStateListeners.remove(listener);
         }
     }
 
