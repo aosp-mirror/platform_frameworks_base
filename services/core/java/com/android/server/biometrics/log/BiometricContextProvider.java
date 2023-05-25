@@ -156,7 +156,7 @@ public final class BiometricContextProvider implements BiometricContext {
     @Override
     public OperationContextExt updateContext(@NonNull OperationContextExt operationContext,
             boolean isCryptoOperation) {
-        return operationContext.update(this);
+        return operationContext.update(this, isCryptoOperation);
     }
 
     @Nullable
@@ -238,7 +238,7 @@ public final class BiometricContextProvider implements BiometricContext {
 
     private void notifySubscribers() {
         mSubscribers.forEach((context, consumer) -> {
-            consumer.accept(context.update(this).toAidlContext());
+            consumer.accept(context.update(this, context.isCrypto()).toAidlContext());
         });
     }
 
