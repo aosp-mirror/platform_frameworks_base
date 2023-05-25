@@ -16,11 +16,15 @@
 
 package com.android.keyguard.logging
 
+import android.content.Intent
 import android.hardware.biometrics.BiometricConstants.LockoutMode
 import android.os.PowerManager
 import android.os.PowerManager.WakeReason
 import android.telephony.ServiceState
 import android.telephony.SubscriptionInfo
+import android.telephony.SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.TelephonyManager
 import com.android.keyguard.ActiveUnlockConfig
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.KeyguardListenModel
@@ -360,6 +364,21 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
                 int1 = subId
             },
             { "action $str1 serviceState=$str2 subId=$int1" }
+        )
+    }
+
+    fun logServiceProvidersUpdated(intent: Intent) {
+        logBuffer.log(
+                TAG,
+                VERBOSE,
+                {
+                    int1 = intent.getIntExtra(EXTRA_SUBSCRIPTION_INDEX, INVALID_SUBSCRIPTION_ID)
+                    str1 = intent.getStringExtra(TelephonyManager.EXTRA_SPN)
+                    str2 = intent.getStringExtra(TelephonyManager.EXTRA_PLMN)
+                },
+                {
+                    "action SERVICE_PROVIDERS_UPDATED subId=$int1 spn=$str1 plmn=$str2"
+                }
         )
     }
 
