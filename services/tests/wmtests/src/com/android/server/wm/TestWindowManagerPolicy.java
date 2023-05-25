@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 
+import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -353,5 +355,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean isGlobalKey(int keyCode) {
         return false;
+    }
+
+    @Override
+    public int getLidState() {
+        return LID_ABSENT;
     }
 }
