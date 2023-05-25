@@ -1311,7 +1311,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public ViewRootImpl getViewRootImpl() {
-        ViewGroup viewGroup = mNotificationShadeWindowController.getNotificationShadeView();
+        ViewGroup viewGroup = mNotificationShadeWindowController.getWindowRootView();
         if (viewGroup != null) {
             return viewGroup.getViewRootImpl();
         } else {

@@ -53,6 +53,7 @@ import android.os.SystemProperties;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.TaskSnapshot;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
@@ -874,6 +875,14 @@ public class PipTransition extends PipTransitionController {
                             mPipBoundsState.getLauncherState().getAppIconSizePx());
                 } else {
                     animator.setColorContentOverlay(mContext);
+                }
+            } else {
+                final TaskSnapshot snapshot = PipUtils.getTaskSnapshot(
+                        taskInfo.launchIntoPipHostTaskId, false /* isLowResolution */);
+                if (snapshot != null) {
+                    // use the task snapshot during the animation, this is for
+                    // launch-into-pip aka. content-pip use case.
+                    animator.setSnapshotContentOverlay(snapshot, sourceHintRect);
                 }
             }
         } else if (enterAnimationType == ANIM_TYPE_ALPHA) {

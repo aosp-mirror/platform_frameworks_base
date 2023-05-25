@@ -62,6 +62,7 @@ import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionInfo;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -140,8 +141,8 @@ public class KeyguardService extends Service {
             return apps.length == 0 ? TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                     : TRANSIT_OLD_KEYGUARD_GOING_AWAY;
         } else if (type == TRANSIT_KEYGUARD_OCCLUDE) {
-            boolean isOccludeByDream = apps.length > 0 && apps[0].taskInfo.topActivityType
-                    == WindowConfiguration.ACTIVITY_TYPE_DREAM;
+            boolean isOccludeByDream = apps.length > 0 && apps[0].taskInfo != null
+                    && apps[0].taskInfo.topActivityType == WindowConfiguration.ACTIVITY_TYPE_DREAM;
             if (isOccludeByDream) return TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
             return TRANSIT_OLD_KEYGUARD_OCCLUDE;
         } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
@@ -156,64 +157,61 @@ public class KeyguardService extends Service {
     // Note: Also used for wrapping occlude by Dream animation. It works (with some redundancy).
     public static IRemoteTransition wrap(IRemoteAnimationRunner runner) {
         return new IRemoteTransition.Stub() {
-            final ArrayMap<IBinder, IRemoteTransitionFinishedCallback> mFinishCallbacks =
-                    new ArrayMap<>();
+
             private final ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = new ArrayMap<>();
+
+            @GuardedBy("mLeashMap")
+            private IRemoteTransitionFinishedCallback mFinishCallback = null;
 
             @Override
             public void startAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
                     throws RemoteException {
                 Slog.d(TAG, "Starts IRemoteAnimationRunner: info=" + info);
-                final RemoteAnimationTarget[] apps =
-                        wrap(info, false /* wallpapers */, t, mLeashMap);
-                final RemoteAnimationTarget[] wallpapers =
-                        wrap(info, true /* wallpapers */, t, mLeashMap);
-                final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
 
-                // Set alpha back to 1 for the independent changes because we will be animating
-                // children instead.
-                for (TransitionInfo.Change chg : info.getChanges()) {
-                    if (TransitionInfo.isIndependent(chg, info)) {
-                        t.setAlpha(chg.getLeash(), 1.f);
-                    }
-                }
-                initAlphaForAnimationTargets(t, apps);
-                initAlphaForAnimationTargets(t, wallpapers);
-                t.apply();
-                synchronized (mFinishCallbacks) {
-                    mFinishCallbacks.put(transition, finishCallback);
-                }
-                runner.onAnimationStart(getTransitionOldType(info.getType(), info.getFlags(), apps),
-                        apps, wallpapers, nonApps,
-                        new IRemoteAnimationFinishedCallback.Stub() {
-                            @Override
-                            public void onAnimationFinished() throws RemoteException {
-                                synchronized (mFinishCallbacks) {
-                                    if (mFinishCallbacks.remove(transition) == null) return;
-                                }
-                                info.releaseAllSurfaces();
-                                Slog.d(TAG, "Finish IRemoteAnimationRunner.");
-                                finishCallback.onTransitionFinished(null /* wct */, null /* t */);
-                            }
+                synchronized (mLeashMap) {
+                    final RemoteAnimationTarget[] apps =
+                            wrap(info, false /* wallpapers */, t, mLeashMap);
+                    final RemoteAnimationTarget[] wallpapers =
+                            wrap(info, true /* wallpapers */, t, mLeashMap);
+                    final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
+
+                    // Set alpha back to 1 for the independent changes because we will be animating
+                    // children instead.
+                    for (TransitionInfo.Change chg : info.getChanges()) {
+                        if (TransitionInfo.isIndependent(chg, info)) {
+                            t.setAlpha(chg.getLeash(), 1.f);
                         }
-                );
+                    }
+                    initAlphaForAnimationTargets(t, apps);
+                    initAlphaForAnimationTargets(t, wallpapers);
+                    t.apply();
+                    mFinishCallback = finishCallback;
+                    runner.onAnimationStart(
+                            getTransitionOldType(info.getType(), info.getFlags(), apps),
+                            apps, wallpapers, nonApps,
+                            new IRemoteAnimationFinishedCallback.Stub() {
+                                @Override
+                                public void onAnimationFinished() throws RemoteException {
+                                    synchronized (mLeashMap) {
+                                        Slog.d(TAG, "Finish IRemoteAnimationRunner.");
+                                        finish();
+                                    }
+                                }
+                            }
+                    );
+                }
             }
 
             public void mergeAnimation(IBinder candidateTransition, TransitionInfo candidateInfo,
                     SurfaceControl.Transaction candidateT, IBinder currentTransition,
-                    IRemoteTransitionFinishedCallback candidateFinishCallback) {
+                    IRemoteTransitionFinishedCallback candidateFinishCallback)
+                    throws RemoteException {
                 try {
-                    final IRemoteTransitionFinishedCallback currentFinishCB;
-                    synchronized (mFinishCallbacks) {
-                        currentFinishCB = mFinishCallbacks.remove(currentTransition);
+                    synchronized (mLeashMap) {
+                        runner.onAnimationCancelled();
+                        finish();
                     }
-                    if (currentFinishCB == null) {
-                        Slog.e(TAG, "Called mergeAnimation, but finish callback is missing");
-                        return;
-                    }
-                    runner.onAnimationCancelled();
-                    currentFinishCB.onTransitionFinished(null /* wct */, null /* t */);
                 } catch (RemoteException e) {
                     // nothing, we'll just let it finish on its own I guess.
                 }
@@ -224,6 +222,16 @@ public class KeyguardService extends Service {
                 for (RemoteAnimationTarget target : targets) {
                     if (target.mode != MODE_OPENING) continue;
                     t.setAlpha(target.leash, 0.f);
+                }
+            }
+
+            @GuardedBy("mLeashMap")
+            private void finish() throws RemoteException {
+                mLeashMap.clear();
+                final IRemoteTransitionFinishedCallback finishCallback = mFinishCallback;
+                if (finishCallback != null) {
+                    mFinishCallback = null;
+                    finishCallback.onTransitionFinished(null /* wct */, null /* t */);
                 }
             }
         };

@@ -1104,6 +1104,10 @@ class RecentTasks {
                         // front unless overridden by the provided activity options
                         mTasks.remove(taskIndex);
                         mTasks.add(0, task);
+                        if (taskIndex != 0) {
+                            // Only notify when position changes
+                            mTaskNotificationController.notifyTaskListUpdated();
+                        }
 
                         if (DEBUG_RECENTS) {
                             Slog.d(TAG_RECENTS, "addRecent: moving to top " + task
@@ -1552,7 +1556,7 @@ class RecentTasks {
                         task.affinity != null && task.affinity.equals(t.affinity);
                 final boolean sameIntent = intent != null && intent.filterEquals(trIntent);
                 boolean multiTasksAllowed = false;
-                final int flags = intent.getFlags();
+                final int flags = intent != null ? intent.getFlags() : 0;
                 if ((flags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NEW_DOCUMENT)) != 0
                         && (flags & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
                     multiTasksAllowed = true;

@@ -77,6 +77,7 @@ import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.DropBoxManager;
 import android.os.HandlerThread;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.TestLooperManager;
 import android.os.UserHandle;
@@ -327,6 +328,20 @@ public final class BroadcastQueueModernImplTest {
     }
 
     @Test
+    public void testRunnableList_sameRunnableAt() {
+        doReturn(2L).when(mQueue1).getRunnableAt();
+        doReturn(2L).when(mQueue2).getRunnableAt();
+        doReturn(2L).when(mQueue3).getRunnableAt();
+        doReturn(2L).when(mQueue4).getRunnableAt();
+
+        mHead = insertIntoRunnableList(mHead, mQueue1);
+        mHead = insertIntoRunnableList(mHead, mQueue2);
+        mHead = insertIntoRunnableList(mHead, mQueue3);
+        mHead = insertIntoRunnableList(mHead, mQueue4);
+        assertRunnableList(List.of(mQueue1, mQueue2, mQueue3, mQueue4), mHead);
+    }
+
+    @Test
     public void testProcessQueue_Complex() {
         BroadcastProcessQueue red = mImpl.getOrCreateProcessQueue(PACKAGE_RED, TEST_UID);
         BroadcastProcessQueue green = mImpl.getOrCreateProcessQueue(PACKAGE_GREEN, TEST_UID);
@@ -559,6 +574,20 @@ public final class BroadcastQueueModernImplTest {
         queue.setProcessAndUidState(mProcess, false, false);
         assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
         assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+    }
+
+    @Test
+    public void testRunnableAt_coreUid() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                "com.android.bluetooth", Process.BLUETOOTH_UID);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver()));
+        enqueueOrReplaceBroadcast(queue, timeTickRecord, 0);
+
+        assertThat(queue.getRunnableAt()).isEqualTo(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_CORE_UID, queue.getRunnableAtReason());
     }
 
     /**
@@ -945,6 +974,166 @@ public final class BroadcastQueueModernImplTest {
         // Verify that the older timeTick has been removed.
         verifyPendingRecords(queue,
                 List.of(musicVolumeChanged, alarmVolumeChanged, timeTick));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_diffReceivers() {
+        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
+        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
+        final BroadcastOptions screenOnOffOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey("screenOnOff", Intent.ACTION_SCREEN_ON);
+
+        final Object greenReceiver = makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN);
+        final Object redReceiver = makeManifestReceiver(PACKAGE_RED, CLASS_RED);
+        final Object blueReceiver = makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), false));
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+        final BroadcastProcessQueue blueQueue = mImpl.getProcessQueue(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyPendingRecords(greenQueue, List.of(screenOff));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff));
+
+        assertTrue(greenQueue.isEmpty());
+        assertTrue(redQueue.isEmpty());
+        assertTrue(blueQueue.isEmpty());
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), false));
+        verifyPendingRecords(greenQueue, List.of(screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOn));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_ordered_diffReceivers() {
+        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
+        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
+        final BroadcastOptions screenOnOffOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey("screenOnOff", Intent.ACTION_SCREEN_ON);
+
+        final Object greenReceiver = makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN);
+        final Object redReceiver = makeManifestReceiver(PACKAGE_RED, CLASS_RED);
+        final Object blueReceiver = makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), true));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), true));
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+        final BroadcastProcessQueue blueQueue = mImpl.getProcessQueue(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyPendingRecords(greenQueue, List.of(screenOff));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff));
+
+        assertTrue(greenQueue.isEmpty());
+        assertTrue(redQueue.isEmpty());
+        assertTrue(blueQueue.isEmpty());
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), true));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), true));
+        verifyPendingRecords(greenQueue, List.of(screenOff, screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff, screenOn));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_resultTo_diffReceivers() {
+        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
+        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
+        final BroadcastOptions screenOnOffOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey("screenOnOff", Intent.ACTION_SCREEN_ON);
+
+        final Object greenReceiver = makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN);
+        final Object redReceiver = makeManifestReceiver(PACKAGE_RED, CLASS_RED);
+        final Object blueReceiver = makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE);
+        final IIntentReceiver resultTo = mock(IIntentReceiver.class);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), resultTo, false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), resultTo, false));
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+        final BroadcastProcessQueue blueQueue = mImpl.getProcessQueue(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyPendingRecords(greenQueue, List.of(screenOff));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff));
+
+        assertTrue(greenQueue.isEmpty());
+        assertTrue(redQueue.isEmpty());
+        assertTrue(blueQueue.isEmpty());
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), resultTo, false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), resultTo, false));
+        verifyPendingRecords(greenQueue, List.of(screenOff, screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff, screenOn));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_prioritized_diffReceivers() {
+        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
+        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
+        final BroadcastOptions screenOnOffOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey("screenOnOff", Intent.ACTION_SCREEN_ON);
+
+        final Object greenReceiver = withPriority(
+                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 10);
+        final Object redReceiver = withPriority(
+                makeManifestReceiver(PACKAGE_RED, CLASS_RED), 5);
+        final Object blueReceiver = withPriority(
+                makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE), 0);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), false));
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+        final BroadcastProcessQueue blueQueue = mImpl.getProcessQueue(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyPendingRecords(greenQueue, List.of(screenOff));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff));
+
+        assertTrue(greenQueue.isEmpty());
+        assertTrue(redQueue.isEmpty());
+        assertTrue(blueQueue.isEmpty());
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), false));
+        verifyPendingRecords(greenQueue, List.of(screenOff, screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff, screenOn));
     }
 
     /**

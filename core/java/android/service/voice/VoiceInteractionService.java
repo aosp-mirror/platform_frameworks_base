@@ -1066,7 +1066,9 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             mActiveDetectors.forEach(detector -> {
                 try {
-                    if (detector != mActiveVisualQueryDetector.getInitializationDelegate()
+                    // Skip destroying VisualQueryDetector if HotwordDetectors are created
+                    if (!(mActiveVisualQueryDetector != null
+                            && detector == mActiveVisualQueryDetector.getInitializationDelegate())
                             || shouldShutDownVisualQueryDetector) {
                         detector.destroy();
                     }
