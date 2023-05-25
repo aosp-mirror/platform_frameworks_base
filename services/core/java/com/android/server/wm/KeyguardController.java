@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
@@ -411,19 +410,20 @@ class KeyguardController {
         if (waitAppTransition) {
             mService.deferWindowLayout();
             try {
-                mRootWindowContainer.getDefaultDisplay()
-                        .requestTransitionAndLegacyPrepare(
-                                isDisplayOccluded(DEFAULT_DISPLAY)
-                                        ? TRANSIT_KEYGUARD_OCCLUDE
-                                        : TRANSIT_KEYGUARD_UNOCCLUDE, 0 /* flags */);
+                if (isDisplayOccluded(DEFAULT_DISPLAY)) {
+                    mRootWindowContainer.getDefaultDisplay().requestTransitionAndLegacyPrepare(
+                            TRANSIT_KEYGUARD_OCCLUDE,
+                            topActivity != null ? topActivity.getRootTask() : null);
+                } else {
+                    mRootWindowContainer.getDefaultDisplay().requestTransitionAndLegacyPrepare(
+                            TRANSIT_KEYGUARD_UNOCCLUDE, 0 /* flags */);
+                }
                 updateKeyguardSleepToken(DEFAULT_DISPLAY);
                 mWindowManager.executeAppTransition();
             } finally {
                 mService.continueWindowLayout();
             }
         }
-        dismissMultiWindowModeForTaskIfNeeded(displayId, topActivity != null
-                ? topActivity.getRootTask() : null);
     }
 
     /**
@@ -473,6 +473,14 @@ class KeyguardController {
         return getDisplayState(displayId).mOccluded;
     }
 
+    ActivityRecord getTopOccludingActivity(int displayId) {
+        return getDisplayState(displayId).mTopOccludesActivity;
+    }
+
+    ActivityRecord getDismissKeyguardActivity(int displayId) {
+        return getDisplayState(displayId).mDismissingKeyguardActivity;
+    }
+
     /**
      * @return true if Keyguard can be currently dismissed without entering credentials.
      */
@@ -486,22 +494,6 @@ class KeyguardController {
      */
     boolean isShowingDream() {
         return getDisplayState(DEFAULT_DISPLAY).mShowingDream;
-    }
-
-    private void dismissMultiWindowModeForTaskIfNeeded(int displayId,
-            @Nullable Task currentTaskControllingOcclusion) {
-        // TODO(b/113840485): Handle docked stack for individual display.
-        if (!getDisplayState(displayId).mKeyguardShowing || !isDisplayOccluded(DEFAULT_DISPLAY)) {
-            return;
-        }
-
-        // Dismiss freeform windowing mode
-        if (currentTaskControllingOcclusion == null) {
-            return;
-        }
-        if (currentTaskControllingOcclusion.inFreeformWindowingMode()) {
-            currentTaskControllingOcclusion.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        }
     }
 
     private void updateKeyguardSleepToken() {
