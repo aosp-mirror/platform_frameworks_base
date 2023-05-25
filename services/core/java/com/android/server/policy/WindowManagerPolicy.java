@@ -218,6 +218,14 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * between it and the policy.
      */
     public interface WindowManagerFuncs {
+        @IntDef(prefix = { "LID_" }, value = {
+                LID_ABSENT,
+                LID_CLOSED,
+                LID_OPEN,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface LidState{}
+
         public static final int LID_ABSENT = -1;
         public static final int LID_CLOSED = 0;
         public static final int LID_OPEN = 1;
@@ -231,8 +239,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public static final int CAMERA_LENS_COVERED = 1;
 
         /**
-         * Returns a code that describes the current state of the lid switch.
+         * Returns a {@link LidState} that describes the current state of the lid switch.
          */
+        @LidState
         public int getLidState();
 
         /**
@@ -282,7 +291,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         /**
          * Convert the lid state to a human readable format.
          */
-        static String lidStateToString(int lid) {
+        static String lidStateToString(@LidState int lid) {
             switch (lid) {
                 case LID_ABSENT:
                     return "LID_ABSENT";
@@ -1241,4 +1250,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @return {@code true} if the key will be handled globally.
      */
     boolean isGlobalKey(int keyCode);
+
+    /**
+     * Returns a {@link WindowManagerFuncs.LidState} that describes the current state of
+     * the lid switch.
+     */
+    @WindowManagerFuncs.LidState
+    int getLidState();
 }
