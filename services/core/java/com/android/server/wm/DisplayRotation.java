@@ -513,6 +513,7 @@ public class DisplayRotation {
             }
 
             if (mDisplayContent.inTransition()
+                    && mDisplayContent.getDisplayPolicy().isScreenOnFully()
                     && !mDisplayContent.mTransitionController.useShellTransitionsRotation()) {
                 // Rotation updates cannot be performed while the previous rotation change animation
                 // is still in progress. Skip this update. We will try updating again after the
