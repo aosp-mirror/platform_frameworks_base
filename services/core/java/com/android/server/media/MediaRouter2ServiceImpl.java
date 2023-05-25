@@ -1477,6 +1477,7 @@ class MediaRouter2ServiceImpl {
         final ArrayList<RouterRecord> mRouterRecords = new ArrayList<>();
         final ArrayList<ManagerRecord> mManagerRecords = new ArrayList<>();
         RouteDiscoveryPreference mCompositeDiscoveryPreference = RouteDiscoveryPreference.EMPTY;
+        Set<String> mActivelyScanningPackages = Set.of();
         final UserHandler mHandler;
 
         UserRecord(int userId) {
@@ -1524,7 +1525,12 @@ class MediaRouter2ServiceImpl {
                 pw.println(indent + "<no manager records>");
             }
 
-            mCompositeDiscoveryPreference.dump(pw, indent);
+            pw.println(indent + "Composite discovery preference:");
+            mCompositeDiscoveryPreference.dump(pw, indent + "  ");
+            pw.println(
+                    indent
+                            + "Packages actively scanning: "
+                            + String.join(", ", mActivelyScanningPackages));
 
             if (!mHandler.runWithScissors(() -> mHandler.dump(pw, indent), 1000)) {
                 pw.println(indent + "<could not dump handler state>");
@@ -1833,7 +1839,9 @@ class MediaRouter2ServiceImpl {
         public void onAddProviderService(@NonNull MediaRoute2ProviderServiceProxy proxy) {
             proxy.setCallback(this);
             mRouteProviders.add(proxy);
-            proxy.updateDiscoveryPreference(mUserRecord.mCompositeDiscoveryPreference);
+            proxy.updateDiscoveryPreference(
+                    mUserRecord.mActivelyScanningPackages,
+                    mUserRecord.mCompositeDiscoveryPreference);
         }
 
         @Override
@@ -2340,8 +2348,8 @@ class MediaRouter2ServiceImpl {
                     return;
                 }
                 notifySessionInfoChangedToRouters(getRouterRecords(true), sessionInfo);
-                notifySessionInfoChangedToRouters(getRouterRecords(false),
-                        mSystemProvider.getDefaultSessionInfo());
+                notifySessionInfoChangedToRouters(
+                        getRouterRecords(false), mSystemProvider.getDefaultSessionInfo());
                 return;
             }
 
@@ -2710,8 +2718,8 @@ class MediaRouter2ServiceImpl {
             if (service == null) {
                 return;
             }
-            List<RouteDiscoveryPreference> discoveryPreferences = Collections.emptyList();
-            List<RouterRecord> routerRecords = getRouterRecords();
+            List<RouterRecord> activeRouterRecords = Collections.emptyList();
+            List<RouterRecord> allRouterRecords = getRouterRecords();
             List<ManagerRecord> managerRecords = getManagerRecords();
 
             boolean isManagerScanning = false;
@@ -2722,18 +2730,15 @@ class MediaRouter2ServiceImpl {
                                 <= sPackageImportanceForScanning);
 
                 if (isManagerScanning) {
-                    discoveryPreferences = routerRecords.stream()
-                            .map(record -> record.mDiscoveryPreference)
-                            .collect(Collectors.toList());
+                    activeRouterRecords = allRouterRecords;
                 } else {
-                    discoveryPreferences =
-                            routerRecords.stream()
+                    activeRouterRecords =
+                            allRouterRecords.stream()
                                     .filter(
                                             record ->
                                                     service.mActivityManager.getPackageImportance(
                                                                     record.mPackageName)
                                                             <= sPackageImportanceForScanning)
-                                    .map(record -> record.mDiscoveryPreference)
                                     .collect(Collectors.toList());
                 }
             }
@@ -2751,22 +2756,30 @@ class MediaRouter2ServiceImpl {
             // to query route providers once to obtain all of the routes of interest, which
             // can be subsequently filtered for the individual discovery preferences.
             Set<String> preferredFeatures = new HashSet<>();
+            Set<String> activelyScanningPackages = new HashSet<>();
             boolean activeScan = false;
-            for (RouteDiscoveryPreference preference : discoveryPreferences) {
+            for (RouterRecord activeRouterRecord : activeRouterRecords) {
+                RouteDiscoveryPreference preference = activeRouterRecord.mDiscoveryPreference;
                 preferredFeatures.addAll(preference.getPreferredFeatures());
-                activeScan |= preference.shouldPerformActiveScan();
+                if (preference.shouldPerformActiveScan()) {
+                    activeScan = true;
+                    activelyScanningPackages.add(activeRouterRecord.mPackageName);
+                }
             }
             RouteDiscoveryPreference newPreference = new RouteDiscoveryPreference.Builder(
                     List.copyOf(preferredFeatures), activeScan || isManagerScanning).build();
 
             synchronized (service.mLock) {
-                if (newPreference.equals(mUserRecord.mCompositeDiscoveryPreference)) {
+                if (newPreference.equals(mUserRecord.mCompositeDiscoveryPreference)
+                        && activelyScanningPackages.equals(mUserRecord.mActivelyScanningPackages)) {
                     return;
                 }
                 mUserRecord.mCompositeDiscoveryPreference = newPreference;
+                mUserRecord.mActivelyScanningPackages = activelyScanningPackages;
             }
             for (MediaRoute2Provider provider : mRouteProviders) {
-                provider.updateDiscoveryPreference(mUserRecord.mCompositeDiscoveryPreference);
+                provider.updateDiscoveryPreference(
+                        activelyScanningPackages, mUserRecord.mCompositeDiscoveryPreference);
             }
         }
 
