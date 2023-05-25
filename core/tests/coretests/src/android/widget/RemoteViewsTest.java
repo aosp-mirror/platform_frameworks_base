@@ -531,6 +531,19 @@ public class RemoteViewsTest {
     }
 
     @Test
+    public void visitUris_themedIcons() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final Icon iconLight = Icon.createWithContentUri("content://light/icon");
+        final Icon iconDark = Icon.createWithContentUri("content://dark/icon");
+        views.setIcon(R.id.layout, "setLargeIcon", iconLight, iconDark);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        views.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(iconLight.getUri()));
+        verify(visitor, times(1)).accept(eq(iconDark.getUri()));
+    }
+
+    @Test
     public void visitUris_nestedViews() {
         final RemoteViews outer = new RemoteViews(mPackage, R.layout.remote_views_test);
 
