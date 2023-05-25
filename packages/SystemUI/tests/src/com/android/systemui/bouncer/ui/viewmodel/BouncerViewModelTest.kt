@@ -93,22 +93,21 @@ class BouncerViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun isMessageUpdateAnimationsEnabled() =
+    fun message() =
         testScope.runTest {
-            val isMessageUpdateAnimationsEnabled by
-                collectLastValue(underTest.isMessageUpdateAnimationsEnabled)
+            val message by collectLastValue(underTest.message)
             val throttling by collectLastValue(bouncerInteractor.throttling)
             authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
-            assertThat(isMessageUpdateAnimationsEnabled).isTrue()
+            assertThat(message?.isUpdateAnimated).isTrue()
 
             repeat(BouncerInteractor.THROTTLE_EVERY) {
                 // Wrong PIN.
                 bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
             }
-            assertThat(isMessageUpdateAnimationsEnabled).isFalse()
+            assertThat(message?.isUpdateAnimated).isFalse()
 
             throttling?.totalDurationSec?.let { seconds -> advanceTimeBy(seconds * 1000L) }
-            assertThat(isMessageUpdateAnimationsEnabled).isTrue()
+            assertThat(message?.isUpdateAnimated).isTrue()
         }
 
     @Test
