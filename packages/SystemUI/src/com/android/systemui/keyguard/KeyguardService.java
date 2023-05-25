@@ -122,6 +122,10 @@ public class KeyguardService extends Service {
                 }
             }
 
+            // Avoid wrapping non-task and non-wallpaper changes as they don't need to animate
+            // for keyguard unlock animation.
+            if (taskId < 0 && !wallpapers) continue;
+
             final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
                     // wallpapers go into the "below" layer space
                     info.getChanges().size() - i,
