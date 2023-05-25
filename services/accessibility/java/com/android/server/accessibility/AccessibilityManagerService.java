@@ -958,7 +958,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final ComponentName menuToMigrate =
                 AccessibilityUtils.getAccessibilityMenuComponentToMigrate(mPackageManager, userId);
         if (menuToMigrate != null) {
-            mPackageManager.setComponentEnabledSetting(
+            // PackageManager#setComponentEnabledSetting disables the component for only the user
+            // linked to PackageManager's context, but mPackageManager is linked to the system user,
+            // so grab a new PackageManager for the current user to support secondary users.
+            final PackageManager userPackageManager;
+            try {
+                userPackageManager = mContext.createPackageContextAsUser(
+                        menuToMigrate.getPackageName(), /*flags=*/0,
+                        UserHandle.of(userId)).getPackageManager();
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.w(LOG_TAG, "Unable to create user context for package: " + e);
+                return;
+            }
+            userPackageManager.setComponentEnabledSetting(
                     menuToMigrate,
                     PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                     PackageManager.DONT_KILL_APP);
@@ -1845,6 +1857,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // find out a way to detect the device finished the OTA and switch the user.
             migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, null,
                     /* restoreFromSdkInt = */0);
+            // Package components are disabled per user, so secondary users also need their migrated
+            // Accessibility Menu component disabled.
+            disableAccessibilityMenuToMigrateIfNeeded();
 
             if (announceNewUser) {
                 // Schedule announcement of the current user if needed.
