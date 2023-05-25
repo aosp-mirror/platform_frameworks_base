@@ -903,27 +903,42 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runListLibraries() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        final List<String> list = new ArrayList<String>();
-        final String[] rawList = mInterface.getSystemSharedLibraryNames();
-        for (int i = 0; i < rawList.length; i++) {
-            list.add(rawList[i]);
+        boolean verbose = false;
+        String opt;
+        while ((opt = getNextArg()) != null) {
+            switch (opt) {
+                case "-v":
+                    verbose = true;
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return -1;
+            }
+        }
+
+        final Map<String, String> namesAndPaths = mInterface.getSystemSharedLibraryNamesAndPaths();
+        if (namesAndPaths.isEmpty()) {
+            return 0;
         }
 
         // sort by name
-        Collections.sort(list, new Comparator<String>() {
-            public int compare(String o1, String o2) {
+        final List<String> libs = new ArrayList<>(namesAndPaths.keySet());
+        Collections.sort(libs, (o1, o2) -> {
                 if (o1 == o2) return 0;
                 if (o1 == null) return -1;
                 if (o2 == null) return 1;
                 return o1.compareTo(o2);
-            }
         });
 
-        final int count = (list != null) ? list.size() : 0;
-        for (int p = 0; p < count; p++) {
-            String lib = list.get(p);
+        for (int i = 0; i < libs.size(); i++) {
+            String lib = libs.get(i);
             pw.print("library:");
-            pw.println(lib);
+            pw.print(lib);
+            if (verbose) {
+                pw.print(" path:");
+                pw.print(namesAndPaths.get(lib));
+            }
+            pw.println();
         }
         return 0;
     }
@@ -4125,8 +4140,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Options:");
         pw.println("      -f: dump the name of the .apk file containing the test package");
         pw.println("");
-        pw.println("  list libraries");
+        pw.println("  list libraries [-v]");
         pw.println("    Prints all system libraries.");
+        pw.println("    Options:");
+        pw.println("      -v: shows the location of the library in the device's filesystem");
         pw.println("");
         pw.println("  list packages [-f] [-d] [-e] [-s] [-3] [-i] [-l] [-u] [-U] ");
         pw.println("      [--show-versioncode] [--apex-only] [--factory-only]");
