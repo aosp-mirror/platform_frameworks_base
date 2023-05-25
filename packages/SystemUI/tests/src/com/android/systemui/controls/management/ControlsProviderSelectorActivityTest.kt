@@ -144,7 +144,7 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
         assertThat(activityRule.activity.lastStartedActivity?.component?.className)
             .isEqualTo(ControlsFavoritingActivity::class.java.name)
 
-        assertThat(activityRule.activity.triedToFinish).isTrue()
+        assertThat(activityRule.activity.triedToFinish).isFalse()
     }
 
     @Test
