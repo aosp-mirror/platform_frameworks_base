@@ -153,6 +153,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -1712,7 +1714,8 @@ class UserController implements Handler.Callback {
                     mInjector.getWindowManager().setSwitchingUser(true);
                     // Only lock if the user has a secure keyguard PIN/Pattern/Pwd
                     if (mInjector.getKeyguardManager().isDeviceSecure(userId)) {
-                        mInjector.getWindowManager().lockNow(null);
+                        // Make sure the device is locked before moving on with the user switch
+                        mInjector.lockDeviceNowAndWaitForKeyguardShown();
                     }
                 }
 
@@ -3467,6 +3470,11 @@ class UserController implements Handler.Callback {
         WindowManagerService getWindowManager() {
             return mService.mWindowManager;
         }
+
+        ActivityTaskManagerInternal getActivityTaskManagerInternal() {
+            return mService.mAtmInternal;
+        }
+
         void activityManagerOnUserStopped(@UserIdInt int userId) {
             LocalServices.getService(ActivityTaskManagerInternal.class).onUserStopped(userId);
         }
@@ -3689,6 +3697,44 @@ class UserController implements Handler.Callback {
 
         void onSystemUserVisibilityChanged(boolean visible) {
             getUserManagerInternal().onSystemUserVisibilityChanged(visible);
+        }
+
+        void lockDeviceNowAndWaitForKeyguardShown() {
+            if (getWindowManager().isKeyguardLocked()) {
+                return;
+            }
+
+            final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+            t.traceBegin("lockDeviceNowAndWaitForKeyguardShown");
+
+            final CountDownLatch latch = new CountDownLatch(1);
+            ActivityTaskManagerInternal.ScreenObserver screenObserver =
+                    new ActivityTaskManagerInternal.ScreenObserver() {
+                        @Override
+                        public void onAwakeStateChanged(boolean isAwake) {
+
+                        }
+
+                        @Override
+                        public void onKeyguardStateChanged(boolean isShowing) {
+                            if (isShowing) {
+                                latch.countDown();
+                            }
+                        }
+                    };
+
+            getActivityTaskManagerInternal().registerScreenObserver(screenObserver);
+            getWindowManager().lockDeviceNow();
+            try {
+                if (!latch.await(20, TimeUnit.SECONDS)) {
+                    throw new RuntimeException("Keyguard is not shown in 20 seconds");
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } finally {
+                getActivityTaskManagerInternal().unregisterScreenObserver(screenObserver);
+                t.traceEnd();
+            }
         }
     }
 }
