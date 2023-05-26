@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Outline;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -33,7 +34,11 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleTaskViewHelper;
+import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.taskview.TaskView;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Expanded view of a bubble when it's part of the bubble bar.
@@ -47,6 +52,9 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
 
     private BubbleController mController;
     private BubbleTaskViewHelper mBubbleTaskViewHelper;
+    private BubbleBarMenuViewController mMenuViewController;
+    private @Nullable Supplier<Rect> mLayerBoundsSupplier;
+    private @Nullable Consumer<String> mUnBubbleConversationCallback;
 
     private BubbleBarHandleView mHandleView = new BubbleBarHandleView(getContext());
     private @Nullable TaskView mTaskView;
@@ -98,6 +106,13 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         });
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        // Hide manage menu when view disappears
+        mMenuViewController.hideMenu(false /* animated */);
+    }
+
     /** Set the BubbleController on the view, must be called before doing anything else. */
     public void initialize(BubbleController controller) {
         mController = controller;
@@ -108,6 +123,36 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         addView(mTaskView);
         mTaskView.setEnableSurfaceClipping(true);
         mTaskView.setCornerRadius(mCornerRadius);
+        mMenuViewController = new BubbleBarMenuViewController(mContext, this);
+        mMenuViewController.setListener(new BubbleBarMenuViewController.Listener() {
+            @Override
+            public void onMenuVisibilityChanged(boolean visible) {
+                if (mTaskView == null || mLayerBoundsSupplier == null) return;
+                // Updates the obscured touchable region for the task surface.
+                mTaskView.setObscuredTouchRect(visible ? mLayerBoundsSupplier.get() : null);
+            }
+
+            @Override
+            public void onUnBubbleConversation(Bubble bubble) {
+                if (mUnBubbleConversationCallback != null) {
+                    mUnBubbleConversationCallback.accept(bubble.getKey());
+                }
+            }
+
+            @Override
+            public void onOpenAppSettings(Bubble bubble) {
+                mController.collapseStack();
+                mContext.startActivityAsUser(bubble.getSettingsIntent(mContext), bubble.getUser());
+            }
+
+            @Override
+            public void onDismissBubble(Bubble bubble) {
+                mController.dismissBubble(bubble, Bubbles.DISMISS_USER_REMOVED);
+            }
+        });
+        mHandleView.setOnClickListener(view -> {
+            mMenuViewController.showMenu(true /* animated */);
+        });
     }
 
     // TODO (b/275087636): call this when theme/config changes
@@ -183,16 +228,29 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             }
             mBubbleTaskViewHelper.cleanUpTaskView();
         }
+        mMenuViewController.hideMenu(false /* animated */);
     }
 
-    /** Updates the bubble shown in this task view. */
+    /** Updates the bubble shown in the expanded view. */
     public void update(Bubble bubble) {
         mBubbleTaskViewHelper.update(bubble);
+        mMenuViewController.updateMenu(bubble);
     }
 
     /** The task id of the activity shown in the task view, if it exists. */
     public int getTaskId() {
         return mBubbleTaskViewHelper != null ? mBubbleTaskViewHelper.getTaskId() : INVALID_TASK_ID;
+    }
+
+    /** Sets layer bounds supplier used for obscured touchable region of task view */
+    void setLayerBoundsSupplier(@Nullable Supplier<Rect> supplier) {
+        mLayerBoundsSupplier = supplier;
+    }
+
+    /** Sets the function to call to un-bubble the given conversation. */
+    public void setUnBubbleConversationCallback(
+            @Nullable Consumer<String> unBubbleConversationCallback) {
+        mUnBubbleConversationCallback = unBubbleConversationCallback;
     }
 
     /**
