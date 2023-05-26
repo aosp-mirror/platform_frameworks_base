@@ -355,7 +355,8 @@ object Flags {
 
     // TODO(b/280426085): Tracking Bug
     @JvmField
-    val NEW_BLUETOOTH_REPOSITORY = unreleasedFlag(612, "new_bluetooth_repository")
+    val NEW_BLUETOOTH_REPOSITORY =
+            unreleasedFlag(612, "new_bluetooth_repository", teamfood = true)
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
