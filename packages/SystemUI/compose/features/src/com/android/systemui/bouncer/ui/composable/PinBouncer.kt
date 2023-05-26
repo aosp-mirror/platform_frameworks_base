@@ -18,11 +18,15 @@
 
 package com.android.systemui.bouncer.ui.composable
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -48,6 +52,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,15 +60,23 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.Easings
 import com.android.compose.grid.VerticalGrid
 import com.android.systemui.R
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.compose.modifiers.thenIf
 import kotlin.math.max
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun PinBouncer(
@@ -75,6 +88,16 @@ internal fun PinBouncer(
 
     // The length of the PIN input received so far, so we know how many dots to render.
     val pinLength: Pair<Int, Int> by viewModel.pinLengths.collectAsState()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
+
+    // Show the failure animation if the user entered the wrong input.
+    LaunchedEffect(animateFailure) {
+        if (animateFailure) {
+            showFailureAnimation()
+            viewModel.onFailureAnimationShown()
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -116,6 +139,7 @@ internal fun PinBouncer(
                 val digit = index + 1
                 PinButton(
                     onClicked = { viewModel.onPinButtonClicked(digit) },
+                    isEnabled = isInputEnabled,
                 ) { contentColor ->
                     PinDigit(digit, contentColor)
                 }
@@ -124,7 +148,8 @@ internal fun PinBouncer(
             PinButton(
                 onClicked = { viewModel.onBackspaceButtonClicked() },
                 onLongPressed = { viewModel.onBackspaceButtonLongPressed() },
-                isHighlighted = true,
+                isEnabled = isInputEnabled,
+                isIconButton = true,
             ) { contentColor ->
                 PinIcon(
                     Icon.Resource(
@@ -138,13 +163,15 @@ internal fun PinBouncer(
 
             PinButton(
                 onClicked = { viewModel.onPinButtonClicked(0) },
+                isEnabled = isInputEnabled,
             ) { contentColor ->
                 PinDigit(0, contentColor)
             }
 
             PinButton(
                 onClicked = { viewModel.onAuthenticateButtonClicked() },
-                isHighlighted = true,
+                isEnabled = isInputEnabled,
+                isIconButton = true,
             ) { contentColor ->
                 PinIcon(
                     Icon.Resource(
@@ -187,61 +214,107 @@ private fun PinIcon(
 @Composable
 private fun PinButton(
     onClicked: () -> Unit,
+    isEnabled: Boolean,
     modifier: Modifier = Modifier,
     onLongPressed: (() -> Unit)? = null,
-    isHighlighted: Boolean = false,
+    isIconButton: Boolean = false,
     content: @Composable (contentColor: Color) -> Unit,
 ) {
     var isPressed: Boolean by remember { mutableStateOf(false) }
+
+    val view = LocalView.current
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            view.performHapticFeedback(
+                HapticFeedbackConstants.VIRTUAL_KEY,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
+            )
+        }
+    }
+
+    // Pin button animation specification is asymmetric: fast animation to the pressed state, and a
+    // slow animation upon release. Note that isPressed is guaranteed to be true for at least the
+    // press animation duration (see below in detectTapGestures).
+    val animEasing = if (isPressed) pinButtonPressedEasing else pinButtonReleasedEasing
+    val animDurationMillis =
+        (if (isPressed) pinButtonPressedDuration else pinButtonReleasedDuration).toInt(
+            DurationUnit.MILLISECONDS
+        )
+
     val cornerRadius: Dp by
         animateDpAsState(
-            if (isPressed) 24.dp else PinButtonSize / 2,
+            if (isPressed) 24.dp else pinButtonSize / 2,
             label = "PinButton round corners",
+            animationSpec = tween(animDurationMillis, easing = animEasing)
         )
+    val colorAnimationSpec: AnimationSpec<Color> = tween(animDurationMillis, easing = animEasing)
     val containerColor: Color by
         animateColorAsState(
             when {
-                isPressed -> MaterialTheme.colorScheme.primaryContainer
-                isHighlighted -> MaterialTheme.colorScheme.secondaryContainer
-                else -> MaterialTheme.colorScheme.surface
+                isPressed -> MaterialTheme.colorScheme.primary
+                isIconButton -> MaterialTheme.colorScheme.secondaryContainer
+                else -> MaterialTheme.colorScheme.surfaceVariant
             },
             label = "Pin button container color",
+            animationSpec = colorAnimationSpec
         )
     val contentColor: Color by
         animateColorAsState(
             when {
-                isPressed -> MaterialTheme.colorScheme.onPrimaryContainer
-                isHighlighted -> MaterialTheme.colorScheme.onSecondaryContainer
-                else -> MaterialTheme.colorScheme.onSurface
+                isPressed -> MaterialTheme.colorScheme.onPrimary
+                isIconButton -> MaterialTheme.colorScheme.onSecondaryContainer
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
             },
             label = "Pin button container color",
+            animationSpec = colorAnimationSpec
         )
+
+    val scope = rememberCoroutineScope()
 
     Box(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
-                .size(PinButtonSize)
+                .size(pinButtonSize)
                 .drawBehind {
                     drawRoundRect(
                         color = containerColor,
                         cornerRadius = CornerRadius(cornerRadius.toPx()),
                     )
                 }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = {
-                            isPressed = true
-                            tryAwaitRelease()
-                            isPressed = false
-                        },
-                        onTap = { onClicked() },
-                        onLongPress = onLongPressed?.let { { onLongPressed() } },
-                    )
+                .thenIf(isEnabled) {
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = {
+                                scope.launch {
+                                    isPressed = true
+                                    val minDuration = async {
+                                        delay(pinButtonPressedDuration + pinButtonHoldTime)
+                                    }
+                                    tryAwaitRelease()
+                                    minDuration.await()
+                                    isPressed = false
+                                }
+                            },
+                            onTap = { onClicked() },
+                            onLongPress = onLongPressed?.let { { onLongPressed() } },
+                        )
+                    }
                 },
     ) {
         content(contentColor)
     }
 }
 
-private val PinButtonSize = 84.dp
+private fun showFailureAnimation() {
+    // TODO(b/282730134): implement.
+}
+
+private val pinButtonSize = 84.dp
+
+// Pin button motion spec: http://shortn/_9TTIG6SoEa
+private val pinButtonPressedDuration = 100.milliseconds
+private val pinButtonPressedEasing = LinearEasing
+private val pinButtonHoldTime = 33.milliseconds
+private val pinButtonReleasedDuration = 420.milliseconds
+private val pinButtonReleasedEasing = Easings.StandardEasing
