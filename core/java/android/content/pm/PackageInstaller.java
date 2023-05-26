@@ -444,6 +444,10 @@ public class PackageInstaller {
      * exist, it may be missing native code for the ABIs supported by the
      * device, or it requires a newer SDK version, etc.
      *
+     * Starting in {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, an app with only 32-bit native
+     * code can still be installed on a device that supports both 64-bit and 32-bit ABIs.
+     * However, a warning dialog will be displayed when the app is launched.
+     *
      * @see #EXTRA_STATUS_MESSAGE
      */
     public static final int STATUS_FAILURE_INCOMPATIBLE = 7;
