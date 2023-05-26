@@ -3828,10 +3828,27 @@ public class Vpn {
                     }, retryDelayMs, TimeUnit.MILLISECONDS);
         }
 
+        private boolean significantCapsChange(@Nullable final NetworkCapabilities left,
+                @Nullable final NetworkCapabilities right) {
+            if (left == right) return false;
+            return null == left
+                    || null == right
+                    || !Arrays.equals(left.getTransportTypes(), right.getTransportTypes())
+                    || !Arrays.equals(left.getCapabilities(), right.getCapabilities())
+                    || !Arrays.equals(left.getEnterpriseIds(), right.getEnterpriseIds())
+                    || !Objects.equals(left.getTransportInfo(), right.getTransportInfo())
+                    || !Objects.equals(left.getAllowedUids(), right.getAllowedUids())
+                    || !Objects.equals(left.getUnderlyingNetworks(), right.getUnderlyingNetworks())
+                    || !Objects.equals(left.getNetworkSpecifier(), right.getNetworkSpecifier());
+        }
+
         /** Called when the NetworkCapabilities of underlying network is changed */
         public void onDefaultNetworkCapabilitiesChanged(@NonNull NetworkCapabilities nc) {
-            mEventChanges.log("[UnderlyingNW] Cap changed from "
-                    + mUnderlyingNetworkCapabilities + " to " + nc);
+            if (significantCapsChange(mUnderlyingNetworkCapabilities, nc)) {
+                // TODO : make this log terser
+                mEventChanges.log("[UnderlyingNW] Cap changed from "
+                        + mUnderlyingNetworkCapabilities + " to " + nc);
+            }
             final NetworkCapabilities oldNc = mUnderlyingNetworkCapabilities;
             mUnderlyingNetworkCapabilities = nc;
             if (oldNc == null || !nc.getSubscriptionIds().equals(oldNc.getSubscriptionIds())) {

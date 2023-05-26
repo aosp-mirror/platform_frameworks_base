@@ -192,6 +192,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final SplitScreenTransitions mSplitTransitions;
     private final SplitscreenEventLogger mLogger;
     private final ShellExecutor mMainExecutor;
+    // Cache live tile tasks while entering recents, evict them from stages in finish transaction
+    // if user is opening another task(s).
+    private final ArrayList<Integer> mPausingTasks = new ArrayList<>();
     private final Optional<RecentTasksController> mRecentTasks;
 
     private final Rect mTempRect1 = new Rect();
@@ -658,6 +661,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Add task launch requests
         wct.startTask(mainTaskId, mainOptions);
 
+        // leave recents animation by re-start pausing tasks
+        if (mPausingTasks.contains(mainTaskId)) {
+            mPausingTasks.clear();
+        }
         mSplitTransitions.startEnterTransition(
                 TRANSIT_TO_FRONT, wct, remoteTransition, this, null, null,
                 TRANSIT_SPLIT_SCREEN_PAIR_OPEN, false);
@@ -1630,7 +1637,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void updateRecentTasksSplitPair() {
-        if (!mShouldUpdateRecents) {
+        // Preventing from single task update while processing recents.
+        if (!mShouldUpdateRecents || !mPausingTasks.isEmpty()) {
             return;
         }
         mRecentTasks.ifPresent(recentTasks -> {
@@ -2582,6 +2590,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final TransitionInfo.Change change = info.getChanges().get(iC);
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
             if (taskInfo == null || !taskInfo.hasParentTask()) continue;
+            if (mPausingTasks.contains(taskInfo.taskId)) {
+                continue;
+            }
             final @StageType int stageType = getStageType(getStageOfTask(taskInfo));
             if (stageType == STAGE_TYPE_MAIN
                     && (isOpeningType(change.getMode()) || change.getMode() == TRANSIT_CHANGE)) {
@@ -2654,6 +2665,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mShowDecorImmediately = true;
                 mSplitLayout.flingDividerToCenter();
             }
+            mPausingTasks.clear();
         });
 
         finishEnterSplitScreen(finishT);
@@ -2811,12 +2823,33 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     /** Call this when starting the open-recents animation while split-screen is active. */
     public void onRecentsInSplitAnimationStart(TransitionInfo info) {
+        if (isSplitScreenVisible()) {
+            // Cache tasks on live tile.
+            for (int i = 0; i < info.getChanges().size(); ++i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                if (TransitionUtil.isClosingType(change.getMode())
+                        && change.getTaskInfo() != null) {
+                    final int taskId = change.getTaskInfo().taskId;
+                    if (mMainStage.getTopVisibleChildTaskId() == taskId
+                            || mSideStage.getTopVisibleChildTaskId() == taskId) {
+                        mPausingTasks.add(taskId);
+                    }
+                }
+            }
+        }
+
         addDividerBarToTransition(info, false /* show */);
+    }
+
+    /** Call this when the recents animation canceled during split-screen. */
+    public void onRecentsInSplitAnimationCanceled() {
+        mPausingTasks.clear();
     }
 
     /** Call this when the recents animation during split-screen finishes. */
     public void onRecentsInSplitAnimationFinish(WindowContainerTransaction finishWct,
-            SurfaceControl.Transaction finishT, TransitionInfo info) {
+            SurfaceControl.Transaction finishT) {
+        mPausingTasks.clear();
         // Check if the recent transition is finished by returning to the current
         // split, so we can restore the divider bar.
         for (int i = 0; i < finishWct.getHierarchyOps().size(); ++i) {
@@ -2838,6 +2871,27 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         finishWct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
                 true /* reparentLeafTaskIfRelaunch */);
         logExit(EXIT_REASON_UNKNOWN);
+    }
+
+    /** Call this when the recents animation finishes by doing pair-to-pair switch. */
+    public void onRecentsPairToPairAnimationFinish(WindowContainerTransaction finishWct) {
+        // Pair-to-pair switch happened so here should evict the live tile from its stage.
+        // Otherwise, the task will remain in stage, and occluding the new task when next time
+        // user entering recents.
+        for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
+            final int taskId = mPausingTasks.get(i);
+            if (mMainStage.containsTask(taskId)) {
+                mMainStage.evictChildren(finishWct, taskId);
+            } else if (mSideStage.containsTask(taskId)) {
+                mSideStage.evictChildren(finishWct, taskId);
+            }
+        }
+        // If pending enter hasn't consumed, the mix handler will invoke start pending
+        // animation within following transition.
+        if (mSplitTransitions.mPendingEnter == null) {
+            mPausingTasks.clear();
+            updateRecentTasksSplitPair();
+        }
     }
 
     private void addDividerBarToTransition(@NonNull TransitionInfo info, boolean show) {
@@ -2891,6 +2945,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mMainStage.isActive()) {
             pw.println(innerPrefix + "SplitLayout");
             mSplitLayout.dump(pw, childPrefix);
+        }
+        if (!mPausingTasks.isEmpty()) {
+            pw.println(childPrefix + "mPausingTasks=" + mPausingTasks);
         }
     }
 
