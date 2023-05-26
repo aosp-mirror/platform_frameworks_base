@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -122,6 +123,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     private final CentralSurfaces mCentralSurfaces;
     private final NotificationPresenter mPresenter;
     private final ShadeViewController mNotificationPanel;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     private final UserTracker mUserTracker;
@@ -157,6 +159,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             CentralSurfaces centralSurfaces,
             NotificationPresenter presenter,
             ShadeViewController panel,
+            NotificationShadeWindowController notificationShadeWindowController,
             ActivityLaunchAnimator activityLaunchAnimator,
             NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
             LaunchFullScreenIntentProvider launchFullScreenIntentProvider,
@@ -182,6 +185,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         mLockPatternUtils = lockPatternUtils;
         mStatusBarRemoteInputCallback = remoteInputCallback;
         mActivityIntentHelper = activityIntentHelper;
+        mNotificationShadeWindowController = notificationShadeWindowController;
         mFeatureFlags = featureFlags;
         mMetricsLogger = metricsLogger;
         mLogger = logger;
@@ -437,6 +441,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                     new StatusBarLaunchAnimatorController(
                             mNotificationAnimationProvider.getAnimatorController(row, null),
                             mCentralSurfaces,
+                            mNotificationShadeWindowController,
                             isActivityIntent);
             mActivityLaunchAnimator.startPendingIntentWithAnimation(
                     animationController,
@@ -475,7 +480,9 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                     ActivityLaunchAnimator.Controller animationController =
                             new StatusBarLaunchAnimatorController(
                                     mNotificationAnimationProvider.getAnimatorController(row),
-                                    mCentralSurfaces, true /* isActivityIntent */);
+                                    mCentralSurfaces,
+                                    mNotificationShadeWindowController,
+                                    true /* isActivityIntent */);
 
                     mActivityLaunchAnimator.startIntentWithAnimation(
                             animationController, animate, intent.getPackage(),
@@ -520,9 +527,11 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                             );
                     ActivityLaunchAnimator.Controller animationController =
                             viewController == null ? null
-                                : new StatusBarLaunchAnimatorController(viewController,
+                                : new StatusBarLaunchAnimatorController(
+                                        viewController,
                                         mCentralSurfaces,
-                                    true /* isActivityIntent */);
+                                        mNotificationShadeWindowController,
+                                        true /* isActivityIntent */);
 
                     mActivityLaunchAnimator.startIntentWithAnimation(animationController, animate,
                             intent.getPackage(),
