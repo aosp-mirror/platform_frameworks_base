@@ -186,6 +186,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                         public void onTransitionFinished(
                                 WindowContainerTransaction wct, SurfaceControl.Transaction sct) {
                             mMainExecutor.execute(() -> {
+                                mStartedTransitions.remove(transition);
                                 finishCallback.onTransitionFinished(wct, null);
                             });
                         }
@@ -206,7 +207,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
         final IRemoteTransition playing = mStartedTransitions.get(currentTransition);
 
         if (playing == null) {
-            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, 
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                     "unknown keyguard transition %s", currentTransition);
             return;
         }
@@ -217,14 +218,17 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
             // the device sleeping/waking, so it's best to ignore this and keep playing anyway.
             return;
         } else {
-            finishAnimationImmediately(currentTransition);
+            finishAnimationImmediately(currentTransition, playing);
         }
     }
 
     @Override
     public void onTransitionConsumed(IBinder transition, boolean aborted,
             SurfaceControl.Transaction finishTransaction) {
-        finishAnimationImmediately(transition);
+        final IRemoteTransition playing = mStartedTransitions.remove(transition);
+        if (playing != null) {
+            finishAnimationImmediately(transition, playing);
+        }
     }
 
     @Nullable
@@ -234,21 +238,17 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
         return null;
     }
 
-    private void finishAnimationImmediately(IBinder transition) {
-        final IRemoteTransition playing = mStartedTransitions.get(transition);
-
-        if (playing != null) {
-            final IBinder fakeTransition = new Binder();
-            final TransitionInfo fakeInfo = new TransitionInfo(TRANSIT_SLEEP, 0x0);
-            final SurfaceControl.Transaction fakeT = new SurfaceControl.Transaction();
-            final FakeFinishCallback fakeFinishCb = new FakeFinishCallback();
-            try {
-                playing.mergeAnimation(fakeTransition, fakeInfo, fakeT, transition, fakeFinishCb);
-            } catch (RemoteException e) {
-                // There is no good reason for this to happen because the player is a local object
-                // implementing an AIDL interface.
-                Log.wtf(TAG, "RemoteException thrown from KeyguardService transition", e);
-            }
+    private void finishAnimationImmediately(IBinder transition, IRemoteTransition playing) {
+        final IBinder fakeTransition = new Binder();
+        final TransitionInfo fakeInfo = new TransitionInfo(TRANSIT_SLEEP, 0x0);
+        final SurfaceControl.Transaction fakeT = new SurfaceControl.Transaction();
+        final FakeFinishCallback fakeFinishCb = new FakeFinishCallback();
+        try {
+            playing.mergeAnimation(fakeTransition, fakeInfo, fakeT, transition, fakeFinishCb);
+        } catch (RemoteException e) {
+            // There is no good reason for this to happen because the player is a local object
+            // implementing an AIDL interface.
+            Log.wtf(TAG, "RemoteException thrown from KeyguardService transition", e);
         }
     }
 
