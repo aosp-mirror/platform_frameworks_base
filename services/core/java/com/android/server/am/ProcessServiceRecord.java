@@ -341,7 +341,8 @@ final class ProcessServiceRecord {
         mHasAboveClient = false;
         for (int i = mConnections.size() - 1; i >= 0; i--) {
             ConnectionRecord cr = mConnections.valueAt(i);
-            if (cr.hasFlag(Context.BIND_ABOVE_CLIENT)) {
+            if (cr.binding.service.app.mServices != this
+                    && cr.hasFlag(Context.BIND_ABOVE_CLIENT)) {
                 mHasAboveClient = true;
                 break;
             }
