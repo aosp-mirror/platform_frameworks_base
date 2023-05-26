@@ -433,7 +433,7 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onSnooze(StatusBarNotification sbn,
                                      NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
-                    mCentralSurfaces.setNotificationSnoozed(sbn, snoozeOption);
+                    mNotificationsController.setNotificationSnoozed(sbn, snoozeOption);
                 }
 
                 @Override

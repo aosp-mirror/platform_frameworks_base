@@ -173,7 +173,6 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
@@ -3570,12 +3569,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         }
     };
-
-    @Override
-    public void setNotificationSnoozed(StatusBarNotification sbn, SnoozeOption snoozeOption) {
-        mNotificationsController.setNotificationSnoozed(sbn, snoozeOption);
-    }
-
 
     @Override
     public void awakenDreams() {

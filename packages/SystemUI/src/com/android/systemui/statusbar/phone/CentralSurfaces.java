@@ -26,7 +26,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
@@ -44,7 +43,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.RemoteAnimationRunnerCompat;
@@ -380,9 +378,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean shouldIgnoreTouch();
 
     boolean isDeviceInteractive();
-
-    void setNotificationSnoozed(StatusBarNotification sbn,
-            NotificationSwipeActionHelper.SnoozeOption snoozeOption);
 
     void awakenDreams();
 
