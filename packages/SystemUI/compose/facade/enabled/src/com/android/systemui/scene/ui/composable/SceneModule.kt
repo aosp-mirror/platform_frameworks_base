@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.ui.composable
 
+import android.content.Context
 import com.android.systemui.bouncer.ui.composable.BouncerScene
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.dagger.SysUISingleton
@@ -28,6 +29,7 @@ import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.shade.ui.composable.ShadeScene
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -57,6 +59,7 @@ object SceneModule {
     @SysUISingleton
     @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
     fun bouncerScene(
+        @Application context: Context,
         viewModelFactory: BouncerViewModel.Factory,
     ): BouncerScene {
         return BouncerScene(
@@ -64,6 +67,7 @@ object SceneModule {
                 viewModelFactory.create(
                     containerName = SceneContainerNames.SYSTEM_UI_DEFAULT,
                 ),
+            dialogFactory = { SystemUIDialog(context) },
         )
     }
 
