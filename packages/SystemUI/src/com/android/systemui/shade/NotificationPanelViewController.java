@@ -2568,7 +2568,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                                         this);
                                 return;
                             }
-                            if (mCentralSurfaces.getNotificationShadeWindowView()
+                            if (mNotificationShadeWindowController.getWindowRootView()
                                     .isVisibleToUser()) {
                                 mView.getViewTreeObserver().removeOnGlobalLayoutListener(
                                         this);
