@@ -855,7 +855,8 @@ public class Bubble implements BubbleViewProvider {
         return mIsAppBubble;
     }
 
-    Intent getSettingsIntent(final Context context) {
+    /** Creates open app settings intent */
+    public Intent getSettingsIntent(final Context context) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
         final int uid = getUid(context);
