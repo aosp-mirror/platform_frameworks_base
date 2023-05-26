@@ -135,7 +135,7 @@ public class StatusBarMobileView extends BaseStatusBarFrameLayout implements Dar
         mDotView = new StatusBarIconView(mContext, mSlot, null);
         mDotView.setVisibleState(STATE_DOT);
 
-        int width = mContext.getResources().getDimensionPixelSize(R.dimen.status_bar_icon_size);
+        int width = mContext.getResources().getDimensionPixelSize(R.dimen.status_bar_icon_size_sp);
         LayoutParams lp = new LayoutParams(width, width);
         lp.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
         addView(mDotView, lp);

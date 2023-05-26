@@ -370,7 +370,7 @@ public interface StatusBarIconController {
         private final MobileIconsViewModel mMobileIconsViewModel;
 
         protected final Context mContext;
-        protected final int mIconSize;
+        protected int mIconSize;
         // Whether or not these icons show up in dumpsys
         protected boolean mShouldLog = false;
         private StatusBarIconController mController;
@@ -395,9 +395,9 @@ public interface StatusBarIconController {
             mStatusBarPipelineFlags = statusBarPipelineFlags;
             mMobileContextProvider = mobileContextProvider;
             mContext = group.getContext();
-            mIconSize = mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_icon_size);
             mLocation = location;
+
+            reloadDimens();
 
             if (statusBarPipelineFlags.runNewMobileIconsBackend()) {
                 // This starts the flow for the new pipeline, and will notify us of changes if
@@ -609,13 +609,9 @@ public interface StatusBarIconController {
             mGroup.removeAllViews();
         }
 
-        protected void onDensityOrFontScaleChanged() {
-            for (int i = 0; i < mGroup.getChildCount(); i++) {
-                View child = mGroup.getChildAt(i);
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
-                child.setLayoutParams(lp);
-            }
+        protected void reloadDimens() {
+            mIconSize = mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.status_bar_icon_size_sp);
         }
 
         private void setHeightAndCenter(ImageView imageView, int height) {
