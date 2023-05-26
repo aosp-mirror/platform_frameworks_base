@@ -440,14 +440,14 @@ public final class RouteListingPreference implements Parcelable {
          * <p>If this method returns {@link #SUBTEXT_CUSTOM}, then the subtext is obtained form
          * {@link #getCustomSubtextMessage()}.
          *
-         * @see #SUBTEXT_NONE,
-         * @see #SUBTEXT_ERROR_UNKNOWN,
-         * @see #SUBTEXT_SUBSCRIPTION_REQUIRED,
-         * @see #SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED,
-         * @see #SUBTEXT_AD_ROUTING_DISALLOWED,
-         * @see #SUBTEXT_DEVICE_LOW_POWER,
-         * @see #SUBTEXT_UNAUTHORIZED ,
-         * @see #SUBTEXT_TRACK_UNSUPPORTED,
+         * @see #SUBTEXT_NONE
+         * @see #SUBTEXT_ERROR_UNKNOWN
+         * @see #SUBTEXT_SUBSCRIPTION_REQUIRED
+         * @see #SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED
+         * @see #SUBTEXT_AD_ROUTING_DISALLOWED
+         * @see #SUBTEXT_DEVICE_LOW_POWER
+         * @see #SUBTEXT_UNAUTHORIZED
+         * @see #SUBTEXT_TRACK_UNSUPPORTED
          * @see #SUBTEXT_CUSTOM
          */
         @SubText
