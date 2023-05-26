@@ -3755,6 +3755,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @TestApi
         public float preferredMinDisplayRefreshRate;
 
         /**
@@ -3763,6 +3764,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @TestApi
         public float preferredMaxDisplayRefreshRate;
 
         /** Indicates whether this window wants the HDR conversion is disabled. */
