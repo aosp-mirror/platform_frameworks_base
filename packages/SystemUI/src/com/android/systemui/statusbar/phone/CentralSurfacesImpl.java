@@ -648,7 +648,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Optional<StartingSurface> mStartingSurfaceOptional;
 
     private final ActivityIntentHelper mActivityIntentHelper;
-    private NotificationStackScrollLayoutController mStackScrollerController;
+
+    @VisibleForTesting
+    protected NotificationStackScrollLayoutController mStackScrollerController;
 
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
@@ -2922,6 +2924,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mBouncerShowing = bouncerShowing;
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
         mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
+        mStackScrollerController.setBouncerShowingFromCentralSurfaces(bouncerShowing);
         setBouncerShowingForStatusBarComponents(bouncerShowing);
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
