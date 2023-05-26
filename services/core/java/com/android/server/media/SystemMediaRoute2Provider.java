@@ -42,6 +42,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Provides routes for local playbacks such as phone speaker, wired headset, or Bluetooth speakers.
@@ -196,7 +197,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+    public void updateDiscoveryPreference(
+            Set<String> activelyScanningPackages, RouteDiscoveryPreference discoveryPreference) {
         // Do nothing
     }
 
