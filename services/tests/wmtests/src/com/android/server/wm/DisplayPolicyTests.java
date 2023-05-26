@@ -51,14 +51,18 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.DisplayShape;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
+import android.view.Surface;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Side;
 import android.view.WindowManager;
 
@@ -388,6 +392,34 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 && displayPolicy.updateDecorInsetsInfo());
         assertEquals(STATUS_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
                 di.logicalWidth, di.logicalHeight).mConfigInsets.top);
+
+        // Add a window that provides the same insets in current rotation. But it specifies
+        // different insets in other rotations.
+        final WindowState bar2 = createWindow(null, statusBar.mAttrs.type, "bar2");
+        bar2.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(bar2, 0, WindowInsets.Type.statusBars())
+                        .setInsetsSize(Insets.of(0, STATUS_BAR_HEIGHT, 0, 0))
+        };
+        bar2.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
+        final int doubleHeightFor90 = STATUS_BAR_HEIGHT * 2;
+        for (int i = ROTATION_0; i <= Surface.ROTATION_270; i++) {
+            final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+            if (i == Surface.ROTATION_90) {
+                params.providedInsets = new InsetsFrameProvider[] {
+                        new InsetsFrameProvider(bar2, 0, WindowInsets.Type.statusBars())
+                                .setInsetsSize(Insets.of(0, doubleHeightFor90, 0, 0))
+                };
+            } else {
+                params.providedInsets = bar2.mAttrs.providedInsets;
+            }
+            bar2.mAttrs.paramsForRotation[i] = params;
+        }
+        displayPolicy.addWindowLw(bar2, bar2.mAttrs);
+        // Current rotation is 0 and the top insets is still STATUS_BAR_HEIGHT, so no change.
+        assertFalse(displayPolicy.updateDecorInsetsInfo());
+        // The insets in other rotations should be still updated.
+        assertEquals(doubleHeightFor90, displayPolicy.getDecorInsetsInfo(Surface.ROTATION_90,
+                di.logicalHeight, di.logicalWidth).mConfigInsets.top);
     }
 
     @SetupWindows(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
