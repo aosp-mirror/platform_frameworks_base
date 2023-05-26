@@ -99,6 +99,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -209,6 +210,8 @@ public class NavigationBarTest extends SysuiTestCase {
     private EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
     @Mock
     private EdgeBackGestureHandler mEdgeBackGestureHandler;
+    @Mock
+    private NotificationShadeWindowController mNotificationShadeWindowController;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private DeviceConfigProxyFake mDeviceConfigProxyFake = new DeviceConfigProxyFake();
     private TaskStackChangeListeners mTaskStackChangeListeners =
@@ -256,7 +259,8 @@ public class NavigationBarTest extends SysuiTestCase {
                     () -> mock(AssistManager.class), () -> Optional.of(mCentralSurfaces),
                     mKeyguardStateController, mock(NavigationModeController.class),
                     mEdgeBackGestureHandlerFactory, mock(IWindowManager.class),
-                    mock(UserTracker.class), mock(DisplayTracker.class), mock(DumpManager.class),
+                    mock(UserTracker.class), mock(DisplayTracker.class),
+                    mNotificationShadeWindowController, mock(DumpManager.class),
                     mock(CommandQueue.class)));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
@@ -339,7 +343,6 @@ public class NavigationBarTest extends SysuiTestCase {
         NotificationShadeWindowView mockShadeWindowView = mock(NotificationShadeWindowView.class);
         WindowInsets windowInsets = new WindowInsets.Builder().setVisible(ime(), false).build();
         doReturn(windowInsets).when(mockShadeWindowView).getRootWindowInsets();
-        doReturn(mockShadeWindowView).when(mCentralSurfaces).getNotificationShadeWindowView();
         doReturn(true).when(mockShadeWindowView).isAttachedToWindow();
         doNothing().when(defaultNavBar).checkNavBarModes();
         doNothing().when(externalNavBar).checkNavBarModes();
@@ -375,7 +378,7 @@ public class NavigationBarTest extends SysuiTestCase {
     @Test
     public void testSetImeWindowStatusWhenKeyguardLockingAndImeInsetsChange() {
         NotificationShadeWindowView mockShadeWindowView = mock(NotificationShadeWindowView.class);
-        doReturn(mockShadeWindowView).when(mCentralSurfaces).getNotificationShadeWindowView();
+        doReturn(mockShadeWindowView).when(mNotificationShadeWindowController).getWindowRootView();
         doReturn(true).when(mockShadeWindowView).isAttachedToWindow();
         doNothing().when(mNavigationBar).checkNavBarModes();
         mNavigationBar.init();
