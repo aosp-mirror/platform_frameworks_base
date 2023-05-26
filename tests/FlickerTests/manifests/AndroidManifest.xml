@@ -48,9 +48,4 @@
         <uses-library android:name="android.test.runner"/>
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
     </application>
-
-    <!--<instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-                     android:targetPackage="{{package}}"
-                     android:label="WindowManager Flicker Tests {MODULE}">
-    </instrumentation>-->
 </manifest>
