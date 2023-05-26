@@ -31,3 +31,9 @@ function testNotifyPurchaseFailed(failure_code = 0, failure_reason = "unknown") 
     document.getElementById("purchase_failed").innerHTML =
             "Notified purchase failed.";
 }
+
+function testDismissFlow() {
+    DataBoostWebServiceFlow.dismissFlow();
+    document.getElementById("dismiss_flow").innerHTML =
+            "Called dismiss flow.";
+}
