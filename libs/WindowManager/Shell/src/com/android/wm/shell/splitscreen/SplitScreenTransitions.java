@@ -348,8 +348,6 @@ class SplitScreenTransitions {
             WindowContainerTransaction wct,
             @Nullable RemoteTransition remoteTransition,
             Transitions.TransitionHandler handler,
-            @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback,
             int extraTransitType, boolean resizeAnim) {
         if (mPendingEnter != null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
@@ -357,20 +355,16 @@ class SplitScreenTransitions {
             return null;
         }
         final IBinder transition = mTransitions.startTransition(transitType, wct, handler);
-        setEnterTransition(transition, remoteTransition, consumedCallback, finishedCallback,
-                extraTransitType, resizeAnim);
+        setEnterTransition(transition, remoteTransition, extraTransitType, resizeAnim);
         return transition;
     }
 
     /** Sets a transition to enter split. */
     void setEnterTransition(@NonNull IBinder transition,
             @Nullable RemoteTransition remoteTransition,
-            @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback,
             int extraTransitType, boolean resizeAnim) {
         mPendingEnter = new EnterSession(
-                transition, consumedCallback, finishedCallback, remoteTransition, extraTransitType,
-                resizeAnim);
+                transition, remoteTransition, extraTransitType, resizeAnim);
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                 + " deduced Enter split screen");
@@ -608,12 +602,10 @@ class SplitScreenTransitions {
         final boolean mResizeAnim;
 
         EnterSession(IBinder transition,
-                @Nullable TransitionConsumedCallback consumedCallback,
-                @Nullable TransitionFinishedCallback finishedCallback,
                 @Nullable RemoteTransition remoteTransition,
                 int extraTransitType, boolean resizeAnim) {
-            super(transition, consumedCallback, finishedCallback, remoteTransition,
-                    extraTransitType);
+            super(transition, null /* consumedCallback */, null /* finishedCallback */,
+                    remoteTransition, extraTransitType);
             this.mResizeAnim = resizeAnim;
         }
     }
