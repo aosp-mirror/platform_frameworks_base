@@ -293,8 +293,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void readyForKeyguardDone();
 
-    void resetUserExpandedStates();
-
     void setLockscreenUser(int newUserId);
 
     void showKeyguard();

@@ -2314,7 +2314,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     mNotificationShadeWindowController.setNotTouchable(false);
                 }
                 finishBarAnimations();
-                resetUserExpandedStates();
+                mNotificationsController.resetUserExpandedStates();
             }
             Trace.endSection();
         }
@@ -2332,11 +2332,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         }
     };
-
-    @Override
-    public void resetUserExpandedStates() {
-        mNotificationsController.resetUserExpandedStates();
-    }
 
     /**
      * Notify the shade controller that the current user changed
