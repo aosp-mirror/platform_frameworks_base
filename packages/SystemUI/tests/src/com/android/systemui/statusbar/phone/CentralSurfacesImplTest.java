@@ -287,7 +287,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
-    @Mock private KeyguardDismissUtil mKeyguardDismissUtil;
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
     @Mock private PhoneStatusBarPolicy mPhoneStatusBarPolicy;
@@ -516,7 +515,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mInitController,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mPluginDependencyProvider,
-                mKeyguardDismissUtil,
                 mExtensionController,
                 mUserInfoControllerImpl,
                 mPhoneStatusBarPolicy,
