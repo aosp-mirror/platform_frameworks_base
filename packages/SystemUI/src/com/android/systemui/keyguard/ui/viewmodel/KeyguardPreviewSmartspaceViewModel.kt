@@ -26,19 +26,13 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-/** View model for the small clock view, large clock view and smartspace. */
-class KeyguardPreviewClockSmartspaceViewModel
+/** View model for the smartspace. */
+class KeyguardPreviewSmartspaceViewModel
 @Inject
 constructor(
     @Application private val context: Context,
     interactor: KeyguardClockInteractor,
 ) {
-
-    val isLargeClockVisible: Flow<Boolean> =
-        interactor.selectedClockSize.map { it == SettingsClockSize.DYNAMIC }
-
-    val isSmallClockVisible: Flow<Boolean> =
-        interactor.selectedClockSize.map { it == SettingsClockSize.SMALL }
 
     val smartSpaceTopPadding: Flow<Int> =
         interactor.selectedClockSize.map {
