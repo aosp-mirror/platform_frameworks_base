@@ -141,7 +141,11 @@ class AccessPolicy private constructor(
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (packageName, packageState) ->
                 if (packageState.volumeUuid == volumeUuid) {
-                    check(packageNames.contains(packageName)) {
+                    // The APK for a package on a mounted storage volume may still be unavailable
+                    // due to APK being deleted, e.g. after an OTA.
+                    check(
+                        packageState.androidPackage == null || packageNames.contains(packageName)
+                    ) {
                         "Package $packageName on storage volume $volumeUuid didn't receive" +
                             " onPackageAdded() before onStorageVolumeMounted()"
                     }
