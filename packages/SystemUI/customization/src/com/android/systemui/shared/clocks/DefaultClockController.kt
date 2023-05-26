@@ -50,6 +50,7 @@ class DefaultClockController(
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
     private val settings: ClockSettings?,
+    private val hasStepClockAnimation: Boolean = false,
 ) : ClockController {
     override val smallClock: DefaultClockFaceController
     override val largeClock: LargeClockFaceController
@@ -170,7 +171,8 @@ class DefaultClockController(
         view: AnimatableClockView,
         seedColor: Int?,
     ) : DefaultClockFaceController(view, seedColor) {
-        override val config = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
+        override val config =
+            ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
 
         init {
             animations = LargeClockAnimations(view, 0f, 0f)
