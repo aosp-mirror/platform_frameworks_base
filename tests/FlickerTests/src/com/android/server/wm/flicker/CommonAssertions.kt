@@ -97,19 +97,19 @@ fun FlickerTest.entireScreenCovered(allStates: Boolean = true) {
     if (allStates) {
         assertLayers {
             this.invoke("entireScreenCovered") { entry ->
-                entry.entry.displays.forEach { display ->
+                entry.entry.displays.filter { it.isOn }.forEach { display ->
                     entry.visibleRegion().coversAtLeast(display.layerStackSpace)
                 }
             }
         }
     } else {
         assertLayersStart {
-            this.entry.displays.forEach { display ->
+            this.entry.displays.filter { it.isOn }.forEach { display ->
                 this.visibleRegion().coversAtLeast(display.layerStackSpace)
             }
         }
         assertLayersEnd {
-            this.entry.displays.forEach { display ->
+            this.entry.displays.filter { it.isOn }.forEach { display ->
                 this.visibleRegion().coversAtLeast(display.layerStackSpace)
             }
         }
