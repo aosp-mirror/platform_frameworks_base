@@ -548,6 +548,10 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
             if (!cancelled) {
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
                 resetSwipeOfView(animView);
+                // Clear the snapped view after success, assuming it's not being swiped now
+                if (animView == mTouchedView && !mIsSwiping) {
+                    mTouchedView = null;
+                }
             }
             onChildSnappedBack(animView, targetLeft);
         });
