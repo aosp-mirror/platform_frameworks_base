@@ -93,6 +93,7 @@ class ScreenRecordPermissionDialog(
             }
             dismiss()
         }
+        setCancelButtonOnClickListener { dismiss() }
         initRecordOptionsView()
     }
 
