@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.service.quickaccesswallet.GetWalletCardsError
 import android.service.quickaccesswallet.GetWalletCardsResponse
@@ -33,7 +32,6 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.Companion.componentName
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.wallet.controller.QuickAccessWalletController
 import javax.inject.Inject
@@ -103,17 +101,6 @@ constructor(
             !walletController.walletClient.isWalletServiceAvailable ->
                 KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
             !walletController.isWalletEnabled || queryCards().isEmpty() -> {
-                val componentName =
-                    walletController.walletClient.createWalletSettingsIntent().toComponentName()
-                val actionText =
-                    if (componentName != null) {
-                        context.getString(
-                            R.string.keyguard_affordance_enablement_dialog_action_template,
-                            pickerName,
-                        )
-                    } else {
-                        null
-                    }
                 KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
                     instructions =
                         listOf(
@@ -124,8 +111,6 @@ constructor(
                                 R.string.keyguard_affordance_enablement_dialog_wallet_instruction_2
                             ),
                         ),
-                    actionText = actionText,
-                    actionComponentName = componentName,
                 )
             }
             else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default()
@@ -180,14 +165,6 @@ constructor(
         } else {
             KeyguardQuickAffordanceConfig.LockScreenState.Hidden
         }
-    }
-
-    private fun Intent?.toComponentName(): String? {
-        if (this == null) {
-            return null
-        }
-
-        return componentName(packageName = `package`, action = action)
     }
 
     companion object {
