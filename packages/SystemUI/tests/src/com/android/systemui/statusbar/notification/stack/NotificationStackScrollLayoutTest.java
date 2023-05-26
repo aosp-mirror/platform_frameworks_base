@@ -794,7 +794,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void onShadeClosesWithAnimationWillResetSwipeState() {
+    public void onShadeClosesWithAnimationWillResetTouchState() {
         // GIVEN shade is expanded
         mStackScroller.setIsExpanded(true);
         clearInvocations(mNotificationSwipeHelper);
@@ -804,12 +804,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setIsExpanded(false);
         mStackScroller.onExpansionStopped();
 
-        // VERIFY swipe is reset
-        verify(mNotificationSwipeHelper).resetSwipeState();
+        // VERIFY touch is reset
+        verify(mNotificationSwipeHelper).resetTouchState();
     }
 
     @Test
-    public void onShadeClosesWithoutAnimationWillResetSwipeState() {
+    public void onShadeClosesWithoutAnimationWillResetTouchState() {
         // GIVEN shade is expanded
         mStackScroller.setIsExpanded(true);
         clearInvocations(mNotificationSwipeHelper);
@@ -817,8 +817,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // WHEN closing the shade without the animation
         mStackScroller.setIsExpanded(false);
 
-        // VERIFY swipe is reset
-        verify(mNotificationSwipeHelper).resetSwipeState();
+        // VERIFY touch is reset
+        verify(mNotificationSwipeHelper).resetTouchState();
     }
 
     @Test
