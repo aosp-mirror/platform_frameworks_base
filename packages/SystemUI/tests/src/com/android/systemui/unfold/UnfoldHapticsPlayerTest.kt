@@ -20,10 +20,9 @@ import android.os.Vibrator
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.unfold.updates.FoldProvider
+import com.android.systemui.unfold.util.TestFoldProvider
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
-import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -114,21 +113,5 @@ class UnfoldHapticsPlayerTest : SysuiTestCase() {
         progressProvider.onTransitionFinished()
 
         verify(vibrator).vibrate(any<VibrationEffect>())
-    }
-
-    private class TestFoldProvider : FoldProvider {
-        private val listeners = arrayListOf<FoldProvider.FoldCallback>()
-
-        override fun registerCallback(callback: FoldProvider.FoldCallback, executor: Executor) {
-            listeners += callback
-        }
-
-        override fun unregisterCallback(callback: FoldProvider.FoldCallback) {
-            listeners -= callback
-        }
-
-        fun onFoldUpdate(isFolded: Boolean) {
-            listeners.forEach { it.onFoldUpdated(isFolded) }
-        }
     }
 }
