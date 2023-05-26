@@ -37,8 +37,11 @@ class PatternBouncerViewModel(
     private val applicationContext: Context,
     applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
-    override val isInputEnabled: StateFlow<Boolean>,
-) : AuthMethodBouncerViewModel {
+    isInputEnabled: StateFlow<Boolean>,
+) :
+    AuthMethodBouncerViewModel(
+        isInputEnabled = isInputEnabled,
+    ) {
 
     /** The number of columns in the dot grid. */
     val columnCount = 3
@@ -150,7 +153,11 @@ class PatternBouncerViewModel(
 
     /** Notifies that the user has ended the drag gesture across the dot grid. */
     fun onDragEnd() {
-        interactor.authenticate(_selectedDots.value.map { it.toCoordinate() })
+        val isSuccessfullyAuthenticated =
+            interactor.authenticate(_selectedDots.value.map { it.toCoordinate() })
+        if (!isSuccessfullyAuthenticated) {
+            showFailureAnimation()
+        }
 
         _dots.value = defaultDots()
         _currentDot.value = null
