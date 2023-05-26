@@ -89,6 +89,15 @@ internal fun PinBouncer(
     // The length of the PIN input received so far, so we know how many dots to render.
     val pinLength: Pair<Int, Int> by viewModel.pinLengths.collectAsState()
     val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
+
+    // Show the failure animation if the user entered the wrong input.
+    LaunchedEffect(animateFailure) {
+        if (animateFailure) {
+            showFailureAnimation()
+            viewModel.onFailureAnimationShown()
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
