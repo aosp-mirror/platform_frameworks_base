@@ -515,8 +515,6 @@ public class SettingsBackupTest {
                     Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS,
                     Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES,
                     Settings.Global.ANGLE_EGL_FEATURES,
-                    Settings.Global.ANGLE_DEFERLIST,
-                    Settings.Global.ANGLE_DEFERLIST_MODE,
                     Settings.Global.UPDATABLE_DRIVER_ALL_APPS,
                     Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS,
                     Settings.Global.UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS,

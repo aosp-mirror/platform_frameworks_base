@@ -38,3 +38,4 @@ per-file TestProtoLibraries.bp = file:platform/platform_testing:/libraries/healt
 per-file TestProtoLibraries.bp = file:platform/tools/tradefederation:/OWNERS
 
 per-file ZYGOTE_OWNERS = file:/ZYGOTE_OWNERS
+per-file SQLITE_OWNERS = file:/SQLITE_OWNERS

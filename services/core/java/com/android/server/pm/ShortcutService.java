@@ -181,6 +181,9 @@ public class ShortcutService extends IShortcutService.Stub {
     static final int DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY = 15;
 
     @VisibleForTesting
+    static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 100;
+
+    @VisibleForTesting
     static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
 
     @VisibleForTesting
@@ -257,6 +260,11 @@ public class ShortcutService extends IShortcutService.Stub {
         String KEY_MAX_SHORTCUTS = "max_shortcuts";
 
         /**
+         * Key name for the max shortcuts can be retained in system ram per app. (int)
+         */
+        String KEY_MAX_SHORTCUTS_PER_APP = "max_shortcuts_per_app";
+
+        /**
          * Key name for icon compression quality, 0-100.
          */
         String KEY_ICON_QUALITY = "icon_quality";
@@ -329,9 +337,14 @@ public class ShortcutService extends IShortcutService.Stub {
             new SparseArray<>();
 
     /**
-     * Max number of dynamic + manifest shortcuts that each application can have at a time.
+     * Max number of dynamic + manifest shortcuts that each activity can have at a time.
      */
     private int mMaxShortcuts;
+
+    /**
+     * Max number of shortcuts that can exists in system ram for each application.
+     */
+    private int mMaxShortcutsPerApp;
 
     /**
      * Max number of updating API calls that each application can make during the interval.
@@ -806,6 +819,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
         mMaxShortcuts = Math.max(0, (int) parser.getLong(
                 ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY));
+
+        mMaxShortcutsPerApp = Math.max(0, (int) parser.getLong(
+                ConfigConstants.KEY_MAX_SHORTCUTS_PER_APP, DEFAULT_MAX_SHORTCUTS_PER_APP));
 
         final int iconDimensionDp = Math.max(1, injectIsLowRamDevice()
                 ? (int) parser.getLong(
@@ -1756,6 +1772,13 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     int getMaxActivityShortcuts() {
         return mMaxShortcuts;
+    }
+
+    /**
+     * Return the max number of shortcuts can be retaiend in system ram for each application.
+     */
+    int getMaxAppShortcuts() {
+        return mMaxShortcutsPerApp;
     }
 
     /**

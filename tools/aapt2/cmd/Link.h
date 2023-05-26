@@ -206,6 +206,11 @@ class LinkCommand : public Command {
     AddOptionalFlag("--compile-sdk-version-name",
         "Version name to inject into the AndroidManifest.xml if none is present.",
         &options_.manifest_fixer_options.compile_sdk_version_codename);
+    AddOptionalSwitch(
+        "--no-compile-sdk-metadata",
+        "Suppresses output of compile SDK-related attributes in AndroidManifest.xml,\n"
+        "including android:compileSdkVersion and platformBuildVersion.",
+        &options_.manifest_fixer_options.no_compile_sdk_metadata);
     AddOptionalSwitch("--shared-lib", "Generates a shared Android runtime library.",
         &shared_lib_);
     AddOptionalSwitch("--static-lib", "Generate a static Android library.", &static_lib_);

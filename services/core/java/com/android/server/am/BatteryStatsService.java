@@ -1982,32 +1982,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    /**
-     * Bluetooth on stat logging
-     */
-    public void noteBluetoothOn(int uid, int reason, String packageName) {
-        if (Binder.getCallingPid() != Process.myPid()) {
-            mContext.enforcePermission(android.Manifest.permission.BLUETOOTH_CONNECT,
-                    Binder.getCallingPid(), uid, null);
-        }
-        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
-                uid, null, FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED,
-                reason, packageName);
-    }
-
-    /**
-     * Bluetooth off stat logging
-     */
-    public void noteBluetoothOff(int uid, int reason, String packageName) {
-        if (Binder.getCallingPid() != Process.myPid()) {
-            mContext.enforcePermission(android.Manifest.permission.BLUETOOTH_CONNECT,
-                    Binder.getCallingPid(), uid, null);
-        }
-        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
-                uid, null, FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED,
-                reason, packageName);
-    }
-
     @Override
     public void noteBleScanStarted(final WorkSource ws, final boolean isUnoptimized) {
         enforceCallingPermission();

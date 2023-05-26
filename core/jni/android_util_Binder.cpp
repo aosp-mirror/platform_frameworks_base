@@ -974,7 +974,7 @@ static jint android_os_Binder_getCallingUid()
     return IPCThreadState::self()->getCallingUid();
 }
 
-static jboolean android_os_Binder_isDirectlyHandlingTransaction() {
+static jboolean android_os_Binder_isDirectlyHandlingTransactionNative() {
     return getCurrentServingCall() == BinderCallType::BINDER;
 }
 
@@ -1082,7 +1082,8 @@ static const JNINativeMethod gBinderMethods[] = {
     // @CriticalNative
     { "getCallingUid", "()I", (void*)android_os_Binder_getCallingUid },
     // @CriticalNative
-    { "isDirectlyHandlingTransaction", "()Z", (void*)android_os_Binder_isDirectlyHandlingTransaction },
+    { "isDirectlyHandlingTransactionNative", "()Z",
+        (void*)android_os_Binder_isDirectlyHandlingTransactionNative },
     // @CriticalNative
     { "clearCallingIdentity", "()J", (void*)android_os_Binder_clearCallingIdentity },
     // @CriticalNative

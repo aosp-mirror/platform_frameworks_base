@@ -252,3 +252,8 @@ java_genrule {
     out: ["api_fingerprint.txt"],
     cmd: "cat $(in) | md5sum | cut -d' ' -f1 > $(out)",
 }
+
+build = [
+    "ApiDocs.bp",
+    "StubLibraries.bp",
+]

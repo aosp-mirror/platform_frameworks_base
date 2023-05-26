@@ -42,6 +42,7 @@ java_fuzz {
             "smoreland@google.com",
             "waghpawan@google.com",
         ],
+        triage_assignee: "cobark@google.com", // TODO(b/261539788)
         // Adds bugs to hotlist "AIDL fuzzers bugs" on buganizer
         hotlists: ["4637097"],
     },
