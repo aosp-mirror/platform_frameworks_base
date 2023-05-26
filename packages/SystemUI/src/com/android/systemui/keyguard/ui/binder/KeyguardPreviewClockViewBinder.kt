@@ -21,19 +21,17 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockSmartspaceViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import kotlinx.coroutines.flow.collect
 
-/** Binder for the small clock view, large clock view and smartspace. */
-object KeyguardPreviewClockSmartspaceViewBinder {
+/** Binder for the small clock view, large clock view. */
+object KeyguardPreviewClockViewBinder {
 
     @JvmStatic
     fun bind(
         largeClockHostView: View,
         smallClockHostView: View,
-        smartspace: View?,
-        viewModel: KeyguardPreviewClockSmartspaceViewModel,
+        viewModel: KeyguardPreviewClockViewModel,
     ) {
         largeClockHostView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -46,15 +44,5 @@ object KeyguardPreviewClockSmartspaceViewBinder {
                 viewModel.isSmallClockVisible.collect { smallClockHostView.isVisible = it }
             }
         }
-
-        smartspace?.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.smartSpaceTopPadding.collect { smartspace.setTopPadding(it) }
-            }
-        }
-    }
-
-    private fun View.setTopPadding(padding: Int) {
-        setPaddingRelative(paddingStart, padding, paddingEnd, paddingBottom)
     }
 }
