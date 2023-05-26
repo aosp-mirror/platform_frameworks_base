@@ -1285,6 +1285,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * </ul>
      * These values are relative to the state from the last event, not accumulated, so developers
      * should make sure to process this axis value for all batched historical events.
+     * <p>
+     * This axis is only set on the first pointer in a motion event.
      */
     public static final int AXIS_GESTURE_X_OFFSET = 48;
 
@@ -1304,6 +1306,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * </ul>
      * These values are relative to the state from the last event, not accumulated, so developers
      * should make sure to process this axis value for all batched historical events.
+     * <p>
+     * This axis is only set on the first pointer in a motion event.
      */
     public static final int AXIS_GESTURE_SCROLL_X_DISTANCE = 50;
 
@@ -1324,14 +1328,29 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * </ul>
      * These values are relative to the state from the last event, not accumulated, so developers
      * should make sure to process this axis value for all batched historical events.
+     * <p>
+     * This axis is only set on the first pointer in a motion event.
      */
     public static final int AXIS_GESTURE_PINCH_SCALE_FACTOR = 52;
+
+    /**
+     * Axis constant: the number of fingers being used in a multi-finger swipe gesture.
+     * <p>
+     * <ul>
+     * <li>For a touch pad, reports the number of fingers being used in a multi-finger swipe gesture
+     * (with CLASSIFICATION_MULTI_FINGER_SWIPE).
+     * </ul>
+     * <p>
+     * Since CLASSIFICATION_MULTI_FINGER_SWIPE is a hidden API, so is this axis. It is only set on
+     * the first pointer in a motion event.
+     * @hide
+     */
+    public static final int AXIS_GESTURE_SWIPE_FINGER_COUNT = 53;
 
     // NOTE: If you add a new axis here you must also add it to:
     //  frameworks/native/include/android/input.h
     //  frameworks/native/libs/input/InputEventLabels.cpp
-    //  platform/cts/tests/tests/view/src/android/view/cts/MotionEventTest.java
-    //    (testAxisFromToString)
+    //  cts/tests/tests/view/src/android/view/cts/MotionEventTest.java (testAxisFromToString)
 
     // Symbolic names of all axes.
     private static final SparseArray<String> AXIS_SYMBOLIC_NAMES = new SparseArray<String>();
@@ -1387,6 +1406,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(AXIS_GESTURE_SCROLL_X_DISTANCE, "AXIS_GESTURE_SCROLL_X_DISTANCE");
         names.append(AXIS_GESTURE_SCROLL_Y_DISTANCE, "AXIS_GESTURE_SCROLL_Y_DISTANCE");
         names.append(AXIS_GESTURE_PINCH_SCALE_FACTOR, "AXIS_GESTURE_PINCH_SCALE_FACTOR");
+        names.append(AXIS_GESTURE_SWIPE_FINGER_COUNT, "AXIS_GESTURE_SWIPE_FINGER_COUNT");
     }
 
     /**
