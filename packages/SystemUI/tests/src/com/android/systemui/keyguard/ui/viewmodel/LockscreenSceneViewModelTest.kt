@@ -109,7 +109,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_swipeToUnlockedNotEnabled_bouncer() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
@@ -119,7 +119,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun onLockButtonClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             runCurrent()
 
@@ -132,7 +132,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.unlockDevice()
             runCurrent()
 
@@ -145,7 +145,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             runCurrent()
 
@@ -158,7 +158,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun onLockButtonClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.unlockDevice()
             runCurrent()
 

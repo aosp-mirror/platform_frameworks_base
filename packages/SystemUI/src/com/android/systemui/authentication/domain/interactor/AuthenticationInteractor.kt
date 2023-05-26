@@ -129,7 +129,7 @@ constructor(
     fun authenticate(input: List<Any>): Boolean {
         val isSuccessful =
             when (val authMethod = this.authenticationMethod.value) {
-                is AuthenticationMethodModel.PIN -> input.asCode() == authMethod.code
+                is AuthenticationMethodModel.Pin -> input.asCode() == authMethod.code
                 is AuthenticationMethodModel.Password -> input.asPassword() == authMethod.password
                 is AuthenticationMethodModel.Pattern -> input.asPattern() == authMethod.coordinates
                 else -> true

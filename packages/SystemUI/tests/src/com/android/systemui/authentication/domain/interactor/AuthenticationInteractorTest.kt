@@ -48,7 +48,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun authMethod() =
         testScope.runTest {
             val authMethod by collectLastValue(underTest.authenticationMethod)
-            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.PIN(1234))
+            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.Pin(1234))
 
             underTest.setAuthenticationMethod(AuthenticationMethodModel.Password("password"))
             assertThat(authMethod).isEqualTo(AuthenticationMethodModel.Password("password"))
@@ -147,7 +147,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
-            underTest.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            underTest.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
@@ -160,7 +160,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
-            underTest.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            underTest.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(9, 8, 7))).isFalse()
