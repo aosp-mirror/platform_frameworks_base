@@ -6550,6 +6550,9 @@
          device. -->
     <bool name="config_enableAppCloningBuildingBlocks">true</bool>
 
+    <!-- Whether the variable refresh rate when typing feature is enabled for the device. -->
+    <bool name="config_variableRefreshRateTypingSupported">false</bool>
+
     <!-- Enables or disables support for repair mode. The feature creates a secure
          environment to protect the user's privacy when the device is being repaired.
          Off by default, since OEMs may have had a similar feature on their devices. -->
