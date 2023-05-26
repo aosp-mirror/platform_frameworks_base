@@ -14,12 +14,14 @@
      limitations under the License.
 -->
 
-<com.android.soundpicker.CheckedListItem xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.soundpicker.CheckedListItem
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:background="?android:attr/selectableItemBackground"
-    >
+    android:focusable="true"
+    android:clickable="true">
 
     <CheckedTextView
         android:id="@+id/checked_text_view"
@@ -35,7 +37,7 @@
         android:drawablePadding="20dp"
         android:ellipsize="marquee"
         android:layout_toLeftOf="@+id/work_icon"
-        android:maxLines="3" />
+        android:maxLines="3"/>
 
     <ImageView
         android:id="@id/work_icon"
@@ -44,5 +46,5 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:scaleType="centerCrop"
-        android:layout_marginRight="20dp" />
+        android:layout_marginRight="20dp"/>
 </com.android.soundpicker.CheckedListItem>

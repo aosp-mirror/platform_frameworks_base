@@ -34,6 +34,9 @@
             <intent-filter>
                 <action android:name="android.intent.action.RINGTONE_PICKER" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.RINGTONE_PICKER_SOUND" />
+                <category android:name="android.intent.category.RINGTONE_PICKER_VIBRATION" />
+                <category android:name="android.intent.category.RINGTONE_PICKER_RINGTONE" />
             </intent-filter>
         </activity>
     </application>
