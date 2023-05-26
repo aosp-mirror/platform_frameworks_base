@@ -3560,10 +3560,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mRootWindowContainer.forAllDisplays(displayContent -> {
                     mKeyguardController.keyguardGoingAway(displayContent.getDisplayId(), flags);
                 });
-                WallpaperManagerInternal wallpaperManagerInternal = getWallpaperManagerInternal();
-                if (wallpaperManagerInternal != null) {
-                    wallpaperManagerInternal.onKeyguardGoingAway();
-                }
+            }
+            WallpaperManagerInternal wallpaperManagerInternal = getWallpaperManagerInternal();
+            if (wallpaperManagerInternal != null) {
+                wallpaperManagerInternal.onKeyguardGoingAway();
             }
         } finally {
             Binder.restoreCallingIdentity(token);
