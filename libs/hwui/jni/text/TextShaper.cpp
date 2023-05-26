@@ -62,7 +62,7 @@ static jlong shapeTextRun(const uint16_t* text, int textSize, int start, int cou
         const minikin::Font* font = layout.getFont(i);
         if (seenFonts.find(font) != seenFonts.end()) continue;
         minikin::MinikinExtent extent = {};
-        font->typeface()->GetFontExtent(&extent, minikinPaint, layout.getFakery(i));
+        layout.typeface(i)->GetFontExtent(&extent, minikinPaint, layout.getFakery(i));
         overallAscent = std::min(overallAscent, extent.ascent);
         overallDescent = std::max(overallDescent, extent.descent);
     }

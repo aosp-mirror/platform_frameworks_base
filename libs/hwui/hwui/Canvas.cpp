@@ -151,7 +151,7 @@ void Canvas::drawGlyphs(const minikin::Font& font, const int* glyphIds, const fl
         memcpy(outPositions, positions, sizeof(float) * 2 * glyphCount);
     };
 
-    const minikin::MinikinFont* minikinFont = font.typeface().get();
+    const minikin::MinikinFont* minikinFont = font.baseTypeface().get();
     SkFont* skfont = &copied.getSkFont();
     MinikinFontSkia::populateSkFont(skfont, minikinFont, minikin::FontFakery());
 
