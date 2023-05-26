@@ -473,6 +473,42 @@ public class AutomaticBrightnessControllerTest {
     }
 
     @Test
+    public void testSwitchBetweenModesNoUserInteractions() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Sensor reads 123 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 123));
+        when(mBrightnessMappingStrategy.getShortTermModelTimeout()).thenReturn(2000L);
+        when(mBrightnessMappingStrategy.getUserBrightness()).thenReturn(-1.0f);
+        when(mBrightnessMappingStrategy.getUserLux()).thenReturn(-1.0f);
+
+        // No user brightness interaction.
+
+        mController.switchToIdleMode();
+        when(mIdleBrightnessMappingStrategy.isForIdleMode()).thenReturn(true);
+        when(mIdleBrightnessMappingStrategy.getUserBrightness()).thenReturn(-1.0f);
+        when(mIdleBrightnessMappingStrategy.getUserLux()).thenReturn(-1.0f);
+
+        // Sensor reads 1000 lux,
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        // Do not fast-forward time.
+        mTestLooper.dispatchAll();
+
+        mController.switchToInteractiveScreenBrightnessMode();
+        // Do not fast-forward time
+        mTestLooper.dispatchAll();
+
+        // Ensure that there are no data points added, since the user has never adjusted the
+        // brightness
+        verify(mBrightnessMappingStrategy, times(0))
+                .addUserDataPoint(anyFloat(), anyFloat());
+    }
+
+    @Test
     public void testSwitchToIdleMappingStrategy() throws Exception {
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
