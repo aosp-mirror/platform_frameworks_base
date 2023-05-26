@@ -448,9 +448,14 @@ public class NotificationIconContainer extends ViewGroup {
     @VisibleForTesting
     boolean isOverflowing(boolean isLastChild, float translationX, float layoutEnd,
             float iconSize) {
-        // Layout end, as used here, does not include padding end.
-        final float overflowX = isLastChild ? layoutEnd : layoutEnd - iconSize;
-        return translationX >= overflowX;
+        if (isLastChild) {
+            return translationX + iconSize > layoutEnd;
+        } else {
+            // If the child is not the last child, we need to ensure that we have room for the next
+            // icon and the dot. The dot could be as large as an icon, so verify that we have room
+            // for 2 icons.
+            return translationX + iconSize * 2f > layoutEnd;
+        }
     }
 
     /**
@@ -490,10 +495,7 @@ public class NotificationIconContainer extends ViewGroup {
             // First icon to overflow.
             if (firstOverflowIndex == -1 && isOverflowing) {
                 firstOverflowIndex = i;
-                mVisualOverflowStart = layoutEnd - mIconSize;
-                if (forceOverflow || mIsStaticLayout) {
-                    mVisualOverflowStart = Math.min(translationX, mVisualOverflowStart);
-                }
+                mVisualOverflowStart = translationX;
             }
             final float drawingScale = mOnLockScreen && view instanceof StatusBarIconView
                     ? ((StatusBarIconView) view).getIconScaleIncreased()
