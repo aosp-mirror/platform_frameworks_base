@@ -20,7 +20,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -38,35 +37,35 @@ import com.android.wm.shell.R;
 public class BubbleBarHandleView extends View {
     private static final long COLOR_CHANGE_DURATION = 120;
 
-    private final int mHandleWidth;
-    private final int mHandleHeight;
-    private final @ColorInt int mHandleLightColor;
-    private final @ColorInt int mHandleDarkColor;
+    private int mHandleWidth;
+    private int mHandleHeight;
+    private @ColorInt int mHandleLightColor;
+    private @ColorInt int mHandleDarkColor;
     private @Nullable ObjectAnimator mColorChangeAnim;
 
     public BubbleBarHandleView(Context context) {
-        this(context, null);
+        this(context, null /* attrs */);
     }
 
     public BubbleBarHandleView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, 0 /* defStyleAttr */);
     }
 
     public BubbleBarHandleView(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
+        this(context, attrs, defStyleAttr, 0 /* defStyleRes */);
     }
 
     public BubbleBarHandleView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        Resources resources = context.getResources();
-        mHandleWidth = resources.getDimensionPixelSize(
+
+        mHandleWidth = getResources().getDimensionPixelSize(
                 R.dimen.bubble_bar_expanded_view_handle_width);
-        mHandleHeight = resources.getDimensionPixelSize(
+        mHandleHeight = getResources().getDimensionPixelSize(
                 R.dimen.bubble_bar_expanded_view_handle_height);
-        mHandleLightColor = ContextCompat.getColor(context,
+        mHandleLightColor = ContextCompat.getColor(getContext(),
                 R.color.bubble_bar_expanded_view_handle_light);
-        mHandleDarkColor = ContextCompat.getColor(context,
+        mHandleDarkColor = ContextCompat.getColor(getContext(),
                 R.color.bubble_bar_expanded_view_handle_dark);
 
         setClipToOutline(true);

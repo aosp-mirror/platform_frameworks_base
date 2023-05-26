@@ -192,6 +192,11 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             }
 
             info.rawBadgeBitmap = iconFactory.getBadgeBitmap(badgedIcon, false).icon;
+            float[] bubbleBitmapScale = new float[1];
+            info.bubbleBitmap = iconFactory.getBubbleBitmap(
+                    iconFactory.getBubbleDrawable(c, info.shortcutInfo,
+                            b.getIcon()), bubbleBitmapScale);
+
 
             return info;
         }
