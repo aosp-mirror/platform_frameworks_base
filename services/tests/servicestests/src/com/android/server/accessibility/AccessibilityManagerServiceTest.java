@@ -290,9 +290,9 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    public void testRegisterProxyWithoutA11yPermission() throws Exception {
+    public void testRegisterProxyWithoutA11yPermissionOrRole() throws Exception {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
-                .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+                .checkForAccessibilityPermissionOrRole();
 
         assertThrows(SecurityException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY));
@@ -342,9 +342,9 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    public void testUnRegisterProxyWithoutA11yPermission() {
+    public void testUnRegisterProxyWithoutA11yPermissionOrRole() {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
-                .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+                .checkForAccessibilityPermissionOrRole();
 
         assertThrows(SecurityException.class,
                 () -> mA11yms.unregisterProxyForDisplay(TEST_DISPLAY));
