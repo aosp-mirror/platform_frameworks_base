@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -428,6 +429,84 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
         // THEN: NSSL is updated with the current state
         verify(mNotificationStackScrollLayout).setStatusBarState(KEYGUARD);
+    }
+
+    @Test
+    public void updateImportantForAccessibility_noChild_onKeyGuard_notImportantForA11y() {
+        // GIVEN: Controller is attached, active notifications is empty,
+        // and mNotificationStackScrollLayout.onKeyguard() is true
+        initController(/* viewIsAttached= */ true);
+        when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(true);
+        mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
+
+        // WHEN: call updateImportantForAccessibility
+        mController.updateImportantForAccessibility();
+
+        // THEN: mNotificationStackScrollLayout should not be important for A11y
+        verify(mNotificationStackScrollLayout)
+                .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    @Test
+    public void updateImportantForAccessibility_hasChild_onKeyGuard_importantForA11y() {
+        // GIVEN: Controller is attached, active notifications is not empty,
+        // and mNotificationStackScrollLayout.onKeyguard() is true
+        initController(/* viewIsAttached= */ true);
+        when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(true);
+        mController.getNotifStackController().setNotifStats(
+                new NotifStats(
+                        /* numActiveNotifs = */ 1,
+                        /* hasNonClearableAlertingNotifs = */ false,
+                        /* hasClearableAlertingNotifs = */ false,
+                        /* hasNonClearableSilentNotifs = */ false,
+                        /* hasClearableSilentNotifs = */ false)
+        );
+
+        // WHEN: call updateImportantForAccessibility
+        mController.updateImportantForAccessibility();
+
+        // THEN: mNotificationStackScrollLayout should be important for A11y
+        verify(mNotificationStackScrollLayout)
+                .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+    }
+
+    @Test
+    public void updateImportantForAccessibility_hasChild_notOnKeyGuard_importantForA11y() {
+        // GIVEN: Controller is attached, active notifications is not empty,
+        // and mNotificationStackScrollLayout.onKeyguard() is false
+        initController(/* viewIsAttached= */ true);
+        when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(false);
+        mController.getNotifStackController().setNotifStats(
+                new NotifStats(
+                        /* numActiveNotifs = */ 1,
+                        /* hasNonClearableAlertingNotifs = */ false,
+                        /* hasClearableAlertingNotifs = */ false,
+                        /* hasNonClearableSilentNotifs = */ false,
+                        /* hasClearableSilentNotifs = */ false)
+        );
+
+        // WHEN: call updateImportantForAccessibility
+        mController.updateImportantForAccessibility();
+
+        // THEN: mNotificationStackScrollLayout should be important for A11y
+        verify(mNotificationStackScrollLayout)
+                .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+    }
+
+    @Test
+    public void updateImportantForAccessibility_noChild_notOnKeyGuard_importantForA11y() {
+        // GIVEN: Controller is attached, active notifications is empty,
+        // and mNotificationStackScrollLayout.onKeyguard() is false
+        initController(/* viewIsAttached= */ true);
+        when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(false);
+        mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
+
+        // WHEN: call updateImportantForAccessibility
+        mController.updateImportantForAccessibility();
+
+        // THEN: mNotificationStackScrollLayout should be important for A11y
+        verify(mNotificationStackScrollLayout)
+                .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
     private LogMaker logMatcher(int category, int type) {
