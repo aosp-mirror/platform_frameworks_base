@@ -17,8 +17,6 @@
 package com.android.systemui.shade;
 
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
-import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
-import static android.view.MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
@@ -30,6 +28,8 @@ import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
+import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
+import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPEN;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPENING;
@@ -4656,6 +4656,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             final float x = event.getX(pointerIndex);
             final float y = event.getY(pointerIndex);
             boolean canCollapsePanel = canCollapsePanelOnTouch();
+            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(
+                    mTrackpadGestureFeaturesEnabled, event) || isTrackpadThreeFingerSwipe(
+                    mTrackpadGestureFeaturesEnabled, event);
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
@@ -4688,7 +4691,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     addMovement(event);
                     break;
                 case MotionEvent.ACTION_POINTER_UP:
-                    if (isTrackpadMotionEvent(event)) {
+                    if (isTrackpadTwoOrThreeFingerSwipe) {
                         break;
                     }
                     final int upPointer = event.getPointerId(event.getActionIndex());
@@ -4704,7 +4707,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mShadeLog.logMotionEventStatusBarState(event,
                             mStatusBarStateController.getState(),
                             "onInterceptTouchEvent: pointer down action");
-                    if (!isTrackpadMotionEvent(event)
+                    if (!isTrackpadTwoOrThreeFingerSwipe
                             && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                         mMotionAborted = true;
                         mVelocityTracker.clear();
@@ -4853,9 +4856,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 return false;
             }
 
+            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(
+                    mTrackpadGestureFeaturesEnabled, event) || isTrackpadThreeFingerSwipe(
+                    mTrackpadGestureFeaturesEnabled, event);
+
             // On expanding, single mouse click expands the panel instead of dragging.
             if (isFullyCollapsed() && (event.isFromSource(InputDevice.SOURCE_MOUSE)
-                    && !isTrackpadMotionEvent(event))) {
+                    && !isTrackpadTwoOrThreeFingerSwipe)) {
                 if (event.getAction() == MotionEvent.ACTION_UP) {
                     expand(true /* animate */);
                 }
@@ -4915,7 +4922,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     break;
 
                 case MotionEvent.ACTION_POINTER_UP:
-                    if (isTrackpadMotionEvent(event)) {
+                    if (isTrackpadTwoOrThreeFingerSwipe) {
                         break;
                     }
                     final int upPointer = event.getPointerId(event.getActionIndex());
@@ -4934,7 +4941,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mShadeLog.logMotionEventStatusBarState(event,
                             mStatusBarStateController.getState(),
                             "handleTouch: pointer down action");
-                    if (!isTrackpadMotionEvent(event)
+                    if (!isTrackpadTwoOrThreeFingerSwipe
                             && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                         mMotionAborted = true;
                         endMotionEvent(event, x, y, true /* forceCancel */);
@@ -5008,12 +5015,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
             mShadeLog.logHandleTouchLastReturn(event, !mGestureWaitForTouchSlop, mTracking);
             return !mGestureWaitForTouchSlop || mTracking;
-        }
-
-        private boolean isTrackpadMotionEvent(MotionEvent ev) {
-            return mTrackpadGestureFeaturesEnabled && (
-                    ev.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE
-                            || ev.getClassification() == CLASSIFICATION_TWO_FINGER_SWIPE);
         }
     }
 
