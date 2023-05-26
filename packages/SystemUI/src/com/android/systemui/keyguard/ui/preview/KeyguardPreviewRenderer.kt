@@ -42,9 +42,11 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockSmartspaceViewBinder
+import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
+import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockSmartspaceViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewSmartspaceViewModel
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.shared.clocks.DefaultClockController
@@ -65,7 +67,8 @@ constructor(
     @Application private val context: Context,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Main private val mainHandler: Handler,
-    private val clockSmartspaceViewModel: KeyguardPreviewClockSmartspaceViewModel,
+    private val clockViewModel: KeyguardPreviewClockViewModel,
+    private val smartspaceViewModel: KeyguardPreviewSmartspaceViewModel,
     private val bottomAreaViewModel: KeyguardBottomAreaViewModel,
     displayManager: DisplayManager,
     private val windowManager: WindowManager,
@@ -129,16 +132,18 @@ constructor(
             setUpBottomArea(rootView)
 
             setUpSmartspace(rootView)
+            smartSpaceView?.let {
+                KeyguardPreviewSmartspaceViewBinder.bind(it, smartspaceViewModel)
+            }
 
             setUpUdfps(rootView)
 
             if (!shouldHideClock) {
                 setUpClock(rootView)
-                KeyguardPreviewClockSmartspaceViewBinder.bind(
+                KeyguardPreviewClockViewBinder.bind(
                     largeClockHostView,
                     smallClockHostView,
-                    smartSpaceView,
-                    clockSmartspaceViewModel,
+                    clockViewModel,
                 )
             }
 
@@ -219,8 +224,8 @@ constructor(
         smartSpaceView = lockscreenSmartspaceController.buildAndConnectDateView(parentView)
 
         val topPadding: Int =
-            KeyguardPreviewClockSmartspaceViewModel.getLargeClockSmartspaceTopPadding(
-                context.resources
+            KeyguardPreviewSmartspaceViewModel.getLargeClockSmartspaceTopPadding(
+                context.resources,
             )
 
         val startPadding: Int =
@@ -372,7 +377,7 @@ constructor(
                 resources.getDimensionPixelSize(R.dimen.small_clock_height)
             )
         layoutParams.topMargin =
-            KeyguardPreviewClockSmartspaceViewModel.getStatusBarHeight(resources) +
+            KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
                 resources.getDimensionPixelSize(R.dimen.small_clock_padding_top)
         hostView.layoutParams = layoutParams
 
