@@ -1859,6 +1859,9 @@ public class DisplayPolicy {
              */
             final Rect mConfigFrame = new Rect();
 
+            /** The count of insets sources when calculating this info. */
+            int mLastInsetsSourceCount;
+
             private boolean mNeedUpdate = true;
 
             void update(DisplayContent dc, int rotation, int w, int h) {
@@ -1880,6 +1883,7 @@ public class DisplayPolicy {
                 mNonDecorFrame.inset(mNonDecorInsets);
                 mConfigFrame.set(displayFrame);
                 mConfigFrame.inset(mConfigInsets);
+                mLastInsetsSourceCount = dc.getDisplayPolicy().mInsetsSourceWindowsExceptIme.size();
                 mNeedUpdate = false;
             }
 
@@ -1888,6 +1892,7 @@ public class DisplayPolicy {
                 mConfigInsets.set(other.mConfigInsets);
                 mNonDecorFrame.set(other.mNonDecorFrame);
                 mConfigFrame.set(other.mConfigFrame);
+                mLastInsetsSourceCount = other.mLastInsetsSourceCount;
                 mNeedUpdate = false;
             }
 
@@ -1986,6 +1991,19 @@ public class DisplayPolicy {
         newInfo.update(mDisplayContent, rotation, dw, dh);
         final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
         if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)) {
+            // Even if the config frame is not changed in current rotation, it may change the
+            // insets in other rotations if the source count is changed.
+            if (newInfo.mLastInsetsSourceCount != currentInfo.mLastInsetsSourceCount) {
+                for (int i = mDecorInsets.mInfoForRotation.length - 1; i >= 0; i--) {
+                    if (i != rotation) {
+                        final boolean flipSize = (i + rotation) % 2 == 1;
+                        final int w = flipSize ? dh : dw;
+                        final int h = flipSize ? dw : dh;
+                        mDecorInsets.mInfoForRotation[i].update(mDisplayContent, i, w, h);
+                    }
+                }
+                mDecorInsets.mInfoForRotation[rotation].set(newInfo);
+            }
             return false;
         }
         if (mCachedDecorInsets != null && !mCachedDecorInsets.canPreserve()
