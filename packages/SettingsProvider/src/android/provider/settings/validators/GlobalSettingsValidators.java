@@ -20,6 +20,9 @@ import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_FORCE;
 import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
 import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_SYSTEM;
 import static android.media.AudioFormat.SURROUND_SOUND_ENCODING;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI_AVOID;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI_IGNORE;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI_PROMPT;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
@@ -103,6 +106,14 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.NETWORK_RECOMMENDATIONS_ENABLED,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1"}));
+        VALIDATORS.put(
+                Global.NETWORK_AVOID_BAD_WIFI,
+                new DiscreteValueValidator(
+                        new String[] {
+                                String.valueOf(NETWORK_AVOID_BAD_WIFI_IGNORE),
+                                String.valueOf(NETWORK_AVOID_BAD_WIFI_PROMPT),
+                                String.valueOf(NETWORK_AVOID_BAD_WIFI_AVOID),
+                        }));
         VALIDATORS.put(Global.WIFI_WAKEUP_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
@@ -114,6 +125,8 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
                 NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
+                NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.EMERGENCY_GESTURE_STICKY_UI_MAX_DURATION_MILLIS,
                 NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.CALL_AUTO_RETRY, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.DOCK_AUDIO_MEDIA_ENABLED, BOOLEAN_VALIDATOR);
@@ -272,7 +285,6 @@ public class GlobalSettingsValidators {
                         }));
         VALIDATORS.put(Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.SIDE_BUTTON, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Global.Wearable.BUTTON_SET, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.ANDROID_WEAR_VERSION, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.SYSTEM_CAPABILITIES, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.SYSTEM_EDITION, ANY_INTEGER_VALIDATOR);
@@ -332,6 +344,7 @@ public class GlobalSettingsValidators {
                             String.valueOf(Global.Wearable.HFP_CLIENT_DISABLED)
                         }));
         VALIDATORS.put(Global.Wearable.COMPANION_OS_VERSION, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.COMPANION_APP_NAME, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.Wearable.ENABLE_ALL_LANGUAGES, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.OEM_SETUP_VERSION, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(
@@ -391,16 +404,6 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BEDTIME_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BEDTIME_HARD_MODE, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(
-                Global.Wearable.EARLY_UPDATES_STATUS,
-                new DiscreteValueValidator(
-                        new String[] {
-                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_NOT_STARTED),
-                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_STARTED),
-                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_SUCCESS),
-                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_SKIPPED),
-                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_ABORTED),
-                          }));
         VALIDATORS.put(Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED, BOOLEAN_VALIDATOR);
 	VALIDATORS.put(Global.Wearable.SCREENSHOT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.UPGRADE_DATA_MIGRATION_STATUS,
@@ -410,5 +413,22 @@ public class GlobalSettingsValidators {
                             String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_PENDING),
                             String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_DONE)
                         }));
+        VALIDATORS.put(Global.Wearable.DISABLE_AOD_WHILE_PLUGGED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.NETWORK_LOCATION_OPT_IN, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_STATUS,
+                new InclusiveIntegerRangeValidator(
+                        Global.Wearable.PHONE_SWITCHING_STATUS_NOT_STARTED,
+                        Global.Wearable.PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_SUCCESS));
+        VALIDATORS.put(Global.Wearable.REDUCE_MOTION, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.RTL_SWIPE_TO_DISMISS_ENABLED_DEV, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.TETHER_CONFIG_STATE,
+                new DiscreteValueValidator(
+                        new String[] {
+                                String.valueOf(Global.Wearable.TETHERED_CONFIG_UNKNOWN),
+                                String.valueOf(Global.Wearable.TETHERED_CONFIG_STANDALONE),
+                                String.valueOf(Global.Wearable.TETHERED_CONFIG_TETHERED)
+                        }));
+        VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_SUPPORTED, BOOLEAN_VALIDATOR);
     }
 }

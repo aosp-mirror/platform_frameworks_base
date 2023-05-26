@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -156,6 +158,16 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         mAllCallbacks.remove(callback);
         // Re-populate the top callback to WM if the removed callback was previously the top one.
         if (previousTopCallback == callback) {
+            // We should call onBackCancelled() when an active callback is removed from dispatcher.
+            if (mProgressAnimator.isBackAnimationInProgress()
+                    && callback instanceof OnBackAnimationCallback) {
+                // The ProgressAnimator will handle the new topCallback, so we don't want to call
+                // onBackCancelled() on it. We call immediately the callback instead.
+                OnBackAnimationCallback animatedCallback = (OnBackAnimationCallback) callback;
+                animatedCallback.onBackCancelled();
+                Log.d(TAG, "The callback was removed while a back animation was in progress, "
+                        + "an onBackCancelled() was dispatched.");
+            }
             setTopOnBackInvokedCallback(getTopCallback());
         }
     }
@@ -193,7 +205,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                                 ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
                                         callback).getIOnBackInvokedCallback()
                                 : new OnBackInvokedCallbackWrapper(callback);
-                callbackInfo = new OnBackInvokedCallbackInfo(iCallback, priority);
+                callbackInfo = new OnBackInvokedCallbackInfo(
+                        iCallback,
+                        priority,
+                        callback instanceof OnBackAnimationCallback);
             }
             mWindowSession.setOnBackInvokedCallbackInfo(mWindow, callbackInfo);
         } catch (RemoteException e) {
@@ -357,6 +372,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         mImeDispatcher = imeDispatcher;
     }
 
+    /** Returns true if a non-null {@link ImeOnBackInvokedDispatcher} has been set. **/
+    public boolean hasImeOnBackInvokedDispatcher() {
+        return mImeDispatcher != null;
+    }
+
     /**
      * Class used to check whether a callback can be registered or not. This is meant to be
      * shared with {@link ProxyOnBackInvokedDispatcher} which needs to do the same checks.
@@ -413,36 +433,45 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 return false;
             }
 
-            boolean requestsPredictiveBack;
+            boolean requestsPredictiveBack = false;
 
             // Check if the context is from an activity.
             while ((context instanceof ContextWrapper) && !(context instanceof Activity)) {
                 context = ((ContextWrapper) context).getBaseContext();
             }
 
+            boolean shouldCheckActivity = false;
+
             if (context instanceof Activity) {
                 final Activity activity = (Activity) context;
 
-                if (activity.getActivityInfo().hasOnBackInvokedCallbackEnabled()) {
-                    requestsPredictiveBack =
-                            activity.getActivityInfo().isOnBackInvokedCallbackEnabled();
-                } else {
-                    requestsPredictiveBack =
-                            context.getApplicationInfo().isOnBackInvokedCallbackEnabled();
-                }
+                final ActivityInfo activityInfo = activity.getActivityInfo();
+                if (activityInfo != null) {
+                    if (activityInfo.hasOnBackInvokedCallbackEnabled()) {
+                        shouldCheckActivity = true;
+                        requestsPredictiveBack = activityInfo.isOnBackInvokedCallbackEnabled();
 
-                if (DEBUG) {
-                    Log.d(TAG, TextUtils.formatSimple("Activity: %s isPredictiveBackEnabled=%s",
-                            activity.getComponentName(),
-                            requestsPredictiveBack));
+                        if (DEBUG) {
+                            Log.d(TAG, TextUtils.formatSimple(
+                                    "Activity: %s isPredictiveBackEnabled=%s",
+                                    activity.getComponentName(),
+                                    requestsPredictiveBack));
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "The ActivityInfo is null, so we cannot verify if this Activity"
+                            + " has the 'android:enableOnBackInvokedCallback' attribute."
+                            + " The application attribute will be used as a fallback.");
                 }
-            } else {
-                requestsPredictiveBack =
-                        context.getApplicationInfo().isOnBackInvokedCallbackEnabled();
+            }
+
+            if (!shouldCheckActivity) {
+                final ApplicationInfo applicationInfo = context.getApplicationInfo();
+                requestsPredictiveBack = applicationInfo.isOnBackInvokedCallbackEnabled();
 
                 if (DEBUG) {
                     Log.d(TAG, TextUtils.formatSimple("App: %s requestsPredictiveBack=%s",
-                            context.getApplicationInfo().packageName,
+                            applicationInfo.packageName,
                             requestsPredictiveBack));
                 }
             }

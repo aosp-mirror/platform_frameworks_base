@@ -395,7 +395,7 @@ public final class SingleKeyGestureDetector {
 
     private class KeyHandler extends Handler {
         KeyHandler() {
-            super(Looper.getMainLooper());
+            super(Looper.myLooper());
         }
 
         @Override

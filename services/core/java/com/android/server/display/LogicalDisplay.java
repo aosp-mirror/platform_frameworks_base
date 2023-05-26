@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.Display;
@@ -33,6 +32,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.server.display.layout.Layout;
+import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -174,11 +174,24 @@ final class LogicalDisplay {
     private boolean mDirty = false;
 
     /**
-     * The ID of the brightness throttling data that should be used. This can change e.g. in
-     * concurrent displays mode in which a stricter brightness throttling policy might need to be
-     * used.
+     * The ID of the thermal brightness throttling data that should be used. This can change e.g.
+     * in concurrent displays mode in which a stricter brightness throttling policy might need to
+     * be used.
      */
-    private String mBrightnessThrottlingDataId;
+    private String mThermalBrightnessThrottlingDataId;
+
+    /**
+     * Refresh rate range limitation based on the current device layout
+     */
+    @Nullable
+    private SurfaceControl.RefreshRateRange mLayoutLimitedRefreshRate;
+
+    /**
+     * RefreshRateRange limitation for @Temperature.ThrottlingStatus
+     */
+    @NonNull
+    private SparseArray<SurfaceControl.RefreshRateRange> mThermalRefreshRateThrottling =
+            new SparseArray<>();
 
     public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
@@ -188,7 +201,8 @@ final class LogicalDisplay {
         mTempFrameRateOverride = new SparseArray<>();
         mIsEnabled = true;
         mIsInTransition = false;
-        mBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID;
+        mThermalBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
+        mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
     }
 
     public void setDevicePositionLocked(int position) {
@@ -318,6 +332,10 @@ final class LogicalDisplay {
         return mPrimaryDisplayDevice != null;
     }
 
+    boolean isDirtyLocked() {
+        return mDirty;
+    }
+
     /**
      * Updates the {@link DisplayGroup} to which the logical display belongs.
      *
@@ -326,8 +344,7 @@ final class LogicalDisplay {
     public void updateDisplayGroupIdLocked(int groupId) {
         if (groupId != mDisplayGroupId) {
             mDisplayGroupId = groupId;
-            mBaseDisplayInfo.displayGroupId = groupId;
-            mInfo.set(null);
+            mDirty = true;
         }
     }
 
@@ -338,9 +355,24 @@ final class LogicalDisplay {
      */
     public void updateLayoutLimitedRefreshRateLocked(
             @Nullable SurfaceControl.RefreshRateRange layoutLimitedRefreshRate) {
-        if (!Objects.equals(layoutLimitedRefreshRate, mBaseDisplayInfo.layoutLimitedRefreshRate)) {
-            mBaseDisplayInfo.layoutLimitedRefreshRate = layoutLimitedRefreshRate;
-            mInfo.set(null);
+        if (!Objects.equals(layoutLimitedRefreshRate, mLayoutLimitedRefreshRate)) {
+            mLayoutLimitedRefreshRate = layoutLimitedRefreshRate;
+            mDirty = true;
+        }
+    }
+    /**
+     * Updates thermalRefreshRateThrottling
+     *
+     * @param refreshRanges new thermalRefreshRateThrottling ranges limited by layout or default
+     */
+    public void updateThermalRefreshRateThrottling(
+            @Nullable SparseArray<SurfaceControl.RefreshRateRange> refreshRanges) {
+        if (refreshRanges == null) {
+            refreshRanges = new SparseArray<>();
+        }
+        if (!mThermalRefreshRateThrottling.contentEquals(refreshRanges)) {
+            mThermalRefreshRateThrottling = refreshRanges;
+            mDirty = true;
         }
     }
 
@@ -483,6 +515,10 @@ final class LogicalDisplay {
                 mBaseDisplayInfo.removeMode = Display.REMOVE_MODE_DESTROY_CONTENT;
             }
 
+            mBaseDisplayInfo.layoutLimitedRefreshRate = mLayoutLimitedRefreshRate;
+            mBaseDisplayInfo.thermalRefreshRateThrottling = mThermalRefreshRateThrottling;
+            mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
+
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
             mDirty = false;
@@ -571,7 +607,7 @@ final class LogicalDisplay {
             DisplayDevice device,
             boolean isBlanked) {
         // Set the layer stack.
-        device.setLayerStackLocked(t, isBlanked ? BLANK_LAYER_STACK : mLayerStack);
+        device.setLayerStackLocked(t, isBlanked ? BLANK_LAYER_STACK : mLayerStack, mDisplayId);
         // Also inform whether the device is the same one sent to inputflinger for its layerstack.
         // Prevent displays that are disabled from receiving input.
         // TODO(b/188914255): Remove once input can dispatch against device vs layerstack.
@@ -854,19 +890,14 @@ final class LogicalDisplay {
     }
 
     /**
-     * @return The ID of the brightness throttling data that this display should use.
-     */
-    public String getBrightnessThrottlingDataIdLocked() {
-        return mBrightnessThrottlingDataId;
-    }
-
-    /**
      * @param brightnessThrottlingDataId The ID of the brightness throttling data that this
      *                                  display should use.
      */
-    public void setBrightnessThrottlingDataIdLocked(String brightnessThrottlingDataId) {
-        mBrightnessThrottlingDataId =
-                brightnessThrottlingDataId;
+    public void setThermalBrightnessThrottlingDataIdLocked(String brightnessThrottlingDataId) {
+        if (!Objects.equals(brightnessThrottlingDataId, mThermalBrightnessThrottlingDataId)) {
+            mThermalBrightnessThrottlingDataId = brightnessThrottlingDataId;
+            mDirty = true;
+        }
     }
 
     /**
@@ -903,18 +934,6 @@ final class LogicalDisplay {
         return mDisplayGroupName;
     }
 
-    /**
-     * Returns whether a display group other than the default display group needs to be assigned.
-     *
-     * <p>If display group name is empty or {@code Display.FLAG_OWN_DISPLAY_GROUP} is set, the
-     * display is assigned to the default display group.
-     */
-    public boolean needsOwnDisplayGroupLocked() {
-        DisplayInfo info = getDisplayInfoLocked();
-        return (info.flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0
-                || !TextUtils.isEmpty(mDisplayGroupName);
-    }
-
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mIsEnabled=" + mIsEnabled);
@@ -934,8 +953,10 @@ final class LogicalDisplay {
         pw.println("mFrameRateOverrides=" + Arrays.toString(mFrameRateOverrides));
         pw.println("mPendingFrameRateOverrideUids=" + mPendingFrameRateOverrideUids);
         pw.println("mDisplayGroupName=" + mDisplayGroupName);
-        pw.println("mBrightnessThrottlingDataId=" + mBrightnessThrottlingDataId);
+        pw.println("mThermalBrightnessThrottlingDataId=" + mThermalBrightnessThrottlingDataId);
         pw.println("mLeadDisplayId=" + mLeadDisplayId);
+        pw.println("mLayoutLimitedRefreshRate=" + mLayoutLimitedRefreshRate);
+        pw.println("mThermalRefreshRateThrottling=" + mThermalRefreshRateThrottling);
     }
 
     @Override

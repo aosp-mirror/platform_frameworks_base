@@ -105,15 +105,6 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /**
-     * Called to inform the transition that the animation should start with the assumption that
-     * PiP is not animating from its original bounds, but rather a continuation of another
-     * animation. For example, gesture navigation would first fade out the PiP activity, and the
-     * transition should be responsible to animate in (such as fade in) the PiP.
-     */
-    public void setIsFullAnimation(boolean isFullAnimation) {
-    }
-
-    /**
      * Called when the Shell wants to start an exit Pip transition/animation.
      */
     public void startExitTransition(int type, WindowContainerTransaction out,
@@ -130,6 +121,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     /** Called when the fixed rotation started. */
     public void onFixedRotationStarted() {
+    }
+
+    /** Called when the fixed rotation finished. */
+    public void onFixedRotationFinished() {
     }
 
     public PipTransitionController(
@@ -234,11 +229,27 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         throw new IllegalStateException("Request isn't entering PiP");
     }
 
+    /** Sets the type of animation when a PiP task appears. */
+    public void setEnterAnimationType(@PipAnimationController.AnimationType int type) {
+    }
+
     /** Play a transition animation for entering PiP on a specific PiP change. */
     public void startEnterAnimation(@NonNull final TransitionInfo.Change pipChange,
             @NonNull final SurfaceControl.Transaction startTransaction,
             @NonNull final SurfaceControl.Transaction finishTransaction,
             @NonNull final Transitions.TransitionFinishCallback finishCallback) {
+    }
+
+    /**
+     * Applies the proper surface states (rounded corners/shadows) to pip surfaces in `info`.
+     * This is intended to be used when PiP is part of another animation but isn't, itself,
+     * animating (eg. unlocking).
+     * @return `true` if there was a pip in `info`.
+     */
+    public boolean syncPipSurfaceState(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction) {
+        return false;
     }
 
     /** End the currently-playing PiP animation. */

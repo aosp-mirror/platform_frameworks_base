@@ -19,9 +19,7 @@ package com.android.systemui.keyguard;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
-import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
@@ -31,21 +29,16 @@ import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
-import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionOldType;
 import static android.view.WindowManager.TransitionType;
-import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.Service;
 import android.app.WindowConfiguration;
 import android.content.Intent;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -67,10 +60,9 @@ import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
-import android.window.RemoteTransition;
-import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -81,6 +73,7 @@ import com.android.systemui.SystemUIApplication;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 
@@ -109,7 +102,8 @@ public class KeyguardService extends Service {
         }
     }
 
-    private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers) {
+    private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers,
+            SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         final ArrayList<RemoteAnimationTarget> out = new ArrayList<>();
         for (int i = 0; i < info.getChanges().size(); i++) {
             boolean changeIsWallpaper =
@@ -119,39 +113,26 @@ public class KeyguardService extends Service {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
             final int taskId = taskInfo != null ? change.getTaskInfo().taskId : -1;
-            boolean isNotInRecents;
-            WindowConfiguration windowConfiguration = null;
-            if (taskInfo != null) {
-                if (taskInfo.getConfiguration() != null) {
-                    windowConfiguration =
-                            change.getTaskInfo().getConfiguration().windowConfiguration;
-                }
-                isNotInRecents = !change.getTaskInfo().isRunning;
-            } else {
-                isNotInRecents = true;
-            }
-            Rect localBounds = new Rect(change.getEndAbsBounds());
-            localBounds.offsetTo(change.getEndRelOffset().x, change.getEndRelOffset().y);
 
-            final RemoteAnimationTarget target = new RemoteAnimationTarget(
-                    taskId,
-                    newModeToLegacyMode(change.getMode()),
-                    change.getLeash(),
-                    (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0
-                            || (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0,
-                    null /* clipRect */,
-                    new Rect(0, 0, 0, 0) /* contentInsets */,
-                    info.getChanges().size() - i,
-                    new Point(), localBounds, new Rect(change.getEndAbsBounds()),
-                    windowConfiguration, isNotInRecents, null /* startLeash */,
-                    change.getStartAbsBounds(), taskInfo, false /* allowEnterPip */);
-            // Use hasAnimatingParent to mark the anything below root task
             if (taskId != -1 && change.getParent() != null) {
                 final TransitionInfo.Change parentChange = info.getChange(change.getParent());
                 if (parentChange != null && parentChange.getTaskInfo() != null) {
-                    target.hasAnimatingParent = true;
+                    // Only adding the root task as the animation target.
+                    continue;
                 }
             }
+
+            // Avoid wrapping non-task and non-wallpaper changes as they don't need to animate
+            // for keyguard unlock animation.
+            if (taskId < 0 && !wallpapers) continue;
+
+            final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
+                    // wallpapers go into the "below" layer space
+                    info.getChanges().size() - i,
+                    // keyguard treats wallpaper as translucent
+                    (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0,
+                    info, t, leashMap);
+
             out.add(target);
         }
         return out.toArray(new RemoteAnimationTarget[out.size()]);
@@ -164,8 +145,8 @@ public class KeyguardService extends Service {
             return apps.length == 0 ? TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                     : TRANSIT_OLD_KEYGUARD_GOING_AWAY;
         } else if (type == TRANSIT_KEYGUARD_OCCLUDE) {
-            boolean isOccludeByDream = apps.length > 0 && apps[0].taskInfo.topActivityType
-                    == WindowConfiguration.ACTIVITY_TYPE_DREAM;
+            boolean isOccludeByDream = apps.length > 0 && apps[0].taskInfo != null
+                    && apps[0].taskInfo.topActivityType == WindowConfiguration.ACTIVITY_TYPE_DREAM;
             if (isOccludeByDream) return TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM;
             return TRANSIT_OLD_KEYGUARD_OCCLUDE;
         } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
@@ -178,77 +159,83 @@ public class KeyguardService extends Service {
 
     // Wrap Keyguard going away animation.
     // Note: Also used for wrapping occlude by Dream animation. It works (with some redundancy).
-    private static IRemoteTransition wrap(IRemoteAnimationRunner runner) {
+    public static IRemoteTransition wrap(IRemoteAnimationRunner runner) {
         return new IRemoteTransition.Stub() {
-            final ArrayMap<IBinder, IRemoteTransitionFinishedCallback> mFinishCallbacks =
-                    new ArrayMap<>();
+
+            private final ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = new ArrayMap<>();
+
+            @GuardedBy("mLeashMap")
+            private IRemoteTransitionFinishedCallback mFinishCallback = null;
 
             @Override
             public void startAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
                     throws RemoteException {
                 Slog.d(TAG, "Starts IRemoteAnimationRunner: info=" + info);
-                final RemoteAnimationTarget[] apps = wrap(info, false /* wallpapers */);
-                final RemoteAnimationTarget[] wallpapers = wrap(info, true /* wallpapers */);
-                final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
 
-                // Sets the alpha to 0 for the opening root task for fade in animation. And since
-                // the fade in animation can only apply on the first opening app, so set alpha to 1
-                // for anything else.
-                boolean foundOpening = false;
-                for (RemoteAnimationTarget target : apps) {
-                    if (target.taskId != -1
-                            && target.mode == RemoteAnimationTarget.MODE_OPENING
-                            && !target.hasAnimatingParent) {
-                        if (foundOpening) {
-                            Log.w(TAG, "More than one opening target");
-                            t.setAlpha(target.leash, 1.0f);
-                            continue;
+                synchronized (mLeashMap) {
+                    final RemoteAnimationTarget[] apps =
+                            wrap(info, false /* wallpapers */, t, mLeashMap);
+                    final RemoteAnimationTarget[] wallpapers =
+                            wrap(info, true /* wallpapers */, t, mLeashMap);
+                    final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
+
+                    // Set alpha back to 1 for the independent changes because we will be animating
+                    // children instead.
+                    for (TransitionInfo.Change chg : info.getChanges()) {
+                        if (TransitionInfo.isIndependent(chg, info)) {
+                            t.setAlpha(chg.getLeash(), 1.f);
                         }
-                        t.setAlpha(target.leash, 0.0f);
-                        foundOpening = true;
-                    } else {
-                        t.setAlpha(target.leash, 1.0f);
                     }
-                }
-                t.apply();
-                synchronized (mFinishCallbacks) {
-                    mFinishCallbacks.put(transition, finishCallback);
-                }
-                runner.onAnimationStart(getTransitionOldType(info.getType(), info.getFlags(), apps),
-                        apps, wallpapers, nonApps,
-                        new IRemoteAnimationFinishedCallback.Stub() {
-                            @Override
-                            public void onAnimationFinished() throws RemoteException {
-                                synchronized (mFinishCallbacks) {
-                                    if (mFinishCallbacks.remove(transition) == null) return;
+                    initAlphaForAnimationTargets(t, apps);
+                    initAlphaForAnimationTargets(t, wallpapers);
+                    t.apply();
+                    mFinishCallback = finishCallback;
+                    runner.onAnimationStart(
+                            getTransitionOldType(info.getType(), info.getFlags(), apps),
+                            apps, wallpapers, nonApps,
+                            new IRemoteAnimationFinishedCallback.Stub() {
+                                @Override
+                                public void onAnimationFinished() throws RemoteException {
+                                    synchronized (mLeashMap) {
+                                        Slog.d(TAG, "Finish IRemoteAnimationRunner.");
+                                        finish();
+                                    }
                                 }
-                                info.releaseAllSurfaces();
-                                Slog.d(TAG, "Finish IRemoteAnimationRunner.");
-                                finishCallback.onTransitionFinished(null /* wct */, null /* t */);
                             }
-                        }
-                );
+                    );
+                }
             }
 
-            public void mergeAnimation(IBinder transition, TransitionInfo info,
-                    SurfaceControl.Transaction t, IBinder mergeTarget,
-                    IRemoteTransitionFinishedCallback finishCallback) {
+            public void mergeAnimation(IBinder candidateTransition, TransitionInfo candidateInfo,
+                    SurfaceControl.Transaction candidateT, IBinder currentTransition,
+                    IRemoteTransitionFinishedCallback candidateFinishCallback)
+                    throws RemoteException {
                 try {
-                    final IRemoteTransitionFinishedCallback origFinishCB;
-                    synchronized (mFinishCallbacks) {
-                        origFinishCB = mFinishCallbacks.remove(transition);
+                    synchronized (mLeashMap) {
+                        runner.onAnimationCancelled();
+                        finish();
                     }
-                    info.releaseAllSurfaces();
-                    t.close();
-                    if (origFinishCB == null) {
-                        // already finished (or not started yet), so do nothing.
-                        return;
-                    }
-                    runner.onAnimationCancelled(false /* isKeyguardOccluded */);
-                    origFinishCB.onTransitionFinished(null /* wct */, null /* t */);
                 } catch (RemoteException e) {
                     // nothing, we'll just let it finish on its own I guess.
+                }
+            }
+
+            private static void initAlphaForAnimationTargets(@NonNull SurfaceControl.Transaction t,
+                    @NonNull RemoteAnimationTarget[] targets) {
+                for (RemoteAnimationTarget target : targets) {
+                    if (target.mode != MODE_OPENING) continue;
+                    t.setAlpha(target.leash, 0.f);
+                }
+            }
+
+            @GuardedBy("mLeashMap")
+            private void finish() throws RemoteException {
+                mLeashMap.clear();
+                final IRemoteTransitionFinishedCallback finishCallback = mFinishCallback;
+                if (finishCallback != null) {
+                    mFinishCallback = null;
+                    finishCallback.onTransitionFinished(null /* wct */, null /* t */);
                 }
             }
         };
@@ -275,7 +262,8 @@ public class KeyguardService extends Service {
         if (mShellTransitions == null || !Transitions.ENABLE_SHELL_TRANSITIONS) {
             RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
             final RemoteAnimationAdapter exitAnimationAdapter =
-                    new RemoteAnimationAdapter(mExitAnimationRunner, 0, 0);
+                    new RemoteAnimationAdapter(
+                            mKeyguardViewMediator.getExitAnimationRunner(), 0, 0);
             definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                     exitAnimationAdapter);
             definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
@@ -299,92 +287,7 @@ public class KeyguardService extends Service {
                     unoccludeAnimationAdapter);
             ActivityTaskManager.getInstance().registerRemoteAnimationsForDisplay(
                     mDisplayTracker.getDefaultDisplayId(), definition);
-            return;
         }
-        Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_GOING_AWAY");
-        TransitionFilter f = new TransitionFilter();
-        f.mFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-        mShellTransitions.registerRemote(f,
-                new RemoteTransition(wrap(mExitAnimationRunner), getIApplicationThread()));
-
-        Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
-        // Register for occluding
-        final RemoteTransition occludeTransition = new RemoteTransition(
-                mOccludeAnimation, getIApplicationThread());
-        f = new TransitionFilter();
-        f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
-        f.mRequirements = new TransitionFilter.Requirement[]{
-                new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
-        // First require at-least one app showing that occludes.
-        f.mRequirements[0].mMustBeIndependent = false;
-        f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
-        f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-        // Then require that we aren't closing any occludes (because this would mean a
-        // regular task->task or activity->activity animation not involving keyguard).
-        f.mRequirements[1].mNot = true;
-        f.mRequirements[1].mMustBeIndependent = false;
-        f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
-        f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
-        mShellTransitions.registerRemote(f, occludeTransition);
-
-        // Now register for un-occlude.
-        final RemoteTransition unoccludeTransition = new RemoteTransition(
-                mUnoccludeAnimation, getIApplicationThread());
-        f = new TransitionFilter();
-        f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
-        f.mRequirements = new TransitionFilter.Requirement[]{
-                new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
-        // First require at-least one app going-away (doesn't need occlude flag
-        // as that is implicit by it having been visible and we don't want to exclude
-        // cases where we are un-occluding because the app removed its showWhenLocked
-        // capability at runtime).
-        f.mRequirements[1].mMustBeIndependent = false;
-        f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
-        f.mRequirements[1].mMustBeTask = true;
-        // Then require that we aren't opening any occludes (otherwise we'd remain
-        // occluded).
-        f.mRequirements[0].mNot = true;
-        f.mRequirements[0].mMustBeIndependent = false;
-        f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
-        f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-        mShellTransitions.registerRemote(f, unoccludeTransition);
-
-        // Register for specific transition type.
-        // Above filter cannot fulfill all conditions.
-        // E.g. close top activity while screen off but next activity is occluded, this should
-        // an occluded transition, but since the activity is invisible, the condition would
-        // match unoccluded transition.
-        // But on the contrary, if we add above condition in occluded transition, then when user
-        // trying to dismiss occluded activity when unlock keyguard, the condition would match
-        // occluded transition.
-        f = new TransitionFilter();
-        f.mTypeSet = new int[]{TRANSIT_KEYGUARD_OCCLUDE};
-        mShellTransitions.registerRemote(f, occludeTransition);
-
-        f = new TransitionFilter();
-        f.mTypeSet = new int[]{TRANSIT_KEYGUARD_UNOCCLUDE};
-        mShellTransitions.registerRemote(f, unoccludeTransition);
-
-        Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_OCCLUDE for DREAM");
-        // Register for occluding by Dream
-        f = new TransitionFilter();
-        f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
-        f.mRequirements = new TransitionFilter.Requirement[]{
-                new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
-        // First require at-least one app of type DREAM showing that occludes.
-        f.mRequirements[0].mActivityType = WindowConfiguration.ACTIVITY_TYPE_DREAM;
-        f.mRequirements[0].mMustBeIndependent = false;
-        f.mRequirements[0].mFlags = FLAG_OCCLUDES_KEYGUARD;
-        f.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-        // Then require that we aren't closing any occludes (because this would mean a
-        // regular task->task or activity->activity animation not involving keyguard).
-        f.mRequirements[1].mNot = true;
-        f.mRequirements[1].mMustBeIndependent = false;
-        f.mRequirements[1].mFlags = FLAG_OCCLUDES_KEYGUARD;
-        f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
-        mShellTransitions.registerRemote(f, new RemoteTransition(
-                wrap(mKeyguardViewMediator.getOccludeByDreamAnimationRunner()),
-                getIApplicationThread()));
     }
 
     @Override
@@ -404,77 +307,30 @@ public class KeyguardService extends Service {
         }
     }
 
-    private final IRemoteAnimationRunner.Stub mExitAnimationRunner =
-            new IRemoteAnimationRunner.Stub() {
-        @Override // Binder interface
-        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
-                RemoteAnimationTarget[] apps,
-                RemoteAnimationTarget[] wallpapers,
-                RemoteAnimationTarget[] nonApps,
-                IRemoteAnimationFinishedCallback finishedCallback) {
-            Trace.beginSection("mExitAnimationRunner.onAnimationStart#startKeyguardExitAnimation");
-            checkPermission();
-            mKeyguardViewMediator.startKeyguardExitAnimation(transit, apps, wallpapers,
-                    nonApps, finishedCallback);
-            Trace.endSection();
-        }
-
-        @Override // Binder interface
-        public void onAnimationCancelled(boolean isKeyguardOccluded) {
-            mKeyguardViewMediator.cancelKeyguardExitAnimation();
-        }
-    };
-
-    final IRemoteTransition mOccludeAnimation = new IRemoteTransition.Stub() {
-        @Override
-        public void startAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
-                    throws RemoteException {
-            t.apply();
-            mBinder.setOccluded(true /* isOccluded */, true /* animate */);
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
-            info.releaseAllSurfaces();
-        }
-
-        @Override
-        public void mergeAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IBinder mergeTarget,
-                IRemoteTransitionFinishedCallback finishCallback) {
-            t.close();
-            info.releaseAllSurfaces();
-        }
-    };
-
-    final IRemoteTransition mUnoccludeAnimation = new IRemoteTransition.Stub() {
-        @Override
-        public void startAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
-                throws RemoteException {
-            t.apply();
-            mBinder.setOccluded(false /* isOccluded */, true /* animate */);
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
-            info.releaseAllSurfaces();
-        }
-
-        @Override
-        public void mergeAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IBinder mergeTarget,
-                IRemoteTransitionFinishedCallback finishCallback) {
-            t.close();
-            info.releaseAllSurfaces();
-        }
-    };
-
     private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
+        private static final String TRACK_NAME = "IKeyguardService";
+
+        /**
+         * Helper for tracing the most-recent call on the IKeyguardService interface.
+         * IKeyguardService is oneway, so we are most interested in the order of the calls as they
+         * are received. We use an async track to make it easier to visualize in the trace.
+         * @param name name of the trace section
+         */
+        private static void trace(String name) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TRACK_NAME, 0);
+            Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, TRACK_NAME, name, 0);
+        }
 
         @Override // Binder interface
         public void addStateMonitorCallback(IKeyguardStateCallback callback) {
+            trace("addStateMonitorCallback");
             checkPermission();
             mKeyguardViewMediator.addStateMonitorCallback(callback);
         }
 
         @Override // Binder interface
         public void verifyUnlock(IKeyguardExitCallback callback) {
+            trace("verifyUnlock");
             Trace.beginSection("KeyguardService.mBinder#verifyUnlock");
             checkPermission();
             mKeyguardViewMediator.verifyUnlock(callback);
@@ -483,6 +339,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void setOccluded(boolean isOccluded, boolean animate) {
+            trace("setOccluded isOccluded=" + isOccluded + " animate=" + animate);
             Log.d(TAG, "setOccluded(" + isOccluded + ")");
 
             Trace.beginSection("KeyguardService.mBinder#setOccluded");
@@ -493,24 +350,28 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
+            trace("dismiss message=" + message);
             checkPermission();
             mKeyguardViewMediator.dismiss(callback, message);
         }
 
         @Override // Binder interface
         public void onDreamingStarted() {
+            trace("onDreamingStarted");
             checkPermission();
             mKeyguardViewMediator.onDreamingStarted();
         }
 
         @Override // Binder interface
         public void onDreamingStopped() {
+            trace("onDreamingStopped");
             checkPermission();
             mKeyguardViewMediator.onDreamingStopped();
         }
 
         @Override // Binder interface
         public void onStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
+            trace("onStartedGoingToSleep pmSleepReason=" + pmSleepReason);
             checkPermission();
             mKeyguardViewMediator.onStartedGoingToSleep(
                     WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason));
@@ -521,6 +382,8 @@ public class KeyguardService extends Service {
         @Override // Binder interface
         public void onFinishedGoingToSleep(
                 @PowerManager.GoToSleepReason int pmSleepReason, boolean cameraGestureTriggered) {
+            trace("onFinishedGoingToSleep pmSleepReason=" + pmSleepReason
+                    + " cameraGestureTriggered=" + cameraGestureTriggered);
             checkPermission();
             mKeyguardViewMediator.onFinishedGoingToSleep(
                     WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason),
@@ -532,6 +395,8 @@ public class KeyguardService extends Service {
         @Override // Binder interface
         public void onStartedWakingUp(
                 @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
+            trace("onStartedWakingUp pmWakeReason=" + pmWakeReason
+                    + " cameraGestureTriggered=" + cameraGestureTriggered);
             Trace.beginSection("KeyguardService.mBinder#onStartedWakingUp");
             checkPermission();
             mKeyguardViewMediator.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
@@ -542,6 +407,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onFinishedWakingUp() {
+            trace("onFinishedWakingUp");
             Trace.beginSection("KeyguardService.mBinder#onFinishedWakingUp");
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.FINISHED_WAKING_UP);
@@ -550,6 +416,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onScreenTurningOn(IKeyguardDrawnCallback callback) {
+            trace("onScreenTurningOn");
             Trace.beginSection("KeyguardService.mBinder#onScreenTurningOn");
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON,
@@ -584,6 +451,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onScreenTurnedOn() {
+            trace("onScreenTurnedOn");
             Trace.beginSection("KeyguardService.mBinder#onScreenTurnedOn");
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_ON);
@@ -593,12 +461,14 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onScreenTurningOff() {
+            trace("onScreenTurningOff");
             checkPermission();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_OFF);
         }
 
         @Override // Binder interface
         public void onScreenTurnedOff() {
+            trace("onScreenTurnedOff");
             checkPermission();
             mKeyguardViewMediator.onScreenTurnedOff();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_OFF);
@@ -607,12 +477,14 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void setKeyguardEnabled(boolean enabled) {
+            trace("setKeyguardEnabled enabled" + enabled);
             checkPermission();
             mKeyguardViewMediator.setKeyguardEnabled(enabled);
         }
 
         @Override // Binder interface
         public void onSystemReady() {
+            trace("onSystemReady");
             Trace.beginSection("KeyguardService.mBinder#onSystemReady");
             checkPermission();
             mKeyguardViewMediator.onSystemReady();
@@ -621,24 +493,28 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void doKeyguardTimeout(Bundle options) {
+            trace("doKeyguardTimeout");
             checkPermission();
             mKeyguardViewMediator.doKeyguardTimeout(options);
         }
 
         @Override // Binder interface
         public void setSwitchingUser(boolean switching) {
+            trace("setSwitchingUser switching=" + switching);
             checkPermission();
             mKeyguardViewMediator.setSwitchingUser(switching);
         }
 
         @Override // Binder interface
         public void setCurrentUser(int userId) {
+            trace("setCurrentUser userId=" + userId);
             checkPermission();
             mKeyguardViewMediator.setCurrentUser(userId);
         }
 
-        @Override
+        @Override // Binder interface
         public void onBootCompleted() {
+            trace("onBootCompleted");
             checkPermission();
             mKeyguardViewMediator.onBootCompleted();
         }
@@ -648,28 +524,33 @@ public class KeyguardService extends Service {
          * {@code IRemoteAnimationRunner#onAnimationStart} instead.
          */
         @Deprecated
-        @Override
+        @Override // Binder interface
         public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+            trace("startKeyguardExitAnimation startTime=" + startTime
+                    + " fadeoutDuration=" + fadeoutDuration);
             Trace.beginSection("KeyguardService.mBinder#startKeyguardExitAnimation");
             checkPermission();
             mKeyguardViewMediator.startKeyguardExitAnimation(startTime, fadeoutDuration);
             Trace.endSection();
         }
 
-        @Override
+        @Override // Binder interface
         public void onShortPowerPressedGoHome() {
+            trace("onShortPowerPressedGoHome");
             checkPermission();
             mKeyguardViewMediator.onShortPowerPressedGoHome();
         }
 
-        @Override
+        @Override // Binder interface
         public void dismissKeyguardToLaunch(Intent intentToLaunch) {
+            trace("dismissKeyguardToLaunch");
             checkPermission();
             mKeyguardViewMediator.dismissKeyguardToLaunch(intentToLaunch);
         }
 
-        @Override
+        @Override // Binder interface
         public void onSystemKeyPressed(int keycode) {
+            trace("onSystemKeyPressed keycode=" + keycode);
             checkPermission();
             mKeyguardViewMediator.onSystemKeyPressed(keycode);
         }

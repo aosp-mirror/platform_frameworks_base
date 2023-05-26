@@ -58,6 +58,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -100,13 +101,16 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.am.UserState.KeyEvictedCallback;
+import com.android.server.pm.UserJourneyLogger;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -186,6 +190,7 @@ public class UserControllerTest {
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
             doNothing().when(mInjector).taskSupervisorRemoveUser(anyInt());
+            doNothing().when(mInjector).lockDeviceNowAndWaitForKeyguardShown();
             mockIsUsersOnSecondaryDisplaysEnabled(false);
             // All UserController params are set to default.
 
@@ -199,6 +204,7 @@ public class UserControllerTest {
             mUserController.setAllowUserUnlocking(true);
             setUpUser(TEST_USER_ID, NO_USERINFO_FLAGS);
             setUpUser(TEST_PRE_CREATED_USER_ID, NO_USERINFO_FLAGS, /* preCreated= */ true, null);
+            mInjector.mRelevantUser = null;
         });
     }
 
@@ -211,8 +217,7 @@ public class UserControllerTest {
     @Test
     public void testStartUser_foreground() {
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
-        verify(mInjector.getWindowManager()).startFreezingScreen(anyInt(), anyInt());
-        verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
+        verify(mInjector, never()).dismissUserSwitchingDialog(any());
         verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
         verify(mInjector.getWindowManager()).setSwitchingUser(true);
         verify(mInjector).clearAllLockedTasks(anyString());
@@ -224,11 +229,31 @@ public class UserControllerTest {
     public void testStartUser_background() {
         boolean started = mUserController.startUser(TEST_USER_ID, USER_START_MODE_BACKGROUND);
         assertWithMessage("startUser(%s, foreground=false)", TEST_USER_ID).that(started).isTrue();
-        verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
+        verify(mInjector, never()).showUserSwitchingDialog(
+                any(), any(), anyString(), anyString(), any());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
         startBackgroundUserAssertions();
         verifyUserAssignedToDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testStartUser_background_duringBootHsum() {
+        mockIsHeadlessSystemUserMode(true);
+        mUserController.setAllowUserUnlocking(false);
+        mInjector.mRelevantUser = TEST_USER_ID;
+        boolean started = mUserController.startUser(TEST_USER_ID, USER_START_MODE_BACKGROUND);
+        assertWithMessage("startUser(%s, foreground=false)", TEST_USER_ID).that(started).isTrue();
+
+        // ACTION_LOCKED_BOOT_COMPLETED not sent yet
+        startUserAssertions(newArrayList(Intent.ACTION_USER_STARTED, Intent.ACTION_USER_STARTING),
+                START_BACKGROUND_USER_MESSAGE_CODES);
+
+        mUserController.onBootComplete(null);
+
+        startUserAssertions(newArrayList(Intent.ACTION_USER_STARTED, Intent.ACTION_USER_STARTING,
+                        Intent.ACTION_LOCKED_BOOT_COMPLETED),
+                START_BACKGROUND_USER_MESSAGE_CODES);
     }
 
     @Test
@@ -276,7 +301,8 @@ public class UserControllerTest {
         assertWithMessage("startUserOnDisplay(%s, %s)", TEST_USER_ID, 42).that(started).isTrue();
         verifyUserAssignedToDisplay(TEST_USER_ID, 42);
 
-        verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
+        verify(mInjector, never()).showUserSwitchingDialog(
+                any(), any(), anyString(), anyString(), any());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
         startBackgroundUserAssertions();
@@ -288,8 +314,9 @@ public class UserControllerTest {
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
 
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
-        verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
-        verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
+        verify(mInjector, never()).showUserSwitchingDialog(
+                any(), any(), anyString(), anyString(), any());
+        verify(mInjector, never()).dismissUserSwitchingDialog(any());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         startForegroundUserAssertions();
     }
@@ -310,7 +337,8 @@ public class UserControllerTest {
         // Make sure no intents have been fired for pre-created users.
         assertTrue(mInjector.mSentIntents.isEmpty());
 
-        verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
+        verify(mInjector, never()).showUserSwitchingDialog(
+                any(), any(), anyString(), anyString(), any());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
 
@@ -383,6 +411,7 @@ public class UserControllerTest {
         // Call dispatchUserSwitch and verify that observer was called only once
         mInjector.mHandler.clearAllRecordedMessages();
         mUserController.dispatchUserSwitch(userState, oldUserId, newUserId);
+        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         verify(observer, times(1)).onUserSwitching(eq(TEST_USER_ID), any());
         Set<Integer> expectedCodes = Collections.singleton(CONTINUE_USER_SWITCH_MSG);
         Set<Integer> actualCodes = mInjector.mHandler.getMessageCodes();
@@ -413,6 +442,7 @@ public class UserControllerTest {
         // Call dispatchUserSwitch and verify that observer was called only once
         mInjector.mHandler.clearAllRecordedMessages();
         mUserController.dispatchUserSwitch(userState, oldUserId, newUserId);
+        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         verify(observer, times(1)).onUserSwitching(eq(TEST_USER_ID), any());
         // Verify that CONTINUE_USER_SWITCH_MSG is not sent (triggers timeout)
         Set<Integer> actualCodes = mInjector.mHandler.getMessageCodes();
@@ -440,7 +470,7 @@ public class UserControllerTest {
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector, times(0)).dismissKeyguard(any());
-        verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
+        verify(mInjector, times(1)).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
         verifySystemUserVisibilityChangesNeverNotified();
     }
@@ -461,7 +491,7 @@ public class UserControllerTest {
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector, times(1)).dismissKeyguard(any());
-        verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
+        verify(mInjector, times(1)).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
         verifySystemUserVisibilityChangesNeverNotified();
     }
@@ -481,7 +511,7 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
+        verify(mInjector, never()).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
     }
 
@@ -925,6 +955,45 @@ public class UserControllerTest {
                 .systemServiceManagerOnUserCompletedEvent(eq(user2), eq(event2a));
     }
 
+    @Test
+    public void testStallUserSwitchUntilTheKeyguardIsShown() throws Exception {
+        // enable user switch ui, because keyguard is only shown then
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+
+        // mock the device to be secure in order to expect the keyguard to be shown
+        when(mInjector.mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
+
+        // call real lockDeviceNowAndWaitForKeyguardShown method for this test
+        doCallRealMethod().when(mInjector).lockDeviceNowAndWaitForKeyguardShown();
+
+        // call startUser on a thread because we're expecting it to be blocked
+        Thread threadStartUser = new Thread(()-> {
+            mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
+        });
+        threadStartUser.start();
+
+        // make sure the switch is stalled...
+        Thread.sleep(2000);
+        // by checking REPORT_USER_SWITCH_MSG is not sent yet
+        assertNull(mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG));
+        // and the thread is still alive
+        assertTrue(threadStartUser.isAlive());
+
+        // mock send the keyguard shown event
+        ArgumentCaptor<ActivityTaskManagerInternal.ScreenObserver> captor = ArgumentCaptor.forClass(
+                ActivityTaskManagerInternal.ScreenObserver.class);
+        verify(mInjector.mActivityTaskManagerInternal).registerScreenObserver(captor.capture());
+        captor.getValue().onKeyguardStateChanged(true);
+
+        // verify the switch now moves on...
+        Thread.sleep(1000);
+        // by checking REPORT_USER_SWITCH_MSG is sent
+        assertNotNull(mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG));
+        // and the thread is finished
+        assertFalse(threadStartUser.isAlive());
+    }
+
     private void setUpAndStartUserInBackground(int userId) throws Exception {
         setUpUser(userId, 0);
         mUserController.startUser(userId, USER_START_MODE_BACKGROUND);
@@ -983,8 +1052,7 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        verify(mInjector.getWindowManager(), times(expectedNumberOfCalls))
-                .stopFreezingScreen();
+        verify(mInjector, times(expectedNumberOfCalls)).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, newUserId, expectOldUserStopping);
     }
 
@@ -1067,10 +1135,15 @@ public class UserControllerTest {
         private final IStorageManager mStorageManagerMock;
         private final UserManagerInternal mUserManagerInternalMock;
         private final WindowManagerService mWindowManagerMock;
+        private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
         private final KeyguardManager mKeyguardManagerMock;
         private final LockPatternUtils mLockPatternUtilsMock;
 
+        private final UserJourneyLogger mUserJourneyLoggerMock;
+
         private final Context mCtx;
+
+        private Integer mRelevantUser;
 
         TestInjector(Context ctx) {
             super(null);
@@ -1082,10 +1155,12 @@ public class UserControllerTest {
             mUserManagerMock = mock(UserManagerService.class);
             mUserManagerInternalMock = mock(UserManagerInternal.class);
             mWindowManagerMock = mock(WindowManagerService.class);
+            mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
             mStorageManagerMock = mock(IStorageManager.class);
             mKeyguardManagerMock = mock(KeyguardManager.class);
             when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
             mLockPatternUtilsMock = mock(LockPatternUtils.class);
+            mUserJourneyLoggerMock = mock(UserJourneyLogger.class);
         }
 
         @Override
@@ -1142,6 +1217,11 @@ public class UserControllerTest {
         }
 
         @Override
+        ActivityTaskManagerInternal getActivityTaskManagerInternal() {
+            return mActivityTaskManagerInternal;
+        }
+
+        @Override
         KeyguardManager getKeyguardManager() {
             return mKeyguardManagerMock;
         }
@@ -1158,7 +1238,9 @@ public class UserControllerTest {
                 boolean sticky, int callingPid, int callingUid, int realCallingUid,
                 int realCallingPid, int userId) {
             Log.i(TAG, "broadcastIntentLocked " + intent);
-            mSentIntents.add(intent);
+            if (mRelevantUser == null || mRelevantUser == userId || userId == UserHandle.USER_ALL) {
+                mSentIntents.add(intent);
+            }
             return 0;
         }
 
@@ -1187,6 +1269,22 @@ public class UserControllerTest {
         }
 
         @Override
+        void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,
+                String switchingFromSystemUserMessage, String switchingToSystemUserMessage,
+                Runnable onShown) {
+            if (onShown != null) {
+                onShown.run();
+            }
+        }
+
+        @Override
+        void dismissUserSwitchingDialog(Runnable onDismissed) {
+            if (onDismissed != null) {
+                onDismissed.run();
+            }
+        }
+
+        @Override
         protected LockPatternUtils getLockPatternUtils() {
             return mLockPatternUtilsMock;
         }
@@ -1199,6 +1297,11 @@ public class UserControllerTest {
         @Override
         void onSystemUserVisibilityChanged(boolean visible) {
             Log.i(TAG, "onSystemUserVisibilityChanged(" + visible + ")");
+        }
+
+        @Override
+        protected UserJourneyLogger getUserJourneyLogger() {
+            return mUserJourneyLoggerMock;
         }
     }
 

@@ -183,6 +183,10 @@ MissingGetterMatchingBuilder: android.telecom.ConnectionRequest.Builder#setShoul
     android.telecom.ConnectionRequest does not declare a `shouldShowIncomingCallUi()` method matching method android.telecom.ConnectionRequest.Builder.setShouldShowIncomingCallUi(boolean)
 MissingGetterMatchingBuilder: android.view.Display.Mode.Builder#setResolution(int, int):
     android.view.Display.Mode does not declare a `getResolution()` method matching method android.view.Display.Mode.Builder.setResolution(int,int)
+MissingGetterMatchingBuilder: android.view.inputmethod.InlineSuggestionsRequest.Builder#setClientSupported(boolean):
+    android.view.inputmethod.InlineSuggestionsRequest does not declare a `isClientSupported()` method matching method android.view.inputmethod.InlineSuggestionsRequest.Builder.setClientSupported(boolean)
+MissingGetterMatchingBuilder: android.view.inputmethod.InlineSuggestionsRequest.Builder#setServiceSupported(boolean):
+    android.view.inputmethod.InlineSuggestionsRequest does not declare a `isServiceSupported()` method matching method android.view.inputmethod.InlineSuggestionsRequest.Builder.setServiceSupported(boolean)
 
 
 MissingNullability: android.app.Activity#onMovedToDisplay(int, android.content.res.Configuration) parameter #1:

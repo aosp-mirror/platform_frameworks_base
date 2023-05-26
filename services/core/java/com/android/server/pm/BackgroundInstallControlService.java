@@ -231,6 +231,14 @@ public class BackgroundInstallControlService extends SystemService {
             return;
         }
 
+        // the installers without INSTALL_PACKAGES perm can't perform
+        // the installation in background. So we can just filter out them.
+        if (mPermissionManager.checkPermission(installerPackageName,
+                android.Manifest.permission.INSTALL_PACKAGES,
+                userId) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
         // convert up-time to current time.
         final long installTimestamp = System.currentTimeMillis()
                 - (SystemClock.uptimeMillis() - appInfo.createTimestamp);
@@ -248,7 +256,7 @@ public class BackgroundInstallControlService extends SystemService {
     // ADB sets installerPackageName to null, this creates a loophole to bypass BIC which will be
     // addressed with b/265203007
     private boolean installedByAdb(String initiatingPackageName) {
-        return initiatingPackageName == null;
+        return PackageManagerServiceUtils.isInstalledByAdb(initiatingPackageName);
     }
 
     private boolean wasForegroundInstallation(String installerPackageName,

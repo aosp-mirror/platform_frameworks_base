@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"Slått på"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"Filtrert topptekst"</item>
-    <item msgid="4818549483446395865">"Filtrerte A2DP-mediepakker"</item>
-    <item msgid="8207123990453243311">"Filtrert RFCOMM-kanal"</item>
+    <item msgid="195768089203590086">"La bare ACL-hoder være igjen"</item>
+    <item msgid="2776218217644557831">"Filtrer A2DP-mediepakker"</item>
+    <item msgid="8163235976612675092">"Filtrer RFCOMM-kanalen"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"Slått av"</item>
-    <item msgid="5884245882825346396">"Magi"</item>
-    <item msgid="6569400572915342949">"Topptekst"</item>
-    <item msgid="1239386221416967664">"Fullt filter"</item>
+    <item msgid="3961868665260627524">"Deaktiver"</item>
+    <item msgid="2505973306504851132">"Fyll med en streng med tegn"</item>
+    <item msgid="5883011000629613855">"La bare hodet være igjen"</item>
+    <item msgid="1051534112762023603">"Fjern fullstendig"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (standard)"</item>

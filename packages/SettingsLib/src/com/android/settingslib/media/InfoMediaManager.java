@@ -23,7 +23,13 @@ import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_GAME_CONSOLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTWATCH;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET_DOCKED;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
 import static android.media.MediaRoute2Info.TYPE_USB_ACCESSORY;
@@ -31,7 +37,6 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
@@ -51,6 +56,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.DoNotInline;
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -531,7 +537,6 @@ public class InfoMediaManager extends MediaManager {
     @SuppressWarnings("NewApi")
     @VisibleForTesting
     void addMediaDevice(MediaRoute2Info route) {
-        //TODO(b/258141461): Attach flag and disable reason in MediaDevice
         final int deviceType = route.getType();
         MediaDevice mediaDevice = null;
         switch (deviceType) {
@@ -539,16 +544,14 @@ public class InfoMediaManager extends MediaManager {
             case TYPE_REMOTE_TV:
             case TYPE_REMOTE_SPEAKER:
             case TYPE_GROUP:
-                //TODO(b/148765806): use correct device type once api is ready.
+            case TYPE_REMOTE_TABLET:
+            case TYPE_REMOTE_TABLET_DOCKED:
+            case TYPE_REMOTE_COMPUTER:
+            case TYPE_REMOTE_GAME_CONSOLE:
+            case TYPE_REMOTE_CAR:
+            case TYPE_REMOTE_SMARTWATCH:
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
                         mPackageName, mPreferenceItemMap.get(route.getId()));
-                if (!TextUtils.isEmpty(mPackageName)
-                        && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
-                    mediaDevice.setState(STATE_SELECTED);
-                    if (mCurrentConnectedDevice == null) {
-                        mCurrentConnectedDevice = mediaDevice;
-                    }
-                }
                 break;
             case TYPE_BUILTIN_SPEAKER:
             case TYPE_USB_DEVICE:
@@ -581,7 +584,13 @@ public class InfoMediaManager extends MediaManager {
                 break;
 
         }
-
+        if (mediaDevice != null && !TextUtils.isEmpty(mPackageName)
+                && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
+            mediaDevice.setState(STATE_SELECTED);
+            if (mCurrentConnectedDevice == null) {
+                mCurrentConnectedDevice = mediaDevice;
+            }
+        }
         if (mediaDevice != null) {
             mMediaDevices.add(mediaDevice);
         }
@@ -621,9 +630,11 @@ public class InfoMediaManager extends MediaManager {
             dispatchConnectedDeviceChanged(id);
         }
 
+        /**
+         * Ignore callback here since we'll also receive {@link onRequestFailed} with reason code.
+         */
         @Override
         public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
-            dispatchOnRequestFailed(REASON_UNKNOWN_ERROR);
         }
 
         @Override
@@ -633,6 +644,11 @@ public class InfoMediaManager extends MediaManager {
 
         @Override
         public void onSessionUpdated(RoutingSessionInfo sessionInfo) {
+            refreshDevices();
+        }
+
+        @Override
+        public void onSessionReleased(@NonNull RoutingSessionInfo session) {
             refreshDevices();
         }
 

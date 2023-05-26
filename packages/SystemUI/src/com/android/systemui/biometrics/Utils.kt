@@ -26,17 +26,19 @@ import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX
 import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Insets
 import android.hardware.biometrics.BiometricManager.Authenticators
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.SensorPropertiesInternal
 import android.os.UserManager
 import android.util.DisplayMetrics
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowMetrics
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.R
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 
@@ -115,10 +117,15 @@ object Utils {
         return hasPermission && "android" == clientPackage
     }
 
+    @JvmStatic
+    fun getNavbarInsets(context: Context): Insets {
+        val windowManager: WindowManager? = context.getSystemService(WindowManager::class.java)
+        val windowMetrics: WindowMetrics? = windowManager?.maximumWindowMetrics
+        return windowMetrics?.windowInsets?.getInsets(WindowInsets.Type.navigationBars())
+            ?: Insets.NONE
+    }
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(CREDENTIAL_PIN, CREDENTIAL_PATTERN, CREDENTIAL_PASSWORD)
     internal annotation class CredentialType
 }
-
-fun Context.isInRearDisplayMode(): Boolean = resources.getIntArray(
-        com.android.internal.R.array.config_rearDisplayDeviceStates).isNotEmpty()

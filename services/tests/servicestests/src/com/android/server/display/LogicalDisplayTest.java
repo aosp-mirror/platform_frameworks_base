@@ -17,6 +17,9 @@
 package com.android.server.display;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -26,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
 import android.graphics.Point;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -47,6 +51,7 @@ public class LogicalDisplayTest {
     private static final int LAYER_STACK = 0;
     private static final int DISPLAY_WIDTH = 100;
     private static final int DISPLAY_HEIGHT = 200;
+    private static final int MODE_ID = 1;
 
     private LogicalDisplay mLogicalDisplay;
     private DisplayDevice mDisplayDevice;
@@ -65,6 +70,9 @@ public class LogicalDisplayTest {
         mDisplayDeviceInfo.height = DISPLAY_HEIGHT;
         mDisplayDeviceInfo.flags = DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
         mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
+        mDisplayDeviceInfo.modeId = MODE_ID;
+        mDisplayDeviceInfo.supportedModes = new Display.Mode[] {new Display.Mode(MODE_ID,
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, /* refreshRate= */ 60)};
         when(mDisplayDevice.getDisplayDeviceInfoLocked()).thenReturn(mDisplayDeviceInfo);
 
         // Disable binder caches in this process.
@@ -168,14 +176,112 @@ public class LogicalDisplayTest {
     }
 
     @Test
-    public void testLayoutLimitedRefreshRateNotClearedAfterUpdate() {
-        SurfaceControl.RefreshRateRange refreshRateRange = new SurfaceControl.RefreshRateRange(1,
-                2);
-        mLogicalDisplay.updateLayoutLimitedRefreshRateLocked(refreshRateRange);
-        mLogicalDisplay.updateDisplayGroupIdLocked(1);
+    public void testUpdateLayoutLimitedRefreshRate() {
+        SurfaceControl.RefreshRateRange layoutLimitedRefreshRate =
+                new SurfaceControl.RefreshRateRange(0, 120);
+        DisplayInfo info1 = mLogicalDisplay.getDisplayInfoLocked();
+        mLogicalDisplay.updateLayoutLimitedRefreshRateLocked(layoutLimitedRefreshRate);
+        DisplayInfo info2 = mLogicalDisplay.getDisplayInfoLocked();
+        // Display info should only be updated when updateLocked is called
+        assertEquals(info2, info1);
 
-        DisplayInfo result = mLogicalDisplay.getDisplayInfoLocked();
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        DisplayInfo info3 = mLogicalDisplay.getDisplayInfoLocked();
+        assertNotEquals(info3, info2);
+        assertEquals(layoutLimitedRefreshRate, info3.layoutLimitedRefreshRate);
+    }
 
-        assertEquals(refreshRateRange, result.layoutLimitedRefreshRate);
+    @Test
+    public void testUpdateLayoutLimitedRefreshRate_setsDirtyFlag() {
+        SurfaceControl.RefreshRateRange layoutLimitedRefreshRate =
+                new SurfaceControl.RefreshRateRange(0, 120);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLayoutLimitedRefreshRateLocked(layoutLimitedRefreshRate);
+        assertTrue(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+    }
+
+    @Test
+    public void testUpdateRefreshRateThermalThrottling() {
+        SparseArray<SurfaceControl.RefreshRateRange> refreshRanges = new SparseArray<>();
+        refreshRanges.put(0, new SurfaceControl.RefreshRateRange(0, 120));
+        DisplayInfo info1 = mLogicalDisplay.getDisplayInfoLocked();
+        mLogicalDisplay.updateThermalRefreshRateThrottling(refreshRanges);
+        DisplayInfo info2 = mLogicalDisplay.getDisplayInfoLocked();
+        // Display info should only be updated when updateLocked is called
+        assertEquals(info2, info1);
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        DisplayInfo info3 = mLogicalDisplay.getDisplayInfoLocked();
+        assertNotEquals(info3, info2);
+        assertTrue(refreshRanges.contentEquals(info3.thermalRefreshRateThrottling));
+    }
+
+    @Test
+    public void testUpdateRefreshRateThermalThrottling_setsDirtyFlag() {
+        SparseArray<SurfaceControl.RefreshRateRange> refreshRanges = new SparseArray<>();
+        refreshRanges.put(0, new SurfaceControl.RefreshRateRange(0, 120));
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateThermalRefreshRateThrottling(refreshRanges);
+        assertTrue(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+    }
+
+    @Test
+    public void testUpdateDisplayGroupIdLocked() {
+        int newId = 999;
+        DisplayInfo info1 = mLogicalDisplay.getDisplayInfoLocked();
+        mLogicalDisplay.updateDisplayGroupIdLocked(newId);
+        DisplayInfo info2 = mLogicalDisplay.getDisplayInfoLocked();
+        // Display info should only be updated when updateLocked is called
+        assertEquals(info2, info1);
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        DisplayInfo info3 = mLogicalDisplay.getDisplayInfoLocked();
+        assertNotEquals(info3, info2);
+        assertEquals(newId, info3.displayGroupId);
+    }
+
+    @Test
+    public void testUpdateDisplayGroupIdLocked_setsDirtyFlag() {
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateDisplayGroupIdLocked(99);
+        assertTrue(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+    }
+
+    @Test
+    public void testSetThermalBrightnessThrottlingDataId() {
+        String brightnessThrottlingDataId = "throttling_data_id";
+        DisplayInfo info1 = mLogicalDisplay.getDisplayInfoLocked();
+        mLogicalDisplay.setThermalBrightnessThrottlingDataIdLocked(brightnessThrottlingDataId);
+        DisplayInfo info2 = mLogicalDisplay.getDisplayInfoLocked();
+        // Display info should only be updated when updateLocked is called
+        assertEquals(info2, info1);
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        DisplayInfo info3 = mLogicalDisplay.getDisplayInfoLocked();
+        assertNotEquals(info3, info2);
+        assertEquals(brightnessThrottlingDataId, info3.thermalBrightnessThrottlingDataId);
+    }
+
+    @Test
+    public void testSetThermalBrightnessThrottlingDataId_setsDirtyFlag() {
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.setThermalBrightnessThrottlingDataIdLocked("99");
+        assertTrue(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
     }
 }

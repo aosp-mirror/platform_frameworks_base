@@ -16,7 +16,10 @@
 
 package com.android.wm.shell.back;
 
+import android.annotation.FloatRange;
 import android.os.SystemProperties;
+import android.util.MathUtils;
+import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
@@ -25,11 +28,13 @@ import android.window.BackMotionEvent;
  * Helper class to record the touch location for gesture and generate back events.
  */
 class TouchTracker {
-    private static final String PREDICTIVE_BACK_PROGRESS_THRESHOLD_PROP =
-            "persist.wm.debug.predictive_back_progress_threshold";
-    private static final int PROGRESS_THRESHOLD = SystemProperties
-            .getInt(PREDICTIVE_BACK_PROGRESS_THRESHOLD_PROP, -1);
-    private float mProgressThreshold;
+    private static final String PREDICTIVE_BACK_LINEAR_DISTANCE_PROP =
+            "persist.wm.debug.predictive_back_linear_distance";
+    private static final int LINEAR_DISTANCE = SystemProperties
+            .getInt(PREDICTIVE_BACK_LINEAR_DISTANCE_PROP, -1);
+    private float mLinearDistance = LINEAR_DISTANCE;
+    private float mMaxDistance;
+    private float mNonLinearFactor;
     /**
      * Location of the latest touch event
      */
@@ -42,11 +47,13 @@ class TouchTracker {
      */
     private float mInitTouchX;
     private float mInitTouchY;
+    private float mLatestVelocityX;
+    private float mLatestVelocityY;
     private float mStartThresholdX;
     private int mSwipeEdge;
     private boolean mCancelled;
 
-    void update(float touchX, float touchY) {
+    void update(float touchX, float touchY, float velocityX, float velocityY) {
         /**
          * If back was previously cancelled but the user has started swiping in the forward
          * direction again, restart back.
@@ -58,6 +65,8 @@ class TouchTracker {
         }
         mLatestTouchX = touchX;
         mLatestTouchY = touchY;
+        mLatestVelocityX = velocityX;
+        mLatestVelocityY = velocityY;
     }
 
     void setTriggerBack(boolean triggerBack) {
@@ -84,37 +93,97 @@ class TouchTracker {
     }
 
     BackMotionEvent createStartEvent(RemoteAnimationTarget target) {
-        return new BackMotionEvent(mInitTouchX, mInitTouchY, 0, mSwipeEdge, target);
+        return new BackMotionEvent(
+                /* touchX = */ mInitTouchX,
+                /* touchY = */ mInitTouchY,
+                /* progress = */ 0,
+                /* velocityX = */ 0,
+                /* velocityY = */ 0,
+                /* swipeEdge = */ mSwipeEdge,
+                /* departingAnimationTarget = */ target);
     }
 
     BackMotionEvent createProgressEvent() {
-        float progressThreshold = PROGRESS_THRESHOLD >= 0
-                ? PROGRESS_THRESHOLD : mProgressThreshold;
-        progressThreshold = progressThreshold == 0 ? 1 : progressThreshold;
         float progress = 0;
         // Progress is always 0 when back is cancelled and not restarted.
         if (!mCancelled) {
-            // If back is committed, progress is the distance between the last and first touch
-            // point, divided by the max drag distance. Otherwise, it's the distance between
-            // the last touch point and the starting threshold, divided by max drag distance.
-            // The starting threshold is initially the first touch location, and updated to
-            // the location everytime back is restarted after being cancelled.
-            float startX = mTriggerBack ? mInitTouchX : mStartThresholdX;
-            float deltaX = Math.max(
-                    mSwipeEdge == BackEvent.EDGE_LEFT
-                            ? mLatestTouchX - startX
-                            : startX - mLatestTouchX,
-                    0);
-            progress = Math.min(Math.max(deltaX / progressThreshold, 0), 1);
+            progress = getProgress(mLatestTouchX);
         }
         return createProgressEvent(progress);
     }
 
-    BackMotionEvent createProgressEvent(float progress) {
-        return new BackMotionEvent(mLatestTouchX, mLatestTouchY, progress, mSwipeEdge, null);
+    /**
+     * Progress value computed from the touch position.
+     *
+     * @param touchX the X touch position of the {@link MotionEvent}.
+     * @return progress value
+     */
+    @FloatRange(from = 0.0, to = 1.0)
+    float getProgress(float touchX) {
+        // If back is committed, progress is the distance between the last and first touch
+        // point, divided by the max drag distance. Otherwise, it's the distance between
+        // the last touch point and the starting threshold, divided by max drag distance.
+        // The starting threshold is initially the first touch location, and updated to
+        // the location everytime back is restarted after being cancelled.
+        float startX = mTriggerBack ? mInitTouchX : mStartThresholdX;
+        float deltaX = Math.abs(startX - touchX);
+        float linearDistance = mLinearDistance;
+        float maxDistance = getMaxDistance();
+        maxDistance = maxDistance == 0 ? 1 : maxDistance;
+        float progress;
+        if (linearDistance < maxDistance) {
+            // Up to linearDistance it behaves linearly, then slowly reaches 1f.
+
+            // maxDistance is composed of linearDistance + nonLinearDistance
+            float nonLinearDistance = maxDistance - linearDistance;
+            float initialTarget = linearDistance + nonLinearDistance * mNonLinearFactor;
+
+            boolean isLinear = deltaX <= linearDistance;
+            if (isLinear) {
+                progress = deltaX / initialTarget;
+            } else {
+                float nonLinearDeltaX = deltaX - linearDistance;
+                float nonLinearProgress = nonLinearDeltaX / nonLinearDistance;
+                float currentTarget = MathUtils.lerp(
+                        /* start = */ initialTarget,
+                        /* stop = */ maxDistance,
+                        /* amount = */ nonLinearProgress);
+                progress = deltaX / currentTarget;
+            }
+        } else {
+            // Always linear behavior.
+            progress = deltaX / maxDistance;
+        }
+        return MathUtils.constrain(progress, 0, 1);
     }
 
-    public void setProgressThreshold(float progressThreshold) {
-        mProgressThreshold = progressThreshold;
+    /**
+     * Maximum distance in pixels.
+     * Progress is considered to be completed (1f) when this limit is exceeded.
+     */
+    float getMaxDistance() {
+        return mMaxDistance;
+    }
+
+    BackMotionEvent createProgressEvent(float progress) {
+        return new BackMotionEvent(
+                /* touchX = */ mLatestTouchX,
+                /* touchY = */ mLatestTouchY,
+                /* progress = */ progress,
+                /* velocityX = */ mLatestVelocityX,
+                /* velocityY = */ mLatestVelocityY,
+                /* swipeEdge = */ mSwipeEdge,
+                /* departingAnimationTarget = */ null);
+    }
+
+    public void setProgressThresholds(float linearDistance, float maxDistance,
+            float nonLinearFactor) {
+        if (LINEAR_DISTANCE >= 0) {
+            mLinearDistance = LINEAR_DISTANCE;
+        } else {
+            mLinearDistance = linearDistance;
+        }
+        mMaxDistance = maxDistance;
+        mNonLinearFactor = nonLinearFactor;
     }
 }

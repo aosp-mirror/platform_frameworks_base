@@ -248,6 +248,18 @@ public class InsetsStateTest {
     }
 
     @Test
+    public void testCalculateInsets_captionBarOffset() {
+        mState.getOrCreateSource(ID_CAPTION_BAR, captionBar())
+                .setFrame(new Rect(0, 0, 100, 300))
+                .setVisible(true);
+
+        Insets visibleInsets = mState.calculateVisibleInsets(
+                new Rect(0, 0, 150, 400), TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                SOFT_INPUT_ADJUST_NOTHING, 0 /* windowFlags */);
+        assertEquals(Insets.of(0, 300, 0, 0), visibleInsets);
+    }
+
+    @Test
     public void testCalculateInsets_extraNavRightStatusTop() {
         mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))

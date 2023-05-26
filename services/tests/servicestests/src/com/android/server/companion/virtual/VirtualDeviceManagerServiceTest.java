@@ -18,6 +18,7 @@ package com.android.server.companion.virtual;
 
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.content.Context.DEVICE_ID_INVALID;
@@ -117,6 +118,7 @@ import com.android.server.sensors.SensorManagerInternal;
 
 import com.google.android.collect.Sets;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -128,7 +130,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -281,7 +282,7 @@ public class VirtualDeviceManagerServiceTest {
         return blockedActivities;
     }
 
-    private Intent createRestrictedActivityBlockedIntent(List displayCategories,
+    private Intent createRestrictedActivityBlockedIntent(Set<String> displayCategories,
             String targetDisplayCategory) {
         when(mDisplayManagerInternalMock.createVirtualDisplay(any(), any(), any(), any(),
                 eq(NONBLOCKED_APP_PACKAGE_NAME))).thenReturn(DISPLAY_ID_1);
@@ -355,11 +356,10 @@ public class VirtualDeviceManagerServiceTest {
                 TestableLooper.get(this), mNativeWrapperMock, mIInputManagerMock);
         // Allow virtual devices to be created on the looper thread for testing.
         final InputController.DeviceCreationThreadVerifier threadVerifier = () -> true;
-        mInputController = new InputController(new Object(), mNativeWrapperMock,
+        mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mContext.getSystemService(WindowManager.class), threadVerifier);
-        mSensorController =
-                new SensorController(new Object(), VIRTUAL_DEVICE_ID_1, mVirtualSensorCallback);
+        mSensorController = new SensorController(VIRTUAL_DEVICE_ID_1, mVirtualSensorCallback);
         mCameraAccessController =
                 new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
 
@@ -370,6 +370,11 @@ public class VirtualDeviceManagerServiceTest {
         mLocalService = mVdms.getLocalServiceInstance();
         mVdm = mVdms.new VirtualDeviceManagerImpl();
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1);
+    }
+
+    @After
+    public void tearDown() {
+        mDeviceImpl.close();
     }
 
     @Test
@@ -444,10 +449,40 @@ public class VirtualDeviceManagerServiceTest {
                 .setBlockedActivities(getBlockedActivities())
                 .setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
                 .build();
+        mDeviceImpl.close();
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
 
         assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_CUSTOM);
+    }
+
+    @Test
+    public void getDevicePolicy_defaultRecentsPolicy_gwpcCanShowRecentsOnHostDevice() {
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .build();
+        mDeviceImpl.close();
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+
+        GenericWindowPolicyController gwpc =
+                mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1);
+        assertThat(gwpc.canShowTasksInHostDeviceRecents()).isTrue();
+    }
+
+    @Test
+    public void getDevicePolicy_customRecentsPolicy_gwpcCannotShowRecentsOnHostDevice() {
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .setDevicePolicy(POLICY_TYPE_RECENTS, DEVICE_POLICY_CUSTOM)
+                .build();
+        mDeviceImpl.close();
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+
+        GenericWindowPolicyController gwpc =
+                mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1);
+        assertThat(gwpc.canShowTasksInHostDeviceRecents()).isFalse();
     }
 
     @Test
@@ -500,7 +535,9 @@ public class VirtualDeviceManagerServiceTest {
                 .build();
 
         doReturn(SENSOR_HANDLE).when(mSensorManagerInternalMock).createRuntimeSensor(
-                anyInt(), anyInt(), anyString(), anyString(), any());
+                anyInt(), anyInt(), anyString(), anyString(), anyFloat(), anyFloat(), anyFloat(),
+                anyInt(), anyInt(), anyInt(), any());
+        mDeviceImpl.close();
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
 
         VirtualSensor sensor = mLocalService.getVirtualSensor(VIRTUAL_DEVICE_ID_1, SENSOR_HANDLE);
@@ -1122,6 +1159,7 @@ public class VirtualDeviceManagerServiceTest {
         final int fd = 1;
         final int keyCode = KeyEvent.KEYCODE_A;
         final int action = VirtualKeyEvent.ACTION_UP;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_KEYBOARD, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
@@ -1129,8 +1167,9 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.sendKeyEvent(BINDER, new VirtualKeyEvent.Builder()
                 .setKeyCode(keyCode)
                 .setAction(action)
+                .setEventTimeNanos(eventTimeNanos)
                 .build());
-        verify(mNativeWrapperMock).writeKeyEvent(fd, keyCode, action);
+        verify(mNativeWrapperMock).writeKeyEvent(fd, keyCode, action, eventTimeNanos);
     }
 
     @Test
@@ -1150,14 +1189,17 @@ public class VirtualDeviceManagerServiceTest {
         final int fd = 1;
         final int buttonCode = VirtualMouseButtonEvent.BUTTON_BACK;
         final int action = VirtualMouseButtonEvent.ACTION_BUTTON_PRESS;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
         doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mDeviceImpl.sendButtonEvent(BINDER, new VirtualMouseButtonEvent.Builder()
                 .setButtonCode(buttonCode)
-                .setAction(action).build());
-        verify(mNativeWrapperMock).writeButtonEvent(fd, buttonCode, action);
+                .setAction(action)
+                .setEventTimeNanos(eventTimeNanos)
+                .build());
+        verify(mNativeWrapperMock).writeButtonEvent(fd, buttonCode, action, eventTimeNanos);
     }
 
     @Test
@@ -1191,13 +1233,17 @@ public class VirtualDeviceManagerServiceTest {
         final int fd = 1;
         final float x = -0.2f;
         final float y = 0.7f;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
                 INPUT_DEVICE_ID);
         doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mDeviceImpl.sendRelativeEvent(BINDER, new VirtualMouseRelativeEvent.Builder()
-                .setRelativeX(x).setRelativeY(y).build());
-        verify(mNativeWrapperMock).writeRelativeEvent(fd, x, y);
+                .setRelativeX(x)
+                .setRelativeY(y)
+                .setEventTimeNanos(eventTimeNanos)
+                .build());
+        verify(mNativeWrapperMock).writeRelativeEvent(fd, x, y, eventTimeNanos);
     }
 
     @Test
@@ -1232,14 +1278,17 @@ public class VirtualDeviceManagerServiceTest {
         final int fd = 1;
         final float x = 0.5f;
         final float y = 1f;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
                 INPUT_DEVICE_ID);
         doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mDeviceImpl.sendScrollEvent(BINDER, new VirtualMouseScrollEvent.Builder()
                 .setXAxisMovement(x)
-                .setYAxisMovement(y).build());
-        verify(mNativeWrapperMock).writeScrollEvent(fd, x, y);
+                .setYAxisMovement(y)
+                .setEventTimeNanos(eventTimeNanos)
+                .build());
+        verify(mNativeWrapperMock).writeScrollEvent(fd, x, y, eventTimeNanos);
     }
 
     @Test
@@ -1280,6 +1329,7 @@ public class VirtualDeviceManagerServiceTest {
         final float x = 100.5f;
         final float y = 200.5f;
         final int action = VirtualTouchEvent.ACTION_UP;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_TOUCHSCREEN, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
@@ -1289,9 +1339,10 @@ public class VirtualDeviceManagerServiceTest {
                 .setAction(action)
                 .setPointerId(pointerId)
                 .setToolType(toolType)
+                .setEventTimeNanos(eventTimeNanos)
                 .build());
         verify(mNativeWrapperMock).writeTouchEvent(fd, pointerId, toolType, action, x, y, Float.NaN,
-                Float.NaN);
+                Float.NaN, eventTimeNanos);
     }
 
     @Test
@@ -1304,6 +1355,7 @@ public class VirtualDeviceManagerServiceTest {
         final int action = VirtualTouchEvent.ACTION_UP;
         final float pressure = 1.0f;
         final float majorAxisSize = 10.0f;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_TOUCHSCREEN, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
@@ -1315,9 +1367,10 @@ public class VirtualDeviceManagerServiceTest {
                 .setToolType(toolType)
                 .setPressure(pressure)
                 .setMajorAxisSize(majorAxisSize)
+                .setEventTimeNanos(eventTimeNanos)
                 .build());
         verify(mNativeWrapperMock).writeTouchEvent(fd, pointerId, toolType, action, x, y, pressure,
-                majorAxisSize);
+                majorAxisSize, eventTimeNanos);
     }
 
     @Test
@@ -1596,7 +1649,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void nonRestrictedActivityOnRestrictedVirtualDisplay_startBlockedAlertActivity() {
-        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"),
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(Set.of("abc"),
                 /* targetDisplayCategory= */ null);
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
@@ -1604,7 +1657,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void restrictedActivityOnRestrictedVirtualDisplay_doesNotStartBlockedAlertActivity() {
-        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"), "abc");
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(Set.of("abc"), "abc");
         verify(mContext, never()).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
@@ -1612,14 +1665,14 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void restrictedActivityOnNonRestrictedVirtualDisplay_startBlockedAlertActivity() {
         Intent blockedAppIntent = createRestrictedActivityBlockedIntent(
-                /* displayCategories= */ List.of(), "abc");
+                /* displayCategories= */ Set.of(), "abc");
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
 
     @Test
     public void restrictedActivityNonMatchingRestrictedVirtualDisplay_startBlockedAlertActivity() {
-        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"), "def");
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(Set.of("abc"), "def");
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }

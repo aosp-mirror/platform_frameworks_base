@@ -67,7 +67,7 @@ public class RecoverableKeyStoreDbTest {
     public void setUp() {
         Context context = InstrumentationRegistry.getTargetContext();
         mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
-        mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context, 7);
+        mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
     }
 
     @After

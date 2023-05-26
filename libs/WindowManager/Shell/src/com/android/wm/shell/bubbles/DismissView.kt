@@ -144,6 +144,7 @@ class DismissView(context: Context) : FrameLayout(context) {
         val gd = GradientDrawable(
                 GradientDrawable.Orientation.BOTTOM_TOP,
                 intArrayOf(gradientColorWithAlpha, Color.TRANSPARENT))
+        gd.setDither(true)
         gd.setAlpha(0)
         return gd
     }

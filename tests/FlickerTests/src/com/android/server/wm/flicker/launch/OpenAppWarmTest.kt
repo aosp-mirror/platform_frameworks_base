@@ -42,6 +42,7 @@ import org.junit.runners.Parameterized
  *     Press home
  *     Relaunch an app [testApp] and wait animation to complete (only this action is traced)
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

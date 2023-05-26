@@ -50,6 +50,9 @@ android_test {
         "platform-test-annotations",
         "wm-flicker-window-extensions",
     ],
+    data: [
+        ":FlickerTestApp",
+    ],
 }
 
 java_library {

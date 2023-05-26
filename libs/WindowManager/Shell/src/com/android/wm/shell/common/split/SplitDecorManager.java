@@ -22,6 +22,8 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.FADE_DURATION;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -51,6 +53,8 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.SurfaceUtils;
 
+import java.util.function.Consumer;
+
 /**
  * Handles split decor like showing resizing hint for a specific split.
  */
@@ -58,7 +62,6 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private static final String TAG = SplitDecorManager.class.getSimpleName();
     private static final String RESIZING_BACKGROUND_SURFACE_NAME = "ResizingBackground";
     private static final String GAP_BACKGROUND_SURFACE_NAME = "GapBackground";
-    private static final long FADE_DURATION = 133;
 
     private final IconProvider mIconProvider;
     private final SurfaceSession mSurfaceSession;
@@ -165,6 +168,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
             t.remove(mGapBackgroundLeash);
             mGapBackgroundLeash = null;
         }
+        if (mScreenshot != null) {
+            t.remove(mScreenshot);
+            mScreenshot = null;
+        }
         mHostLeash = null;
         mIcon = null;
         mResizingIconView = null;
@@ -247,16 +254,17 @@ public class SplitDecorManager extends WindowlessWindowManager {
     }
 
     /** Stops showing resizing hint. */
-    public void onResized(SurfaceControl.Transaction t, Runnable animFinishedCallback) {
-        if (mScreenshot != null) {
-            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
-                mScreenshotAnimator.cancel();
-            }
+    public void onResized(SurfaceControl.Transaction t, Consumer<Boolean> animFinishedCallback) {
+        if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+            mScreenshotAnimator.cancel();
+        }
 
+        if (mScreenshot != null) {
             t.setPosition(mScreenshot, mOffsetX, mOffsetY);
 
             final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
             mScreenshotAnimator = ValueAnimator.ofFloat(1, 0);
+            mScreenshotAnimator.setDuration(FADE_DURATION);
             mScreenshotAnimator.addUpdateListener(valueAnimator -> {
                 final float progress = (float) valueAnimator.getAnimatedValue();
                 animT.setAlpha(mScreenshot, progress);
@@ -277,7 +285,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                     mScreenshot = null;
 
                     if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
-                        animFinishedCallback.run();
+                        animFinishedCallback.accept(true);
                     }
                 }
             });
@@ -285,6 +293,9 @@ public class SplitDecorManager extends WindowlessWindowManager {
         }
 
         if (mResizingIconView == null) {
+            if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
+                animFinishedCallback.accept(false);
+            }
             return;
         }
 
@@ -303,18 +314,21 @@ public class SplitDecorManager extends WindowlessWindowManager {
                         releaseDecor(finishT);
                         finishT.apply();
                         finishT.close();
+                        if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
+                            animFinishedCallback.accept(true);
+                        }
                     }
                 });
                 return;
             }
         }
         if (mShown) {
-            fadeOutDecor(animFinishedCallback);
+            fadeOutDecor(()-> animFinishedCallback.accept(true));
         } else {
             // Decor surface is hidden so release it directly.
             releaseDecor(t);
             if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
-                animFinishedCallback.run();
+                animFinishedCallback.accept(false);
             }
         }
     }
@@ -322,6 +336,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
     /** Screenshot host leash and attach on it if meet some conditions */
     public void screenshotIfNeeded(SurfaceControl.Transaction t) {
         if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+                mScreenshotAnimator.cancel();
+            } else if (mScreenshot != null) {
+                t.remove(mScreenshot);
+            }
+
             mTempRect.set(mOldBounds);
             mTempRect.offsetTo(0, 0);
             mScreenshot = ScreenshotUtils.takeScreenshot(t, mHostLeash, mTempRect,
@@ -334,6 +354,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (screenshot == null || !screenshot.isValid()) return;
 
         if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+                mScreenshotAnimator.cancel();
+            } else if (mScreenshot != null) {
+                t.remove(mScreenshot);
+            }
+
             mScreenshot = screenshot;
             t.reparent(screenshot, mHostLeash);
             t.setLayer(screenshot, Integer.MAX_VALUE - 1);

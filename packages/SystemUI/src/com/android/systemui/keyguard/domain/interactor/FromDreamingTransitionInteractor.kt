@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
@@ -26,15 +26,14 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -57,14 +56,7 @@ constructor(
 
     private fun listenForDreamingToLockscreen() {
         scope.launch {
-            // Dependending on the dream, either dream state or occluded change will change first,
-            // so listen for both
-            combine(keyguardInteractor.isAbleToDream, keyguardInteractor.isKeyguardOccluded) {
-                    isAbleToDream,
-                    isKeyguardOccluded ->
-                    isAbleToDream && isKeyguardOccluded
-                }
-                .distinctUntilChanged()
+            keyguardInteractor.isAbleToDream
                 .sample(
                     combine(
                         keyguardInteractor.dozeTransitionModel,

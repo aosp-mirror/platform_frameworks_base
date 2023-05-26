@@ -204,6 +204,36 @@ public abstract class PackageManager {
             "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE";
 
     /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the app can be opted-in or opted-out
+     * from the compatibility treatment that rotates camera output by 90 degrees on landscape
+     * sensors on devices known to have compatibility issues.
+     *
+     * <p>The treatment is disabled by default but device manufacturers can enable the treatment
+     * using their discretion to improve camera compatibility. With this property set to
+     * {@code false}, the rotation will not be applied. A value of {@code true}
+     * will ensure that rotation is applied, provided it is enabled for the device. In most cases,
+     * if rotation is the desired behavior this property need not be set. However, if your app
+     * experiences stretching or incorrect rotation on these devices, explicitly setting this to
+     * {@code true} may resolve that behavior. Apps should set this to {@code false} if there
+     * is confidence that the app handles
+     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_ORIENTATION} correctly.
+     * See <a href="https://developer.android.com/training/camera2/camera-preview"> the
+     * documentation for best practice.</a>
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.camera.PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     */
+    public static final String PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT =
+            "android.camera.PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by
@@ -734,6 +764,7 @@ public abstract class PackageManager {
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
             MATCH_SYSTEM_ONLY,
             MATCH_FACTORY_ONLY,
+            MATCH_ANY_USER,
             MATCH_DEBUG_TRIAGED_MISSING,
             MATCH_INSTANT,
             MATCH_APEX,
@@ -2852,6 +2883,20 @@ public abstract class PackageManager {
             "android.software.car.templates_host";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:If this
+     * feature is supported, the device should also declare {@link #FEATURE_AUTOMOTIVE} and show
+     * a UI that can display multiple tasks at the same time on a single display. The user can
+     * perform multiple actions on different tasks simultaneously. Apps open in split screen mode
+     * by default, instead of full screen. Unlike Android's multi-window mode, where users can
+     * choose how to display apps, the device determines how apps are shown.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAR_SPLITSCREEN_MULTITASKING =
+            "android.software.car.splitscreen_multitasking";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
      * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
@@ -3013,6 +3058,17 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_NFC_ANY = "android.hardware.nfc.any";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device contains support for installing SDKs to a work
+     * profile.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SDK_SANDBOX_WORK_PROFILE_INSTALL =
+            "android.software.sdksandbox.sdk_install_work_profile";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -4353,19 +4409,26 @@ public abstract class PackageManager {
     public static final String FEATURE_CREDENTIALS = "android.software.credentials";
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device supports locking (for example, by a financing provider in case of a missed
-     * payment).
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports locking (for example, by a financing provider in case of a missed payment).
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_DEVICE_LOCK = "android.software.device_lock";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports showing location-based suggestions for wallet cards provided by the default payment
+     * app.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WALLET_LOCATION_BASED_SUGGESTIONS =
+            "android.software.wallet_location_based_suggestions";
 
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
     /**
-     * Extra field name for the URI to a verification file. Passed to a package
-     * verifier.
+     * Extra field name for the URI to a verification file. Passed to a package verifier.
      *
      * @hide
      */
@@ -5717,17 +5780,6 @@ public abstract class PackageManager {
             @NonNull ComponentInfoFlags flags) throws NameNotFoundException {
         throw new UnsupportedOperationException(
                 "getActivityInfo not implemented in subclass");
-    }
-
-    /**
-     * @hide
-     */
-    @NonNull
-    public ActivityInfo getActivityInfoAsUser(@NonNull ComponentName component,
-            @NonNull ComponentInfoFlags flags, @UserIdInt int userId)
-            throws NameNotFoundException {
-        throw new UnsupportedOperationException(
-                "getActivityInfoAsUser not implemented in subclass");
     }
 
     /**
@@ -8640,7 +8692,7 @@ public abstract class PackageManager {
      * requesting its own install information and is not an instant app.
      *
      * @param packageName The name of the package to query
-     * @throws NameNotFoundException if the given package name is not installed
+     * @throws NameNotFoundException if the given package name is not available to the caller.
      */
     @NonNull
     public InstallSourceInfo getInstallSourceInfo(@NonNull String packageName)
@@ -10108,25 +10160,9 @@ public abstract class PackageManager {
 
     /**
      * Register an application dex module with the package manager.
-     * The package manager will keep track of the given module for future optimizations.
      *
-     * Dex module optimizations will disable the classpath checking at runtime. The client bares
-     * the responsibility to ensure that the static assumptions on classes in the optimized code
-     * hold at runtime (e.g. there's no duplicate classes in the classpath).
-     *
-     * Note that the package manager already keeps track of dex modules loaded with
-     * {@link dalvik.system.DexClassLoader} and {@link dalvik.system.PathClassLoader}.
-     * This can be called for an eager registration.
-     *
-     * The call might take a while and the results will be posted on the main thread, using
-     * the given callback.
-     *
-     * If the module is intended to be shared with other apps, make sure that the file
-     * permissions allow for it.
-     * If at registration time the permissions allow for others to read it, the module would
-     * be marked as a shared module which might undergo a different optimization strategy.
-     * (usually shared modules will generated larger optimizations artifacts,
-     * taking more disk space).
+     * This call no longer does anything. If a callback is given it is called with a false success
+     * value.
      *
      * @param dexModulePath the absolute path of the dex module.
      * @param callback if not null, {@link DexModuleRegisterCallback#onDexModuleRegistered} will

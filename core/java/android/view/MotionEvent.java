@@ -2440,9 +2440,27 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @hide
      */
-    @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(publicAlternatives =
+            "Use {@link #getEventTimeNanos()} public API instead.",
+            maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public final long getEventTimeNano() {
+        return nativeGetEventTimeNanos(mNativePtr, HISTORY_CURRENT);
+    }
+
+    /**
+     * Retrieve the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+     * nanosecond precision.
+     * <p>
+     * The value is in nanosecond precision but it may not have nanosecond accuracy.
+     * </p>
+     *
+     * @return Returns the time this event occurred,
+     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
+     * nanosecond precision.
+     */
+    @Override
+    public long getEventTimeNanos() {
         return nativeGetEventTimeNanos(mNativePtr, HISTORY_CURRENT);
     }
 
@@ -3104,10 +3122,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @see #getHistorySize
      * @see #getEventTime
-     *
-     * @hide
      */
-    public final long getHistoricalEventTimeNano(int pos) {
+    public long getHistoricalEventTimeNanos(int pos) {
         return nativeGetEventTimeNanos(mNativePtr, pos);
     }
 
@@ -4148,6 +4164,40 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(PARCEL_TOKEN_MOTION_EVENT);
         nativeWriteToParcel(mNativePtr, out);
+    }
+
+    /**
+     * Get the x coordinate of the location where the pointer should be dispatched.
+     *
+     * This is required because a mouse event, such as from a touchpad, may contain multiple
+     * pointers that should all be dispatched to the cursor position.
+     * @hide
+     */
+    public float getXDispatchLocation(int pointerIndex) {
+        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            final float xCursorPosition = getXCursorPosition();
+            if (xCursorPosition != INVALID_CURSOR_POSITION) {
+                return xCursorPosition;
+            }
+        }
+        return getX(pointerIndex);
+    }
+
+    /**
+     * Get the y coordinate of the location where the pointer should be dispatched.
+     *
+     * This is required because a mouse event, such as from a touchpad, may contain multiple
+     * pointers that should all be dispatched to the cursor position.
+     * @hide
+     */
+    public float getYDispatchLocation(int pointerIndex) {
+        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            final float yCursorPosition = getYCursorPosition();
+            if (yCursorPosition != INVALID_CURSOR_POSITION) {
+                return yCursorPosition;
+            }
+        }
+        return getY(pointerIndex);
     }
 
     /**

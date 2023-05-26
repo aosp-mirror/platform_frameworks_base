@@ -54,6 +54,7 @@ import android.view.ViewConfiguration;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ConcurrentUtils;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
@@ -170,8 +171,8 @@ public class FullScreenMagnificationGestureHandlerTest {
                 new Object(),
                 mMagnificationInfoChangedCallback,
                 new MagnificationScaleProvider(mContext),
-                () -> null
-        ) {
+                () -> null,
+                ConcurrentUtils.DIRECT_EXECUTOR) {
             @Override
             public boolean magnificationRegionContains(int displayId, float x, float y) {
                 return true;
@@ -413,6 +414,15 @@ public class FullScreenMagnificationGestureHandlerTest {
         assertActionsInOrder(eventCaptor.mEvents, expectedActions);
 
         returnToNormalFrom(STATE_ACTIVATED);
+    }
+
+    @Test
+    public void testMagnifierDeactivates_shortcutTriggeredState_returnToIdleState() {
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+
+        mFullScreenMagnificationController.reset(DISPLAY_0, /* animate= */ false);
+
+        assertIn(STATE_IDLE);
     }
 
     @Test

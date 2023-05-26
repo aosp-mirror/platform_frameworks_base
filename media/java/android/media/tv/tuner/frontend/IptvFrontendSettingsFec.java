@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public class IptvFrontendSettingsFec {
+public final class IptvFrontendSettingsFec {
     /** @hide */
     @IntDef(prefix = "FEC_TYPE_",
             value = {FEC_TYPE_UNDEFINED, FEC_TYPE_COLUMN, FEC_TYPE_ROW, FEC_TYPE_COLUMN_ROW})
@@ -93,14 +93,6 @@ public class IptvFrontendSettingsFec {
     }
 
     /**
-     * Creates a builder for {@link IptvFrontendSettingsFec}.
-     */
-    @NonNull
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
      * Builder for {@link IptvFrontendSettingsFec}.
      */
     public static final class Builder {
@@ -108,7 +100,7 @@ public class IptvFrontendSettingsFec {
         private int mFecRowNum;
         private int mFecColNum;
 
-        private Builder() {
+        public Builder() {
         }
 
         /**

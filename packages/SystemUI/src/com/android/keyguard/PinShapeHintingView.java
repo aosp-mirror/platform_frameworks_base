@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.PIN_SHAPES;
+
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
@@ -37,7 +39,7 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
 
     private int mPinLength;
     private int mDotDiameter;
-    private int mColor = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary)
+    private int mColor = Utils.getColorAttr(getContext(), PIN_SHAPES)
             .getDefaultColor();
     private int mPosition = 0;
     private static final int DEFAULT_PIN_LENGTH = 6;

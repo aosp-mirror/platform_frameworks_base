@@ -16,15 +16,16 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.annotation.FlickerServiceCompatible
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.setRotation
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,6 +42,7 @@ import org.junit.runners.Parameterized
  *     Make sure no apps are running on the device
  *     Launch an app [testApp] and wait animation to complete
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
@@ -71,6 +73,10 @@ open class OpenAppColdTest(flicker: FlickerTest) : OpenAppFromLauncherTransition
 
     /** {@inheritDoc} */
     @Presubmit @Test override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
+
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     companion object {
         /**

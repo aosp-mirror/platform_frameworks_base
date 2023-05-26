@@ -258,7 +258,7 @@ public class AppTransitionController {
             tmpCloseApps = new ArraySet<>(mDisplayContent.mClosingApps);
             if (mDisplayContent.mAtmService.mBackNavigationController
                     .removeIfContainsBackAnimationTargets(tmpOpenApps, tmpCloseApps)) {
-                mDisplayContent.mAtmService.mBackNavigationController.clearBackAnimations(null);
+                mDisplayContent.mAtmService.mBackNavigationController.clearBackAnimations();
             }
         }
 
@@ -321,7 +321,7 @@ public class AppTransitionController {
             mService.mSurfaceAnimationRunner.continueStartingAnimations();
         }
 
-        mService.mTaskSnapshotController.onTransitionStarting(mDisplayContent);
+        mService.mSnapshotController.onTransitionStarting(mDisplayContent);
 
         mDisplayContent.mOpeningApps.clear();
         mDisplayContent.mClosingApps.clear();
@@ -929,7 +929,7 @@ public class AppTransitionController {
 
     /**
      * Returns {@code true} if a given {@link WindowContainer} is an embedded Task in
-     * {@link com.android.wm.shell.TaskView}.
+     * {@link TaskView}.
      *
      * Note that this is a short term workaround to support Android Auto until it migrate to
      * ShellTransition. This should only be used by {@link #getAnimationTargets}.
@@ -1030,12 +1030,11 @@ public class AppTransitionController {
                     canPromote = false;
                 }
 
-                // If the current window container is task and it have adjacent task, it means
-                // both tasks will open or close app toghther but we want get their opening or
-                // closing animation target independently so do not promote.
+                // If the current window container is a task with adjacent task set, the both
+                // adjacent tasks will be opened or closed together. To get their opening or
+                // closing animation target independently, skip promoting their animation targets.
                 if (current.asTask() != null
-                        && current.asTask().getAdjacentTaskFragment() != null
-                        && current.asTask().getAdjacentTaskFragment().asTask() != null) {
+                        && current.asTask().getAdjacentTask() != null) {
                     canPromote = false;
                 }
 

@@ -16,18 +16,12 @@
 
 package com.android.server;
 
-import static android.content.IntentFilter.BLOCK_NULL_ACTION_INTENTS;
-
-import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.Binder;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.FastImmutableArraySet;
@@ -40,7 +34,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FastPrintWriter;
-import com.android.server.am.ActivityManagerUtils;
 import com.android.server.pm.Computer;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 
@@ -88,7 +81,7 @@ public abstract class IntentResolver<F, R extends Object> {
      * Returns whether an intent matches the IntentFilter with a pre-resolved type.
      */
     public static boolean intentMatchesFilter(
-            IntentFilter filter, Intent intent, String resolvedType, boolean blockNullAction) {
+            IntentFilter filter, Intent intent, String resolvedType) {
         final boolean debug = localLOGV
                 || ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
@@ -102,8 +95,7 @@ public abstract class IntentResolver<F, R extends Object> {
         }
 
         final int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
-                intent.getData(), intent.getCategories(), TAG, /* supportWildcards */ false,
-                blockNullAction, null, null);
+                intent.getData(), intent.getCategories(), TAG);
 
         if (match >= 0) {
             if (debug) {
@@ -358,31 +350,13 @@ public abstract class IntentResolver<F, R extends Object> {
         return Collections.unmodifiableSet(mFilters);
     }
 
-    private boolean blockNullAction(Computer computer, Intent intent,
-            String resolvedType, int callingUid, boolean debug) {
-        if (intent.getAction() == null) {
-            final boolean blockNullAction = UserHandle.isCore(callingUid)
-                    || computer.isChangeEnabled(BLOCK_NULL_ACTION_INTENTS, callingUid);
-            ActivityManagerUtils.logUnsafeIntentEvent(
-                    UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH,
-                    callingUid, intent, resolvedType, blockNullAction);
-            if (blockNullAction) {
-                if (debug) Slog.v(TAG, "Skip matching filters: action is null");
-                return true;
-            }
-        }
-        return false;
-    }
-
     public List<R> queryIntentFromList(@NonNull Computer computer, Intent intent,
-            String resolvedType, boolean defaultOnly, ArrayList<F[]> listCut,
-            int callingUid, @UserIdInt int userId, long customFlags) {
+            String resolvedType, boolean defaultOnly, ArrayList<F[]> listCut, int userId,
+            long customFlags) {
         ArrayList<R> resultList = new ArrayList<R>();
 
         final boolean debug = localLOGV ||
                 ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
-
-        if (blockNullAction(computer, intent, resolvedType, callingUid, debug)) return resultList;
 
         FastImmutableArraySet<String> categories = getFastIntentCategories(intent);
         final String scheme = intent.getScheme();
@@ -391,26 +365,18 @@ public abstract class IntentResolver<F, R extends Object> {
             buildResolveList(computer, intent, categories, debug, defaultOnly, resolvedType, scheme,
                     listCut.get(i), resultList, userId, customFlags);
         }
-        filterResults(computer, intent, resultList);
+        filterResults(resultList);
         sortResults(resultList);
         return resultList;
     }
 
-    public final List<R> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
-            String resolvedType, boolean defaultOnly, @UserIdInt int userId) {
-        return queryIntent(snapshot, intent, resolvedType, defaultOnly,
-                Binder.getCallingUid(), userId, 0);
-    }
-
     public List<R> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
-            String resolvedType, boolean defaultOnly, int callingUid, @UserIdInt int userId) {
-        return queryIntent(snapshot, intent, resolvedType, defaultOnly, callingUid, userId, 0);
+            String resolvedType, boolean defaultOnly, @UserIdInt int userId) {
+        return queryIntent(snapshot, intent, resolvedType, defaultOnly, userId, 0);
     }
 
     protected final List<R> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
-            String resolvedType, boolean defaultOnly, int callingUid, @UserIdInt int userId,
-            long customFlags) {
-        final Computer computer = (Computer) snapshot;
+            String resolvedType, boolean defaultOnly, @UserIdInt int userId, long customFlags) {
         String scheme = intent.getScheme();
 
         ArrayList<R> finalList = new ArrayList<R>();
@@ -421,8 +387,6 @@ public abstract class IntentResolver<F, R extends Object> {
         if (debug) Slog.v(
             TAG, "Resolving type=" + resolvedType + " scheme=" + scheme
             + " defaultOnly=" + defaultOnly + " userId=" + userId + " of " + intent);
-
-        if (blockNullAction(computer, intent, resolvedType, callingUid, debug)) return finalList;
 
         F[] firstTypeCut = null;
         F[] secondTypeCut = null;
@@ -484,6 +448,7 @@ public abstract class IntentResolver<F, R extends Object> {
         }
 
         FastImmutableArraySet<String> categories = getFastIntentCategories(intent);
+        Computer computer = (Computer) snapshot;
         if (firstTypeCut != null) {
             buildResolveList(computer, intent, categories, debug, defaultOnly, resolvedType,
                     scheme, firstTypeCut, finalList, userId, customFlags);
@@ -500,7 +465,7 @@ public abstract class IntentResolver<F, R extends Object> {
             buildResolveList(computer, intent, categories, debug, defaultOnly, resolvedType,
                     scheme, schemeCut, finalList, userId, customFlags);
         }
-        filterResults(computer, intent, finalList);
+        filterResults(finalList);
         sortResults(finalList);
 
         if (debug) {
@@ -569,8 +534,7 @@ public abstract class IntentResolver<F, R extends Object> {
     /**
      * Apply filtering to the results. This happens before the results are sorted.
      */
-    protected void filterResults(@NonNull Computer computer, @NonNull Intent intent,
-            List<R> results) {
+    protected void filterResults(List<R> results) {
     }
 
     protected void dumpFilter(PrintWriter out, String prefix, F filter) {
@@ -802,11 +766,7 @@ public abstract class IntentResolver<F, R extends Object> {
                 continue;
             }
 
-            match = intentFilter.match(action, resolvedType, scheme, data, categories, TAG,
-                    false /*supportWildcards*/,
-                    false /*blockNullAction: already handled*/,
-                    null /*ignoreActions*/,
-                    null /*extras*/);
+            match = intentFilter.match(action, resolvedType, scheme, data, categories, TAG);
             if (match >= 0) {
                 if (debug) Slog.v(TAG, "  Filter matched!  match=0x" +
                         Integer.toHexString(match) + " hasDefault="

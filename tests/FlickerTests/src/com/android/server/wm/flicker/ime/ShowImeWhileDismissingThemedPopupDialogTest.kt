@@ -18,8 +18,7 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -29,6 +28,7 @@ import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.FixMethodOrder
@@ -45,7 +45,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ShowImeWhileDismissingThemedPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class ShowImeWhileDismissingThemedPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */

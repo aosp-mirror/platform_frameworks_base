@@ -8,13 +8,15 @@ import android.database.ContentObserver
 import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
+import android.view.Display
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager.fixScale
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
-import com.android.systemui.animation.Interpolators
+import com.android.systemui.DejankUtils
+import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -27,6 +29,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.TraceUtils
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 
@@ -116,6 +119,11 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         })
     }
 
+    // FrameCallback used to delay starting the light reveal animation until the next frame
+    private val startLightRevealCallback = TraceUtils.namedRunnable("startLightReveal") {
+        lightRevealAnimator.start()
+    }
+
     val animatorDurationScaleObserver = object : ContentObserver(null) {
         override fun onChange(selfChange: Boolean) {
             updateAnimatorDurationScale()
@@ -168,15 +176,19 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // We animate the Y properly separately using the PropertyAnimator, as the panel
         // view also needs to update the end position.
         PropertyAnimator.cancelAnimation(keyguardView, AnimatableProperty.Y)
-        PropertyAnimator.setProperty<View>(keyguardView, AnimatableProperty.Y, currentY,
+        PropertyAnimator.setProperty(keyguardView, AnimatableProperty.Y, currentY,
                 AnimationProperties().setDuration(duration.toLong()),
                 true /* animate */)
 
-        keyguardView.animate()
+        // Cancel any existing CUJs before starting the animation
+        interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
+
+        PropertyAnimator.setProperty(
+            keyguardView, AnimatableProperty.ALPHA, 1f,
+            AnimationProperties()
+                .setDelay(0)
                 .setDuration(duration.toLong())
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .alpha(1f)
-                .withEndAction {
+                .setAnimationEndAction {
                     aodUiAnimationPlaying = false
 
                     // Lock the keyguard if it was waiting for the screen off animation to end.
@@ -192,30 +204,23 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                     // Done going to sleep, reset this flag.
                     decidedToAnimateGoingToSleep = null
 
-                    // We need to unset the listener. These are persistent for future animators
-                    keyguardView.animate().setListener(null)
                     interactionJankMonitor.end(CUJ_SCREEN_OFF_SHOW_AOD)
                 }
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationCancel(animation: Animator?) {
-                        // If we're cancelled, reset state flags/listeners. The end action above
-                        // will not be called, which is what we want since that will finish the
-                        // screen off animation and show the lockscreen, which we don't want if we
-                        // were cancelled.
-                        aodUiAnimationPlaying = false
-                        decidedToAnimateGoingToSleep = null
-                        keyguardView.animate().setListener(null)
-
-                        interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
-                    }
-
-                    override fun onAnimationStart(animation: Animator?) {
-                        interactionJankMonitor.begin(
-                                mCentralSurfaces.notificationShadeWindowView,
-                                CUJ_SCREEN_OFF_SHOW_AOD)
-                    }
-                })
-                .start()
+                .setAnimationCancelAction {
+                    // If we're cancelled, reset state flags/listeners. The end action above
+                    // will not be called, which is what we want since that will finish the
+                    // screen off animation and show the lockscreen, which we don't want if we
+                    // were cancelled.
+                    aodUiAnimationPlaying = false
+                    decidedToAnimateGoingToSleep = null
+                    interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
+                }
+                .setCustomInterpolator(View.ALPHA, Interpolators.FAST_OUT_SLOW_IN),
+            true /* animate */)
+        interactionJankMonitor.begin(
+            mCentralSurfaces.notificationShadeWindowView,
+            CUJ_SCREEN_OFF_SHOW_AOD
+        )
     }
 
     override fun onStartedWakingUp() {
@@ -223,6 +228,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         decidedToAnimateGoingToSleep = null
 
         shouldAnimateInKeyguard = false
+        DejankUtils.removeCallbacks(startLightRevealCallback)
         lightRevealAnimator.cancel()
         handler.removeCallbacksAndMessages(null)
     }
@@ -253,19 +259,26 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
             shouldAnimateInKeyguard = true
             lightRevealAnimationPlaying = true
-            lightRevealAnimator.start()
+
+            // Start the animation on the next frame. startAnimation() is called after
+            // PhoneWindowManager makes a binder call to System UI on
+            // IKeyguardService#onStartedGoingToSleep(). By the time we get here, system_server is
+            // already busy making changes to PowerManager and DisplayManager. This increases our
+            // chance of missing the first frame, so to mitigate this we should start the animation
+            // on the next frame.
+            DejankUtils.postAfterTraversal(startLightRevealCallback)
             handler.postDelayed({
                 // Only run this callback if the device is sleeping (not interactive). This callback
                 // is removed in onStartedWakingUp, but since that event is asynchronously
                 // dispatched, a race condition could make it possible for this callback to be run
                 // as the device is waking up. That results in the AOD UI being shown while we wake
                 // up, with unpredictable consequences.
-                if (!powerManager.isInteractive) {
+                if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY)) {
                     aodUiAnimationPlaying = true
 
                     // Show AOD. That'll cause the KeyguardVisibilityHelper to call
                     // #animateInKeyguard.
-                    mCentralSurfaces.notificationPanelViewController.showAodUi()
+                    mCentralSurfaces.shadeViewController.showAodUi()
                 }
             }, (ANIMATE_IN_KEYGUARD_DELAY * animatorDurationScale).toLong())
 
@@ -314,7 +327,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
         // disable it if the notification panel is expanded.
         if ((!this::mCentralSurfaces.isInitialized ||
-                mCentralSurfaces.notificationPanelViewController.isPanelExpanded) &&
+                mCentralSurfaces.shadeViewController.isPanelExpanded) &&
                 // Status bar might be expanded because we have started
                 // playing the animation already
                 !isAnimationPlaying()

@@ -213,7 +213,7 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     @Override
     public boolean isApplicableTask(TaskInfo taskInfo) {
         return taskInfo.hasParentTask()
-                && taskInfo.isVisible
+                && taskInfo.isRunning
                 && taskInfo.realActivity != null // to filter out parents created by organizer
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW;
     }
@@ -290,6 +290,11 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
         transaction
                 .setWindowCrop(context.mLeash, null)
                 .setCornerRadius(context.mLeash, 0.0F);
+    }
+
+    @Override
+    public void onSplitVisibilityChanged(boolean visible) {
+        mUnfoldBackgroundController.onSplitVisibilityChanged(visible);
     }
 
     private class AnimationContext {

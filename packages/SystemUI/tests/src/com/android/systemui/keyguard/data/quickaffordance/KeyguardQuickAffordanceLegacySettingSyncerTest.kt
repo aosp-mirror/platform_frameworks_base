@@ -23,6 +23,7 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
@@ -48,6 +49,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
 
@@ -106,7 +108,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `Setting a setting selects the affordance`() =
+    fun settingAsettingSelectsTheAffordance() =
         testScope.runTest {
             val job = underTest.startSyncing()
 
@@ -129,7 +131,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         }
 
     @Test
-    fun `Clearing a setting selects the affordance`() =
+    fun clearingAsettingSelectsTheAffordance() =
         testScope.runTest {
             val job = underTest.startSyncing()
 
@@ -156,7 +158,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         }
 
     @Test
-    fun `Selecting an affordance sets its setting`() =
+    fun selectingAnAffordanceSetsItsSetting() =
         testScope.runTest {
             val job = underTest.startSyncing()
 
@@ -172,7 +174,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         }
 
     @Test
-    fun `Unselecting an affordance clears its setting`() =
+    fun unselectingAnAffordanceClearsItsSetting() =
         testScope.runTest {
             val job = underTest.startSyncing()
 

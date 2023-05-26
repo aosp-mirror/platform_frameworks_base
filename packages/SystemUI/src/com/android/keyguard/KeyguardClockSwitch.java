@@ -1,32 +1,34 @@
 package com.android.keyguard;
 
+import static android.view.View.ALPHA;
+import static android.view.View.TRANSLATION_Y;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.app.animation.Interpolators;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.LogLevel;
 import com.android.systemui.plugins.ClockController;
-import com.android.systemui.plugins.log.LogBuffer;
-import com.android.systemui.plugins.log.LogLevel;
+import com.android.systemui.shared.clocks.DefaultClockController;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import kotlin.Unit;
 
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
@@ -36,9 +38,12 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private static final String TAG = "KeyguardClockSwitch";
 
-    private static final long CLOCK_OUT_MILLIS = 150;
-    private static final long CLOCK_IN_MILLIS = 200;
-    private static final long STATUS_AREA_MOVE_MILLIS = 350;
+    private static final long CLOCK_OUT_MILLIS = 133;
+    private static final long CLOCK_IN_MILLIS = 167;
+    public static final long CLOCK_IN_START_DELAY_MILLIS = 133;
+    private static final long STATUS_AREA_START_DELAY_MILLIS = 0;
+    private static final long STATUS_AREA_MOVE_UP_MILLIS = 967;
+    private static final long STATUS_AREA_MOVE_DOWN_MILLIS = 467;
 
     @IntDef({LARGE, SMALL})
     @Retention(RetentionPolicy.SOURCE)
@@ -46,6 +51,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public static final int LARGE = 0;
     public static final int SMALL = 1;
+    // compensate for translation of parents subject to device screen
+    // In this case, the translation comes from KeyguardStatusView
+    public int screenOffsetYPadding = 0;
 
     /** Returns a region for the large clock to position itself, based on the given parent. */
     public static Rect getLargeClockRegion(ViewGroup parent) {
@@ -62,15 +70,27 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 top + targetHeight);
     }
 
+    /** Returns a region for the small clock to position itself, based on the given parent. */
+    public static Rect getSmallClockRegion(ViewGroup parent) {
+        int targetHeight = parent.getResources()
+                .getDimensionPixelSize(R.dimen.small_clock_text_size);
+        return new Rect(
+                parent.getLeft(),
+                parent.getTop(),
+                parent.getRight(),
+                parent.getTop() + targetHeight);
+    }
+
     /**
      * Frame for small/large clocks
      */
-    private FrameLayout mSmallClockFrame;
-    private FrameLayout mLargeClockFrame;
+    private KeyguardClockFrame mSmallClockFrame;
+    private KeyguardClockFrame mLargeClockFrame;
     private ClockController mClock;
 
     private View mStatusArea;
     private int mSmartspaceTopOffset;
+    private int mDrawAlpha = 255;
 
     /**
      * Maintain state so that a newly connected plugin can be initialized.
@@ -85,7 +105,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     @VisibleForTesting AnimatorSet mClockInAnim = null;
     @VisibleForTesting AnimatorSet mClockOutAnim = null;
-    private ObjectAnimator mStatusAreaAnim = null;
+    private AnimatorSet mStatusAreaAnim = null;
 
     private int mClockSwitchYAmount;
     @VisibleForTesting boolean mChildrenAreLaidOut = false;
@@ -115,6 +135,22 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mStatusArea = findViewById(R.id.keyguard_status_area);
 
         onDensityOrFontScaleChanged();
+    }
+
+    @Override
+    protected boolean onSetAlpha(int alpha) {
+        mDrawAlpha = alpha;
+        return true;
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        KeyguardClockFrame.saveCanvasAlpha(
+                this, canvas, mDrawAlpha,
+                c -> {
+                    super.dispatchDraw(c);
+                    return kotlin.Unit.INSTANCE;
+                });
     }
 
     public void setLogBuffer(LogBuffer logBuffer) {
@@ -151,18 +187,23 @@ public class KeyguardClockSwitch extends RelativeLayout {
     void updateClockTargetRegions() {
         if (mClock != null) {
             if (mSmallClockFrame.isLaidOut()) {
-                int targetHeight =  getResources()
-                        .getDimensionPixelSize(R.dimen.small_clock_text_size);
-                mClock.getSmallClock().getEvents().onTargetRegionChanged(new Rect(
-                        mSmallClockFrame.getLeft(),
-                        mSmallClockFrame.getTop(),
-                        mSmallClockFrame.getRight(),
-                        mSmallClockFrame.getTop() + targetHeight));
+                Rect targetRegion = getSmallClockRegion(mSmallClockFrame);
+                mClock.getSmallClock().getEvents().onTargetRegionChanged(targetRegion);
             }
 
             if (mLargeClockFrame.isLaidOut()) {
-                mClock.getLargeClock().getEvents().onTargetRegionChanged(
-                        getLargeClockRegion(mLargeClockFrame));
+                Rect targetRegion = getLargeClockRegion(mLargeClockFrame);
+                if (mClock instanceof DefaultClockController) {
+                    mClock.getLargeClock().getEvents().onTargetRegionChanged(
+                            targetRegion);
+                } else {
+                    mClock.getLargeClock().getEvents().onTargetRegionChanged(
+                            new Rect(
+                                    targetRegion.left,
+                                    targetRegion.top - screenOffsetYPadding,
+                                    targetRegion.right,
+                                    targetRegion.bottom - screenOffsetYPadding));
+                }
             }
         }
     }
@@ -173,7 +214,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 msg.setBool1(useLargeClock);
                 msg.setBool2(animate);
                 msg.setBool3(mChildrenAreLaidOut);
-                return Unit.INSTANCE;
+                return kotlin.Unit.INSTANCE;
             }, (msg) -> "updateClockViews"
                     + "; useLargeClock=" + msg.getBool1()
                     + "; animate=" + msg.getBool2()
@@ -189,39 +230,44 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mStatusAreaAnim = null;
 
         View in, out;
-        int direction = 1;
-        float statusAreaYTranslation;
+        float statusAreaYTranslation, clockInYTranslation, clockOutYTranslation;
         if (useLargeClock) {
             out = mSmallClockFrame;
             in = mLargeClockFrame;
             if (indexOfChild(in) == -1) addView(in, 0);
-            direction = -1;
             statusAreaYTranslation = mSmallClockFrame.getTop() - mStatusArea.getTop()
                     + mSmartspaceTopOffset;
+            clockInYTranslation = 0;
+            clockOutYTranslation = 0; // Small clock translation is handled with statusArea
         } else {
             in = mSmallClockFrame;
             out = mLargeClockFrame;
             statusAreaYTranslation = 0f;
+            clockInYTranslation = 0f;
+            clockOutYTranslation = mClockSwitchYAmount * -1f;
 
-            // Must remove in order for notifications to appear in the proper place
+            // Must remove in order for notifications to appear in the proper place, ideally this
+            // would happen after the out animation runs, but we can't guarantee that the
+            // nofications won't enter only after the out animation runs.
             removeView(out);
         }
 
         if (!animate) {
             out.setAlpha(0f);
+            out.setTranslationY(clockOutYTranslation);
             in.setAlpha(1f);
-            in.setVisibility(VISIBLE);
+            in.setTranslationY(clockInYTranslation);
+            in.setVisibility(View.VISIBLE);
             mStatusArea.setTranslationY(statusAreaYTranslation);
             return;
         }
 
         mClockOutAnim = new AnimatorSet();
         mClockOutAnim.setDuration(CLOCK_OUT_MILLIS);
-        mClockOutAnim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+        mClockOutAnim.setInterpolator(Interpolators.LINEAR);
         mClockOutAnim.playTogether(
-                ObjectAnimator.ofFloat(out, View.ALPHA, 0f),
-                ObjectAnimator.ofFloat(out, View.TRANSLATION_Y, 0,
-                        direction * -mClockSwitchYAmount));
+                ObjectAnimator.ofFloat(out, ALPHA, 0f),
+                ObjectAnimator.ofFloat(out, TRANSLATION_Y, clockOutYTranslation));
         mClockOutAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
                 mClockOutAnim = null;
@@ -233,27 +279,32 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockInAnim = new AnimatorSet();
         mClockInAnim.setDuration(CLOCK_IN_MILLIS);
         mClockInAnim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        mClockInAnim.playTogether(ObjectAnimator.ofFloat(in, View.ALPHA, 1f),
-                ObjectAnimator.ofFloat(in, View.TRANSLATION_Y, direction * mClockSwitchYAmount, 0));
-        mClockInAnim.setStartDelay(CLOCK_OUT_MILLIS / 2);
+        mClockInAnim.playTogether(
+                ObjectAnimator.ofFloat(in, ALPHA, 1f),
+                ObjectAnimator.ofFloat(in, TRANSLATION_Y, clockInYTranslation));
+        mClockInAnim.setStartDelay(CLOCK_IN_START_DELAY_MILLIS);
         mClockInAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
                 mClockInAnim = null;
             }
         });
 
-        mClockInAnim.start();
-        mClockOutAnim.start();
-
-        mStatusAreaAnim = ObjectAnimator.ofFloat(mStatusArea, View.TRANSLATION_Y,
-                statusAreaYTranslation);
-        mStatusAreaAnim.setDuration(STATUS_AREA_MOVE_MILLIS);
-        mStatusAreaAnim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mStatusAreaAnim = new AnimatorSet();
+        mStatusAreaAnim.setStartDelay(STATUS_AREA_START_DELAY_MILLIS);
+        mStatusAreaAnim.setDuration(
+                useLargeClock ? STATUS_AREA_MOVE_UP_MILLIS : STATUS_AREA_MOVE_DOWN_MILLIS);
+        mStatusAreaAnim.setInterpolator(Interpolators.EMPHASIZED);
+        mStatusAreaAnim.playTogether(
+                ObjectAnimator.ofFloat(mStatusArea, TRANSLATION_Y, statusAreaYTranslation),
+                ObjectAnimator.ofFloat(mSmallClockFrame, TRANSLATION_Y, statusAreaYTranslation));
         mStatusAreaAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
                 mStatusAreaAnim = null;
             }
         });
+
+        mClockInAnim.start();
+        mClockOutAnim.start();
         mStatusAreaAnim.start();
     }
 
@@ -294,11 +345,11 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardClockSwitch:");
-        pw.println("  mSmallClockFrame: " + mSmallClockFrame);
-        pw.println("  mSmallClockFrame.alpha: " + mSmallClockFrame.getAlpha());
-        pw.println("  mLargeClockFrame: " + mLargeClockFrame);
-        pw.println("  mLargeClockFrame.alpha: " + mLargeClockFrame.getAlpha());
-        pw.println("  mStatusArea: " + mStatusArea);
-        pw.println("  mDisplayedClockSize: " + mDisplayedClockSize);
+        pw.println("  mSmallClockFrame = " + mSmallClockFrame);
+        pw.println("  mSmallClockFrame.alpha = " + mSmallClockFrame.getAlpha());
+        pw.println("  mLargeClockFrame = " + mLargeClockFrame);
+        pw.println("  mLargeClockFrame.alpha = " + mLargeClockFrame.getAlpha());
+        pw.println("  mStatusArea = " + mStatusArea);
+        pw.println("  mDisplayedClockSize = " + mDisplayedClockSize);
     }
 }

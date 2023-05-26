@@ -16,7 +16,9 @@
 
 package com.android.server.locksettings;
 
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
+import static com.android.internal.widget.LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -351,15 +353,30 @@ class SyntheticPasswordManager {
         // When Weaver is unavailable, this is the Gatekeeper password handle that resulted from
         // enrolling the stretched LSKF.
         public byte[] passwordHandle;
+        /**
+         * Pin length field, only stored in version 2 of the password data and when auto confirm
+         * flag is enabled, otherwise this field contains PIN_LENGTH_UNAVAILABLE
+         */
+        public int pinLength;
 
-        public static PasswordData create(int credentialType) {
+        public static PasswordData create(int credentialType, int pinLength) {
             PasswordData result = new PasswordData();
             result.scryptLogN = PASSWORD_SCRYPT_LOG_N;
             result.scryptLogR = PASSWORD_SCRYPT_LOG_R;
             result.scryptLogP = PASSWORD_SCRYPT_LOG_P;
             result.credentialType = credentialType;
+            result.pinLength = pinLength;
             result.salt = SecureRandomUtils.randomBytes(PASSWORD_SALT_LENGTH);
             return result;
+        }
+
+        /**
+         * Returns true if the given serialized PasswordData begins with the value 2 as a short.
+         * This detects the "bad" (non-forwards-compatible) PasswordData format that was temporarily
+         * used during development of Android 14.  For more details, see fromBytes() below.
+         */
+        public static boolean isBadFormatFromAndroid14Beta(byte[] data) {
+            return data != null && data.length >= 2 && data[0] == 0 && data[1] == 2;
         }
 
         public static PasswordData fromBytes(byte[] data) {
@@ -367,7 +384,19 @@ class SyntheticPasswordManager {
             ByteBuffer buffer = ByteBuffer.allocate(data.length);
             buffer.put(data, 0, data.length);
             buffer.flip();
-            result.credentialType = buffer.getInt();
+
+            /*
+             * The serialized PasswordData is supposed to begin with credentialType as an int.
+             * However, all credentialType values fit in a short and the byte order is big endian,
+             * so the first two bytes don't convey any non-redundant information.  For this reason,
+             * temporarily during development of Android 14, the first two bytes were "stolen" from
+             * credentialType to use for a data format version number.
+             *
+             * However, this change was reverted as it was a non-forwards-compatible change.  (See
+             * toBytes() for why this data format needs to be forwards-compatible.)  Therefore,
+             * recover from this misstep by ignoring the first two bytes.
+             */
+            result.credentialType = (short) buffer.getInt();
             result.scryptLogN = buffer.get();
             result.scryptLogR = buffer.get();
             result.scryptLogP = buffer.get();
@@ -381,14 +410,32 @@ class SyntheticPasswordManager {
             } else {
                 result.passwordHandle = null;
             }
+            if (buffer.remaining() >= Integer.BYTES) {
+                result.pinLength = buffer.getInt();
+            } else {
+                result.pinLength = PIN_LENGTH_UNAVAILABLE;
+            }
             return result;
         }
 
+        /**
+         * Serializes this PasswordData into a byte array.
+         * <p>
+         * Careful: all changes to the format of the serialized PasswordData must be forwards
+         * compatible.  I.e., older versions of Android must still accept the latest PasswordData.
+         * This is because a serialized PasswordData is stored in the Factory Reset Protection (FRP)
+         * persistent data block.  It's possible that a device has FRP set up on a newer version of
+         * Android, is factory reset, and then is set up with an older version of Android.
+         */
         public byte[] toBytes() {
 
             ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + 3 * Byte.BYTES
                     + Integer.BYTES + salt.length + Integer.BYTES +
-                    (passwordHandle != null ? passwordHandle.length : 0));
+                    (passwordHandle != null ? passwordHandle.length : 0) + Integer.BYTES);
+            // credentialType must fit in a short.  For an explanation, see fromBytes().
+            if (credentialType < Short.MIN_VALUE || credentialType > Short.MAX_VALUE) {
+                throw new IllegalArgumentException("Unknown credential type: " + credentialType);
+            }
             buffer.putInt(credentialType);
             buffer.put(scryptLogN);
             buffer.put(scryptLogR);
@@ -401,6 +448,7 @@ class SyntheticPasswordManager {
             } else {
                 buffer.putInt(0);
             }
+            buffer.putInt(pinLength);
             return buffer.array();
         }
     }
@@ -508,6 +556,11 @@ class SyntheticPasswordManager {
         }
         Slog.w(TAG, "Device does not support weaver");
         return null;
+    }
+
+    @VisibleForTesting
+    public boolean isAutoPinConfirmationFeatureAvailable() {
+        return LockPatternUtils.isAutoPinConfirmFeatureAvailable();
     }
 
     private synchronized boolean isWeaverAvailable() {
@@ -649,6 +702,14 @@ class SyntheticPasswordManager {
         }
     }
 
+    int getPinLength(long protectorId, int userId) {
+        byte[] passwordData = loadState(PASSWORD_DATA_NAME, protectorId, userId);
+        if (passwordData == null) {
+            return LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
+        }
+        return PasswordData.fromBytes(passwordData).pinLength;
+    }
+
     int getCredentialType(long protectorId, int userId) {
         byte[] passwordData = loadState(PASSWORD_DATA_NAME, protectorId, userId);
         if (passwordData == null) {
@@ -744,6 +805,11 @@ class SyntheticPasswordManager {
                 && hasState(SP_P1_NAME, NULL_PROTECTOR_ID, userId);
     }
 
+    public boolean hasAnyEscrowData(int userId) {
+        return hasState(SP_E0_NAME, NULL_PROTECTOR_ID, userId)
+                || hasState(SP_P1_NAME, NULL_PROTECTOR_ID, userId);
+    }
+
     public void destroyEscrowData(int userId) {
         destroyState(SP_E0_NAME, NULL_PROTECTOR_ID, userId);
         destroyState(SP_P1_NAME, NULL_PROTECTOR_ID, userId);
@@ -780,13 +846,17 @@ class SyntheticPasswordManager {
         int slot = loadWeaverSlot(protectorId, userId);
         destroyState(WEAVER_SLOT_NAME, protectorId, userId);
         if (slot != INVALID_WEAVER_SLOT) {
+            if (!isWeaverAvailable()) {
+                Slog.e(TAG, "Cannot erase Weaver slot because Weaver is unavailable");
+                return;
+            }
             Set<Integer> usedSlots = getUsedWeaverSlots();
             if (!usedSlots.contains(slot)) {
-                Slog.i(TAG, "Destroy weaver slot " + slot + " for user " + userId);
+                Slogf.i(TAG, "Erasing Weaver slot %d", slot);
                 weaverEnroll(slot, null, null);
                 mPasswordSlotManager.markSlotDeleted(slot);
             } else {
-                Slog.w(TAG, "Skip destroying reused weaver slot " + slot + " for user " + userId);
+                Slogf.i(TAG, "Weaver slot %d was already reused; not erasing it", slot);
             }
         }
     }
@@ -848,17 +918,24 @@ class SyntheticPasswordManager {
     public long createLskfBasedProtector(IGateKeeperService gatekeeper,
             LockscreenCredential credential, SyntheticPassword sp, int userId) {
         long protectorId = generateProtectorId();
+        int pinLength = PIN_LENGTH_UNAVAILABLE;
+        if (isAutoPinConfirmationFeatureAvailable()) {
+            pinLength = derivePinLength(credential.size(), credential.isPin(), userId);
+        }
         // There's no need to store password data about an empty LSKF.
-        PasswordData pwd = credential.isNone() ? null : PasswordData.create(credential.getType());
+        PasswordData pwd = credential.isNone() ? null :
+                PasswordData.create(credential.getType(), pinLength);
         byte[] stretchedLskf = stretchLskf(credential, pwd);
         long sid = GateKeeper.INVALID_SECURE_USER_ID;
         final byte[] protectorSecret;
+
+        Slogf.i(TAG, "Creating LSKF-based protector %016x for user %d", protectorId, userId);
 
         if (isWeaverAvailable()) {
             // Weaver is available, so make the protector use it to verify the LSKF.  Do this even
             // if the LSKF is empty, as that gives us support for securely deleting the protector.
             int weaverSlot = getNextAvailableWeaverSlot();
-            Slog.i(TAG, "Weaver enroll password to slot " + weaverSlot + " for user " + userId);
+            Slogf.i(TAG, "Enrolling LSKF for user %d into Weaver slot %d", userId, weaverSlot);
             byte[] weaverSecret = weaverEnroll(weaverSlot, stretchedLskfToWeaverKey(stretchedLskf),
                     null);
             if (weaverSecret == null) {
@@ -888,6 +965,7 @@ class SyntheticPasswordManager {
                 } catch (RemoteException ignore) {
                     Slog.w(TAG, "Failed to clear SID from gatekeeper");
                 }
+                Slogf.i(TAG, "Enrolling LSKF for user %d into Gatekeeper", userId);
                 GateKeeperResponse response;
                 try {
                     response = gatekeeper.enroll(fakeUserId(userId), null, null,
@@ -916,6 +994,15 @@ class SyntheticPasswordManager {
                 sid, userId);
         syncState(userId); // ensure the new files are really saved to disk
         return protectorId;
+    }
+
+    private int derivePinLength(int sizeOfCredential, boolean isPinCredential, int userId) {
+        if (!isPinCredential
+                || !mStorage.isAutoPinConfirmSettingEnabled(userId)
+                || sizeOfCredential < LockPatternUtils.MIN_AUTO_PIN_REQUIREMENT_LENGTH) {
+            return PIN_LENGTH_UNAVAILABLE;
+        }
+        return sizeOfCredential;
     }
 
     public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
@@ -960,6 +1047,7 @@ class SyntheticPasswordManager {
                 && LockPatternUtils.userOwnsFrpCredential(mContext, userInfo)
                 && getCredentialType(protectorId, userInfo.id) !=
                         LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+            Slog.i(TAG, "Migrating FRP credential to persistent data block");
             PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, protectorId,
                     userInfo.id));
             int weaverSlot = loadWeaverSlot(protectorId, userInfo.id);
@@ -1088,9 +1176,10 @@ class SyntheticPasswordManager {
             Slog.w(TAG, "User is not escrowable");
             return false;
         }
+        Slogf.i(TAG, "Creating token-based protector %016x for user %d", tokenHandle, userId);
         if (isWeaverAvailable()) {
             int slot = getNextAvailableWeaverSlot();
-            Slog.i(TAG, "Weaver enroll token to slot " + slot + " for user " + userId);
+            Slogf.i(TAG, "Using Weaver slot %d for new token-based protector", slot);
             if (weaverEnroll(slot, null, tokenData.weaverSecret) == null) {
                 Slog.e(TAG, "Failed to enroll weaver secret when activating token");
                 return false;
@@ -1166,8 +1255,9 @@ class SyntheticPasswordManager {
             storedType = pwd.credentialType;
         }
         if (!credential.checkAgainstStoredType(storedType)) {
-            Slog.e(TAG, TextUtils.formatSimple("Credential type mismatch: expected %d actual %d",
-                    storedType, credential.getType()));
+            Slogf.e(TAG, "Credential type mismatch: stored type is %s but provided type is %s",
+                    LockPatternUtils.credentialTypeToString(storedType),
+                    LockPatternUtils.credentialTypeToString(credential.getType()));
             result.gkResponse = VerifyCredentialResponse.ERROR;
             return result;
         }
@@ -1270,12 +1360,41 @@ class SyntheticPasswordManager {
 
         // Upgrade case: store the metrics if the device did not have stored metrics before, should
         // only happen once on old protectors.
-        if (result.syntheticPassword != null && !credential.isNone() &&
-                !hasPasswordMetrics(protectorId, userId)) {
+        if (result.syntheticPassword != null && !credential.isNone()
+                && !hasPasswordMetrics(protectorId, userId)) {
             savePasswordMetrics(credential, result.syntheticPassword, protectorId, userId);
             syncState(userId); // Not strictly needed as the upgrade can be re-done, but be safe.
         }
         return result;
+    }
+
+    /**
+     * {@link LockPatternUtils#refreshStoredPinLength(int)}
+     * @param passwordMetrics passwordMetrics object containing the cached pin length
+     * @param userId userId of the user whose pin length we want to store on disk
+     * @param protectorId current LSKF based protectorId
+     * @return true/false depending on whether PIN length has been saved on disk
+     */
+    public boolean refreshPinLengthOnDisk(PasswordMetrics passwordMetrics,
+            long protectorId, int userId) {
+        if (!isAutoPinConfirmationFeatureAvailable()) {
+            return false;
+        }
+
+        byte[] pwdDataBytes = loadState(PASSWORD_DATA_NAME, protectorId, userId);
+        if (pwdDataBytes == null) {
+            return false;
+        }
+
+        PasswordData pwd = PasswordData.fromBytes(pwdDataBytes);
+        int pinLength = derivePinLength(passwordMetrics.length,
+                passwordMetrics.credType == CREDENTIAL_TYPE_PIN, userId);
+        if (pwd.pinLength != pinLength) {
+            pwd.pinLength = pinLength;
+            saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
+            syncState(userId);
+        }
+        return true;
     }
 
     /**
@@ -1469,6 +1588,7 @@ class SyntheticPasswordManager {
 
     /** Destroy a token-based SP protector. */
     public void destroyTokenBasedProtector(long protectorId, int userId) {
+        Slogf.i(TAG, "Destroying token-based protector %016x for user %d", protectorId, userId);
         SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME,
                     protectorId, userId));
         destroyProtectorCommon(protectorId, userId);
@@ -1494,6 +1614,7 @@ class SyntheticPasswordManager {
      * Destroy an LSKF-based SP protector.  This is used when the user's LSKF is changed.
      */
     public void destroyLskfBasedProtector(long protectorId, int userId) {
+        Slogf.i(TAG, "Destroying LSKF-based protector %016x for user %d", protectorId, userId);
         destroyProtectorCommon(protectorId, userId);
         destroyState(PASSWORD_DATA_NAME, protectorId, userId);
         destroyState(PASSWORD_METRICS_NAME, protectorId, userId);
@@ -1654,6 +1775,9 @@ class SyntheticPasswordManager {
     }
 
     private String getProtectorKeyAlias(long protectorId) {
+        // Note, this arguably has a bug: %x should be %016x so that the protector ID is left-padded
+        // with zeroes, like how the synthetic password state files are named.  It's too late to fix
+        // this, though, and it doesn't actually matter.
         return TextUtils.formatSimple("%s%x", PROTECTOR_KEY_ALIAS_PREFIX, protectorId);
     }
 

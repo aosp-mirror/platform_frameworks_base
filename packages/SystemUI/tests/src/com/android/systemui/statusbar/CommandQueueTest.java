@@ -28,11 +28,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
-import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
@@ -397,9 +397,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testHandleSysKey() {
-        mCommandQueue.handleSystemKey(1);
+        KeyEvent testEvent = new KeyEvent(1, 1);
+        mCommandQueue.handleSystemKey(testEvent);
         waitForIdleSync();
-        verify(mCallbacks).handleSystemKey(eq(1));
+        verify(mCallbacks).handleSystemKey(eq(testEvent));
     }
 
     @Test
@@ -441,15 +442,13 @@ public class CommandQueueTest extends SysuiTestCase {
         final long operationId = 1;
         final String packageName = "test";
         final long requestId = 10;
-        final int multiSensorConfig = BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
 
         mCommandQueue.showAuthenticationDialog(promptInfo, receiver, sensorIds,
-                credentialAllowed, requireConfirmation, userId, operationId, packageName, requestId,
-                multiSensorConfig);
+                credentialAllowed, requireConfirmation, userId, operationId, packageName, requestId);
         waitForIdleSync();
         verify(mCallbacks).showAuthenticationDialog(eq(promptInfo), eq(receiver), eq(sensorIds),
                 eq(credentialAllowed), eq(requireConfirmation), eq(userId), eq(operationId),
-                eq(packageName), eq(requestId), eq(multiSensorConfig));
+                eq(packageName), eq(requestId));
     }
 
     @Test

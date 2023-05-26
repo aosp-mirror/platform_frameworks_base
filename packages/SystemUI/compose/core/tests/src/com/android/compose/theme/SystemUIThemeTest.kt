@@ -40,7 +40,9 @@ class SystemUIThemeTest {
     @Test
     fun testAndroidColorsAreAvailableInsideTheme() {
         composeRule.setContent {
-            PlatformTheme { Text("foo", color = LocalAndroidColorScheme.current.colorAccent) }
+            PlatformTheme {
+                Text("foo", color = LocalAndroidColorScheme.current.deprecated.colorAccent)
+            }
         }
 
         composeRule.onNodeWithText("foo").assertIsDisplayed()
@@ -50,7 +52,7 @@ class SystemUIThemeTest {
     fun testAccessingAndroidColorsWithoutThemeThrows() {
         assertThrows(IllegalStateException::class.java) {
             composeRule.setContent {
-                Text("foo", color = LocalAndroidColorScheme.current.colorAccent)
+                Text("foo", color = LocalAndroidColorScheme.current.deprecated.colorAccent)
             }
         }
     }

@@ -519,17 +519,24 @@ public class ContextHubService extends IContextHubService.Stub {
         BroadcastReceiver btReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())
-                        || BluetoothAdapter.ACTION_BLE_STATE_CHANGED.equals(
-                        intent.getAction())) {
+                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
                     sendBtSettingUpdate(/* forceUpdate= */ false);
                 }
             }
         };
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        filter.addAction(BluetoothAdapter.ACTION_BLE_STATE_CHANGED);
         mContext.registerReceiver(btReceiver, filter);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE),
+                /* notifyForDescendants= */ false,
+                new ContentObserver(/* handler= */ null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        sendBtSettingUpdate(/* forceUpdate= */ false);
+                    }
+                }, UserHandle.USER_ALL);
     }
 
     /**
@@ -1148,7 +1155,7 @@ public class ContextHubService extends IContextHubService.Stub {
         super.getPreloadedNanoAppIds_enforcePermission();
         Objects.requireNonNull(hubInfo, "hubInfo cannot be null");
 
-        long[] nanoappIds = mContextHubWrapper.getPreloadedNanoappIds();
+        long[] nanoappIds = mContextHubWrapper.getPreloadedNanoappIds(hubInfo.getId());
         if (nanoappIds == null) {
             return new long[0];
         }
@@ -1261,13 +1268,19 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
-        long[] preloadedNanoappIds = mContextHubWrapper.getPreloadedNanoappIds();
-        if (preloadedNanoappIds == null) {
-            return;
-        }
-        for (long preloadedNanoappId : preloadedNanoappIds) {
-            pw.print("ID: 0x");
-            pw.println(Long.toHexString(preloadedNanoappId));
+        for (int contextHubId: mContextHubIdToInfoMap.keySet()) {
+            long[] preloadedNanoappIds = mContextHubWrapper.getPreloadedNanoappIds(contextHubId);
+            if (preloadedNanoappIds == null) {
+                return;
+            }
+
+            pw.print("Context Hub (id=");
+            pw.print(contextHubId);
+            pw.println("):");
+            for (long preloadedNanoappId : preloadedNanoappIds) {
+                pw.print("  ID: 0x");
+                pw.println(Long.toHexString(preloadedNanoappId));
+            }
         }
     }
 

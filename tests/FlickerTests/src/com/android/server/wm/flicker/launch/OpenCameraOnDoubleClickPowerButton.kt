@@ -16,18 +16,20 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.os.SystemClock
 import android.platform.test.annotations.Postsubmit
 import android.tools.device.apphelpers.CameraAppHelper
-import android.tools.device.flicker.annotation.FlickerServiceCompatible
+import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import android.view.KeyEvent
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.setRotation
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -43,6 +45,7 @@ import org.junit.runners.Parameterized
  *     Make sure no apps are running on the device
  *     Launch an app [testApp] and wait animation to complete
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
@@ -54,13 +57,14 @@ import org.junit.runners.Parameterized
  * ```
  */
 @RequiresDevice
-@FlickerServiceCompatible
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
     OpenAppFromLauncherTransition(flicker) {
     private val cameraApp = CameraAppHelper(instrumentation)
+    override val testApp: StandardAppHelper
+        get() = cameraApp
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -70,6 +74,7 @@ class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
             }
             transitions {
                 device.pressKeyCode(KeyEvent.KEYCODE_POWER)
+                SystemClock.sleep(100)
                 device.pressKeyCode(KeyEvent.KEYCODE_POWER)
                 wmHelper.StateSyncBuilder().withWindowSurfaceAppeared(cameraApp).waitForAndVerify()
             }
@@ -97,7 +102,7 @@ class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
 
     @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
-    @Postsubmit
+    @Ignore("Not applicable to this CUJ. App is full screen at the end")
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
@@ -109,24 +114,24 @@ class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
-    @Postsubmit
+    @Ignore("Status bar visibility depends on whether the permission dialog is displayed or not")
     @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
         super.statusBarLayerIsVisibleAtStartAndEnd()
 
-    @Postsubmit
+    @Ignore("Status bar visibility depends on whether the permission dialog is displayed or not")
     @Test
     override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
-    @Postsubmit
+    @Ignore("Status bar visibility depends on whether the permission dialog is displayed or not")
     @Test
     override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
-    @Postsubmit
+    @Ignore("Not applicable to this CUJ. App is full screen at the end")
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
-    @Postsubmit
+    @Ignore("Not applicable to this CUJ. App is full screen at the end")
     @Test
     override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
@@ -140,7 +145,7 @@ class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
-    @Postsubmit
+    @Ignore("Not applicable to this CUJ. App is full screen at the end")
     @Test
     override fun navBarWindowIsVisibleAtStartAndEnd() {
         super.navBarWindowIsVisibleAtStartAndEnd()

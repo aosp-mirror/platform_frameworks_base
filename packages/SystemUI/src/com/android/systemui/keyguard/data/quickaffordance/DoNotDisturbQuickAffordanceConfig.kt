@@ -134,7 +134,9 @@ constructor(
                 .flowOn(backgroundDispatcher)
                 .distinctUntilChanged()
                 .onEach { settingsValue = it }
-        ) { callbackFlowValue, _ -> callbackFlowValue }
+        ) { callbackFlowValue, _ ->
+            callbackFlowValue
+        }
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
         return if (controller.isZenAvailable) {

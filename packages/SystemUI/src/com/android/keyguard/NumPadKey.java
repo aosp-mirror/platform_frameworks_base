@@ -15,6 +15,8 @@
  */
 package com.android.keyguard;
 
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -50,6 +52,7 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
     private int mDigit = -1;
     private int mTextViewResId;
     private PasswordTextView mTextView;
+    private boolean mAnimationsEnabled = true;
 
     @Nullable
     private NumPadAnimator mAnimator;
@@ -149,7 +152,7 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
      * Reload colors from resources.
      **/
     public void reloadColors() {
-        int textColor = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary)
+        int textColor = Utils.getColorAttr(getContext(), NUM_PAD_KEY)
                 .getDefaultColor();
         int klondikeColor = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary)
                 .getDefaultColor();
@@ -164,11 +167,11 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         switch(event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 doHapticKeyClick();
-                if (mAnimator != null) mAnimator.expand();
+                if (mAnimator != null && mAnimationsEnabled) mAnimator.expand();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (mAnimator != null) mAnimator.contract();
+                if (mAnimator != null && mAnimationsEnabled) mAnimator.contract();
                 break;
         }
         return super.onTouchEvent(event);
@@ -227,5 +230,12 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         if (mAnimator != null) {
             mAnimator.setProgress(progress);
         }
+    }
+
+    /**
+     * Controls the animation when a key is pressed
+     */
+    public void setAnimationEnabled(boolean enabled) {
+        mAnimationsEnabled = enabled;
     }
 }

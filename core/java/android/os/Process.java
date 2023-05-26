@@ -365,6 +365,11 @@ public class Process {
     public static final int LAST_APPLICATION_CACHE_GID = 29999;
 
     /**
+     * An invalid PID value.
+     */
+    public static final int INVALID_PID = -1;
+
+    /**
      * Standard priority of application threads.
      * Use with {@link #setThreadPriority(int)} and
      * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
@@ -1354,7 +1359,7 @@ public class Process {
         String formatSize = MemoryProperties.memory_ddr_size().orElse("0KB");
         long memSize = FileUtils.parseSize(formatSize);
 
-        if (memSize == Long.MIN_VALUE) {
+        if (memSize <= 0) {
             return FileUtils.roundStorageSize(getTotalMemory());
         }
 
@@ -1492,6 +1497,15 @@ public class Process {
      * @hide
      */
     public static final native int killProcessGroup(int uid, int pid);
+
+    /**
+     * Send a signal to all processes in a group under the given PID, but do not wait for the
+     * processes to be fully cleaned up, or for the cgroup to be removed before returning.
+     * Callers should also ensure that killProcessGroup is called later to ensure the cgroup is
+     * fully removed, otherwise system resources may leak.
+     * @hide
+     */
+    public static final native int sendSignalToProcessGroup(int uid, int pid, int signal);
 
     /**
       * Freeze the cgroup for the given UID.

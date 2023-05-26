@@ -53,13 +53,38 @@ public class FeatureFlagsRelease implements FeatureFlags {
     private final Map<String, Flag<?>> mAllFlags;
     private final Map<String, Boolean> mBooleanCache = new HashMap<>();
     private final Map<String, String> mStringCache = new HashMap<>();
+    private final Map<String, Integer> mIntCache = new HashMap<>();
 
     private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
             new ServerFlagReader.ChangeListener() {
                 @Override
-                public void onChange(Flag<?> flag) {
-                    mRestarter.restartSystemUI(
-                            "Server flag change: " + flag.getNamespace() + "." + flag.getName());
+                public void onChange(Flag<?> flag, String value) {
+                    boolean shouldRestart = false;
+                    if (mBooleanCache.containsKey(flag.getName())) {
+                        boolean newValue = value == null ? false : Boolean.parseBoolean(value);
+                        if (mBooleanCache.get(flag.getName()) != newValue) {
+                            shouldRestart = true;
+                        }
+                    } else if (mStringCache.containsKey(flag.getName())) {
+                        String newValue = value == null ? "" : value;
+                        if (mStringCache.get(flag.getName()) != newValue) {
+                            shouldRestart = true;
+                        }
+                    } else if (mIntCache.containsKey(flag.getName())) {
+                        int newValue = 0;
+                        try {
+                            newValue = value == null ? 0 : Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                        }
+                        if (mIntCache.get(flag.getName()) != newValue) {
+                            shouldRestart = true;
+                        }
+                    }
+                    if (shouldRestart) {
+                        mRestarter.restartSystemUI(
+                                "Server flag change: " + flag.getNamespace() + "."
+                                        + flag.getName());
+                    }
                 }
             };
 
@@ -97,66 +122,95 @@ public class FeatureFlagsRelease implements FeatureFlags {
 
     @Override
     public boolean isEnabled(@NotNull ReleasedFlag flag) {
-        return mServerFlagReader.readServerOverride(flag.getNamespace(), flag.getName(), true);
+        // Fill the cache.
+        return isEnabledInternal(flag.getName(),
+                mServerFlagReader.readServerOverride(flag.getNamespace(), flag.getName(), true));
     }
 
     @Override
     public boolean isEnabled(ResourceBooleanFlag flag) {
-        if (!mBooleanCache.containsKey(flag.getName())) {
-            return isEnabled(flag.getName(), mResources.getBoolean(flag.getResourceId()));
-        }
-
-        return mBooleanCache.get(flag.getName());
+        // Fill the cache.
+        return isEnabledInternal(flag.getName(), mResources.getBoolean(flag.getResourceId()));
     }
 
     @Override
     public boolean isEnabled(SysPropBooleanFlag flag) {
-        if (!mBooleanCache.containsKey(flag.getName())) {
-            return isEnabled(
-                    flag.getName(),
-                    mSystemProperties.getBoolean(flag.getName(), flag.getDefault()));
-        }
-
-        return mBooleanCache.get(flag.getName());
+        // Fill the cache.
+        return isEnabledInternal(
+                flag.getName(),
+                mSystemProperties.getBoolean(flag.getName(), flag.getDefault()));
     }
 
-    private boolean isEnabled(String name, boolean defaultValue) {
-        mBooleanCache.put(name, defaultValue);
-        return defaultValue;
+    /**
+     * Checks and fills the boolean cache. This is important, Always call through to this method!
+     *
+     * We use the cache as a way to decide if we need to restart the process when server-side
+     * changes occur.
+     */
+    private boolean isEnabledInternal(String name, boolean defaultValue) {
+        // Fill the cache.
+        if (!mBooleanCache.containsKey(name)) {
+            mBooleanCache.put(name, defaultValue);
+        }
+
+        return mBooleanCache.get(name);
     }
 
     @NonNull
     @Override
     public String getString(@NonNull StringFlag flag) {
-        return getString(flag.getName(), flag.getDefault());
+        // Fill the cache.
+        return getStringInternal(flag.getName(), flag.getDefault());
     }
 
     @NonNull
     @Override
     public String getString(@NonNull ResourceStringFlag flag) {
-        if (!mStringCache.containsKey(flag.getName())) {
-            return getString(flag.getName(),
-                    requireNonNull(mResources.getString(flag.getResourceId())));
-        }
-
-        return mStringCache.get(flag.getName());
+        // Fill the cache.
+        return getStringInternal(flag.getName(),
+                requireNonNull(mResources.getString(flag.getResourceId())));
     }
 
-    private String getString(String name, String defaultValue) {
-        mStringCache.put(name, defaultValue);
-        return defaultValue;
+    /**
+     * Checks and fills the String cache. This is important, Always call through to this method!
+     *
+     * We use the cache as a way to decide if we need to restart the process when server-side
+     * changes occur.
+     */
+    private String getStringInternal(String name, String defaultValue) {
+        if (!mStringCache.containsKey(name)) {
+            mStringCache.put(name, defaultValue);
+        }
+
+        return mStringCache.get(name);
     }
 
     @NonNull
     @Override
     public int getInt(@NonNull IntFlag flag) {
-        return flag.getDefault();
+        // Fill the cache.
+        return getIntInternal(flag.getName(), flag.getDefault());
     }
 
     @NonNull
     @Override
     public int getInt(@NonNull ResourceIntFlag flag) {
+        // Fill the cache.
         return mResources.getInteger(flag.getResourceId());
+    }
+
+    /**
+     * Checks and fills the integer cache. This is important, Always call through to this method!
+     *
+     * We use the cache as a way to decide if we need to restart the process when server-side
+     * changes occur.
+     */
+    private int getIntInternal(String name, int defaultValue) {
+        if (!mIntCache.containsKey(name)) {
+            mIntCache.put(name, defaultValue);
+        }
+
+        return mIntCache.get(name);
     }
 
     @Override

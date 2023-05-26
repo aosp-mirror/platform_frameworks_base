@@ -48,6 +48,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
@@ -60,13 +62,13 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.settings.SecureSettings;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Handles keeping track of the current user, profiles, and various things related to hiding
@@ -100,7 +102,7 @@ public class NotificationLockscreenUserManagerImpl implements
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final NotificationClickNotifier mClickNotifier;
     private final Lazy<OverviewProxyService> mOverviewProxyServiceLazy;
-
+    private final FeatureFlags mFeatureFlags;
     private boolean mShowLockscreenNotifications;
     private boolean mAllowLockscreenRemoteInput;
     private LockPatternUtils mLockPatternUtils;
@@ -145,7 +147,10 @@ public class NotificationLockscreenUserManagerImpl implements
                     break;
                 case Intent.ACTION_USER_UNLOCKED:
                     // Start the overview connection to the launcher service
-                    mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
+                    // Connect if user hasn't connected yet
+                    if (mOverviewProxyServiceLazy.get().getProxy() == null) {
+                        mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
+                    }
                     break;
                 case NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION:
                     final IntentSender intentSender = intent.getParcelableExtra(
@@ -172,6 +177,21 @@ public class NotificationLockscreenUserManagerImpl implements
             new UserTracker.Callback() {
                 @Override
                 public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    if (!mFeatureFlags.isEnabled(
+                            Flags.LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE)) {
+                        handleUserChange(newUser);
+                    }
+                }
+
+                @Override
+                public void onUserChanging(int newUser, @NonNull Context userContext) {
+                    if (mFeatureFlags.isEnabled(
+                            Flags.LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE)) {
+                        handleUserChange(newUser);
+                    }
+                }
+
+                private void handleUserChange(int newUser) {
                     mCurrentUserId = newUser;
                     updateCurrentProfilesCache();
 
@@ -214,7 +234,8 @@ public class NotificationLockscreenUserManagerImpl implements
             KeyguardStateController keyguardStateController,
             SecureSettings secureSettings,
             DumpManager dumpManager,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils,
+            FeatureFlags featureFlags) {
         mContext = context;
         mMainHandler = mainHandler;
         mDevicePolicyManager = devicePolicyManager;
@@ -232,6 +253,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mDeviceProvisionedController = deviceProvisionedController;
         mSecureSettings = secureSettings;
         mKeyguardStateController = keyguardStateController;
+        mFeatureFlags = featureFlags;
 
         dumpManager.registerDumpable(this);
     }

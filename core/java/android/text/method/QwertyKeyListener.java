@@ -362,6 +362,15 @@ public class QwertyKeyListener extends BaseKeyListener {
 
                 return true;
             }
+        } else if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers()) {
+            // If user is in the process of composing with a dead key, and
+            // presses Escape, cancel it. We need special handling because
+            // the Escape key will not produce a Unicode character
+            if (activeStart == selStart && activeEnd == selEnd) {
+                Selection.setSelection(content, selEnd);
+                content.removeSpan(TextKeyListener.ACTIVE);
+                return true;
+            }
         }
 
         return super.onKeyDown(view, content, keyCode, event);

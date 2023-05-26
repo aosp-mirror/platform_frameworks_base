@@ -20,20 +20,20 @@ import android.app.Instrumentation
 import android.os.Bundle
 import android.os.Handler
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher
 import android.tools.common.traces.ConditionsFactory
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerBuilderProvider
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.R
-import com.android.server.wm.flicker.helpers.setRotation
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
-import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -93,8 +93,7 @@ class OverrideTaskTransitionTest(val flicker: FlickerTest) {
                 .then()
                 // Animation starts, but the app may not be drawn yet which means the Splash
                 // may be visible.
-                .isInvisible(testApp, isOptional = true)
-                .isVisible(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
+                .isSplashScreenVisibleFor(testApp, isOptional = true)
                 .then()
                 // App shows up with the custom animation starting at alpha=1.
                 .isVisible(testApp)

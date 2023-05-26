@@ -261,14 +261,17 @@ public class UserInfo implements Parcelable {
     public boolean guestToRemove;
 
     /**
-     * This is used to optimize the creation of an user, i.e. OEMs might choose to pre-create a
+     * This is used to optimize the creation of a user, i.e. OEMs might choose to pre-create a
      * number of users at the first boot, so the actual creation later is faster.
      *
      * <p>A {@code preCreated} user is not a real user yet, so it should not show up on regular
      * user operations (other than user creation per se).
      *
-     * <p>Once the pre-created is used to create a "real" user later on, {@code preCreate} is set to
-     * {@code false}.
+     * <p>Once the pre-created is used to create a "real" user later on, {@code preCreated} is set
+     * to {@code false}.
+     *
+     * <p><b>NOTE: Pre-created users are deprecated. This field remains to be able to recognize
+     * pre-created users in older versions, but will eventually be removed.
      */
     public boolean preCreated;
 
@@ -277,6 +280,9 @@ public class UserInfo implements Parcelable {
      * user.
      *
      * <p><b>NOTE: </b>only used for debugging purposes, it's not set when marshalled to a parcel.
+     *
+     * <p><b>NOTE: Pre-created users are deprecated. This field remains to be able to recognize
+     * pre-created users in older versions, but will eventually ve removed.
      */
     public boolean convertedFromPreCreated;
 

@@ -21,6 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 import android.content.Context;
@@ -32,6 +33,8 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+
+import com.google.common.util.concurrent.MoreExecutors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,6 +58,7 @@ public class DeviceStateControllerTests {
     private DeviceStateManager mMockDeviceStateManager;
     private DeviceStateController.DeviceState mCurrentState =
             DeviceStateController.DeviceState.UNKNOWN;
+    private Consumer<DeviceStateController.DeviceState> mDelegate;
 
     @Before
     public void setUp() {
@@ -64,10 +68,10 @@ public class DeviceStateControllerTests {
 
     private void initialize(boolean supportFold, boolean supportHalfFold) {
         mBuilder.setSupportFold(supportFold, supportHalfFold);
-        Consumer<DeviceStateController.DeviceState> delegate = (newFoldState) -> {
+        mDelegate = (newFoldState) -> {
             mCurrentState = newFoldState;
         };
-        mBuilder.setDelegate(delegate);
+        mBuilder.setDelegate(mDelegate);
         mBuilder.build();
         verify(mMockDeviceStateManager).registerCallback(any(), any());
     }
@@ -109,6 +113,24 @@ public class DeviceStateControllerTests {
         assertEquals(DeviceStateController.DeviceState.HALF_FOLDED, mCurrentState);
         mTarget.onStateChanged(mConcurrentDisplayState);
         assertEquals(DeviceStateController.DeviceState.CONCURRENT, mCurrentState);
+    }
+
+    @Test
+    public void testUnregisterDeviceStateCallback() {
+        initialize(true /* supportFold */, true /* supportHalfFolded */);
+        assertEquals(1, mTarget.mDeviceStateCallbacks.size());
+        assertTrue(mTarget.mDeviceStateCallbacks.containsKey(mDelegate));
+
+        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
+        mTarget.onStateChanged(mFoldedStates[0]);
+        assertEquals(DeviceStateController.DeviceState.FOLDED, mCurrentState);
+
+        // The callback should not receive state change when the it is unregistered.
+        mTarget.unregisterDeviceStateCallback(mDelegate);
+        assertTrue(mTarget.mDeviceStateCallbacks.isEmpty());
+        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        assertEquals(DeviceStateController.DeviceState.FOLDED /* unchanged */, mCurrentState);
     }
 
     private final int[] mFoldedStates = {0};
@@ -174,8 +196,9 @@ public class DeviceStateControllerTests {
             when(mMockContext.getResources()).thenReturn((mockRes));
             mockFold(mSupportFold, mSupportHalfFold);
             Handler mockHandler = mock(Handler.class);
-            mTarget = new DeviceStateController(mMockContext, mockHandler);
-            mTarget.registerDeviceStateCallback(mDelegate);
+            mTarget = new DeviceStateController(mMockContext, mockHandler,
+                    new WindowManagerGlobalLock());
+            mTarget.registerDeviceStateCallback(mDelegate, MoreExecutors.directExecutor());
         }
     }
 }

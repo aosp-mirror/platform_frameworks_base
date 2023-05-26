@@ -17,15 +17,21 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
+import com.android.keyguard.KeyguardSecurityModel
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode.Password
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -37,15 +43,57 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardSecurityModel: KeyguardSecurityModel,
 ) : TransitionInteractor(FromPrimaryBouncerTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
         listenForPrimaryBouncerToGone()
-        listenForPrimaryBouncerToLockscreenAodOrDozing()
+        listenForPrimaryBouncerToAodOrDozing()
+        listenForPrimaryBouncerToLockscreenOrOccluded()
     }
 
-    private fun listenForPrimaryBouncerToLockscreenAodOrDozing() {
+    private fun listenForPrimaryBouncerToLockscreenOrOccluded() {
+        scope.launch {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(
+                    combine(
+                        keyguardInteractor.wakefulnessModel,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        keyguardInteractor.isKeyguardOccluded,
+                        ::Triple
+                    ),
+                    ::toQuad
+                )
+                .collect { (isBouncerShowing, wakefulnessState, lastStartedTransitionStep, occluded)
+                    ->
+                    if (
+                        !isBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER &&
+                            (wakefulnessState.state == WakefulnessState.AWAKE ||
+                                wakefulnessState.state == WakefulnessState.STARTING_TO_WAKE)
+                    ) {
+                        val to =
+                            if (occluded) {
+                                KeyguardState.OCCLUDED
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                ownerName = name,
+                                from = KeyguardState.PRIMARY_BOUNCER,
+                                to = to,
+                                animator = getAnimator(),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForPrimaryBouncerToAodOrDozing() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
                 .sample(
@@ -53,7 +101,7 @@ constructor(
                         keyguardInteractor.wakefulnessModel,
                         keyguardTransitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
-                        ::toTriple
+                        ::Triple
                     ),
                     ::toQuad
                 )
@@ -62,21 +110,17 @@ constructor(
                     ->
                     if (
                         !isBouncerShowing &&
-                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
+                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER &&
+                            (wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP ||
+                                wakefulnessState.state == WakefulnessState.ASLEEP)
                     ) {
                         val to =
-                            if (
-                                wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP ||
-                                    wakefulnessState.state == WakefulnessState.ASLEEP
-                            ) {
-                                if (isAodAvailable) {
-                                    KeyguardState.AOD
-                                } else {
-                                    KeyguardState.DOZING
-                                }
+                            if (isAodAvailable) {
+                                KeyguardState.AOD
                             } else {
-                                KeyguardState.LOCKSCREEN
+                                KeyguardState.DOZING
                             }
+
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 ownerName = name,
@@ -93,31 +137,47 @@ constructor(
     private fun listenForPrimaryBouncerToGone() {
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(keyguardTransitionInteractor.finishedKeyguardState) { a, b -> Pair(a, b) }
-                .collect { pair ->
-                    val (isKeyguardGoingAway, keyguardState) = pair
-                    if (isKeyguardGoingAway && keyguardState == KeyguardState.PRIMARY_BOUNCER) {
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isKeyguardGoingAway, lastStartedTransitionStep) ->
+                    if (
+                        isKeyguardGoingAway &&
+                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
+                    ) {
+                        val securityMode =
+                            keyguardSecurityModel.getSecurityMode(
+                                KeyguardUpdateMonitor.getCurrentUser()
+                            )
+                        // IME for password requires a slightly faster animation
+                        val duration =
+                            if (securityMode == Password) {
+                                TO_GONE_SHORT_DURATION
+                            } else {
+                                TO_GONE_DURATION
+                            }
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 ownerName = name,
                                 from = KeyguardState.PRIMARY_BOUNCER,
                                 to = KeyguardState.GONE,
-                                animator = getAnimator(),
-                            )
+                                animator = getAnimator(duration),
+                            ),
+                            resetIfCanceled = true,
                         )
                     }
                 }
         }
     }
 
-    private fun getAnimator(): ValueAnimator {
+    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
         return ValueAnimator().apply {
             setInterpolator(Interpolators.LINEAR)
-            setDuration(TRANSITION_DURATION_MS)
+            setDuration(duration.inWholeMilliseconds)
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 300L
+        private val DEFAULT_DURATION = 300.milliseconds
+        val TO_GONE_DURATION = 250.milliseconds
+        val TO_GONE_SHORT_DURATION = 200.milliseconds
     }
 }

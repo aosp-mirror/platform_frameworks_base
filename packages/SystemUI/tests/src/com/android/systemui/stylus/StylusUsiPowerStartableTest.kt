@@ -96,7 +96,6 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
         startable.start()
 
         verify(stylusManager, times(1)).registerCallback(startable)
-        verify(stylusManager, times(1)).registerBatteryCallback(startable)
     }
 
     @Test
@@ -111,20 +110,6 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
         startable.onStylusAdded(EXTERNAL_DEVICE_ID)
 
         verifyZeroInteractions(stylusUsiPowerUi)
-    }
-
-    @Test
-    fun onStylusBluetoothConnected_refreshesNotification() {
-        startable.onStylusBluetoothConnected(STYLUS_DEVICE_ID, "ANY")
-
-        verify(stylusUsiPowerUi, times(1)).refresh()
-    }
-
-    @Test
-    fun onStylusBluetoothDisconnected_refreshesNotification() {
-        startable.onStylusBluetoothDisconnected(STYLUS_DEVICE_ID, "ANY")
-
-        verify(stylusUsiPowerUi, times(1)).refresh()
     }
 
     @Test

@@ -43,34 +43,41 @@ class InputSettingsObserver extends ContentObserver {
 
     private final Context mContext;
     private final Handler mHandler;
+    private final InputManagerService mService;
     private final NativeInputManagerService mNative;
     private final Map<Uri, Consumer<String /* reason*/>> mObservers;
 
-    InputSettingsObserver(Context context, Handler handler, NativeInputManagerService nativeIms) {
+    InputSettingsObserver(Context context, Handler handler, InputManagerService service,
+            NativeInputManagerService nativeIms) {
         super(handler);
         mContext = context;
         mHandler = handler;
+        mService = service;
         mNative = nativeIms;
         mObservers = Map.ofEntries(
-            Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SPEED),
-                    (reason) -> updateMousePointerSpeed()),
-            Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_POINTER_SPEED),
-                    (reason) -> updateTouchpadPointerSpeed()),
-            Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_NATURAL_SCROLLING),
-                    (reason) -> updateTouchpadNaturalScrollingEnabled()),
-            Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_TO_CLICK),
-                    (reason) -> updateTouchpadTapToClickEnabled()),
-            Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE),
-                    (reason) -> updateTouchpadRightClickZoneEnabled()),
-            Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
-                    (reason) -> updateShowTouches()),
-            Map.entry(Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON),
-                    (reason) -> updateAccessibilityLargePointer()),
-            Map.entry(Settings.Secure.getUriFor(Settings.Secure.LONG_PRESS_TIMEOUT),
-                    (reason) -> updateDeepPressStatus(reason)),
-            Map.entry(
-                    Settings.Global.getUriFor(Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH),
-                    (reason) -> updateMaximumObscuringOpacityForTouch()));
+                Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SPEED),
+                        (reason) -> updateMousePointerSpeed()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_POINTER_SPEED),
+                        (reason) -> updateTouchpadPointerSpeed()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_NATURAL_SCROLLING),
+                        (reason) -> updateTouchpadNaturalScrollingEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_TO_CLICK),
+                        (reason) -> updateTouchpadTapToClickEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE),
+                        (reason) -> updateTouchpadRightClickZoneEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
+                        (reason) -> updateShowTouches()),
+                Map.entry(
+                        Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON),
+                        (reason) -> updateAccessibilityLargePointer()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.LONG_PRESS_TIMEOUT),
+                        (reason) -> updateLongPressTimeout(reason)),
+                Map.entry(
+                        Settings.Global.getUriFor(
+                                Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH),
+                        (reason) -> updateMaximumObscuringOpacityForTouch()),
+                Map.entry(Settings.System.getUriFor(Settings.System.SHOW_KEY_PRESSES),
+                        (reason) -> updateShowKeyPresses()));
     }
 
     /**
@@ -143,6 +150,11 @@ class InputSettingsObserver extends ContentObserver {
         mNative.setShowTouches(getBoolean(Settings.System.SHOW_TOUCHES, false));
     }
 
+    private void updateShowKeyPresses() {
+        mService.updateFocusEventDebugViewEnabled(
+                getBoolean(Settings.System.SHOW_KEY_PRESSES, false));
+    }
+
     private void updateAccessibilityLargePointer() {
         final int accessibilityConfig = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
@@ -151,8 +163,13 @@ class InputSettingsObserver extends ContentObserver {
         mNative.reloadPointerIcons();
     }
 
-    private void updateDeepPressStatus(String reason) {
-        // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value
+    private void updateLongPressTimeout(String reason) {
+        // Some key gesture timeouts are based on the long press timeout, so update key gesture
+        // timeouts when the value changes. See ViewConfiguration#getKeyRepeatTimeout().
+        mNative.notifyKeyGestureTimeoutsChanged();
+
+        // Update the deep press status.
+        // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value.
         final int timeout = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LONG_PRESS_TIMEOUT, ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT,
                 UserHandle.USER_CURRENT);

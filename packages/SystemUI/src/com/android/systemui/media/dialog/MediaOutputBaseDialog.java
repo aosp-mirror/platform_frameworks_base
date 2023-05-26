@@ -78,7 +78,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private static final boolean DEBUG = true;
     private static final int HANDLE_BROADCAST_FAILED_DELAY = 3000;
 
-    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
+    protected final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
 
     final Context mContext;
@@ -101,15 +101,19 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private Button mAppButton;
     private int mListMaxHeight;
     private int mItemHeight;
+    private int mListPaddingTop;
     private WallpaperColors mWallpaperColors;
-    private Executor mExecutor;
     private boolean mShouldLaunchLeBroadcastDialog;
+    private boolean mIsLeBroadcastCallbackRegistered;
 
     MediaOutputBaseAdapter mAdapter;
 
+    protected Executor mExecutor;
+
     private final ViewTreeObserver.OnGlobalLayoutListener mDeviceListLayoutListener = () -> {
         ViewGroup.LayoutParams params = mDeviceListLayout.getLayoutParams();
-        int totalItemsHeight = mAdapter.getItemCount() * mItemHeight;
+        int totalItemsHeight = mAdapter.getItemCount() * mItemHeight
+                + mListPaddingTop;
         int correctHeight = Math.min(totalItemsHeight, mListMaxHeight);
         // Set max height for list
         if (correctHeight != params.height) {
@@ -218,6 +222,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 R.dimen.media_output_dialog_list_max_height);
         mItemHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.media_output_dialog_list_item_height);
+        mListPaddingTop = mContext.getResources().getDimensionPixelSize(
+                R.dimen.media_output_dialog_list_padding_top);
         mExecutor = Executors.newSingleThreadExecutor();
     }
 
@@ -264,27 +270,25 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             dismiss();
         });
         mAppButton.setOnClickListener(mMediaOutputController::tryToLaunchMediaApplication);
-        if (mMediaOutputController.isAdvancedLayoutSupported()) {
-            mMediaMetadataSectionLayout.setOnClickListener(
-                    mMediaOutputController::tryToLaunchMediaApplication);
-        }
+        mMediaMetadataSectionLayout.setOnClickListener(
+                mMediaOutputController::tryToLaunchMediaApplication);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void start() {
         mMediaOutputController.start(this);
-        if(isBroadcastSupported()) {
-            mMediaOutputController.registerLeBroadcastServiceCallBack(mExecutor,
+        if (isBroadcastSupported() && !mIsLeBroadcastCallbackRegistered) {
+            mMediaOutputController.registerLeBroadcastServiceCallback(mExecutor,
                     mBroadcastCallback);
+            mIsLeBroadcastCallbackRegistered = true;
         }
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if(isBroadcastSupported()) {
-            mMediaOutputController.unregisterLeBroadcastServiceCallBack(mBroadcastCallback);
+    public void stop() {
+        if (isBroadcastSupported() && mIsLeBroadcastCallbackRegistered) {
+            mMediaOutputController.unregisterLeBroadcastServiceCallback(mBroadcastCallback);
+            mIsLeBroadcastCallbackRegistered = false;
         }
         mMediaOutputController.stop();
     }
@@ -380,7 +384,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                     && currentActivePosition < mAdapter.getItemCount()) {
                 mAdapter.notifyItemChanged(currentActivePosition);
             } else {
-                mAdapter.notifyDataSetChanged();
+                mAdapter.updateItems();
             }
         } else {
             mMediaOutputController.setRefreshing(false);

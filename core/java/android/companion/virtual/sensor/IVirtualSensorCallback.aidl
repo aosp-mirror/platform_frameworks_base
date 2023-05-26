@@ -17,6 +17,7 @@
 package android.companion.virtual.sensor;
 
 import android.companion.virtual.sensor.VirtualSensor;
+import android.os.SharedMemory;
 
 /**
  * Interface for notifying the sensor owner about whether and how sensor events should be injected.
@@ -32,8 +33,35 @@ oneway interface IVirtualSensorCallback {
      * @param enabled Whether the sensor is enabled.
      * @param samplingPeriodMicros The requested sensor's sampling period in microseconds.
      * @param batchReportingLatencyMicros The requested maximum time interval in microseconds
-     * between the delivery of two batches of sensor events.
+     *   between the delivery of two batches of sensor events.
      */
     void onConfigurationChanged(in VirtualSensor sensor, boolean enabled, int samplingPeriodMicros,
             int batchReportLatencyMicros);
+
+    /**
+     * Called when a sensor direct channel is created.
+     *
+     * @param channelHandle Identifier of the channel that was created.
+     * @param sharedMemory The shared memory region for the direct sensor channel.
+     */
+    void onDirectChannelCreated(int channelHandle, in SharedMemory sharedMemory);
+
+    /**
+     * Called when a sensor direct channel is destroyed.
+     *
+     * @param channelHandle Identifier of the channel that was destroyed.
+     */
+    void onDirectChannelDestroyed(int channelHandle);
+
+    /**
+     * Called when a sensor direct channel is configured.
+     *
+     * @param channelHandle Identifier of the channel that was configured.
+     * @param sensor The sensor, for which the channel was configured.
+     * @param rateLevel The rate level used to configure the direct sensor channel.
+     * @param reportToken A positive sensor report token, used to differentiate between events from
+     *   different sensors within the same channel.
+     */
+    void onDirectChannelConfigured(int channelHandle, in VirtualSensor sensor, int rateLevel,
+            int reportToken);
 }

@@ -2120,6 +2120,33 @@ class InputType : public ManifestExtractor::Element {
   }
 };
 
+/** Represents <install-constraints> elements. **/
+class InstallConstraints : public ManifestExtractor::Element {
+ public:
+  InstallConstraints() = default;
+  std::vector<std::string> fingerprint_prefixes;
+
+  void Extract(xml::Element* element) override {
+    for (xml::Element* child : element->GetChildElements()) {
+      if (child->name == "fingerprint-prefix") {
+        xml::Attribute* attr = child->FindAttribute(kAndroidNamespace, "value");
+        if (attr) {
+          fingerprint_prefixes.push_back(attr->value);
+        }
+      }
+    }
+  }
+
+  void Print(text::Printer* printer) override {
+    if (!fingerprint_prefixes.empty()) {
+      printer->Print(StringPrintf("install-constraints:\n"));
+      for (const auto& prefix : fingerprint_prefixes) {
+        printer->Print(StringPrintf("  fingerprint-prefix='%s'\n", prefix.c_str()));
+      }
+    }
+  }
+};
+
 /** Represents <original-package> elements. **/
 class OriginalPackage : public ManifestExtractor::Element {
  public:
@@ -2869,7 +2896,7 @@ template <typename T>
 constexpr const char* GetExpectedTagForType() {
   // This array does not appear at runtime, as GetExpectedTagForType function is used by compiler
   // to inject proper 'expected_tag' into ElementCast.
-  std::array<std::pair<const char*, bool>, 37> tags = {
+  std::array<std::pair<const char*, bool>, 38> tags = {
       std::make_pair("action", std::is_same<Action, T>::value),
       std::make_pair("activity", std::is_same<Activity, T>::value),
       std::make_pair("additional-certificate", std::is_same<AdditionalCertificate, T>::value),
@@ -2878,6 +2905,7 @@ constexpr const char* GetExpectedTagForType() {
       std::make_pair("compatible-screens", std::is_same<CompatibleScreens, T>::value),
       std::make_pair("feature-group", std::is_same<FeatureGroup, T>::value),
       std::make_pair("input-type", std::is_same<InputType, T>::value),
+      std::make_pair("install-constraints", std::is_same<InstallConstraints, T>::value),
       std::make_pair("intent-filter", std::is_same<IntentFilter, T>::value),
       std::make_pair("meta-data", std::is_same<MetaData, T>::value),
       std::make_pair("manifest", std::is_same<Manifest, T>::value),
@@ -2948,6 +2976,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"compatible-screens", &CreateType<CompatibleScreens>},
           {"feature-group", &CreateType<FeatureGroup>},
           {"input-type", &CreateType<InputType>},
+          {"install-constraints", &CreateType<InstallConstraints>},
           {"intent-filter", &CreateType<IntentFilter>},
           {"manifest", &CreateType<Manifest>},
           {"meta-data", &CreateType<MetaData>},

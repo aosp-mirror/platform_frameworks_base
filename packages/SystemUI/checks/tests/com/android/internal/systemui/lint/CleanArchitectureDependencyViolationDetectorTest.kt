@@ -38,7 +38,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `No violations`() {
+    fun noViolations() {
         lint()
             .files(
                 *LEGITIMATE_FILES,
@@ -51,7 +51,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `Violation - domain depends on ui`() {
+    fun violation_domainDependsOnUi() {
         lint()
             .files(
                 *LEGITIMATE_FILES,
@@ -64,7 +64,8 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
                         class BadClass(
                             private val viewModel: ViewModel,
                         )
-                    """.trimIndent()
+                    """
+                        .trimIndent()
                 )
             )
             .issues(
@@ -85,7 +86,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `Violation - ui depends on data`() {
+    fun violation_uiDependsOnData() {
         lint()
             .files(
                 *LEGITIMATE_FILES,
@@ -98,7 +99,8 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
                         class BadClass(
                             private val repository: Repository,
                         )
-                    """.trimIndent()
+                    """
+                        .trimIndent()
                 )
             )
             .issues(
@@ -119,7 +121,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `Violation - shared depends on all other layers`() {
+    fun violation_sharedDependsOnAllOtherLayers() {
         lint()
             .files(
                 *LEGITIMATE_FILES,
@@ -136,7 +138,8 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
                             private val interactor: Interactor,
                             private val viewmodel: ViewModel,
                         )
-                    """.trimIndent()
+                    """
+                        .trimIndent()
                 )
             )
             .issues(
@@ -163,7 +166,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `Violation - data depends on domain`() {
+    fun violation_dataDependsOnDomain() {
         lint()
             .files(
                 *LEGITIMATE_FILES,
@@ -176,7 +179,8 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
                         class BadClass(
                             private val interactor: Interactor,
                         )
-                    """.trimIndent()
+                    """
+                        .trimIndent()
                 )
             )
             .issues(
@@ -207,7 +211,8 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
                     data class Model(
                         private val name: String,
                     )
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         private val REPOSITORY_FILE =
             TestFiles.kotlin(
@@ -228,7 +233,8 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
                             return models
                         }
                     }
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         private val INTERACTOR_FILE =
             TestFiles.kotlin(
@@ -245,7 +251,8 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
                             return repository.getModels()
                         }
                     }
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         private val VIEW_MODEL_FILE =
             TestFiles.kotlin(
@@ -262,7 +269,8 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
                             return interactor.getModels().map { model -> model.name }
                         }
                     }
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         private val NON_CLEAN_ARCHITECTURE_FILE =
             TestFiles.kotlin(
@@ -282,7 +290,8 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
                             )
                         }
                     }
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         private val LEGITIMATE_FILES =
             arrayOf(

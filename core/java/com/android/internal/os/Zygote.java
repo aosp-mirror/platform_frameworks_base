@@ -1018,7 +1018,7 @@ public final class Zygote {
      * Applies debugger system properties to the zygote arguments.
      *
      * For eng builds all apps are debuggable. On userdebug and user builds
-     * if persist.debuggable.dalvik.vm.jdwp.enabled is 1 all apps are
+     * if persist.debug.dalvik.vm.jdwp.enabled is 1 all apps are
      * debuggable. Otherwise, the debugger state is specified via the
      * "--enable-jdwp" flag in the spawn request.
      *
@@ -1270,6 +1270,15 @@ public final class Zygote {
             @NonNull ApplicationInfo info,
             @Nullable ProcessInfo processInfo,
             @Nullable IPlatformCompat platformCompat) {
+        String appOverride = SystemProperties.get("persist.arm64.memtag.app." + info.packageName);
+        if ("sync".equals(appOverride)) {
+            return MEMORY_TAG_LEVEL_SYNC;
+        } else if ("async".equals(appOverride)) {
+            return MEMORY_TAG_LEVEL_ASYNC;
+        } else if ("off".equals(appOverride)) {
+            return MEMORY_TAG_LEVEL_NONE;
+        }
+
         // Look at the process attribute first.
         if (processInfo != null && processInfo.memtagMode != ApplicationInfo.MEMTAG_DEFAULT) {
             return memtagModeToZygoteMemtagLevel(processInfo.memtagMode);

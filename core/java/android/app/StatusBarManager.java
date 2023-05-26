@@ -24,9 +24,11 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
+import android.compat.annotation.LoggingOnly;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,8 +48,10 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.KeyEvent;
 import android.view.View;
 
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.statusbar.AppClipsServiceConnector;
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBarService;
@@ -168,6 +172,8 @@ public class StatusBarManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Disable2Flags {}
     // LINT.ThenChange(frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/disableflags/DisableFlagsLogger.kt)
+
+    private static final String TAG = "StatusBarManager";
 
     /**
      * Default disable flags for setup
@@ -570,11 +576,23 @@ public class StatusBarManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long MEDIA_CONTROL_SESSION_ACTIONS = 203800354L;
 
+    /**
+     * Media controls based on {@link android.app.Notification.MediaStyle} notifications should
+     * include a non-empty title, either in the {@link android.media.MediaMetadata} or
+     * notification title.
+     */
+    @ChangeId
+    @LoggingOnly
+    private static final long MEDIA_CONTROL_BLANK_TITLE = 274775190L;
+
     @UnsupportedAppUsage
     private Context mContext;
     private IStatusBarService mService;
     @UnsupportedAppUsage
     private IBinder mToken = new Binder();
+
+    private final IPlatformCompat mPlatformCompat = IPlatformCompat.Stub.asInterface(
+            ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
 
     @UnsupportedAppUsage
     StatusBarManager(Context context) {
@@ -587,7 +605,7 @@ public class StatusBarManager {
             mService = IStatusBarService.Stub.asInterface(
                     ServiceManager.getService(Context.STATUS_BAR_SERVICE));
             if (mService == null) {
-                Slog.w("StatusBarManager", "warning: no STATUS_BAR_SERVICE");
+                Slog.w(TAG, "warning: no STATUS_BAR_SERVICE");
             }
         }
         return mService;
@@ -740,7 +758,7 @@ public class StatusBarManager {
      */
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     @TestApi
-    public void handleSystemKey(int key) {
+    public void handleSystemKey(@NonNull KeyEvent key) {
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
@@ -749,6 +767,29 @@ public class StatusBarManager {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Gets the last handled system key. A system key is a KeyEvent that the
+     * {@link com.android.server.policy.PhoneWindowManager} sends directly to the
+     * status bar, rather than forwarding to apps. If a key has never been sent to the
+     * status bar, will return -1.
+     *
+     * @return the keycode of the last KeyEvent that has been sent to the system.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    @TestApi
+    public int getLastSystemKey() {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                return svc.getLastSystemKey();
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+        return -1;
     }
 
     /**
@@ -1190,6 +1231,25 @@ public class StatusBarManager {
             android.Manifest.permission.LOG_COMPAT_CHANGE})
     public static boolean useMediaSessionActionsForApp(String packageName, UserHandle user) {
         return CompatChanges.isChangeEnabled(MEDIA_CONTROL_SESSION_ACTIONS, packageName, user);
+    }
+
+    /**
+     * Log that the given package has posted media controls with a blank title
+     *
+     * @param packageName App posting media controls
+     * @param userId Current user ID
+     * @throws RuntimeException if there is an error reporting the change
+     *
+     * @hide
+     */
+    public void logBlankMediaTitle(String packageName, @UserIdInt int userId)
+            throws RuntimeException {
+        try {
+            mPlatformCompat.reportChangeByPackageName(MEDIA_CONTROL_BLANK_TITLE, packageName,
+                        userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

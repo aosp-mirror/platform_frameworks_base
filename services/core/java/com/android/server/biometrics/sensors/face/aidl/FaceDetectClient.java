@@ -31,6 +31,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -47,6 +48,7 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
     private static final String TAG = "FaceDetectClient";
 
     private final boolean mIsStrongBiometric;
+    private final FaceAuthenticateOptions mOptions;
     @Nullable private ICancellationSignal mCancellationSignal;
     @Nullable private SensorPrivacyManager mSensorPrivacyManager;
 
@@ -70,10 +72,11 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
             boolean isStrongBiometric, SensorPrivacyManager sensorPrivacyManager) {
         super(context, lazyDaemon, token, listener, options.getUserId(),
                 options.getOpPackageName(), 0 /* cookie */, options.getSensorId(),
-                true /* shouldVibrate */, logger, biometricContext);
+                false /* shouldVibrate */, logger, biometricContext);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
         mSensorPrivacyManager = sensorPrivacyManager;
+        mOptions = options;
     }
 
     @Override
@@ -84,6 +87,8 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
 
     @Override
     protected void stopHalOperation() {
+        unsubscribeBiometricContext();
+
         if (mCancellationSignal != null) {
             try {
                 mCancellationSignal.cancel();
@@ -117,8 +122,17 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            return session.getSession().detectInteractionWithContext(
-                    getOperationContext().toAidlContext());
+            final OperationContextExt opContext = getOperationContext();
+            final ICancellationSignal cancel = session.getSession().detectInteractionWithContext(
+                    opContext.toAidlContext(mOptions));
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            });
+            return cancel;
         } else {
             return session.getSession().detectInteraction();
         }

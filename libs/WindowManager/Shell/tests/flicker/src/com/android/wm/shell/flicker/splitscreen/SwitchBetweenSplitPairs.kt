@@ -18,12 +18,14 @@ package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowBecomesInvisible
 import com.android.wm.shell.flicker.appWindowBecomesVisible
@@ -36,6 +38,7 @@ import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsSnapToDivider
 import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtStart
+import com.android.wm.shell.flicker.splitscreen.benchmark.SwitchBetweenSplitPairsBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,32 +54,20 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class SwitchBetweenSplitPairs(flicker: FlickerTest) : SplitScreenBase(flicker) {
-    private val thirdApp = SplitScreenUtils.getIme(instrumentation)
-    private val fourthApp = SplitScreenUtils.getSendNotification(instrumentation)
-
+class SwitchBetweenSplitPairs(override val flicker: FlickerTest) :
+    SwitchBetweenSplitPairsBenchmark(flicker), ICommonAssertions {
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-            setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, thirdApp, fourthApp)
-                SplitScreenUtils.waitForSplitComplete(wmHelper, thirdApp, fourthApp)
-            }
-            transitions {
-                tapl.launchedAppState.quickSwitchToPreviousApp()
-                SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
-            }
-            teardown {
-                thirdApp.exit(wmHelper)
-                fourthApp.exit(wmHelper)
-            }
+            defaultSetup(this)
+            defaultTeardown(this)
+            thisTransition(this)
         }
 
+    @PlatinumTest(focusArea = "sysui")
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
-    fun cujCompleted() {
+    override fun cujCompleted() {
         flicker.appWindowIsVisibleAtStart(thirdApp)
         flicker.appWindowIsVisibleAtStart(fourthApp)
         flicker.splitScreenDividerIsVisibleAtStart()

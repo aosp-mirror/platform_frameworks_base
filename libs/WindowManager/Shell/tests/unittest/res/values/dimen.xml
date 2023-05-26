@@ -24,4 +24,6 @@
     <dimen name="test_window_decor_bottom_outset">40dp</dimen>
     <dimen name="test_window_decor_shadow_radius">5dp</dimen>
     <dimen name="test_window_decor_resize_handle">10dp</dimen>
+    <dimen name="test_caption_menu_shadow_radius">4dp</dimen>
+    <dimen name="test_caption_menu_corner_radius">20dp</dimen>
 </resources>

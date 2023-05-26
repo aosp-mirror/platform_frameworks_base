@@ -19,7 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-import static android.app.ActivityManager.PROCESS_CAPABILITY_NETWORK;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
@@ -38,6 +38,7 @@ import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRI
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MODERATE;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_COUNT;
@@ -46,6 +47,7 @@ import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -57,12 +59,12 @@ import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.IProcessObserver;
 import android.app.IStopUserCallback;
-import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
 import android.app.ProcessStateEnum;
 import android.app.ProfilerInfo;
 import android.app.RemoteServiceException.CrashedByAdbException;
+import android.app.UidObserver;
 import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.app.usage.AppStandbyInfo;
@@ -111,6 +113,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
+import android.util.TeeWriter;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.window.SplashScreen;
@@ -146,6 +149,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -243,6 +247,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSendBroadcast(pw);
                 case "compact":
                     return runCompact(pw);
+                case "freeze":
+                    return runFreeze(pw);
+                case "unfreeze":
+                    return runUnfreeze(pw);
                 case "instrument":
                     getOutPrintWriter().println("Error: must be invoked through 'am instrument'.");
                     return -1;
@@ -358,6 +366,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runWaitForBroadcastIdle(pw);
                 case "wait-for-broadcast-barrier":
                     return runWaitForBroadcastBarrier(pw);
+                case "wait-for-application-barrier":
+                    return runWaitForApplicationBarrier(pw);
+                case "wait-for-broadcast-dispatch":
+                    return runWaitForBroadcastDispatch(pw);
                 case "set-ignore-delivery-group-policy":
                     return runSetIgnoreDeliveryGroupPolicy(pw);
                 case "clear-ignore-delivery-group-policy":
@@ -595,10 +607,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        String mimeType = intent.getType();
-        if (mimeType == null && intent.getData() != null
+        AtomicReference<String> mimeType = new AtomicReference<>(intent.getType());
+
+        if (mimeType.get() == null && intent.getData() != null
                 && "content".equals(intent.getData().getScheme())) {
-            mimeType = mInterface.getProviderMimeType(intent.getData(), mUserId);
+            mInterface.getMimeTypeFilterAsync(intent.getData(), mUserId,
+                    new RemoteCallback(result -> {
+                        mimeType.set(result.getPairValue());
+                    }));
         }
 
         do {
@@ -611,8 +627,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     int userIdForQuery = mInternal.mUserController.handleIncomingUser(
                             Binder.getCallingPid(), Binder.getCallingUid(), mUserId, false,
                             ALLOW_NON_FULL, "ActivityManagerShellCommand", null);
-                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType, 0,
-                            userIdForQuery).getList();
+                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType.get(),
+                            0, userIdForQuery).getList();
                     if (activities == null || activities.size() <= 0) {
                         getErrPrintWriter().println("Error: Intent does not match any activities: "
                                 + intent);
@@ -708,12 +724,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
-                        mimeType, null, null, 0, mStartFlags, profilerInfo,
+                        mimeType.get(), null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
                 res = mInternal.startActivityAsUserWithFeature(null, SHELL_PACKAGE_NAME, null,
-                        intent, mimeType, null, null, 0, mStartFlags, profilerInfo,
+                        intent, mimeType.get(), null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
             }
             final long endTime = SystemClock.uptimeMillis();
@@ -902,6 +918,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runSendBroadcast(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
         Intent intent;
         try {
             intent = makeIntent(UserHandle.USER_CURRENT);
@@ -915,9 +932,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.println("Broadcasting: " + intent);
         pw.flush();
         Bundle bundle = mBroadcastOptions == null ? null : mBroadcastOptions.toBundle();
-        mInterface.broadcastIntentWithFeature(null, null, intent, null, receiver, 0, null, null,
-                requiredPermissions, null, null, android.app.AppOpsManager.OP_NONE, bundle, true,
-                false, mUserId);
+        final int result = mInterface.broadcastIntentWithFeature(null, null, intent, null,
+                receiver, 0, null, null, requiredPermissions, null, null,
+                android.app.AppOpsManager.OP_NONE, bundle, true, false, mUserId);
+        Slogf.i(TAG, "Broadcasted %s: " + result, intent);
         if (!mAsync) {
             receiver.waitForFinish();
         }
@@ -1058,16 +1076,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     @NeverCompile
-    int runCompact(PrintWriter pw) {
+    int runCompact(PrintWriter pw) throws RemoteException {
         ProcessRecord app;
         String op = getNextArgRequired();
         boolean isFullCompact = op.equals("full");
         boolean isSomeCompact = op.equals("some");
         if (isFullCompact || isSomeCompact) {
-            String processName = getNextArgRequired();
-            String uid = getNextArgRequired();
-            synchronized (mInternal.mProcLock) {
-                app = mInternal.getProcessRecordLocked(processName, Integer.parseInt(uid));
+            app = getProcessFromShell();
+            if (app == null) {
+                getErrPrintWriter().println("Error: could not find process");
+                return -1;
             }
             pw.println("Process record found pid: " + app.mPid);
             if (isFullCompact) {
@@ -1075,7 +1093,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 synchronized (mInternal.mProcLock) {
                     mInternal.mOomAdjuster.mCachedAppOptimizer.compactApp(app,
                             CachedAppOptimizer.CompactProfile.FULL,
-                            CachedAppOptimizer.CompactSource.APP, true);
+                            CachedAppOptimizer.CompactSource.SHELL, true);
                 }
                 pw.println("Finished full compaction for " + app.mPid);
             } else if (isSomeCompact) {
@@ -1083,7 +1101,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 synchronized (mInternal.mProcLock) {
                     mInternal.mOomAdjuster.mCachedAppOptimizer.compactApp(app,
                             CachedAppOptimizer.CompactProfile.SOME,
-                            CachedAppOptimizer.CompactSource.APP, true);
+                            CachedAppOptimizer.CompactSource.SHELL, true);
                 }
                 pw.println("Finished some compaction for " + app.mPid);
             }
@@ -1093,12 +1111,121 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 mInternal.mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
             }
             pw.println("Finished system compaction");
+        } else if (op.equals("native")) {
+            op = getNextArgRequired();
+            isFullCompact = op.equals("full");
+            isSomeCompact = op.equals("some");
+            int pid;
+            String pidStr = getNextArgRequired();
+            try {
+                pid = Integer.parseInt(pidStr);
+            } catch (Exception e) {
+                getErrPrintWriter().println("Error: failed to parse '" + pidStr + "' as a PID");
+                return -1;
+            }
+            if (isFullCompact) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactNative(
+                        CachedAppOptimizer.CompactProfile.FULL, pid);
+            } else if (isSomeCompact) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactNative(
+                        CachedAppOptimizer.CompactProfile.SOME, pid);
+            } else {
+                getErrPrintWriter().println("Error: unknown compaction type '" + op + "'");
+                return -1;
+            }
         } else {
             getErrPrintWriter().println("Error: unknown compact command '" + op + "'");
             return -1;
         }
 
         return 0;
+    }
+
+    @NeverCompile
+    int runFreeze(PrintWriter pw) throws RemoteException {
+        String freezerOpt = getNextOption();
+        boolean isSticky = false;
+        if (freezerOpt != null) {
+            isSticky = freezerOpt.equals("--sticky");
+        }
+        ProcessRecord app = getProcessFromShell();
+        if (app == null) {
+            getErrPrintWriter().println("Error: could not find process");
+            return -1;
+        }
+        pw.println("Freezing pid: " + app.mPid + " sticky=" + isSticky);
+        synchronized (mInternal) {
+            synchronized (mInternal.mProcLock) {
+                app.mOptRecord.setFreezeSticky(isSticky);
+                mInternal.mOomAdjuster.mCachedAppOptimizer.freezeAppAsyncInternalLSP(app, 0, true);
+            }
+        }
+        return 0;
+    }
+
+    @NeverCompile
+    int runUnfreeze(PrintWriter pw) throws RemoteException {
+        String freezerOpt = getNextOption();
+        boolean isSticky = false;
+        if (freezerOpt != null) {
+            isSticky = freezerOpt.equals("--sticky");
+        }
+        ProcessRecord app = getProcessFromShell();
+        if (app == null) {
+            getErrPrintWriter().println("Error: could not find process");
+            return -1;
+        }
+        pw.println("Unfreezing pid: " + app.mPid);
+        synchronized (mInternal) {
+            synchronized (mInternal.mProcLock) {
+                synchronized (mInternal.mOomAdjuster.mCachedAppOptimizer.mFreezerLock) {
+                    app.mOptRecord.setFreezeSticky(isSticky);
+                    mInternal.mOomAdjuster.mCachedAppOptimizer.unfreezeAppInternalLSP(app, 0,
+                            false);
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Parses from the shell the process name and user id if provided and provides the corresponding
+     * {@link ProcessRecord)} If no user is provided, it will fallback to current user.
+     * Example usage: {@code <processname> --user current} or {@code <processname>}
+     * @return process record of process, null if none found.
+     * @throws RemoteException
+     */
+    @NeverCompile
+    ProcessRecord getProcessFromShell() throws RemoteException {
+        ProcessRecord app;
+        String processName = getNextArgRequired();
+        synchronized (mInternal.mProcLock) {
+            // Default to current user
+            int userId = getUserIdFromShellOrFallback();
+            final int uid =
+                    mInternal.getPackageManagerInternal().getPackageUid(processName, 0, userId);
+            app = mInternal.getProcessRecordLocked(processName, uid);
+        }
+        return app;
+    }
+
+    /**
+     * @return User id from command line provided in the form of
+     *  {@code --user <userid|current|all>} and if the argument is not found it will fallback
+     *  to current user.
+     * @throws RemoteException
+     */
+    @NeverCompile
+    int getUserIdFromShellOrFallback() throws RemoteException {
+        int userId = mInterface.getCurrentUserId();
+        String userOpt = getNextOption();
+        if (userOpt != null && "--user".equals(userOpt)) {
+            int inputUserId = UserHandle.parseUserArg(getNextArgRequired());
+            if (inputUserId != UserHandle.USER_CURRENT) {
+                userId = inputUserId;
+            }
+        }
+        return userId;
     }
 
     int runDumpHeap(PrintWriter pw) throws RemoteException {
@@ -1816,7 +1943,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    static final class MyUidObserver extends IUidObserver.Stub
+    static final class MyUidObserver extends UidObserver
             implements ActivityManagerService.OomAdjObserver {
         final IActivityManager mInterface;
         final ActivityManagerService mInternal;
@@ -1841,8 +1968,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability)
-                throws RemoteException {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1861,7 +1987,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidGone(int uid, boolean disabled) throws RemoteException {
+        public void onUidGone(int uid, boolean disabled) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1879,7 +2005,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidActive(int uid) throws RemoteException {
+        public void onUidActive(int uid) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1893,7 +2019,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+        public void onUidIdle(int uid, boolean disabled) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1911,7 +2037,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
+        public void onUidCachedChanged(int uid, boolean cached) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1922,10 +2048,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     StrictMode.setThreadPolicy(oldPolicy);
                 }
             }
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) throws RemoteException {
         }
 
         @Override
@@ -2009,7 +2131,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         int mask = PROCESS_CAPABILITY_FOREGROUND_LOCATION
                 | PROCESS_CAPABILITY_FOREGROUND_CAMERA
                 | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
-                | PROCESS_CAPABILITY_NETWORK;
+                | PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 
         while ((opt=getNextOption()) != null) {
             if (opt.equals("--oom")) {
@@ -2215,7 +2337,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         boolean wait = false;
         String opt;
         int displayId = Display.INVALID_DISPLAY;
-        boolean forceInvisible = false;
         while ((opt = getNextOption()) != null) {
             switch(opt) {
                 case "-w":
@@ -2224,27 +2345,31 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 case "--display":
                     displayId = getDisplayIdFromNextArg();
                     break;
-                case "--force-invisible":
-                    forceInvisible = true;
-                    break;
                 default:
                     getErrPrintWriter().println("Error: unknown option: " + opt);
                     return -1;
             }
         }
         final int userId = Integer.parseInt(getNextArgRequired());
-        final boolean callStartProfile = !forceInvisible && isProfile(userId);
         final ProgressWaiter waiter = wait ? new ProgressWaiter(userId) : null;
-        Slogf.d(TAG, "runStartUser(): userId=%d, display=%d, waiter=%s, callStartProfile=%b, "
-                + "forceInvisible=%b", userId,  displayId, waiter, callStartProfile,
-                forceInvisible);
+
+        // For backwards compatibility, if the user is a profile, we need to define whether it
+        // should be started visible (when its parent is the current user) or not (when it isn't)
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
+        final int parentUserId = umi.getProfileParentId(userId);
+        final int currentUserId = ami.getCurrentUserId();
+        final boolean isProfile = parentUserId != userId;
+        final boolean isVisibleProfile = isProfile && parentUserId == currentUserId;
+        Slogf.d(TAG, "runStartUser(): userId=%d, parentUserId=%d, currentUserId=%d, isProfile=%b, "
+                + "isVisibleProfile=%b, display=%d, waiter=%s", userId, parentUserId, currentUserId,
+                isProfile, isVisibleProfile, displayId, waiter);
 
         boolean success;
         String displaySuffix = "";
-
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "shell_runStartUser" + userId);
         try {
-            if (callStartProfile) {
+            if (isVisibleProfile) {
                 Slogf.d(TAG, "calling startProfileWithListener(%d, %s)", userId, waiter);
                 // startProfileWithListener() will start the profile visible (as long its parent is
                 // the current user), while startUserInBackgroundWithListener() will always start
@@ -3321,11 +3446,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runWaitForBroadcastIdle(PrintWriter pw) throws RemoteException {
-        mInternal.waitForBroadcastIdle(pw);
-        return 0;
-    }
-
-    int runWaitForBroadcastBarrier(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
         boolean flushBroadcastLoopers = false;
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -3336,7 +3457,44 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
         }
-        mInternal.waitForBroadcastBarrier(pw, flushBroadcastLoopers);
+        mInternal.waitForBroadcastIdle(pw, flushBroadcastLoopers);
+        return 0;
+    }
+
+    int runWaitForBroadcastBarrier(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
+        boolean flushBroadcastLoopers = false;
+        boolean flushApplicationThreads = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--flush-broadcast-loopers")) {
+                flushBroadcastLoopers = true;
+            } else if (opt.equals("--flush-application-threads")) {
+                flushApplicationThreads = true;
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        mInternal.waitForBroadcastBarrier(pw, flushBroadcastLoopers, flushApplicationThreads);
+        return 0;
+    }
+
+    int runWaitForApplicationBarrier(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
+        mInternal.waitForApplicationBarrier(pw);
+        return 0;
+    }
+
+    int runWaitForBroadcastDispatch(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
+        final Intent intent;
+        try {
+            intent = makeIntent(UserHandle.USER_CURRENT);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        mInternal.waitForBroadcastDispatch(pw, intent);
         return 0;
     }
 
@@ -3891,11 +4049,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return new Resources(AssetManager.getSystem(), metrics, config);
     }
 
-    private boolean isProfile(@UserIdInt int userId) {
-        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
-        return umi.getProfileParentId(userId) != userId;
-    }
-
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -3930,6 +4083,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    package [PACKAGE_NAME]: all state related to given package");
             pw.println("    all: dump all activities");
             pw.println("    top: dump the top activity");
+            pw.println("    users: user state");
             pw.println("  WHAT may also be a COMP_SPEC to dump activities.");
             pw.println("  COMP_SPEC may be a component name (com.foo/.myApp),");
             pw.println("    a partial substring in a component name, a");
@@ -3937,6 +4091,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  -a: include all available server state.");
             pw.println("  -c: include client state.");
             pw.println("  -p: limit output to given package.");
+            pw.println("  -d: limit output to given display.");
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
             pw.println("  --proto: output dump in protocol buffer format.");
@@ -4002,11 +4157,25 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --allow-background-activity-starts: The receiver may start activities");
             pw.println("          even if in the background.");
             pw.println("      --async: Send without waiting for the completion of the receiver.");
-            pw.println("  compact [some|full|system] <process_name> <Package UID>");
-            pw.println("      Force process compaction.");
+            pw.println("  compact [some|full] <process_name> [--user <USER_ID>]");
+            pw.println("      Perform a single process compaction.");
             pw.println("      some: execute file compaction.");
             pw.println("      full: execute anon + file compaction.");
             pw.println("      system: system compaction.");
+            pw.println("  compact system");
+            pw.println("      Perform a full system compaction.");
+            pw.println("  compact native [some|full] <pid>");
+            pw.println("      Perform a native compaction for process with <pid>.");
+            pw.println("      some: execute file compaction.");
+            pw.println("      full: execute anon + file compaction.");
+            pw.println("  freeze [--sticky] <processname> [--user <USER_ID>]");
+            pw.println("      Freeze a process.");
+            pw.println("        --sticky: persists the frozen state for the process lifetime or");
+            pw.println("                  until an unfreeze is triggered via shell");
+            pw.println("  unfreeze [--sticky] <processname> [--user <USER_ID>]");
+            pw.println("      Unfreeze a process.");
+            pw.println("        --sticky: persists the unfrozen state for the process lifetime or");
+            pw.println("                  until a freeze is triggered via shell");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
             pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
@@ -4140,7 +4309,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      execution of that user if it is currently stopped.");
             pw.println("  get-current-user");
             pw.println("      Returns id of the current foreground user.");
-            pw.println("  start-user [-w] [--display DISPLAY_ID] [--force-invisible] <USER_ID>");
+            pw.println("  start-user [-w] [--display DISPLAY_ID] <USER_ID>");
             pw.println("      Start USER_ID in background if it is currently stopped;");
             pw.println("      use switch-user if you want to start the user in foreground.");
             pw.println("      -w: wait for start-user to complete and the user to be unlocked.");
@@ -4148,10 +4317,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     + "which allows the user to launch activities on it.");
             pw.println("        (not supported on all devices; typically only on automotive builds "
                     + "where the vehicle has passenger displays)");
-            pw.println("      --force-invisible: always start the user invisible, even if it's a "
-                    + "profile.");
-            pw.println("        (by default, a profile is visible in the default display when its "
-                    + "parent is the current foreground user)");
             pw.println("  unlock-user <USER_ID>");
             pw.println("      Unlock the given user.  This will only work if the user doesn't");
             pw.println("      have an LSKF (PIN/pattern/password).");

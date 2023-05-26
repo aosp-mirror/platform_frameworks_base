@@ -32,9 +32,12 @@ import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensorConfig;
+import android.companion.virtual.sensor.VirtualSensorDirectChannelCallback;
 import android.content.ComponentName;
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SharedMemory;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -139,7 +142,8 @@ public final class VirtualDeviceParams implements Parcelable {
      * a given policy type.
      * @hide
      */
-    @IntDef(prefix = "POLICY_TYPE_",  value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO})
+    @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO,
+            POLICY_TYPE_RECENTS})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface PolicyType {}
@@ -168,22 +172,21 @@ public final class VirtualDeviceParams implements Parcelable {
      *     <li>{@link #DEVICE_POLICY_CUSTOM}: audio framework will assign device specific session
      *     ids to players and recorders constructed within device context. The session ids are
      *     used to re-route corresponding audio streams to VirtualAudioDevice.
-     * <ul/>
+     * </ul>
      */
     public static final int POLICY_TYPE_AUDIO = 1;
 
-    /** @hide */
-    @IntDef(flag = true, prefix = "RECENTS_POLICY_",
-            value = {RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS})
-    @Retention(RetentionPolicy.SOURCE)
-    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
-    public @interface RecentsPolicy {}
-
     /**
-     * If set, activities launched on this virtual device are allowed to appear in the host device
-     * of the recently launched activities list.
+     * Tells the activity manager how to handle recents entries for activities run on this device.
+     *
+     * <ul>
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: Activities launched on VirtualDisplays owned by this
+     *     device will appear in the host device recents.
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: Activities launched on VirtualDisplays owned by this
+     *      *     device will not appear in recents.
+     * </ul>
      */
-    public static final int RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS = 1 << 0;
+    public static final int POLICY_TYPE_RECENTS = 2;
 
     private final int mLockState;
     @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
@@ -200,8 +203,6 @@ public final class VirtualDeviceParams implements Parcelable {
     @NonNull private final SparseIntArray mDevicePolicies;
     @NonNull private final List<VirtualSensorConfig> mVirtualSensorConfigs;
     @Nullable private final IVirtualSensorCallback mVirtualSensorCallback;
-    @RecentsPolicy
-    private final int mDefaultRecentsPolicy;
     private final int mAudioPlaybackSessionId;
     private final int mAudioRecordingSessionId;
 
@@ -218,7 +219,6 @@ public final class VirtualDeviceParams implements Parcelable {
             @NonNull SparseIntArray devicePolicies,
             @NonNull List<VirtualSensorConfig> virtualSensorConfigs,
             @Nullable IVirtualSensorCallback virtualSensorCallback,
-            @RecentsPolicy int defaultRecentsPolicy,
             int audioPlaybackSessionId,
             int audioRecordingSessionId) {
         mLockState = lockState;
@@ -236,10 +236,8 @@ public final class VirtualDeviceParams implements Parcelable {
         mDevicePolicies = Objects.requireNonNull(devicePolicies);
         mVirtualSensorConfigs = Objects.requireNonNull(virtualSensorConfigs);
         mVirtualSensorCallback = virtualSensorCallback;
-        mDefaultRecentsPolicy = defaultRecentsPolicy;
         mAudioPlaybackSessionId = audioPlaybackSessionId;
         mAudioRecordingSessionId = audioRecordingSessionId;
-
     }
 
     @SuppressWarnings("unchecked")
@@ -258,7 +256,6 @@ public final class VirtualDeviceParams implements Parcelable {
         parcel.readTypedList(mVirtualSensorConfigs, VirtualSensorConfig.CREATOR);
         mVirtualSensorCallback =
                 IVirtualSensorCallback.Stub.asInterface(parcel.readStrongBinder());
-        mDefaultRecentsPolicy = parcel.readInt();
         mAudioPlaybackSessionId = parcel.readInt();
         mAudioRecordingSessionId = parcel.readInt();
     }
@@ -386,22 +383,13 @@ public final class VirtualDeviceParams implements Parcelable {
     }
 
     /**
-     * Returns the callback to get notified about changes in the sensor listeners.
+     * Returns the callback to get notified about changes in the sensor listeners or sensor direct
+     * channel configuration.
      * @hide
      */
     @Nullable
     public IVirtualSensorCallback getVirtualSensorCallback() {
         return mVirtualSensorCallback;
-    }
-
-    /**
-     * Returns the policy of how to handle activities in recents.
-     *
-     * @see RecentsPolicy
-     */
-    @RecentsPolicy
-    public int getDefaultRecentsPolicy() {
-        return mDefaultRecentsPolicy;
     }
 
     /**
@@ -442,7 +430,6 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeTypedList(mVirtualSensorConfigs);
         dest.writeStrongBinder(
                 mVirtualSensorCallback != null ? mVirtualSensorCallback.asBinder() : null);
-        dest.writeInt(mDefaultRecentsPolicy);
         dest.writeInt(mAudioPlaybackSessionId);
         dest.writeInt(mAudioRecordingSessionId);
     }
@@ -477,7 +464,6 @@ public final class VirtualDeviceParams implements Parcelable {
                 && Objects.equals(mBlockedActivities, that.mBlockedActivities)
                 && mDefaultActivityPolicy == that.mDefaultActivityPolicy
                 && Objects.equals(mName, that.mName)
-                && mDefaultRecentsPolicy == that.mDefaultRecentsPolicy
                 && mAudioPlaybackSessionId == that.mAudioPlaybackSessionId
                 && mAudioRecordingSessionId == that.mAudioRecordingSessionId;
     }
@@ -488,7 +474,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 mLockState, mUsersWithMatchingAccounts, mAllowedCrossTaskNavigations,
                 mBlockedCrossTaskNavigations, mDefaultNavigationPolicy, mAllowedActivities,
                 mBlockedActivities, mDefaultActivityPolicy, mName, mDevicePolicies,
-                mDefaultRecentsPolicy, mAudioPlaybackSessionId, mAudioRecordingSessionId);
+                mAudioPlaybackSessionId, mAudioRecordingSessionId);
         for (int i = 0; i < mDevicePolicies.size(); i++) {
             hashCode = 31 * hashCode + mDevicePolicies.keyAt(i);
             hashCode = 31 * hashCode + mDevicePolicies.valueAt(i);
@@ -510,7 +496,6 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mDefaultActivityPolicy=" + mDefaultActivityPolicy
                 + " mName=" + mName
                 + " mDevicePolicies=" + mDevicePolicies
-                + " mDefaultRecentsPolicy=" + mDefaultRecentsPolicy
                 + " mAudioPlaybackSessionId=" + mAudioPlaybackSessionId
                 + " mAudioRecordingSessionId=" + mAudioRecordingSessionId
                 + ")";
@@ -547,24 +532,33 @@ public final class VirtualDeviceParams implements Parcelable {
         private boolean mDefaultActivityPolicyConfigured = false;
         @Nullable private String mName;
         @NonNull private SparseIntArray mDevicePolicies = new SparseIntArray();
-        private int mDefaultRecentsPolicy;
         private int mAudioPlaybackSessionId = AUDIO_SESSION_ID_GENERATE;
         private int mAudioRecordingSessionId = AUDIO_SESSION_ID_GENERATE;
 
         @NonNull private List<VirtualSensorConfig> mVirtualSensorConfigs = new ArrayList<>();
-        @Nullable
-        private IVirtualSensorCallback mVirtualSensorCallback;
+        @Nullable private Executor mVirtualSensorCallbackExecutor;
+        @Nullable private VirtualSensorCallback mVirtualSensorCallback;
+        @Nullable private Executor mVirtualSensorDirectChannelCallbackExecutor;
+        @Nullable private VirtualSensorDirectChannelCallback mVirtualSensorDirectChannelCallback;
 
         private static class VirtualSensorCallbackDelegate extends IVirtualSensorCallback.Stub {
             @NonNull
             private final Executor mExecutor;
             @NonNull
             private final VirtualSensorCallback mCallback;
+            @Nullable
+            private final Executor mDirectChannelExecutor;
+            @Nullable
+            private final VirtualSensorDirectChannelCallback mDirectChannelCallback;
 
             VirtualSensorCallbackDelegate(@NonNull @CallbackExecutor Executor executor,
-                    @NonNull VirtualSensorCallback callback) {
-                mCallback = callback;
+                    @NonNull VirtualSensorCallback callback,
+                    @Nullable @CallbackExecutor Executor directChannelExecutor,
+                    @Nullable VirtualSensorDirectChannelCallback directChannelCallback) {
                 mExecutor = executor;
+                mCallback = callback;
+                mDirectChannelExecutor = directChannelExecutor;
+                mDirectChannelCallback = directChannelCallback;
             }
 
             @Override
@@ -576,6 +570,34 @@ public final class VirtualDeviceParams implements Parcelable {
                         Duration.ofNanos(MICROSECONDS.toNanos(batchReportLatencyMicros));
                 mExecutor.execute(() -> mCallback.onConfigurationChanged(
                         sensor, enabled, samplingPeriod, batchReportingLatency));
+            }
+
+            @Override
+            public void onDirectChannelCreated(int channelHandle,
+                    @NonNull SharedMemory sharedMemory) {
+                if (mDirectChannelCallback != null && mDirectChannelExecutor != null) {
+                    mDirectChannelExecutor.execute(
+                            () -> mDirectChannelCallback.onDirectChannelCreated(channelHandle,
+                                    sharedMemory));
+                }
+            }
+
+            @Override
+            public void onDirectChannelDestroyed(int channelHandle) {
+                if (mDirectChannelCallback != null && mDirectChannelExecutor != null) {
+                    mDirectChannelExecutor.execute(
+                            () -> mDirectChannelCallback.onDirectChannelDestroyed(channelHandle));
+                }
+            }
+
+            @Override
+            public void onDirectChannelConfigured(int channelHandle, @NonNull VirtualSensor sensor,
+                    int rateLevel, int reportToken) {
+                if (mDirectChannelCallback != null && mDirectChannelExecutor != null) {
+                    mDirectChannelExecutor.execute(
+                            () -> mDirectChannelCallback.onDirectChannelConfigured(
+                                    channelHandle, sensor, rateLevel, reportToken));
+                }
             }
         }
 
@@ -659,7 +681,7 @@ public final class VirtualDeviceParams implements Parcelable {
          * {@link #NAVIGATION_POLICY_DEFAULT_ALLOWED}, meaning activities are allowed to launch
          * unless they are in {@code blockedCrossTaskNavigations}.
          *
-         * <p> This method must not be called if {@link #setAllowedCrossTaskNavigations(Set)} has
+         * <p>This method must not be called if {@link #setAllowedCrossTaskNavigations(Set)} has
          * been called.
          *
          * @throws IllegalArgumentException if {@link #setAllowedCrossTaskNavigations(Set)} has
@@ -783,31 +805,37 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
-         * Sets the callback to get notified about changes in the sensor listeners.
+         * Sets the callback to get notified about changes in the sensor configuration.
          *
          * @param executor The executor where the callback is executed on.
          * @param callback The callback to get notified when the state of the sensor
-         * listeners has changed, see {@link VirtualSensorCallback}
+         * configuration has changed, see {@link VirtualSensorCallback}
          */
         @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
         public Builder setVirtualSensorCallback(
                 @NonNull @CallbackExecutor Executor executor,
                 @NonNull VirtualSensorCallback callback) {
-            mVirtualSensorCallback = new VirtualSensorCallbackDelegate(
-                    Objects.requireNonNull(executor),
-                    Objects.requireNonNull(callback));
+            mVirtualSensorCallbackExecutor = Objects.requireNonNull(executor);
+            mVirtualSensorCallback = Objects.requireNonNull(callback);
             return this;
         }
 
         /**
-         * Sets the policy to indicate how activities are handled in recents.
+         * Sets the callback to get notified about changes in
+         * {@link android.hardware.SensorDirectChannel} configuration.
          *
-         * @param defaultRecentsPolicy A policy specifying how to handle activities in recents.
+         * @param executor The executor where the callback is executed on.
+         * @param callback The callback to get notified when the state of the sensor
+         * configuration has changed, see {@link VirtualSensorDirectChannelCallback}
          */
+        @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
-        public Builder setDefaultRecentsPolicy(@RecentsPolicy int defaultRecentsPolicy) {
-            mDefaultRecentsPolicy = defaultRecentsPolicy;
+        public Builder setVirtualSensorDirectChannelCallback(
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull VirtualSensorDirectChannelCallback callback) {
+            mVirtualSensorDirectChannelCallbackExecutor = Objects.requireNonNull(executor);
+            mVirtualSensorDirectChannelCallback = Objects.requireNonNull(callback);
             return this;
         }
 
@@ -820,11 +848,11 @@ public final class VirtualDeviceParams implements Parcelable {
          * <p>Requires {@link #DEVICE_POLICY_CUSTOM} to be set for {@link #POLICY_TYPE_AUDIO},
          * otherwise {@link #build()} method will throw {@link IllegalArgumentException} if
          * the playback session id is set to value other than
-         * {@link android.media.AudioManager.AUDIO_SESSION_ID_GENERATE}.
+         * {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}.
          *
          * @param playbackSessionId requested device-specific audio session id for playback
-         * @see android.media.AudioManager.generateAudioSessionId()
-         * @see android.media.AudioTrack.Builder.setContext(Context)
+         * @see android.media.AudioManager#generateAudioSessionId()
+         * @see android.media.AudioTrack.Builder#setContext(Context)
          */
         @NonNull
         public Builder setAudioPlaybackSessionId(int playbackSessionId) {
@@ -844,11 +872,11 @@ public final class VirtualDeviceParams implements Parcelable {
          * <p>Requires {@link #DEVICE_POLICY_CUSTOM} to be set for {@link #POLICY_TYPE_AUDIO},
          * otherwise {@link #build()} method will throw {@link IllegalArgumentException} if
          * the recording session id is set to value other than
-         * {@link android.media.AudioManager.AUDIO_SESSION_ID_GENERATE}.
+         * {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}.
          *
          * @param recordingSessionId requested device-specific audio session id for playback
-         * @see android.media.AudioManager.generateAudioSessionId()
-         * @see android.media.AudioRecord.Builder.setContext(Context)
+         * @see android.media.AudioManager#generateAudioSessionId()
+         * @see android.media.AudioRecord.Builder#setContext(Context)
          */
         @NonNull
         public Builder setAudioRecordingSessionId(int recordingSessionId) {
@@ -868,6 +896,7 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public VirtualDeviceParams build() {
+            VirtualSensorCallbackDelegate virtualSensorCallbackDelegate = null;
             if (!mVirtualSensorConfigs.isEmpty()) {
                 if (mDevicePolicies.get(POLICY_TYPE_SENSORS, DEVICE_POLICY_DEFAULT)
                         != DEVICE_POLICY_CUSTOM) {
@@ -879,6 +908,22 @@ public final class VirtualDeviceParams implements Parcelable {
                     throw new IllegalArgumentException(
                             "VirtualSensorCallback is required for creating virtual sensors.");
                 }
+
+                for (int i = 0; i < mVirtualSensorConfigs.size(); ++i) {
+                    if (mVirtualSensorConfigs.get(i).getDirectChannelTypesSupported() > 0) {
+                        if (mVirtualSensorDirectChannelCallback == null) {
+                            throw new IllegalArgumentException(
+                                    "VirtualSensorDirectChannelCallback is required for creating "
+                                            + "virtual sensors that support direct channel.");
+                        }
+                        break;
+                    }
+                }
+                virtualSensorCallbackDelegate = new VirtualSensorCallbackDelegate(
+                        mVirtualSensorCallbackExecutor,
+                        mVirtualSensorCallback,
+                        mVirtualSensorDirectChannelCallbackExecutor,
+                        mVirtualSensorDirectChannelCallback);
             }
 
             if ((mAudioPlaybackSessionId != AUDIO_SESSION_ID_GENERATE
@@ -912,8 +957,7 @@ public final class VirtualDeviceParams implements Parcelable {
                     mName,
                     mDevicePolicies,
                     mVirtualSensorConfigs,
-                    mVirtualSensorCallback,
-                    mDefaultRecentsPolicy,
+                    virtualSensorCallbackDelegate,
                     mAudioPlaybackSessionId,
                     mAudioRecordingSessionId);
         }

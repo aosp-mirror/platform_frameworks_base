@@ -480,9 +480,9 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                     : inset != 0;
 
             if (outState != null && source != null) {
-                outState.getOrCreateSource(source.getId(), source.getType())
+                outState.addSource(new InsetsSource(source)
                         .setVisible(visible)
-                        .setFrame(mTmpFrame);
+                        .setFrame(mTmpFrame));
             }
 
             // If the system is controlling the insets source, the leash can be null.

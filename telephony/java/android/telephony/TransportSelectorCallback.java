@@ -35,8 +35,10 @@ public interface TransportSelectorCallback {
 
     /**
      * Notify that WLAN transport has been selected.
+     *
+     * @param useEmergencyPdn Indicates whether Wi-Fi emergency services use emergency PDN or not.
      */
-    void onWlanSelected();
+    void onWlanSelected(boolean useEmergencyPdn);
 
     /**
      * Notify that WWAN transport has been selected.

@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.PIN_SHAPES;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -30,15 +32,14 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.core.graphics.drawable.DrawableCompat;
 
+import com.android.app.animation.Interpolators;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 
 /**
  * This class contains implementation for methods that will be used when user has set a
@@ -46,11 +47,10 @@ import com.android.systemui.animation.Interpolators;
  */
 public class PinShapeNonHintingView extends LinearLayout implements PinShapeInput {
 
-    private int mColor = Utils.getColorAttr(getContext(),
-            android.R.attr.textColorPrimary).getDefaultColor();
+    private int mColor = Utils.getColorAttr(getContext(), PIN_SHAPES).getDefaultColor();
     private int mPosition = 0;
     private final PinShapeAdapter mPinShapeAdapter;
-    private Animation mCurrentPlayingAnimation;
+    private ValueAnimator mValueAnimator = ValueAnimator.ofFloat(1f, 0f);
     public PinShapeNonHintingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPinShapeAdapter = new PinShapeAdapter(context);
@@ -80,15 +80,17 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
             Log.e(getClass().getName(), "Trying to delete a non-existent char");
             return;
         }
+        if (mValueAnimator.isRunning()) {
+            mValueAnimator.end();
+        }
         mPosition--;
         ImageView pinDot = (ImageView) getChildAt(mPosition);
-        ValueAnimator animator = ValueAnimator.ofFloat(1f, 0f);
-        animator.addUpdateListener(valueAnimator -> {
+        mValueAnimator.addUpdateListener(valueAnimator -> {
             float value = (float) valueAnimator.getAnimatedValue();
             pinDot.setScaleX(value);
             pinDot.setScaleY(value);
         });
-        animator.addListener(new AnimatorListenerAdapter() {
+        mValueAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -96,11 +98,10 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
                         PinShapeNonHintingView.this,
                         new PinShapeViewTransition());
                 removeView(pinDot);
-                mCurrentPlayingAnimation = null;
             }
         });
-        animator.setDuration(PasswordTextView.DISAPPEAR_DURATION);
-        animator.start();
+        mValueAnimator.setDuration(PasswordTextView.DISAPPEAR_DURATION);
+        mValueAnimator.start();
     }
 
     @Override

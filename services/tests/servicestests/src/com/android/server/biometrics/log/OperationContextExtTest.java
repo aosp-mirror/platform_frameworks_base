@@ -19,7 +19,9 @@ package com.android.server.biometrics.log;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Intent;
+import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.IBiometricContextListener;
+import android.hardware.biometrics.common.DisplayState;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
 import android.platform.test.annotations.Presubmit;
@@ -37,6 +39,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.Map;
+
 @Presubmit
 @SmallTest
 public class OperationContextExtTest {
@@ -49,32 +53,54 @@ public class OperationContextExtTest {
 
     @Test
     public void hasAidlContext() {
-        OperationContextExt context = new OperationContextExt();
+        OperationContextExt context = new OperationContextExt(false);
         assertThat(context.toAidlContext()).isNotNull();
 
         final OperationContext aidlContext = newAidlContext();
 
-        context = new OperationContextExt(aidlContext);
+        context = new OperationContextExt(aidlContext, false);
         assertThat(context.toAidlContext()).isSameInstanceAs(aidlContext);
 
         final int id = 5;
         final byte reason = OperationReason.UNKNOWN;
+        final int displayState = DisplayState.NO_UI;
         aidlContext.id = id;
         aidlContext.isAod = true;
         aidlContext.isCrypto = true;
         aidlContext.reason = reason;
+        aidlContext.displayState = displayState;
 
         assertThat(context.getId()).isEqualTo(id);
         assertThat(context.isAod()).isTrue();
         assertThat(context.isCrypto()).isTrue();
         assertThat(context.getReason()).isEqualTo(reason);
+        assertThat(context.getDisplayState()).isEqualTo(displayState);
     }
 
     @Test
     public void hasNoOrderWithoutSession() {
-        OperationContextExt context = new OperationContextExt();
+        OperationContextExt context = new OperationContextExt(false);
         assertThat(context.getOrderAndIncrement()).isEqualTo(-1);
         assertThat(context.getOrderAndIncrement()).isEqualTo(-1);
+    }
+
+    @Test
+    public void mapsDisplayStatesToAidl() {
+        final Map<Integer, Integer> map = Map.of(
+                AuthenticateOptions.DISPLAY_STATE_UNKNOWN, DisplayState.UNKNOWN,
+                AuthenticateOptions.DISPLAY_STATE_AOD, DisplayState.AOD,
+                AuthenticateOptions.DISPLAY_STATE_NO_UI, DisplayState.NO_UI,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN, DisplayState.LOCKSCREEN,
+                AuthenticateOptions.DISPLAY_STATE_SCREENSAVER, DisplayState.SCREENSAVER,
+                100, DisplayState.UNKNOWN
+        );
+
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            final OperationContextExt context = new OperationContextExt(newAidlContext(), true);
+            when(mBiometricContext.getDisplayState()).thenReturn(entry.getKey());
+            assertThat(context.update(mBiometricContext).getDisplayState())
+                    .isEqualTo(entry.getValue());
+        }
     }
 
     @Test
@@ -102,13 +128,16 @@ public class OperationContextExtTest {
         final int rotation = Surface.ROTATION_270;
         final int foldState = IBiometricContextListener.FoldState.HALF_OPENED;
         final int dockState = Intent.EXTRA_DOCK_STATE_CAR;
+        final int displayState = AuthenticateOptions.DISPLAY_STATE_AOD;
 
         when(mBiometricContext.getCurrentRotation()).thenReturn(rotation);
         when(mBiometricContext.getFoldState()).thenReturn(foldState);
         when(mBiometricContext.getDockedState()).thenReturn(dockState);
         when(mBiometricContext.isDisplayOn()).thenReturn(true);
+        when(mBiometricContext.getDisplayState()).thenReturn(displayState);
 
-        final OperationContextExt context = new OperationContextExt(newAidlContext());
+        final OperationContextExt context = new OperationContextExt(newAidlContext(),
+                sessionType == OperationReason.BIOMETRIC_PROMPT);
 
         assertThat(context.update(mBiometricContext)).isSameInstanceAs(context);
 
@@ -124,6 +153,7 @@ public class OperationContextExtTest {
         assertThat(context.getFoldState()).isEqualTo(foldState);
         assertThat(context.getOrientation()).isEqualTo(rotation);
         assertThat(context.isDisplayOn()).isTrue();
+        assertThat(context.getDisplayState()).isEqualTo(DisplayState.AOD);
     }
 
     private static OperationContext newAidlContext() {

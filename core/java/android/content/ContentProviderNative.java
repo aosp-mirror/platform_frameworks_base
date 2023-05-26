@@ -315,9 +315,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 case GET_STREAM_TYPES_TRANSACTION:
                 {
                     data.enforceInterface(IContentProvider.descriptor);
+                    AttributionSource attributionSource = AttributionSource.CREATOR
+                            .createFromParcel(data);
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     String mimeTypeFilter = data.readString();
-                    String[] types = getStreamTypes(url, mimeTypeFilter);
+                    String[] types = getStreamTypes(attributionSource, url, mimeTypeFilter);
                     reply.writeNoException();
                     reply.writeStringArray(types);
 
@@ -769,12 +771,14 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException
+    public String[] getStreamTypes(AttributionSource attributionSource,
+            Uri url, String mimeTypeFilter) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
+            attributionSource.writeToParcel(data, 0);
 
             url.writeToParcel(data, 0);
             data.writeString(mimeTypeFilter);

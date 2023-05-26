@@ -14,48 +14,46 @@
  * limitations under the License.
  */
 
+@file:OptIn(InternalNoteTaskApi::class)
+
 package com.android.systemui.notetask
 
 import android.app.role.RoleManager
-import android.content.Context
+import android.app.role.RoleManager.ROLE_NOTES
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.os.UserHandle
 import android.util.Log
+import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import javax.inject.Inject
 
 class NoteTaskInfoResolver
 @Inject
 constructor(
-    private val context: Context,
     private val roleManager: RoleManager,
     private val packageManager: PackageManager,
 ) {
+
     fun resolveInfo(
         entryPoint: NoteTaskEntryPoint? = null,
-        isInMultiWindowMode: Boolean = false,
         isKeyguardLocked: Boolean = false,
+        user: UserHandle,
     ): NoteTaskInfo? {
-        // TODO(b/267634412): Select UserHandle depending on where the user initiated note-taking.
-        val user = context.user
-        val packageName = roleManager.getRoleHoldersAsUser(ROLE_NOTES, user).firstOrNull()
+        val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
 
         if (packageName.isNullOrEmpty()) return null
 
         return NoteTaskInfo(
             packageName = packageName,
             uid = packageManager.getUidOf(packageName, user),
+            user = user,
             entryPoint = entryPoint,
-            isInMultiWindowMode = isInMultiWindowMode,
             isKeyguardLocked = isKeyguardLocked,
         )
     }
 
     companion object {
         private val TAG = NoteTaskInfoResolver::class.simpleName.orEmpty()
-
-        // TODO(b/265912743): Use RoleManager.NOTES_ROLE instead.
-        const val ROLE_NOTES = "android.app.role.NOTES"
 
         private val EMPTY_APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0)!!
 

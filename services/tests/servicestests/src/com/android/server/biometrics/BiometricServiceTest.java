@@ -18,7 +18,7 @@ package com.android.server.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
-import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
+import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTHENTICATED_PENDING_SYSUI;
@@ -47,6 +47,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
@@ -54,23 +55,25 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricAuthenticator;
+import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.security.KeyStore;
 import android.view.Display;
@@ -94,6 +97,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Random;
 
 @Presubmit
@@ -145,9 +149,9 @@ public class BiometricServiceTest {
     @Mock
     private ISessionListener mSessionListener;
     @Mock
-    private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
-    @Mock
     private AuthSessionCoordinator mAuthSessionCoordinator;
+    @Mock
+    private UserManager mUserManager;
 
     BiometricContextProvider mBiometricContextProvider;
 
@@ -173,6 +177,7 @@ public class BiometricServiceTest {
         when(mInjector.getTrustManager()).thenReturn(mTrustManager);
         when(mInjector.getDevicePolicyManager(any())).thenReturn(mDevicePolicyManager);
         when(mInjector.getRequestGenerator()).thenReturn(() -> TEST_REQUEST_ID);
+        when(mInjector.getUserManager(any())).thenReturn(mUserManager);
 
         when(mResources.getString(R.string.biometric_error_hw_unavailable))
                 .thenReturn(ERROR_HW_UNAVAILABLE);
@@ -184,9 +189,8 @@ public class BiometricServiceTest {
         when(mWindowManager.getDefaultDisplay()).thenReturn(
                 new Display(DisplayManagerGlobal.getInstance(), Display.DEFAULT_DISPLAY,
                         new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS));
-        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         mBiometricContextProvider = new BiometricContextProvider(mContext, mWindowManager,
-                mAmbientDisplayConfiguration, mStatusBarService, null /* handler */,
+                mStatusBarService, null /* handler */,
                 mAuthSessionCoordinator);
         when(mInjector.getBiometricContext(any())).thenReturn(mBiometricContextProvider);
 
@@ -307,8 +311,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -393,8 +396,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -512,7 +514,7 @@ public class BiometricServiceTest {
         assertEquals(STATE_AUTH_STARTED, mBiometricService.mAuthSession.getState());
 
         // startPreparedClient invoked
-        mBiometricService.mAuthSession.onDialogAnimatedIn();
+        mBiometricService.mAuthSession.onDialogAnimatedIn(true /* startFingerprintNow */);
         verify(mBiometricService.mSensors.get(0).impl)
                 .startPreparedClient(cookieCaptor.getValue());
 
@@ -526,8 +528,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
 
         // Hardware authenticated
         final byte[] HAT = generateRandomHAT();
@@ -583,8 +584,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -748,8 +748,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 anyString(),
-                anyLong() /* requestId */,
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                anyLong() /* requestId */);
     }
 
     @Test
@@ -850,8 +849,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -931,8 +929,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -1428,8 +1425,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(requestId),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(requestId));
 
         // Requesting strong and credential, when credential is setup
         resetReceivers();
@@ -1452,8 +1448,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(requestId),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(requestId));
 
         // Un-downgrading the authenticator allows successful strong auth
         for (BiometricSensor sensor : mBiometricService.mSensors) {
@@ -1478,8 +1473,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(requestId),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(requestId));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -1586,6 +1580,33 @@ public class BiometricServiceTest {
         assertEquals(STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mAuthSession.getState());
         verify(mReceiver2, never()).onError(anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testRegisterEnabledOnKeyguardCallback() throws RemoteException {
+        final UserInfo userInfo1 = new UserInfo(0 /* userId */, "user1" /* name */, 0 /* flags */);
+        final UserInfo userInfo2 = new UserInfo(10 /* userId */, "user2" /* name */, 0 /* flags */);
+        final List<UserInfo> aliveUsers = List.of(userInfo1, userInfo2);
+        final IBiometricEnabledOnKeyguardCallback callback =
+                mock(IBiometricEnabledOnKeyguardCallback.class);
+
+        mBiometricService = new BiometricService(mContext, mInjector);
+
+        when(mUserManager.getAliveUsers()).thenReturn(aliveUsers);
+        when(mBiometricService.mSettingObserver.getEnabledOnKeyguard(userInfo1.id))
+                .thenReturn(true);
+        when(mBiometricService.mSettingObserver.getEnabledOnKeyguard(userInfo2.id))
+                .thenReturn(false);
+        when(callback.asBinder()).thenReturn(mock(IBinder.class));
+
+        mBiometricService.mImpl.registerEnabledOnKeyguardCallback(callback);
+
+        waitForIdle();
+
+        verify(callback).asBinder();
+        verify(callback).onChanged(true, userInfo1.id);
+        verify(callback).onChanged(false, userInfo2.id);
+        verifyNoMoreInteractions(callback);
     }
 
     // Helper methods

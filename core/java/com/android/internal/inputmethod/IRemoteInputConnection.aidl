@@ -18,6 +18,7 @@ package com.android.internal.inputmethod;
 
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
@@ -94,7 +95,7 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
             in ParcelableHandwritingGesture gesture, in ResultReceiver resultReceiver);
 
     void previewHandwritingGesture(in InputConnectionCommandHeader header,
-            in ParcelableHandwritingGesture gesture, in ICancellationSignal transport);
+            in ParcelableHandwritingGesture gesture, in IBinder cancellationSignal);
 
     void setComposingRegion(in InputConnectionCommandHeader header, int start, int end);
 
@@ -124,4 +125,8 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
     void replaceText(in InputConnectionCommandHeader header, int start, int end, CharSequence text,
             int newCursorPosition,in TextAttribute textAttribute);
+
+    void cancelCancellationSignal(in IBinder token);
+    void forgetCancellationSignal(in IBinder token);
+
 }

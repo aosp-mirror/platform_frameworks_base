@@ -8,6 +8,9 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation.getContentAlpha
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.EmptyShadeView
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarState
@@ -15,11 +18,13 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.util.mockito.mock
+import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.any
 import org.mockito.Mockito.eq
@@ -30,12 +35,19 @@ import org.mockito.Mockito.`when` as whenever
 @SmallTest
 class StackScrollAlgorithmTest : SysuiTestCase() {
 
+
+    @JvmField @Rule
+    var expect: Expect = Expect.create()
+
+    private val largeScreenShadeInterpolator = mock<LargeScreenShadeInterpolator>()
+
     private val hostView = FrameLayout(context)
     private val stackScrollAlgorithm = StackScrollAlgorithm(context, hostView)
     private val notificationRow = mock<ExpandableNotificationRow>()
     private val dumpManager = mock<DumpManager>()
     private val mStatusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>()
     private val notificationShelf = mock<NotificationShelf>()
+    private val featureFlags = mock<FeatureFlags>()
     private val emptyShadeView = EmptyShadeView(context, /* attrs= */ null).apply {
         layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
     }
@@ -44,8 +56,10 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             dumpManager,
             /* sectionProvider */ { _, _ -> false },
             /* bypassController */ { false },
-            mStatusBarKeyguardViewManager
-    )
+            mStatusBarKeyguardViewManager,
+            largeScreenShadeInterpolator,
+            featureFlags,
+        )
 
     private val testableResources = mContext.getOrCreateTestableResources()
 
@@ -59,6 +73,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun setUp() {
         whenever(notificationShelf.viewState).thenReturn(ExpandableViewState())
         whenever(notificationRow.viewState).thenReturn(ExpandableViewState())
+        ambientState.isSmallScreen = true
 
         hostView.addView(notificationRow)
     }
@@ -145,11 +160,46 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
-    fun resetViewStates_expansionChangingWhileBouncerInTransit_notificationAlphaUpdated() {
+    fun resetViewStates_flagTrue_largeScreen_expansionChanging_alphaUpdated_largeScreenValue() {
+        val expansionFraction = 0.6f
+        val surfaceAlpha = 123f
+        ambientState.isSmallScreen = false
+        whenever(featureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
+                .thenReturn(true)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
+        whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
+            .thenReturn(surfaceAlpha)
+
+        resetViewStates_expansionChanging_notificationAlphaUpdated(
+            expansionFraction = expansionFraction,
+            expectedAlpha = surfaceAlpha,
+        )
+    }
+
+    @Test
+    fun resetViewStates_flagFalse_largeScreen_expansionChanging_alphaUpdated_standardValue() {
+        val expansionFraction = 0.6f
+        val surfaceAlpha = 123f
+        ambientState.isSmallScreen = false
+        whenever(featureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
+                .thenReturn(false)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
+        whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
+            .thenReturn(surfaceAlpha)
+
+        resetViewStates_expansionChanging_notificationAlphaUpdated(
+            expansionFraction = expansionFraction,
+            expectedAlpha = getContentAlpha(expansionFraction),
+        )
+    }
+
+    @Test
+    fun expansionChanging_largeScreen_bouncerInTransit_alphaUpdated_bouncerValues() {
+        ambientState.isSmallScreen = false
         whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(true)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.95f,
-                expectedAlpha = aboutToShowBouncerProgress(0.95f)
+                expectedAlpha = aboutToShowBouncerProgress(0.95f),
         )
     }
 
@@ -666,6 +716,94 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 .isLessThan(px(R.dimen.heads_up_pinned_elevation))
     }
 
+    @Test
+    fun aodToLockScreen_hasPulsingNotification_pulsingNotificationRowDoesNotChange() {
+        // Given: Before AOD to LockScreen, there was a pulsing notification
+        val pulsingNotificationView = createPulsingViewMock()
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(pulsingNotificationView)
+        ambientState.setPulsingRow(pulsingNotificationView)
+
+        // When: during AOD to LockScreen, any dozeAmount between (0, 1.0) is equivalent as a middle
+        // stage; here we use 0.5 for testing.
+        // stackScrollAlgorithm.updatePulsingStates is called
+        ambientState.dozeAmount = 0.5f
+        stackScrollAlgorithm.updatePulsingStates(algorithmState, ambientState)
+
+        // Then: ambientState.pulsingRow should still be pulsingNotificationView
+        assertTrue(ambientState.isPulsingRow(pulsingNotificationView))
+    }
+
+    @Test
+    fun deviceOnAod_hasPulsingNotification_recordPulsingNotificationRow() {
+        // Given: Device is on AOD, there is a pulsing notification
+        // ambientState.pulsingRow is null before stackScrollAlgorithm.updatePulsingStates
+        ambientState.dozeAmount = 1.0f
+        val pulsingNotificationView = createPulsingViewMock()
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(pulsingNotificationView)
+        ambientState.setPulsingRow(null)
+
+        // When: stackScrollAlgorithm.updatePulsingStates is called
+        stackScrollAlgorithm.updatePulsingStates(algorithmState, ambientState)
+
+        // Then: ambientState.pulsingRow should record the pulsingNotificationView
+        assertTrue(ambientState.isPulsingRow(pulsingNotificationView))
+    }
+
+    @Test
+    fun deviceOnLockScreen_hasPulsingNotificationBefore_clearPulsingNotificationRowRecord() {
+        // Given: Device finished AOD to LockScreen, there was a pulsing notification, and
+        // ambientState.pulsingRow was not null before AOD to LockScreen
+        // pulsingNotificationView.showingPulsing() returns false since the device is on LockScreen
+        ambientState.dozeAmount = 0.0f
+        val pulsingNotificationView = createPulsingViewMock()
+        whenever(pulsingNotificationView.showingPulsing()).thenReturn(false)
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(pulsingNotificationView)
+        ambientState.setPulsingRow(pulsingNotificationView)
+
+        // When: stackScrollAlgorithm.updatePulsingStates is called
+        stackScrollAlgorithm.updatePulsingStates(algorithmState, ambientState)
+
+        // Then: ambientState.pulsingRow should be null
+        assertTrue(ambientState.isPulsingRow(null))
+    }
+
+    @Test
+    fun aodToLockScreen_hasPulsingNotification_pulsingNotificationRowShowAtFullHeight() {
+        // Given: Before AOD to LockScreen, there was a pulsing notification
+        val pulsingNotificationView = createPulsingViewMock()
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(pulsingNotificationView)
+        ambientState.setPulsingRow(pulsingNotificationView)
+
+        // When: during AOD to LockScreen, any dozeAmount between (0, 1.0) is equivalent as a middle
+        // stage; here we use 0.5 for testing. The expansionFraction is also 0.5.
+        // stackScrollAlgorithm.resetViewStates is called.
+        ambientState.dozeAmount = 0.5f
+        setExpansionFractionWithoutShelfDuringAodToLockScreen(
+                ambientState,
+                algorithmState,
+                fraction = 0.5f
+        )
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        // Then: pulsingNotificationView should show at full height
+        assertEquals(
+                stackScrollAlgorithm.getMaxAllowedChildHeight(pulsingNotificationView),
+                pulsingNotificationView.viewState.height
+        )
+
+        // After: reset dozeAmount and expansionFraction
+        ambientState.dozeAmount = 0f
+        setExpansionFractionWithoutShelfDuringAodToLockScreen(
+                ambientState,
+                algorithmState,
+                fraction = 1f
+        )
+    }
+
     private fun createHunViewMock(
             isShadeOpen: Boolean,
             fullyVisible: Boolean,
@@ -694,9 +832,32 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 headsUpIsVisible = fullyVisible
             }
 
+    private fun createPulsingViewMock(
+    ) =
+            mock<ExpandableNotificationRow>().apply {
+                whenever(this.viewState).thenReturn(ExpandableViewState())
+                whenever(this.showingPulsing()).thenReturn(true)
+            }
+
+    private fun setExpansionFractionWithoutShelfDuringAodToLockScreen(
+            ambientState: AmbientState,
+            algorithmState: StackScrollAlgorithm.StackScrollAlgorithmState,
+            fraction: Float
+    ) {
+        // showingShelf: false
+        algorithmState.firstViewInShelf = null
+        // scrimPadding: 0, because device is on lock screen
+        ambientState.setStatusBarState(StatusBarState.KEYGUARD)
+        ambientState.dozeAmount = 0.0f
+        // set stackEndHeight and stackHeight
+        // ExpansionFractionWithoutShelf == stackHeight / stackEndHeight
+        ambientState.stackEndHeight = 100f
+        ambientState.stackHeight = ambientState.stackEndHeight * fraction
+    }
+
     private fun resetViewStates_expansionChanging_notificationAlphaUpdated(
             expansionFraction: Float,
-            expectedAlpha: Float
+            expectedAlpha: Float,
     ) {
         ambientState.isExpansionChanging = true
         ambientState.expansionFraction = expansionFraction
@@ -704,7 +865,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
-        assertThat(notificationRow.viewState.alpha).isEqualTo(expectedAlpha)
+        expect.that(notificationRow.viewState.alpha).isEqualTo(expectedAlpha)
     }
 }
 

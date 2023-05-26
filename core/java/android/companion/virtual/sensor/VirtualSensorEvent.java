@@ -121,7 +121,7 @@ public final class VirtualSensorEvent implements Parcelable {
          * monotonically increasing using the same time base as
          * {@link android.os.SystemClock#elapsedRealtimeNanos()}.
          *
-         * If not explicitly set, the current timestamp is used for the sensor event.
+         * <p>If not explicitly set, the current timestamp is used for the sensor event.
          *
          * @see android.hardware.SensorEvent#timestamp
          */

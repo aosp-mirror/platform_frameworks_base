@@ -18,8 +18,8 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import android.tools.common.datatypes.component.ComponentNameMatcher
 import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -37,7 +37,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val imeTestApp = ImeEditorPopupDialogAppHelper(instrumentation)
 
     /** {@inheritDoc} */
@@ -66,7 +66,7 @@ class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker)
         flicker.assertLayers {
             this.isVisible(ComponentNameMatcher.IME)
                 .then()
-                .isVisible(ComponentNameMatcher.IME_SNAPSHOT)
+                .isVisible(ComponentNameMatcher.IME_SNAPSHOT, isOptional = true)
                 .then()
                 .isInvisible(ComponentNameMatcher.IME_SNAPSHOT, isOptional = true)
                 .isInvisible(ComponentNameMatcher.IME)
@@ -88,7 +88,7 @@ class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker)
                         imeSnapshotLayers
                             .mapNotNull { imeSnapshotLayer -> imeSnapshotLayer.layer.visibleRegion }
                             .toTypedArray()
-                    val imeVisibleRegion = RegionSubject(visibleAreas, this, timestamp)
+                    val imeVisibleRegion = RegionSubject(visibleAreas, timestamp)
                     val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
                         imeVisibleRegion.coversAtMost(appVisibleRegion.region)

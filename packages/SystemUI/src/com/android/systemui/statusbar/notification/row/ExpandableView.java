@@ -32,14 +32,15 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.app.animation.Interpolators;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 
 import java.io.PrintWriter;
@@ -52,7 +53,8 @@ import java.util.List;
 public abstract class ExpandableView extends FrameLayout implements Dumpable, Roundable {
     private static final String TAG = "ExpandableView";
     /** whether the dump() for this class should include verbose details */
-    protected static final boolean DUMP_VERBOSE = false;
+    protected static final boolean DUMP_VERBOSE =
+            Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
 
     private RoundableState mRoundableState = null;
     protected OnHeightChangedListener mOnHeightChangedListener;
@@ -291,6 +293,11 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
             long duration) {
     }
 
+    public int getHeightWithoutLockscreenConstraints() {
+        // ExpandableNotificationRow overrides this.
+        return getHeight();
+    }
+
     /**
      * @return The desired notification height.
      */
@@ -451,7 +458,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     protected void updateClipping() {
         if (mClipToActualHeight && shouldClipToActualHeight()) {
             int top = getClipTopAmount();
-            int bottom = Math.max(Math.max(getActualHeight() + getExtraBottomPadding()
+            int bottom = Math.max(Math.max(getActualHeight()
                     - mClipBottomAmount, top), mMinimumHeightForClipping);
             mClipRect.set(Integer.MIN_VALUE, top, Integer.MAX_VALUE, bottom);
             setClipBounds(mClipRect);
@@ -589,13 +596,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
 
     public ViewGroup getTransientContainer() {
         return mTransientContainer;
-    }
-
-    /**
-     * @return padding used to alter how much of the view is clipped.
-     */
-    public int getExtraBottomPadding() {
-        return 0;
     }
 
     /**

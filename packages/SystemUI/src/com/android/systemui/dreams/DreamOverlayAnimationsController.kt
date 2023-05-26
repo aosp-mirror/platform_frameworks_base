@@ -21,16 +21,17 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.view.View
 import android.view.animation.Interpolator
+import androidx.core.animation.doOnCancel
 import androidx.core.animation.doOnEnd
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.animation.Interpolators
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
-import com.android.systemui.dreams.complication.ComplicationHostViewController
-import com.android.systemui.dreams.complication.ComplicationLayoutParams
-import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_BOTTOM
-import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_TOP
-import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position
+import com.android.systemui.complication.ComplicationHostViewController
+import com.android.systemui.complication.ComplicationLayoutParams
+import com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM
+import com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP
+import com.android.systemui.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel.Companion.DREAM_ANIMATION_DURATION
@@ -43,7 +44,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
@@ -66,7 +66,11 @@ constructor(
     private val mDreamInTranslationYDistance: Int,
     @Named(DreamOverlayModule.DREAM_IN_TRANSLATION_Y_DURATION)
     private val mDreamInTranslationYDurationMs: Long,
+    private val mLogger: DreamLogger,
 ) {
+    companion object {
+        private const val TAG = "DreamOverlayAnimationsController"
+    }
 
     private var mAnimator: Animator? = null
     private lateinit var view: View
@@ -131,9 +135,17 @@ constructor(
         }
     }
 
-    /** Starts the dream content and dream overlay entry animations. */
+    /**
+     * Starts the dream content and dream overlay entry animations.
+     *
+     * @param downwards if true, the entry animation translations downwards into position rather
+     *   than upwards.
+     */
     @JvmOverloads
-    fun startEntryAnimations(animatorBuilder: () -> AnimatorSet = { AnimatorSet() }) {
+    fun startEntryAnimations(
+        downwards: Boolean,
+        animatorBuilder: () -> AnimatorSet = { AnimatorSet() }
+    ) {
         cancelAnimations()
 
         mAnimator =
@@ -153,7 +165,7 @@ constructor(
                         interpolator = Interpolators.LINEAR
                     ),
                     translationYAnimator(
-                        from = mDreamInTranslationYDistance.toFloat(),
+                        from = mDreamInTranslationYDistance.toFloat() * (if (downwards) -1 else 1),
                         to = 0f,
                         durationMs = mDreamInTranslationYDurationMs,
                         interpolator = Interpolators.EMPHASIZED_DECELERATE
@@ -162,9 +174,80 @@ constructor(
                 doOnEnd {
                     mAnimator = null
                     mOverlayStateController.setEntryAnimationsFinished(true)
+                    mLogger.d(TAG, "Dream overlay entry animations finished.")
                 }
+                doOnCancel { mLogger.d(TAG, "Dream overlay entry animations canceled.") }
                 start()
+                mLogger.d(TAG, "Dream overlay entry animations started.")
             }
+    }
+
+    /**
+     * Starts the dream content and dream overlay exit animations.
+     *
+     * This should only be used when the low light dream is entering, animations to/from other SysUI
+     * views is controlled by `transitionViewModel`.
+     */
+    // TODO(b/256916668): integrate with the keyguard transition model once dream surfaces work is
+    // done.
+    @JvmOverloads
+    fun startExitAnimations(animatorBuilder: () -> AnimatorSet = { AnimatorSet() }): Animator {
+        cancelAnimations()
+
+        mAnimator =
+            animatorBuilder().apply {
+                playTogether(
+                    translationYAnimator(
+                        from = 0f,
+                        to = -mDreamInTranslationYDistance.toFloat(),
+                        durationMs = mDreamInTranslationYDurationMs,
+                        delayMs = 0,
+                        interpolator = Interpolators.EMPHASIZED
+                    ),
+                    alphaAnimator(
+                            from =
+                                mCurrentAlphaAtPosition.getOrDefault(
+                                    key = POSITION_BOTTOM,
+                                    defaultValue = 1f
+                                ),
+                            to = 0f,
+                            durationMs = mDreamInComplicationsAnimDurationMs,
+                            delayMs = 0,
+                            positions = POSITION_BOTTOM
+                        )
+                        .apply {
+                            doOnEnd {
+                                // The logical end of the animation is once the alpha and blur
+                                // animations finish, end the animation so that any listeners are
+                                // notified. The Y translation animation is much longer than all of
+                                // the other animations due to how the spec is defined, but is not
+                                // expected to run to completion.
+                                mAnimator?.end()
+                            }
+                        },
+                    alphaAnimator(
+                        from =
+                            mCurrentAlphaAtPosition.getOrDefault(
+                                key = POSITION_TOP,
+                                defaultValue = 1f
+                            ),
+                        to = 0f,
+                        durationMs = mDreamInComplicationsAnimDurationMs,
+                        delayMs = 0,
+                        positions = POSITION_TOP
+                    )
+                )
+                doOnEnd {
+                    mAnimator = null
+                    mOverlayStateController.setExitAnimationsRunning(false)
+                    mLogger.d(TAG, "Dream overlay exit animations finished.")
+                }
+                doOnCancel { mLogger.d(TAG, "Dream overlay exit animations canceled.") }
+                start()
+                mLogger.d(TAG, "Dream overlay exit animations started.")
+            }
+        mOverlayStateController.setExitAnimationsRunning(true)
+        return mAnimator as AnimatorSet
     }
 
     /** Starts the dream content and dream overlay exit animations. */
@@ -178,18 +261,6 @@ constructor(
         mAnimator =
             mAnimator?.let {
                 it.cancel()
-                null
-            }
-    }
-
-    /**
-     * Ends the dream content and dream overlay animations, if they're currently running.
-     * @see [AnimatorSet.end]
-     */
-    fun endAnimations() {
-        mAnimator =
-            mAnimator?.let {
-                it.end()
                 null
             }
     }

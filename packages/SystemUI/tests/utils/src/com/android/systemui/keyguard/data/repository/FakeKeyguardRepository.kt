@@ -47,11 +47,17 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _isKeyguardShowing = MutableStateFlow(false)
     override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
 
+    private val _isKeyguardUnlocked = MutableStateFlow(false)
+    override val isKeyguardUnlocked: Flow<Boolean> = _isKeyguardUnlocked
+
     private val _isKeyguardOccluded = MutableStateFlow(false)
     override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
 
     private val _isDozing = MutableStateFlow(false)
-    override val isDozing: Flow<Boolean> = _isDozing
+    override val isDozing: StateFlow<Boolean> = _isDozing
+
+    private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)
+    override val lastDozeTapToWakePosition = _lastDozeTapToWakePosition.asStateFlow()
 
     private val _isAodAvailable = MutableStateFlow(false)
     override val isAodAvailable: Flow<Boolean> = _isAodAvailable
@@ -73,12 +79,7 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _wakefulnessModel =
         MutableStateFlow(
-            WakefulnessModel(
-                WakefulnessState.ASLEEP,
-                false,
-                WakeSleepReason.OTHER,
-                WakeSleepReason.OTHER
-            )
+            WakefulnessModel(WakefulnessState.ASLEEP, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
         )
     override val wakefulness: Flow<WakefulnessModel> = _wakefulnessModel
 
@@ -126,16 +127,28 @@ class FakeKeyguardRepository : KeyguardRepository {
         _isKeyguardShowing.value = isShowing
     }
 
+    fun setKeyguardGoingAway(isGoingAway: Boolean) {
+        _isKeyguardGoingAway.value = isGoingAway
+    }
+
     fun setKeyguardOccluded(isOccluded: Boolean) {
         _isKeyguardOccluded.value = isOccluded
     }
 
-    fun setDozing(isDozing: Boolean) {
+    override fun setIsDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
+    }
+
+    override fun setLastDozeTapToWakePosition(position: Point) {
+        _lastDozeTapToWakePosition.value = position
     }
 
     fun setAodAvailable(isAodAvailable: Boolean) {
         _isAodAvailable.value = isAodAvailable
+    }
+
+    fun setDreaming(isDreaming: Boolean) {
+        _isDreaming.value = isDreaming
     }
 
     fun setDreamingWithOverlay(isDreaming: Boolean) {

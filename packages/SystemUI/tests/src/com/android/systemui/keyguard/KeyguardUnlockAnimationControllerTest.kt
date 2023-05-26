@@ -10,6 +10,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SyncRtSurfaceTransactionApplier
+import android.view.View
 import android.view.ViewRootImpl
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
@@ -20,6 +21,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.argThat
 import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
@@ -28,13 +30,15 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor.forClass
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
+import java.util.function.Predicate
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
@@ -77,6 +81,13 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
             mock(ActivityManager.RunningTaskInfo::class.java), false)
     private lateinit var remoteAnimationTargets: Array<RemoteAnimationTarget>
 
+    private var surfaceControlWp = mock(SurfaceControl::class.java)
+    private var wallpaperTarget = RemoteAnimationTarget(
+            2 /* taskId */, 0, surfaceControlWp, false, Rect(), Rect(), 0, Point(), Rect(), Rect(),
+            mock(WindowConfiguration::class.java), false, surfaceControlWp, Rect(),
+            mock(ActivityManager.RunningTaskInfo::class.java), false)
+    private lateinit var wallpaperTargets: Array<RemoteAnimationTarget>
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -94,6 +105,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         // All of these fields are final, so we can't mock them, but are needed so that the surface
         // appear amount setter doesn't short circuit.
         remoteAnimationTargets = arrayOf(remoteTarget1)
+        wallpaperTargets = arrayOf(wallpaperTarget)
 
         // Set the surface applier to our mock so that we can verify the arguments passed to it.
         // This applier does not have any side effects within the unlock animation controller, so
@@ -103,8 +115,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        keyguardUnlockAnimationController.surfaceBehindEntryAnimator.cancel()
-        keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.cancel()
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(true)
     }
 
     /**
@@ -119,18 +130,20 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
+            arrayOf(),
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
 
-        val captor = forClass(SyncRtSurfaceTransactionApplier.SurfaceParams::class.java)
-        verify(surfaceTransactionApplier, times(1)).scheduleApply(captor.capture())
+        val captorSb = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
+        verify(surfaceTransactionApplier, times(1)).scheduleApply(
+                captorSb.capture { sp -> sp.surface == surfaceControl1 })
 
-        val params = captor.value
+        val params = captorSb.getLastValue()
 
         // We expect that we've instantly set the surface behind to alpha = 1f, and have no
         // transforms (translate, scale) on its matrix.
-        assertEquals(params.alpha, 1f)
+        assertEquals(1f, params.alpha)
         assertTrue(params.matrix.isIdentity)
 
         // Also expect we've immediately asked the keyguard view mediator to finish the remote
@@ -150,6 +163,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
+            wallpaperTargets,
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -174,6 +188,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
+            wallpaperTargets,
             0 /* startTime */,
             true /* requestedShowSurfaceBehindKeyguard */
         )
@@ -196,6 +211,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
+            wallpaperTargets,
             0 /* startTime */,
             true /* requestedShowSurfaceBehindKeyguard */
         )
@@ -216,6 +232,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     fun playCannedUnlockAnimation_ifDidNotRequestShowSurface() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
+            wallpaperTargets,
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -230,6 +247,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTargets,
+            wallpaperTargets,
             0 /* startTime */,
             true /* requestedShowSurfaceBehindKeyguard */
         )
@@ -245,6 +263,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 remoteAnimationTargets,
+                wallpaperTargets,
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -259,6 +278,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     fun surfaceAnimation_multipleTargets() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 arrayOf(remoteTarget1, remoteTarget2),
+                wallpaperTargets,
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
@@ -267,10 +287,15 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         // means an animation is in progress.
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(0.5f)
 
-        val captor = forClass(SyncRtSurfaceTransactionApplier.SurfaceParams::class.java)
-        verify(surfaceTransactionApplier, times(2)).scheduleApply(captor.capture())
+        val captorSb = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
+        verify(surfaceTransactionApplier, times(2)).scheduleApply(captorSb
+                .capture { sp -> sp.surface == surfaceControl1 || sp.surface == surfaceControl2 })
+        val captorWp = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
+        verify(surfaceTransactionApplier, times(1).description(
+                "WallpaperSurface was expected to receive scheduleApply once"
+        )).scheduleApply(captorWp.capture { sp -> sp.surface == surfaceControlWp})
 
-        val allParams = captor.allValues
+        val allParams = captorSb.getAllValues()
 
         val remainingTargets = mutableListOf(surfaceControl1, surfaceControl2)
         allParams.forEach { params ->
@@ -293,20 +318,29 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 remoteAnimationTargets,
+                wallpaperTargets,
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
 
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(1f)
+        keyguardUnlockAnimationController.setWallpaperAppearAmount(1f)
 
-        val captor = forClass(SyncRtSurfaceTransactionApplier.SurfaceParams::class.java)
-        verify(surfaceTransactionApplier, times(1)).scheduleApply(captor.capture())
+        val captorSb = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
+        verify(surfaceTransactionApplier, times(1)).scheduleApply(
+                captorSb.capture { sp -> sp.surface == surfaceControl1})
+        val captorWp = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
+        verify(surfaceTransactionApplier, atLeastOnce().description("Wallpaper surface has  not " +
+                "received scheduleApply")).scheduleApply(
+                captorWp.capture { sp -> sp.surface == surfaceControlWp })
 
-        val params = captor.value
+        val params = captorSb.getLastValue()
 
         // We expect that we've set the surface behind to alpha = 0f since we're not interactive.
-        assertEquals(params.alpha, 0f)
+        assertEquals(0f, params.alpha)
         assertTrue(params.matrix.isIdentity)
+        assertEquals("Wallpaper surface was expected to have opacity 0",
+                0f, captorWp.getLastValue().alpha)
 
         verifyNoMoreInteractions(surfaceTransactionApplier)
     }
@@ -317,19 +351,127 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 remoteAnimationTargets,
+                wallpaperTargets,
                 0 /* startTime */,
                 false /* requestedShowSurfaceBehindKeyguard */
         )
 
         keyguardUnlockAnimationController.setSurfaceBehindAppearAmount(1f)
+        keyguardUnlockAnimationController.setWallpaperAppearAmount(1f)
 
-        val captor = forClass(SyncRtSurfaceTransactionApplier.SurfaceParams::class.java)
-        verify(surfaceTransactionApplier, times(1)).scheduleApply(captor.capture())
+        val captorSb = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
+        verify(surfaceTransactionApplier, times(1)).scheduleApply(
+                captorSb.capture { sp -> sp.surface == surfaceControl1 })
+        val captorWp = ArgThatCaptor<SyncRtSurfaceTransactionApplier.SurfaceParams>()
+        verify(surfaceTransactionApplier, atLeastOnce().description("Wallpaper surface has  not " +
+                "received scheduleApply")).scheduleApply(
+                captorWp.capture { sp -> sp.surface == surfaceControlWp })
 
-        val params = captor.value
-        assertEquals(params.alpha, 1f)
+        val params = captorSb.getLastValue()
+        assertEquals(1f, params.alpha)
         assertTrue(params.matrix.isIdentity)
+        assertEquals("Wallpaper surface was expected to have opacity 1",
+                1f, captorWp.getLastValue().alpha)
 
         verifyNoMoreInteractions(surfaceTransactionApplier)
+    }
+
+    @Test
+    fun unlockToLauncherWithInWindowAnimations_ssViewIsVisible() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.VISIBLE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.unlockToLauncherWithInWindowAnimations()
+
+        verify(mockLockscreenSmartspaceView).visibility = View.INVISIBLE
+    }
+
+    @Test
+    fun unlockToLauncherWithInWindowAnimations_ssViewIsInvisible() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.INVISIBLE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.unlockToLauncherWithInWindowAnimations()
+
+        verify(mockLockscreenSmartspaceView, never()).visibility = View.INVISIBLE
+    }
+
+    @Test
+    fun unlockToLauncherWithInWindowAnimations_ssViewIsGone() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.GONE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.unlockToLauncherWithInWindowAnimations()
+
+        verify(mockLockscreenSmartspaceView, never()).visibility = View.INVISIBLE
+    }
+
+    @Test
+    fun notifyFinishedKeyguardExitAnimation_ssViewIsInvisibleAndCancelledIsTrue() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.INVISIBLE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(true)
+
+        verify(mockLockscreenSmartspaceView).visibility = View.VISIBLE
+    }
+
+    @Test
+    fun notifyFinishedKeyguardExitAnimation_ssViewIsGoneAndCancelledIsTrue() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.GONE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(true)
+
+        verify(mockLockscreenSmartspaceView, never()).visibility = View.VISIBLE
+    }
+
+    @Test
+    fun notifyFinishedKeyguardExitAnimation_ssViewIsInvisibleAndCancelledIsFalse() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.INVISIBLE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(false)
+
+        verify(mockLockscreenSmartspaceView).visibility = View.VISIBLE
+    }
+
+    @Test
+    fun notifyFinishedKeyguardExitAnimation_ssViewIsGoneAndCancelledIsFalse() {
+        val mockLockscreenSmartspaceView = mock(View::class.java)
+        whenever(mockLockscreenSmartspaceView.visibility).thenReturn(View.GONE)
+        keyguardUnlockAnimationController.lockscreenSmartspace = mockLockscreenSmartspaceView
+
+        keyguardUnlockAnimationController.notifyFinishedKeyguardExitAnimation(false)
+
+        verify(mockLockscreenSmartspaceView, never()).visibility = View.VISIBLE
+    }
+
+    private class ArgThatCaptor<T> {
+        private var allArgs: MutableList<T> = mutableListOf()
+
+        fun capture(predicate: Predicate<T>): T {
+            return argThat{x: T ->
+                if (predicate.test(x)) {
+                    allArgs.add(x)
+                    return@argThat true
+                }
+                return@argThat false
+            }
+        }
+
+        fun getLastValue(): T {
+            return allArgs.last()
+        }
+
+        fun getAllValues(): List<T> {
+            return allArgs
+        }
     }
 }

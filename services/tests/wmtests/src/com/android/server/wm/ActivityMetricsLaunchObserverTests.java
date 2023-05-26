@@ -23,11 +23,15 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -388,6 +392,19 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     }
 
     @Test
+    public void testInTaskActivityStart() {
+        mTrampolineActivity.setVisible(true);
+        doReturn(true).when(mTrampolineActivity).isReportedDrawn();
+        spyOn(mActivityMetricsLogger);
+
+        onActivityLaunched(mTopActivity);
+        transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
+
+        verify(mActivityMetricsLogger, timeout(TIMEOUT_MS)).logInTaskActivityStart(
+                any(), anyBoolean(), anyInt());
+    }
+
+    @Test
     public void testOnActivityLaunchFinishedTrampoline() {
         onActivityLaunchedTrampoline();
 
@@ -501,6 +518,12 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         onActivityLaunched(mTrampolineActivity);
         mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
                 mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
+
+        // Simulate a corner case that the trampoline activity is removed by CLEAR_TASK.
+        // The 2 launch events can still be coalesced to one by matching the uid.
+        mTrampolineActivity.takeFromHistory();
+        assertNull(mTrampolineActivity.getTask());
+
         notifyActivityLaunched(START_SUCCESS, mTopActivity);
         transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
     }

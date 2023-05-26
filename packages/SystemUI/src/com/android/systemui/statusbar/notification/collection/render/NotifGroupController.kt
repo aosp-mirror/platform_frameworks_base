@@ -20,4 +20,7 @@ package com.android.systemui.statusbar.notification.collection.render
 interface NotifGroupController {
     /** Set the number of children that this group would have if not for the 8-child max */
     fun setUntruncatedChildCount(untruncatedChildCount: Int)
+
+    /** Set the when value of notification group that reflects most important closest notification time */
+    fun setNotificationGroupWhen(whenMillis: Long)
 }

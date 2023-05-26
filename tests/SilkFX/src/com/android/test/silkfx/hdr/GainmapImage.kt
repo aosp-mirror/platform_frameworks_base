@@ -27,6 +27,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.RadioGroup
 import android.widget.Spinner
@@ -44,6 +45,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
     private var gainmap: Gainmap? = null
     private var gainmapVisualizer: Bitmap? = null
     private lateinit var imageView: SubsamplingScaleImageView
+    private lateinit var gainmapMetadataEditor: GainmapMetadataEditor
 
     init {
         gainmapImages = context.assets.list("gainmaps")!!
@@ -58,6 +60,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         super.onFinishInflate()
 
         imageView = findViewById(R.id.image)!!
+        gainmapMetadataEditor = GainmapMetadataEditor(this, imageView)
 
         findViewById<RadioGroup>(R.id.output_mode)!!.also {
             it.check(outputMode)
@@ -80,10 +83,10 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         spinner.adapter = adapter
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
             ) {
                 setImage(position)
             }
@@ -92,7 +95,11 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
             }
         }
 
-        setImage(gainmapImages.indexOf("cave.jpg"))
+        findViewById<Button>(R.id.gainmap_metadata)!!.setOnClickListener {
+            gainmapMetadataEditor.openEditor()
+        }
+
+        setImage(0)
 
         imageView.apply {
             isClickable = true
@@ -108,7 +115,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         if (selectedImage == position) return
         selectedImage = position
         val source = ImageDecoder.createSource(resources.assets,
-            "gainmaps/${gainmapImages[position]}")
+                "gainmaps/${gainmapImages[position]}")
         doDecode(source)
     }
 
@@ -132,21 +139,22 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
             findViewById<RadioGroup>(R.id.output_mode)!!.visibility = View.VISIBLE
 
             gainmap = bitmap!!.gainmap
+            gainmapMetadataEditor.setGainmap(gainmap)
             val map = gainmap!!.gainmapContents
             if (map.config != Bitmap.Config.ALPHA_8) {
                 gainmapVisualizer = map
             } else {
                 gainmapVisualizer = Bitmap.createBitmap(map.width, map.height,
-                    Bitmap.Config.ARGB_8888)
+                        Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(gainmapVisualizer!!)
                 val paint = Paint()
                 paint.colorFilter = ColorMatrixColorFilter(
-                    floatArrayOf(
-                        0f, 0f, 0f, 1f, 0f,
-                        0f, 0f, 0f, 1f, 0f,
-                        0f, 0f, 0f, 1f, 0f,
-                        0f, 0f, 0f, 0f, 255f
-                    )
+                        floatArrayOf(
+                                0f, 0f, 0f, 1f, 0f,
+                                0f, 0f, 0f, 1f, 0f,
+                                0f, 0f, 0f, 1f, 0f,
+                                0f, 0f, 0f, 0f, 255f
+                        )
                 )
                 canvas.drawBitmap(map, 0f, 0f, paint)
                 canvas.setBitmap(null)
@@ -174,8 +182,22 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         if (bitmap == null) return
 
         imageView.setImage(ImageSource.cachedBitmap(when (outputMode) {
-            R.id.output_hdr -> { bitmap!!.gainmap = gainmap; bitmap!! }
-            R.id.output_sdr -> { bitmap!!.gainmap = null; bitmap!! }
+            R.id.output_hdr -> {
+                gainmapMetadataEditor.useOriginalMetadata()
+                bitmap!!.gainmap = gainmap
+                bitmap!!
+            }
+
+            R.id.output_hdr_test -> {
+                gainmapMetadataEditor.useEditMetadata()
+                bitmap!!.gainmap = gainmap
+                bitmap!!
+            }
+
+            R.id.output_sdr -> {
+                bitmap!!.gainmap = null; bitmap!!
+            }
+
             R.id.output_gainmap -> gainmapVisualizer!!
             else -> throw IllegalStateException()
         }))

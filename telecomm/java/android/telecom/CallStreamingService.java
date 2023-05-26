@@ -52,6 +52,7 @@ import java.lang.annotation.RetentionPolicy;
  * </service>
  * }
  * </pre>
+ *
  * @hide
  */
 @SystemApi
@@ -65,35 +66,43 @@ public abstract class CallStreamingService extends Service {
     private static final int MSG_SET_STREAMING_CALL_ADAPTER = 1;
     private static final int MSG_CALL_STREAMING_STARTED = 2;
     private static final int MSG_CALL_STREAMING_STOPPED = 3;
-    private static final int MSG_CALL_STREAMING_CHANGED_CHANGED = 4;
+    private static final int MSG_CALL_STREAMING_STATE_CHANGED = 4;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             if (mStreamingCallAdapter == null && msg.what != MSG_SET_STREAMING_CALL_ADAPTER) {
+                Log.i(this, "handleMessage: null adapter!");
                 return;
             }
 
             switch (msg.what) {
                 case MSG_SET_STREAMING_CALL_ADAPTER:
-                    mStreamingCallAdapter = new StreamingCallAdapter(
-                            (IStreamingCallAdapter) msg.obj);
+                    if (msg.obj != null) {
+                        Log.i(this, "MSG_SET_STREAMING_CALL_ADAPTER");
+                        mStreamingCallAdapter = new StreamingCallAdapter(
+                                (IStreamingCallAdapter) msg.obj);
+                    }
                     break;
                 case MSG_CALL_STREAMING_STARTED:
+                    Log.i(this, "MSG_CALL_STREAMING_STARTED");
                     mCall = (StreamingCall) msg.obj;
                     mCall.setAdapter(mStreamingCallAdapter);
                     CallStreamingService.this.onCallStreamingStarted(mCall);
                     break;
                 case MSG_CALL_STREAMING_STOPPED:
+                    Log.i(this, "MSG_CALL_STREAMING_STOPPED");
                     mCall = null;
                     mStreamingCallAdapter = null;
                     CallStreamingService.this.onCallStreamingStopped();
                     break;
-                case MSG_CALL_STREAMING_CHANGED_CHANGED:
+                case MSG_CALL_STREAMING_STATE_CHANGED:
                     int state = (int) msg.obj;
-                    mCall.requestStreamingState(state);
-                    CallStreamingService.this.onCallStreamingStateChanged(state);
+                    if (mStreamingCallAdapter != null) {
+                        mCall.requestStreamingState(state);
+                        CallStreamingService.this.onCallStreamingStateChanged(state);
+                    }
                     break;
                 default:
                     break;
@@ -104,6 +113,7 @@ public abstract class CallStreamingService extends Service {
     @Nullable
     @Override
     public IBinder onBind(@NonNull Intent intent) {
+        Log.i(this, "onBind");
         return new CallStreamingServiceBinder();
     }
 
@@ -112,12 +122,14 @@ public abstract class CallStreamingService extends Service {
         @Override
         public void setStreamingCallAdapter(IStreamingCallAdapter streamingCallAdapter)
                 throws RemoteException {
-            mHandler.obtainMessage(MSG_SET_STREAMING_CALL_ADAPTER, mStreamingCallAdapter)
+            Log.i(this, "setCallStreamingAdapter");
+            mHandler.obtainMessage(MSG_SET_STREAMING_CALL_ADAPTER, streamingCallAdapter)
                     .sendToTarget();
         }
 
         @Override
         public void onCallStreamingStarted(StreamingCall call) throws RemoteException {
+            Log.i(this, "onCallStreamingStarted");
             mHandler.obtainMessage(MSG_CALL_STREAMING_STARTED, call).sendToTarget();
         }
 
@@ -128,7 +140,7 @@ public abstract class CallStreamingService extends Service {
 
         @Override
         public void onCallStreamingStateChanged(int state) throws RemoteException {
-            mHandler.obtainMessage(MSG_CALL_STREAMING_CHANGED_CHANGED, state).sendToTarget();
+            mHandler.obtainMessage(MSG_CALL_STREAMING_STATE_CHANGED, state).sendToTarget();
         }
     }
 
@@ -173,9 +185,12 @@ public abstract class CallStreamingService extends Service {
                     STREAMING_FAILED_ALREADY_STREAMING,
                     STREAMING_FAILED_NO_SENDER,
                     STREAMING_FAILED_SENDER_BINDING_ERROR
-    })
+            })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface StreamingFailedReason {};
+    public @interface StreamingFailedReason {
+    }
+
+    ;
 
     /**
      * Called when a {@code StreamingCall} has been added to this call streaming session. The call

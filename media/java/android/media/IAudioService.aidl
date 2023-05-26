@@ -231,6 +231,12 @@ interface IAudioService {
 
     void setBluetoothScoOn(boolean on);
 
+    @EnforcePermission("BLUETOOTH_STACK")
+    void setA2dpSuspended(boolean on);
+
+    @EnforcePermission("BLUETOOTH_STACK")
+    void setLeAudioSuspended(boolean enable);
+
     boolean isBluetoothScoOn();
 
     void setBluetoothA2dpOn(boolean on);
@@ -268,7 +274,7 @@ interface IAudioService {
     boolean isVolumeControlUsingVolumeGroups();
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    oneway void registerStreamAliasingDispatcher(IStreamAliasingDispatcher isad, boolean register);
+    void registerStreamAliasingDispatcher(IStreamAliasingDispatcher isad, boolean register);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     void setNotifAliasRingForTest(boolean alias);
@@ -296,10 +302,10 @@ interface IAudioService {
     void lowerVolumeToRs1(String callingPackage);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    float getRs2Value();
+    float getOutputRs2UpperBound();
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    oneway void setRs2Value(float rs2Value);
+    oneway void setOutputRs2UpperBound(float rs2Value);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     float getCsd();

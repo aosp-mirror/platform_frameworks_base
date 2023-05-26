@@ -72,6 +72,22 @@ public final class AdRequest implements Parcelable {
     private final Bundle mMetadata;
     private final Uri mUri;
 
+    /**
+     * The key for video metadata.
+     *
+     * @see #getMetadata()
+     * @hide
+     */
+    public static final String KEY_VIDEO_METADATA = "key_video_metadata";
+
+    /**
+     * The key for audio metadata.
+     *
+     * @see #getMetadata()
+     * @hide
+     */
+    public static final String KEY_AUDIO_METADATA = "key_audio_metadata";
+
     public AdRequest(int id, @RequestType int requestType,
             @Nullable ParcelFileDescriptor fileDescriptor, long startTime, long stopTime,
             long echoInterval, @Nullable String mediaFileType, @NonNull Bundle metadata) {

@@ -308,6 +308,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)
         whenever(mocks.systemConfig.defaultVrComponents).thenReturn(ArraySet())
         whenever(mocks.systemConfig.hiddenApiWhitelistedApps).thenReturn(ArraySet())
+        whenever(mocks.systemConfig.appMetadataFilePaths).thenReturn(ArrayMap())
         wheneverStatic { SystemProperties.set(anyString(), anyString()) }.thenDoNothing()
         wheneverStatic { SystemProperties.getBoolean("fw.free_cache_v2", true) }.thenReturn(true)
         wheneverStatic { Environment.getApexDirectory() }.thenReturn(apexDirectory)
@@ -664,7 +665,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     private fun mockQueryActivities(action: String, vararg activities: ActivityInfo) {
         whenever(mocks.componentResolver.queryActivities(any(),
                 argThat { intent: Intent? -> intent != null && (action == intent.action) },
-                nullable(), anyLong(), anyInt(), anyInt())) {
+                nullable(), anyLong(), anyInt())) {
             ArrayList(activities.asList().map { info: ActivityInfo? ->
                 ResolveInfo().apply { activityInfo = info }
             })
@@ -674,7 +675,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     private fun mockQueryServices(action: String, vararg services: ServiceInfo) {
         whenever(mocks.componentResolver.queryServices(any(),
                 argThat { intent: Intent? -> intent != null && (action == intent.action) },
-                nullable(), anyLong(), anyInt(), anyInt())) {
+                nullable(), anyLong(), anyInt())) {
             ArrayList(services.asList().map { info ->
                 ResolveInfo().apply { serviceInfo = info }
             })

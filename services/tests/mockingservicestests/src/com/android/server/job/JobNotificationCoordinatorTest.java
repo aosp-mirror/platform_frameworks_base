@@ -23,6 +23,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -39,6 +41,7 @@ import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 
 import com.android.server.LocalServices;
+import com.android.server.job.controllers.JobStatus;
 import com.android.server.notification.NotificationManagerInternal;
 
 import org.junit.After;
@@ -87,7 +90,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testParameterValidation() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final int uid = 10123;
         final int pid = 42;
         final int notificationId = 23;
@@ -134,7 +137,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_DetachOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification = createValidNotification();
         final int uid = 10123;
         final int pid = 42;
@@ -146,7 +149,8 @@ public class JobNotificationCoordinatorTest {
                 .enqueueNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(notification), eq(UserHandle.getUserId(uid)));
 
-        coordinator.removeNotificationAssociation(jsc, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc, JobParameters.STOP_REASON_UNDEFINED,
+                jsc.getRunningJobLocked());
         verify(mNotificationManagerInternal, never())
                 .cancelNotification(anyString(), anyString(), anyInt(), anyInt(), any(),
                         anyInt(), anyInt());
@@ -155,7 +159,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_RemoveOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification = createValidNotification();
         final int uid = 10123;
         final int pid = 42;
@@ -167,7 +171,8 @@ public class JobNotificationCoordinatorTest {
                 .enqueueNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(notification), eq(UserHandle.getUserId(uid)));
 
-        coordinator.removeNotificationAssociation(jsc, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc, JobParameters.STOP_REASON_UNDEFINED,
+                jsc.getRunningJobLocked());
         verify(mNotificationManagerInternal)
                 .cancelNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(UserHandle.getUserId(uid)));
@@ -176,7 +181,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_EnqueueDifferentNotificationId_DetachOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -205,7 +210,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_EnqueueDifferentNotificationId_RemoveOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -234,7 +239,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_EnqueueSameNotificationId() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -262,8 +267,8 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testMultipleJobs_sameApp_EnqueueDifferentNotificationId() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -289,7 +294,8 @@ public class JobNotificationCoordinatorTest {
                         eq(notificationId2), eq(notification2), eq(UserHandle.getUserId(uid)));
 
         // Remove the first job. Only the first notification should be removed.
-        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_UNDEFINED,
+                jsc1.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal)
                 .cancelNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId1), eq(UserHandle.getUserId(uid)));
@@ -297,7 +303,8 @@ public class JobNotificationCoordinatorTest {
                 .cancelNotification(anyString(), anyString(), anyInt(), anyInt(), any(),
                         eq(notificationId2), anyInt());
 
-        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_UNDEFINED,
+                jsc2.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal)
                 .cancelNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId2), eq(UserHandle.getUserId(uid)));
@@ -306,8 +313,8 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testMultipleJobs_sameApp_EnqueueSameNotificationId() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -332,12 +339,14 @@ public class JobNotificationCoordinatorTest {
                         eq(notificationId), eq(notification2), eq(UserHandle.getUserId(uid)));
 
         // Remove the first job. The notification shouldn't be touched because of the 2nd job.
-        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_UNDEFINED,
+                jsc1.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal, never())
                 .cancelNotification(anyString(), anyString(), anyInt(), anyInt(), any(),
                         anyInt(), anyInt());
 
-        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_UNDEFINED,
+                jsc2.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal)
                 .cancelNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(UserHandle.getUserId(uid)));
@@ -346,8 +355,8 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testMultipleJobs_sameApp_DifferentUsers() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid1 = 10123;
@@ -373,7 +382,8 @@ public class JobNotificationCoordinatorTest {
                         eq(notificationId), eq(notification2), eq(UserHandle.getUserId(uid2)));
 
         // Remove the first job. Only the first notification should be removed.
-        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_UNDEFINED,
+                jsc1.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal)
                 .cancelNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid1), eq(pid), any(),
                         eq(notificationId), eq(UserHandle.getUserId(uid1)));
@@ -381,7 +391,8 @@ public class JobNotificationCoordinatorTest {
                 .cancelNotification(anyString(), anyString(), eq(uid2), anyInt(), any(),
                         anyInt(), anyInt());
 
-        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_UNDEFINED,
+                jsc2.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal)
                 .cancelNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid2), eq(pid), any(),
                         eq(notificationId), eq(UserHandle.getUserId(uid2)));
@@ -392,8 +403,8 @@ public class JobNotificationCoordinatorTest {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
         final String pkg1 = "pkg1";
         final String pkg2 = "pkg2";
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -418,7 +429,8 @@ public class JobNotificationCoordinatorTest {
                         eq(notificationId), eq(notification2), eq(UserHandle.getUserId(uid)));
 
         // Remove the first job. Only the first notification should be removed.
-        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_UNDEFINED,
+                jsc1.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal)
                 .cancelNotification(eq(pkg1), eq(pkg1), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(UserHandle.getUserId(uid)));
@@ -426,7 +438,8 @@ public class JobNotificationCoordinatorTest {
                 .cancelNotification(anyString(), anyString(), eq(uid), anyInt(), any(),
                         anyInt(), anyInt());
 
-        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_UNDEFINED);
+        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_UNDEFINED,
+                jsc2.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal)
                 .cancelNotification(eq(pkg2), eq(pkg2), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(UserHandle.getUserId(uid)));
@@ -435,7 +448,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testUserStop_SingleJob_DetachOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification = createValidNotification();
         final int uid = 10123;
         final int pid = 42;
@@ -447,7 +460,8 @@ public class JobNotificationCoordinatorTest {
                 .enqueueNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(notification), eq(UserHandle.getUserId(uid)));
 
-        coordinator.removeNotificationAssociation(jsc, JobParameters.STOP_REASON_USER);
+        coordinator.removeNotificationAssociation(jsc, JobParameters.STOP_REASON_USER,
+                jsc.getRunningJobLocked());
         verify(mNotificationManagerInternal)
                 .cancelNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(UserHandle.getUserId(uid)));
@@ -456,8 +470,8 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testUserStop_MultipleJobs_sameApp_EnqueueSameNotificationId_DetachOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -482,15 +496,59 @@ public class JobNotificationCoordinatorTest {
                         eq(notificationId), eq(notification2), eq(UserHandle.getUserId(uid)));
 
         // Remove the first job. The notification shouldn't be touched because of the 2nd job.
-        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_USER);
+        coordinator.removeNotificationAssociation(jsc1, JobParameters.STOP_REASON_USER,
+                jsc1.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal, never())
                 .cancelNotification(anyString(), anyString(), anyInt(), anyInt(), any(),
                         anyInt(), anyInt());
 
-        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_USER);
+        coordinator.removeNotificationAssociation(jsc2, JobParameters.STOP_REASON_USER,
+                jsc2.getRunningJobLocked());
         inOrder.verify(mNotificationManagerInternal)
                 .cancelNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(UserHandle.getUserId(uid)));
+    }
+
+    @Test
+    public void testUserInitiatedJob_hasNotificationFlag() {
+        final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
+        final JobServiceContext jsc = createJobServiceContext();
+        final JobStatus js = jsc.getRunningJobLocked();
+        js.startedAsUserInitiatedJob = true;
+        final Notification notification = createValidNotification();
+        final int uid = 10123;
+        final int pid = 42;
+        final int notificationId = 23;
+
+        coordinator.enqueueNotification(jsc, TEST_PACKAGE, pid, uid, notificationId, notification,
+                JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
+        verify(mNotificationManagerInternal)
+                .enqueueNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
+                        eq(notificationId), eq(notification), eq(UserHandle.getUserId(uid)));
+        assertNotEquals(notification.flags & Notification.FLAG_USER_INITIATED_JOB, 0);
+    }
+
+    @Test
+    public void testNonUserInitiatedJob_doesNotHaveNotificationFlag() {
+        final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
+        final JobServiceContext jsc = createJobServiceContext();
+        final Notification notification = createValidNotification();
+        final int uid = 10123;
+        final int pid = 42;
+        final int notificationId = 23;
+
+        coordinator.enqueueNotification(jsc, TEST_PACKAGE, pid, uid, notificationId, notification,
+                JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
+        verify(mNotificationManagerInternal)
+                .enqueueNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
+                        eq(notificationId), eq(notification), eq(UserHandle.getUserId(uid)));
+        assertEquals(notification.flags & Notification.FLAG_USER_INITIATED_JOB, 0);
+    }
+
+    private JobServiceContext createJobServiceContext() {
+        final JobServiceContext jsc = mock(JobServiceContext.class);
+        doReturn(mock(JobStatus.class)).when(jsc).getRunningJobLocked();
+        return jsc;
     }
 
     private Notification createValidNotification() {

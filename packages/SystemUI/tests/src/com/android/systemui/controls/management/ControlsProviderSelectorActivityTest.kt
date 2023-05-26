@@ -34,6 +34,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.UserTracker
@@ -190,6 +191,9 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
         val setCaptor: ArgumentCaptor<Set<String>> = argumentCaptor()
         verify(authorizedPanelsRepository).addAuthorizedPanels(capture(setCaptor))
         assertThat(setCaptor.value).containsExactly(info.componentName.packageName)
+        val selectedComponentCaptor: ArgumentCaptor<SelectedItem> = argumentCaptor()
+        verify(controlsController).setPreferredSelection(capture(selectedComponentCaptor))
+        assertThat(selectedComponentCaptor.value.componentName).isEqualTo(info.componentName)
 
         assertThat(activityRule.activity.triedToFinish).isTrue()
     }

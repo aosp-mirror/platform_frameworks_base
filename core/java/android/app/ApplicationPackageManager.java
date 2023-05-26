@@ -556,12 +556,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ActivityInfo getActivityInfo(ComponentName className, ComponentInfoFlags flags)
             throws NameNotFoundException {
-        return getActivityInfoAsUser(className, flags, getUserId());
-    }
-
-    @Override
-    public ActivityInfo getActivityInfoAsUser(ComponentName className,
-            ComponentInfoFlags flags, @UserIdInt int userId) throws NameNotFoundException {
+        final int userId = getUserId();
         try {
             ActivityInfo ai = mPM.getActivityInfo(className,
                     updateFlagsForComponent(flags.getValue(), userId, null), userId);
@@ -2566,7 +2561,7 @@ public class ApplicationPackageManager extends PackageManager {
     public InstallSourceInfo getInstallSourceInfo(String packageName) throws NameNotFoundException {
         final InstallSourceInfo installSourceInfo;
         try {
-            installSourceInfo = mPM.getInstallSourceInfo(packageName);
+            installSourceInfo = mPM.getInstallSourceInfo(packageName, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3057,7 +3052,7 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.setComponentEnabledSetting(componentName, enabled
                     ? COMPONENT_ENABLED_STATE_DEFAULT
                     : COMPONENT_ENABLED_STATE_DISABLED,
-                    DONT_KILL_APP, getUserId());
+                    DONT_KILL_APP, getUserId(), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3080,7 +3075,8 @@ public class ApplicationPackageManager extends PackageManager {
     public void setComponentEnabledSetting(ComponentName componentName,
                                            int newState, int flags) {
         try {
-            mPM.setComponentEnabledSetting(componentName, newState, flags, getUserId());
+            mPM.setComponentEnabledSetting(componentName, newState, flags, getUserId(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3089,7 +3085,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void setComponentEnabledSettings(List<ComponentEnabledSetting> settings) {
         try {
-            mPM.setComponentEnabledSettings(settings, getUserId());
+            mPM.setComponentEnabledSettings(settings, getUserId(), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

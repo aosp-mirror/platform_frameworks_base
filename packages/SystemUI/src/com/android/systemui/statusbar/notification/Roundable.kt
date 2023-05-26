@@ -315,6 +315,7 @@ interface Roundable {
 
 /**
  * State object for a `Roundable` class.
+ *
  * @param targetView Will handle the [AnimatableProperty]
  * @param roundable Target of the radius animation
  * @param maxRadius Max corner radius in pixels
@@ -382,11 +383,11 @@ class RoundableState(
     }
 
     fun debugString() = buildString {
-        append("TargetView: ${targetView.hashCode()} ")
-        append("Top: $topRoundness ")
-        append(topRoundnessMap.map { "${it.key} ${it.value}" })
-        append(" Bottom: $bottomRoundness ")
-        append(bottomRoundnessMap.map { "${it.key} ${it.value}" })
+        append("Roundable { ")
+        append("top: { value: $topRoundness, requests: $topRoundnessMap}")
+        append(", ")
+        append("bottom: { value: $bottomRoundness, requests: $bottomRoundnessMap}")
+        append("}")
     }
 
     companion object {
@@ -436,7 +437,6 @@ interface SourceType {
          * This is the most convenient way to define a new [SourceType].
          *
          * For example:
-         *
          * ```kotlin
          *     private val SECTION = SourceType.from("Section")
          * ```
@@ -447,11 +447,4 @@ interface SourceType {
                 override fun toString() = name
             }
     }
-}
-
-@Deprecated("Use SourceType.from() instead", ReplaceWith("SourceType.from()"))
-enum class LegacySourceType : SourceType {
-    DefaultValue,
-    OnDismissAnimation,
-    OnScroll,
 }

@@ -18,6 +18,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.service.dreams.DreamManagerInternal;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -27,8 +28,10 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
+import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy.OnKeyguardExitResult;
+import com.android.server.wm.EventLogTags;
 
 import java.io.PrintWriter;
 
@@ -58,6 +61,19 @@ public class KeyguardServiceDelegate {
     private final KeyguardStateMonitor.StateCallback mCallback;
 
     private DrawnListener mDrawnListenerWhenConnect;
+
+    private final DreamManagerInternal.DreamManagerStateListener mDreamManagerStateListener =
+            new DreamManagerInternal.DreamManagerStateListener() {
+                @Override
+                public void onDreamingStarted() {
+                    KeyguardServiceDelegate.this.onDreamingStarted();
+                }
+
+                @Override
+                public void onDreamingStopped() {
+                    KeyguardServiceDelegate.this.onDreamingStopped();
+                }
+            };
 
     private static final class KeyguardState {
         KeyguardState() {
@@ -157,6 +173,11 @@ public class KeyguardServiceDelegate {
         } else {
             if (DEBUG) Log.v(TAG, "*** Keyguard started");
         }
+
+        final DreamManagerInternal dreamManager =
+                LocalServices.getService(DreamManagerInternal.class);
+
+        dreamManager.registerDreamManagerStateListener(mDreamManagerStateListener);
     }
 
     private final ServiceConnection mKeyguardConnection = new ServiceConnection() {
@@ -255,6 +276,11 @@ public class KeyguardServiceDelegate {
     public void setOccluded(boolean isOccluded, boolean notify) {
         if (mKeyguardService != null && notify) {
             if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ")");
+            EventLogTags.writeWmSetKeyguardOccluded(
+                    isOccluded ? 1 : 0,
+                    0 /* animate */,
+                    0 /* transit */,
+                    "setOccluded");
             mKeyguardService.setOccluded(isOccluded, false /* animate */);
         }
         mKeyguardState.occluded = isOccluded;

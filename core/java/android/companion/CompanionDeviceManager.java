@@ -30,6 +30,8 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
@@ -41,6 +43,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.net.MacAddress;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
@@ -53,6 +56,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
+import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
 
@@ -801,6 +805,119 @@ public final class CompanionDeviceManager {
     }
 
     /**
+     * Listener for any changes to {@link com.android.server.companion.transport.Transport}.
+     *
+     * @hide
+     */
+    public interface OnTransportsChangedListener {
+        /**
+         * Invoked when a change occurs to any of the transports
+         *
+         * @param associations all the associations which have connected transports
+         */
+        void onTransportsChanged(@NonNull List<AssociationInfo> associations);
+    }
+
+    /**
+     * Register a listener for any changes to
+     * {@link com.android.server.companion.transport.Transport}. Your app will receive a callback to
+     * {@link OnTransportsChangedListener} immediately with all the existing transports.
+     *
+     * @hide
+     */
+    public void addOnTransportsChangedListener(
+            @NonNull Executor executor, @NonNull OnTransportsChangedListener listener) {
+        final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
+                executor, listener);
+        try {
+            mService.addOnTransportsChangedListener(proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister a listener to stop receiving any changes to
+     * {@link com.android.server.companion.transport.Transport}.
+     *
+     * @hide
+     */
+    public void removeOnTransportsChangedListener(
+            @NonNull OnTransportsChangedListener listener) {
+        final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
+                null, listener);
+        try {
+            mService.removeOnTransportsChangedListener(proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Send a message to remote devices
+     *
+     * @hide
+     */
+    public void sendMessage(int messageType, byte[] data, int[] associationIds) {
+        try {
+            mService.sendMessage(messageType, data, associationIds);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Listener when a message is received for the registered message type
+     *
+     * @see #addOnMessageReceivedListener(Executor, int, OnMessageReceivedListener)
+     *
+     * @hide
+     */
+    public interface OnMessageReceivedListener {
+        /**
+         * Called when a message is received
+         */
+        void onMessageReceived(int associationId, byte[] data);
+    }
+
+    /**
+     * Register a listener to receive callbacks when a message is received by the given type
+     *
+     * @see com.android.server.companion.transport.Transport for supported message types
+     *
+     * @hide
+     */
+    public void addOnMessageReceivedListener(@NonNull Executor executor, int messageType,
+            OnMessageReceivedListener listener) {
+        final OnMessageReceivedListenerProxy proxy = new OnMessageReceivedListenerProxy(
+                executor, listener);
+        try {
+            mService.addOnMessageReceivedListener(messageType, proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister a listener to stop receiving callbacks when a message is received by the given
+     * type
+     *
+     * @see com.android.server.companion.transport.Transport for supported message types
+     *
+     * @hide
+     */
+    public void removeOnMessageReceivedListener(int messageType,
+            OnMessageReceivedListener listener) {
+        final OnMessageReceivedListenerProxy proxy = new OnMessageReceivedListenerProxy(
+                null, listener);
+        try {
+            mService.removeOnMessageReceivedListener(messageType, proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks whether the bluetooth device represented by the mac address was recently associated
      * with the companion app. This allows these devices to skip the Bluetooth pairing dialog if
      * their pairing variant is {@link BluetoothDevice#PAIRING_VARIANT_CONSENT}.
@@ -876,6 +993,15 @@ public final class CompanionDeviceManager {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
             throw e.rethrowFromSystemServer();
         }
+        int callingUid = Binder.getCallingUid();
+        int callingPid = Binder.getCallingPid();
+        ActivityManagerInternal managerInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (managerInternal != null) {
+            managerInternal
+                    .logFgsApiBegin(ActivityManager.FOREGROUND_SERVICE_API_TYPE_CDM,
+                            callingUid, callingPid);
+        }
     }
 
     /**
@@ -907,6 +1033,15 @@ public final class CompanionDeviceManager {
                     mContext.getPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+        }
+        int callingUid = Binder.getCallingUid();
+        int callingPid = Binder.getCallingPid();
+        ActivityManagerInternal managerInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (managerInternal != null) {
+            managerInternal
+                    .logFgsApiEnd(ActivityManager.FOREGROUND_SERVICE_API_TYPE_CDM,
+                            callingUid, callingPid);
         }
     }
 
@@ -1196,10 +1331,12 @@ public final class CompanionDeviceManager {
 
     /**
      * Enable or disable secure transport for testing. Defaults to enabled.
+     * Should not be used outside of testing.
      *
      * @param enabled true to enable. false to disable.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void enableSecureTransport(boolean enabled) {
         try {
             mService.enableSecureTransport(enabled);
@@ -1274,6 +1411,40 @@ public final class CompanionDeviceManager {
         @Override
         public void onAssociationsChanged(@NonNull List<AssociationInfo> associations) {
             mExecutor.execute(() -> mListener.onAssociationsChanged(associations));
+        }
+    }
+
+    private static class OnTransportsChangedListenerProxy
+            extends IOnTransportsChangedListener.Stub {
+        private final Executor mExecutor;
+        private final OnTransportsChangedListener mListener;
+
+        private OnTransportsChangedListenerProxy(Executor executor,
+                OnTransportsChangedListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onTransportsChanged(@NonNull List<AssociationInfo> associations) {
+            mExecutor.execute(() -> mListener.onTransportsChanged(associations));
+        }
+    }
+
+    private static class OnMessageReceivedListenerProxy
+            extends IOnMessageReceivedListener.Stub {
+        private final Executor mExecutor;
+        private final OnMessageReceivedListener mListener;
+
+        private OnMessageReceivedListenerProxy(Executor executor,
+                OnMessageReceivedListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onMessageReceived(int associationId, byte[] data) {
+            mExecutor.execute(() -> mListener.onMessageReceived(associationId, data));
         }
     }
 

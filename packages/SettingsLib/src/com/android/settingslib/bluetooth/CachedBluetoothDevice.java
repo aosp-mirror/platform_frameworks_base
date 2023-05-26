@@ -47,6 +47,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -78,6 +79,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     BluetoothDevice mDevice;
     private HearingAidInfo mHearingAidInfo;
     private int mGroupId;
+    private Timestamp mBondTimestamp;
 
     // Need this since there is no method for getting RSSI
     short mRssi;
@@ -210,7 +212,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
         synchronized (mProfileLock) {
             if (profile instanceof A2dpProfile || profile instanceof HeadsetProfile
-                    || profile instanceof HearingAidProfile) {
+                    || profile instanceof HearingAidProfile || profile instanceof LeAudioProfile) {
                 setProfileConnectedStatus(profile.getProfileId(), false);
                 switch (newProfileState) {
                     case BluetoothProfile.STATE_CONNECTED:
@@ -228,7 +230,20 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                     case BluetoothProfile.STATE_DISCONNECTED:
                         if (mHandler.hasMessages(profile.getProfileId())) {
                             mHandler.removeMessages(profile.getProfileId());
-                            setProfileConnectedStatus(profile.getProfileId(), true);
+                            if (profile.getConnectionPolicy(mDevice) >
+                                BluetoothProfile.CONNECTION_POLICY_FORBIDDEN) {
+                                /*
+                                 * If we received state DISCONNECTED and previous state was
+                                 * CONNECTING and connection policy is FORBIDDEN or UNKNOWN
+                                 * then it's not really a failure to connect.
+                                 *
+                                 * Connection profile is considered as failed when connection
+                                 * policy indicates that profile should be connected
+                                 * but it got disconnected.
+                                 */
+                                Log.w(TAG, "onProfileStateChanged(): Failed to connect profile");
+                                setProfileConnectedStatus(profile.getProfileId(), true);
+                            }
                         }
                         break;
                     default:
@@ -292,10 +307,11 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         synchronized (mProfileLock) {
             if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
                 for (CachedBluetoothDevice member : getMemberDevice()) {
-                    Log.d(TAG, "Disconnect the member(" + member.getAddress() + ")");
+                    Log.d(TAG, "Disconnect the member:" + member);
                     member.disconnect();
                 }
             }
+            Log.d(TAG, "Disconnect " + this);
             mDevice.disconnect();
         }
         // Disconnect  PBAP server in case its connected
@@ -427,11 +443,11 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 Log.d(TAG, "No profiles. Maybe we will connect later for device " + mDevice);
                 return;
             }
-
+            Log.d(TAG, "connect " + this);
             mDevice.connect();
             if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
                 for (CachedBluetoothDevice member : getMemberDevice()) {
-                    Log.d(TAG, "connect the member(" + member.getAddress() + ")");
+                    Log.d(TAG, "connect the member:" + member);
                     member.connect();
                 }
             }
@@ -517,7 +533,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     // TODO: do any of these need to run async on a background thread?
-    private void fillData() {
+    void fillData() {
         updateProfiles();
         fetchActiveDevices();
         migratePhonebookPermissionChoice();
@@ -567,9 +583,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public void setName(String name) {
         // Prevent getName() to be set to null if setName(null) is called
-        if (name != null && !TextUtils.equals(name, getName())) {
-            mDevice.setAlias(name);
-            dispatchAttributesChanged();
+        if (name == null || TextUtils.equals(name, getName())) {
+            return;
+        }
+        mDevice.setAlias(name);
+        dispatchAttributesChanged();
+
+        for (CachedBluetoothDevice cbd : mMemberDevices) {
+            cbd.setName(name);
         }
     }
 
@@ -870,13 +891,23 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             mDevice.setPhonebookAccessPermission(BluetoothDevice.ACCESS_UNKNOWN);
             mDevice.setMessageAccessPermission(BluetoothDevice.ACCESS_UNKNOWN);
             mDevice.setSimAccessPermission(BluetoothDevice.ACCESS_UNKNOWN);
+
+            mBondTimestamp = null;
         }
 
         refresh();
 
-        if (bondState == BluetoothDevice.BOND_BONDED && mDevice.isBondingInitiatedLocally()) {
-            connect();
+        if (bondState == BluetoothDevice.BOND_BONDED) {
+            mBondTimestamp = new Timestamp(System.currentTimeMillis());
+
+            if (mDevice.isBondingInitiatedLocally()) {
+                connect();
+            }
         }
+    }
+
+    public Timestamp getBondTimestamp() {
+        return mBondTimestamp;
     }
 
     public BluetoothClass getBtClass() {
@@ -920,14 +951,15 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     @Override
     public String toString() {
-        return "CachedBluetoothDevice ("
+        return "CachedBluetoothDevice{"
                 + "anonymizedAddress="
                 + mDevice.getAnonymizedAddress()
                 + ", name="
                 + getName()
                 + ", groupId="
                 + mGroupId
-                + ")";
+                + ", member=" + mMemberDevices
+                + "}";
     }
 
     @Override
@@ -1205,6 +1237,13 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     private boolean isProfileConnectedFail() {
+        Log.d(TAG, "anonymizedAddress=" + mDevice.getAnonymizedAddress()
+                + " mIsA2dpProfileConnectedFail=" + mIsA2dpProfileConnectedFail
+                + " mIsHearingAidProfileConnectedFail=" + mIsHearingAidProfileConnectedFail
+                + " mIsLeAudioProfileConnectedFail=" + mIsLeAudioProfileConnectedFail
+                + " mIsHeadsetProfileConnectedFail=" + mIsHeadsetProfileConnectedFail
+                + " isConnectedSapDevice()=" + isConnectedSapDevice());
+
         return mIsA2dpProfileConnectedFail || mIsHearingAidProfileConnectedFail
                 || (!isConnectedSapDevice() && mIsHeadsetProfileConnectedFail)
                 || mIsLeAudioProfileConnectedFail;
@@ -1462,6 +1501,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * Store the member devices that are in the same coordinated set.
      */
     public void addMemberDevice(CachedBluetoothDevice memberDevice) {
+        Log.d(TAG, this + " addMemberDevice = " + memberDevice);
         mMemberDevices.add(memberDevice);
     }
 
@@ -1491,13 +1531,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mDevice = newMainDevice.mDevice;
         mRssi = newMainDevice.mRssi;
         mJustDiscovered = newMainDevice.mJustDiscovered;
+        fillData();
 
         // Set sub device from backup
         newMainDevice.release();
         newMainDevice.mDevice = tmpDevice;
         newMainDevice.mRssi = tmpRssi;
         newMainDevice.mJustDiscovered = tmpJustDiscovered;
-        fetchActiveDevices();
+        newMainDevice.fillData();
     }
 
     /**
@@ -1519,8 +1560,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             refresh();
         }
 
-        return new Pair<>(BluetoothUtils.buildBtRainbowDrawable(
-                        mContext, pair.first, getAddress().hashCode()), pair.second);
+        return BluetoothUtils.getBtRainbowDrawableWithDescription(mContext, this);
     }
 
     void releaseLruCache() {

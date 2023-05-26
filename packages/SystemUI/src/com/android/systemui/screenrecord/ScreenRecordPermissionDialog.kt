@@ -62,8 +62,8 @@ class ScreenRecordPermissionDialog(
     private lateinit var options: Spinner
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setDialogTitle(R.string.screenrecord_start_label)
-        setStartButtonText(R.string.screenrecord_start_recording)
+        setDialogTitle(R.string.screenrecord_permission_dialog_title)
+        setStartButtonText(R.string.screenrecord_permission_dialog_continue)
         setStartButtonOnClickListener { v: View? ->
             onStartRecordingClicked?.run()
             if (selectedScreenShareOption.mode == ENTIRE_SCREEN) {
@@ -124,8 +124,9 @@ class ScreenRecordPermissionDialog(
 
     /**
      * Starts screen capture after some countdown
+     *
      * @param captureTarget target to capture (could be e.g. a task) or null to record the whole
-     * screen
+     *   screen
      */
     private fun requestScreenCapture(captureTarget: MediaProjectionCaptureTarget?) {
         val userContext = userContextProvider.userContext
@@ -185,13 +186,13 @@ class ScreenRecordPermissionDialog(
             return listOf(
                 ScreenShareOption(
                     ENTIRE_SCREEN,
-                    R.string.screenrecord_option_entire_screen,
-                    R.string.screenrecord_warning_entire_screen
+                    R.string.screen_share_permission_dialog_option_entire_screen,
+                    R.string.screenrecord_permission_dialog_warning_entire_screen
                 ),
                 ScreenShareOption(
                     SINGLE_APP,
-                    R.string.screenrecord_option_single_app,
-                    R.string.screenrecord_warning_single_app
+                    R.string.screen_share_permission_dialog_option_single_app,
+                    R.string.screenrecord_permission_dialog_warning_single_app
                 )
             )
         }

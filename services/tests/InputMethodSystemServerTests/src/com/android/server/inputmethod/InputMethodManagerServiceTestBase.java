@@ -34,9 +34,10 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Configuration;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -61,10 +62,12 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.wm.ImeTargetVisibilityPolicy;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -111,6 +114,7 @@ public class InputMethodManagerServiceTestBase {
     @Mock protected IInputMethod mMockInputMethod;
     @Mock protected IBinder mMockInputMethodBinder;
     @Mock protected IInputManager mMockIInputManager;
+    @Mock protected ImeTargetVisibilityPolicy mMockImeTargetVisibilityPolicy;
 
     protected Context mContext;
     protected MockitoSession mMockingSession;
@@ -120,6 +124,15 @@ public class InputMethodManagerServiceTestBase {
     protected IInputMethodInvoker mMockInputMethodInvoker;
     protected InputMethodManagerService mInputMethodManagerService;
     protected ServiceThread mServiceThread;
+    protected boolean mIsLargeScreen;
+
+    @BeforeClass
+    public static void setupClass() {
+        // Make sure DeviceConfig's lazy-initialized ContentProvider gets
+        // a real instance before we stub out all system services below.
+        // TODO(b/272229177): remove dependency on real ContentProvider
+        new InputMethodDeviceConfigs().destroy();
+    }
 
     @Before
     public void setUp() throws RemoteException {
@@ -136,6 +149,8 @@ public class InputMethodManagerServiceTestBase {
         spyOn(mContext);
 
         mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+        mIsLargeScreen = mContext.getResources().getConfiguration()
+                .isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE);
         mCallingUserId = UserHandle.getCallingUserId();
         mEditorInfo = new EditorInfo();
         mEditorInfo.packageName = TEST_EDITOR_PKG_NAME;
@@ -153,6 +168,8 @@ public class InputMethodManagerServiceTestBase {
                 .when(() -> LocalServices.getService(DisplayManagerInternal.class));
         doReturn(mMockUserManagerInternal)
                 .when(() -> LocalServices.getService(UserManagerInternal.class));
+        doReturn(mMockImeTargetVisibilityPolicy)
+                .when(() -> LocalServices.getService(ImeTargetVisibilityPolicy.class));
         doReturn(mMockIInputMethodManager)
                 .when(() -> ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
         doReturn(mMockIPlatformCompat)
@@ -169,7 +186,7 @@ public class InputMethodManagerServiceTestBase {
 
         // Injecting and mocked InputMethodBindingController and InputMethod.
         mMockInputMethodInvoker = IInputMethodInvoker.create(mMockInputMethod);
-        InputManager.resetInstance(mMockIInputManager);
+        InputManagerGlobal.resetInstance(mMockIInputManager);
         synchronized (ImfLock.class) {
             when(mMockInputMethodBindingController.getCurMethod())
                     .thenReturn(mMockInputMethodInvoker);
@@ -190,6 +207,8 @@ public class InputMethodManagerServiceTestBase {
         when(mMockActivityManagerInternal.isSystemReady()).thenReturn(true);
         when(mMockPackageManagerInternal.getPackageUid(anyString(), anyLong(), anyInt()))
                 .thenReturn(Binder.getCallingUid());
+        when(mMockPackageManagerInternal.isSameApp(anyString(), anyLong(), anyInt(), anyInt()))
+            .thenReturn(true);
         when(mMockWindowManagerInternal.onToggleImeRequested(anyBoolean(), any(), any(), anyInt()))
                 .thenReturn(TEST_IME_TARGET_INFO);
         when(mMockInputMethodClient.asBinder()).thenReturn(mMockInputMethodBinder);
@@ -205,6 +224,7 @@ public class InputMethodManagerServiceTestBase {
                         false);
         mInputMethodManagerService = new InputMethodManagerService(mContext, mServiceThread,
                 mMockInputMethodBindingController);
+        spyOn(mInputMethodManagerService);
 
         // Start a InputMethodManagerService.Lifecycle to publish and manage the lifecycle of
         // InputMethodManagerService, which is closer to the real situation.
@@ -231,6 +251,10 @@ public class InputMethodManagerServiceTestBase {
 
     @After
     public void tearDown() {
+        if (mInputMethodManagerService != null) {
+            mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
+        }
+
         if (mServiceThread != null) {
             mServiceThread.quitSafely();
         }

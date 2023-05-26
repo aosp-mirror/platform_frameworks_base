@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.pipeline
 
 import android.media.session.MediaController
+import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.SystemProperties
 import com.android.internal.annotations.VisibleForTesting
@@ -60,6 +61,7 @@ constructor(
 
     /**
      * Callback representing that a media object is now expired:
+     *
      * @param key Media control unique identifier
      * @param timedOut True when expired for {@code PAUSED_MEDIA_TIMEOUT} for active media,
      * ```
@@ -70,6 +72,7 @@ constructor(
 
     /**
      * Callback representing that a media object [PlaybackState] has changed.
+     *
      * @param key Media control unique identifier
      * @param state The new [PlaybackState]
      */
@@ -77,6 +80,7 @@ constructor(
 
     /**
      * Callback representing that the [MediaSession] for an active control has been destroyed
+     *
      * @param key Media control unique identifier
      */
     lateinit var sessionCallback: (String) -> Unit
@@ -145,7 +149,7 @@ constructor(
         reusedListener?.let {
             val wasPlaying = it.isPlaying()
             logger.logUpdateListener(key, wasPlaying)
-            it.mediaData = data
+            it.setMediaData(data)
             it.key = key
             mediaListeners[key] = it
             if (wasPlaying != it.isPlaying()) {
@@ -205,24 +209,7 @@ constructor(
         var resumption: Boolean? = null
         var destroyed = false
         var expiration = Long.MAX_VALUE
-
-        var mediaData: MediaData = data
-            set(value) {
-                destroyed = false
-                mediaController?.unregisterCallback(this)
-                field = value
-                val token = field.token
-                mediaController =
-                    if (token != null) {
-                        mediaControllerFactory.create(token)
-                    } else {
-                        null
-                    }
-                mediaController?.registerCallback(this)
-                // Let's register the cancellations, but not dispatch events now.
-                // Timeouts didn't happen yet and reentrant events are troublesome.
-                processState(mediaController?.playbackState, dispatchEvents = false)
-            }
+        var sessionToken: MediaSession.Token? = null
 
         // Resume controls may have null token
         private var mediaController: MediaController? = null
@@ -233,7 +220,7 @@ constructor(
         fun isPlaying() = lastState?.state?.isPlaying() ?: false
 
         init {
-            mediaData = data
+            setMediaData(data)
         }
 
         fun destroy() {
@@ -242,8 +229,28 @@ constructor(
             destroyed = true
         }
 
+        fun setMediaData(data: MediaData) {
+            sessionToken = data.token
+            destroyed = false
+            mediaController?.unregisterCallback(this)
+            mediaController =
+                if (data.token != null) {
+                    mediaControllerFactory.create(data.token)
+                } else {
+                    null
+                }
+            mediaController?.registerCallback(this)
+            // Let's register the cancellations, but not dispatch events now.
+            // Timeouts didn't happen yet and reentrant events are troublesome.
+            processState(
+                mediaController?.playbackState,
+                dispatchEvents = false,
+                currentResumption = data.resumption,
+            )
+        }
+
         override fun onPlaybackStateChanged(state: PlaybackState?) {
-            processState(state, dispatchEvents = true)
+            processState(state, dispatchEvents = true, currentResumption = resumption)
         }
 
         override fun onSessionDestroyed() {
@@ -260,14 +267,18 @@ constructor(
             }
         }
 
-        private fun processState(state: PlaybackState?, dispatchEvents: Boolean) {
+        private fun processState(
+            state: PlaybackState?,
+            dispatchEvents: Boolean,
+            currentResumption: Boolean?,
+        ) {
             logger.logPlaybackState(key, state)
 
             val playingStateSame = (state?.state?.isPlaying() == isPlaying())
             val actionsSame =
                 (lastState?.actions == state?.actions) &&
                     areCustomActionListsEqual(lastState?.customActions, state?.customActions)
-            val resumptionChanged = resumption != mediaData.resumption
+            val resumptionChanged = resumption != currentResumption
 
             lastState = state
 
@@ -279,7 +290,7 @@ constructor(
             if (playingStateSame && !resumptionChanged) {
                 return
             }
-            resumption = mediaData.resumption
+            resumption = currentResumption
 
             val playing = isPlaying()
             if (!playing) {
@@ -291,7 +302,7 @@ constructor(
                 }
                 expireMediaTimeout(key, "PLAYBACK STATE CHANGED - $state, $resumption")
                 val timeout =
-                    if (mediaData.resumption) {
+                    if (currentResumption == true) {
                         RESUME_MEDIA_TIMEOUT
                     } else {
                         PAUSED_MEDIA_TIMEOUT

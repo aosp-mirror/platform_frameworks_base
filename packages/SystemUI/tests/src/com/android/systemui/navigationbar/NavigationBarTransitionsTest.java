@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
-import android.view.IWindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -60,8 +59,6 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
     EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
     @Mock
     EdgeBackGestureHandler mEdgeBackGestureHandler;
-    @Mock
-    IWindowManager mIWindowManager;
 
     private NavigationBarTransitions mTransitions;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
@@ -88,7 +85,7 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
         when(navBar.getCurrentView()).thenReturn(navBar);
         when(navBar.findViewById(anyInt())).thenReturn(navBar);
         mTransitions = new NavigationBarTransitions(
-                navBar, mIWindowManager, mLightBarTransitionsFactory, mDisplayTracker);
+                navBar, mLightBarTransitionsFactory, mDisplayTracker);
     }
 
     @Test

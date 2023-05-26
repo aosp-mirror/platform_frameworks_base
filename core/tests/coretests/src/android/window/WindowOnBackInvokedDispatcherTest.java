@@ -70,7 +70,13 @@ public class WindowOnBackInvokedDispatcherTest {
     private ApplicationInfo mApplicationInfo;
 
     private final BackMotionEvent mBackEvent = new BackMotionEvent(
-            0, 0, 0, BackEvent.EDGE_LEFT, null);
+            /* touchX = */ 0,
+            /* touchY = */ 0,
+            /* progress = */ 0,
+            /* velocityX = */ 0,
+            /* velocityY = */ 0,
+            /* swipeEdge = */ BackEvent.EDGE_LEFT,
+            /* departingAnimationTarget = */ null);
 
     @Before
     public void setUp() throws Exception {
@@ -166,5 +172,26 @@ public class WindowOnBackInvokedDispatcherTest {
         captor.getValue().getCallback().onBackStarted(mBackEvent);
         waitForIdle();
         verify(mCallback2).onBackStarted(any(BackEvent.class));
+    }
+
+    @Test
+    public void onUnregisterWhileBackInProgress_callOnBackCancelled() throws RemoteException {
+        ArgumentCaptor<OnBackInvokedCallbackInfo> captor =
+                ArgumentCaptor.forClass(OnBackInvokedCallbackInfo.class);
+
+        mDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCallback1);
+
+        verify(mWindowSession).setOnBackInvokedCallbackInfo(
+                Mockito.eq(mWindow),
+                captor.capture());
+        IOnBackInvokedCallback iOnBackInvokedCallback = captor.getValue().getCallback();
+        iOnBackInvokedCallback.onBackStarted(mBackEvent);
+        waitForIdle();
+        verify(mCallback1).onBackStarted(any(BackEvent.class));
+
+        mDispatcher.unregisterOnBackInvokedCallback(mCallback1);
+        verify(mCallback1).onBackCancelled();
+        verifyNoMoreInteractions(mCallback1);
     }
 }

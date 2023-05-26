@@ -18,6 +18,9 @@ package com.android.systemui.flags
 
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import dagger.multibindings.IntoSet
+import javax.inject.Named
 
 @Module(includes = [
     FeatureFlagsReleaseStartableModule::class,
@@ -29,5 +32,18 @@ abstract class FlagsModule {
     abstract fun bindsFeatureFlagRelease(impl: FeatureFlagsRelease): FeatureFlags
 
     @Binds
-    abstract fun bindsRestarter(debugRestarter: FeatureFlagsReleaseRestarter): Restarter
+    @IntoSet
+    abstract fun bindsScreenIdleCondition(impl: ScreenIdleCondition): ConditionalRestarter.Condition
+
+    @Binds
+    @IntoSet
+    abstract fun bindsPluggedInCondition(impl: PluggedInCondition): ConditionalRestarter.Condition
+
+    @Module
+    companion object {
+        @JvmStatic
+        @Provides
+        @Named(ConditionalRestarter.RESTART_DELAY)
+        fun provideRestartDelaySec(): Long = 30
+    }
 }

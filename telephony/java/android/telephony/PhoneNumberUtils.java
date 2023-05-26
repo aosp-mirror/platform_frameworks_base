@@ -1526,10 +1526,14 @@ public class PhoneNumberUtils {
      * Formats the specified {@code phoneNumber} to the E.164 representation.
      *
      * @param phoneNumber the phone number to format.
-     * @param defaultCountryIso the ISO 3166-1 two letters country code.
+     * @param defaultCountryIso the ISO 3166-1 two letters country code in UPPER CASE.
      * @return the E.164 representation, or null if the given phone number is not valid.
      */
     public static String formatNumberToE164(String phoneNumber, String defaultCountryIso) {
+        if (defaultCountryIso != null) {
+            defaultCountryIso = defaultCountryIso.toUpperCase(Locale.ROOT);
+        }
+
         return formatNumberInternal(phoneNumber, defaultCountryIso, PhoneNumberFormat.E164);
     }
 
@@ -1537,10 +1541,14 @@ public class PhoneNumberUtils {
      * Formats the specified {@code phoneNumber} to the RFC3966 representation.
      *
      * @param phoneNumber the phone number to format.
-     * @param defaultCountryIso the ISO 3166-1 two letters country code.
+     * @param defaultCountryIso the ISO 3166-1 two letters country code in UPPER CASE.
      * @return the RFC3966 representation, or null if the given phone number is not valid.
      */
     public static String formatNumberToRFC3966(String phoneNumber, String defaultCountryIso) {
+        if (defaultCountryIso != null) {
+            defaultCountryIso = defaultCountryIso.toUpperCase(Locale.ROOT);
+        }
+
         return formatNumberInternal(phoneNumber, defaultCountryIso, PhoneNumberFormat.RFC3966);
     }
 
@@ -1591,6 +1599,10 @@ public class PhoneNumberUtils {
             return false;
         }
 
+        if (defaultCountryIso != null) {
+            defaultCountryIso = defaultCountryIso.toUpperCase(Locale.ROOT);
+        }
+
         PhoneNumberUtil util = PhoneNumberUtil.getInstance();
         try {
             PhoneNumber pn = util.parseAndKeepRawInput(phoneNumber, defaultCountryIso);
@@ -1617,6 +1629,10 @@ public class PhoneNumberUtils {
         // Do not attempt to format numbers that start with a hash or star symbol.
         if (phoneNumber.startsWith("#") || phoneNumber.startsWith("*")) {
             return phoneNumber;
+        }
+
+        if (defaultCountryIso != null) {
+            defaultCountryIso = defaultCountryIso.toUpperCase(Locale.ROOT);
         }
 
         PhoneNumberUtil util = PhoneNumberUtil.getInstance();
@@ -1671,6 +1687,10 @@ public class PhoneNumberUtils {
      */
     public static String formatNumber(
             String phoneNumber, String phoneNumberE164, String defaultCountryIso) {
+        if (defaultCountryIso != null) {
+            defaultCountryIso = defaultCountryIso.toUpperCase(Locale.ROOT);
+        }
+
         int len = phoneNumber.length();
         for (int i = 0; i < len; i++) {
             if (!isDialable(phoneNumber.charAt(i))) {
@@ -2900,7 +2920,11 @@ public class PhoneNumberUtils {
         PhoneNumberUtil util = PhoneNumberUtil.getInstance();
         PhoneNumber n1;
         PhoneNumber n2;
-        defaultCountryIso = defaultCountryIso.toUpperCase(Locale.ROOT);
+
+        if (defaultCountryIso != null) {
+            defaultCountryIso = defaultCountryIso.toUpperCase(Locale.ROOT);
+        }
+
         try {
             n1 = util.parseAndKeepRawInput(number1, defaultCountryIso);
             n2 = util.parseAndKeepRawInput(number2, defaultCountryIso);

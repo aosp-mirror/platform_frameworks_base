@@ -18,11 +18,12 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UI_VISIBILITY;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_ACTIVITY;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_STARTED_SERVICE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_ACTIVITY;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_STARTED_SERVICE;
 import static com.android.server.am.ProcessRecord.TAG;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -613,7 +614,7 @@ final class ProcessStateRecord {
     void forceProcessStateUpTo(int newState) {
         if (mRepProcState > newState) {
             synchronized (mProcLock) {
-                mRepProcState = newState;
+                setReportedProcState(newState);
                 setCurProcState(newState);
                 setCurRawProcState(newState);
             }
@@ -766,7 +767,7 @@ final class ProcessStateRecord {
             Slog.i(TAG, "Setting runningRemoteAnimation=" + runningRemoteAnimation
                     + " for pid=" + mApp.getPid());
         }
-        mService.updateOomAdjLocked(mApp, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+        mService.updateOomAdjLocked(mApp, OOM_ADJ_REASON_UI_VISIBILITY);
     }
 
     @GuardedBy({"mService", "mProcLock"})

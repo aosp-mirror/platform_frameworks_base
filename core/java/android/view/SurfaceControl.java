@@ -220,6 +220,7 @@ public final class SurfaceControl implements Parcelable {
             long newParentNativeObject);
     private static native void nativeSetBuffer(long transactionObj, long nativeObject,
             HardwareBuffer buffer, long fencePtr, Consumer<SyncFence> releaseCallback);
+    private static native void nativeUnsetBuffer(long transactionObj, long nativeObject);
     private static native void nativeSetBufferTransform(long transactionObj, long nativeObject,
             int transform);
     private static native void nativeSetDataSpace(long transactionObj, long nativeObject,
@@ -265,7 +266,7 @@ public final class SurfaceControl implements Parcelable {
             int transformHint);
     private static native void nativeRemoveCurrentInputFocus(long nativeObject, int displayId);
     private static native void nativeSetFocusedWindow(long transactionObj, IBinder toToken,
-            String windowName, IBinder focusedToken, String focusedWindowName, int displayId);
+            String windowName, int displayId);
     private static native void nativeSetFrameTimelineVsync(long transactionObj,
             long frameTimelineVsyncId);
     private static native void nativeAddJankDataListener(long nativeListener,
@@ -279,7 +280,7 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetLayerId(long nativeObject);
     private static native void nativeAddTransactionCommittedListener(long nativeObject,
             TransactionCommittedListener listener);
-    private static native void nativeSanitize(long transactionObject);
+    private static native void nativeSanitize(long transactionObject, int pid, int uid);
     private static native void nativeSetDestinationFrame(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
     private static native void nativeSetDefaultApplyToken(IBinder token);
@@ -460,6 +461,7 @@ public final class SurfaceControl implements Parcelable {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
+    private String mCallsite;
 
      /**
      * Note: do not rename, this field is used by native code.
@@ -773,7 +775,6 @@ public final class SurfaceControl implements Parcelable {
             release();
         }
         if (nativeObject != 0) {
-            mCloseGuard.openWithCallSite("release", callsite);
             mFreeNativeResources =
                     sRegistry.registerNativeAllocation(this, nativeObject);
         }
@@ -783,6 +784,12 @@ public final class SurfaceControl implements Parcelable {
             mReleaseStack = new Throwable("Assigned invalid nativeObject");
         } else {
             mReleaseStack = null;
+        }
+        setUnreleasedWarningCallSite(callsite);
+        if (nativeObject != 0) {
+            // Only add valid surface controls to the registry. This is called at the end of this
+            // method since its information is dumped if the process threshold is reached.
+            addToRegistry();
         }
     }
 
@@ -888,6 +895,10 @@ public final class SurfaceControl implements Parcelable {
             if ((mWidth > 0 || mHeight > 0) && (isEffectLayer() || isContainerLayer())) {
                 throw new IllegalStateException(
                         "Only buffer layers can set a valid buffer size.");
+            }
+
+            if (mName == null) {
+                Log.w(TAG, "Missing name for SurfaceControl", new Throwable());
             }
 
             if ((mFlags & FX_SURFACE_MASK) == FX_SURFACE_NORMAL) {
@@ -1251,6 +1262,9 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Note: Most callers should use {@link SurfaceControl.Builder} or one of the other constructors
+     *       to build an instance of a SurfaceControl. This constructor is mainly used for
+     *       unparceling and passing into an AIDL call as an out parameter.
      * @hide
      */
     public SurfaceControl() {
@@ -1321,6 +1335,23 @@ public final class SurfaceControl implements Parcelable {
             return;
         }
         mCloseGuard.openWithCallSite("release", callsite);
+        mCallsite = callsite;
+    }
+
+    /**
+     * Returns the last provided call site when this SurfaceControl was created.
+     * @hide
+     */
+    @Nullable String getCallsite() {
+        return mCallsite;
+    }
+
+    /**
+     * Returns the name of this SurfaceControl, mainly for debugging purposes.
+     * @hide
+     */
+    @NonNull String getName() {
+        return mName;
     }
 
     /**
@@ -1434,6 +1465,7 @@ public final class SurfaceControl implements Parcelable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
+            removeFromRegistry();
         } finally {
             super.finalize();
         }
@@ -1464,6 +1496,7 @@ public final class SurfaceControl implements Parcelable {
                     mChoreographer = null;
                 }
             }
+            removeFromRegistry();
         }
     }
 
@@ -2473,6 +2506,7 @@ public final class SurfaceControl implements Parcelable {
     public static SurfaceControl mirrorSurface(SurfaceControl mirrorOf) {
         long nativeObj = nativeMirrorSurface(mirrorOf.mNativeObject);
         SurfaceControl sc = new SurfaceControl();
+        sc.mName = mirrorOf.mName + " (mirror)";
         sc.assignNativeObject(nativeObj, "mirrorSurface");
         return sc;
     }
@@ -3604,28 +3638,7 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setFocusedWindow(@NonNull IBinder token, String windowName,
                 int displayId) {
-            nativeSetFocusedWindow(mNativeObject, token,  windowName,
-                    null /* focusedToken */, null /* focusedWindowName */, displayId);
-            return this;
-        }
-
-        /**
-         * Set focus on the window identified by the input {@code token} if the window identified by
-         * the input {@code focusedToken} is currently focused. If the {@code focusedToken} does not
-         * have focus, the request is dropped.
-         *
-         * This is used by forward focus transfer requests from clients that host embedded windows,
-         * and want to transfer focus to/from them.
-         *
-         * @hide
-         */
-        public Transaction requestFocusTransfer(@NonNull IBinder token,
-                                                String windowName,
-                                                @NonNull IBinder focusedToken,
-                                                String focusedWindowName,
-                                                int displayId) {
-            nativeSetFocusedWindow(mNativeObject, token, windowName, focusedToken,
-                    focusedWindowName, displayId);
+            nativeSetFocusedWindow(mNativeObject, token, windowName, displayId);
             return this;
         }
 
@@ -3685,6 +3698,22 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Unsets the buffer for the SurfaceControl in the current Transaction. This will not clear
+         * the buffer being rendered, but resets the buffer state in the Transaction only. The call
+         * will also invoke the release callback.
+         *
+         * Note, this call is different from passing a null buffer to
+         * {@link SurfaceControl.Transaction#setBuffer} which will release the last displayed
+         * buffer.
+         *
+         * @hide
+         */
+        public Transaction unsetBuffer(SurfaceControl sc) {
+            nativeUnsetBuffer(mNativeObject, sc.mNativeObject);
+            return this;
+        }
+
+        /**
          * Updates the HardwareBuffer displayed for the SurfaceControl.
          *
          * Note that the buffer must be allocated with {@link HardwareBuffer#USAGE_COMPOSER_OVERLAY}
@@ -3703,7 +3732,8 @@ public final class SurfaceControl implements Parcelable {
          * until all presentation fences have signaled, ensuring the transaction remains consistent.
          *
          * @param sc The SurfaceControl to update
-         * @param buffer The buffer to be displayed
+         * @param buffer The buffer to be displayed. Pass in a null buffer to release the last
+         * displayed buffer.
          * @param fence The presentation fence. If null or invalid, this is equivalent to
          *              {@link #setBuffer(SurfaceControl, HardwareBuffer)}
          * @return this
@@ -3867,14 +3897,14 @@ public final class SurfaceControl implements Parcelable {
          *                           100 nits and a max display brightness of 200 nits, this should
          *                           be set to 2.0f.
          *
-         *                           Default value is 1.0f.
+         *                           <p>Default value is 1.0f.
          *
-         *                           Transfer functions that encode their own brightness ranges,
+         *                           <p>Transfer functions that encode their own brightness ranges,
          *                           such as HLG or PQ, should also set this to 1.0f and instead
          *                           communicate extended content brightness information via
          *                           metadata such as CTA861_3 or SMPTE2086.
          *
-         *                           Must be finite && >= 1.0f
+         *                           <p>Must be finite && >= 1.0f
          *
          * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
          *                     desired brightness range. This is similar to the "max luminance"
@@ -3883,23 +3913,29 @@ public final class SurfaceControl implements Parcelable {
          *                     may not be able to, or may choose not to, deliver the
          *                     requested range.
          *
-         *                     If unspecified, the system will attempt to provide the best range
-         *                     it can for the given ambient conditions & device state. However,
-         *                     voluntarily reducing the requested range can help improve battery
-         *                     life as well as can improve quality by ensuring greater bit depth
-         *                     is allocated to the luminance range in use.
+         *                     <p>While requesting a large desired ratio will result in the most
+         *                     dynamic range, voluntarily reducing the requested range can help
+         *                     improve battery life as well as can improve quality by ensuring
+         *                     greater bit depth is allocated to the luminance range in use.
          *
-         *                     Must be finite && >= 1.0f
+         *                     <p>Default value is 1.0f and indicates that extended range brightness
+         *                     is not being used, so the resulting SDR or HDR behavior will be
+         *                     determined entirely by the dataspace being used (ie, typically SDR
+         *                     however PQ or HLG transfer functions will still result in HDR)
+         *
+         *                     <p>Must be finite && >= 1.0f
          * @return this
          **/
         public @NonNull Transaction setExtendedRangeBrightness(@NonNull SurfaceControl sc,
                 float currentBufferRatio, float desiredRatio) {
             checkPreconditions(sc);
             if (!Float.isFinite(currentBufferRatio) || currentBufferRatio < 1.0f) {
-                throw new IllegalArgumentException("currentBufferRatio must be finite && >= 1.0f");
+                throw new IllegalArgumentException(
+                        "currentBufferRatio must be finite && >= 1.0f; got " + currentBufferRatio);
             }
             if (!Float.isFinite(desiredRatio) || desiredRatio < 1.0f) {
-                throw new IllegalArgumentException("desiredRatio must be finite && >= 1.0f");
+                throw new IllegalArgumentException(
+                        "desiredRatio must be finite && >= 1.0f; got " + desiredRatio);
             }
             nativeSetExtendedRangeBrightness(mNativeObject, sc.mNativeObject, currentBufferRatio,
                     desiredRatio);
@@ -3957,8 +3993,8 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
-        public void sanitize() {
-            nativeSanitize(mNativeObject);
+        public void sanitize(int pid, int uid) {
+            nativeSanitize(mNativeObject, pid, uid);
         }
 
         /**
@@ -4299,6 +4335,26 @@ public final class SurfaceControl implements Parcelable {
         }
 
         return -1;
+    }
+
+    /**
+     * Adds this surface control to the registry for this process if it is created.
+     */
+    private void addToRegistry() {
+        final SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
+        if (registry != null) {
+            registry.add(this);
+        }
+    }
+
+    /**
+     * Removes this surface control from the registry for this process.
+     */
+    private void removeFromRegistry() {
+        final SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
+        if (registry != null) {
+            registry.remove(this);
+        }
     }
 
     // Called by native

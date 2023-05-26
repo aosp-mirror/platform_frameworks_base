@@ -45,6 +45,7 @@ public class DraggableConstraintLayout extends ConstraintLayout
         implements ViewTreeObserver.OnComputeInternalInsetsListener {
 
     private static final float VELOCITY_DP_PER_MS = 1;
+    private static final int MAXIMUM_DISMISS_DISTANCE_DP = 400;
 
     private final SwipeDismissHandler mSwipeDismissHandler;
     private final GestureDetector mSwipeDetector;
@@ -347,14 +348,18 @@ public class DraggableConstraintLayout extends ConstraintLayout
             } else {
                 finalX = -1 * getBackgroundRight();
             }
-            float distance = Math.abs(finalX - startX);
+            float distance = Math.min(Math.abs(finalX - startX),
+                    FloatingWindowUtil.dpToPx(mDisplayMetrics, MAXIMUM_DISMISS_DISTANCE_DP));
+            // ensure that view dismisses in the right direction (right in LTR, left in RTL)
+            float distanceVector = Math.copySign(distance, finalX - startX);
 
             anim.addUpdateListener(animation -> {
-                float translation = MathUtils.lerp(startX, finalX, animation.getAnimatedFraction());
+                float translation = MathUtils.lerp(
+                        startX, startX + distanceVector, animation.getAnimatedFraction());
                 mView.setTranslationX(translation);
                 mView.setAlpha(1 - animation.getAnimatedFraction());
             });
-            anim.setDuration((long) (distance / Math.abs(velocity)));
+            anim.setDuration((long) (Math.abs(distance / velocity)));
             return anim;
         }
 

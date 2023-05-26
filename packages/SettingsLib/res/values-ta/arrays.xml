@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"இயக்கப்பட்டது"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"வடிகட்டப்பட்ட தலைப்புப்பகுதிகள்"</item>
-    <item msgid="4818549483446395865">"வடிகட்டப்பட்ட A2DP மீடியா பேக்கெட்டுகள்"</item>
-    <item msgid="8207123990453243311">"வடிகட்டப்பட்ட RFCOMM சேனல்"</item>
+    <item msgid="195768089203590086">"ACL தலைப்புகளை மட்டும் விட்டுவிடுதல்"</item>
+    <item msgid="2776218217644557831">"A2DP மீடியா பேக்கெட்டுகளை வடிகட்டுதல்"</item>
+    <item msgid="8163235976612675092">"RFCOMM சேனலை வடிகட்டுதல்"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"முடக்கப்பட்டுள்ளது"</item>
-    <item msgid="5884245882825346396">"மேஜிக்"</item>
-    <item msgid="6569400572915342949">"தலைப்புப்பகுதி"</item>
-    <item msgid="1239386221416967664">"முழு வடிப்பான்"</item>
+    <item msgid="3961868665260627524">"முடக்குதல்"</item>
+    <item msgid="2505973306504851132">"எழுத்துகளைக் கொண்ட வார்த்தையால் நிரப்புதல்"</item>
+    <item msgid="5883011000629613855">"தலைப்பை மட்டும் விட்டுவிடுதல்"</item>
+    <item msgid="1051534112762023603">"முழுமையாக அகற்றுதல்"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (இயல்பு)"</item>

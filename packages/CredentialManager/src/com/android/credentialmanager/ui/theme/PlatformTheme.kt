@@ -32,7 +32,11 @@ import com.android.credentialmanager.ui.theme.typography.platformTypography
 
 /** File copied from PlatformComposeCore. */
 
-/** The Material 3 theme that should wrap all Platform Composables. */
+/**
+ * The Material 3 theme that should wrap all Platform Composables.
+ *
+ * TODO(b/280685309): Merge with the official SysUI platform theme.
+ */
 @Composable
 fun PlatformTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
@@ -40,7 +44,6 @@ fun PlatformTheme(
 ) {
     val context = LocalContext.current
 
-    // TODO(b/230605885): Define our color scheme.
     val colorScheme =
         if (isDarkTheme) {
             dynamicDarkColorScheme(context)

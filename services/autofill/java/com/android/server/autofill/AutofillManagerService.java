@@ -200,7 +200,11 @@ public final class AutofillManagerService
     final AugmentedAutofillState mAugmentedAutofillState = new AugmentedAutofillState();
 
     /**
-     * Lock used to synchronize access to flags.
+     * Lock used to synchronize access to the flags.
+     * DO NOT USE ANY OTHER LOCK while holding this lock.
+     * NOTE: This lock should only be used for accessing flags. It should never call into other
+     * methods holding another lock. It can lead to potential deadlock if it calls into a method
+     * holding mLock.
      */
     private final Object mFlagLock = new Object();
 
@@ -379,7 +383,7 @@ public final class AutofillManagerService
             final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
             if (service == null) {
                 // If we cannot get the service from the services cache, it will call
-                // updateRemoteAugmentedAutofillService() finally. Skip call this update again.
+                // updateRemoteFieldClassificationService() finally. Skip call this update again.
                 getServiceForUserLocked(userId);
             } else {
                 service.updateRemoteFieldClassificationService();
@@ -757,6 +761,12 @@ public final class AutofillManagerService
     }
 
     // Called by Shell command
+    String getFieldDetectionServiceName(@UserIdInt int userId) {
+        enforceCallingPermissionForManagement();
+        return mFieldClassificationResolver.readServiceName(userId);
+    }
+
+    // Called by Shell command
     boolean setTemporaryDetectionService(@UserIdInt int userId, @NonNull String serviceName,
             int durationMs) {
         Slog.i(mTag, "setTemporaryDetectionService(" + userId + ") to " + serviceName
@@ -899,9 +909,9 @@ public final class AutofillManagerService
     }
 
     /**
-     * Whether the Autofill PCC Classification feature is enabled.
+     * Whether the Autofill PCC Classification feature flag is enabled.
      */
-    public boolean isPccClassificationEnabled() {
+    public boolean isPccClassificationFlagEnabled() {
         synchronized (mFlagLock) {
             return mPccClassificationEnabled;
         }
@@ -1914,6 +1924,16 @@ public final class AutofillManagerService
                 synchronized (mLock) {
                     pw.print("sDebug: "); pw.print(realDebug);
                     pw.print(" sVerbose: "); pw.println(realVerbose);
+                    pw.print("Flags: ");
+                    synchronized (mFlagLock) {
+                        pw.print("mPccClassificationEnabled="); pw.print(mPccClassificationEnabled);
+                        pw.print(";");
+                        pw.print("mPccPreferProviderOverPcc="); pw.print(mPccPreferProviderOverPcc);
+                        pw.print(";");
+                        pw.print("mPccUseFallbackDetection="); pw.print(mPccUseFallbackDetection);
+                        pw.print(";");
+                        pw.print("mPccProviderHints="); pw.println(mPccProviderHints);
+                    }
                     // Dump per-user services
                     dumpLocked("", pw);
                     mAugmentedAutofillResolver.dumpShort(pw); pw.println();

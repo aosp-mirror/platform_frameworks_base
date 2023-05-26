@@ -23,6 +23,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.graphics.HardwareRenderer;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -548,6 +549,11 @@ public final class WindowManagerGlobal {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public void trimMemory(int level) {
         ThreadedRenderer.trimMemory(level);
+    }
+
+    /** @hide */
+    public void trimCaches(@HardwareRenderer.CacheTrimLevel int level) {
+        ThreadedRenderer.trimCaches(level);
     }
 
     public void dumpGfxInfo(FileDescriptor fd, String[] args) {

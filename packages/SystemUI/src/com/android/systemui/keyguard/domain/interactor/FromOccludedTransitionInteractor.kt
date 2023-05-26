@@ -17,19 +17,19 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -47,6 +47,8 @@ constructor(
         listenForOccludedToLockscreen()
         listenForOccludedToDreaming()
         listenForOccludedToAodOrDozing()
+        listenForOccludedToGone()
+        listenForOccludedToAlternateBouncer()
     }
 
     private fun listenForOccludedToDreaming() {
@@ -72,17 +74,60 @@ constructor(
     private fun listenForOccludedToLockscreen() {
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { (isOccluded, lastStartedKeyguardState) ->
+                .sample(
+                    combine(
+                        keyguardInteractor.isKeyguardShowing,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (isOccluded, isShowing, lastStartedKeyguardState) ->
                     // Occlusion signals come from the framework, and should interrupt any
                     // existing transition
-                    if (!isOccluded && lastStartedKeyguardState.to == KeyguardState.OCCLUDED) {
+                    if (
+                        !isOccluded &&
+                            isShowing &&
+                            lastStartedKeyguardState.to == KeyguardState.OCCLUDED
+                    ) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
                                 KeyguardState.OCCLUDED,
                                 KeyguardState.LOCKSCREEN,
                                 getAnimator(TO_LOCKSCREEN_DURATION),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForOccludedToGone() {
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded
+                .sample(
+                    combine(
+                        keyguardInteractor.isKeyguardShowing,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (isOccluded, isShowing, lastStartedKeyguardState) ->
+                    // Occlusion signals come from the framework, and should interrupt any
+                    // existing transition
+                    if (
+                        !isOccluded &&
+                            !isShowing &&
+                            lastStartedKeyguardState.to == KeyguardState.OCCLUDED
+                    ) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                name,
+                                KeyguardState.OCCLUDED,
+                                KeyguardState.GONE,
+                                getAnimator(),
                             )
                         )
                     }
@@ -116,6 +161,28 @@ constructor(
                                     KeyguardState.DOZING
                                 },
                                 getAnimator(),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForOccludedToAlternateBouncer() {
+        scope.launch {
+            keyguardInteractor.alternateBouncerShowing
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isAlternateBouncerShowing, lastStartedTransitionStep) ->
+                    if (
+                        isAlternateBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.OCCLUDED
+                    ) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                ownerName = name,
+                                from = KeyguardState.OCCLUDED,
+                                to = KeyguardState.ALTERNATE_BOUNCER,
+                                animator = getAnimator(),
                             )
                         )
                     }

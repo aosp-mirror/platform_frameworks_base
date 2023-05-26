@@ -30,7 +30,6 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.CameraExtensionSession;
-import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -49,6 +48,7 @@ import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
+import android.hardware.camera2.utils.ExtensionSessionStatsAggregator;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.Image;
 import android.media.ImageReader;
@@ -90,6 +90,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private final int mSessionId;
     private final Set<CaptureRequest.Key> mSupportedRequestKeys;
     private final Set<CaptureResult.Key> mSupportedResultKeys;
+    private final ExtensionSessionStatsAggregator mStatsAggregator;
     private boolean mCaptureResultsSupported;
 
     private CameraCaptureSession mCaptureSession = null;
@@ -117,7 +118,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private boolean mInternalRepeatingRequestEnabled = true;
 
     // Lock to synchronize cross-thread access to device public interface
-    final Object mInterfaceLock = new Object(); // access from this class and Session only!
+    final Object mInterfaceLock;
 
     private static int nativeGetSurfaceFormat(Surface surface) {
         return SurfaceUtils.getSurfaceFormat(surface);
@@ -128,7 +129,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
      */
     @RequiresPermission(android.Manifest.permission.CAMERA)
     public static CameraExtensionSessionImpl createCameraExtensionSession(
-            @NonNull CameraDevice cameraDevice,
+            @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
+            @NonNull Map<String, CameraCharacteristics> characteristicsMap,
             @NonNull Context ctx,
             @NonNull ExtensionSessionConfiguration config,
             int sessionId)
@@ -139,13 +141,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         String cameraId = cameraDevice.getId();
-        CameraManager manager = ctx.getSystemService(CameraManager.class);
-        CameraCharacteristics chars = manager.getCameraCharacteristics(cameraId);
         CameraExtensionCharacteristics extensionChars = new CameraExtensionCharacteristics(ctx,
-                cameraId, chars);
+                cameraId, characteristicsMap);
 
         if (!CameraExtensionCharacteristics.isExtensionSupported(cameraDevice.getId(),
-                config.getExtension(), chars)) {
+                config.getExtension(),
+                CameraExtensionUtils.getCharacteristicsMapNative(characteristicsMap))) {
             throw new UnsupportedOperationException("Unsupported extension type: " +
                     config.getExtension());
         }
@@ -222,10 +223,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             }
         }
 
-        extenders.first.init(cameraId, chars.getNativeMetadata());
-        extenders.first.onInit(cameraId, chars.getNativeMetadata());
-        extenders.second.init(cameraId, chars.getNativeMetadata());
-        extenders.second.onInit(cameraId, chars.getNativeMetadata());
+        extenders.first.init(cameraId, characteristicsMap.get(cameraId).getNativeMetadata());
+        extenders.first.onInit(cameraId, characteristicsMap.get(cameraId).getNativeMetadata());
+        extenders.second.init(cameraId, characteristicsMap.get(cameraId).getNativeMetadata());
+        extenders.second.onInit(cameraId, characteristicsMap.get(cameraId).getNativeMetadata());
 
         CameraExtensionSessionImpl session = new CameraExtensionSessionImpl(
                 extenders.second,
@@ -242,6 +243,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 extensionChars.getAvailableCaptureRequestKeys(config.getExtension()),
                 extensionChars.getAvailableCaptureResultKeys(config.getExtension()));
 
+        session.mStatsAggregator.setClientName(ctx.getOpPackageName());
+        session.mStatsAggregator.setExtensionType(config.getExtension());
+
         session.initialize();
 
         return session;
@@ -251,7 +255,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             @NonNull IPreviewExtenderImpl previewExtender,
             @NonNull List<Size> previewSizes,
             long extensionClientId,
-            @NonNull CameraDevice cameraDevice,
+            @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
             @Nullable Surface repeatingRequestSurface,
             @Nullable Surface burstCaptureSurface,
             @Nullable Surface postviewSurface,
@@ -279,6 +283,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         mSupportedRequestKeys = requestKeys;
         mSupportedResultKeys = resultKeys;
         mCaptureResultsSupported = !resultKeys.isEmpty();
+        mInterfaceLock = cameraDevice.mInterfaceLock;
+
+        mStatsAggregator = new ExtensionSessionStatsAggregator(mCameraDevice.getId(),
+                /*isAdvanced=*/false);
     }
 
     private void initializeRepeatingRequestPipeline() throws RemoteException {
@@ -792,7 +800,23 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                             new CloseRequestHandler(mRepeatingRequestImageCallback), mHandler);
                 }
 
+                mStatsAggregator.commit(/*isFinal*/true); // Commit stats before closing session
                 mCaptureSession.close();
+            }
+        }
+    }
+
+    /**
+     * Called by {@link CameraDeviceImpl} right before the capture session is closed, and before it
+     * calls {@link #release}
+     *
+     * @hide
+     */
+    public void commitStats() {
+        synchronized (mInterfaceLock) {
+            if (mInitialized) {
+                // Only commit stats if a capture session was initialized
+                mStatsAggregator.commit(/*isFinal*/true);
             }
         }
     }
@@ -827,7 +851,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
         synchronized (mInterfaceLock) {
             mInternalRepeatingRequestEnabled = false;
-            mHandlerThread.quitSafely();
+            mHandlerThread.quit();
 
             try {
                 mPreviewExtender.onDeInit();
@@ -839,7 +863,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
             if (mExtensionClientId >= 0) {
                 CameraExtensionCharacteristics.unregisterClient(mExtensionClientId);
-                if (mInitialized) {
+                if (mInitialized || (mCaptureSession != null)) {
                     notifyClose = true;
                     CameraExtensionCharacteristics.releaseSession();
                 }
@@ -954,6 +978,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         public void onConfigured(@NonNull CameraCaptureSession session) {
             synchronized (mInterfaceLock) {
                 mCaptureSession = session;
+                // Commit basic stats as soon as the capture session is created
+                mStatsAggregator.commit(/*isFinal*/false);
                 try {
                     finishPipelineInitialization();
                     CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
@@ -969,46 +995,56 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private class InitializeSessionHandler extends IInitializeSessionCallback.Stub {
         @Override
         public void onSuccess() {
-            boolean status = true;
-            ArrayList<CaptureStageImpl> initialRequestList =
-                    compileInitialRequestList();
-            if (!initialRequestList.isEmpty()) {
-                try {
-                    setInitialCaptureRequest(initialRequestList,
-                            new InitialRequestHandler(
-                                    mRepeatingRequestImageCallback));
-                } catch (CameraAccessException e) {
-                    Log.e(TAG,
-                            "Failed to initialize the initial capture "
-                                    + "request!");
-                    status = false;
-                }
-            } else {
-                try {
-                    setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new PreviewRequestHandler(null, null, null,
-                                    mRepeatingRequestImageCallback));
-                } catch (CameraAccessException | RemoteException e) {
-                    Log.e(TAG,
-                            "Failed to initialize internal repeating "
-                                    + "request!");
-                    status = false;
-                }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    boolean status = true;
+                    ArrayList<CaptureStageImpl> initialRequestList =
+                            compileInitialRequestList();
+                    if (!initialRequestList.isEmpty()) {
+                        try {
+                            setInitialCaptureRequest(initialRequestList,
+                                    new InitialRequestHandler(
+                                            mRepeatingRequestImageCallback));
+                        } catch (CameraAccessException e) {
+                            Log.e(TAG,
+                                    "Failed to initialize the initial capture "
+                                            + "request!");
+                            status = false;
+                        }
+                    } else {
+                        try {
+                            setRepeatingRequest(mPreviewExtender.getCaptureStage(),
+                                    new PreviewRequestHandler(null, null, null,
+                                            mRepeatingRequestImageCallback));
+                        } catch (CameraAccessException | RemoteException e) {
+                            Log.e(TAG,
+                                    "Failed to initialize internal repeating "
+                                            + "request!");
+                            status = false;
+                        }
 
-            }
+                    }
 
-            if (!status) {
-                notifyConfigurationFailure();
-            }
+                    if (!status) {
+                        notifyConfigurationFailure();
+                    }
+                }
+            });
         }
 
         @Override
         public void onFailure() {
-            mCaptureSession.close();
-            Log.e(TAG, "Failed to initialize proxy service session!"
-                    + " This can happen when trying to configure multiple "
-                    + "concurrent extension sessions!");
-            notifyConfigurationFailure();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCaptureSession.close();
+                    Log.e(TAG, "Failed to initialize proxy service session!"
+                            + " This can happen when trying to configure multiple "
+                            + "concurrent extension sessions!");
+                    notifyConfigurationFailure();
+                }
+            });
         }
     }
 
@@ -1357,88 +1393,98 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         @Override
         public void onImageAvailable(ImageReader reader) {
             Image img;
-            try {
-                img = reader.acquireNextImage();
-            } catch (IllegalStateException e) {
-                Log.e(TAG, "Failed to acquire image, too many images pending!");
-                mOutOfBuffers = true;
-                return;
-            }
-            if (img == null) {
-                Log.e(TAG, "Invalid image!");
-                return;
-            }
-
-            Long timestamp = img.getTimestamp();
-            if (mImageListenerMap.containsKey(timestamp)) {
-                Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.remove(timestamp);
-                if (entry.second != null) {
-                    entry.second.onImageAvailable(reader, img);
-                } else {
-                    Log.w(TAG, "Invalid image listener, dropping frame!");
-                    img.close();
+            synchronized (mInterfaceLock) {
+                try {
+                    img = reader.acquireNextImage();
+                } catch (IllegalStateException e) {
+                    Log.e(TAG, "Failed to acquire image, too many images pending!");
+                    mOutOfBuffers = true;
+                    return;
                 }
-            } else {
-                mImageListenerMap.put(img.getTimestamp(), new Pair<>(img, null));
-            }
+                if (img == null) {
+                    Log.e(TAG, "Invalid image!");
+                    return;
+                }
 
-            notifyDroppedImages(timestamp);
+                Long timestamp = img.getTimestamp();
+                if (mImageListenerMap.containsKey(timestamp)) {
+                    Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.remove(
+                            timestamp);
+                    if (entry.second != null) {
+                        entry.second.onImageAvailable(reader, img);
+                    } else {
+                        Log.w(TAG, "Invalid image listener, dropping frame!");
+                        img.close();
+                    }
+                } else {
+                    mImageListenerMap.put(timestamp, new Pair<>(img, null));
+                }
+
+                notifyDroppedImages(timestamp);
+            }
         }
 
         private void notifyDroppedImages(long timestamp) {
-            Set<Long> timestamps = mImageListenerMap.keySet();
-            ArrayList<Long> removedTs = new ArrayList<>();
-            for (long ts : timestamps) {
-                if (ts < timestamp) {
-                    Log.e(TAG, "Dropped image with ts: " + ts);
-                    Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(ts);
-                    if (entry.second != null) {
-                        entry.second.onImageDropped(ts);
+            synchronized (mInterfaceLock) {
+                Set<Long> timestamps = mImageListenerMap.keySet();
+                ArrayList<Long> removedTs = new ArrayList<>();
+                for (long ts : timestamps) {
+                    if (ts < timestamp) {
+                        Log.e(TAG, "Dropped image with ts: " + ts);
+                        Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(ts);
+                        if (entry.second != null) {
+                            entry.second.onImageDropped(ts);
+                        }
+                        if (entry.first != null) {
+                            entry.first.close();
+                        }
+                        removedTs.add(ts);
                     }
-                    if (entry.first != null) {
-                        entry.first.close();
-                    }
-                    removedTs.add(ts);
                 }
-            }
-            for (long ts : removedTs) {
-                mImageListenerMap.remove(ts);
+                for (long ts : removedTs) {
+                    mImageListenerMap.remove(ts);
+                }
             }
         }
 
         public void registerListener(Long timestamp, OnImageAvailableListener listener) {
-            if (mImageListenerMap.containsKey(timestamp)) {
-                Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.remove(timestamp);
-                if (entry.first != null) {
-                    listener.onImageAvailable(mImageReader, entry.first);
-                    if (mOutOfBuffers) {
-                        mOutOfBuffers = false;
-                        Log.w(TAG,"Out of buffers, retry!");
-                        onImageAvailable(mImageReader);
+            synchronized (mInterfaceLock) {
+                if (mImageListenerMap.containsKey(timestamp)) {
+                    Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.remove(
+                            timestamp);
+                    if (entry.first != null) {
+                        listener.onImageAvailable(mImageReader, entry.first);
+                        if (mOutOfBuffers) {
+                            mOutOfBuffers = false;
+                            Log.w(TAG,"Out of buffers, retry!");
+                            onImageAvailable(mImageReader);
+                        }
+                    } else {
+                        Log.w(TAG, "No valid image for listener with ts: " +
+                                timestamp.longValue());
                     }
                 } else {
-                    Log.w(TAG, "No valid image for listener with ts: " +
-                            timestamp.longValue());
+                    mImageListenerMap.put(timestamp, new Pair<>(null, listener));
                 }
-            } else {
-                mImageListenerMap.put(timestamp, new Pair<>(null, listener));
             }
         }
 
         @Override
         public void close() {
-            for (Pair<Image, OnImageAvailableListener> entry : mImageListenerMap.values()) {
-                if (entry.first != null) {
-                    entry.first.close();
+            synchronized (mInterfaceLock) {
+                for (Pair<Image, OnImageAvailableListener> entry : mImageListenerMap.values()) {
+                    if (entry.first != null) {
+                        entry.first.close();
+                    }
                 }
-            }
-            for (long timestamp : mImageListenerMap.keySet()) {
-                Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(timestamp);
-                if (entry.second != null) {
-                    entry.second.onImageDropped(timestamp);
+                for (long timestamp : mImageListenerMap.keySet()) {
+                    Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(timestamp);
+                    if (entry.second != null) {
+                        entry.second.onImageDropped(timestamp);
+                    }
                 }
+                mImageListenerMap.clear();
             }
-            mImageListenerMap.clear();
         }
     }
 

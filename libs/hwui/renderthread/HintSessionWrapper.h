@@ -18,6 +18,8 @@
 
 #include <android/performance_hint.h>
 
+#include <future>
+
 #include "utils/TimeUtils.h"
 
 namespace android {
@@ -38,7 +40,9 @@ public:
 
 private:
     APerformanceHintSession* mHintSession = nullptr;
+    std::future<APerformanceHintSession*> mHintSessionFuture;
 
+    int mResetsSinceLastReport = 0;
     nsecs_t mLastFrameNotification = 0;
     nsecs_t mLastTargetWorkDuration = 0;
 

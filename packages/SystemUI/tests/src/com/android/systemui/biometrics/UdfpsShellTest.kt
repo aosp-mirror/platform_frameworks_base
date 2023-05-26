@@ -17,10 +17,11 @@
 package com.android.systemui.biometrics
 
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.MotionEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.UdfpsController.UdfpsOverlayController
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -39,7 +40,8 @@ import org.mockito.Mockito.`when` as whenEver
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class UdfpsShellTest : SysuiTestCase() {
 
@@ -49,7 +51,6 @@ class UdfpsShellTest : SysuiTestCase() {
     private lateinit var udfpsShell: UdfpsShell
 
     @Mock lateinit var commandRegistry: CommandRegistry
-    @Mock lateinit var udfpsOverlay: UdfpsOverlay
     @Mock lateinit var udfpsOverlayController: UdfpsOverlayController
 
     @Captor private lateinit var motionEvent: ArgumentCaptor<MotionEvent>
@@ -60,7 +61,7 @@ class UdfpsShellTest : SysuiTestCase() {
     fun setup() {
         whenEver(udfpsOverlayController.sensorBounds).thenReturn(sensorBounds)
 
-        udfpsShell = UdfpsShell(commandRegistry, udfpsOverlay)
+        udfpsShell = UdfpsShell(commandRegistry)
         udfpsShell.udfpsOverlayController = udfpsOverlayController
     }
 

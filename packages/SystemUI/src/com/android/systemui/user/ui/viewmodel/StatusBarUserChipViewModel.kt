@@ -55,5 +55,5 @@ constructor(
         interactor.selectedUser.mapLatest { userModel -> userModel.image }
 
     /** Action to execute on click. Should launch the user switcher */
-    val onClick: (Expandable) -> Unit = { interactor.showUserSwitcher(context, it) }
+    val onClick: (Expandable) -> Unit = { interactor.showUserSwitcher(it) }
 }

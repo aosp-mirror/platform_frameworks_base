@@ -71,7 +71,7 @@ constructor(
      * Open Assistance UI.
      *
      * @param longpress open the UI by long pressing power button. Otherwise open the UI through
-     * vioceinteraction shell command directly.
+     *   vioceinteraction shell command directly.
      */
     @JvmOverloads
     fun openUI(longpress: Boolean = false) {

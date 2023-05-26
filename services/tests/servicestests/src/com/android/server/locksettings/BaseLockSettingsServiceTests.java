@@ -16,9 +16,6 @@
 
 package com.android.server.locksettings;
 
-import static android.app.admin.DevicePolicyManager.DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_FLAG;
-import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +36,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.hardware.authsecret.IAuthSecret;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -49,7 +47,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.security.KeyStore;
 
@@ -97,6 +94,7 @@ public abstract class BaseLockSettingsServiceTests {
     MockLockSettingsContext mContext;
     LockSettingsStorageTestable mStorage;
 
+    Resources mResources;
     FakeGateKeeperService mGateKeeperService;
     NotificationManager mNotificationManager;
     UserManager mUserManager;
@@ -122,6 +120,7 @@ public abstract class BaseLockSettingsServiceTests {
 
     @Before
     public void setUp_baseServices() throws Exception {
+        mResources = createMockResources();
         mGateKeeperService = new FakeGateKeeperService();
         mNotificationManager = mock(NotificationManager.class);
         mUserManager = mock(UserManager.class);
@@ -146,7 +145,7 @@ public abstract class BaseLockSettingsServiceTests {
         LocalServices.addService(WindowManagerInternal.class, mMockWindowManager);
 
         final Context origContext = InstrumentationRegistry.getContext();
-        mContext = new MockLockSettingsContext(origContext,
+        mContext = new MockLockSettingsContext(origContext, mResources,
                 mSettingsRule.mockContentResolver(origContext), mUserManager, mNotificationManager,
                 mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class),
                 mock(KeyguardManager.class), mFingerprintManager, mFaceManager, mPackageManager);
@@ -232,9 +231,6 @@ public abstract class BaseLockSettingsServiceTests {
         // Adding a fake Device Owner app which will enable escrow token support in LSS.
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(
                 new ComponentName("com.dummy.package", ".FakeDeviceOwner"));
-        // TODO(b/258213147): Remove
-        DeviceConfig.setProperty(NAMESPACE_DEVICE_POLICY_MANAGER,
-                DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_FLAG, "true", /* makeDefault= */ false);
         when(mUserManagerInternal.isDeviceManaged()).thenReturn(true);
         when(mDeviceStateCache.isUserOrganizationManaged(anyInt())).thenReturn(true);
         when(mDeviceStateCache.isDeviceProvisioned()).thenReturn(true);
@@ -243,6 +239,22 @@ public abstract class BaseLockSettingsServiceTests {
 
         setDeviceProvisioned(true);
         mLocalService = LocalServices.getService(LockSettingsInternal.class);
+    }
+
+    private Resources createMockResources() {
+        Resources res = mock(Resources.class);
+
+        // Set up some default configs, copied from core/res/res/values/config.xml
+        when(res.getBoolean(eq(com.android.internal.R.bool.config_disableLockscreenByDefault)))
+                .thenReturn(false);
+        when(res.getBoolean(
+                eq(com.android.internal.R.bool.config_enableCredentialFactoryResetProtection)))
+                .thenReturn(true);
+        when(res.getBoolean(eq(com.android.internal.R.bool.config_isMainUserPermanentAdmin)))
+                .thenReturn(true);
+        when(res.getBoolean(eq(com.android.internal.R.bool.config_strongAuthRequiredOnBoot)))
+                .thenReturn(true);
+        return res;
     }
 
     protected void setDeviceProvisioned(boolean provisioned) {

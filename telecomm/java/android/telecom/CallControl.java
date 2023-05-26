@@ -294,18 +294,21 @@ public final class CallControl {
     /**
      * Raises an event to the {@link android.telecom.InCallService} implementations tracking this
      * call via {@link android.telecom.Call.Callback#onConnectionEvent(Call, String, Bundle)}.
-     * These events and the associated extra keys for the {@code Bundle} parameter are defined
-     * in Android X. This API is used to relay additional information about a call other than
-     * what is specified in the {@link android.telecom.CallAttributes} to
-     * {@link android.telecom.InCallService}s. This might include, for example, a change to the list
-     * of participants in a meeting, or the name of the speakers who have their hand raised. Where
-     * appropriate, the {@link InCallService}s tracking this call may choose to render this
-     * additional information about the call. An automotive calling UX, for example may have enough
-     * screen real estate to indicate the number of participants in a meeting, but to prevent
-     * distractions could suppress the list of participants.
+     * These events and the associated extra keys for the {@code Bundle} parameter are mutually
+     * defined by a VoIP application and {@link android.telecom.InCallService}. This API is used to
+     * relay additional information about a call other than what is specified in the
+     * {@link android.telecom.CallAttributes} to {@link android.telecom.InCallService}s. This might
+     * include, for example, a change to the list of participants in a meeting, or the name of the
+     * speakers who have their hand raised. Where appropriate, the {@link InCallService}s tracking
+     * this call may choose to render this additional information about the call. An automotive
+     * calling UX, for example may have enough screen real estate to indicate the number of
+     * participants in a meeting, but to prevent distractions could suppress the list of
+     * participants.
      *
-     * @param event  that is defined in AndroidX (ex. The number of participants changed)
-     * @param extras the updated value in relation to the event (ex. 4 participants)
+     * @param event a string event identifier agreed upon between a VoIP application and an
+     *              {@link android.telecom.InCallService}
+     * @param extras a {@link android.os.Bundle} containing information about the event, as agreed
+     *              upon between a VoIP application and {@link android.telecom.InCallService}.
      */
     public void sendEvent(@NonNull String event, @NonNull Bundle extras) {
         Objects.requireNonNull(event);

@@ -26,8 +26,6 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-import static android.view.accessibility.AccessibilityManager.CONTRAST_DEFAULT_VALUE;
-import static android.view.accessibility.AccessibilityManager.CONTRAST_NOT_SET;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
@@ -147,8 +145,6 @@ class AccessibilityUserState {
     private final int mFocusStrokeWidthDefaultValue;
     // The default value of the focus color.
     private final int mFocusColorDefaultValue;
-    /** The color contrast in [-1, 1] */
-    private float mUiContrast = CONTRAST_DEFAULT_VALUE;
 
     private Context mContext;
 
@@ -224,7 +220,6 @@ class AccessibilityUserState {
         mFocusColor = mFocusColorDefaultValue;
         mMagnificationFollowTypingEnabled = true;
         mAlwaysOnMagnificationEnabled = false;
-        mUiContrast = CONTRAST_NOT_SET;
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -1001,7 +996,6 @@ class AccessibilityUserState {
         return mFocusColor;
     }
 
-
     /**
      * Sets the stroke width and color of the focus rectangle.
      *
@@ -1026,21 +1020,5 @@ class AccessibilityUserState {
             return mServiceDetectsGestures.get(displayId);
         }
         return false;
-    }
-
-    /**
-     * Get the color contrast
-     * @return color contrast in [-1, 1]
-     */
-    public float getUiContrastLocked() {
-        return mUiContrast;
-    }
-
-    /**
-     * Set the color contrast
-     * @param contrast the new color contrast in [-1, 1]
-     */
-    public void setUiContrastLocked(float contrast) {
-        mUiContrast = contrast;
     }
 }

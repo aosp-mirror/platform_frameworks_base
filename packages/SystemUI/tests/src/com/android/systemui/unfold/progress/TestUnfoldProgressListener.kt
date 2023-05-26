@@ -126,7 +126,7 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
         }
 
         fun assertLastProgress(progress: Float) {
-            assertThat(progressHistory.last()).isEqualTo(progress)
+            waitForCondition { progress == progressHistory.lastOrNull() }
         }
     }
 

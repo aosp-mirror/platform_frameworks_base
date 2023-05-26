@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.common.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import com.android.credentialmanager.R
 import androidx.compose.material.Icon
@@ -33,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 @Composable
 fun ActionButton(text: String, onClick: () -> Unit) {
@@ -42,12 +42,10 @@ fun ActionButton(text: String, onClick: () -> Unit) {
         onClick = onClick,
         colors = ButtonDefaults.textButtonColors(
             contentColor = MaterialTheme.colorScheme.primary,
-        )
+        ),
+        contentPadding = PaddingValues(start = 12.dp, top = 10.dp, end = 12.dp, bottom = 10.dp),
     ) {
-        LargeLabelText(
-            text = text,
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 12.dp),
-        )
+        LargeLabelText(text = text)
     }
 }
 
@@ -69,7 +67,7 @@ fun ToggleVisibilityButton(modifier: Modifier = Modifier, onToggle: (Boolean) ->
             contentDescription = if (toggleState.value)
                 stringResource(R.string.content_description_show_password) else
                 stringResource(R.string.content_description_hide_password),
-            tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

@@ -49,9 +49,9 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeByteArrayAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.internal.util.XmlUtils.writeUriAttribute;
-import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
+import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 
 import android.Manifest;
 import android.annotation.AnyThread;
@@ -173,7 +173,6 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -925,7 +924,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final int targetPackageUid = snapshot.getPackageUid(packageName, 0, userId);
         final boolean isUpdate = targetPackageUid != -1 || isApexSession();
         final InstallSourceInfo existingInstallSourceInfo = isUpdate
-                ? snapshot.getInstallSourceInfo(packageName)
+                ? snapshot.getInstallSourceInfo(packageName, userId)
                 : null;
         final String existingInstallerPackageName = existingInstallSourceInfo != null
                 ? existingInstallSourceInfo.getInstallingPackageName()
@@ -1135,8 +1134,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.userId = userId;
             info.installerPackageName = mInstallSource.mInstallerPackageName;
             info.installerAttributionTag = mInstallSource.mInstallerAttributionTag;
-            info.resolvedBaseCodePath = (mResolvedBaseFile != null) ?
-                    mResolvedBaseFile.getAbsolutePath() : null;
+            info.resolvedBaseCodePath = null;
+            if (mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+                    == PackageManager.PERMISSION_GRANTED) {
+                File file = mResolvedBaseFile;
+                if (file == null) {
+                    // Try to guess mResolvedBaseFile file.
+                    final List<File> addedFiles = getAddedApksLocked();
+                    if (addedFiles.size() > 0) {
+                        file = addedFiles.get(0);
+                    }
+                }
+                if (file != null) {
+                    info.resolvedBaseCodePath = file.getAbsolutePath();
+                }
+            }
             info.progress = progress;
             info.sealed = mSealed;
             info.isCommitted = isCommitted();
@@ -1337,9 +1350,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private String[] getStageDirContentsLocked() {
+        if (stageDir == null) {
+            return EmptyArray.STRING;
+        }
         String[] result = stageDir.list();
         if (result == null) {
-            result = EmptyArray.STRING;
+            return EmptyArray.STRING;
         }
         return result;
     }
@@ -1397,9 +1413,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
+        final String initiatingPackageName = getInstallSource().mInitiatingPackageName;
         final String installerPackageName;
-        if (!TextUtils.isEmpty(getInstallSource().mInitiatingPackageName)) {
-            installerPackageName = getInstallSource().mInitiatingPackageName;
+        if (!isInstalledByAdb(initiatingPackageName)) {
+            installerPackageName = initiatingPackageName;
         } else {
             installerPackageName = getInstallSource().mInstallerPackageName;
         }
@@ -1442,7 +1459,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener) {
         assertCallerIsOwnerRootOrVerifier();
         final File file = new File(stageDir, name);
-        final String installerPackageName = getInstallSource().mInitiatingPackageName;
+        final String installerPackageName = PackageManagerServiceUtils.isInstalledByAdb(
+                getInstallSource().mInitiatingPackageName)
+                ? getInstallSource().mInstallerPackageName
+                : getInstallSource().mInitiatingPackageName;
         try {
             mPm.requestFileChecksums(file, installerPackageName, optional, required,
                     trustedInstallers, onChecksumsReadyListener);
@@ -1611,13 +1631,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new SecurityException("link() can only be run by the system");
         }
 
+        final File target = new File(path);
+        final File source = new File(stageDir, target.getName());
+        var sourcePath = source.getAbsolutePath();
         try {
-            final File target = new File(path);
-            final File source = new File(stageDir, target.getName());
             try {
-                Os.link(path, source.getAbsolutePath());
+                Os.link(path, sourcePath);
                 // Grant READ access for APK to be read successfully
-                Os.chmod(source.getAbsolutePath(), 0644);
+                Os.chmod(sourcePath, 0644);
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
             }
@@ -1625,6 +1646,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IOException("Can't relabel file: " + source);
             }
         } catch (IOException e) {
+            try {
+                Os.unlink(sourcePath);
+            } catch (Exception ignored) {
+                Slog.d(TAG, "Failed to unlink session file: " + sourcePath);
+            }
+
             throw ExceptionUtils.wrap(e);
         }
     }
@@ -2560,15 +2587,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
 
                 if (isLinkPossible(fromFiles, toDir)) {
-                    if (!useArtService()) { // ART Service creates oat dirs on demand instead.
-                        if (!mResolvedInstructionSets.isEmpty()) {
-                            final File oatDir = new File(toDir, "oat");
-                            try {
-                                createOatDirs(tempPackageName, mResolvedInstructionSets, oatDir);
-                            } catch (LegacyDexoptDisabledException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
+                    if (!mResolvedInstructionSets.isEmpty()) {
+                        final File oatDir = new File(toDir, "oat");
+                        createOatDirs(tempPackageName, mResolvedInstructionSets, oatDir);
                     }
                     // pre-create lib dirs for linking if necessary
                     if (!mResolvedNativeLibPaths.isEmpty()) {
@@ -2763,11 +2784,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         : PackageInstaller.ACTION_CONFIRM_INSTALL);
         intent.setPackage(mPm.getPackageInstallerPackageName());
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-        synchronized (mLock) {
-            intent.putExtra(PackageInstaller.EXTRA_RESOLVED_BASE_PATH,
-                    mResolvedBaseFile != null ? mResolvedBaseFile.getAbsolutePath() : null);
-        }
-
         sendOnUserActionRequired(mContext, target, sessionId, intent);
     }
 
@@ -3829,7 +3845,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void createOatDirs(String packageName, List<String> instructionSets, File fromDir)
-            throws PackageManagerException, LegacyDexoptDisabledException {
+            throws PackageManagerException {
         for (String instructionSet : instructionSets) {
             try {
                 mInstaller.createOatDir(packageName, fromDir.getAbsolutePath(), instructionSet);

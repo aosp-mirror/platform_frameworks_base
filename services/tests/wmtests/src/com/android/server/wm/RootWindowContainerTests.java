@@ -775,7 +775,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         // Assume the task is at the topmost position
         assertFalse(rootTask.isTopRootTaskInDisplayArea());
-        doReturn(rootTask).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
+        doReturn(taskDisplayArea.getHomeActivity()).when(taskDisplayArea).topRunningActivity();
 
         // Use the task as target to resume.
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -1134,7 +1134,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         TaskChangeNotificationController controller = mAtm.getTaskChangeNotificationController();
         spyOn(controller);
         mWm.mRoot.lockAllProfileTasks(profileUserId);
-        verify(controller).notifyTaskProfileLocked(any());
+        verify(controller).notifyTaskProfileLocked(any(), eq(profileUserId));
 
         // Create the work lock activity on top of the task
         final ActivityRecord workLockActivity = new ActivityBuilder(mAtm).setTask(task).build();
@@ -1144,7 +1144,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Make sure the listener won't be notified again.
         clearInvocations(controller);
         mWm.mRoot.lockAllProfileTasks(profileUserId);
-        verify(controller, never()).notifyTaskProfileLocked(any());
+        verify(controller, never()).notifyTaskProfileLocked(any(), anyInt());
     }
 
     /**

@@ -1,16 +1,18 @@
 package com.android.systemui.plugins
 
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 
 class WeatherData
-private constructor(
+constructor(
     val description: String,
     val state: WeatherStateIcon,
     val useCelsius: Boolean,
     val temperature: Int,
 ) {
     companion object {
+        const val DEBUG = true
         private const val TAG = "WeatherData"
         @VisibleForTesting const val DESCRIPTION_KEY = "description"
         @VisibleForTesting const val STATE_KEY = "state"
@@ -23,20 +25,29 @@ private constructor(
             val state =
                 WeatherStateIcon.fromInt(extras.getInt(STATE_KEY, INVALID_WEATHER_ICON_STATE))
             val temperature = readIntFromBundle(extras, TEMPERATURE_KEY)
-            return if (
+            if (
                 description == null ||
                     state == null ||
                     !extras.containsKey(USE_CELSIUS_KEY) ||
                     temperature == null
-            )
-                null
-            else
-                WeatherData(
-                    description = description,
-                    state = state,
-                    useCelsius = extras.getBoolean(USE_CELSIUS_KEY),
-                    temperature = temperature
-                )
+            ) {
+                if (DEBUG) {
+                    Log.w(TAG, "Weather data did not parse from $extras")
+                }
+                return null
+            } else {
+                val result =
+                    WeatherData(
+                        description = description,
+                        state = state,
+                        useCelsius = extras.getBoolean(USE_CELSIUS_KEY),
+                        temperature = temperature
+                    )
+                if (DEBUG) {
+                    Log.i(TAG, "Weather data parsed $result from $extras")
+                }
+                return result
+            }
         }
 
         private fun readIntFromBundle(extras: Bundle, key: String): Int? =
@@ -47,6 +58,7 @@ private constructor(
             }
     }
 
+    // Values for WeatherStateIcon must stay in sync with go/g3-WeatherStateIcon
     enum class WeatherStateIcon(val id: Int) {
         UNKNOWN_ICON(0),
 

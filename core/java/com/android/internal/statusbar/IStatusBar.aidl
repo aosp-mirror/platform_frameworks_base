@@ -28,6 +28,7 @@ import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.view.KeyEvent;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.IAddTileResultCallback;
@@ -141,7 +142,7 @@ oneway interface IStatusBar
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);
     void clickQsTile(in ComponentName tile);
-    void handleSystemKey(in int key);
+    void handleSystemKey(in KeyEvent key);
 
     /**
      * Methods to show toast messages for screen pinning
@@ -156,7 +157,7 @@ oneway interface IStatusBar
     */
     void showAuthenticationDialog(in PromptInfo promptInfo, IBiometricSysuiReceiver sysuiReceiver,
             in int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation, int userId,
-            long operationId, String opPackageName, long requestId, int multiSensorConfig);
+            long operationId, String opPackageName, long requestId);
     /**
     * Used to notify the authentication dialog that a biometric has been authenticated.
     */

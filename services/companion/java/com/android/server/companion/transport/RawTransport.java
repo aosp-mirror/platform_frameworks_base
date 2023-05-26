@@ -21,8 +21,6 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
-import com.android.server.companion.transport.CompanionTransportManager.Listener;
-
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
@@ -32,12 +30,15 @@ import java.nio.ByteBuffer;
 class RawTransport extends Transport {
     private volatile boolean mStopped;
 
-    RawTransport(int associationId, ParcelFileDescriptor fd, Context context, Listener listener) {
-        super(associationId, fd, context, listener);
+    RawTransport(int associationId, ParcelFileDescriptor fd, Context context) {
+        super(associationId, fd, context);
     }
 
     @Override
-    public void start() {
+    void start() {
+        if (DEBUG) {
+            Slog.d(TAG, "Starting raw transport.");
+        }
         new Thread(() -> {
             try {
                 while (!mStopped) {
@@ -46,16 +47,27 @@ class RawTransport extends Transport {
             } catch (IOException e) {
                 if (!mStopped) {
                     Slog.w(TAG, "Trouble during transport", e);
-                    stop();
+                    close();
                 }
             }
         }).start();
     }
 
     @Override
-    public void stop() {
+    void stop() {
+        if (DEBUG) {
+            Slog.d(TAG, "Stopping raw transport.");
+        }
         mStopped = true;
+    }
 
+    @Override
+    void close() {
+        stop();
+
+        if (DEBUG) {
+            Slog.d(TAG, "Closing raw transport.");
+        }
         IoUtils.closeQuietly(mRemoteIn);
         IoUtils.closeQuietly(mRemoteOut);
     }
@@ -64,7 +76,7 @@ class RawTransport extends Transport {
     protected void sendMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException {
         if (DEBUG) {
-            Slog.d(TAG, "Sending message 0x" + Integer.toHexString(message)
+            Slog.e(TAG, "Sending message 0x" + Integer.toHexString(message)
                     + " sequence " + sequence + " length " + data.length
                     + " to association " + mAssociationId);
         }
@@ -81,15 +93,17 @@ class RawTransport extends Transport {
     }
 
     private void receiveMessage() throws IOException {
-        final byte[] headerBytes = new byte[HEADER_LENGTH];
-        Streams.readFully(mRemoteIn, headerBytes);
-        final ByteBuffer header = ByteBuffer.wrap(headerBytes);
-        final int message = header.getInt();
-        final int sequence = header.getInt();
-        final int length = header.getInt();
-        final byte[] data = new byte[length];
-        Streams.readFully(mRemoteIn, data);
+        synchronized (mRemoteIn) {
+            final byte[] headerBytes = new byte[HEADER_LENGTH];
+            Streams.readFully(mRemoteIn, headerBytes);
+            final ByteBuffer header = ByteBuffer.wrap(headerBytes);
+            final int message = header.getInt();
+            final int sequence = header.getInt();
+            final int length = header.getInt();
+            final byte[] data = new byte[length];
+            Streams.readFully(mRemoteIn, data);
 
-        handleMessage(message, sequence, data);
+            handleMessage(message, sequence, data);
+        }
     }
 }

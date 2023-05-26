@@ -139,9 +139,12 @@ public class SecureSettings {
         Settings.Secure.SCREENSAVER_COMPONENTS,
         Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
         Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
+        Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED,
         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
         Settings.Secure.VOLUME_HUSH_GESTURE,
         Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT,
+        Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
+        Settings.Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED,
         Settings.Secure.HUSH_GESTURE_USED,
         Settings.Secure.IN_CALL_NOTIFICATION_ENABLED,
         Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
@@ -237,5 +240,6 @@ public class SecureSettings {
         Settings.Secure.HEARING_AID_CALL_ROUTING,
         Settings.Secure.HEARING_AID_MEDIA_ROUTING,
         Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+        Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED
     };
 }

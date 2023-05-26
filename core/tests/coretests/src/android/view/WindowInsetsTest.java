@@ -40,14 +40,14 @@ public class WindowInsetsTest {
     @Test
     public void systemWindowInsets_afterConsuming_isConsumed() {
         assertTrue(new WindowInsets(WindowInsets.createCompatTypeMap(new Rect(1, 2, 3, 4)), null,
-                null, false, false, null, null, null, null,
+                null, false, false, 0, null, null, null, null,
                 WindowInsets.Type.systemBars(), false)
                 .consumeSystemWindowInsets().isConsumed());
     }
 
     @Test
     public void multiNullConstructor_isConsumed() {
-        assertTrue(new WindowInsets(null, null, null, false, false, null, null, null, null,
+        assertTrue(new WindowInsets(null, null, null, false, false, 0, null, null, null, null,
                 WindowInsets.Type.systemBars(), false).isConsumed());
     }
 
@@ -63,8 +63,8 @@ public class WindowInsetsTest {
         boolean[] visible = new boolean[SIZE];
         WindowInsets.assignCompatInsets(maxInsets, new Rect(0, 10, 0, 0));
         WindowInsets.assignCompatInsets(insets, new Rect(0, 0, 0, 0));
-        WindowInsets windowInsets = new WindowInsets(insets, maxInsets, visible, false, false, null,
-                null, null, DisplayShape.NONE, systemBars(),
+        WindowInsets windowInsets = new WindowInsets(insets, maxInsets, visible, false, false,
+                0, null, null, null, DisplayShape.NONE, systemBars(),
                 true /* compatIgnoreVisibility */);
         assertEquals(Insets.of(0, 10, 0, 0), windowInsets.getSystemWindowInsets());
     }

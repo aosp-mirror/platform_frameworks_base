@@ -45,11 +45,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.TextViewInputDisabler;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 /**
  * Displays an alphanumeric (latin-1) key entry for the user to enter
  * an unlock password
@@ -69,6 +69,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
     private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mFastOutLinearInInterpolator;
+    private DisappearAnimationListener mDisappearAnimationListener;
 
     public KeyguardPasswordView(Context context) {
         this(context, null);
@@ -186,9 +187,13 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                                 return;
                             }
                             Insets shownInsets = controller.getShownStateInsets();
-                            Insets insets = Insets.add(shownInsets, Insets.of(0, 0, 0,
-                                    (int) (-shownInsets.bottom / 4
-                                            * anim.getAnimatedFraction())));
+                            int dist = (int) (-shownInsets.bottom / 4
+                                    * anim.getAnimatedFraction());
+                            Insets insets = Insets.add(shownInsets, Insets.of(0, 0, 0, dist));
+                            if (mDisappearAnimationListener != null) {
+                                mDisappearAnimationListener.setTranslationY(-dist);
+                            }
+
                             controller.setInsetsAndAlpha(insets,
                                     (float) animation.getAnimatedValue(),
                                     anim.getAnimatedFraction());
@@ -209,6 +214,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                                     controller.finish(false);
                                     runOnFinishImeAnimationRunnable();
                                     finishRunnable.run();
+                                    mDisappearAnimationListener = null;
                                     Trace.endSection();
                                 });
                             }
@@ -285,5 +291,20 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                 mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
             }
         });
+    }
+
+    /**
+     * Listens to the progress of the disappear animation and handles it.
+     */
+    interface DisappearAnimationListener {
+        void setTranslationY(int transY);
+    }
+
+    /**
+     * Set an instance of the disappear animation listener to this class. This will be
+     * removed when the animation completes.
+     */
+    public void setDisappearAnimationListener(DisappearAnimationListener listener) {
+        mDisappearAnimationListener = listener;
     }
 }

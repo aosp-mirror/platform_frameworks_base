@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"No usar comprobación de HDCP"</item>
-    <item msgid="8254225038262324761">"Usar comprobación de HDCP solo para contenido DRM"</item>
+    <item msgid="8254225038262324761">"Usa comprobación de HDCP solo para contenido DRM"</item>
     <item msgid="6421717003037072581">"Usar siempre comprobación de HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"Habilitado"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"Encabezados filtrados"</item>
-    <item msgid="4818549483446395865">"Paquetes de medios A2DP filtrados"</item>
-    <item msgid="8207123990453243311">"Canal RFCOMM filtrado"</item>
+    <item msgid="195768089203590086">"Dejar solo los encabezados de LCA"</item>
+    <item msgid="2776218217644557831">"Filtrar paquetes multimedia A2DP"</item>
+    <item msgid="8163235976612675092">"Filtrar canal RFCOMM"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"Inhabilitado"</item>
-    <item msgid="5884245882825346396">"Mágico"</item>
-    <item msgid="6569400572915342949">"Encabezado"</item>
-    <item msgid="1239386221416967664">"Filtro completo"</item>
+    <item msgid="3961868665260627524">"Inhabilitar"</item>
+    <item msgid="2505973306504851132">"Rellenar con cadena de caracteres"</item>
+    <item msgid="5883011000629613855">"Dejar solo el encabezado"</item>
+    <item msgid="1051534112762023603">"Quitar por completo"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (predeterminado)"</item>

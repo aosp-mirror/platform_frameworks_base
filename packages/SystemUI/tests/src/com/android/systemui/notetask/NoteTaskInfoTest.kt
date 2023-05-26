@@ -15,6 +15,7 @@
  */
 package com.android.systemui.notetask
 
+import android.os.UserHandle
 import android.test.suitebuilder.annotation.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
@@ -28,42 +29,20 @@ import org.junit.runner.RunWith
 internal class NoteTaskInfoTest : SysuiTestCase() {
 
     private fun createNoteTaskInfo(): NoteTaskInfo =
-        NoteTaskInfo(packageName = NOTES_PACKAGE_NAME, uid = NOTES_UID)
-
-    @Test
-    fun launchMode_notInMultiWindowModeAndKeyguardUnlocked_launchModeAppBubble() {
-        val underTest =
-            createNoteTaskInfo()
-                .copy(
-                    isKeyguardLocked = false,
-                    isInMultiWindowMode = false,
-                )
-
-        assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.AppBubble)
-    }
-
-    @Test
-    fun launchMode_inMultiWindowMode_launchModeActivity() {
-        val underTest =
-            createNoteTaskInfo()
-                .copy(
-                    isKeyguardLocked = false,
-                    isInMultiWindowMode = true,
-                )
-
-        assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.Activity)
-    }
+        NoteTaskInfo(packageName = NOTES_PACKAGE_NAME, uid = NOTES_UID, UserHandle.of(0))
 
     @Test
     fun launchMode_keyguardLocked_launchModeActivity() {
-        val underTest =
-            createNoteTaskInfo()
-                .copy(
-                    isKeyguardLocked = true,
-                    isInMultiWindowMode = false,
-                )
+        val underTest = createNoteTaskInfo().copy(isKeyguardLocked = true)
 
         assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.Activity)
+    }
+
+    @Test
+    fun launchMode_keyguardUnlocked_launchModeActivity() {
+        val underTest = createNoteTaskInfo().copy(isKeyguardLocked = false)
+
+        assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.AppBubble)
     }
 
     private companion object {

@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"সক্ষম কৰা আছে"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"হেডাৰ ফিল্টাৰ কৰা হৈছে"</item>
-    <item msgid="4818549483446395865">"A2DP মিডিয়াৰ পেকেট ফিল্টাৰ কৰা হৈছে"</item>
-    <item msgid="8207123990453243311">"RFCOMM চেনেল ফিল্টাৰ কৰা হৈছে"</item>
+    <item msgid="195768089203590086">"কেৱল ACL হেডাৰ এৰক"</item>
+    <item msgid="2776218217644557831">"A2DP মিডিয়াৰ পেকেট ফিল্টাৰ কৰক"</item>
+    <item msgid="8163235976612675092">"RFCOMM চেনেল ফিল্টাৰ কৰক"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"অক্ষম কৰা আছে"</item>
-    <item msgid="5884245882825346396">"যাদু"</item>
-    <item msgid="6569400572915342949">"হেডাৰ"</item>
-    <item msgid="1239386221416967664">"সম্পূৰ্ণ ফিল্টাৰ"</item>
+    <item msgid="3961868665260627524">"অক্ষম কৰক"</item>
+    <item msgid="2505973306504851132">"বৰ্ণৰ ষ্ট্ৰীঙেৰে পূৰ কৰক"</item>
+    <item msgid="5883011000629613855">"কেৱল হেডাৰ এৰক"</item>
+    <item msgid="1051534112762023603">"সম্পূৰ্ণকৈ আঁতৰাওক"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (ডিফ’ল্ট)"</item>
@@ -275,7 +275,7 @@
     <item msgid="6506681373060736204">"সৰ্বাধিক ৪টা প্ৰক্ৰিয়া"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="3358668781763928157">"চ্চাৰ্জ কৰি থকা হৈছে"</item>
+    <item msgid="3358668781763928157">"চাৰ্জ কৰি থকা হৈছে"</item>
     <item msgid="7804797564616858506">"এমটিপি (মিডিয়া ট্ৰান্সফাৰ প্ৰ’ট’কল)"</item>
     <item msgid="910925519184248772">"পিটিপি (পিকচাৰ ট্ৰান্সফাৰ প্ৰ’ট’কল)"</item>
     <item msgid="3825132913289380004">"RNDIS (USB ইথাৰনেট)"</item>

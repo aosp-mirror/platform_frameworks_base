@@ -28,6 +28,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -1188,7 +1189,7 @@ public class ViewConfiguration {
     }
 
     private static boolean isInputDeviceInfoValid(int id, int axis, int source) {
-        InputDevice device = InputManager.getInstance().getInputDevice(id);
+        InputDevice device = InputManagerGlobal.getInstance().getInputDevice(id);
         return device != null && device.getMotionRange(axis, source) != null;
     }
 

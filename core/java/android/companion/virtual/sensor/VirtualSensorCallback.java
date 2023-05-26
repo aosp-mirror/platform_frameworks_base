@@ -23,7 +23,8 @@ import android.annotation.SystemApi;
 import java.time.Duration;
 
 /**
- * Interface for notifying the sensor owner about whether and how sensor events should be injected.
+ * Interface for notifying the virtual device owner about whether and how sensor events should be
+ * injected.
  *
  * <p>This callback can be used for controlling the sensor event injection - e.g. if the sensor is
  * not enabled, then no events should be injected. Similarly, the rate and delay of the injected
@@ -40,13 +41,14 @@ public interface VirtualSensorCallback {
      * Called when the requested sensor event injection parameters have changed.
      *
      * <p>This is effectively called when the registered listeners to a virtual sensor have changed.
+     * The events for the corresponding sensor should be sent via {@link VirtualSensor#sendEvent}.
      *
      * @param sensor The sensor whose requested injection parameters have changed.
      * @param enabled Whether the sensor is enabled. True if any listeners are currently registered,
-     * and false otherwise.
+     *   and false otherwise.
      * @param samplingPeriod The requested sampling period of the sensor.
      * @param batchReportLatency The requested maximum time interval between the delivery of two
-     * batches of sensor events.
+     *   batches of sensor events.
      */
     void onConfigurationChanged(@NonNull VirtualSensor sensor, boolean enabled,
             @NonNull Duration samplingPeriod, @NonNull Duration batchReportLatency);

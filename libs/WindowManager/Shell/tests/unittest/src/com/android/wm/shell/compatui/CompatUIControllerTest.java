@@ -54,7 +54,6 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -473,6 +472,36 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mMockCompatLayout).updateVisibility(true);
         verify(mMockLetterboxEduLayout).updateVisibility(true);
         verify(mMockRestartDialogLayout).updateVisibility(true);
+    }
+
+    @Test
+    public void testRestartLayoutRecreatedIfNeeded() {
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN);
+        doReturn(true).when(mMockRestartDialogLayout)
+                .needsToBeRecreated(any(TaskInfo.class),
+                        any(ShellTaskOrganizer.TaskListener.class));
+
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mMockRestartDialogLayout, times(2))
+                .createLayout(anyBoolean());
+    }
+
+    @Test
+    public void testRestartLayoutNotRecreatedIfNotNeeded() {
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN);
+        doReturn(false).when(mMockRestartDialogLayout)
+                .needsToBeRecreated(any(TaskInfo.class),
+                        any(ShellTaskOrganizer.TaskListener.class));
+
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mMockRestartDialogLayout, times(1))
+                .createLayout(anyBoolean());
     }
 
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,

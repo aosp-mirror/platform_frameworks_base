@@ -524,11 +524,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String DEFAULT_QR_CODE_SCANNER = "default_qr_code_scanner";
 
     /**
-     * (boolean) Whether the task manager entrypoint is enabled.
-     */
-    public static final String TASK_MANAGER_ENABLED = "task_manager_enabled";
-
-    /**
      * (boolean) Whether the task manager should show an attention grabbing dot when tasks changed.
      */
     public static final String TASK_MANAGER_SHOW_FOOTER_DOT = "task_manager_show_footer_dot";
@@ -552,11 +547,6 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP =
             "task_manager_inform_job_scheduler_of_pending_app_stop";
-
-    /**
-     * (boolean) Whether to show notification volume control slider separate from ring.
-     */
-    public static final String VOLUME_SEPARATE_NOTIFICATION = "volume_separate_notification";
 
     /**
      * (boolean) Whether widget provider info would be saved to / loaded from system persistence

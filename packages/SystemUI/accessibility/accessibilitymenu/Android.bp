@@ -18,6 +18,15 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// This filegroup is used by menu tests.
+filegroup {
+    name: "AccessibilityMenuSource",
+    srcs: [
+        "src/**/AccessibilityMenuService.java",
+        "src/**/A11yMenuShortcut.java",
+    ],
+}
+
 android_app {
     name: "AccessibilityMenu",
 

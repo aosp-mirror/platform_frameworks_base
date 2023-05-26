@@ -52,7 +52,7 @@ static JNIEnv* getenv(JavaVM* vm) {
     return env;
 }
 
-  struct {
+struct {
     jmethodID onTransactionHang;
 } gTransactionHangCallback;
 
@@ -72,12 +72,14 @@ public:
     }
 
     void onTransactionHang(const std::string& reason) {
-        if (mTransactionHangObject) {
-            JNIEnv* env = getenv(mVm);
-            ScopedLocalRef<jstring> jReason(env, env->NewStringUTF(reason.c_str()));
-            getenv(mVm)->CallVoidMethod(mTransactionHangObject,
-                                        gTransactionHangCallback.onTransactionHang, jReason.get());
+        if (!mTransactionHangObject) {
+            return;
         }
+        JNIEnv* env = getenv(mVm);
+        ScopedLocalRef<jstring> jReason(env, env->NewStringUTF(reason.c_str()));
+        getenv(mVm)->CallVoidMethod(mTransactionHangObject,
+                                    gTransactionHangCallback.onTransactionHang, jReason.get());
+        DieIfException(env, "Uncaught exception in TransactionHangCallback.");
     }
 
 private:
@@ -125,31 +127,34 @@ private:
     jobject mObject;
 };
 
-static void nativeSyncNextTransaction(JNIEnv* env, jclass clazz, jlong ptr, jobject callback,
+static bool nativeSyncNextTransaction(JNIEnv* env, jclass clazz, jlong ptr, jobject callback,
                                       jboolean acquireSingleBuffer) {
+    LOG_ALWAYS_FATAL_IF(!callback, "callback passed in to syncNextTransaction must not be NULL");
+
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
     JavaVM* vm = nullptr;
     LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
-    if (!callback) {
-        queue->syncNextTransaction(nullptr, acquireSingleBuffer);
-    } else {
-        auto globalCallbackRef =
-                std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(callback));
-        queue->syncNextTransaction(
-                [globalCallbackRef](SurfaceComposerClient::Transaction* t) {
-                    JNIEnv* env = getenv(globalCallbackRef->vm());
-                    env->CallVoidMethod(globalCallbackRef->object(), gTransactionConsumer.accept,
-                                        env->NewObject(gTransactionClassInfo.clazz,
-                                                       gTransactionClassInfo.ctor,
-                                                       reinterpret_cast<jlong>(t)));
-                },
-                acquireSingleBuffer);
-    }
+
+    auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(callback));
+    return queue->syncNextTransaction(
+            [globalCallbackRef](SurfaceComposerClient::Transaction* t) {
+                JNIEnv* env = getenv(globalCallbackRef->vm());
+                env->CallVoidMethod(globalCallbackRef->object(), gTransactionConsumer.accept,
+                                    env->NewObject(gTransactionClassInfo.clazz,
+                                                   gTransactionClassInfo.ctor,
+                                                   reinterpret_cast<jlong>(t)));
+            },
+            acquireSingleBuffer);
 }
 
 static void nativeStopContinuousSyncTransaction(JNIEnv* env, jclass clazz, jlong ptr) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
     queue->stopContinuousSyncTransaction();
+}
+
+static void nativeClearSyncTransaction(JNIEnv* env, jclass clazz, jlong ptr) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    queue->clearSyncTransaction();
 }
 
 static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceControl, jlong width,
@@ -207,8 +212,9 @@ static const JNINativeMethod gMethods[] = {
         {"nativeCreate", "(Ljava/lang/String;Z)J", (void*)nativeCreate},
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
-        {"nativeSyncNextTransaction", "(JLjava/util/function/Consumer;Z)V", (void*)nativeSyncNextTransaction},
+        {"nativeSyncNextTransaction", "(JLjava/util/function/Consumer;Z)Z", (void*)nativeSyncNextTransaction},
         {"nativeStopContinuousSyncTransaction", "(J)V", (void*)nativeStopContinuousSyncTransaction},
+        {"nativeClearSyncTransaction", "(J)V", (void*)nativeClearSyncTransaction},
         {"nativeUpdate", "(JJJJI)V", (void*)nativeUpdate},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},

@@ -345,7 +345,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         }
 
         // Alt+Backspace or Alt+ForwardDelete deletes the current line, if possible.
-        if (isAltActive && deleteLine(view, content)) {
+        if (isAltActive && deleteLineFromCursor(view, content, isForwardDelete)) {
             return true;
         }
 
@@ -438,18 +438,34 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         return false;
     }
 
-    private boolean deleteLine(View view, Editable content) {
+    private boolean deleteLineFromCursor(View view, Editable content, boolean forward) {
         if (view instanceof TextView) {
+            final int selectionStart = Selection.getSelectionStart(content);
+            final int selectionEnd = Selection.getSelectionEnd(content);
+            final int selectionMin;
+            final int selectionMax;
+            if (selectionStart < selectionEnd) {
+                selectionMin = selectionStart;
+                selectionMax = selectionEnd;
+            } else {
+                selectionMin = selectionEnd;
+                selectionMax = selectionStart;
+            }
+
             final TextView textView = (TextView) view;
             final Layout layout = textView.getLayout();
             if (layout != null && !textView.isOffsetMappingAvailable()) {
                 final int line = layout.getLineForOffset(Selection.getSelectionStart(content));
                 final int start = layout.getLineStart(line);
                 final int end = layout.getLineEnd(line);
-                if (end != start) {
-                    content.delete(start, end);
-                    return true;
+
+                if (forward) {
+                    content.delete(selectionMin, end);
+                } else {
+                    content.delete(start, selectionMax);
                 }
+
+                return true;
             }
         }
         return false;

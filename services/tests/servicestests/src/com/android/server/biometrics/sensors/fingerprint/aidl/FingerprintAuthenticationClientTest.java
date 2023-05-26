@@ -36,6 +36,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
@@ -165,8 +166,12 @@ public class FingerprintAuthenticationClientTest {
         InOrder order = inOrder(mHal, mBiometricContext);
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
-        order.verify(mHal).authenticateWithContext(
-                eq(OP_ID), same(mOperationContextCaptor.getValue().toAidlContext()));
+
+        final OperationContext aidlContext = mOperationContextCaptor.getValue().toAidlContext();
+        order.verify(mHal).authenticateWithContext(eq(OP_ID), same(aidlContext));
+        assertThat(aidlContext.authenticateReason.getFingerprintAuthenticateReason())
+                .isEqualTo(AuthenticateReason.Fingerprint.UNKNOWN);
+
         verify(mHal, never()).authenticate(anyLong());
     }
 
@@ -333,7 +338,7 @@ public class FingerprintAuthenticationClientTest {
         assertThat(opContext).isSameInstanceAs(
                 mOperationContextCaptor.getValue().toAidlContext());
         mContextInjector.getValue().accept(opContext);
-        verify(mHal).onContextChanged(eq(opContext));
+        verify(mHal).onContextChanged(same(opContext));
 
         client.stopHalOperation();
         verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));

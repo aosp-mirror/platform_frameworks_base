@@ -558,10 +558,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         try {
             final Intent onClickIntent;
 
-            if (provider.maskedBySuspendedPackage) {
+            if (provider.maskedByQuietProfile) {
+                showBadge = true;
+                onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(appUserId);
+            } else if (provider.maskedBySuspendedPackage) {
                 showBadge = mUserManager.hasBadge(appUserId);
                 final String suspendingPackage = mPackageManagerInternal.getSuspendingPackage(
                         appInfo.packageName, appUserId);
+                // TODO(b/281839596): don't rely on platform always meaning suspended by admin.
                 if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
                     onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
                             appUserId, true);
@@ -575,9 +579,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             appInfo.packageName, suspendingPackage, dialogInfo, null, null,
                             appUserId);
                 }
-            } else if (provider.maskedByQuietProfile) {
-                showBadge = true;
-                onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(appUserId);
             } else /* provider.maskedByLockedProfile */ {
                 showBadge = true;
                 onClickIntent = mKeyguardManager

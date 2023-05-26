@@ -20,7 +20,6 @@
 #include <input/MotionPredictor.h>
 
 #include "android_view_MotionEvent.h"
-#include "core_jni_converters.h"
 #include "core_jni_helpers.h"
 
 /**
@@ -29,14 +28,6 @@
  */
 
 namespace android {
-
-// ----------------------------------------------------------------------------
-
-static struct {
-    jclass clazz;
-} gMotionEventClassInfo;
-
-// ----------------------------------------------------------------------------
 
 static void release(void* ptr) {
     delete reinterpret_cast<MotionPredictor*>(ptr);
@@ -57,14 +48,20 @@ static void android_view_MotionPredictor_nativeRecord(JNIEnv* env, jclass clazz,
                                                       jobject event) {
     MotionPredictor* predictor = reinterpret_cast<MotionPredictor*>(ptr);
     MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, event);
-    predictor->record(*motionEvent);
+
+    android::base::Result<void> result = predictor->record(*motionEvent);
+    if (!result.ok()) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          result.error().message().c_str());
+    }
 }
 
 static jobject android_view_MotionPredictor_nativePredict(JNIEnv* env, jclass clazz, jlong ptr,
                                                           jlong predictionTimeNanos) {
     MotionPredictor* predictor = reinterpret_cast<MotionPredictor*>(ptr);
-    return toJavaArray(env, predictor->predict(static_cast<nsecs_t>(predictionTimeNanos)),
-                       gMotionEventClassInfo.clazz, &android_view_MotionEvent_obtainFromNative);
+    return android_view_MotionEvent_obtainFromNative(env,
+                                                     predictor->predict(static_cast<nsecs_t>(
+                                                             predictionTimeNanos)));
 }
 
 static jboolean android_view_MotionPredictor_nativeIsPredictionAvailable(JNIEnv* env, jclass clazz,
@@ -84,15 +81,13 @@ static const std::array<JNINativeMethod, 5> gMotionPredictorMethods{{
          (void*)android_view_MotionPredictor_nativeGetNativeMotionPredictorFinalizer},
         {"nativeRecord", "(JLandroid/view/MotionEvent;)V",
          (void*)android_view_MotionPredictor_nativeRecord},
-        {"nativePredict", "(JJ)[Landroid/view/MotionEvent;",
+        {"nativePredict", "(JJ)Landroid/view/MotionEvent;",
          (void*)android_view_MotionPredictor_nativePredict},
         {"nativeIsPredictionAvailable", "(JII)Z",
          (void*)android_view_MotionPredictor_nativeIsPredictionAvailable},
 }};
 
 int register_android_view_MotionPredictor(JNIEnv* env) {
-    jclass motionEventClazz = FindClassOrDie(env, "android/view/MotionEvent");
-    gMotionEventClassInfo.clazz = MakeGlobalRefOrDie(env, motionEventClazz);
     return RegisterMethodsOrDie(env, "android/view/MotionPredictor", gMotionPredictorMethods.data(),
                                 gMotionPredictorMethods.size());
 }

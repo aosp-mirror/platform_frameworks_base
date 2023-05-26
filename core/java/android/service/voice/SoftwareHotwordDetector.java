@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -86,7 +87,7 @@ class SoftwareHotwordDetector extends AbstractDetector {
 
     @RequiresPermission(RECORD_AUDIO)
     @Override
-    public boolean startRecognition() throws IllegalDetectorStateException {
+    public boolean startRecognition() {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
@@ -109,7 +110,7 @@ class SoftwareHotwordDetector extends AbstractDetector {
     /** TODO: stopRecognition */
     @RequiresPermission(RECORD_AUDIO)
     @Override
-    public boolean stopRecognition() throws IllegalDetectorStateException {
+    public boolean stopRecognition() {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
@@ -176,11 +177,16 @@ class SoftwareHotwordDetector extends AbstractDetector {
 
         /** Called when the detection fails due to an error. */
         @Override
-        public void onError(DetectorFailure detectorFailure) {
-            Slog.v(TAG, "BinderCallback#onError detectorFailure: " + detectorFailure);
+        public void onHotwordDetectionServiceFailure(
+                HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
+            Slog.v(TAG, "BinderCallback#onHotwordDetectionServiceFailure:"
+                    + hotwordDetectionServiceFailure);
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
-                mCallback.onFailure(detectorFailure != null ? detectorFailure
-                        : new UnknownFailure("Error data is null"));
+                if (hotwordDetectionServiceFailure != null) {
+                    mCallback.onFailure(hotwordDetectionServiceFailure);
+                } else {
+                    mCallback.onUnknownFailure("Error data is null");
+                }
             }));
         }
 
@@ -228,19 +234,41 @@ class SoftwareHotwordDetector extends AbstractDetector {
         }
 
         @Override
-        public void onError(int status) throws RemoteException {
-            if (DEBUG) {
-                Slog.i(TAG, "Ignored #onError (" + status + ") event");
-            }
-            // TODO: Check if we still need to implement this method with DetectorFailure mechanism.
+        public void onHotwordDetectionServiceFailure(
+                HotwordDetectionServiceFailure hotwordDetectionServiceFailure)
+                throws RemoteException {
+            Slog.v(TAG, "onHotwordDetectionServiceFailure: " + hotwordDetectionServiceFailure);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                if (hotwordDetectionServiceFailure != null) {
+                    mCallback.onFailure(hotwordDetectionServiceFailure);
+                } else {
+                    mCallback.onUnknownFailure("Error data is null");
+                }
+            }));
         }
 
         @Override
-        public void onDetectionFailure(DetectorFailure detectorFailure) throws RemoteException {
-            Slog.v(TAG, "onDetectionFailure detectorFailure: " + detectorFailure);
+        public void onVisualQueryDetectionServiceFailure(
+                VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure)
+                throws RemoteException {
+            // It should never be called here.
+            Slog.w(TAG, "onVisualQueryDetectionServiceFailure: "
+                    + visualQueryDetectionServiceFailure);
+        }
+
+        @Override
+        public void onSoundTriggerFailure(SoundTriggerFailure onSoundTriggerFailure)
+                throws RemoteException {
+            // It should never be called here.
+            Slog.wtf(TAG, "Unexpected STFailure in software detector: " + onSoundTriggerFailure);
+        }
+
+        @Override
+        public void onUnknownFailure(String errorMessage) throws RemoteException {
+            Slog.v(TAG, "onUnknownFailure: " + errorMessage);
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
-                mCallback.onFailure(detectorFailure != null ? detectorFailure
-                        : new UnknownFailure("Error data is null"));
+                mCallback.onUnknownFailure(
+                        !TextUtils.isEmpty(errorMessage) ? errorMessage : "Error data is null");
             }));
         }
 

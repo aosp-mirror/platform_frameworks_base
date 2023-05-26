@@ -39,13 +39,14 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,7 +55,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-@Ignore("b/269171747")
 public class ReduceBrightColorsTileTest extends SysuiTestCase {
     @Mock
     private QSHost mHost;
@@ -70,6 +70,8 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private ReduceBrightColorsController mReduceBrightColorsController;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private ReduceBrightColorsTile mTile;
@@ -86,6 +88,7 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
                 true,
                 mReduceBrightColorsController,
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -96,6 +99,12 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
         );
 
         mTile.initialize();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

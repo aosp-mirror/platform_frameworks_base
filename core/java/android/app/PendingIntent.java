@@ -407,7 +407,7 @@ public final class PendingIntent implements Parcelable {
     }
 
     private static void checkPendingIntent(int flags, @NonNull Intent intent,
-            @NonNull Context context) {
+            @NonNull Context context, boolean isActivityResultType) {
         final boolean isFlagImmutableSet = (flags & PendingIntent.FLAG_IMMUTABLE) != 0;
         final boolean isFlagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
         final String packageName = context.getPackageName();
@@ -428,11 +428,12 @@ public final class PendingIntent implements Parcelable {
                 throw new IllegalArgumentException(msg);
         }
 
-        // For apps with target SDK < U, warn that creation or retrieval of a mutable
-        // implicit PendingIntent will be blocked from target SDK U onwards for security
-        // reasons. The block itself happens on the server side, but this warning has to
-        // stay here to preserve the client side stack trace for app developers.
-        if (isNewMutableDisallowedImplicitPendingIntent(flags, intent)
+        // For apps with target SDK < U, warn that creation or retrieval of a mutable implicit
+        // PendingIntent that is not of type {@link ActivityManager#INTENT_SENDER_ACTIVITY_RESULT}
+        // will be blocked from target SDK U onwards for security reasons. The block itself
+        // happens on the server side, but this warning has to stay here to preserve the client
+        // side stack trace for app developers.
+        if (isNewMutableDisallowedImplicitPendingIntent(flags, intent, isActivityResultType)
                 && !Compatibility.isChangeEnabled(BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT)) {
             String msg = "New mutable implicit PendingIntent: pkg=" + packageName
                     + ", action=" + intent.getAction()
@@ -445,7 +446,13 @@ public final class PendingIntent implements Parcelable {
 
     /** @hide */
     public static boolean isNewMutableDisallowedImplicitPendingIntent(int flags,
-            @NonNull Intent intent) {
+            @NonNull Intent intent, boolean isActivityResultType) {
+        if (isActivityResultType) {
+            // Pending intents of type {@link ActivityManager#INTENT_SENDER_ACTIVITY_RESULT}
+            // should be ignored as they are intrinsically tied to a target which means they
+            // are already explicit.
+            return false;
+        }
         boolean isFlagNoCreateSet = (flags & PendingIntent.FLAG_NO_CREATE) != 0;
         boolean isFlagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
         boolean isImplicit = (intent.getComponent() == null) && (intent.getPackage() == null);
@@ -534,7 +541,7 @@ public final class PendingIntent implements Parcelable {
             @NonNull Intent intent, int flags, Bundle options, UserHandle user) {
         String packageName = context.getPackageName();
         String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
-        checkPendingIntent(flags, intent, context);
+        checkPendingIntent(flags, intent, context, /* isActivityResultType */ false);
         try {
             intent.migrateExtraStreamToClipData(context);
             intent.prepareToLeaveProcess(context);
@@ -668,7 +675,7 @@ public final class PendingIntent implements Parcelable {
             intents[i].migrateExtraStreamToClipData(context);
             intents[i].prepareToLeaveProcess(context);
             resolvedTypes[i] = intents[i].resolveTypeIfNeeded(context.getContentResolver());
-            checkPendingIntent(flags, intents[i], context);
+            checkPendingIntent(flags, intents[i], context, /* isActivityResultType */ false);
         }
         try {
             IIntentSender target =
@@ -721,7 +728,7 @@ public final class PendingIntent implements Parcelable {
             Intent intent, int flags, UserHandle userHandle) {
         String packageName = context.getPackageName();
         String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
-        checkPendingIntent(flags, intent, context);
+        checkPendingIntent(flags, intent, context, /* isActivityResultType */ false);
         try {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
@@ -800,7 +807,7 @@ public final class PendingIntent implements Parcelable {
             Intent intent, int flags, int serviceKind) {
         String packageName = context.getPackageName();
         String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
-        checkPendingIntent(flags, intent, context);
+        checkPendingIntent(flags, intent, context, /* isActivityResultType */ false);
         try {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
@@ -841,7 +848,8 @@ public final class PendingIntent implements Parcelable {
     /**
      * Perform the operation associated with this PendingIntent.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -855,7 +863,8 @@ public final class PendingIntent implements Parcelable {
      *
      * @param code Result code to supply back to the PendingIntent's target.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -875,7 +884,8 @@ public final class PendingIntent implements Parcelable {
      * original Intent. If flag {@link #FLAG_IMMUTABLE} was set when this
      * pending intent was created, this argument will be ignored.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -893,9 +903,12 @@ public final class PendingIntent implements Parcelable {
      * sending behavior.  May be built from an {@link ActivityOptions} to apply to an
      * activity start.
      *
-     * @hide
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String)
+     *
+     * @throws CanceledException Throws CanceledException if the PendingIntent
+     * is no longer allowing more intents to be sent through it.
      */
-    public void send(Bundle options) throws CanceledException {
+    public void send(@Nullable Bundle options) throws CanceledException {
         send(null, 0, null, null, null, null, options);
     }
 
@@ -910,7 +923,8 @@ public final class PendingIntent implements Parcelable {
      * should happen.  If null, the callback will happen from the thread
      * pool of the process.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -944,11 +958,8 @@ public final class PendingIntent implements Parcelable {
      * should happen.  If null, the callback will happen from the thread
      * pool of the process.
      *
-     * @see #send()
-     * @see #send(int)
-     * @see #send(Context, int, Intent)
-     * @see #send(int, android.app.PendingIntent.OnFinished, Handler)
-     * @see #send(Context, int, Intent, OnFinished, Handler, String)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -987,11 +998,8 @@ public final class PendingIntent implements Parcelable {
      * {@link Context#sendBroadcast(Intent, String) Context.sendOrderedBroadcast(Intent, String)}.
      * If null, no permission is required.
      *
-     * @see #send()
-     * @see #send(int)
-     * @see #send(Context, int, Intent)
-     * @see #send(int, android.app.PendingIntent.OnFinished, Handler)
-     * @see #send(Context, int, Intent, OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -1033,12 +1041,6 @@ public final class PendingIntent implements Parcelable {
      * If null, no permission is required.
      * @param options Additional options the caller would like to provide to modify the sending
      * behavior.  May be built from an {@link ActivityOptions} to apply to an activity start.
-     *
-     * @see #send()
-     * @see #send(int)
-     * @see #send(Context, int, Intent)
-     * @see #send(int, android.app.PendingIntent.OnFinished, Handler)
-     * @see #send(Context, int, Intent, OnFinished, Handler)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.

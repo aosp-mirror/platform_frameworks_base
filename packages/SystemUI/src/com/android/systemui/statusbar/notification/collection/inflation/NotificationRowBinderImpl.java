@@ -177,7 +177,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private void bindRow(NotificationEntry entry, ExpandableNotificationRow row) {
         mListContainer.bindRow(row);
         mNotificationRemoteInputManager.bindRow(row);
-        row.setOnActivatedListener(mPresenter);
         entry.setRow(row);
         mNotifBindPipeline.manageRow(entry, row);
         mBindRowCallback.onBindRow(row);
@@ -211,6 +210,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         final boolean useIncreasedCollapsedHeight =
                 mMessagingUtil.isImportantMessaging(entry.getSbn(), entry.getImportance());
         final boolean isLowPriority = inflaterParams.isLowPriority();
+
+        // Set show snooze action
+        row.setShowSnooze(inflaterParams.getShowSnooze());
 
         RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         params.requireContentViews(FLAG_CONTENT_VIEW_CONTRACTED);

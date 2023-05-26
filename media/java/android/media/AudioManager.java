@@ -661,7 +661,10 @@ public class AudioManager {
      */
     public static final int ENCODED_SURROUND_OUTPUT_MANUAL = 3;
 
-    /** @hide */
+    /**
+     * @hide
+     * This list contains all the flags that can be used in internal APIs for volume
+     * related operations */
     @IntDef(flag = true, prefix = "FLAG", value = {
             FLAG_SHOW_UI,
             FLAG_ALLOW_RINGER_MODES,
@@ -681,16 +684,64 @@ public class AudioManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
 
-    /** @hide */
+    /**
+     * @hide
+     * This list contains all the flags that can be used in SDK-visible methods for volume
+     * related operations.
+     * See for instance {@link #adjustVolume(int, int)},
+     * {@link #adjustStreamVolume(int, int, int)},
+     * {@link #adjustSuggestedStreamVolume(int, int, int)},
+     * {@link #adjustVolumeGroupVolume(int, int, int)},
+     * {@link #setStreamVolume(int, int, int)}
+     * The list contains all volume flags, but the values commented out of the list are there for
+     * maintenance reasons (for when adding flags or changing their visibility),
+     * and to document why some are not in the list (hidden or SystemApi). */
     @IntDef(flag = true, prefix = "FLAG", value = {
             FLAG_SHOW_UI,
             FLAG_ALLOW_RINGER_MODES,
             FLAG_PLAY_SOUND,
             FLAG_REMOVE_SOUND_AND_VIBRATE,
             FLAG_VIBRATE,
+            //FLAG_FIXED_VOLUME,             removed due to @hide
+            //FLAG_BLUETOOTH_ABS_VOLUME,     removed due to @SystemApi
+            //FLAG_SHOW_SILENT_HINT,         removed due to @hide
+            //FLAG_HDMI_SYSTEM_AUDIO_VOLUME, removed due to @hide
+            //FLAG_ACTIVE_MEDIA_ONLY,        removed due to @hide
+            //FLAG_SHOW_UI_WARNINGS,         removed due to @hide
+            //FLAG_SHOW_VIBRATE_HINT,        removed due to @hide
+            //FLAG_FROM_KEY,                 removed due to @SystemApi
+            //FLAG_ABSOLUTE_VOLUME,          removed due to @hide
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PublicVolumeFlags {}
+
+    /**
+     * @hide
+     * Like PublicVolumeFlags, but for all the flags that can be used in @SystemApi methods for
+     * volume related operations.
+     * See for instance {@link #setVolumeIndexForAttributes(AudioAttributes, int, int)},
+     * {@link #setVolumeGroupVolumeIndex(int, int, int)},
+     * {@link #setStreamVolumeForUid(int, int, int, String, int, int, int)},
+     * {@link #adjustStreamVolumeForUid(int, int, int, String, int, int, int)},
+     * {@link #adjustSuggestedStreamVolumeForUid(int, int, int, String, int, int, int)}
+     * The list contains all volume flags, but the values commented out of the list are there for
+     * maintenance reasons (for when adding flags or changing their visibility),
+     * and to document which hidden values are not in the list. */
+    @IntDef(flag = true, prefix = "FLAG", value = {
+            FLAG_SHOW_UI,
+            FLAG_ALLOW_RINGER_MODES,
+            FLAG_PLAY_SOUND,
+            FLAG_REMOVE_SOUND_AND_VIBRATE,
+            FLAG_VIBRATE,
+            //FLAG_FIXED_VOLUME,             removed due to @hide
             FLAG_BLUETOOTH_ABS_VOLUME,
-            FLAG_HDMI_SYSTEM_AUDIO_VOLUME,
+            //FLAG_SHOW_SILENT_HINT,         removed due to @hide
+            //FLAG_HDMI_SYSTEM_AUDIO_VOLUME, removed due to @hide
+            //FLAG_ACTIVE_MEDIA_ONLY,        removed due to @hide
+            //FLAG_SHOW_UI_WARNINGS,         removed due to @hide
+            //FLAG_SHOW_VIBRATE_HINT,        removed due to @hide
             FLAG_FROM_KEY,
+            //FLAG_ABSOLUTE_VOLUME,          removed due to @hide
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SystemVolumeFlags {}
@@ -981,13 +1032,13 @@ public class AudioManager {
      * @param direction The direction to adjust the volume. One of
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *            {@link #ADJUST_SAME}.
-     * @param flags One or more flags.
+     * @param flags
      * @see #adjustVolume(int, int)
      * @see #setStreamVolume(int, int, int)
      * @throws SecurityException if the adjustment triggers a Do Not Disturb change
      *   and the caller is not granted notification policy access.
      */
-    public void adjustStreamVolume(int streamType, int direction, int flags) {
+    public void adjustStreamVolume(int streamType, int direction, @PublicVolumeFlags int flags) {
         final IAudioService service = getService();
         try {
             service.adjustStreamVolumeWithAttribution(streamType, direction, flags,
@@ -1014,13 +1065,13 @@ public class AudioManager {
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE},
      *            {@link #ADJUST_SAME}, {@link #ADJUST_MUTE},
      *            {@link #ADJUST_UNMUTE}, or {@link #ADJUST_TOGGLE_MUTE}.
-     * @param flags One or more flags.
+     * @param flags
      * @see #adjustSuggestedStreamVolume(int, int, int)
      * @see #adjustStreamVolume(int, int, int)
      * @see #setStreamVolume(int, int, int)
      * @see #isVolumeFixed()
      */
-    public void adjustVolume(int direction, int flags) {
+    public void adjustVolume(int direction, @PublicVolumeFlags int flags) {
         MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
         helper.sendAdjustVolumeBy(USE_DEFAULT_STREAM_TYPE, direction, flags);
     }
@@ -1043,13 +1094,14 @@ public class AudioManager {
      * @param suggestedStreamType The stream type that will be used if there
      *            isn't a relevant stream. {@link #USE_DEFAULT_STREAM_TYPE} is
      *            valid here.
-     * @param flags One or more flags.
+     * @param flags
      * @see #adjustVolume(int, int)
      * @see #adjustStreamVolume(int, int, int)
      * @see #setStreamVolume(int, int, int)
      * @see #isVolumeFixed()
      */
-    public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
+    public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType,
+            @PublicVolumeFlags int flags) {
         MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
         helper.sendAdjustVolumeBy(suggestedStreamType, direction, flags);
     }
@@ -1334,14 +1386,14 @@ public class AudioManager {
      * @param streamType The stream whose volume index should be set.
      * @param index The volume index to set. See
      *            {@link #getStreamMaxVolume(int)} for the largest valid value.
-     * @param flags One or more flags.
+     * @param flags
      * @see #getStreamMaxVolume(int)
      * @see #getStreamVolume(int)
      * @see #isVolumeFixed()
      * @throws SecurityException if the volume change triggers a Do Not Disturb change
      *   and the caller is not granted notification policy access.
      */
-    public void setStreamVolume(int streamType, int index, int flags) {
+    public void setStreamVolume(int streamType, int index, @PublicVolumeFlags int flags) {
         final IAudioService service = getService();
         try {
             service.setStreamVolumeWithAttribution(streamType, index, flags,
@@ -1357,7 +1409,7 @@ public class AudioManager {
      * @param index The volume index to set. See
      *          {@link #getMaxVolumeIndexForAttributes(AudioAttributes)} for the largest valid value
      *          {@link #getMinVolumeIndexForAttributes(AudioAttributes)} for the lowest valid value.
-     * @param flags One or more flags.
+     * @param flags
      * @see #getMaxVolumeIndexForAttributes(AudioAttributes)
      * @see #getMinVolumeIndexForAttributes(AudioAttributes)
      * @see #isVolumeFixed()
@@ -1365,7 +1417,8 @@ public class AudioManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setVolumeIndexForAttributes(@NonNull AudioAttributes attr, int index, int flags) {
+    public void setVolumeIndexForAttributes(@NonNull AudioAttributes attr, int index,
+            @SystemVolumeFlags int flags) {
         Preconditions.checkNotNull(attr, "attr must not be null");
         final IAudioService service = getService();
         int groupId = getVolumeGroupIdForAttributes(attr);
@@ -1451,7 +1504,7 @@ public class AudioManager {
      * @param index The volume index to set. See
      *          {@link #getVolumeGroupMaxVolumeIndex(id)} for the largest valid value
      *          {@link #getVolumeGroupMinVolumeIndex(id)} for the lowest valid value.
-     * @param flags One or more flags.
+     * @param flags
      * @hide
      */
     @SystemApi
@@ -1552,11 +1605,11 @@ public class AudioManager {
      * @param direction The direction to adjust the volume. One of
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *            {@link #ADJUST_SAME}.
-     * @param flags One or more flags.
+     * @param flags
      * @throws SecurityException if the adjustment triggers a Do Not Disturb change and the caller
      * is not granted notification policy access.
      */
-    public void adjustVolumeGroupVolume(int groupId, int direction, @SystemVolumeFlags int flags) {
+    public void adjustVolumeGroupVolume(int groupId, int direction, @PublicVolumeFlags int flags) {
         IAudioService service = getService();
         try {
             service.adjustVolumeGroupVolume(groupId, direction, flags,
@@ -3677,7 +3730,12 @@ public class AudioManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(Manifest.permission.BLUETOOTH_STACK)
     public void setA2dpSuspended(boolean enable) {
-        AudioSystem.setParameters("A2dpSuspended=" + enable);
+        final IAudioService service = getService();
+        try {
+            service.setA2dpSuspended(enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -3690,7 +3748,12 @@ public class AudioManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(Manifest.permission.BLUETOOTH_STACK)
     public void setLeAudioSuspended(boolean enable) {
-        AudioSystem.setParameters("LeAudioSuspended=" + enable);
+        final IAudioService service = getService();
+        try {
+            service.setLeAudioSuspended(enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -6752,7 +6815,7 @@ public class AudioManager {
 
     /**
      * @hide
-     * Lower media volume to RS1
+     * Lower media volume to RS1 interval
      */
     public void lowerVolumeToRs1() {
         try {
@@ -6764,13 +6827,13 @@ public class AudioManager {
 
     /**
      * @hide
-     * @return the RS2 value used for momentary exposure warnings
+     * @return the RS2 upper bound used for momentary exposure warnings
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public float getRs2Value() {
         try {
-            return getService().getRs2Value();
+            return getService().getOutputRs2UpperBound();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6778,13 +6841,13 @@ public class AudioManager {
 
     /**
      * @hide
-     * Sets the RS2 value used for momentary exposure warnings
+     * Sets the RS2 upper bound used for momentary exposure warnings
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setRs2Value(float rs2Value) {
         try {
-            getService().setRs2Value(rs2Value);
+            getService().setOutputRs2UpperBound(rs2Value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6806,7 +6869,9 @@ public class AudioManager {
 
     /**
      * @hide
-     * Sets the computed sound dose value to {@code csd}
+     * Sets the computed sound dose value to {@code csd}. A negative value will
+     * reset all the CSD related timeouts: after a momentary exposure warning and
+     * before the momentary exposure reaches RS2 (see IEC62368-1 10.6.5)
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
@@ -6850,7 +6915,7 @@ public class AudioManager {
 
     /**
      * @hide
-     * Returns whether CSD is enabled on this device.
+     * Returns whether CSD is enabled and supported by the HAL on this device.
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
@@ -8232,7 +8297,7 @@ public class AudioManager {
      *         {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE},
      *         {@link #ADJUST_SAME}, {@link #ADJUST_MUTE},
      *         {@link #ADJUST_UNMUTE}, or {@link #ADJUST_TOGGLE_MUTE}.
-     * @param flags One or more flags.
+     * @param flags
      * @param packageName the package name of client application
      * @param uid the uid of client application
      * @param pid the pid of client application
@@ -8245,7 +8310,8 @@ public class AudioManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void adjustSuggestedStreamVolumeForUid(int suggestedStreamType, int direction, int flags,
+    public void adjustSuggestedStreamVolumeForUid(int suggestedStreamType, int direction,
+            @SystemVolumeFlags int flags,
             @NonNull String packageName, int uid, int pid, int targetSdkVersion) {
         try {
             getService().adjustSuggestedStreamVolumeForUid(suggestedStreamType, direction, flags,
@@ -8275,7 +8341,7 @@ public class AudioManager {
      * @param direction The direction to adjust the volume. One of
      *         {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *         {@link #ADJUST_SAME}.
-     * @param flags One or more flags.
+     * @param flags
      * @param packageName the package name of client application
      * @param uid the uid of client application
      * @param pid the pid of client application
@@ -8288,7 +8354,8 @@ public class AudioManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void adjustStreamVolumeForUid(int streamType, int direction, int flags,
+    public void adjustStreamVolumeForUid(int streamType, int direction,
+            @SystemVolumeFlags int flags,
             @NonNull String packageName, int uid, int pid, int targetSdkVersion) {
         try {
             getService().adjustStreamVolumeForUid(streamType, direction, flags, packageName, uid,
@@ -8312,7 +8379,7 @@ public class AudioManager {
      * @param streamType The stream whose volume index should be set.
      * @param index The volume index to set. See
      *         {@link #getStreamMaxVolume(int)} for the largest valid value.
-     * @param flags One or more flags.
+     * @param flags
      * @param packageName the package name of client application
      * @param uid the uid of client application
      * @param pid the pid of client application
@@ -8326,7 +8393,8 @@ public class AudioManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void setStreamVolumeForUid(int streamType, int index, int flags,
+    public void setStreamVolumeForUid(int streamType, int index,
+            @SystemVolumeFlags int flags,
             @NonNull String packageName, int uid, int pid, int targetSdkVersion) {
         try {
             getService().setStreamVolumeForUid(streamType, index, flags, packageName, uid, pid,
@@ -9564,7 +9632,10 @@ public class AudioManager {
      * A stream type is considered independent when the volume changes of that type do not
      * affect any other independent volume control stream type.
      * An independent stream type is its own alias when using {@link #getStreamTypeAlias(int)}.
-     * @return list of independent stream types.
+     * @return list of independent stream types, where each value can be one of
+     *     {@link #STREAM_VOICE_CALL}, {@link #STREAM_SYSTEM}, {@link #STREAM_RING},
+     *     {@link #STREAM_MUSIC}, {@link #STREAM_ALARM}, {@link #STREAM_NOTIFICATION},
+     *     {@link #STREAM_DTMF} and {@link #STREAM_ACCESSIBILITY}.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)

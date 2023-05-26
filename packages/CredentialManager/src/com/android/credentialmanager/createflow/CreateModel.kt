@@ -29,16 +29,29 @@ data class CreateCredentialUiState(
   val currentScreenState: CreateScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
   val sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-  // Should not change with the real time update of default provider, only determine whether
-  // we're showing provider selection page at the beginning
-  val hasDefaultProvider: Boolean,
   val activeEntry: ActiveEntry? = null,
   val remoteEntry: RemoteInfo? = null,
-  val isFromProviderSelection: Boolean? = null,
+  val foundCandidateFromUserDefaultProvider: Boolean,
 )
 
+internal fun isFlowAutoSelectable(
+    uiState: CreateCredentialUiState
+): Boolean {
+  return uiState.requestDisplayInfo.isAutoSelectRequest &&
+      // Even if the flow is auto selectable, still allow passkey intro screen to show once if
+      // applicable.
+      uiState.currentScreenState != CreateScreenState.PASSKEY_INTRO &&
+      uiState.currentScreenState != CreateScreenState.MORE_ABOUT_PASSKEYS_INTRO &&
+      uiState.sortedCreateOptionsPairs.size == 1 &&
+      uiState.activeEntry?.activeEntryInfo?.let {
+        it is CreateOptionInfo && it.allowAutoSelect
+      } ?: false
+}
+
 internal fun hasContentToDisplay(state: CreateCredentialUiState): Boolean {
-    return state.sortedCreateOptionsPairs.isNotEmpty()
+    return state.sortedCreateOptionsPairs.isNotEmpty() ||
+        (!state.requestDisplayInfo.preferImmediatelyAvailableCredentials &&
+            state.remoteEntry != null)
 }
 
 open class ProviderInfo(
@@ -48,11 +61,12 @@ open class ProviderInfo(
 )
 
 class EnabledProviderInfo(
-  icon: Drawable,
-  id: String,
-  displayName: String,
-  var createOptions: List<CreateOptionInfo>,
-  var remoteEntry: RemoteInfo?,
+    icon: Drawable,
+    id: String,
+    displayName: String,
+    // Sorted by last used time
+    var sortedCreateOptions: List<CreateOptionInfo>,
+    var remoteEntry: RemoteInfo?,
 ) : ProviderInfo(icon, id, displayName)
 
 class DisabledProviderInfo(
@@ -67,13 +81,14 @@ class CreateOptionInfo(
     entrySubkey: String,
     pendingIntent: PendingIntent?,
     fillInIntent: Intent?,
-    val userProviderDisplayName: String?,
+    val userProviderDisplayName: String,
     val profileIcon: Drawable?,
     val passwordCount: Int?,
     val passkeyCount: Int?,
     val totalCredentialCount: Int?,
-    val lastUsedTime: Instant?,
+    val lastUsedTime: Instant,
     val footerDescription: String?,
+    val allowAutoSelect: Boolean,
 ) : BaseEntry(
     providerId,
     entryKey,
@@ -104,6 +119,11 @@ data class RequestDisplayInfo(
   val type: CredentialType,
   val appName: String,
   val typeIcon: Drawable,
+  val preferImmediatelyAvailableCredentials: Boolean,
+  val appPreferredDefaultProviderId: String?,
+  val userSetDefaultProviderIds: Set<String>,
+  // Whether the given CreateCredentialRequest allows auto select.
+  val isAutoSelectRequest: Boolean,
 )
 
 /**
@@ -119,9 +139,8 @@ data class ActiveEntry (
 enum class CreateScreenState {
   PASSKEY_INTRO,
   MORE_ABOUT_PASSKEYS_INTRO,
-  PROVIDER_SELECTION,
   CREATION_OPTION_SELECTION,
   MORE_OPTIONS_SELECTION,
-  MORE_OPTIONS_ROW_INTRO,
+  DEFAULT_PROVIDER_CONFIRMATION,
   EXTERNAL_ONLY_SELECTION,
 }

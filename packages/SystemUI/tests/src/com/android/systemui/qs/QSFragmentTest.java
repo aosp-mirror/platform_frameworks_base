@@ -52,6 +52,8 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
@@ -60,6 +62,7 @@ import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.FakeDisplayTracker;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -103,6 +106,9 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Mock private QSSquishinessController mSquishinessController;
     @Mock private FooterActionsViewModel mFooterActionsViewModel;
     @Mock private FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
+    @Mock private FooterActionsViewBinder mFooterActionsViewBinder;
+    @Mock private LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    @Mock private FeatureFlags mFeatureFlags;
     private View mQsFragmentView;
 
     public QSFragmentTest() {
@@ -148,12 +154,50 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    public void transitionToFullShade_setsAlphaUsingShadeInterpolator() {
+    public void transitionToFullShade_smallScreen_alphaAlways1() {
         QSFragment fragment = resumeAndGetFragment();
+        setIsSmallScreen();
         setStatusBarCurrentAndUpcomingState(StatusBarState.SHADE);
         boolean isTransitioningToFullShade = true;
         float transitionProgress = 0.5f;
         float squishinessFraction = 0.5f;
+
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
+
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1f);
+    }
+
+    @Test
+    public void transitionToFullShade_largeScreen_flagEnabled_alphaLargeScreenShadeInterpolator() {
+        when(mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
+                .thenReturn(true);
+        QSFragment fragment = resumeAndGetFragment();
+        setIsLargeScreen();
+        setStatusBarCurrentAndUpcomingState(StatusBarState.SHADE);
+        boolean isTransitioningToFullShade = true;
+        float transitionProgress = 0.5f;
+        float squishinessFraction = 0.5f;
+        when(mLargeScreenShadeInterpolator.getQsAlpha(transitionProgress)).thenReturn(123f);
+
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
+
+        assertThat(mQsFragmentView.getAlpha())
+                .isEqualTo(123f);
+    }
+
+    @Test
+    public void transitionToFullShade_largeScreen_flagDisabled_alphaStandardInterpolator() {
+        when(mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
+                .thenReturn(false);
+        QSFragment fragment = resumeAndGetFragment();
+        setIsLargeScreen();
+        setStatusBarCurrentAndUpcomingState(StatusBarState.SHADE);
+        boolean isTransitioningToFullShade = true;
+        float transitionProgress = 0.5f;
+        float squishinessFraction = 0.5f;
+        when(mLargeScreenShadeInterpolator.getQsAlpha(transitionProgress)).thenReturn(123f);
 
         fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
                 squishinessFraction);
@@ -514,7 +558,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(DumpManager.class),
                 mock(QSLogger.class),
                 mock(FooterActionsController.class),
-                mFooterActionsViewModelFactory);
+                mFooterActionsViewModelFactory,
+                mFooterActionsViewBinder,
+                mLargeScreenShadeInterpolator,
+                mFeatureFlags);
     }
 
     private void setUpOther() {
@@ -539,7 +586,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         when(mQsFragmentView.findViewById(R.id.header)).thenReturn(mHeader);
         when(mQsFragmentView.findViewById(android.R.id.edit)).thenReturn(new View(mContext));
         when(mQsFragmentView.findViewById(R.id.qs_footer_actions)).thenAnswer(
-                invocation -> FooterActionsViewBinder.create(mContext));
+                invocation -> new FooterActionsViewBinder().create(mContext));
     }
 
     private void setUpInflater() {
@@ -621,5 +668,13 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
             locationOnScreen[1] = top;
             return null;
         }).when(view).getLocationOnScreen(any(int[].class));
+    }
+
+    private void setIsLargeScreen() {
+        getFragment().setIsNotificationPanelFullWidth(false);
+    }
+
+    private void setIsSmallScreen() {
+        getFragment().setIsNotificationPanelFullWidth(true);
     }
 }

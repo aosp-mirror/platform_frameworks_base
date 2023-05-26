@@ -44,6 +44,8 @@ constructor(
     private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
     private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
     private val burnInHelperWrapper: BurnInHelperWrapper,
+    private val longPressViewModel: KeyguardLongPressViewModel,
+    val settingsMenuViewModel: KeyguardSettingsMenuViewModel,
 ) {
     data class PreviewMode(
         val isInPreviewMode: Boolean = false,
@@ -135,7 +137,7 @@ constructor(
      *
      * @param initiallySelectedSlotId The ID of the initial slot to render as the selected one.
      * @param shouldHighlightSelectedAffordance Whether the selected quick affordance should be
-     * highlighted (while all others are dimmed to make the selected one stand out).
+     *   highlighted (while all others are dimmed to make the selected one stand out).
      */
     fun enablePreviewMode(
         initiallySelectedSlotId: String?,
@@ -161,6 +163,14 @@ constructor(
         selectedPreviewSlotId.value = slotId
     }
 
+    /**
+     * Notifies that some input gesture has started somewhere in the bottom area that's outside of
+     * the lock screen settings menu item pop-up.
+     */
+    fun onTouchedOutsideLockScreenSettingsMenu() {
+        longPressViewModel.onTouchedOutside()
+    }
+
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
@@ -174,8 +184,10 @@ constructor(
                     bottomAreaInteractor.animateDozingTransitions.distinctUntilChanged(),
                     areQuickAffordancesFullyOpaque,
                     selectedPreviewSlotId,
-                ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId ->
-                    val isSelected = selectedPreviewSlotId == position.toSlotId()
+                    quickAffordanceInteractor.useLongPress(),
+                ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId, useLongPress ->
+                    val slotId = position.toSlotId()
+                    val isSelected = selectedPreviewSlotId == slotId
                     model.toViewModel(
                         animateReveal = !previewMode.isInPreviewMode && animateReveal,
                         isClickable = isFullyOpaque && !previewMode.isInPreviewMode,
@@ -187,6 +199,9 @@ constructor(
                             previewMode.isInPreviewMode &&
                                 previewMode.shouldHighlightSelectedAffordance &&
                                 !isSelected,
+                        forceInactive = previewMode.isInPreviewMode,
+                        slotId = slotId,
+                        useLongPress = useLongPress,
                     )
                 }
                 .distinctUntilChanged()
@@ -198,6 +213,9 @@ constructor(
         isClickable: Boolean,
         isSelected: Boolean,
         isDimmed: Boolean,
+        forceInactive: Boolean,
+        slotId: String,
+        useLongPress: Boolean,
     ): KeyguardQuickAffordanceViewModel {
         return when (this) {
             is KeyguardQuickAffordanceModel.Visible ->
@@ -210,15 +228,20 @@ constructor(
                         quickAffordanceInteractor.onQuickAffordanceTriggered(
                             configKey = parameters.configKey,
                             expandable = parameters.expandable,
+                            slotId = parameters.slotId,
                         )
                     },
                     isClickable = isClickable,
-                    isActivated = activationState is ActivationState.Active,
+                    isActivated = !forceInactive && activationState is ActivationState.Active,
                     isSelected = isSelected,
-                    useLongPress = quickAffordanceInteractor.useLongPress,
+                    useLongPress = useLongPress,
                     isDimmed = isDimmed,
+                    slotId = slotId,
                 )
-            is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel()
+            is KeyguardQuickAffordanceModel.Hidden ->
+                KeyguardQuickAffordanceViewModel(
+                    slotId = slotId,
+                )
         }
     }
 

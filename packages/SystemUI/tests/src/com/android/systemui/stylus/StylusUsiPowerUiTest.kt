@@ -45,6 +45,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.never
@@ -194,22 +195,14 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     }
 
     @Test
-    fun refresh_hasConnectedBluetoothStylus_cancelsNotification() {
-        whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(0))
-
-        stylusUsiPowerUi.refresh()
-
-        verify(notificationManager).cancel(R.string.stylus_battery_low_percentage)
-    }
-
-    @Test
-    fun refresh_hasConnectedBluetoothStylus_existingNotification_cancelsNotification() {
+    fun refresh_hasConnectedBluetoothStylus_existingNotification_doesNothing() {
         stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
         whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(0))
+        clearInvocations(notificationManager)
 
         stylusUsiPowerUi.refresh()
 
-        verify(notificationManager).cancel(R.string.stylus_battery_low_percentage)
+        verifyNoMoreInteractions(notificationManager)
     }
 
     @Test

@@ -27,7 +27,6 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
@@ -46,6 +45,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
@@ -66,7 +66,6 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
 
     private lateinit var underTest: WifiViewModel
 
-    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
@@ -121,16 +120,16 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
             underTest =
                 WifiViewModel(
                     airplaneModeViewModel,
+                    shouldShowSignalSpacerProvider = { MutableStateFlow(false) },
                     connectivityConstants,
                     context,
                     tableLogBuffer,
                     interactor,
                     scope,
-                    statusBarPipelineFlags,
                     wifiConstants,
                 )
 
-            val iconFlow = underTest.home.wifiIcon
+            val iconFlow = underTest.wifiIcon
             val job = iconFlow.launchIn(this)
 
             // WHEN we set a certain network
@@ -368,40 +367,37 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
 
                 // network = CarrierMerged => not shown
                 TestCase(
+                    enabled = true,
+                    isDefault = true,
+                    forceHidden = false,
                     network =
                         WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
                     expected = null,
                 ),
 
-                // network = Inactive => not shown
+                // isDefault = false => no networks shown
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Inactive,
                     expected = null,
                 ),
-
-                // network = Unavailable => not shown
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Unavailable,
                     expected = null,
                 ),
-
-                // network = Active & validated = false => not shown
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 3),
                     expected = null,
                 ),
 
-                // network = Active & validated = true => shown
+                // Even though this network is active and validated, we still doesn't want it shown
+                // because wifi isn't the default connection (b/272509965).
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 4),
-                    expected =
-                        Expected(
-                            iconResource = WIFI_FULL_ICONS[4],
-                            contentDescription = { context ->
-                                context.getString(WIFI_CONNECTION_STRENGTH[4])
-                            },
-                            description = "Full internet level 4 icon",
-                        ),
+                    expected = null,
                 ),
             )
     }

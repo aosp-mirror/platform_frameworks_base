@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -44,6 +44,7 @@ import org.junit.runners.Parameterized
  *     Launch a secondary activity within the app
  *     Close the secondary activity back to the initial one
  * ```
+ *
  * Notes:
  * ```
  *     1. Part of the test setup occurs automatically via

@@ -17,11 +17,20 @@
 package com.android.server.companion;
 
 import android.companion.AssociationInfo;
+import android.companion.ContextSyncMessage;
+import android.companion.Telecom;
+import android.companion.datatransfer.PermissionSyncRequest;
 import android.net.MacAddress;
 import android.os.Binder;
 import android.os.ShellCommand;
+import android.util.proto.ProtoOutputStream;
 
+import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
+import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
+import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.transport.CompanionTransportManager;
+import com.android.server.companion.transport.Transport;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -30,15 +39,25 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private static final String TAG = "CDM_CompanionDeviceShellCommand";
 
     private final CompanionDeviceManagerService mService;
-    private final AssociationStore mAssociationStore;
+    private final AssociationStoreImpl mAssociationStore;
     private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
+    private final CompanionTransportManager mTransportManager;
+
+    private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
+    private final AssociationRequestsProcessor mAssociationRequestsProcessor;
 
     CompanionDeviceShellCommand(CompanionDeviceManagerService service,
-            AssociationStore associationStore,
-            CompanionDevicePresenceMonitor devicePresenceMonitor) {
+            AssociationStoreImpl associationStore,
+            CompanionDevicePresenceMonitor devicePresenceMonitor,
+            CompanionTransportManager transportManager,
+            SystemDataTransferRequestStore systemDataTransferRequestStore,
+            AssociationRequestsProcessor associationRequestsProcessor) {
         mService = service;
         mAssociationStore = associationStore;
         mDevicePresenceMonitor = devicePresenceMonitor;
+        mTransportManager = transportManager;
+        mSystemDataTransferRequestStore = systemDataTransferRequestStore;
+        mAssociationRequestsProcessor = associationRequestsProcessor;
     }
 
     @Override
@@ -55,7 +74,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                         // TODO(b/212535524): use AssociationInfo.toShortString(), once it's not
                         //  longer referenced in tests.
                         out.println(association.getPackageName() + " "
-                                + association.getDeviceMacAddress());
+                                + association.getDeviceMacAddress() + " " + association.getId());
                     }
                 }
                 break;
@@ -107,6 +126,156 @@ class CompanionDeviceShellCommand extends ShellCommand {
                 }
                 break;
 
+                case "create-emulated-transport":
+                    // This command creates a RawTransport in order to test Transport listeners
+                    associationId = getNextIntArgRequired();
+                    mTransportManager.createEmulatedTransport(associationId);
+                    break;
+
+                case "send-context-sync-empty-message": {
+                    associationId = getNextIntArgRequired();
+                    mTransportManager.createEmulatedTransport(associationId)
+                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                                    /* sequence= */ 0,
+                                    CrossDeviceSyncController.createEmptyMessage());
+                    break;
+                }
+
+                case "send-context-sync-call-create-message": {
+                    associationId = getNextIntArgRequired();
+                    String callId = getNextArgRequired();
+                    String address = getNextArgRequired();
+                    String facilitator = getNextArgRequired();
+                    mTransportManager.createEmulatedTransport(associationId)
+                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                                    /* sequence= */ 0,
+                                    CrossDeviceSyncController.createCallCreateMessage(callId,
+                                            address, facilitator));
+                    break;
+                }
+
+                case "send-context-sync-call-control-message": {
+                    associationId = getNextIntArgRequired();
+                    String callId = getNextArgRequired();
+                    int control = getNextIntArgRequired();
+                    mTransportManager.createEmulatedTransport(associationId)
+                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                                    /* sequence= */ 0,
+                                    CrossDeviceSyncController.createCallControlMessage(callId,
+                                            control));
+                    break;
+                }
+
+                case "send-context-sync-call-facilitators-message": {
+                    associationId = getNextIntArgRequired();
+                    int numberOfFacilitators = getNextIntArgRequired();
+                    String facilitatorName = getNextArgRequired();
+                    String facilitatorId = getNextArgRequired();
+                    final ProtoOutputStream pos = new ProtoOutputStream();
+                    pos.write(ContextSyncMessage.VERSION, 1);
+                    final long telecomToken = pos.start(ContextSyncMessage.TELECOM);
+                    for (int i = 0; i < numberOfFacilitators; i++) {
+                        final long facilitatorsToken = pos.start(Telecom.FACILITATORS);
+                        pos.write(Telecom.CallFacilitator.NAME,
+                                numberOfFacilitators == 1 ? facilitatorName : facilitatorName + i);
+                        pos.write(Telecom.CallFacilitator.IDENTIFIER,
+                                numberOfFacilitators == 1 ? facilitatorId : facilitatorId + i);
+                        pos.end(facilitatorsToken);
+                    }
+                    pos.end(telecomToken);
+                    mTransportManager.createEmulatedTransport(associationId)
+                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                                    /* sequence= */ 0, pos.getBytes());
+                    break;
+                }
+
+                case "send-context-sync-call-message": {
+                    associationId = getNextIntArgRequired();
+                    String callId = getNextArgRequired();
+                    String facilitatorId = getNextArgRequired();
+                    int status = getNextIntArgRequired();
+                    boolean acceptControl = getNextBooleanArgRequired();
+                    boolean rejectControl = getNextBooleanArgRequired();
+                    boolean silenceControl = getNextBooleanArgRequired();
+                    boolean muteControl = getNextBooleanArgRequired();
+                    boolean unmuteControl = getNextBooleanArgRequired();
+                    boolean endControl = getNextBooleanArgRequired();
+                    boolean holdControl = getNextBooleanArgRequired();
+                    boolean unholdControl = getNextBooleanArgRequired();
+                    final ProtoOutputStream pos = new ProtoOutputStream();
+                    pos.write(ContextSyncMessage.VERSION, 1);
+                    final long telecomToken = pos.start(ContextSyncMessage.TELECOM);
+                    final long callsToken = pos.start(Telecom.CALLS);
+                    pos.write(Telecom.Call.ID, callId);
+                    final long originToken = pos.start(Telecom.Call.ORIGIN);
+                    pos.write(Telecom.Call.Origin.CALLER_ID, "Caller Name");
+                    pos.write(Telecom.Call.Origin.APP_ICON, BitmapUtils.renderDrawableToByteArray(
+                            mService.getContext().getPackageManager().getApplicationIcon(
+                                    facilitatorId)));
+                    final long facilitatorToken = pos.start(
+                            Telecom.Request.CreateAction.FACILITATOR);
+                    pos.write(Telecom.CallFacilitator.NAME, "Test App Name");
+                    pos.write(Telecom.CallFacilitator.IDENTIFIER, facilitatorId);
+                    pos.end(facilitatorToken);
+                    pos.end(originToken);
+                    pos.write(Telecom.Call.STATUS, status);
+                    if (acceptControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.ACCEPT);
+                    }
+                    if (rejectControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.REJECT);
+                    }
+                    if (silenceControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.SILENCE);
+                    }
+                    if (muteControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.MUTE);
+                    }
+                    if (unmuteControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.UNMUTE);
+                    }
+                    if (endControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.END);
+                    }
+                    if (holdControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.PUT_ON_HOLD);
+                    }
+                    if (unholdControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.TAKE_OFF_HOLD);
+                    }
+                    pos.end(callsToken);
+                    pos.end(telecomToken);
+                    mTransportManager.createEmulatedTransport(associationId)
+                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                                    /* sequence= */ 0, pos.getBytes());
+                    break;
+                }
+
+                case "disable-context-sync": {
+                    associationId = getNextIntArgRequired();
+                    int flag = getNextIntArgRequired();
+                    mAssociationRequestsProcessor.disableSystemDataSync(associationId, flag);
+                    break;
+                }
+
+                case "enable-context-sync": {
+                    associationId = getNextIntArgRequired();
+                    int flag = getNextIntArgRequired();
+                    mAssociationRequestsProcessor.enableSystemDataSync(associationId, flag);
+                    break;
+                }
+
+                case "allow-permission-sync": {
+                    int userId = getNextIntArgRequired();
+                    associationId = getNextIntArgRequired();
+                    boolean enabled = getNextBooleanArgRequired();
+                    PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+                    request.setUserId(userId);
+                    request.setUserConsented(enabled);
+                    mSystemDataTransferRequestStore.writeRequest(userId, request);
+                }
+                break;
+
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -122,6 +291,15 @@ class CompanionDeviceShellCommand extends ShellCommand {
 
     private int getNextIntArgRequired() {
         return Integer.parseInt(getNextArgRequired());
+    }
+
+    private boolean getNextBooleanArgRequired() {
+        String arg = getNextArgRequired();
+        if ("true".equalsIgnoreCase(arg) || "false".equalsIgnoreCase(arg)) {
+            return Boolean.parseBoolean(arg);
+        } else {
+            throw new IllegalArgumentException("Expected a boolean argument but was: " + arg);
+        }
     }
 
     @Override
@@ -165,5 +343,8 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      for a long time (90 days or as configured via ");
         pw.println("      \"debug.cdm.cdmservice.cleanup_time_window\" system property). ");
         pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+        pw.println("  create-emulated-transport <ASSOCIATION_ID>");
+        pw.println("      Create an EmulatedTransport for testing purposes only");
     }
 }

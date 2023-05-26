@@ -42,6 +42,13 @@ public final class BrightnessUtils {
     }
 
     /**
+     * Clamps the brightness value in the maximum and the minimum brightness adjustment range
+     */
+    public static float clampBrightnessAdjustment(float value) {
+        return MathUtils.constrain(value, -1.0f, 1.0f);
+    }
+
+    /**
      * A utility to construct the DisplayBrightnessState
      */
     public static DisplayBrightnessState constructDisplayBrightnessState(

@@ -979,6 +979,19 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
+     * An unrestricted version of getType, which does not reveal sensitive information
+     */
+    @Override
+    public final @Nullable String getTypeAnonymous(@NonNull Uri uri) {
+        switch (mMatcher.match(uri)) {
+            case MATCH_ROOT:
+                return DocumentsContract.Root.MIME_TYPE_ITEM;
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Implementation is provided by the parent class. Can be overridden to
      * provide additional functionality, but subclasses <em>must</em> always
      * call the superclass. If the superclass returns {@code null}, the subclass

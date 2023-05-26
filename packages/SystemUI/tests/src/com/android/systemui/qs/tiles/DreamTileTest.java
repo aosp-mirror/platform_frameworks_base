@@ -48,12 +48,14 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +84,8 @@ public class DreamTileTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
 
@@ -110,6 +114,12 @@ public class DreamTileTest extends SysuiTestCase {
 
         mTestableLooper.processAllMessages();
         mTile.initialize();
+    }
+
+    @After
+    public void tearDown() {
+        mTile.destroy();
+        mTestableLooper.processAllMessages();
     }
 
     @Test
@@ -251,6 +261,7 @@ public class DreamTileTest extends SysuiTestCase {
             boolean dreamOnlyEnabledForSystemUser) {
         return new DreamTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

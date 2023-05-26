@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"Omogočeno"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"Glave so filtrirane"</item>
-    <item msgid="4818549483446395865">"Predstavnostni paketi A2DP so filtrirani"</item>
-    <item msgid="8207123990453243311">"Kanal RFCOMM je filtriran"</item>
+    <item msgid="195768089203590086">"Ohranitev samo glav ACL"</item>
+    <item msgid="2776218217644557831">"Filtriranje predstavnostnih paketov A2DP"</item>
+    <item msgid="8163235976612675092">"Filtriranje kanala RFCOMM"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"Onemogočeno"</item>
-    <item msgid="5884245882825346396">"Čarovnija"</item>
-    <item msgid="6569400572915342949">"Glava"</item>
-    <item msgid="1239386221416967664">"Polni filter"</item>
+    <item msgid="3961868665260627524">"Onemogoči"</item>
+    <item msgid="2505973306504851132">"Zapolnitev z nizom znakov"</item>
+    <item msgid="5883011000629613855">"Ohranitev samo glave"</item>
+    <item msgid="1051534112762023603">"Popolna odstranitev"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (privzeto)"</item>

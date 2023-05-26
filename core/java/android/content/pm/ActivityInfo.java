@@ -1083,8 +1083,23 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION =
             254631730L; // buganizer id
+
+    /**
+     * This change id enables compat policy that ignores app requested orientation in
+     * response to an app calling {@link android.app.Activity#setRequestedOrientation} more
+     * than twice in one second if an activity is not letterboxed for fixed orientation.
+     * See com.android.server.wm.LetterboxUiController#shouldIgnoreRequestedOrientation
+     * for details.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
+            273509367L; // buganizer id
 
     /**
      * This change id forces the packages it is applied to never have Display API sandboxing
@@ -1128,6 +1143,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION =
             263959004L; // buganizer id
 
@@ -1140,6 +1156,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH = 264304459L; // buganizer id
 
     /**
@@ -1152,8 +1169,37 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
             264301586L; // buganizer id
+
+    /**
+     * This change id forces the packages it is applied to sandbox {@link android.view.View} API to
+     * an activity bounds for:
+     *
+     * <p>{@link android.view.View#getLocationOnScreen},
+     * {@link android.view.View#getWindowVisibleDisplayFrame},
+     * {@link android.view.View}#getWindowDisplayFrame,
+     * {@link android.view.View}#getBoundsOnScreen.
+     *
+     * <p>For {@link android.view.View#getWindowVisibleDisplayFrame} and
+     * {@link android.view.View}#getWindowDisplayFrame this sandboxing is happening indirectly
+     * through
+     * {@link android.view.ViewRootImpl}#getWindowVisibleDisplayFrame,
+     * {@link android.view.ViewRootImpl}#getDisplayFrame respectively.
+     *
+     * <p>Some applications assume that they occupy the whole screen and therefore use the display
+     * coordinates in their calculations as if an activity is  positioned in the top-left corner of
+     * the screen, with left coordinate equal to 0. This may not be the case of applications in
+     * multi-window and in letterbox modes. This can lead to shifted or out of bounds UI elements in
+     * case the activity is Letterboxed or is in multi-window mode.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS = 237531167L; // buganizer id
 
     /**
      * This change id is the gatekeeper for all treatments that force a given min aspect ratio.
@@ -1250,6 +1296,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS = 263259275L;
 
     // Compat framework that per-app overrides rely on only supports booleans. That's why we have
@@ -1265,6 +1312,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT = 265452344L;
 
     /**
@@ -1276,6 +1324,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR = 265451093L;
 
     /**
@@ -1289,6 +1338,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE = 266124927L;
 
     /**
@@ -1335,6 +1385,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
 
     /**
@@ -1644,27 +1695,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @UnsupportedAppUsage
     public boolean supportsPictureInPicture() {
         return (flags & FLAG_SUPPORTS_PICTURE_IN_PICTURE) != 0;
-    }
-
-    /**
-     * Returns whether the activity supports size changes.
-     * @hide
-     */
-    @SizeChangesSupportMode
-    public int supportsSizeChanges() {
-        if (isChangeEnabled(FORCE_NON_RESIZE_APP)) {
-            return SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
-        }
-
-        if (supportsSizeChanges) {
-            return SIZE_CHANGES_SUPPORTED_METADATA;
-        }
-
-        if (isChangeEnabled(FORCE_RESIZE_APP)) {
-            return SIZE_CHANGES_SUPPORTED_OVERRIDE;
-        }
-
-        return SIZE_CHANGES_UNSUPPORTED_METADATA;
     }
 
     /**

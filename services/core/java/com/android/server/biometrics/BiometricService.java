@@ -31,6 +31,7 @@ import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -58,6 +59,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.security.KeyStore;
 import android.text.TextUtils;
@@ -102,6 +104,7 @@ public class BiometricService extends SystemService {
     private final Random mRandom = new Random();
     @NonNull private final Supplier<Long> mRequestCounter;
     @NonNull private final BiometricContext mBiometricContext;
+    private final UserManager mUserManager;
 
     @VisibleForTesting
     IStatusBarService mStatusBarService;
@@ -477,8 +480,13 @@ public class BiometricService extends SystemService {
             }
 
             @Override
-            public void onDialogAnimatedIn() {
-                mHandler.post(() -> handleOnDialogAnimatedIn(requestId));
+            public void onDialogAnimatedIn(boolean startFingerprintNow) {
+                mHandler.post(() -> handleOnDialogAnimatedIn(requestId, startFingerprintNow));
+            }
+
+            @Override
+            public void onStartFingerprintNow() {
+                mHandler.post(() -> handleOnStartFingerprintNow(requestId));
             }
         };
     }
@@ -688,14 +696,18 @@ public class BiometricService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public void registerEnabledOnKeyguardCallback(
-                IBiometricEnabledOnKeyguardCallback callback, int callingUserId) {
+                IBiometricEnabledOnKeyguardCallback callback) {
 
             super.registerEnabledOnKeyguardCallback_enforcePermission();
 
             mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
+            final List<UserInfo> aliveUsers = mUserManager.getAliveUsers();
             try {
-                callback.onChanged(mSettingObserver.getEnabledOnKeyguard(callingUserId),
-                        callingUserId);
+                for (UserInfo userInfo: aliveUsers) {
+                    final int userId = userInfo.id;
+                    callback.onChanged(mSettingObserver.getEnabledOnKeyguard(userId),
+                            userId);
+                }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
             }
@@ -1010,6 +1022,10 @@ public class BiometricService extends SystemService {
         public BiometricContext getBiometricContext(Context context) {
             return BiometricContext.getInstance(context);
         }
+
+        public UserManager getUserManager(Context context) {
+            return context.getSystemService(UserManager.class);
+        }
     }
 
     /**
@@ -1037,6 +1053,7 @@ public class BiometricService extends SystemService {
                 mEnabledOnKeyguardCallbacks);
         mRequestCounter = mInjector.getRequestGenerator();
         mBiometricContext = injector.getBiometricContext(context);
+        mUserManager = injector.getUserManager(context);
 
         try {
             injector.getActivityManagerService().registerUserSwitchObserver(
@@ -1225,7 +1242,7 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleOnDialogAnimatedIn(long requestId) {
+    private void handleOnDialogAnimatedIn(long requestId, boolean startFingerprintNow) {
         Slog.d(TAG, "handleOnDialogAnimatedIn");
 
         final AuthSession session = getAuthSessionIfCurrent(requestId);
@@ -1234,7 +1251,19 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        session.onDialogAnimatedIn();
+        session.onDialogAnimatedIn(startFingerprintNow);
+    }
+
+    private void handleOnStartFingerprintNow(long requestId) {
+        Slog.d(TAG, "handleOnStartFingerprintNow");
+
+        final AuthSession session = getAuthSessionIfCurrent(requestId);
+        if (session == null) {
+            Slog.w(TAG, "handleOnStartFingerprintNow: AuthSession is not current");
+            return;
+        }
+
+        session.onStartFingerprint();
     }
 
     /**

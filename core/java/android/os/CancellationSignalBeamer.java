@@ -18,10 +18,15 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.system.SystemCleaner;
+import android.util.Pair;
+import android.view.inputmethod.CancellableHandwritingGesture;
+import android.view.inputmethod.HandwritingGesture;
 
 import java.lang.ref.Cleaner;
 import java.lang.ref.Reference;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -133,7 +138,7 @@ public class CancellationSignalBeamer {
          * MUST be forwarded to {@link Receiver#cancel} with proper ordering. See
          * {@link CancellationSignalBeamer} for details.
          */
-        public abstract void onCancel(IBinder token);
+        public abstract void onCancel(@NonNull IBinder token);
 
         /**
          * A {@link #beam}ed {@link CancellationSignal} was GC'd.
@@ -141,7 +146,61 @@ public class CancellationSignalBeamer {
          * MUST be forwarded to {@link Receiver#forget} with proper ordering. See
          * {@link CancellationSignalBeamer} for details.
          */
-        public abstract void onForget(IBinder token);
+        public abstract void onForget(@NonNull IBinder token);
+
+        private static final ThreadLocal<Pair<Sender, ArrayList<CloseableToken>>> sScope =
+                new ThreadLocal<>();
+
+        /**
+         * Beams a {@link CancellationSignal} through an existing Binder interface.
+         * @param gesture {@link HandwritingGesture} that supports
+         *  {@link CancellableHandwritingGesture cancellation} requesting cancellation token.
+         * @return {@link IBinder} token. MUST be {@link MustClose#close}d <em>after</em>
+         *  the binder call transporting it to the remote process, best with
+         *  try-with-resources. {@code null} if {@code cs} was {@code null} or if
+         *  {@link HandwritingGesture} isn't {@link CancellableHandwritingGesture cancellable}.
+         */
+        @NonNull
+        public MustClose beamScopeIfNeeded(@NonNull HandwritingGesture gesture) {
+            if (!(gesture instanceof CancellableHandwritingGesture)) {
+                return null;
+            }
+            sScope.set(Pair.create(this, new ArrayList<>()));
+            return () -> {
+                var tokens = sScope.get().second;
+                sScope.remove();
+                for (int i = tokens.size() - 1; i >= 0; i--) {
+                    if (tokens.get(i) != null) {
+                        tokens.get(i).close();
+                    }
+                }
+            };
+        }
+
+        /**
+         * An {@link AutoCloseable} interface with {@link AutoCloseable#close()} callback.
+         */
+        public interface MustClose extends AutoCloseable {
+            @Override
+            void close();
+        }
+
+        /**
+         * Beams a {@link CancellationSignal} token from existing scope created by previous call to
+         * {@link #beamScopeIfNeeded()}
+         * @param cs {@link CancellationSignal} for which token should be returned.
+         * @return {@link IBinder} token.
+         */
+        @NonNull
+        public static IBinder beamFromScope(@NonNull CancellationSignal cs) {
+            var state = sScope.get();
+            if (state != null) {
+                var token = state.first.beam(cs);
+                state.second.add(token);
+                return token;
+            }
+            return null;
+        }
 
         private static class Token extends Binder implements CloseableToken, Runnable {
 
@@ -200,7 +259,7 @@ public class CancellationSignalBeamer {
          *
          * MUST be closed <em>after</em> it is sent over binder, ideally through try-with-resources.
          */
-        public interface CloseableToken extends IBinder, AutoCloseable {
+        public interface CloseableToken extends IBinder, MustClose {
             @Override
             void close(); // No throws
         }
@@ -215,10 +274,10 @@ public class CancellationSignalBeamer {
          * Constructs a new {@code Receiver}.
          *
          * @param cancelOnSenderDeath if true, {@link CancellationSignal}s obtained from
-         *   {@link #unbeam} are automatically {@link #cancel}led if the sender token
-         *   {@link Binder#linkToDeath dies}; otherwise they are simnply dropped. Note: if the
-         *   sending process drops all references to the {@link CancellationSignal} before
-         *   process death, the cancellation is not guaranteed.
+         *  {@link #unbeam} are automatically {@link #cancel}led if the sender token
+         *  {@link Binder#linkToDeath dies}; otherwise they are simnply dropped. Note: if the
+         *  sending process drops all references to the {@link CancellationSignal} before
+         *  process death, the cancellation is not guaranteed.
          */
         public Receiver(boolean cancelOnSenderDeath) {
             mCancelOnSenderDeath = cancelOnSenderDeath;
@@ -235,6 +294,7 @@ public class CancellationSignalBeamer {
          * @return a {@link CancellationSignal} linked to the given token.
          */
         @Nullable
+        @SuppressLint("VisiblySynchronized")
         public CancellationSignal unbeam(@Nullable IBinder token) {
             if (token == null) {
                 return null;
@@ -271,6 +331,7 @@ public class CancellationSignalBeamer {
          *
          * @param token the token to forget. No-op if {@code null}.
          */
+        @SuppressLint("VisiblySynchronized")
         public void forget(@Nullable IBinder token) {
             synchronized (this) {
                 if (mTokenMap.remove(token) != null) {
@@ -291,6 +352,7 @@ public class CancellationSignalBeamer {
          *
          * @param token the token to forget. No-op if {@code null}.
          */
+        @SuppressLint("VisiblySynchronized")
         public void cancel(@Nullable IBinder token) {
             CancellationSignal cs;
             synchronized (this) {

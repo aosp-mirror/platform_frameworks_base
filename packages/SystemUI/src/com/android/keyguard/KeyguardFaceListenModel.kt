@@ -17,9 +17,9 @@
 package com.android.keyguard
 
 import android.annotation.CurrentTimeMillisLong
+import com.android.systemui.common.buffer.RingBuffer
 import com.android.systemui.dump.DumpsysTableLogger
 import com.android.systemui.dump.Row
-import com.android.systemui.plugins.util.RingBuffer
 
 /** Verbose debug information associated. */
 data class KeyguardFaceListenModel(
@@ -40,11 +40,11 @@ data class KeyguardFaceListenModel(
     var keyguardGoingAway: Boolean = false,
     var listeningForFaceAssistant: Boolean = false,
     var occludingAppRequestingFaceAuth: Boolean = false,
-    val postureAllowsListening: Boolean = false,
-    var primaryUser: Boolean = false,
+    var postureAllowsListening: Boolean = false,
     var secureCameraLaunched: Boolean = false,
     var supportsDetect: Boolean = false,
     var switchingUser: Boolean = false,
+    var systemUser: Boolean = false,
     var udfpsFingerDown: Boolean = false,
     var userNotTrustedOrDetectionIsNeeded: Boolean = false,
 ) : KeyguardListenModel() {
@@ -69,10 +69,11 @@ data class KeyguardFaceListenModel(
             keyguardGoingAway.toString(),
             listeningForFaceAssistant.toString(),
             occludingAppRequestingFaceAuth.toString(),
-            primaryUser.toString(),
+            postureAllowsListening.toString(),
             secureCameraLaunched.toString(),
             supportsDetect.toString(),
             switchingUser.toString(),
+            systemUser.toString(),
             alternateBouncerShowing.toString(),
             udfpsFingerDown.toString(),
             userNotTrustedOrDetectionIsNeeded.toString(),
@@ -108,11 +109,11 @@ data class KeyguardFaceListenModel(
                 keyguardGoingAway = model.keyguardGoingAway
                 listeningForFaceAssistant = model.listeningForFaceAssistant
                 occludingAppRequestingFaceAuth = model.occludingAppRequestingFaceAuth
-                primaryUser = model.primaryUser
+                postureAllowsListening = model.postureAllowsListening
                 secureCameraLaunched = model.secureCameraLaunched
                 supportsDetect = model.supportsDetect
                 switchingUser = model.switchingUser
-                switchingUser = model.switchingUser
+                systemUser = model.systemUser
                 udfpsFingerDown = model.udfpsFingerDown
                 userNotTrustedOrDetectionIsNeeded = model.userNotTrustedOrDetectionIsNeeded
             }
@@ -151,10 +152,11 @@ data class KeyguardFaceListenModel(
                 "keyguardGoingAway",
                 "listeningForFaceAssistant",
                 "occludingAppRequestingFaceAuth",
-                "primaryUser",
+                "postureAllowsListening",
                 "secureCameraLaunched",
                 "supportsDetect",
                 "switchingUser",
+                "systemUser",
                 "udfpsBouncerShowing",
                 "udfpsFingerDown",
                 "userNotTrustedOrDetectionIsNeeded",

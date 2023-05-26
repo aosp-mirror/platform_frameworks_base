@@ -25,12 +25,50 @@ import android.graphics.Typeface
 import android.graphics.fonts.Font
 import android.graphics.fonts.FontVariationAxis
 import android.text.Layout
-import android.util.SparseArray
+import android.util.LruCache
 
-private const val TAG_WGHT = "wght"
 private const val DEFAULT_ANIMATION_DURATION: Long = 300
+private const val TYPEFACE_CACHE_MAX_ENTRIES = 5
 
 typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
+
+interface TypefaceVariantCache {
+    fun getTypefaceForVariant(fvar: String?): Typeface?
+
+    companion object {
+        fun createVariantTypeface(baseTypeface: Typeface, fVar: String?): Typeface {
+            if (fVar.isNullOrEmpty()) {
+                return baseTypeface
+            }
+
+            val axes = FontVariationAxis.fromFontVariationSettings(fVar).toMutableList()
+            axes.removeIf { !baseTypeface.isSupportedAxes(it.getOpenTypeTagValue()) }
+            if (axes.isEmpty()) {
+                return baseTypeface
+            }
+            return Typeface.createFromTypefaceWithVariation(baseTypeface, axes)
+        }
+    }
+}
+
+class TypefaceVariantCacheImpl(
+    var baseTypeface: Typeface,
+) : TypefaceVariantCache {
+    private val cache = LruCache<String, Typeface>(TYPEFACE_CACHE_MAX_ENTRIES)
+    override fun getTypefaceForVariant(fvar: String?): Typeface? {
+        if (fvar == null) {
+            return baseTypeface
+        }
+        cache.get(fvar)?.let {
+            return it
+        }
+
+        return TypefaceVariantCache
+            .createVariantTypeface(baseTypeface, fvar)
+            .also { cache.put(fvar, it) }
+    }
+}
+
 /**
  * This class provides text animation between two styles.
  *
@@ -51,15 +89,25 @@ typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
  *
  *         // Change the text size with animation.
  *         fun setTextSize(sizePx: Float, animate: Boolean) {
- *             animator.setTextStyle(-1 /* unchanged weight */, sizePx, animate)
+ *             animator.setTextStyle("" /* unchanged fvar... */, sizePx, animate)
  *         }
  *     }
  * ```
  * </code> </pre>
  */
-class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
+class TextAnimator(
+    layout: Layout,
+    private val invalidateCallback: () -> Unit,
+) {
+    var typefaceCache: TypefaceVariantCache = TypefaceVariantCacheImpl(layout.paint.typeface)
+        get() = field
+        set(value) {
+            field = value
+            textInterpolator.typefaceCache = value
+        }
+
     // Following two members are for mutable for testing purposes.
-    public var textInterpolator: TextInterpolator = TextInterpolator(layout)
+    public var textInterpolator: TextInterpolator = TextInterpolator(layout, typefaceCache)
     public var animator: ValueAnimator =
         ValueAnimator.ofFloat(1f).apply {
             duration = DEFAULT_ANIMATION_DURATION
@@ -69,9 +117,7 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
             }
             addListener(
                 object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        textInterpolator.rebase()
-                    }
+                    override fun onAnimationEnd(animation: Animator?) = textInterpolator.rebase()
                     override fun onAnimationCancel(animation: Animator?) = textInterpolator.rebase()
                 }
             )
@@ -115,7 +161,7 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
             protected set
     }
 
-    private val typefaceCache = SparseArray<Typeface?>()
+    private val fontVariationUtils = FontVariationUtils()
 
     fun updateLayout(layout: Layout) {
         textInterpolator.layout = layout
@@ -186,10 +232,11 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
      * Bu passing -1 to duration, the default text animation, 1000ms, is used.
      * By passing false to animate, the text will be updated without animation.
      *
-     * @param weight an optional text weight.
+     * @param fvar an optional text fontVariationSettings.
      * @param textSize an optional font size.
      * @param colors an optional colors array that must be the same size as numLines passed to
      *               the TextInterpolator
+     * @param strokeWidth an optional paint stroke width
      * @param animate an optional boolean indicating true for showing style transition as animation,
      *                false for immediate style transition. True by default.
      * @param duration an optional animation duration in milliseconds. This is ignored if animate is
@@ -198,9 +245,10 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
      *                     will be used. This is ignored if animate is false.
      */
     fun setTextStyle(
-        weight: Int = -1,
+        fvar: String? = "",
         textSize: Float = -1f,
         color: Int? = null,
+        strokeWidth: Float = -1f,
         animate: Boolean = true,
         duration: Long = -1L,
         interpolator: TimeInterpolator? = null,
@@ -215,44 +263,16 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
         if (textSize >= 0) {
             textInterpolator.targetPaint.textSize = textSize
         }
-        if (weight >= 0) {
-            val fontVariationArray =
-                    FontVariationAxis.fromFontVariationSettings(
-                        textInterpolator.targetPaint.fontVariationSettings
-                    )
-            if (fontVariationArray.isNullOrEmpty()) {
-                textInterpolator.targetPaint.typeface =
-                    typefaceCache.getOrElse(weight) {
-                        textInterpolator.targetPaint.fontVariationSettings = "'$TAG_WGHT' $weight"
-                        textInterpolator.targetPaint.typeface
-                    }
-            } else {
-                val idx = fontVariationArray.indexOfFirst { it.tag == "$TAG_WGHT" }
-                if (idx == -1) {
-                    val updatedFontVariation =
-                        textInterpolator.targetPaint.fontVariationSettings + ",'$TAG_WGHT' $weight"
-                    textInterpolator.targetPaint.typeface =
-                        typefaceCache.getOrElse(weight) {
-                            textInterpolator.targetPaint.fontVariationSettings =
-                                    updatedFontVariation
-                            textInterpolator.targetPaint.typeface
-                        }
-                } else {
-                    fontVariationArray[idx] = FontVariationAxis(
-                            "$TAG_WGHT", weight.toFloat())
-                    val updatedFontVariation =
-                            FontVariationAxis.toFontVariationSettings(fontVariationArray)
-                    textInterpolator.targetPaint.typeface =
-                        typefaceCache.getOrElse(weight) {
-                            textInterpolator.targetPaint.fontVariationSettings =
-                                    updatedFontVariation
-                            textInterpolator.targetPaint.typeface
-                        }
-                }
-            }
+
+        if (!fvar.isNullOrBlank()) {
+            textInterpolator.targetPaint.typeface = typefaceCache.getTypefaceForVariant(fvar)
         }
+
         if (color != null) {
             textInterpolator.targetPaint.color = color
+        }
+        if (strokeWidth >= 0F) {
+            textInterpolator.targetPaint.strokeWidth = strokeWidth
         }
         textInterpolator.onTargetPaintModified()
 
@@ -286,13 +306,56 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
             invalidateCallback()
         }
     }
-}
 
-private fun <V> SparseArray<V>.getOrElse(key: Int, defaultValue: () -> V): V {
-    var v = get(key)
-    if (v == null) {
-        v = defaultValue()
-        put(key, v)
+    /**
+     * Set text style with animation. Similar as
+     * fun setTextStyle(
+     *      fvar: String? = "",
+     *      textSize: Float = -1f,
+     *      color: Int? = null,
+     *      strokeWidth: Float = -1f,
+     *      animate: Boolean = true,
+     *      duration: Long = -1L,
+     *      interpolator: TimeInterpolator? = null,
+     *      delay: Long = 0,
+     *      onAnimationEnd: Runnable? = null
+     * )
+     *
+     * @param weight an optional style value for `wght` in fontVariationSettings.
+     * @param width an optional style value for `wdth` in fontVariationSettings.
+     * @param opticalSize an optional style value for `opsz` in fontVariationSettings.
+     * @param roundness an optional style value for `ROND` in fontVariationSettings.
+     */
+    fun setTextStyle(
+        weight: Int = -1,
+        width: Int = -1,
+        opticalSize: Int = -1,
+        roundness: Int = -1,
+        textSize: Float = -1f,
+        color: Int? = null,
+        strokeWidth: Float = -1f,
+        animate: Boolean = true,
+        duration: Long = -1L,
+        interpolator: TimeInterpolator? = null,
+        delay: Long = 0,
+        onAnimationEnd: Runnable? = null
+    ) {
+        val fvar = fontVariationUtils.updateFontVariation(
+            weight = weight,
+            width = width,
+            opticalSize = opticalSize,
+            roundness = roundness,
+        )
+        setTextStyle(
+            fvar = fvar,
+            textSize = textSize,
+            color = color,
+            strokeWidth = strokeWidth,
+            animate = animate,
+            duration = duration,
+            interpolator = interpolator,
+            delay = delay,
+            onAnimationEnd = onAnimationEnd,
+        )
     }
-    return v
 }

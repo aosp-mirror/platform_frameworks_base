@@ -21,7 +21,6 @@ import android.util.FloatProperty
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
-import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import javax.inject.Inject
@@ -59,10 +58,13 @@ constructor(private val foldStateProvider: FoldStateProvider) :
     }
 
     override fun onFoldUpdate(@FoldUpdate update: Int) {
-        when (update) {
-            FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE -> animator.start()
-            FOLD_UPDATE_FINISH_CLOSED -> animator.cancel()
+        if (update == FOLD_UPDATE_FINISH_CLOSED) {
+             animator.cancel()
         }
+    }
+
+    override fun onUnfoldedScreenAvailable() {
+        animator.start()
     }
 
     override fun addCallback(listener: TransitionProgressListener) {
@@ -72,8 +74,6 @@ constructor(private val foldStateProvider: FoldStateProvider) :
     override fun removeCallback(listener: TransitionProgressListener) {
         listeners.remove(listener)
     }
-
-    override fun onHingeAngleUpdate(angle: Float) {}
 
     private object AnimationProgressProperty :
         FloatProperty<FixedTimingTransitionProgressProvider>("animation_progress") {

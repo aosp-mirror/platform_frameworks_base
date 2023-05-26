@@ -120,7 +120,9 @@ class Owners {
                 } else {
                     mDeviceStateCache.setDeviceOwnerType(NO_DEVICE_OWNER);
                 }
-
+                for (int userId : usersIds) {
+                    mDeviceStateCache.setHasProfileOwner(userId, hasProfileOwner(userId));
+                }
             } else {
                 mUserManagerInternal.setDeviceManaged(hasDeviceOwner());
                 for (int userId : usersIds) {
@@ -129,7 +131,8 @@ class Owners {
             }
 
             notifyChangeLocked();
-            pushToActivityTaskManagerLocked();
+            pushDeviceOwnerUidToActivityTaskManagerLocked();
+            pushProfileOwnerUidsToActivityTaskManagerLocked();
         }
     }
 
@@ -161,8 +164,13 @@ class Owners {
     }
 
     @GuardedBy("mData")
-    private void pushToActivityTaskManagerLocked() {
+    private void pushDeviceOwnerUidToActivityTaskManagerLocked() {
         mActivityTaskManagerInternal.setDeviceOwnerUid(getDeviceOwnerUidLocked());
+    }
+
+    @GuardedBy("mData")
+    private void pushProfileOwnerUidsToActivityTaskManagerLocked() {
+        mActivityTaskManagerInternal.setProfileOwnerUids(getProfileOwnerUidsLocked());
     }
 
     @GuardedBy("mData")
@@ -192,6 +200,19 @@ class Owners {
         } else {
             return Process.INVALID_UID;
         }
+    }
+
+    @GuardedBy("mData")
+    Set<Integer> getProfileOwnerUidsLocked() {
+        Set<Integer> uids = new ArraySet<>();
+        for (int i = 0; i < mData.mProfileOwners.size(); i++) {
+            int userId = mData.mProfileOwners.keyAt(i);
+            OwnerInfo info = mData.mProfileOwners.valueAt(i);
+            uids.add(mPackageManagerInternal.getPackageUid(info.packageName,
+                    PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
+                    userId));
+        }
+        return uids;
     }
 
     String getDeviceOwnerPackageName() {
@@ -261,7 +282,7 @@ class Owners {
             }
 
             notifyChangeLocked();
-            pushToActivityTaskManagerLocked();
+            pushDeviceOwnerUidToActivityTaskManagerLocked();
         }
     }
 
@@ -280,7 +301,7 @@ class Owners {
                 mUserManagerInternal.setDeviceManaged(false);
             }
             notifyChangeLocked();
-            pushToActivityTaskManagerLocked();
+            pushDeviceOwnerUidToActivityTaskManagerLocked();
         }
     }
 
@@ -300,6 +321,7 @@ class Owners {
                 mUserManagerInternal.setUserManaged(userId, true);
             }
             notifyChangeLocked();
+            pushProfileOwnerUidsToActivityTaskManagerLocked();
         }
     }
 
@@ -315,6 +337,7 @@ class Owners {
                 mUserManagerInternal.setUserManaged(userId, false);
             }
             notifyChangeLocked();
+            pushProfileOwnerUidsToActivityTaskManagerLocked();
         }
     }
 
@@ -326,6 +349,7 @@ class Owners {
                     ownerInfo.isOrganizationOwnedDevice);
             mData.mProfileOwners.put(userId, newOwnerInfo);
             notifyChangeLocked();
+            pushProfileOwnerUidsToActivityTaskManagerLocked();
         }
     }
 
@@ -343,7 +367,7 @@ class Owners {
                         mData.mDeviceOwner.packageName, previousDeviceOwnerType);
             }
             notifyChangeLocked();
-            pushToActivityTaskManagerLocked();
+            pushDeviceOwnerUidToActivityTaskManagerLocked();
         }
     }
 

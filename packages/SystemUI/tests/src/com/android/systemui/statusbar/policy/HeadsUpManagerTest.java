@@ -114,6 +114,54 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     }
 
     @Test
+    public void testShouldHeadsUpBecomePinned_hasFSI_notUnpinned_true() {
+        // Set up NotifEntry with FSI
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+        notifEntry.getSbn().getNotification().fullScreenIntent = PendingIntent.getActivity(
+                getContext(), 0, new Intent(getContext(), this.getClass()),
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+
+        // Add notifEntry to ANM mAlertEntries map and make it NOT unpinned
+        mHeadsUpManager.showNotification(notifEntry);
+        HeadsUpManager.HeadsUpEntry headsUpEntry =
+                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
+        headsUpEntry.wasUnpinned = false;
+
+        assertTrue(mHeadsUpManager.shouldHeadsUpBecomePinned(notifEntry));
+    }
+
+    @Test
+    public void testShouldHeadsUpBecomePinned_wasUnpinned_false() {
+        // Set up NotifEntry with FSI
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+        notifEntry.getSbn().getNotification().fullScreenIntent = PendingIntent.getActivity(
+                getContext(), 0, new Intent(getContext(), this.getClass()),
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+
+        // Add notifEntry to ANM mAlertEntries map and make it unpinned
+        mHeadsUpManager.showNotification(notifEntry);
+        HeadsUpManager.HeadsUpEntry headsUpEntry =
+                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
+        headsUpEntry.wasUnpinned = true;
+
+        assertFalse(mHeadsUpManager.shouldHeadsUpBecomePinned(notifEntry));
+    }
+
+    @Test
+    public void testShouldHeadsUpBecomePinned_noFSI_false() {
+        // Set up NotifEntry with no FSI
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+
+        assertFalse(mHeadsUpManager.shouldHeadsUpBecomePinned(notifEntry));
+    }
+
+    @Test
     public void testShowNotification_autoDismissesWithAccessibilityTimeout() {
         doReturn(TEST_A11Y_AUTO_DISMISS_TIME).when(mAccessibilityMgr)
                 .getRecommendedTimeoutMillis(anyInt(), anyInt());

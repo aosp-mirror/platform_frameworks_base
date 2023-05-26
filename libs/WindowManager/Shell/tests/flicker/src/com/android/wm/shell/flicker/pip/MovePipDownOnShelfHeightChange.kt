@@ -40,6 +40,7 @@ import org.junit.runners.Parameterized
  *     Launch [testApp]
  *     Check if pip window moves down (visually)
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

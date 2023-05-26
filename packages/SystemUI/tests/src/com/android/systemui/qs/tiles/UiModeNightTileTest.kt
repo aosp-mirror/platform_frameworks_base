@@ -25,7 +25,6 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
@@ -33,12 +32,14 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.LocationController
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,8 +63,8 @@ class UiModeNightTileTest : SysuiTestCase() {
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var batteryController: BatteryController
     @Mock private lateinit var locationController: LocationController
+    @Mock private lateinit var uiEventLogger: QsEventLogger
 
-    private val uiEventLogger = UiEventLoggerFake()
     private val falsingManager = FalsingManagerFake()
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: UiModeNightTile
@@ -80,11 +81,11 @@ class UiModeNightTileTest : SysuiTestCase() {
         `when`(qsHost.userContext).thenReturn(mContext)
         `when`(mockContext.resources).thenReturn(resources)
         `when`(resources.configuration).thenReturn(configuration)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
         tile =
             UiModeNightTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 falsingManager,
@@ -96,6 +97,12 @@ class UiModeNightTileTest : SysuiTestCase() {
                 batteryController,
                 locationController
             )
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
+        testableLooper.processAllMessages()
     }
 
     @Test

@@ -33,7 +33,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
-import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
@@ -53,6 +52,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -302,7 +302,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void remQsTile(ComponentName tile) { }
         default void clickTile(ComponentName tile) { }
 
-        default void handleSystemKey(int arg1) { }
+        default void handleSystemKey(KeyEvent arg1) { }
         default void showPinningEnterExitToast(boolean entering) { }
         default void showPinningEscapeToast() { }
         default void handleShowGlobalActionsMenu() { }
@@ -316,7 +316,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                 IBiometricSysuiReceiver receiver,
                 int[] sensorIds, boolean credentialAllowed,
                 boolean requireConfirmation, int userId, long operationId, String opPackageName,
-                long requestId, @BiometricMultiSensorMode int multiSensorConfig) {
+                long requestId) {
         }
 
         /** @see IStatusBar#onBiometricAuthenticated(int) */
@@ -891,9 +891,9 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void handleSystemKey(int key) {
+    public void handleSystemKey(KeyEvent key) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_HANDLE_SYSTEM_KEY, key, 0).sendToTarget();
+            mHandler.obtainMessage(MSG_HANDLE_SYSTEM_KEY, key).sendToTarget();
         }
     }
 
@@ -955,8 +955,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
             int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
-            int userId, long operationId, String opPackageName, long requestId,
-            @BiometricMultiSensorMode int multiSensorConfig) {
+            int userId, long operationId, String opPackageName, long requestId) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = promptInfo;
@@ -968,7 +967,6 @@ public class CommandQueue extends IStatusBar.Stub implements
             args.arg6 = opPackageName;
             args.argl1 = operationId;
             args.argl2 = requestId;
-            args.argi2 = multiSensorConfig;
             mHandler.obtainMessage(MSG_BIOMETRIC_SHOW, args)
                     .sendToTarget();
         }
@@ -1534,7 +1532,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                     break;
                 case MSG_HANDLE_SYSTEM_KEY:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).handleSystemKey(msg.arg1);
+                        mCallbacks.get(i).handleSystemKey((KeyEvent) msg.obj);
                     }
                     break;
                 case MSG_SHOW_GLOBAL_ACTIONS:
@@ -1572,8 +1570,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                                 someArgs.argi1 /* userId */,
                                 someArgs.argl1 /* operationId */,
                                 (String) someArgs.arg6 /* opPackageName */,
-                                someArgs.argl2 /* requestId */,
-                                someArgs.argi2 /* multiSensorConfig */);
+                                someArgs.argl2 /* requestId */);
                     }
                     someArgs.recycle();
                     break;
