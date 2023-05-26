@@ -761,6 +761,18 @@ public final class AutofillManagerService
     }
 
     // Called by Shell command
+    boolean isFieldDetectionServiceEnabledForUser(@UserIdInt int userId) {
+        enforceCallingPermissionForManagement();
+        synchronized (mLock) {
+            final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+            if (service != null) {
+                return service.isPccClassificationEnabled();
+            }
+        }
+        return false;
+    }
+
+    // Called by Shell command
     String getFieldDetectionServiceName(@UserIdInt int userId) {
         enforceCallingPermissionForManagement();
         return mFieldClassificationResolver.readServiceName(userId);
