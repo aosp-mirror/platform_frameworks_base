@@ -1964,6 +1964,13 @@ public abstract class TvInteractiveAppService extends Service {
          */
         @CallSuper
         public void notifyAdBufferReady(@NonNull AdBuffer buffer) {
+            AdBuffer dupBuffer;
+            try {
+                dupBuffer = AdBuffer.dupAdBuffer(buffer);
+            } catch (IOException e) {
+                Log.w(TAG, "dup AdBuffer error in notifyAdBufferReady:", e);
+                return;
+            }
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1974,10 +1981,14 @@ public abstract class TvInteractiveAppService extends Service {
                                     "notifyAdBufferReady(buffer=" + buffer + ")");
                         }
                         if (mSessionCallback != null) {
-                            mSessionCallback.onAdBufferReady(AdBuffer.dupAdBuffer(buffer));
+                            mSessionCallback.onAdBufferReady(dupBuffer);
                         }
-                    } catch (RemoteException | IOException e) {
+                    } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyAdBuffer", e);
+                    } finally {
+                        if (dupBuffer != null) {
+                            dupBuffer.getSharedMemory().close();
+                        }
                     }
                 }
             });
