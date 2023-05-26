@@ -138,6 +138,14 @@ public class SlicePurchaseActivity extends Activity {
         finishAndRemoveTask();
     }
 
+    protected void onDismissFlow() {
+        logd("onDismissFlow: Dismiss flow called while purchasing premium capability "
+                + TelephonyManager.convertPremiumCapabilityToString(mCapability));
+        SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
+                mIntent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED);
+        finishAndRemoveTask();
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         // Pressing back in the WebView will go to the previous page instead of closing
