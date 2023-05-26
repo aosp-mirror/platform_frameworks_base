@@ -282,12 +282,20 @@ final class ScanPackageUtils {
         if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
             if (needToDeriveAbi) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
-                final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths> derivedAbi =
-                        packageAbiHelper.derivePackageAbi(parsedPackage, isSystemApp,
-                                isUpdatedSystemApp, cpuAbiOverride, appLib32InstallDir);
-                derivedAbi.first.applyTo(parsedPackage);
-                derivedAbi.second.applyTo(parsedPackage);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                try {
+                    final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
+                            derivedAbi =
+                                    packageAbiHelper.derivePackageAbi(
+                                            parsedPackage,
+                                            isSystemApp,
+                                            isUpdatedSystemApp,
+                                            cpuAbiOverride,
+                                            appLib32InstallDir);
+                    derivedAbi.first.applyTo(parsedPackage);
+                    derivedAbi.second.applyTo(parsedPackage);
+                } finally {
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                }
 
                 // Some system apps still use directory structure for native libraries
                 // in which case we might end up not detecting abi solely based on apk
