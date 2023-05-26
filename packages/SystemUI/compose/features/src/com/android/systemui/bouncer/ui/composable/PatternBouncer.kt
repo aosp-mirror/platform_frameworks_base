@@ -100,10 +100,14 @@ internal fun PatternBouncer(
 
     // When the current dot is changed, we need to update our animations.
     LaunchedEffect(currentDot, isAnimationEnabled) {
-        view.performHapticFeedback(
-            HapticFeedbackConstants.VIRTUAL_KEY,
-            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
-        )
+        // Perform haptic feedback, but only if the current dot is not null, so we don't perform it
+        // when the UI first shows up or when the user lifts their pointer/finger.
+        if (currentDot != null) {
+            view.performHapticFeedback(
+                HapticFeedbackConstants.VIRTUAL_KEY,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
+            )
+        }
 
         if (!isAnimationEnabled) {
             return@LaunchedEffect
