@@ -831,7 +831,13 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 }
             } else {
                 val wasGrantedByLegacy = newFlags.hasBits(PermissionFlags.LEGACY_GRANTED)
-                newFlags = newFlags andInv PermissionFlags.LEGACY_GRANTED
+                val hasImplicitFlag = newFlags.hasBits(PermissionFlags.IMPLICIT)
+                if (wasGrantedByLegacy) {
+                    newFlags = newFlags andInv PermissionFlags.LEGACY_GRANTED
+                    if (!hasImplicitFlag) {
+                        newFlags = newFlags or PermissionFlags.RUNTIME_GRANTED
+                    }
+                }
                 val wasGrantedByImplicit = newFlags.hasBits(PermissionFlags.IMPLICIT_GRANTED)
                 val isLeanbackNotificationsPermission = newState.externalState.isLeanback &&
                     permissionName in NOTIFICATIONS_PERMISSIONS
@@ -870,7 +876,6 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         )
                     }
                 }
-                val hasImplicitFlag = newFlags.hasBits(PermissionFlags.IMPLICIT)
                 if (!isImplicitPermission && hasImplicitFlag) {
                     newFlags = newFlags andInv PermissionFlags.IMPLICIT
                     var shouldRetainAsNearbyDevices = false
