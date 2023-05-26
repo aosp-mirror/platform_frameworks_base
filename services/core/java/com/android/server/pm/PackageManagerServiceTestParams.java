@@ -100,7 +100,6 @@ public final class PackageManagerServiceTestParams {
     public @Nullable String wearableSensingPackage;
     public ComponentName resolveComponentName;
     public ArrayMap<String, AndroidPackage> packages;
-    public boolean enableFreeCacheV2;
     public int sdkVersion;
     public File appInstallDir;
     public File appLib32InstallDir;
@@ -123,4 +122,5 @@ public final class PackageManagerServiceTestParams {
     public StorageEventHelper storageEventHelper;
     public Set<String> initialNonStoppedSystemPackages = new ArraySet<>();
     public boolean shouldStopSystemPackagesByDefault;
+    public FreeStorageHelper freeStorageHelper;
 }
