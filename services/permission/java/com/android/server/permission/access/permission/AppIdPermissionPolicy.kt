@@ -155,19 +155,13 @@ class AppIdPermissionPolicy : SchemePolicy() {
             evaluatePermissionStateForAllPackages(permissionName, null)
         }
 
-        newState.externalState.packageStates.forEach { (_, packageState) ->
-            val androidPackage = packageState.androidPackage
-            if (androidPackage == null || androidPackage.volumeUuid != volumeUuid) {
-                return@forEach
-            }
+        packageNames.forEachIndexed { _, packageName ->
+            val packageState = newState.externalState.packageStates[packageName]!!
             val installedPackageState = if (isSystemUpdated) packageState else null
             evaluateAllPermissionStatesForPackage(packageState, installedPackageState)
         }
-        newState.externalState.packageStates.forEach { (_, packageState) ->
-            val androidPackage = packageState.androidPackage
-            if (androidPackage == null || androidPackage.volumeUuid != volumeUuid) {
-                return@forEach
-            }
+        packageNames.forEachIndexed { _, packageName ->
+            val packageState = newState.externalState.packageStates[packageName]!!
             newState.externalState.userIds.forEachIndexed { _, userId ->
                 inheritImplicitPermissionStates(packageState.appId, userId)
             }
