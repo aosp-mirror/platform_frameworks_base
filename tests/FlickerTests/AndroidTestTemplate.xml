@@ -4,6 +4,9 @@
  -->
 <configuration description="Runs WindowManager {MODULE}">
     <option name="test-tag" value="FlickerTests" />
+    <!-- Needed for storing the perfetto trace files in the sdcard/test_results-->
+    <option name="isolated-storage" value="false" />
+
     <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
         <!-- keeps the screen on during tests -->
         <option name="screen-always-on" value="on" />
@@ -29,25 +32,51 @@
         <option name="run-command" value="settings put secure show_ime_with_hard_keyboard 1" />
         <option name="run-command" value="settings put system show_touches 1" />
         <option name="run-command" value="settings put system pointer_location 1" />
-        <option name="teardown-command" value="settings delete secure show_ime_with_hard_keyboard" />
+        <option name="teardown-command"
+                value="settings delete secure show_ime_with_hard_keyboard" />
         <option name="teardown-command" value="settings delete system show_touches" />
         <option name="teardown-command" value="settings delete system pointer_location" />
-        <option name="teardown-command" value="cmd overlay enable com.android.internal.systemui.navbar.gestural" />
+        <option name="teardown-command"
+                value="cmd overlay enable com.android.internal.systemui.navbar.gestural" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true"/>
         <option name="test-file-name" value="{MODULE}.apk"/>
         <option name="test-file-name" value="FlickerTestApp.apk" />
     </target_preparer>
+    <!-- Needed for pushing the trace config file -->
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="push-file"
+                key="trace_config.textproto"
+                value="/data/misc/perfetto-traces/trace_config.textproto"
+        />
+        <!--Install the content provider automatically when we push some file in sdcard folder.-->
+        <!--Needed to avoid the installation during the test suite.-->
+        <option name="push-file" key="trace_config.textproto" value="/sdcard/sample.textproto" />
+    </target_preparer>
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
         <option name="package" value="{PACKAGE}"/>
         <option name="shell-timeout" value="6600s" />
         <option name="test-timeout" value="6600s" />
         <option name="hidden-api-checks" value="false" />
+        <option name="device-listeners" value="android.device.collectors.PerfettoListener" />
+        <!-- PerfettoListener related arguments -->
+        <option name="instrumentation-arg" key="perfetto_config_text_proto" value="true" />
+        <option name="instrumentation-arg"
+                key="perfetto_config_file"
+                value="trace_config.textproto"
+        />
+        <option name="instrumentation-arg" key="per_run" value="true" />
     </test>
+    <!-- Needed for pulling the collected trace config on to the host -->
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
-        <option name="directory-keys" value="/sdcard/flicker" />
-        <option name="collect-on-run-ended-only" value="true" />
+        <option name="pull-pattern-keys" value="perfetto_file_path" />
+    </metrics_collector>
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="pull-pattern-keys" value="(\w)+\.winscope" />
+        <option name="pull-pattern-keys" value="(\w)+\.mp4" />
+        <option name="collect-on-run-ended-only" value="false" />
         <option name="clean-up" value="true" />
     </metrics_collector>
 </configuration>
