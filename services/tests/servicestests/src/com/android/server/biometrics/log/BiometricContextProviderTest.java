@@ -316,13 +316,13 @@ public class BiometricContextProviderTest {
         assertThat(aidlContext.isAod).isEqualTo(false);
         assertThat(aidlContext.isCrypto).isEqualTo(false);
 
-        context = mProvider.updateContext(mOpContext, false /* crypto */);
+        context = mProvider.updateContext(mOpContext, true /* crypto */);
         aidlContext = context.toAidlContext();
         assertThat(context).isSameInstanceAs(mOpContext);
         assertThat(aidlContext.id).isEqualTo(0);
         assertThat(aidlContext.reason).isEqualTo(OperationReason.UNKNOWN);
         assertThat(aidlContext.isAod).isEqualTo(false);
-        assertThat(aidlContext.isCrypto).isEqualTo(false);
+        assertThat(aidlContext.isCrypto).isEqualTo(true);
     }
 
     @Test
