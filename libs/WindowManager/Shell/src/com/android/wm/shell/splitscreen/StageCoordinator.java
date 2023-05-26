@@ -2303,6 +2303,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     prepareExitSplitScreen(dismissTop, out);
                     mSplitTransitions.setDismissTransition(transition, dismissTop,
                             EXIT_REASON_APP_FINISHED);
+                } else if (!isSplitScreenVisible() && isOpening) {
+                    // If split running backgroud and trigger task is appearing into split,
+                    // prepare to enter split screen.
+                    prepareEnterSplitScreen(out);
+                    mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
+                            null /* consumedCallback */, null /* finishedCallback */,
+                            TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
                 }
             } else if (isOpening && inFullscreen) {
                 final int activityType = triggerTask.getActivityType();
@@ -2328,7 +2335,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 prepareEnterSplitScreen(out);
                 mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                         null /* consumedCallback */, null /* finishedCallback */,
-                        TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, !mIsDropEntering);
+                        TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
             }
         }
         return out;
@@ -2586,6 +2593,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // First, verify that we actually have opened apps in both splits.
         TransitionInfo.Change mainChild = null;
         TransitionInfo.Change sideChild = null;
+        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         for (int iC = 0; iC < info.getChanges().size(); ++iC) {
             final TransitionInfo.Change change = info.getChanges().get(iC);
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
@@ -2594,12 +2602,16 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 continue;
             }
             final @StageType int stageType = getStageType(getStageOfTask(taskInfo));
-            if (stageType == STAGE_TYPE_MAIN
+            if (mainChild == null && stageType == STAGE_TYPE_MAIN
                     && (isOpeningType(change.getMode()) || change.getMode() == TRANSIT_CHANGE)) {
                 // Includes TRANSIT_CHANGE to cover reparenting top-most task to split.
                 mainChild = change;
-            } else if (stageType == STAGE_TYPE_SIDE && isOpeningType(change.getMode())) {
+            } else if (sideChild == null && stageType == STAGE_TYPE_SIDE
+                    && isOpeningType(change.getMode())) {
                 sideChild = change;
+            } else if (stageType != STAGE_TYPE_UNDEFINED && change.getMode() == TRANSIT_TO_BACK) {
+                // Collect all to back task's and evict them when transition finished.
+                evictWct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
             }
         }
 
@@ -2660,6 +2672,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 } else {
                     mSideStage.evictInvisibleChildren(callbackWct);
                 }
+            }
+            if (!evictWct.isEmpty()) {
+                callbackWct.merge(evictWct, true);
             }
             if (enterTransition.mResizeAnim) {
                 mShowDecorImmediately = true;
