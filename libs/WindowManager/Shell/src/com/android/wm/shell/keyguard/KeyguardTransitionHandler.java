@@ -166,7 +166,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                     "unocclude",
                     transition, info, startTransaction, finishTransaction, finishCallback);
         } else {
-            Log.wtf(TAG, "Failed to play: " + info);
+            Log.w(TAG, "Failed to play: " + info);
             return false;
         }
     }
