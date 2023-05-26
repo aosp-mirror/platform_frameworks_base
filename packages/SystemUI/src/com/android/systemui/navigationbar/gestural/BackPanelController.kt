@@ -607,7 +607,7 @@ class BackPanelController internal constructor(
         )
     }
 
-    private var previousPreThresholdWidthInterpolator = params.entryWidthTowardsEdgeInterpolator
+    private var previousPreThresholdWidthInterpolator = params.entryWidthInterpolator
     private fun preThresholdWidthStretchAmount(progress: Float): Float {
         val interpolator = run {
             val isPastSlop = totalTouchDeltaInactive > viewConfiguration.scaledTouchSlop
