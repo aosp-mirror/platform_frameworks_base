@@ -333,11 +333,8 @@ public class AutomaticBrightnessController {
         // Initialize to active (normal) screen brightness mode
         switchToInteractiveScreenBrightnessMode();
 
-        if (userLux != BrightnessMappingStrategy.NO_USER_LUX
-                && userBrightness != BrightnessMappingStrategy.NO_USER_BRIGHTNESS) {
-            // Use the given short-term model
-            setScreenBrightnessByUser(userLux, userBrightness);
-        }
+        // Use the given short-term model
+        setScreenBrightnessByUser(userLux, userBrightness);
     }
 
     /**
@@ -520,6 +517,10 @@ public class AutomaticBrightnessController {
     }
 
     private boolean setScreenBrightnessByUser(float lux, float brightness) {
+        if (lux == BrightnessMappingStrategy.NO_USER_LUX
+                || brightness == BrightnessMappingStrategy.NO_USER_BRIGHTNESS) {
+            return false;
+        }
         mCurrentBrightnessMapper.addUserDataPoint(lux, brightness);
         mShortTermModel.setUserBrightness(lux, brightness);
         return true;
@@ -1234,14 +1235,14 @@ public class AutomaticBrightnessController {
         // light.
         // The anchor determines what were the light levels when the user has set their preference,
         // and we use a relative threshold to determine when to revert to the OEM curve.
-        private float mAnchor = -1f;
-        private float mBrightness;
-        private boolean mIsValid = true;
+        private float mAnchor = BrightnessMappingStrategy.NO_USER_LUX;
+        private float mBrightness = BrightnessMappingStrategy.NO_USER_BRIGHTNESS;
+        private boolean mIsValid = false;
 
         private void reset() {
-            mAnchor = -1f;
-            mBrightness = -1f;
-            mIsValid = true;
+            mAnchor = BrightnessMappingStrategy.NO_USER_LUX;
+            mBrightness = BrightnessMappingStrategy.NO_USER_BRIGHTNESS;
+            mIsValid = false;
         }
 
         private void invalidate() {
