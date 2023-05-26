@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.android.internal.R
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
+import com.android.systemui.compose.modifiers.thenIf
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -82,6 +83,8 @@ internal fun PatternBouncer(
     val currentDot: PatternDotViewModel? by viewModel.currentDot.collectAsState()
     // The dots selected so far, if the user is currently dragging.
     val selectedDots: List<PatternDotViewModel> by viewModel.selectedDots.collectAsState()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
+    val isAnimationEnabled: Boolean by viewModel.isPatternVisible.collectAsState()
 
     // Map of animatables for the scale of each dot, keyed by dot.
     val dotScalingAnimatables = remember(dots) { dots.associateWith { Animatable(1f) } }
@@ -96,16 +99,24 @@ internal fun PatternBouncer(
     val view = LocalView.current
 
     // When the current dot is changed, we need to update our animations.
-    LaunchedEffect(currentDot) {
+    LaunchedEffect(currentDot, isAnimationEnabled) {
         view.performHapticFeedback(
             HapticFeedbackConstants.VIRTUAL_KEY,
             HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
         )
 
-        // Make sure that the current dot is scaled up while the other dots are scaled back down.
+        if (!isAnimationEnabled) {
+            return@LaunchedEffect
+        }
+
+        // Make sure that the current dot is scaled up while the other dots are scaled back
+        // down.
         dotScalingAnimatables.entries.forEach { (dot, animatable) ->
             val isSelected = dot == currentDot
-            launch {
+            // Launch using the longer-lived scope because we want these animations to proceed to
+            // completion even if the LaunchedEffect is canceled because its key objects have
+            // changed.
+            scope.launch {
                 animatable.animateTo(if (isSelected) 2f else 1f)
                 if (isSelected) {
                     animatable.animateTo(1f)
@@ -116,14 +127,18 @@ internal fun PatternBouncer(
         selectedDots.forEach { dot ->
             lineFadeOutAnimatables[dot]?.let { line ->
                 if (!line.isRunning) {
+                    // Launch using the longer-lived scope because we want these animations to
+                    // proceed to completion even if the LaunchedEffect is canceled because its key
+                    // objects have changed.
                     scope.launch {
                         if (dot == currentDot) {
-                            // Reset the fade-out animation for the current dot. When the current
-                            // dot is switched, this entire code block runs again for the newly
-                            // selected dot.
+                            // Reset the fade-out animation for the current dot. When the
+                            // current dot is switched, this entire code block runs again for
+                            // the newly selected dot.
                             line.snapTo(1f)
                         } else {
-                            // For all non-current dots, make sure that the lines are fading out.
+                            // For all non-current dots, make sure that the lines are fading
+                            // out.
                             line.animateTo(
                                 targetValue = 0f,
                                 animationSpec =
@@ -148,27 +163,34 @@ internal fun PatternBouncer(
             // when it leaves the bounds of the dot grid.
             .clipToBounds()
             .onSizeChanged { containerSize = it }
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { start ->
-                        inputPosition = start
-                        viewModel.onDragStart()
-                    },
-                    onDragEnd = {
-                        inputPosition = null
-                        lineFadeOutAnimatables.values.forEach { animatable ->
-                            scope.launch { animatable.animateTo(1f) }
-                        }
-                        viewModel.onDragEnd()
-                    },
-                ) { change, _ ->
-                    inputPosition = change.position
-                    viewModel.onDrag(
-                        xPx = change.position.x,
-                        yPx = change.position.y,
-                        containerSizePx = containerSize.width,
-                        verticalOffsetPx = verticalOffset,
-                    )
+            .thenIf(isInputEnabled) {
+                Modifier.pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { start ->
+                            inputPosition = start
+                            viewModel.onDragStart()
+                        },
+                        onDragEnd = {
+                            inputPosition = null
+                            if (isAnimationEnabled) {
+                                lineFadeOutAnimatables.values.forEach { animatable ->
+                                    // Launch using the longer-lived scope because we want these
+                                    // animations to proceed to completion even if the surrounding
+                                    // scope is canceled.
+                                    scope.launch { animatable.animateTo(1f) }
+                                }
+                            }
+                            viewModel.onDragEnd()
+                        },
+                    ) { change, _ ->
+                        inputPosition = change.position
+                        viewModel.onDrag(
+                            xPx = change.position.x,
+                            yPx = change.position.y,
+                            containerSizePx = containerSize.width,
+                            verticalOffsetPx = verticalOffset,
+                        )
+                    }
                 }
             }
     ) {

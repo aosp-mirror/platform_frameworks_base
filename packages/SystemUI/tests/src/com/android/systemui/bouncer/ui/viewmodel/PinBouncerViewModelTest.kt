@@ -94,7 +94,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onShown()
 
-            assertThat(message).isEqualTo(ENTER_YOUR_PIN)
+            assertThat(message?.text).isEqualTo(ENTER_YOUR_PIN)
             assertThat(pinLengths).isEqualTo(0 to 0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -116,7 +116,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onPinButtonClicked(1)
 
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
             assertThat(pinLengths).isEqualTo(0 to 1)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -140,7 +140,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onBackspaceButtonClicked()
 
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
             assertThat(pinLengths).isEqualTo(1 to 0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -170,7 +170,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
                 advanceTimeBy(PinBouncerViewModel.BACKSPACE_LONG_PRESS_DELAY_MS)
             }
 
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
             assertThat(pinLengths).isEqualTo(1 to 0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -220,7 +220,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onAuthenticateButtonClicked()
 
             assertThat(pinLengths).isEqualTo(0 to 0)
-            assertThat(message).isEqualTo(WRONG_PIN)
+            assertThat(message?.text).isEqualTo(WRONG_PIN)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
@@ -244,7 +244,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onPinButtonClicked(4)
             underTest.onPinButtonClicked(5) // PIN is now wrong!
             underTest.onAuthenticateButtonClicked()
-            assertThat(message).isEqualTo(WRONG_PIN)
+            assertThat(message?.text).isEqualTo(WRONG_PIN)
             assertThat(pinLengths).isEqualTo(0 to 0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -254,7 +254,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onPinButtonClicked(2)
             underTest.onPinButtonClicked(3)
             underTest.onPinButtonClicked(4)
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
 
             underTest.onAuthenticateButtonClicked()
 
