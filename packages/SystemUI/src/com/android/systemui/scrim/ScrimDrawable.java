@@ -203,7 +203,10 @@ public class ScrimDrawable extends Drawable {
     }
 
     public void setBottomEdgeRadius(float radius) {
-        mBottomEdgeRadius = radius;
+        if (mBottomEdgeRadius != radius) {
+            mBottomEdgeRadius = radius;
+            invalidateSelf();
+        }
     }
 
     @Override
