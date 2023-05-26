@@ -70,12 +70,16 @@ public class PhoneMediaDevice extends MediaDevice {
                 name = mContext.getString(R.string.media_transfer_wired_usb_device_name);
                 break;
             case TYPE_DOCK:
-            case TYPE_HDMI:
-                name = mRouteInfo.getName();
+                name = mContext.getString(R.string.media_transfer_dock_speaker_device_name);
                 break;
             case TYPE_BUILTIN_SPEAKER:
-            default:
                 name = mContext.getString(R.string.media_transfer_this_device_name);
+                break;
+            case TYPE_HDMI:
+                name = mContext.getString(R.string.media_transfer_external_device_name);
+                break;
+            default:
+                name = mContext.getString(R.string.media_transfer_default_device_name);
                 break;
         }
         return name.toString();
