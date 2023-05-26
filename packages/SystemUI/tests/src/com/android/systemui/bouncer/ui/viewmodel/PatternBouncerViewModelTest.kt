@@ -89,7 +89,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onShown()
 
-            assertThat(message).isEqualTo(ENTER_YOUR_PATTERN)
+            assertThat(message?.text).isEqualTo(ENTER_YOUR_PATTERN)
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
             assertThat(isUnlocked).isFalse()
@@ -115,7 +115,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onDragStart()
 
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
             assertThat(isUnlocked).isFalse()
@@ -202,7 +202,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(message).isEqualTo(WRONG_PATTERN)
+            assertThat(message?.text).isEqualTo(WRONG_PATTERN)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
@@ -235,7 +235,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             underTest.onDragEnd()
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(message).isEqualTo(WRONG_PATTERN)
+            assertThat(message?.text).isEqualTo(WRONG_PATTERN)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
