@@ -32,6 +32,9 @@ interface IDesktopMode {
     /** Hide apps that may be stashed */
     void hideStashedDesktopApps(int displayId);
 
+    /** Bring task with the given id to front */
+    oneway void showDesktopApp(int taskId);
+
     /** Get count of visible desktop tasks on the given display */
     int getVisibleTaskCount(int displayId);
 
