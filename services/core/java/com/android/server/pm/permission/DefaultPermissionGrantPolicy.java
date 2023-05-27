@@ -74,6 +74,8 @@ import com.android.server.pm.KnownPackages;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal.PackagesProvider;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal.SyncAdapterPackagesProvider;
 
+import libcore.util.HexEncoding;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -126,6 +128,7 @@ final class DefaultPermissionGrantPolicy {
     private static final String ATTR_NAME = "name";
     private static final String ATTR_FIXED = "fixed";
     private static final String ATTR_WHITELISTED = "whitelisted";
+    private static final String ATTR_CERT = "cert";
 
     private static final Set<String> PHONE_PERMISSIONS = new ArraySet<>();
 
@@ -1438,7 +1441,7 @@ final class DefaultPermissionGrantPolicy {
         final int exceptionCount = mGrantExceptions.size();
         for (int i = 0; i < exceptionCount; i++) {
             String packageName = mGrantExceptions.keyAt(i);
-            PackageInfo pkg = pm.getSystemPackageInfo(packageName);
+            PackageInfo pkg = pm.getPackageInfo(packageName);
             List<DefaultPermissionGrant> permissionGrants = mGrantExceptions.valueAt(i);
             final int permissionGrantCount = permissionGrants.size();
             for (int j = 0; j < permissionGrantCount; j++) {
@@ -1556,12 +1559,12 @@ final class DefaultPermissionGrantPolicy {
             }
             if (TAG_EXCEPTION.equals(parser.getName())) {
                 String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+                String cert = parser.getAttributeValue(null, ATTR_CERT);
 
                 List<DefaultPermissionGrant> packageExceptions =
                         outGrantExceptions.get(packageName);
                 if (packageExceptions == null) {
-                    // The package must be on the system image
-                    PackageInfo packageInfo = pm.getSystemPackageInfo(packageName);
+                    PackageInfo packageInfo = pm.getPackageInfo(packageName);
 
                     if (packageInfo == null) {
                         Log.w(TAG, "No such package:" + packageName);
@@ -1569,8 +1572,8 @@ final class DefaultPermissionGrantPolicy {
                         continue;
                     }
 
-                    if (!pm.isSystemPackage(packageInfo)) {
-                        Log.w(TAG, "Unknown system package:" + packageName);
+                    if (!isSystemOrCertificateMatchingPackage(packageInfo, cert)) {
+                        Log.w(TAG, "Not system or certificate-matching package: " + packageName);
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
@@ -1623,6 +1626,15 @@ final class DefaultPermissionGrantPolicy {
                 Log.e(TAG, "Unknown tag " + parser.getName() + "under <exception>");
             }
         }
+    }
+
+    private boolean isSystemOrCertificateMatchingPackage(PackageInfo pi, String cert) {
+        if (cert == null) {
+            return pi.applicationInfo.isSystemApp();
+        }
+
+        return mContext.getPackageManager().hasSigningCertificate(pi.packageName, HexEncoding.
+                decode(cert.replace(":", "")), PackageManager.CERT_INPUT_SHA256);
     }
 
     private static boolean doesPackageSupportRuntimePermissions(PackageInfo pkg) {
