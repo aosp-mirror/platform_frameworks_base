@@ -16,9 +16,12 @@
 
 package com.android.wm.shell.transition;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -567,8 +570,8 @@ public class Transitions implements RemoteCallable<Transitions>,
                     layer = zSplitLine + numChanges - i;
                 }
             } else { // CHANGE or other
-                if (isClosing) {
-                    // Put below CLOSE mode.
+                if (isClosing || TransitionUtil.isOrderOnly(change)) {
+                    // Put below CLOSE mode (in the "static" section).
                     layer = zSplitLine - i;
                 } else {
                     // Put above CLOSE mode.
@@ -1080,6 +1083,16 @@ public class Transitions implements RemoteCallable<Transitions>,
                             change.getEndRotation(), null /* newDisplayAreaInfo */);
                 }
             }
+        }
+        if (request.getType() == TRANSIT_KEYGUARD_OCCLUDE && request.getTriggerTask() != null
+                && request.getTriggerTask().getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            // This freeform task is on top of keyguard, so its windowing mode should be changed to
+            // fullscreen.
+            if (wct == null) {
+                wct = new WindowContainerTransaction();
+            }
+            wct.setWindowingMode(request.getTriggerTask().token, WINDOWING_MODE_FULLSCREEN);
+            wct.setBounds(request.getTriggerTask().token, null);
         }
         mOrganizer.startTransition(transitionToken, wct != null && wct.isEmpty() ? null : wct);
         active.mToken = transitionToken;

@@ -24,8 +24,11 @@ import kotlinx.coroutines.flow.asStateFlow
 /** Holds UI state and handles user input for the password bouncer UI. */
 class PasswordBouncerViewModel(
     private val interactor: BouncerInteractor,
-    override val isInputEnabled: StateFlow<Boolean>,
-) : AuthMethodBouncerViewModel {
+    isInputEnabled: StateFlow<Boolean>,
+) :
+    AuthMethodBouncerViewModel(
+        isInputEnabled = isInputEnabled,
+    ) {
 
     private val _password = MutableStateFlow("")
     /** The password entered so far. */
@@ -47,7 +50,10 @@ class PasswordBouncerViewModel(
 
     /** Notifies that the user has pressed the key for attempting to authenticate the password. */
     fun onAuthenticateKeyPressed() {
-        interactor.authenticate(password.value.toCharArray().toList())
+        if (!interactor.authenticate(password.value.toCharArray().toList())) {
+            showFailureAnimation()
+        }
+
         _password.value = ""
     }
 }
