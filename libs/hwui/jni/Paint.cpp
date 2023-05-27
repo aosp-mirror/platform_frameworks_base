@@ -583,7 +583,7 @@ namespace PaintGlue {
         minikin::FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
         float saveSkewX = font->getSkewX();
         bool savefakeBold = font->isEmbolden();
-        MinikinFontSkia::populateSkFont(font, baseFont.font->typeface().get(), baseFont.fakery);
+        MinikinFontSkia::populateSkFont(font, baseFont.typeface().get(), baseFont.fakery);
         SkScalar spacing = font->getMetrics(metrics);
         // The populateSkPaint call may have changed fake bold / text skew
         // because we want to measure with those effects applied, so now

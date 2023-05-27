@@ -76,7 +76,7 @@ public:
         size_t start = 0;
         size_t nGlyphs = layout.nGlyphs();
         for (size_t i = 0; i < nGlyphs; i++) {
-            const minikin::MinikinFont* nextFont = layout.getFont(i)->typeface().get();
+            const minikin::MinikinFont* nextFont = layout.typeface(i).get();
             if (i > 0 && nextFont != curFont) {
                 SkFont* skfont = &paint->getSkFont();
                 MinikinFontSkia::populateSkFont(skfont, curFont, layout.getFakery(start));
