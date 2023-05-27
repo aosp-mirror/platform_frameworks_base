@@ -98,7 +98,7 @@ public class OperationContextExtTest {
         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
             final OperationContextExt context = new OperationContextExt(newAidlContext(), true);
             when(mBiometricContext.getDisplayState()).thenReturn(entry.getKey());
-            assertThat(context.update(mBiometricContext).getDisplayState())
+            assertThat(context.update(mBiometricContext, context.isCrypto()).getDisplayState())
                     .isEqualTo(entry.getValue());
         }
     }
@@ -139,7 +139,7 @@ public class OperationContextExtTest {
         final OperationContextExt context = new OperationContextExt(newAidlContext(),
                 sessionType == OperationReason.BIOMETRIC_PROMPT);
 
-        assertThat(context.update(mBiometricContext)).isSameInstanceAs(context);
+        assertThat(context.update(mBiometricContext, context.isCrypto())).isSameInstanceAs(context);
 
         if (sessionInfo != null) {
             assertThat(context.getId()).isEqualTo(sessionInfo.getId());
