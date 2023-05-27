@@ -29,10 +29,11 @@ const val DEFAULT_CLOCK_NAME = "Default Clock"
 const val DEFAULT_CLOCK_ID = "DEFAULT"
 
 /** Provides the default system clock */
-class DefaultClockProvider constructor(
+class DefaultClockProvider(
     val ctx: Context,
     val layoutInflater: LayoutInflater,
-    val resources: Resources
+    val resources: Resources,
+    val hasStepClockAnimation: Boolean = false
 ) : ClockProvider {
     override fun getClocks(): List<ClockMetadata> =
         listOf(ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME))
@@ -42,7 +43,13 @@ class DefaultClockProvider constructor(
             throw IllegalArgumentException("${settings.clockId} is unsupported by $TAG")
         }
 
-        return DefaultClockController(ctx, layoutInflater, resources, settings)
+        return DefaultClockController(
+            ctx,
+            layoutInflater,
+            resources,
+            settings,
+            hasStepClockAnimation,
+        )
     }
 
     override fun getClockThumbnail(id: ClockId): Drawable? {
