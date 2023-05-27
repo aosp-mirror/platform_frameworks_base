@@ -66,6 +66,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
         sharedPrefs = mutableMapOf()
         whenever(userFileManager.getSharedPreferences(anyString(), anyInt(), anyInt())).thenAnswer {
             val userId = it.arguments[2] as Int
@@ -86,6 +87,13 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
+        mContext
+            .getOrCreateTestableResources()
+            .removeOverride(R.bool.custom_lockscreen_shortcuts_enabled)
+        mContext
+            .getOrCreateTestableResources()
+            .removeOverride(R.array.config_keyguardQuickAffordanceDefaults)
+
         Dispatchers.resetMain()
     }
 
@@ -356,6 +364,22 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
 
         verify(userFileManager, atLeastOnce()).getSharedPreferences(anyString(), anyInt(), anyInt())
         job.cancel()
+    }
+
+    @Test
+    fun getSelections_alwaysReturnsDefaultsIfCustomShortcutsFeatureDisabled() {
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, false)
+        overrideResource(
+            R.array.config_keyguardQuickAffordanceDefaults,
+            arrayOf("leftTest:testShortcut1", "rightTest:testShortcut2")
+        )
+
+        assertThat(underTest.getSelections()).isEqualTo(
+            mapOf(
+                "leftTest" to listOf("testShortcut1"),
+                "rightTest" to listOf("testShortcut2"),
+            )
+        )
     }
 
     private fun assertSelections(

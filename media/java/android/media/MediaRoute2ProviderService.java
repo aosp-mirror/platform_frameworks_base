@@ -81,6 +81,18 @@ public abstract class MediaRoute2ProviderService extends Service {
     public static final String SERVICE_INTERFACE = "android.media.MediaRoute2ProviderService";
 
     /**
+     * A category indicating that the associated provider is only intended for use within the app
+     * that hosts the provider.
+     *
+     * <p>Declaring this category helps the system save resources by avoiding the launch of services
+     * whose routes are known to be private to the app that provides them.
+     *
+     * @hide
+     */
+    public static final String CATEGORY_SELF_SCAN_ONLY =
+            "android.media.MediaRoute2ProviderService.SELF_SCAN_ONLY";
+
+    /**
      * The request ID to pass {@link #notifySessionCreated(long, RoutingSessionInfo)}
      * when {@link MediaRoute2ProviderService} created a session although there was no creation
      * request.

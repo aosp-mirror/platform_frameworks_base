@@ -20,6 +20,7 @@ import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.bouncer.shared.model.AuthenticationThrottledModel
 import com.android.systemui.dagger.qualifiers.Application
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -44,21 +46,6 @@ constructor(
     @Assisted containerName: String,
 ) {
     private val interactor: BouncerInteractor = interactorFactory.create(containerName)
-
-    /**
-     * Whether updates to the message should be cross-animated from one message to another.
-     *
-     * If `false`, no animation should be applied, the message text should just be replaced
-     * instantly.
-     */
-    val isMessageUpdateAnimationsEnabled: StateFlow<Boolean> =
-        interactor.throttling
-            .map { it == null }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = interactor.throttling.value == null,
-            )
 
     private val isInputEnabled: StateFlow<Boolean> =
         interactor.throttling
@@ -104,13 +91,21 @@ constructor(
             )
 
     /** The user-facing message to show in the bouncer. */
-    val message: StateFlow<String> =
-        interactor.message
-            .map { it ?: "" }
+    val message: StateFlow<MessageViewModel> =
+        combine(
+                interactor.message,
+                interactor.throttling,
+            ) { message, throttling ->
+                toMessageViewModel(message, throttling)
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = interactor.message.value ?: "",
+                initialValue =
+                    toMessageViewModel(
+                        message = interactor.message.value,
+                        throttling = interactor.throttling.value,
+                    ),
             )
 
     private val _throttlingDialogMessage = MutableStateFlow<String?>(null)
@@ -176,6 +171,28 @@ constructor(
             else -> null
         }
     }
+
+    private fun toMessageViewModel(
+        message: String?,
+        throttling: AuthenticationThrottledModel?,
+    ): MessageViewModel {
+        return MessageViewModel(
+            text = message ?: "",
+            isUpdateAnimated = throttling == null,
+        )
+    }
+
+    data class MessageViewModel(
+        val text: String,
+
+        /**
+         * Whether updates to the message should be cross-animated from one message to another.
+         *
+         * If `false`, no animation should be applied, the message text should just be replaced
+         * instantly.
+         */
+        val isUpdateAnimated: Boolean,
+    )
 
     @AssistedFactory
     interface Factory {

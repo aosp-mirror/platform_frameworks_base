@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -203,14 +204,17 @@ public class MediaProjectionPermissionActivity extends Activity
             dialogTitle = getString(R.string.media_projection_dialog_title, appName);
         }
 
+        // Using application context for the dialog, instead of the activity context, so we get
+        // the correct screen width when in split screen.
+        Context dialogContext = getApplicationContext();
         if (isPartialScreenSharingEnabled()) {
-            mDialog = new MediaProjectionPermissionDialog(this, () -> {
+            mDialog = new MediaProjectionPermissionDialog(dialogContext, () -> {
                 ScreenShareOption selectedOption =
                         ((MediaProjectionPermissionDialog) mDialog).getSelectedScreenShareOption();
                 grantMediaProjectionPermission(selectedOption.getMode());
             }, () -> finish(RECORD_CANCEL, /* projection= */ null), appName);
         } else {
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this,
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(dialogContext,
                     R.style.Theme_SystemUI_Dialog)
                     .setTitle(dialogTitle)
                     .setIcon(R.drawable.ic_media_projection_permission)
@@ -263,7 +267,10 @@ public class MediaProjectionPermissionActivity extends Activity
         final UserHandle hostUserHandle = getHostUserHandle();
         if (mScreenCaptureDevicePolicyResolver.get()
                 .isScreenCaptureCompletelyDisabled(hostUserHandle)) {
-            AlertDialog dialog = new ScreenCaptureDisabledDialog(this);
+            // Using application context for the dialog, instead of the activity context, so we get
+            // the correct screen width when in split screen.
+            Context dialogContext = getApplicationContext();
+            AlertDialog dialog = new ScreenCaptureDisabledDialog(dialogContext);
             setUpDialog(dialog);
             dialog.show();
             return true;

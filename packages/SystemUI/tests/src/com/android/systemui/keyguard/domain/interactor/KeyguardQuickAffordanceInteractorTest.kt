@@ -102,6 +102,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
+
         repository = FakeKeyguardRepository()
         repository.setKeyguardShowing(true)
 
@@ -200,7 +202,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 devicePolicyManager = devicePolicyManager,
                 dockManager = dockManager,
                 backgroundDispatcher = testDispatcher,
-                appContext = mContext,
+                appContext = context,
             )
     }
 
