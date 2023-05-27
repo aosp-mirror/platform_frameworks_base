@@ -345,6 +345,18 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    fun moveTaskToFront_postsWctWithReorderOp() {
+        val task1 = setUpFreeformTask()
+        val task2 = setUpFreeformTask()
+
+        controller.moveTaskToFront(task1)
+
+        val wct = getLatestWct(expectTransition = TRANSIT_TO_FRONT)
+        assertThat(wct.hierarchyOps).hasSize(1)
+        wct.assertReorderAt(index = 0, task1)
+    }
+
+    @Test
     fun moveToNextDisplay_noOtherDisplays() {
         whenever(rootTaskDisplayAreaOrganizer.displayIds).thenReturn(intArrayOf(DEFAULT_DISPLAY))
         val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
