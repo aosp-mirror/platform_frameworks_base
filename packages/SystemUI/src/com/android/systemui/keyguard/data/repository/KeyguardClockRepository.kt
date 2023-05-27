@@ -21,12 +21,17 @@ import android.provider.Settings
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.plugins.ClockId
+import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 
@@ -35,6 +40,7 @@ class KeyguardClockRepository
 @Inject
 constructor(
     private val secureSettings: SecureSettings,
+    private val clockRegistry: ClockRegistry,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
 
@@ -46,6 +52,24 @@ constructor(
             )
             .onStart { emit(Unit) } // Forces an initial update.
             .map { getClockSize() }
+
+    val currentClockId: Flow<ClockId> =
+        callbackFlow {
+                fun send() {
+                    trySend(clockRegistry.currentClockId)
+                }
+
+                val listener =
+                    object : ClockRegistry.ClockChangeListener {
+                        override fun onCurrentClockChanged() {
+                            send()
+                        }
+                    }
+                clockRegistry.registerClockChangeListener(listener)
+                send()
+                awaitClose { clockRegistry.unregisterClockChangeListener(listener) }
+            }
+            .mapNotNull { it }
 
     private suspend fun getClockSize(): SettingsClockSize {
         return withContext(backgroundDispatcher) {
