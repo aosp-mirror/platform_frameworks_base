@@ -32,6 +32,8 @@ import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 
+import java.util.function.Consumer;
+
 /**
  * Similar to {@link com.android.wm.shell.bubbles.BubbleStackView}, this view is added to window
  * manager to display bubbles. However, it is only used when bubbles are being displayed in
@@ -53,6 +55,7 @@ public class BubbleBarLayerView extends FrameLayout
     @Nullable
     private BubbleViewProvider mExpandedBubble;
     private BubbleBarExpandedView mExpandedView;
+    private @Nullable Consumer<String> mUnBubbleConversationCallback;
 
     // TODO(b/273310265) - currently the view is always on the right, need to update for RTL.
     /** Whether the expanded view is displaying on the left of the screen or not. */
@@ -146,6 +149,13 @@ public class BubbleBarLayerView extends FrameLayout
             final int width = mPositioner.getExpandedViewWidthForBubbleBar();
             final int height = mPositioner.getExpandedViewHeightForBubbleBar();
             mExpandedView.setVisibility(GONE);
+            mExpandedView.setUnBubbleConversationCallback(mUnBubbleConversationCallback);
+            mExpandedView.setLayerBoundsSupplier(() -> new Rect(0, 0, getWidth(), getHeight()));
+            mExpandedView.setUnBubbleConversationCallback(bubbleKey -> {
+                if (mUnBubbleConversationCallback != null) {
+                    mUnBubbleConversationCallback.accept(bubbleKey);
+                }
+            });
             addView(mExpandedView, new FrameLayout.LayoutParams(width, height));
         }
 
@@ -163,6 +173,12 @@ public class BubbleBarLayerView extends FrameLayout
         mBubbleController.getSysuiProxy().onStackExpandChanged(false);
         mExpandedView = null;
         showScrim(false);
+    }
+
+    /** Sets the function to call to un-bubble the given conversation. */
+    public void setUnBubbleConversationCallback(
+            @Nullable Consumer<String> unBubbleConversationCallback) {
+        mUnBubbleConversationCallback = unBubbleConversationCallback;
     }
 
     /** Updates the expanded view size and position. */

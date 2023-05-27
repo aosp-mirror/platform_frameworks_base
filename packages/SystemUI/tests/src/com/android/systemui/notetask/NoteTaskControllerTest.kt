@@ -36,7 +36,6 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.content.pm.UserInfo
 import android.graphics.drawable.Icon
@@ -62,6 +61,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.SecureSettings
@@ -115,7 +115,11 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
         whenever(context.getString(R.string.note_task_button_label))
             .thenReturn(NOTE_TASK_SHORT_LABEL)
+        whenever(context.getString(eq(R.string.note_task_shortcut_long_label), any()))
+            .thenReturn(NOTE_TASK_LONG_LABEL)
         whenever(context.packageManager).thenReturn(packageManager)
+        whenever(packageManager.getApplicationInfo(any(), any<Int>())).thenReturn(mock())
+        whenever(packageManager.getApplicationLabel(any())).thenReturn(NOTE_TASK_LONG_LABEL)
         whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(NOTE_TASK_INFO)
         whenever(userManager.isUserUnlocked).thenReturn(true)
         whenever(userManager.isUserUnlocked(any<Int>())).thenReturn(true)
@@ -706,19 +710,20 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
         verify(shortcutManager, never()).disableShortcuts(any())
         verify(shortcutManager).enableShortcuts(listOf(SHORTCUT_ID))
-        val actualShortcuts = argumentCaptor<List<ShortcutInfo>>()
-        verify(shortcutManager).updateShortcuts(actualShortcuts.capture())
-        val actualShortcut = actualShortcuts.value.first()
-        assertThat(actualShortcut.id).isEqualTo(SHORTCUT_ID)
-        assertThat(actualShortcut.intent).run {
-            hasComponentClass(LaunchNoteTaskActivity::class.java)
-            hasAction(ACTION_CREATE_NOTE)
+        val shortcutInfo = withArgCaptor { verify(shortcutManager).updateShortcuts(capture()) }
+        with(shortcutInfo.first()) {
+            assertThat(id).isEqualTo(SHORTCUT_ID)
+            assertThat(intent).run {
+                hasComponentClass(LaunchNoteTaskActivity::class.java)
+                hasAction(ACTION_CREATE_NOTE)
+            }
+            assertThat(shortLabel).isEqualTo(NOTE_TASK_SHORT_LABEL)
+            assertThat(longLabel).isEqualTo(NOTE_TASK_LONG_LABEL)
+            assertThat(isLongLived).isEqualTo(true)
+            assertThat(icon.resId).isEqualTo(R.drawable.ic_note_task_shortcut_widget)
+            assertThat(extras?.getString(EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE))
+                .isEqualTo(NOTE_TASK_PACKAGE_NAME)
         }
-        assertThat(actualShortcut.shortLabel).isEqualTo(NOTE_TASK_SHORT_LABEL)
-        assertThat(actualShortcut.isLongLived).isEqualTo(true)
-        assertThat(actualShortcut.icon.resId).isEqualTo(R.drawable.ic_note_task_shortcut_widget)
-        assertThat(actualShortcut.extras?.getString(EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE))
-            .isEqualTo(NOTE_TASK_PACKAGE_NAME)
     }
 
     @Test
@@ -893,7 +898,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     // endregion
 
     private companion object {
-        const val NOTE_TASK_SHORT_LABEL = "Notetaking"
+        const val NOTE_TASK_SHORT_LABEL = "Note-taking"
+        const val NOTE_TASK_LONG_LABEL = "Note-taking, App"
         const val NOTE_TASK_ACTIVITY_NAME = "NoteTaskActivity"
         const val NOTE_TASK_PACKAGE_NAME = "com.android.note.app"
         const val NOTE_TASK_UID = 123456

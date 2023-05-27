@@ -33,8 +33,11 @@ import kotlinx.coroutines.launch
 class PinBouncerViewModel(
     private val applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
-    override val isInputEnabled: StateFlow<Boolean>,
-) : AuthMethodBouncerViewModel {
+    isInputEnabled: StateFlow<Boolean>,
+) :
+    AuthMethodBouncerViewModel(
+        isInputEnabled = isInputEnabled,
+    ) {
 
     private val entered = MutableStateFlow<List<Int>>(emptyList())
     /**
@@ -92,7 +95,10 @@ class PinBouncerViewModel(
 
     /** Notifies that the user clicked the "enter" button. */
     fun onAuthenticateButtonClicked() {
-        interactor.authenticate(entered.value)
+        if (!interactor.authenticate(entered.value)) {
+            showFailureAnimation()
+        }
+
         entered.value = emptyList()
     }
 

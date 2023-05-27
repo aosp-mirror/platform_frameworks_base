@@ -114,6 +114,8 @@ import javax.inject.Inject;
 public class QuickSettingsController implements Dumpable {
     public static final String TAG = "QuickSettingsController";
 
+    public static final int SHADE_BACK_ANIM_SCALE_MULTIPLIER = 100;
+
     private QS mQs;
     private final Lazy<NotificationPanelViewController> mPanelViewControllerLazy;
 
@@ -1128,7 +1130,7 @@ public class QuickSettingsController implements Dumpable {
      * Updates scrim bounds, QS clipping, notifications clipping and keyguard status view clipping
      * as well based on the bounds of the shade and QS state.
      */
-    private void setClippingBounds() {
+    void setClippingBounds() {
         float qsExpansionFraction = computeExpansionFraction();
         final int qsPanelBottomY = calculateBottomPosition(qsExpansionFraction);
         // Split shade has no QQS
@@ -1216,7 +1218,10 @@ public class QuickSettingsController implements Dumpable {
                             ? 0 : mScreenCornerRadius;
             radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
-            mScrimController.setNotificationBottomRadius(radius);
+
+            float bottomRadius = mExpanded ? screenCornerRadius :
+                    calculateBottomCornerRadius(screenCornerRadius);
+            mScrimController.setNotificationBottomRadius(bottomRadius);
         }
         if (isQsFragmentCreated()) {
             float qsTranslation = 0;
@@ -1277,6 +1282,28 @@ public class QuickSettingsController implements Dumpable {
                 && mPanelViewControllerLazy.get().isExpandingFromHeadsUp() ? 0 : radius;
         mNotificationStackScrollLayoutController.setRoundedClippingBounds(
                 nsslLeft, nsslTop, nsslRight, nsslBottom, topRadius, bottomRadius);
+    }
+
+    /**
+     * Bottom corner radius should follow screen corner radius unless
+     * predictive back is running. We want a smooth transition from screen
+     * corner radius to scrim corner radius as the notification scrim is scaled down,
+     * but the transition should be brief enough to accommodate very short back gestures.
+     */
+    @VisibleForTesting
+    int calculateBottomCornerRadius(float screenCornerRadius) {
+        return (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
+                Math.min(calculateBottomRadiusProgress(), 1f));
+    }
+
+    @VisibleForTesting
+    float calculateBottomRadiusProgress() {
+        return (1 - mScrimController.getBackScaling()) * SHADE_BACK_ANIM_SCALE_MULTIPLIER;
+    }
+
+    @VisibleForTesting
+    int getScrimCornerRadius() {
+        return mScrimCornerRadius;
     }
 
     void setDisplayInsets(int leftInset, int rightInset) {

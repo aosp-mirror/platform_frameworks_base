@@ -287,7 +287,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
-    @Mock private KeyguardDismissUtil mKeyguardDismissUtil;
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
     @Mock private PhoneStatusBarPolicy mPhoneStatusBarPolicy;
@@ -516,7 +515,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mInitController,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mPluginDependencyProvider,
-                mKeyguardDismissUtil,
                 mExtensionController,
                 mUserInfoControllerImpl,
                 mPhoneStatusBarPolicy,
@@ -1103,8 +1101,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         clearInvocations(mNotificationPanelViewController);
 
         mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
-        verify(mDozeServiceHost).stopDozing();
+        verify(mDozeServiceHost, never()).stopDozing();
         verify(mNotificationPanelViewController).expand(eq(false));
+        mCentralSurfaces.mWakefulnessObserver.onFinishedWakingUp();
+        verify(mDozeServiceHost).stopDozing();
     }
 
     @Test
@@ -1118,6 +1118,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.setBouncerShowing(true);
         mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
         verify(mNotificationPanelViewController, never()).expand(anyBoolean());
+        mCentralSurfaces.mWakefulnessObserver.onFinishedWakingUp();
+        verify(mDozeServiceHost).stopDozing();
     }
 
     @Test

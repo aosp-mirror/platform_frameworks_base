@@ -55,6 +55,7 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
     @Mock PendingIntent mPendingIntent;
     @Mock PendingIntent mSuccessfulIntent;
     @Mock PendingIntent mCanceledIntent;
+    @Mock PendingIntent mRequestFailedIntent;
     @Mock CarrierConfigManager mCarrierConfigManager;
     @Mock NotificationManager mNotificationManager;
     @Mock PersistableBundle mPersistableBundle;
@@ -112,6 +113,11 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
         doReturn(true).when(mSuccessfulIntent).isBroadcast();
         doReturn(mSuccessfulIntent).when(spiedIntent).getParcelableExtra(
                 eq(SlicePurchaseController.EXTRA_INTENT_SUCCESS), eq(PendingIntent.class));
+        doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(mRequestFailedIntent)
+                .getCreatorPackage();
+        doReturn(true).when(mRequestFailedIntent).isBroadcast();
+        doReturn(mRequestFailedIntent).when(spiedIntent).getParcelableExtra(
+                eq(SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED), eq(PendingIntent.class));
 
         mSlicePurchaseActivity = startActivity(spiedIntent, null, null);
     }
@@ -124,7 +130,7 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
 
     @Test
     public void testOnPurchaseFailed() throws Exception {
-        int failureCode = SlicePurchaseController.FAILURE_CODE_SERVER_UNREACHABLE;
+        int failureCode = SlicePurchaseController.FAILURE_CODE_CARRIER_URL_UNAVAILABLE;
         String failureReason = "Server unreachable";
         mSlicePurchaseActivity.onPurchaseFailed(failureCode, failureReason);
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -140,5 +146,11 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
     public void testOnUserCanceled() throws Exception {
         mSlicePurchaseActivity.onDestroy();
         verify(mCanceledIntent).send();
+    }
+
+    @Test
+    public void testOnDismissFlow() throws Exception {
+        mSlicePurchaseActivity.onDismissFlow();
+        verify(mRequestFailedIntent).send();
     }
 }

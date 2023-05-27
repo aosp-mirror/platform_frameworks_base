@@ -83,6 +83,7 @@ java_defaults {
     ],
     data: [
         ":FlickerTestApp",
+        "trace_config/*",
     ],
 }
 

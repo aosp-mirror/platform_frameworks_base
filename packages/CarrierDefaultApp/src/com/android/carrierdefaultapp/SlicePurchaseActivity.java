@@ -27,6 +27,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.webkit.CookieManager;
 import android.webkit.WebView;
 
 import com.android.phone.slice.SlicePurchaseController;
@@ -137,6 +138,14 @@ public class SlicePurchaseActivity extends Activity {
         finishAndRemoveTask();
     }
 
+    protected void onDismissFlow() {
+        logd("onDismissFlow: Dismiss flow called while purchasing premium capability "
+                + TelephonyManager.convertPremiumCapabilityToString(mCapability));
+        SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
+                mIntent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED);
+        finishAndRemoveTask();
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         // Pressing back in the WebView will go to the previous page instead of closing
@@ -167,6 +176,12 @@ public class SlicePurchaseActivity extends Activity {
     private void setupWebView() {
         // Create WebView
         mWebView = new WebView(this);
+
+        // Clear any cookies and state that might be saved from previous sessions
+        CookieManager.getInstance().removeAllCookies(null);
+        CookieManager.getInstance().flush();
+        mWebView.clearCache(true);
+        mWebView.clearHistory();
 
         // Enable JavaScript for the carrier purchase website to send results back to
         //  the slice purchase application.

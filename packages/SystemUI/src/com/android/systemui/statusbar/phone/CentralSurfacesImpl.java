@@ -500,7 +500,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     private final PluginDependencyProvider mPluginDependencyProvider;
-    private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final ExtensionController mExtensionController;
     private final UserInfoControllerImpl mUserInfoControllerImpl;
     private final DemoModeController mDemoModeController;
@@ -787,7 +786,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             InitController initController,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             PluginDependencyProvider pluginDependencyProvider,
-            KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
@@ -884,7 +882,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mKeyguardViewMediatorCallback = viewMediatorCallback;
         mInitController = initController;
         mPluginDependencyProvider = pluginDependencyProvider;
-        mKeyguardDismissUtil = keyguardDismissUtil;
         mExtensionController = extensionController;
         mUserInfoControllerImpl = userInfoControllerImpl;
         mIconPolicy = phoneStatusBarPolicy;
@@ -1742,7 +1739,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
         mMediaManager.setBiometricUnlockController(mBiometricUnlockController);
-        mKeyguardDismissUtil.setDismissHandler(this::executeWhenUnlocked);
         Trace.endSection();
     }
 
@@ -2366,15 +2362,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotificationsController.resetUserExpandedStates();
     }
 
-    private void executeWhenUnlocked(OnDismissAction action, boolean requiresShadeOpen,
-            boolean afterKeyguardGone) {
-        if (mKeyguardStateController.isShowing() && requiresShadeOpen) {
-            mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
-        }
-        mActivityStarter.dismissKeyguardThenExecute(action, null /* cancelAction */,
-                afterKeyguardGone /* afterKeyguardGone */);
-    }
-
     /**
      * Notify the shade controller that the current user changed
      *
@@ -2844,7 +2831,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     private void updateDozingState() {
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, "Dozing", 0);
+            Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, "Dozing", String.valueOf(mDozing),
+                    0);
+        }
         Trace.beginSection("CentralSurfaces#updateDozingState");
 
         boolean keyguardVisible = mKeyguardStateController.isVisible();
@@ -3198,6 +3189,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         @Override
         public void onStartedWakingUp() {
+            // Between onStartedWakingUp() and onFinishedWakingUp(), the system is changing the
+            // display power mode. To avoid jank, animations should NOT run during these power
+            // mode transitions, which means that whenever possible, animations should
+            // start running during the onFinishedWakingUp() callback instead of this callback.
             String tag = "CentralSurfaces#onStartedWakingUp";
             DejankUtils.startDetectingBlockingIpcs(tag);
             mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
@@ -3242,6 +3237,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                 updateVisibleToUser();
                 updateIsKeyguard();
+            });
+            DejankUtils.stopDetectingBlockingIpcs(tag);
+        }
+
+        @Override
+        public void onFinishedWakingUp() {
+            mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
+                // stopDozing() starts the LOCKSCREEN_TRANSITION_FROM_AOD animation.
                 mDozeServiceHost.stopDozing();
                 // This is intentionally below the stopDozing call above, since it avoids that we're
                 // unnecessarily animating the wakeUp transition. Animations should only be enabled
@@ -3255,13 +3258,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
                     mShadeController.makeExpandedInvisible();
                 }
-
             });
-            DejankUtils.stopDetectingBlockingIpcs(tag);
-        }
-
-        @Override
-        public void onFinishedWakingUp() {
             mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false, false);
             if (mKeyguardStateController.isOccluded()

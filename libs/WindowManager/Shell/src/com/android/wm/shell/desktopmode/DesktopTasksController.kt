@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.R
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
@@ -24,6 +25,7 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.Region
@@ -458,6 +460,25 @@ class DesktopTasksController(
             task.windowingMode == WINDOWING_MODE_FREEFORM -> handleFreeformTaskLaunch(task)
             else -> null
         }
+    }
+
+    /**
+     * Applies the proper surface states (rounded corners) to tasks when desktop mode is active.
+     * This is intended to be used when desktop mode is part of another animation but isn't, itself,
+     * animating.
+     */
+    fun syncSurfaceState(
+            info: TransitionInfo,
+            finishTransaction: SurfaceControl.Transaction
+    ) {
+        // Add rounded corners to freeform windows
+        val ta: TypedArray = context.obtainStyledAttributes(
+                intArrayOf(R.attr.dialogCornerRadius))
+        val cornerRadius = ta.getDimensionPixelSize(0, 0).toFloat()
+        ta.recycle()
+        info.changes
+                .filter { it.taskInfo.windowingMode == WINDOWING_MODE_FREEFORM }
+                .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
     }
 
     private fun handleFreeformTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {

@@ -323,7 +323,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Id of the View currently being displayed.
      */
     @GuardedBy("mLock")
-    @Nullable AutofillId mCurrentViewId;
+    private @Nullable AutofillId mCurrentViewId;
 
     @GuardedBy("mLock")
     private IAutoFillManagerClient mClient;
@@ -614,7 +614,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * TODO(b/151867668): improve how asynchronous data dependencies are handled, without using
      * CountDownLatch.
      */
-    private final class AssistDataReceiverImpl extends IAssistDataReceiver.Stub {
+    final class AssistDataReceiverImpl extends IAssistDataReceiver.Stub {
         @GuardedBy("mLock")
         private boolean mWaitForInlineRequest;
         @GuardedBy("mLock")
@@ -629,17 +629,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mPendingFillRequest = null;
             mWaitForInlineRequest = isInlineRequest;
             mPendingInlineSuggestionsRequest = null;
-            return isInlineRequest ? (inlineSuggestionsRequest) -> {
-                synchronized (mLock) {
-                    if (!mWaitForInlineRequest || mPendingInlineSuggestionsRequest != null) {
-                        return;
-                    }
-                    mWaitForInlineRequest = inlineSuggestionsRequest != null;
-                    mPendingInlineSuggestionsRequest = inlineSuggestionsRequest;
-                    maybeRequestFillLocked();
-                    viewState.resetState(ViewState.STATE_PENDING_CREATE_INLINE_REQUEST);
+            if (isInlineRequest) {
+                WeakReference<AssistDataReceiverImpl> assistDataReceiverWeakReference =
+                        new WeakReference<AssistDataReceiverImpl>(this);
+                WeakReference<ViewState> viewStateWeakReference =
+                        new WeakReference<ViewState>(viewState);
+                return new InlineSuggestionRequestConsumer(assistDataReceiverWeakReference,
+                    viewStateWeakReference);
+            }
+            return null;
+        }
+
+        void handleInlineSuggestionRequest(InlineSuggestionsRequest inlineSuggestionsRequest,
+                ViewState viewState) {
+            synchronized (mLock) {
+                if (!mWaitForInlineRequest || mPendingInlineSuggestionsRequest != null) {
+                    return;
                 }
-            } : null;
+                mWaitForInlineRequest = inlineSuggestionsRequest != null;
+                mPendingInlineSuggestionsRequest = inlineSuggestionsRequest;
+                maybeRequestFillLocked();
+                viewState.resetState(ViewState.STATE_PENDING_CREATE_INLINE_REQUEST);
+            }
         }
 
         @GuardedBy("mLock")

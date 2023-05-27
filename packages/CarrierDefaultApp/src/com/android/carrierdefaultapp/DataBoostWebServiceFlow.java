@@ -88,4 +88,21 @@ public class DataBoostWebServiceFlow {
             @Nullable String failureReason) {
         mActivity.onPurchaseFailed(failureCode, failureReason);
     }
+
+    /**
+     * Interface method allowing the carrier website to notify the slice purchase application that
+     * the service flow ended prematurely. This can be due to user action, an error in the
+     * web sheet logic, or an error on the network side.
+     *
+     * This can be called using the JavaScript below:
+     * <script type="text/javascript">
+     *     function dismissFlow() {
+     *         DataBoostWebServiceFlow.dismissFlow();
+     *     }
+     * </script>
+     */
+    @JavascriptInterface
+    public void dismissFlow() {
+        mActivity.onDismissFlow();
+    }
 }

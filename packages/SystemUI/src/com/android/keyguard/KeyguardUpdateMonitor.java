@@ -246,6 +246,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_TIME_FORMAT_UPDATE = 344;
     private static final int MSG_REQUIRE_NFC_UNLOCK = 345;
     private static final int MSG_KEYGUARD_DISMISS_ANIMATION_FINISHED = 346;
+    private static final int MSG_SERVICE_PROVIDERS_UPDATED = 347;
 
     /** Biometric authentication state: Not listening. */
     private static final int BIOMETRIC_STATE_STOPPED = 0;
@@ -1818,6 +1819,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
                 String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
+            } else if (TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED.equals(action)) {
+                mHandler.obtainMessage(MSG_SERVICE_PROVIDERS_UPDATED, intent).sendToTarget();
             } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_AIRPLANE_MODE_CHANGED);
             } else if (Intent.ACTION_SERVICE_STATE.equals(action)) {
@@ -2387,6 +2390,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     case MSG_SERVICE_STATE_CHANGE:
                         handleServiceStateChange(msg.arg1, (ServiceState) msg.obj);
                         break;
+                    case MSG_SERVICE_PROVIDERS_UPDATED:
+                        handleServiceProvidersUpdated((Intent) msg.obj);
+                        break;
                     case MSG_SCREEN_TURNED_OFF:
                         Trace.beginSection("KeyguardUpdateMonitor#handler MSG_SCREEN_TURNED_OFF");
                         handleScreenTurnedOff();
@@ -2457,6 +2463,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         filter.addAction(Intent.ACTION_SERVICE_STATE);
         filter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+        filter.addAction(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         filter.addAction(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED);
         mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter, mHandler);
@@ -3708,6 +3715,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         mServiceStates.put(subId, serviceState);
 
+        callbacksRefreshCarrierInfo();
+    }
+
+    /**
+     * Handle {@link #MSG_SERVICE_PROVIDERS_UPDATED}
+     */
+    private void handleServiceProvidersUpdated(Intent intent) {
+        mLogger.logServiceProvidersUpdated(intent);
         callbacksRefreshCarrierInfo();
     }
 

@@ -16,48 +16,41 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.util.Log;
-
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
 /**
- * Executes actions that require the screen to be unlocked. Delegates the actual handling to an
- * implementation passed via {@link #setDismissHandler}.
+ * Executes actions that require the screen to be unlocked.
  */
 @SysUISingleton
 public class KeyguardDismissUtil implements KeyguardDismissHandler {
-    private static final String TAG = "KeyguardDismissUtil";
+    private final KeyguardStateController mKeyguardStateController;
 
-    private volatile KeyguardDismissHandler mDismissHandler;
+    private final SysuiStatusBarStateController mStatusBarStateController;
+
+    private final ActivityStarter mActivityStarter;
 
     @Inject
-    public KeyguardDismissUtil() {
+    public KeyguardDismissUtil(KeyguardStateController keyguardStateController,
+            SysuiStatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter) {
+        mKeyguardStateController = keyguardStateController;
+        mStatusBarStateController = statusBarStateController;
+        mActivityStarter = activityStarter;
     }
 
-    /** Sets the actual {@link KeyguardDismissHandler} implementation. */
-    public void setDismissHandler(KeyguardDismissHandler dismissHandler) {
-        mDismissHandler = dismissHandler;
-    }
-
-    /**
-     * Executes an action that requires the screen to be unlocked.
-     *
-     * <p>Must be called after {@link #setDismissHandler}.
-     *
-     * @param requiresShadeOpen does the shade need to be forced open when hiding the keyguard?
-     */
     @Override
     public void executeWhenUnlocked(OnDismissAction action, boolean requiresShadeOpen,
             boolean afterKeyguardGone) {
-        KeyguardDismissHandler dismissHandler = mDismissHandler;
-        if (dismissHandler == null) {
-            Log.wtf(TAG, "KeyguardDismissHandler not set.");
-            action.onDismiss();
-            return;
+        if (mKeyguardStateController.isShowing() && requiresShadeOpen) {
+            mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
-        dismissHandler.executeWhenUnlocked(action, requiresShadeOpen, afterKeyguardGone);
+        mActivityStarter.dismissKeyguardThenExecute(action, null /* cancelAction */,
+                afterKeyguardGone /* afterKeyguardGone */);
     }
 }
