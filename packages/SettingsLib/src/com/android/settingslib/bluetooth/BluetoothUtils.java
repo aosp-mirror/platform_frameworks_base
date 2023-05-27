@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -162,14 +163,21 @@ public class BluetoothUtils {
                     resources, ((BitmapDrawable) pair.first).getBitmap()), pair.second);
         }
 
+        int hashCode;
+        if ((cachedDevice.getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID)) {
+            hashCode = new Integer(cachedDevice.getGroupId()).hashCode();
+        } else {
+            hashCode = cachedDevice.getAddress().hashCode();
+        }
+
         return new Pair<>(buildBtRainbowDrawable(context,
-                pair.first, cachedDevice.getAddress().hashCode()), pair.second);
+                pair.first, hashCode), pair.second);
     }
 
     /**
      * Build Bluetooth device icon with rainbow
      */
-    public static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
+    private static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
             int hashCode) {
         final Resources resources = context.getResources();
 

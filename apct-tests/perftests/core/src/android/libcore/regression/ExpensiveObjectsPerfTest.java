@@ -52,7 +52,7 @@ public class ExpensiveObjectsPerfTest {
         }
     }
 
-    @Test
+    @Test(timeout = 900)
     public void timeClonedDateFormatTimeInstance() {
         DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();

@@ -52,7 +52,7 @@ public class KeyguardSimPinViewController
 
     private ProgressDialog mSimUnlockProgressDialog;
     private CheckSimPin mCheckSimPinThread;
-    private int mRemainingAttempts;
+    private int mRemainingAttempts = -1;
     // Below flag is set to true during power-up or when a new SIM card inserted on device.
     // When this is true and when SIM card is PIN locked state, on PIN lock screen, message would
     // be displayed to inform user about the number of remaining PIN attempts left.

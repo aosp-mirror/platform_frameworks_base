@@ -14615,18 +14615,6 @@ public final class Settings {
         public static final String ANGLE_EGL_FEATURES = "angle_egl_features";
 
         /**
-         * Comma-separated list of package names that ANGLE may have issues with
-         * @hide
-         */
-        public static final String ANGLE_DEFERLIST = "angle_deferlist";
-
-        /**
-         * Integer mode of the logic for applying `angle_deferlist`
-         * @hide
-         */
-        public static final String ANGLE_DEFERLIST_MODE = "angle_deferlist_mode";
-
-        /**
          * Show the "ANGLE In Use" dialog box to the user when ANGLE is the OpenGL driver.
          * The value is a boolean (1 or 0).
          * @hide

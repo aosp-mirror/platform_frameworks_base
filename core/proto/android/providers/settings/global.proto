@@ -468,10 +468,6 @@ message GlobalSettingsProto {
         optional SettingProto updatable_driver_prerelease_opt_in_apps = 18;
 
         optional SettingProto angle_egl_features = 19;
-        // ANGLE - List of Apps that ANGLE may have issues with
-        optional SettingProto angle_deferlist = 20;
-        // ANGLE - Integer mode of the logic for applying `angle_deferlist`
-        optional SettingProto angle_deferlist_mode = 21;
     }
     optional Gpu gpu = 59;
 

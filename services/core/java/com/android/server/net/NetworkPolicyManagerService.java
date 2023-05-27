@@ -220,6 +220,7 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.SubscriptionPlan;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -801,6 +802,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             return buckets;
         }
+
+        /** Require IPC call. Don't call when holding a lock. */
+        int getDefaultDataSubId() {
+            return SubscriptionManager.getDefaultDataSubscriptionId();
+        }
+
+        /** Require IPC call. Don't call when holding a lock. */
+        int getActivateDataSubId() {
+            return SubscriptionManager.getActiveDataSubscriptionId();
+        }
     }
 
     @VisibleForTesting
@@ -828,7 +839,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         mSuppressDefaultPolicy = suppressDefaultPolicy;
         mDeps = Objects.requireNonNull(deps, "missing Dependencies");
-
+        mActiveDataSubIdListener = new ActiveDataSubIdListener();
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"), "net-policy");
 
         mAppOps = context.getSystemService(AppOpsManager.class);
@@ -1088,6 +1099,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
                     });
 
+            // Listen for active data sub Id change, upon which data notifications is shown/hidden.
+            mContext.getSystemService(TelephonyManager.class).registerTelephonyCallback(executor,
+                    mActiveDataSubIdListener);
+
             // tell systemReady() that the service has been initialized
             initCompleteSignal.countDown();
         } finally {
@@ -1255,6 +1270,38 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
     };
+
+    /**
+     * Listener that watches for active data sub Id change, upon which data notifications are
+     * shown/hidden.
+     */
+    private final ActiveDataSubIdListener mActiveDataSubIdListener;
+    private class ActiveDataSubIdListener extends TelephonyCallback implements
+            TelephonyCallback.ActiveDataSubscriptionIdListener {
+        /**
+         * In most cases active data sub is the same as the default data sub, but if user enabled
+         * auto data switch {@link TelephonyManager#MOBILE_DATA_POLICY_AUTO_DATA_SWITCH},
+         * active data sub could be the non-default data sub.
+         *
+         * If the listener is initialized before the phone process is up, the IPC call to the
+         * static method of SubscriptionManager lead to INVALID_SUBSCRIPTION_ID to be returned,
+         * indicating the phone process is unable to determine a valid data sub Id at this point, in
+         * which case no data notifications should be shown anyway. Later on when an active data
+         * sub is known, notifications will be re-evaluated by this callback.
+         */
+        private int mDefaultDataSubId = mDeps.getDefaultDataSubId();
+        private int mActiveDataSubId = mDeps.getActivateDataSubId();
+        // Only listen to active data sub change is sufficient because default data sub change
+        // leads to active data sub change as well.
+        @Override
+        public void onActiveDataSubscriptionIdChanged(int subId) {
+            mActiveDataSubId = subId;
+            mDefaultDataSubId = mDeps.getDefaultDataSubId();
+            synchronized (mNetworkPoliciesSecondLock) {
+                updateNotificationsNL();
+            }
+        }
+    }
 
     /**
      * Listener that watches for {@link NetworkStatsManager} updates, which
@@ -1445,6 +1492,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // ignore policies that aren't relevant to user
             if (subId == INVALID_SUBSCRIPTION_ID) continue;
+            // ignore if the data sub is neither default nor active for data at the moment.
+            if (subId != mActiveDataSubIdListener.mDefaultDataSubId
+                    && subId != mActiveDataSubIdListener.mActiveDataSubId) continue;
             if (!policy.hasCycle()) continue;
 
             final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
