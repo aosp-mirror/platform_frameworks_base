@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ರದ್ದುಮಾಡಿ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ಸಂಪರ್ಕಗೊಳಿಸಿದಾಗ, ಜೋಡಿಸುವಿಕೆಯು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಣೆ ಮಾಡಲಾಗಲಿಲ್ಲ."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ತಪ್ಪಾಗಿರುವ ಪಿನ್‌ ಅಥವಾ ಪಾಸ್‌ಕೀ ಕಾರಣದಿಂದಾಗಿ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ತಪ್ಪು ಪಿನ್‌ ಅಥವಾ ಪಾಸ್‌ಕೀ ಕಾರಣ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಿಸಲಾಗಲಿಲ್ಲ."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಸಂವಹನ ನಡೆಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"ಜೋಡಿಸುವಿಕೆಯನ್ನು <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ತಿರಸ್ಕರಿಸಿದೆ"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"ಕಂಪ್ಯೂಟರ್‌"</string>
@@ -329,7 +329,7 @@
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ವೈ-ಫೈ ಸಕ್ರಿಯವಾಗಿರುವಾಗಲೂ, ಯಾವಾಗಲೂ ಮೊಬೈಲ್‌ ಡೇಟಾ ಸಕ್ರಿಯವಾಗಿರಿಸಿ (ವೇಗವಾಗಿ ನೆಟ್‌ವರ್ಕ್‌ ಬದಲಾಯಿಸಲು)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"ಹಾರ್ಡ್‌ವೇರ್‌ನ ವೇಗವರ್ಧನೆ ಟೆಥರಿಂಗ್ ಲಭ್ಯವಿದ್ದರೆ ಅದನ್ನು ಬಳಸಿ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ಅಧಿಸೂಚನೆ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ನೋಟಿಫಿಕೇಶನ್ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆ್ಯಪ್‍ಗಳನ್ನು ಇನ್‍ಸ್ಟಾಲ್ ಮಾಡಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಬೇಕೆ?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ಅಧಿಸೂಚನೆ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"ನೀವು ಹಿಂದೆ ಅಧಿಕೃತಗೊಳಿಸಿದ ಎಲ್ಲ ಕಂಪ್ಯೂಟರ್‌ಗಳಿಂದ USB ಡೀಬಗ್‌ಗೆ ಪ್ರವೇಶವನ್ನು ರದ್ದುಗೊಳಿಸುವುದೇ?"</string>
@@ -400,7 +400,7 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"ಹಿನ್ನೆಲೆ ಪ್ರಕ್ರಿಯೆ ಮಿತಿ"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"ಹಿನ್ನೆಲೆ ANR ಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ಹಿನ್ನೆಲೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಿಲ್ಲ ಎಂಬ ಸಂಭಾಷಣೆ ತೋರಿಸಿ"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ಅಧಿಸೂಚನೆ ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ನೋಟಿಫಿಕೇಶನ್ ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ಅಮಾನ್ಯ ಚಾನಲ್ ಅಧಿಸೂಚನೆಗಾಗಿ ಪರದೆಯಲ್ಲಿ ಎಚ್ಚರಿಕೆ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ಬಾಹ್ಯವಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಒತ್ತಾಯವಾಗಿ ಅನುಮತಿಸಿ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳು ಯಾವುದೇ ಆಗಿದ್ದರೂ, ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
