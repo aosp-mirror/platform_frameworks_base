@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.plugins.ClockId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -31,4 +32,6 @@ constructor(
     repository: KeyguardClockRepository,
 ) {
     val selectedClockSize: Flow<SettingsClockSize> = repository.selectedClockSize
+
+    val currentClockId: Flow<ClockId> = repository.currentClockId
 }
