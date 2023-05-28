@@ -240,7 +240,7 @@ constructor(
         smartSpaceView?.let {
             it.setPaddingRelative(startPadding, topPadding, endPadding, 0)
             it.isClickable = false
-
+            it.isInvisible = true
             parentView.addView(
                 it,
                 FrameLayout.LayoutParams(
@@ -399,9 +399,6 @@ constructor(
 
         updateLargeClock(clock)
         updateSmallClock(clock)
-
-        // Hide smart space if the clock has weather display; otherwise show it
-        hideSmartspace(clock.largeClock.config.hasCustomWeatherDataDisplay)
     }
 
     private fun updateLargeClock(clock: ClockController) {
