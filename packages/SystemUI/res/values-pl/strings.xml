@@ -94,7 +94,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Rozpocząć nagrywanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Podczas nagrywania system Android może rejestrować wszelkie informacje poufne wyświetlane na ekranie lub odtwarzane na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nagraj dźwięk"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nagrywaj dźwięk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Dźwięki z urządzenia"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Dźwięki odtwarzane na urządzeniu, na przykład muzyka, połączenia i dzwonki"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>

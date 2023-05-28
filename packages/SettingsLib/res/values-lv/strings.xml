@@ -116,7 +116,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Tālruņa zvani"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failu pārsūtīšana"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ievades ierīce"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Interneta piekļuve"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Piekļuve internetam"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontaktpersonas informācijas kopīgošana"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Izmantot kontaktpersonas informācijas kopīgošanai"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneta savienojuma koplietošana"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Atcelt"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Veicot savienošanu pārī, šī ierīce savienojuma laikā varēs piekļūt jūsu kontaktpersonām un zvanu vēsturei."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nevarēja savienot pārī ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nevarēja savienot pārī ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, jo tika ievadīts nepareizs PIN kods vai nepareiza ieejas atslēga."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nevarēja savienot pārī ar <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, jo tika ievadīts nepareizs PIN kods vai ieejas atslēga."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nevar sazināties ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> noraidīja pāra izveidi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Dators"</string>

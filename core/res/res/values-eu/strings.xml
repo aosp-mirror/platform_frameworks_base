@@ -423,7 +423,7 @@
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Aplikazioak deien historia irakur dezake."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"idatzi deien erregistroan"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tabletaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Asmo txarreko aplikazioek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Android TV gailuko deien erregistroa aldatzeko baimena ematen die aplikazioei, jasotako eta egindako deiei buruzko datuak barne. Baliteke asmo txarreko aplikazioek deien erregistroa ezabatzea edo aldatzea."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Android TV gailuko deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Baliteke asmo txarreko aplikazioek deien erregistroa ezabatzea edo aldatzea."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Telefonoaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Asmo txarreko aplikazioek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Atzitu gorputz-sentsoreen datuak (esaterako, bihotz-maiztasuna) aplikazioa erabili bitartean"</string>
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Aplikazioak erabiltzen diren bitartean, gorputz-sentsoreen datuak (besteak beste, bihotz-maiztasuna, tenperatura eta odolean dagoen oxigenoaren ehunekoa) erabiltzeko baimena ematen die aplikazio horiei."</string>
@@ -1907,9 +1907,9 @@
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Bideoa"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Baztertu"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Amaitu deia"</string>
-    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Jasotako deia"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Sarrerako deia"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Deia abian da"</string>
-    <string name="call_notification_screening_text" msgid="8396931408268940208">"Jasotako dei bat bistaratzen"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Sarrerako dei bat bistaratzen"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Kategoriarik gabea"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Zuk ezarri duzu jakinarazpen hauen garrantzia."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Garrantzitsua da eragiten dien pertsonengatik."</string>
