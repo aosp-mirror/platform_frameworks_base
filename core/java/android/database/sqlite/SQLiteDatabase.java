@@ -2170,12 +2170,14 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * progress or an exception will be thrown.  The resulting object will be closed automatically
      * when the current transaction closes.
      * @param sql The SQL string to be compiled into a prepared statement.
-     * @return A raw statement holding the compiled sql.
+     * @return A {@link SQLiteRawStatement} holding the compiled SQL.
      * @throws IllegalStateException if a transaction is not in progress.
-     * @throws SQLiteException if the sql cannot be compiled.
+     * @throws SQLiteException if the SQL cannot be compiled.
      * @hide
      */
+    @NonNull
     public SQLiteRawStatement createRawStatement(@NonNull String sql) {
+        Objects.requireNonNull(sql);
         return new SQLiteRawStatement(this, sql);
     }
 
@@ -2183,7 +2185,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * Return the "rowid" of the last row to be inserted on the current connection.  See the
      * SQLite documentation for the specific details.  This method must only be called when inside
      * a transaction.  {@link IllegalStateException} is thrown if the method is called outside a
-     * transaction.
+     * transaction.  If the function is called before any inserts in the current transaction, the
+     * value returned will be from a previous transaction, which may be from a different thread.
+     * @return The ROWID of the last row to be inserted under this connection.
+     * @throws IllegalStateException if there is no current transaction.
      * @hide
      */
     public long lastInsertRowId() {

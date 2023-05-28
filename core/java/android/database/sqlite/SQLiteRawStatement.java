@@ -28,6 +28,7 @@ import java.io.Closeable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.Reference;
+import java.util.Objects;
 
 /**
  * Represents a SQLite statement. The methods correspond very closely to SQLite APIs that operate
@@ -35,22 +36,28 @@ import java.lang.ref.Reference;
  * the APIs in this class correspond to the SQLite APIs with the same name, except that snake-case
  * is changed to camel-case.
  * <p>
- * A {@link SQLiteRawStatement} must be created through a database, and there must be a transaction
- * open at the time. The statement may be explicitly closed with {@link #close} but if it is not
- * explicitly closed, it will be closed when the outermost transaction is ended. ({@link #close} may
- * be called multiple times without harm.)
+ * A {@link SQLiteRawStatement} must be created through a database, and there must be a
+ * transaction open at the time. Statements are implicitly closed when the outermost transaction
+ * ends, or if the current transaction is marked successful. Statements may be explicitly
+ * closed at any time with {@link #close}.  The {@link #close} operation is idempotent and may be
+ * called multiple times without harm.
  * <p>
- * Once a {@link SQLiteRawStatement} has been closed, no further operations are permitted. A
- * {@link SQLiteMisuseException} will be thrown.
+ * Multiple {@link SQLiteRawStatement}s may be open simultaneously.  They are independent of each
+ * other.  Closing one statement does not affect any other statement nor does it have any effect
+ * on the enclosing transaction.
  * <p>
- * All operations on a {@link SQLiteRawStatement} must be invoked from the thread that created it. A
- * {@link SQLiteMisuseException} will be thrown if cross-thread use is detected.
+ * Once a {@link SQLiteRawStatement} has been closed, no further database operations are
+ * permitted on that statement. An {@link IllegalStateException} will be thrown if a database
+ * operation is attempted on a closed statement.
  * <p>
+ * All operations on a {@link SQLiteRawStatement} must be invoked from the thread that created
+ * it. A {@link IllegalStateException} will be thrown if cross-thread use is detected.
+ * <p>
+ * A common pattern for statements is try-with-resources.
  * <code><pre>
  * // Begin a transaction.
  * database.beginTransaction();
- * try {
- *     SQLiteRawStatement statement = database.createRawStatement("SELECT * FROM ...");
+ * try (SQLiteRawStatement statement = database.createRawStatement("SELECT * FROM ...")) {
  *     while (statement.step()) {
  *         // Fetch columns from the result rows.
  *     }
@@ -104,6 +111,7 @@ public final class SQLiteRawStatement implements Closeable {
 
     /**
      * The field types for SQLite columns.
+     * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, SQLITE_NULL})
@@ -158,7 +166,8 @@ public final class SQLiteRawStatement implements Closeable {
     }
 
     /**
-     * Throw if the length + offset are invalid with respect to the array length.
+     * Throw {@link IllegalArgumentException} if the length + offset are invalid with respect to
+     * the array length.
      */
     private void throwIfInvalidBounds(int arrayLength, int offset, int length) {
         if (arrayLength < 0) {
@@ -192,8 +201,8 @@ public final class SQLiteRawStatement implements Closeable {
 
     /**
      * Return true if the statement is still open and false otherwise.
+     * @return True if the statement is open.
      */
-    @VisibleForTesting
     public boolean isOpen() {
         return mThread != null;
     }
@@ -202,7 +211,8 @@ public final class SQLiteRawStatement implements Closeable {
      * Step to the next result. This returns true if the statement stepped to a new row, and
      * false if the statement is done.  The method throws on any other result, including a busy or
      * locked database.  If WAL is enabled then the database should never be locked or busy.
-     * @throws IllegalStateException if the statement is closed or this is a foreign thread
+     * @return True if a row is available and false otherwise.
+     * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteDatabaseLockedException if the database is locked or busy.
      * @throws SQLiteException if a native error occurs.
      */
@@ -232,7 +242,8 @@ public final class SQLiteRawStatement implements Closeable {
      * Step to the next result. This returns the raw error code code from the native method.  The
      * expected values are SQLITE_ROW and SQLITE_DONE.  For other return values, clients must
      * decode the error and handle it themselves.
-     * @throws IllegalStateException if the statement is closed or this is a foreign thread
+     * @return The native result code from the sqlite3_step() operation.
+     * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      */
     public int stepNoThrow() {
         throwIfInvalid();
@@ -246,7 +257,7 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Reset the statement. The sqlite3 API returns an error code if the last call to step
      * generated an error; this function discards those error codes.
-     * @throws IllegalStateException if the statement is closed or this is a foreign thread
+     * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteException if a native error occurs.
      */
     public void reset() {
@@ -259,8 +270,8 @@ public final class SQLiteRawStatement implements Closeable {
     }
 
     /**
-     * Clear bindings
-     * @throws IllegalStateException if the statement is closed or this is a foreign thread
+     * Clear all parameter bindings.
+     * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteException if a native error occurs.
      */
     public void clearBindings() {
@@ -275,7 +286,7 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Return the number of parameters in the statement.
      * @return The number of parameters in the statement.
-     * @throws IllegalStateException if the statement is closed or this is a foreign thread
+     * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      */
     public int bindParameterCount() {
         throwIfInvalid();
@@ -294,6 +305,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      */
     public int bindParameterIndex(@NonNull String name) {
+        Objects.requireNonNull(name);
         throwIfInvalid();
         try {
             return nativeBindParameterIndex(mStatement, name);
@@ -327,10 +339,10 @@ public final class SQLiteRawStatement implements Closeable {
      * @param value The value to be bound to the parameter.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
-     * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
     public void bindBlob(int parameter, @NonNull byte[] value) throws SQLiteException {
+        Objects.requireNonNull(value);
         throwIfInvalid();
         try {
             nativeBindBlob(mStatement, parameter, value, 0, value.length);
@@ -348,11 +360,13 @@ public final class SQLiteRawStatement implements Closeable {
      * @param offset An offset into the value array
      * @param length The number of bytes to bind from the value array.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
+     * @throws IllegalArgumentException if the sub-array exceeds the bounds of the value array.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
     public void bindBlob(int parameter, @NonNull byte[] value, int offset, int length)
             throws SQLiteException {
+        Objects.requireNonNull(value);
         throwIfInvalid();
         throwIfInvalidBounds(value.length, offset, length);
         try {
@@ -441,6 +455,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteException if a native error occurs.
      */
     public void bindText(int parameter, @NonNull String value) throws SQLiteException {
+        Objects.requireNonNull(value);
         throwIfInvalid();
         try {
             nativeBindText(mStatement, parameter, value);
@@ -453,7 +468,6 @@ public final class SQLiteRawStatement implements Closeable {
      * Return the number of columns in the current result row.
      * @return The number of columns in the result row.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
-     * @throws SQLiteException if a native error occurs.
      */
     public int getResultColumnsCount() {
         throwIfInvalid();
@@ -489,7 +503,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @return The name of the column in the result row.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
-     * @throws SQLiteException if a native error occurs.
+     * @throws SQLiteOutOfMemoryException if the database cannot allocate memory for the name.
      */
     @NonNull
     public String getName(int column) throws SQLiteException {
@@ -505,9 +519,10 @@ public final class SQLiteRawStatement implements Closeable {
      * Return the length of the column value in the result row. Column indices start at 0. This
      * returns 0 for a null and number of bytes for text or blob. Numeric values are converted to
      * a string and the length of the string is returned. Note that this cannot be used to
-     * distinguish a null value from an empty text or blob.
+     * distinguish a null value from an empty text or blob.  Note that this returns the number of
+     * bytes in the text value, not the number of characters.
      * @param column The index of a column in the result row. It is zero-based.
-     * @return The length, in bytes, of the value in the column
+     * @return The length, in bytes, of the value in the column.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
@@ -554,6 +569,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteException if a native error occurs.
      */
     public int getBlob(int column, @NonNull byte[] buffer) throws SQLiteException {
+        Objects.requireNonNull(buffer);
         throwIfInvalid();
         try {
             return nativeColumnBuffer(mStatement, column, buffer, 0, buffer.length, 0);
@@ -573,14 +589,15 @@ public final class SQLiteRawStatement implements Closeable {
      * @param offset An offset into the buffer: copying starts here.
      * @param length The number of bytes to copy.
      * @param srcOffset The offset into the blob from which to start copying.
-     * @return the number of bytes that were copied
+     * @return the number of bytes that were copied.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
-     * @throws IllegalArbumentException if the buffer is too small for offset+length.
+     * @throws IllegalArgumentException if the buffer is too small for offset+length.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
     public int getBlob(int column, @NonNull byte[] buffer, int offset, int length, int srcOffset)
             throws SQLiteException {
+        Objects.requireNonNull(buffer);
         throwIfInvalid();
         throwIfInvalidBounds(buffer.length, offset, length);
         try {
@@ -653,7 +670,8 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public @NonNull String getText(int column) throws SQLiteException {
+    @NonNull
+    public String getText(int column) throws SQLiteException {
         throwIfInvalid();
         try {
             return nativeColumnText(mStatement, column);
