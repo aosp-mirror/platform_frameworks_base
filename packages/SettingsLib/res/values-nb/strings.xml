@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nå nettopp"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Denne telefonen"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Dette nettbrettet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Denne telefonen"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan ikke spille på denne enheten"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Oppgrader kontoen for å bytte"</string>
@@ -575,7 +581,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Bruker"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrenset profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du legge til en ny bruker?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enheten med andre folk ved å opprette flere brukere. Hver bruker har sin egen plass de kan tilpasse med apper, bakgrunner og annet. Brukere kan også justere enhetsinnstillinger, for eksempel wifi, som påvirker alle.\n\nNår du legger til en ny bruker, må vedkommende angi innstillinger for plassen sin.\n\nAlle brukere kan oppdatere apper for alle andre brukere. Innstillinger og tjenester for tilgjengelighet overføres kanskje ikke til den nye brukeren."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enheten med andre folk ved å opprette flere brukere. Hver bruker har sitt eget område de kan tilpasse med apper, bakgrunner og annet. Brukere kan også justere enhetsinnstillinger, for eksempel wifi, som påvirker alle.\n\nNår du legger til en ny bruker, må vedkommende angi innstillinger for sitt område.\n\nAlle brukere kan oppdatere apper for alle andre brukere. Innstillinger og tjenester for tilgjengelighet overføres kanskje ikke til den nye brukeren."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du legger til en ny bruker, må hen konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Vil du gjøre denne brukeren til administrator?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratorer har spesielle rettigheter som ikke andre brukere har. Administratorer kan administrere alle brukere, oppdatere og tilbakestille denne enheten, endre innstillinger, se alle installerte apper, gi administratorrettigheter til andre samt oppheve andres administratorrettigheter."</string>

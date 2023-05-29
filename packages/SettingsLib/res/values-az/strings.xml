@@ -455,7 +455,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"İstifadəyə əsasən təxminən <xliff:g id="TIME">%1$s</xliff:g> olana qədər davam edəcək"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Təxminən <xliff:g id="TIME">%1$s</xliff:g> olana qədər davam edəcək (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Təxminən <xliff:g id="TIME">%1$s</xliff:g> olana qədər davam edəcək"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> olana qədər"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> radəsinə qədər"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batareya <xliff:g id="TIME">%1$s</xliff:g> radələrinə qədər boşala bilər"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Maksimum <xliff:g id="THRESHOLD">%1$s</xliff:g> qalıb"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Maksimum <xliff:g id="THRESHOLD">%1$s</xliff:g> qalıb (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -545,14 +545,20 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"İndicə"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Bu telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Bu planşet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Bu telefon"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Bu cihazda oxutmaq mümkün deyil"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Keçirmək üçün hesabı təkmilləşdirin"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Burada endirmələri oxutmaq mümkün deyil"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Reklamdan sonra yenidən cəhd edin"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Burada oxutmaq üçün cihazı oyadın"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Cihaz oxudulmaq üçün təsdiqlənməyib"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Bu medianı burada oxutmaq mümkün deyil"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Bu cihazda oxutmaq olmur"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Keçirmək üçün hesabı güncəllə"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Burada endirmələri oxutmaq olmur"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Reklamdan sonra yenidən sına"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Burada oxutmaqçün cihazı oyat"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Cihaz oxutmaq üçün təsdiqlənməyib"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Bu medianı burada oxutmaq olmur"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Qoşulmaqla bağlı problem. Cihazı deaktiv edin, sonra yenidən aktiv edin"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Simli audio cihaz"</string>
     <string name="help_label" msgid="3528360748637781274">"Yardım və rəy"</string>

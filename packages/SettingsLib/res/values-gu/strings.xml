@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"ડિસ્કનેક્ટ થઈ રહ્યું છે..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"કનેક્ટ થઈ રહ્યું છે…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> સાથે કનેક્ટ થયેલ"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"જોડી કરી રહ્યું છે…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"જોડાણ કરી રહ્યાં છીએ…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> સાથે કનેક્ટ થયેલ (કોઈ ફોન નથી)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> સાથે કનેક્ટ થયેલ (કોઈ મીડિયા નથી)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> સાથે કનેક્ટ થયેલ (ફોન કે મીડિયા નથી)"</string>
@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"આ ફોન"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"આ ટૅબ્લેટ"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"આ ફોન"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"આ ડિવાઇસ પર ચલાવી શકતા નથી"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"સ્વિચ કરવા માટે એકાઉન્ટ અપગ્રેડ કરો"</string>
@@ -576,7 +582,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"પ્રતિબંધિત પ્રોફાઇલ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"તમે વધારાના વપરાશકર્તાઓ બનાવીને અન્ય લોકો સાથે આ ડિવાઇસને શેર કરી શકો છો. દરેક વપરાશકર્તા પાસે તેમની પોતાની સ્પેસ છે, જેને તેઓ ઍપ, વૉલપેપર, વગેરે સાથે કસ્ટમાઇઝ કરી શકે છે. વપરાશકર્તાઓ પ્રત્યેક વ્યક્તિને અસર કરતી હોય તેવી ડિવાઇસ સેટિંગ જેમ કે વાઇ-ફાઇને પણ સમાયોજિત કરી શકે છે.\n\nજ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમની સ્પેસ સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા અન્ય બધા વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે. નવા વપરાશકર્તાને ઍક્સેસિબિલિટી સેટિંગ અને સેવાઓ ટ્રાન્સફર ન પણ થાય."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ અપ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમની સ્પેસ સેટ અપ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"આ વપરાશકર્તાને ઍડમિન બનાવવા છે?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"ઍડમિન પાસે વિશિષ્ટ વિશેષાધિકારો હોય છે જે અન્ય વપરાશકર્તાઓ પાસે હોતા નથી. ઍડમિન બધા વપરાશકર્તાઓને મેનેજ કરી શકે, આ ડિવાઇસને અપડેટ અથવા રીસેટ કરી શકે, સેટિંગમાં ફેરફાર કરી શકે, ઇન્સ્ટૉલ કરેલી બધી ઍપ જોઈ શકે અને અન્ય લોકોને ઍડમિનના અધિકારો આપી શકે અથવા તેમને રદબાતલ કરી શકે."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"ઍડમિન બનાવો"</string>
