@@ -400,10 +400,12 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 new InsetsFrameProvider(bar2, 0, WindowInsets.Type.statusBars())
                         .setInsetsSize(Insets.of(0, STATUS_BAR_HEIGHT, 0, 0))
         };
+        bar2.mAttrs.setFitInsetsTypes(0);
         bar2.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
         final int doubleHeightFor90 = STATUS_BAR_HEIGHT * 2;
         for (int i = ROTATION_0; i <= Surface.ROTATION_270; i++) {
             final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+            params.setFitInsetsTypes(0);
             if (i == Surface.ROTATION_90) {
                 params.providedInsets = new InsetsFrameProvider[] {
                         new InsetsFrameProvider(bar2, 0, WindowInsets.Type.statusBars())
