@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este telemóvel"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Este tablet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telemóvel"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Não é possível reproduzir neste dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Atualize a conta para mudar"</string>
@@ -576,7 +582,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo utilizador?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com apps, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Definir este utilizador como um administrador?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Os administradores têm privilégios especiais que outros utilizadores não têm. Um administrador pode gerir todos os utilizadores, atualizar ou repor este dispositivo, modificar definições, ver todas as apps instaladas e revogar ou conceder privilégios de administrador a outras pessoas."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Definir como administrador"</string>
@@ -588,7 +594,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Adicionar"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Novo utilizador"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Novo perfil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Info. utilizador"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Dados do utilizador"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informação do perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Antes de poder criar um perfil restrito, tem de configurar um bloqueio de ecrã para proteger as suas aplicações e dados pessoais."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Definir bloqueio"</string>

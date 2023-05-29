@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Дөнгөж сая"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Энэ утас"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Энэ таблет"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Энэ утас"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Энэ төхөөрөмжид тоглуулах боломжгүй"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Сэлгэхийн тулд бүртгэлийг сайжруулна уу"</string>
@@ -576,7 +582,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Хязгаарлагдсан профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Шинэ хэрэглэгч нэмэх үү?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, дэлгэцийн зураг болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байна. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хандалтын тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бусад бүх хэрэглэгчийн аппуудыг шинэчлэх боломжтой."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн орон зайг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бусад бүх хэрэглэгчийн аппуудыг шинэчлэх боломжтой."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Энэ хэрэглэгчийг админ болгох уу?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Админууд бусад хэрэглэгчид байхгүй тусгай эрхтэй байдаг. Админ нь бүх хэрэглэгчийг удирдах, энэ төхөөрөмжийг шинэчлэх, сэргээх, тохиргоог өөрчлөх, бүх суулгасан аппыг харах болон бусад хэрэглэгчид админы эрх өгөх эсвэл эрхийг нь цуцлах боломжтой."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Админ болгох"</string>

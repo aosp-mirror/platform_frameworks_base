@@ -84,7 +84,7 @@
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"विच्छेदन गरियो"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"जडान हटाइँदै ..."</string>
-    <string name="bluetooth_connecting" msgid="5871702668260192755">"जडान हुँदै..."</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"कनेक्ट गरिँदै छ..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> सँग कनेक्ट भएको छ"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"कनेक्ट गरिँदै छ..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"जडान गरियो (फोनबाहेेक) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -99,7 +99,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"ब्याट्रीको स्तर: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ब्याट्री, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ब्याट्री"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"सक्रिय"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"सक्रिय, बायाँ मात्र"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"बायाँ मात्र अन छ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"सक्रिय, दायाँ मात्र"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"सक्रिय, बायाँ र दायाँ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"मिडिया अडियो"</string>
@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"अहिले भर्खरै"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"यो फोन"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"यो ट्याब्लेट"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यो फोन"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"यो डिभाइसमा मिडिया प्ले गर्न मिल्दैन"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"आफूले प्रयोग गर्न चाहेको खाता अपग्रेड गर्नुहोस्"</string>
@@ -592,7 +598,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफाइलको जानकारी"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"निषेधयुक्त प्रोफाइल बनाउनु अघि तपाईँको एप र व्यक्तिगत डेटा सुरक्षा गर्नाका लागि तपाईँले स्क्रिन लक सेटअप गर्नु पर्दछ ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लक सेट गर्नुहोस्"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"प्रयोगकर्ता बदलेर <xliff:g id="USER_NAME">%s</xliff:g> पार्नुहोस्"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"प्रयोगकर्ता बदलेर <xliff:g id="USER_NAME">%s</xliff:g> बनाउनुहोस्"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"नयाँ प्रयोगकर्ता बनाइँदै छ…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"नयाँ अतिथि बनाइँदै छ…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"नयाँ प्रयोगकर्ता सिर्जना गर्न सकिएन"</string>

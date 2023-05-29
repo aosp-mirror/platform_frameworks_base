@@ -545,8 +545,14 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"justo ahora"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Esta tablet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"No se puede reproducir contenido en este dispositivo"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"No se puede reproducir en este dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Actualiza la cuenta para cambiar"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"No se pueden reproducir descargas aquí"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Prueba de nuevo después del anuncio"</string>
