@@ -485,6 +485,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 new InsetsFrameProvider(owner, 0, WindowInsets.Type.statusBars())
                         .setInsetsSize(Insets.of(0, STATUS_BAR_HEIGHT, 0, 0))
         };
+        statusBar.mAttrs.setFitInsetsTypes(0);
         dc.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
         return statusBar;
     }
