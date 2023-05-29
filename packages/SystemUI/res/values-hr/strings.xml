@@ -182,7 +182,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Zaslon obavijesti."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Brze postavke."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Zaključavanje zaslona."</string>
-    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključan zaslon radnog profila"</string>
+    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključani zaslon radnog profila"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zatvaranje"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"potpuna tišina"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"samo alarmi"</string>
@@ -667,7 +667,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Uređivanje redoslijeda postavki."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Izbornik tipke za uključivanje/isključivanje"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključan zaslon"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključani zaslon"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog vrućine"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon sad radi normalno.\nDodirnite za više informacija"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon se pregrijao, stoga se isključio kako bi se ohladio Telefon sada radi normalno.\n\nTelefon se može pregrijati ako:\n	• upotrebljavate zahtjevne aplikacije (kao što su igre, aplikacije za videozapise ili navigaciju)\n	• preuzimate ili prenosite velike datoteke\n	• upotrebljavate telefon na visokim temperaturama."</string>

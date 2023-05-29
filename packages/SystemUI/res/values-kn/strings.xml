@@ -186,7 +186,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ಮುಚ್ಚು"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ಸಂಪೂರ್ಣ ನಿಶ್ಯಬ್ಧ"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ಅಡಚಣೆ ಮಾಡಬೇಡ."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ಬ್ಲೂಟೂತ್."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ಬ್ಲೂಟೂತ್ ಆನ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g> ಗಂಟೆಗೆ ಅಲಾರಮ್ ಹೊಂದಿಸಲಾಗಿದೆ."</string>
@@ -211,7 +211,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"ಡೆಸರ್ಟ್ ಕೇಸ್"</string>
     <string name="start_dreams" msgid="9131802557946276718">"ಸ್ಕ್ರೀನ್ ಸೇವರ್"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ಇಥರ್ನೆಟ್"</string>
-    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ಬ್ಲೂಟೂತ್‌"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ಯಾವುದೇ ಜೋಡಿಸಲಾದ ಸಾಧನಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ಬ್ಯಾಟರಿ"</string>
@@ -586,7 +586,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"ಎಸ್ಎಂಎಸ್"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"ಸಂಗೀತ"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
-    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ವಾಲ್ಯೂಮ್ ಬಟನ್‌ಗಳ ಶಾರ್ಟ್‌ಕಟ್‌"</string>
     <string name="battery" msgid="769686279459897127">"ಬ್ಯಾಟರಿ"</string>
     <string name="headset" msgid="4485892374984466437">"ಹೆಡ್‌ಸೆಟ್"</string>
