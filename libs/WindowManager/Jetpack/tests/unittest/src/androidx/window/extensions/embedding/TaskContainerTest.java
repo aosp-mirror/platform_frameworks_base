@@ -127,7 +127,7 @@ public class TaskContainerTest {
         assertFalse(taskContainer.isEmpty());
 
         taskContainer.mFinishedContainer.add(tf.getTaskFragmentToken());
-        taskContainer.mContainers.clear();
+        taskContainer.clearTaskFragmentContainer();
 
         assertFalse(taskContainer.isEmpty());
     }
@@ -152,13 +152,13 @@ public class TaskContainerTest {
         assertNull(taskContainer.getTopNonFinishingActivity());
 
         final TaskFragmentContainer tf0 = mock(TaskFragmentContainer.class);
-        taskContainer.mContainers.add(tf0);
+        taskContainer.addTaskFragmentContainer(tf0);
         final Activity activity0 = mock(Activity.class);
         doReturn(activity0).when(tf0).getTopNonFinishingActivity();
         assertEquals(activity0, taskContainer.getTopNonFinishingActivity());
 
         final TaskFragmentContainer tf1 = mock(TaskFragmentContainer.class);
-        taskContainer.mContainers.add(tf1);
+        taskContainer.addTaskFragmentContainer(tf1);
         assertEquals(activity0, taskContainer.getTopNonFinishingActivity());
 
         final Activity activity1 = mock(Activity.class);
