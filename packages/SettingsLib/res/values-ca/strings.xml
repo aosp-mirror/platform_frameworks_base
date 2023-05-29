@@ -182,7 +182,7 @@
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Idioma"</string>
     <string name="tts_lang_use_system" msgid="6312945299804012406">"Utilitza l\'idioma del sistema"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"No has seleccionat cap idioma"</string>
-    <string name="tts_default_lang_summary" msgid="9042620014800063470">"Defineix la llengua utilitzada per a la síntesi de veu"</string>
+    <string name="tts_default_lang_summary" msgid="9042620014800063470">"Defineix la llengua utilitzada per al text enunciat"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Vull escoltar un exemple"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"Reprodueix una breu demostració de síntesi de veu"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instal·la dades de veu"</string>
@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ara mateix"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Aquest telèfon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Aquesta tauleta"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Aquest telèfon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"No es pot reproduir en aquest dispositiu"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Actualitza el compte per canviar"</string>
@@ -611,8 +617,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Aquesta acció iniciarà una nova sessió de convidat i suprimirà totes les aplicacions i dades de la sessió actual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sortir del mode de convidat?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Aquesta acció suprimirà les aplicacions i dades de la sessió de convidat actual"</string>
-    <string name="grant_admin" msgid="4323199171790522574">"Sí, converteix en administrador"</string>
-    <string name="not_grant_admin" msgid="3557849576157702485">"No, no converteixis en administrador"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Sí, converteix-lo en administrador"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"No, no el converteixis en administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Surt"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Desar l\'activitat de convidat?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Pots desar l\'activitat de la sessió actual o suprimir totes les apps i dades"</string>

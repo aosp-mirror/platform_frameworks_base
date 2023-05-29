@@ -99,9 +99,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"I: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Activado"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo; solo izquierda"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo; solo derecha"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activo; izquierda y derecha"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo; solo oído izquierdo"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo; solo oído derecho"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activo; oídos izquierdo y derecho"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimedia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Llamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferencia de archivos"</string>
@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Recién"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Esta tablet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"No se puede reproducir en este dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Actualiza la cuenta para cambiar"</string>
