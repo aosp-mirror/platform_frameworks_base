@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Volto autenticato"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confermato"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tocca Conferma per completare"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Sbloccato con il volto."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Sbloccato con il volto. Premi per continuare."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Volto riconosciuto. Premi per continuare."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Volto riconosciuto. Premi l\'icona Sblocca e continua."</string>
@@ -974,7 +973,7 @@
     <string name="controls_menu_add" msgid="4447246119229920050">"Aggiungi controlli"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Modifica controlli"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Aggiungi app"</string>
-    <string name="controls_menu_remove" msgid="3006525275966023468">"Rimuovi l\'app"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"Rimuovi app"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Aggiungi uscite"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Gruppo"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 dispositivo selezionato"</string>

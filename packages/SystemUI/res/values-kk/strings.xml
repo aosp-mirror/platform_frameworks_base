@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Бет танылды."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Расталды"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Аяқтау үшін \"Растау\" түймесін түртіңіз."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Бетпен ашылды."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Бетпен ашылды. Жалғастыру үшін басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Бет танылды. Жалғастыру үшін басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Бет танылды. Жалғастыру үшін құлыпты ашу белгішесін басыңыз."</string>
@@ -908,7 +907,7 @@
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Басқару элементтері"</string>
     <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Жылдам кіру үшін құрылғыны басқару элементтерін таңдаңыз."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Басқару элементтерінің ретін өзгерту үшін оларды басып тұрып сүйреңіз."</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементтері жойылды."</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементі жойылды."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгерістер сақталмады."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Басқа қолданбаларды көру"</string>
     <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Қайта реттеу"</string>

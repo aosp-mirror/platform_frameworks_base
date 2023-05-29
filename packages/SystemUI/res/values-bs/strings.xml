@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Lice je provjereno"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrđeno"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Dodirnite Potvrdi da završite"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Otključano je licem."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Otključano licem. Pritisnite da nastavite."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice prepoznato. Pritisnite da nastavite."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice prepoznato. Pritisnite ikonu za otklj. da nastavite."</string>
@@ -906,7 +905,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"uklonite iz omiljenog"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premjesti na poziciju <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
-    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Odaberite kontrole uređaja da pristupite brzo"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Odaberite kontrole uređaja za brzi pristup"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite i prevucite da preuredite kontrole"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve kontrole su uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu sačuvane"</string>
