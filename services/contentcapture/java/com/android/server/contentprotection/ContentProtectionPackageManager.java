@@ -43,7 +43,7 @@ public class ContentProtectionPackageManager {
 
     @NonNull private final PackageManager mPackageManager;
 
-    ContentProtectionPackageManager(@NonNull Context context) {
+    public ContentProtectionPackageManager(@NonNull Context context) {
         mPackageManager = context.getPackageManager();
     }
 
