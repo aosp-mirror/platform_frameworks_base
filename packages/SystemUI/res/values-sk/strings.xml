@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Tvár bola overená"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrdené"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Overenie dokončíte klepnutím na Potvrdiť"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Odomknuté tvárou."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odomknuté tvárou. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Tvár bola rozpoznaná. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Tvár bola rozpoznaná. Pokračujte stlačením ikony odomknutia"</string>
@@ -721,7 +720,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ľavá ikona"</string>
     <string name="right_icon" msgid="1103955040645237425">"Pravá ikona"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pridržaním a presunutím pridáte karty"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Dlaždice môžete usporiadať pridržaním a presunutím"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Karty môžete usporiadať pridržaním a presunutím"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Presunutím sem odstránite"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Minimálny počet vyžadovaných dlaždíc: <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Upraviť"</string>
