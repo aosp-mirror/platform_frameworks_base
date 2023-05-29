@@ -47,8 +47,8 @@
     <string name="needPuk2" msgid="3910763547447344963">"Idatzi PUK2-a SIMa desblokeatzeko."</string>
     <string name="enablePin" msgid="2543771964137091212">"Ezin izan da aldatu. Gaitu SIM edo RUIM txartelaren blokeoa."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu SIM txartela blokeatu aurretik.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> saiakera geratzen zaizu SIM txartela blokeatu aurretik.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu SIMa blokeatu aurretik.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> saiakera geratzen zaizu SIMa blokeatu aurretik.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEIa"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
@@ -80,7 +80,7 @@
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ez dago ahots-deien zerbitzurik"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"Ez dago ahozko zerbitzurik eta ezin da egin larrialdi-deirik"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"Operadoreak desaktibatu egin du aldi baterako"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Operadoreak <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela desaktibatu egin du aldi baterako"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Operadoreak <xliff:g id="SIMNUMBER">%d</xliff:g> SIMa desaktibatu egin du aldi baterako"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ezin da konektatu sare mugikorrera"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Aldatu sare hobetsia. Sakatu aldatzeko."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Ezin da egin larrialdi-deirik"</string>
@@ -1046,7 +1046,7 @@
     <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Aurpegi bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN kodearen bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIMa desblokeatzeko PINa."</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM txartela desblokeatzeko PUK kodea."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIMa desblokeatzeko PUK kodea."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"Pasahitzaren bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"Eredua marrazteko eremua."</string>
     <string name="keyguard_accessibility_slide_area" msgid="4331399051142520176">"Hatza lerratzeko eremua."</string>
@@ -1977,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Aplikazioa ezin da <xliff:g id="DEVICE">%1$s</xliff:g> erabilita atzitu. Gailu horren ordez, erabili telefonoa."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Android-en bertsio zaharrago baterako sortu da aplikazio hau. Baliteke behar bezala ez funtzionatzea, eta ez ditu barne hartzen azken segurtasun- eta pribatutasun-babesak. Begiratu ea eguneratzerik dagoen edo jarri aplikazioaren garatzailearekin harremanetan."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Bilatu eguneratzeak"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Aplikazio hau ez da Androiden azken bertsioarekin bateragarria. Begiratu ea eguneratzerik dagoen edo jarri aplikazioaren garatzailearekin harremanetan."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Mezu berriak dituzu"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Mezuak ikusteko, ireki SMSetarako aplikazioa"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Baliteke funtzio batzuk mugatuta egotea"</string>
@@ -2046,14 +2047,14 @@
     <string name="etws_primary_default_message_test" msgid="4583367373909549421">"Larrialdi-mezuen proba"</string>
     <string name="notification_reply_button_accessibility" msgid="5235776156579456126">"Erantzun"</string>
     <string name="etws_primary_default_message_others" msgid="7958161706019130739"></string>
-    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"SIM txartela ezin da erabili ahotsa erabiltzeko"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"SIM txartela ez dago hornituta ahotsa erabiltzeko"</string>
+    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"SIMa ezin da erabili ahotsa erabiltzeko"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"SIMa ez dago hornituta ahotsa erabiltzeko"</string>
     <string name="mmcc_illegal_ms" msgid="7509650265233909445">"SIM txartela ezin da erabili ahotsa erabiltzeko"</string>
     <string name="mmcc_illegal_me" msgid="6505557881889904915">"Telefonoa ezin da erabili ahotsa erabiltzeko"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"Ez da onartzen <xliff:g id="SIMNUMBER">%d</xliff:g> SIMa"</string>
     <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"Ez dago <xliff:g id="SIMNUMBER">%d</xliff:g> SIMik"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIMa"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIMa"</string>
     <string name="popup_window_default_title" msgid="6907717596694826919">"Leiho gainerakorra"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"Beste <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"Aplikazioaren bertsio zaharrago batera aldatu da, edo aplikazioa ez da lasterbide honekin bateragarria"</string>

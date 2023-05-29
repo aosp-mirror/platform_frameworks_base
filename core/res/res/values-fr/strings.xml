@@ -1700,9 +1700,9 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DÉSACTIVÉE"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Accorder le contrôle total de votre appareil à <xliff:g id="SERVICE">%1$s</xliff:g> ?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Le contrôle total convient aux applications qui répondent à vos besoins d\'accessibilité. Il ne convient pas à la plupart des autres applications."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et contrôler l\'écran"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Voir et contrôler l\'écran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Le service peut lire l\'intégralité du contenu à l\'écran et afficher du contenu par-dessus d\'autres applications."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Afficher et effectuer des actions"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Voir et effectuer des actions"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Le service peut suivre vos interactions avec une application ou un capteur matériel, et interagir avec des applications de votre part."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Autoriser"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuser"</string>
@@ -1978,6 +1978,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Impossible d\'accéder à ces paramètres sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt sur votre téléphone."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Cette appli a été conçue pour une ancienne version d\'Android. Elle risque de ne pas fonctionner correctement et n\'inclut pas les derniers dispositifs de sécurité et de protection de la confidentialité. Recherchez une mise à jour ou contactez le développeur de l\'appli."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Rechercher une mise à jour"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Cette appli n\'est pas compatible avec la dernière version d\'Android. Recherchez une mise à jour ou contactez le développeur de l\'appli."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Vous avez de nouveaux messages"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Ouvrir l\'application de SMS pour afficher le message"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Des fonctions peuvent être limitées"</string>

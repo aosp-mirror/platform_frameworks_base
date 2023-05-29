@@ -1977,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"यह ऐप्लिकेशन, Android के पुराने वर्शन के लिए बनाया गया था. इसमें सिक्योरिटी और निजता सुरक्षा से जुड़ी नई सुविधाएं शामिल नहीं हैं. साथ ही, ऐसा हो सकता है कि यह ठीक से काम न करे. अपडेट के बारे में पता करें या ऐप्लिकेशन के डेवलपर से संपर्क करें."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"देखें कि अपडेट मौजूद है या नहीं"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"यह ऐप्लिकेशन, Android के सबसे नए वर्शन पर काम नहीं करता है. अपडेट के बारे में पता करें या ऐप्लिकेशन के डेवलपर से संपर्क करें."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"आपके पास नए संदेश हैं"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"देखने के लिए मैसेज (एसएमएस) ऐप खोलें"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"शायद कुछ सुविधाएं काम न करें"</string>
@@ -2168,7 +2169,7 @@
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"निजी प्रोफ़ाइल वाले <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन में जाकर खोलें?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"वर्क प्रोफ़ाइल वाले <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन में जाकर खोलें?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"क्या आपको वर्क ऐप्लिकेशन से कॉल करना है?"</string>
-    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"क्या आपको वर्क ऐप्लिकेशन में स्विच करना है?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"क्या आपको वर्क ऐप्लिकेशन पर स्विच करना है?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"आपके संगठन ने, सिर्फ़ वर्क ऐप्लिकेशन से कॉल करने की अनुमति दी है"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"आपके संगठन ने, सिर्फ़ वर्क ऐप्लिकेशन से मैसेज भेजने की अनुमति दी है"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"निजी ब्राउज़र का इस्तेमाल करें"</string>

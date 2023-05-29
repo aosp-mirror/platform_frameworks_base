@@ -1978,6 +1978,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Não é possível acessar essa configuração pelo seu <xliff:g id="DEVICE">%1$s</xliff:g>. Tente pelo smartphone."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Este app foi criado para uma versão mais antiga do Android. Ele pode não funcionar corretamente e não inclui as proteções de privacidade e segurança mais recentes. Verifique se há uma atualização ou entre em contato com o desenvolvedor do app."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Procurar atualizações"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Este app não é compatível com a versão mais recente do Android. Verifique se há uma atualização ou entre em contato com o desenvolvedor do app."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Você tem mensagens novas"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Abra o app de SMS para ver"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Algumas funções são limitadas"</string>

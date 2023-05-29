@@ -694,10 +694,10 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vuelve a registrar tu rostro."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"No se reconoce el rostro. Vuelve a intentarlo."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Cambia levemente la posición de la cabeza"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mira el teléfono de forma más directa"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mira el teléfono de forma más directa"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mira el teléfono de forma más directa"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Quítate cualquier objeto que te cubra el rostro."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mira directamente al teléfono"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mira directamente al teléfono"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mira directamente al teléfono"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Quítate cualquier objeto que te cubra el rostro"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpia la parte superior de la pantalla, incluida la barra negra"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1978,6 +1978,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"No se puede acceder a esto en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Inténtalo en tu teléfono."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Esta app se compiló para una versión anterior de Android. Es posible que no funcione correctamente ni incluya las protecciones de la privacidad más recientes. Consulta si hay actualizaciones o comunícate con el desarrollador."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Buscar actualización"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Esta app no es compatible con la versión más reciente de Android. Revisa si hay actualizaciones o comunícate con el desarrollador."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tienes mensajes nuevos"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Abrir app de SMS para ver el mensaje"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Podrían limitarse algunas funciones"</string>
@@ -2326,7 +2327,7 @@
     <string name="mic_access_on_toast" msgid="2666925317663845156">"El micrófono está disponible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micrófono está bloqueado"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Pantalla dual"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La Pantalla dual está activada"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La función Dual Screen está activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando ambas pantallas para mostrar contenido"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositivo está muy caliente"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"La Pantalla dual no está disponible porque el teléfono se está calentando demasiado"</string>
@@ -2338,7 +2339,7 @@
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%s</xliff:g>. Presiona para cambiar esta opción."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g> y <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Presiona para cambiar esta opción."</string>
     <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> y <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Presiona para cambiar esta opción."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> y <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Presiona para cambiar esta opción."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> y <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Presiona para cambiarlo."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclados físicos configurados"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Presiona para ver los teclados"</string>
 </resources>

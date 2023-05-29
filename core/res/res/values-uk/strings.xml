@@ -1979,6 +1979,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Немає доступу на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися телефоном."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Цей додаток створено для старішої версії ОС Android. Він може не працювати належним чином і не містить найновіших засобів захисту конфіденційності та безпеки. Перевірте наявність оновлень або зв’яжіться з розробником додатка."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шукати оновлення"</string>
+    <!-- no translation found for deprecated_abi_message (6820548011196218091) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас є нові повідомлення"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Щоб переглянути, відкрийте додаток для SMS"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Деякі функції може бути обмежено"</string>

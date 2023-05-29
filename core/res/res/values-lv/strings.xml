@@ -1700,7 +1700,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"IZSLĒGTA"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vai atļaut pakalpojumam <xliff:g id="SERVICE">%1$s</xliff:g> pilnībā kontrolēt jūsu ierīci?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pilnīga kontrole ir piemērota lietotnēm, kas nepieciešamas lietotājiem ar īpašām vajadzībām, taču ne lielākajai daļai lietotņu."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skatīt un pārvaldīt ekrānu"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekrāna skatīšana un pārvaldīšana"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Tā var nolasīt visu ekrānā esošo saturu un attēlot saturu citām lietotnēm."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Darbību skatīšana un veikšana"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Tā var izsekot jūsu mijiedarbību ar lietotni vai aparatūras sensoru un mijiedarboties ar lietotnēm jūsu vārdā."</string>
@@ -1978,6 +1978,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ierīcē <xliff:g id="DEVICE">%1$s</xliff:g> nevar piekļūt šai funkcijai. Mēģiniet tai piekļūt tālrunī."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Šī lietotne ir paredzēta vecākai Android versijai. Tā var nedarboties pareizi un neietver jaunākās drošības un konfidencialitātes aizsardzības funkcijas. Pārbaudiet atjauninājumu pieejamību vai sazinieties ar lietotnes izstrādātāju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Meklēt atjauninājumu"</string>
+    <!-- no translation found for deprecated_abi_message (6820548011196218091) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jums ir jaunas īsziņas."</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Lai skatītu, atveriet īsziņu lietotni."</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Funkcijas var būt ierobežotas"</string>

@@ -705,7 +705,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"No se puede crear tu modelo. Inténtalo de nuevo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Gafas oscuras detectadas. Tu cara se debe poder ver entera."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Mascarilla detectada. Tu cara se debe poder ver entera."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Cara parcialmente cubierta. Tu cara se debe poder ver entera."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No se puede verificar. Hardware no disponible."</string>
@@ -1978,6 +1978,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"No se puede acceder desde tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Esta aplicación se creó para una versión anterior de Android. Puede que no funcione correctamente y que no incluya las protecciones de seguridad y privacidad más recientes. Comprueba si hay actualizaciones o ponte en contacto con el desarrollador de la aplicación."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Buscar actualizaciones"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Esta aplicación no es compatible con la última versión de Android. Comprueba si hay actualizaciones o contacta con el desarrollador de la aplicación."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tienes mensajes nuevos"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Abre la aplicación de SMS para ver el mensaje"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Algunas funciones limitadas"</string>
@@ -2168,8 +2169,8 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"¿Abrir <xliff:g id="APP">%s</xliff:g> de trabajo?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"¿Abrir en <xliff:g id="APP">%s</xliff:g> personal?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"¿Abrir en <xliff:g id="APP">%s</xliff:g> de trabajo?"</string>
-    <string name="miniresolver_call_in_work" msgid="528779988307529039">"¿Llamar desde una aplicación de trabajo?"</string>
-    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"¿Cambiar a una aplicación de trabajo?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"¿Llamar desde la aplicación de trabajo?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"¿Cambiar a la aplicación de trabajo?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Tu organización solo te permite hacer llamadas desde aplicaciones de trabajo"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Tu organización solo te permite enviar mensajes desde aplicaciones de trabajo"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar navegador personal"</string>
