@@ -63,19 +63,13 @@ jstring JNICALL Java_com_android_server_usb_descriptors_UsbDescriptorParser_getD
         return NULL;
     }
 
-    // Get Raw UCS2 Bytes
-    jbyte* byteBuffer = NULL;
-    size_t numUSC2Bytes = 0;
-    int retVal =
-            usb_device_get_string_ucs2(device, stringId,
-                                       USB_CONTROL_TRANSFER_TIMEOUT_MS,
-                                       (void**)&byteBuffer, &numUSC2Bytes);
+    char* data = usb_device_get_string(device, stringId, USB_CONTROL_TRANSFER_TIMEOUT_MS);
 
     jstring j_str = NULL;
 
-    if (retVal == 0) {
-        j_str = env->NewString((jchar*)byteBuffer, numUSC2Bytes/2);
-        free(byteBuffer);
+    if (data != NULL) {
+        j_str = env->NewStringUTF(data);
+        free(data);
     }
 
     usb_device_close(device);
