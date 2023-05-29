@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Tvár bola overená"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrdené"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Overenie dokončíte klepnutím na Potvrdiť"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Odomknuté tvárou."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odomknuté tvárou. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Tvár bola rozpoznaná. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Tvár bola rozpoznaná. Pokračujte stlačením ikony odomknutia"</string>
@@ -721,7 +720,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ľavá ikona"</string>
     <string name="right_icon" msgid="1103955040645237425">"Pravá ikona"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pridržaním a presunutím pridáte karty"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Dlaždice môžete usporiadať pridržaním a presunutím"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Karty môžete usporiadať pridržaním a presunutím"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Presunutím sem odstránite"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Minimálny počet vyžadovaných dlaždíc: <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Upraviť"</string>
@@ -860,8 +859,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zväčšenie celej obrazovky"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zväčšiť časť obrazovky"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Otvoriť nastavenia zväčšenia"</string>
-    <!-- no translation found for magnification_close_settings_click_label (4642477260651704517) -->
-    <skip />
+    <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Zavrieť nastavenia zväčšenia"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Veľkosť zmeníte presunutím rohu"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Povoliť diagonálne posúvanie"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Zmeniť veľkosť"</string>
@@ -1110,7 +1108,10 @@
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Asistent počúva"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# upozornenie}few{# upozornenia}many{# notifications}other{# upozornení}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <string name="note_task_button_label" msgid="8718616095800343136">"Zapisovanie poznámok"</string>
+    <!-- no translation found for note_task_button_label (230135078402003532) -->
+    <skip />
+    <!-- no translation found for note_task_shortcut_long_label (7729325091147319409) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Vysiela"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Chcete zastaviť vysielanie aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ak vysielate aplikáciu <xliff:g id="SWITCHAPP">%1$s</xliff:g> alebo zmeníte výstup, aktuálne vysielanie bude zastavené"</string>
