@@ -238,7 +238,10 @@ public final class TextAppearanceInfo implements Parcelable {
                 .setFontFeatureSettings(textPaint.getFontFeatureSettings())
                 .setFontVariationSettings(textPaint.getFontVariationSettings())
                 .setTextScaleX(textPaint.getTextScaleX())
-                .setTextColor(textPaint.getColor())
+                // When there is a hint text (text length is 0), the text color should be the normal
+                // text color rather than hint text color.
+                .setTextColor(text.length() == 0
+                        ? textView.getCurrentTextColor() : textPaint.getColor())
                 .setLinkTextColor(textPaint.linkColor)
                 .setAllCaps(textView.isAllCaps())
                 .setFallbackLineSpacing(textView.isFallbackLineSpacing())

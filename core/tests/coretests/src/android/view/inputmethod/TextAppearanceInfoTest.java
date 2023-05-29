@@ -37,6 +37,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ScaleXSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TypefaceSpan;
+import android.text.util.Linkify;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
@@ -53,7 +54,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class TextAppearanceInfoTest {
     private static final float EPSILON = 0.0000001f;
-    private static final String TEST_TEXT = "Happy birthday!";
+    private static final String TEST_TEXT = "Hello: google.com";
     private static final float TEXT_SIZE = 16.5f;
     private static final LocaleList TEXT_LOCALES = LocaleList.forLanguageTags("en,ja");
     private static final String FONT_FAMILY_NAME = "sans-serif";
@@ -84,39 +85,7 @@ public class TextAppearanceInfoTest {
 
     @Before
     public void setUp() {
-        mEditText.setText(mSpannableText);
-        mEditText.getPaint().setTextSize(TEXT_SIZE);
-        mEditText.setTextLocales(TEXT_LOCALES);
-        Typeface family = Typeface.create(FONT_FAMILY_NAME, Typeface.NORMAL);
-        mEditText.setTypeface(
-                Typeface.create(family, TEXT_WEIGHT, (TEXT_STYLE & Typeface.ITALIC) != 0));
-        mEditText.setAllCaps(ALL_CAPS);
-        mEditText.setShadowLayer(SHADOW_RADIUS, SHADOW_DX, SHADOW_DY, SHADOW_COLOR);
-        mEditText.setElegantTextHeight(ELEGANT_TEXT_HEIGHT);
-        mEditText.setFallbackLineSpacing(FALLBACK_LINE_SPACING);
-        mEditText.setLetterSpacing(LETTER_SPACING);
-        mEditText.setFontFeatureSettings(FONT_FEATURE_SETTINGS);
-        mEditText.setFontVariationSettings(FONT_VARIATION_SETTINGS);
-        mEditText.setLineBreakStyle(LINE_BREAK_STYLE);
-        mEditText.setLineBreakWordStyle(LINE_BREAK_WORD_STYLE);
-        mEditText.setTextScaleX(TEXT_SCALEX);
-        mEditText.setHighlightColor(HIGHLIGHT_TEXT_COLOR);
-        mEditText.setTextColor(TEXT_COLOR);
-        mEditText.setHintTextColor(HINT_TEXT_COLOR);
-        mEditText.setLinkTextColor(LINK_TEXT_COLOR);
-        ViewGroup.LayoutParams params =
-                new ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        mEditText.setLayoutParams(params);
-        mEditText.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        Bitmap bitmap =
-                Bitmap.createBitmap(
-                        Math.max(1, mEditText.getMeasuredWidth()),
-                        Math.max(1, mEditText.getMeasuredHeight()),
-                        Bitmap.Config.ARGB_8888);
-        mEditText.layout(0, 0, mEditText.getMeasuredWidth(), mEditText.getMeasuredHeight());
-        mCanvas = new Canvas(bitmap);
-        mEditText.draw(mCanvas);
+        initEditText(mSpannableText);
     }
 
     @Test
@@ -233,6 +202,43 @@ public class TextAppearanceInfoTest {
         assertEquals(info1.getSystemFontFamilyName(), FONT_FAMILY_NAME);
     }
 
+    private void initEditText(CharSequence text) {
+        mEditText.setText(text);
+        mEditText.getPaint().setTextSize(TEXT_SIZE);
+        mEditText.setTextLocales(TEXT_LOCALES);
+        Typeface family = Typeface.create(FONT_FAMILY_NAME, Typeface.NORMAL);
+        mEditText.setTypeface(
+                Typeface.create(family, TEXT_WEIGHT, (TEXT_STYLE & Typeface.ITALIC) != 0));
+        mEditText.setAllCaps(ALL_CAPS);
+        mEditText.setShadowLayer(SHADOW_RADIUS, SHADOW_DX, SHADOW_DY, SHADOW_COLOR);
+        mEditText.setElegantTextHeight(ELEGANT_TEXT_HEIGHT);
+        mEditText.setFallbackLineSpacing(FALLBACK_LINE_SPACING);
+        mEditText.setLetterSpacing(LETTER_SPACING);
+        mEditText.setFontFeatureSettings(FONT_FEATURE_SETTINGS);
+        mEditText.setFontVariationSettings(FONT_VARIATION_SETTINGS);
+        mEditText.setLineBreakStyle(LINE_BREAK_STYLE);
+        mEditText.setLineBreakWordStyle(LINE_BREAK_WORD_STYLE);
+        mEditText.setTextScaleX(TEXT_SCALEX);
+        mEditText.setHighlightColor(HIGHLIGHT_TEXT_COLOR);
+        mEditText.setTextColor(TEXT_COLOR);
+        mEditText.setHintTextColor(HINT_TEXT_COLOR);
+        mEditText.setHint("Hint text");
+        mEditText.setLinkTextColor(LINK_TEXT_COLOR);
+        mEditText.setAutoLinkMask(Linkify.WEB_URLS);
+        ViewGroup.LayoutParams params =
+                new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        mEditText.setLayoutParams(params);
+        mEditText.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        Bitmap bitmap =
+                Bitmap.createBitmap(
+                        Math.max(1, mEditText.getMeasuredWidth()),
+                        Math.max(1, mEditText.getMeasuredHeight()),
+                        Bitmap.Config.ARGB_8888);
+        mEditText.layout(0, 0, mEditText.getMeasuredWidth(), mEditText.getMeasuredHeight());
+        mCanvas = new Canvas(bitmap);
+        mEditText.draw(mCanvas);
+    }
     private void assertTextAppearanceInfoContentsEqual(TextAppearanceInfo textAppearanceInfo) {
         assertEquals(textAppearanceInfo.getTextSize(), TEXT_SIZE, EPSILON);
         assertEquals(textAppearanceInfo.getTextLocales(), TEXT_LOCALES);
@@ -256,6 +262,15 @@ public class TextAppearanceInfoTest {
         assertEquals(textAppearanceInfo.getHighlightTextColor(), HIGHLIGHT_TEXT_COLOR);
         assertEquals(textAppearanceInfo.getHintTextColor(), HINT_TEXT_COLOR);
         assertEquals(textAppearanceInfo.getLinkTextColor(), LINK_TEXT_COLOR);
+    }
+
+    @Test
+    public void testCreateFromTextView_withHintText() {
+        // Make hint text display
+        initEditText("");
+
+        // The text color should not be hint color
+        assertTextAppearanceInfoContentsEqual(TextAppearanceInfo.createFromTextView(mEditText));
     }
 
     static class CustomForegroundColorSpan extends ForegroundColorSpan {
