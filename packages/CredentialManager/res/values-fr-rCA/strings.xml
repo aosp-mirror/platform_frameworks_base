@@ -75,7 +75,7 @@
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Choisissez une clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Choisissez un mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Choisissez une connexion enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Choisir un identifiant de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Choisissez un identifiant de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Choisir une option pour <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Utiliser ces renseignements dans <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Se connecter d\'une autre manière"</string>
