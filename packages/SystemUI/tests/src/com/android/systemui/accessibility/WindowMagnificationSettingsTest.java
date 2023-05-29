@@ -20,7 +20,6 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATI
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
-import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -29,6 +28,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -525,13 +525,13 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     private void setupMagnificationCapabilityAndMode(int capability, int mode) {
         when(mSecureSettings.getIntForUser(
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
-                ACCESSIBILITY_MAGNIFICATION_MODE_NONE,
-                UserHandle.USER_CURRENT)).thenReturn(capability);
+                eq(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY),
+                anyInt(),
+                eq(UserHandle.USER_CURRENT))).thenReturn(capability);
         when(mSecureSettings.getIntForUser(
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
-                ACCESSIBILITY_MAGNIFICATION_MODE_NONE,
-                UserHandle.USER_CURRENT)).thenReturn(mode);
+                eq(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE),
+                anyInt(),
+                eq(UserHandle.USER_CURRENT))).thenReturn(mode);
     }
 
     private void setupScaleInSecureSettings(float scale) {

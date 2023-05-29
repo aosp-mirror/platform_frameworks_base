@@ -18,7 +18,6 @@ package com.android.systemui.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
-import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
@@ -405,16 +404,23 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     }
 
     private int getMagnificationMode() {
+        // If current capability is window mode, we would like the default value of the mode to
+        // be WINDOW, otherwise, the default value would be FULLSCREEN.
+        int defaultValue =
+                (getMagnificationCapability() == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
+                        ? ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+                        : ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+
         return mSecureSettings.getIntForUser(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
-                ACCESSIBILITY_MAGNIFICATION_MODE_NONE,
+                defaultValue,
                 UserHandle.USER_CURRENT);
     }
 
     private int getMagnificationCapability() {
         return mSecureSettings.getIntForUser(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
-                ACCESSIBILITY_MAGNIFICATION_MODE_NONE,
+                ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
                 UserHandle.USER_CURRENT);
     }
 
