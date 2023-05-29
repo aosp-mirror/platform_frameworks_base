@@ -308,7 +308,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
             forAllTaskContainers(taskContainer -> {
                 synchronized (mLock) {
-                    final List<TaskFragmentContainer> containers = taskContainer.mContainers;
+                    final List<TaskFragmentContainer> containers =
+                            taskContainer.getTaskFragmentContainers();
                     // Clean up the TaskFragmentContainers by the z-order from the lowest.
                     for (int i = 0; i < containers.size(); i++) {
                         final TaskFragmentContainer container = containers.get(i);
@@ -611,8 +612,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             @NonNull TaskContainer taskContainer) {
         // Update all TaskFragments in the Task. Make a copy of the list since some may be
         // removed on updating.
-        final List<TaskFragmentContainer> containers =
-                new ArrayList<>(taskContainer.mContainers);
+        final List<TaskFragmentContainer> containers = taskContainer.getTaskFragmentContainers();
         for (int i = containers.size() - 1; i >= 0; i--) {
             final TaskFragmentContainer container = containers.get(i);
             // Wait until onTaskFragmentAppeared to update new container.
@@ -1331,7 +1331,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // Check pending appeared activity first because there can be a delay for the server
         // update.
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
-            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
+            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i)
+                    .getTaskFragmentContainers();
             for (int j = containers.size() - 1; j >= 0; j--) {
                 final TaskFragmentContainer container = containers.get(j);
                 if (container.hasPendingAppearedActivity(activityToken)) {
@@ -1342,7 +1343,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // Check appeared activity if there is no such pending appeared activity.
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
-            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
+            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i)
+                    .getTaskFragmentContainers();
             for (int j = containers.size() - 1; j >= 0; j--) {
                 final TaskFragmentContainer container = containers.get(j);
                 if (container.hasAppearedActivity(activityToken)) {
@@ -1472,7 +1474,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     void removeContainers(@NonNull TaskContainer taskContainer,
             @NonNull List<TaskFragmentContainer> containers) {
         // Remove all split containers that included this one
-        taskContainer.mContainers.removeAll(containers);
+        taskContainer.removeTaskFragmentContainers(containers);
         // Marked as a pending removal which will be removed after it is actually removed on the
         // server side (#onTaskFragmentVanished).
         // In this way, we can keep track of the Task bounds until we no longer have any
@@ -1497,7 +1499,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         taskContainer.removeSplitContainers(containersToRemove);
 
         // Cleanup any dependent references.
-        for (TaskFragmentContainer containerToUpdate : taskContainer.mContainers) {
+        final List<TaskFragmentContainer> taskFragmentContainers =
+                taskContainer.getTaskFragmentContainers();
+        for (TaskFragmentContainer containerToUpdate : taskFragmentContainers) {
             containerToUpdate.removeContainersToFinishOnExit(containers);
         }
     }
@@ -1536,8 +1540,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (taskContainer == null) {
             return null;
         }
-        for (int i = taskContainer.mContainers.size() - 1; i >= 0; i--) {
-            final TaskFragmentContainer container = taskContainer.mContainers.get(i);
+        final List<TaskFragmentContainer> containers = taskContainer.getTaskFragmentContainers();
+        for (int i = containers.size() - 1; i >= 0; i--) {
+            final TaskFragmentContainer container = containers.get(i);
             if (!container.isFinished() && (container.getRunningActivityCount() > 0
                     // We may be waiting for the top TaskFragment to become non-empty after
                     // creation. In that case, we don't want to treat the TaskFragment below it as
@@ -1933,7 +1938,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     TaskFragmentContainer getContainer(@NonNull IBinder fragmentToken) {
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
-            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
+            final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i)
+                    .getTaskFragmentContainers();
             for (TaskFragmentContainer container : containers) {
                 if (container.getTaskFragmentToken().equals(fragmentToken)) {
                     return container;
@@ -2094,7 +2100,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 }
                 for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
                     final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i)
-                            .mContainers;
+                            .getTaskFragmentContainers();
                     for (int j = containers.size() - 1; j >= 0; j--) {
                         final TaskFragmentContainer container = containers.get(j);
                         if (!container.hasActivity(activityToken)
