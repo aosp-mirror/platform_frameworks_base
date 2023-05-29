@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"ବିଚ୍ଛିନ୍ନ କରୁଛି…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"ସଂଯୋଗ କରାଯାଉଛି…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"ସଂଯୁକ୍ତ ହେଲା<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"ପେୟାର୍‌ କରୁଛି…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"ପେୟାର କରୁଛି…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"ସଂଯୁକ୍ତ ହେଲା (ଫୋନ୍ ନୁହେଁ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"ସଂଯୁକ୍ତ ହେଲା (ମିଡିଆ ନୁହେଁ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"ସଂଯୁକ୍ତ ହେଲା (ଫୋନ୍ କିମ୍ବା ମେଡିଆ ନୁହେଁ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -174,7 +174,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"କିଛି ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ ମାନ ସେଟ୍‌ ହୋଇଛି"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"କୌଣସି ଡିଫଲ୍ଟ ସେଟ୍‍ ହୋଇନାହିଁ"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ଟେକ୍ସଟ୍-ଟୁ-ସ୍ପିଚ୍ ସେଟିଂସ"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"ଟେକ୍ସଟ୍‍-ଟୁ-ସ୍ପିଚ୍‍ ଆଉଟ୍‍ପୁଟ୍‌"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"ଟେକ୍ସଟ-ଟୁ-ସ୍ପିଚ ଆଉଟପୁଟ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"ସ୍ପିଚ୍‌ ରେଟ୍"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ଲେଖା ପଢ଼ିବାର ବେଗ"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"ପିଚ୍‌"</string>
@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ଏହିକ୍ଷଣି"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ଏହି ଫୋନ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ଏହି ଟାବଲେଟ"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ଏହି ଫୋନ୍"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ଏହି ଡିଭାଇସରେ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ସ୍ୱିଚ କରିବା ପାଇଁ ଆକାଉଣ୍ଟକୁ ଅପଗ୍ରେଡ କରନ୍ତୁ"</string>
@@ -578,7 +584,7 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ଅତିରିକ୍ତ ୟୁଜରଙ୍କୁ ଯୋଗ କରି ଆପଣ ଏହି ଡିଭାଇସକୁ ଅନ୍ୟ ଲୋକମାନଙ୍କ ସହିତ ସେୟାର କରିପାରିବେ। ପ୍ରତ୍ୟେକ ୟୁଜରଙ୍କ ନିଜର ସ୍ପେସ ଅଛି ଯାହାକୁ ସେମାନେ ଆପ, ୱାଲପେପର ଓ ଏପରି ଅନେକ କିଛି ସହିତ କଷ୍ଟମାଇଜ କରିପାରିବେ। ୟୁଜର ୱାଇ-ଫାଇ ଭଳି ଡିଭାଇସ ସେଟିଂସକୁ ମଧ୍ୟ ଆଡଜଷ୍ଟ କରିପାରିବେ ଯାହା ସମସ୍ତଙ୍କୁ ପ୍ରଭାବିତ କରିଥାଏ। \n\nଯେତେବେଳେ ଆପଣ ଜଣେ ନୂଆ ୟୁଜରଙ୍କୁ ଯୋଗ କରିବେ, ସେତେବେଳେ ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ନିଜର ସ୍ପେସକୁ ସେଟ‌ଅପ କରିବାକୁ ପଡ଼ିବ। \n\nଅନ୍ୟ ୟୁଜରଙ୍କ ପାଇଁ ଯେ କୌଣସି ୟୁଜର ଆପକୁ ଅପଡେଟ କରିପାରିବେ। ଆକ୍ସେସିବିଲିଟୀ ସେଟିଂସ ଏବଂ ସେବାଗୁଡ଼ିକ ନୂଆ ୟୁଜରଙ୍କୁ ସ୍ଥାନାନ୍ତର ହୋ‌ଇନପାରେ।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ଆପଣ ଜଣେ ନୂଆ ୟୁଜରଙ୍କୁ ଯୋଗ କରିବା ବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ତାଙ୍କ ସ୍ପେସ ସେଟ ଅପ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ୟୁଜରଙ୍କ ପାଇଁ ଆପ୍ସକୁ ଯେ କୌଣସି ୟୁଜର ଅପଡେଟ କରିପାରିବେ।"</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"ଏହି ୟୁଜରଙ୍କୁ ଜଣେ ଆଡମିନ କରିବେ?"</string>
-    <string name="user_grant_admin_message" msgid="1673791931033486709">"ଆଡମିନମାନଙ୍କର ବିଶେଷ ଅଧିକାରଗୁଡ଼ିକ ଥାଏ ଯାହା ଅନ୍ୟ ୟୁଜରମାନଙ୍କର ନଥାଏ। ଜଣେ ଆଡମିନ ସମସ୍ତ ୟୁଜରଙ୍କୁ ପରିଚାଳନା କରିପାରିବେ, ଏହି ଡିଭାଇସକୁ ଅପଡେଟ କିମ୍ବା ରିସେଟ କରିପାରିବେ, ସେଟିଂସ ପରିବର୍ତ୍ତନ କରିପାରିବେ, ଇନଷ୍ଟଲ କରାଯାଇଥିବା ସମସ୍ତ ଆପ୍ସ ଦେଖିପାରିବେ ଏବଂ ଅନ୍ୟମାନଙ୍କ ପାଇଁ ଆଡମିନ ବିଶେଷ ଅଧିକାରଗୁଡ଼ିକୁ ଅନୁମତି ଦେଇପାରିବେ କିମ୍ବା ପ୍ରତ୍ୟାହାର କରିପାରିବେ।"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ଆଡମିନମାନଙ୍କର ବିଶେଷ ଅଧିକାରଗୁଡ଼ିକ ଥାଏ ଯାହା ଅନ୍ୟ ୟୁଜରମାନଙ୍କର ନଥାଏ। ଜଣେ ଆଡମିନ ସମସ୍ତ ୟୁଜରଙ୍କୁ ପରିଚାଳନା କରିପାରିବେ, ଏହି ଡିଭାଇସକୁ ଅପଡେଟ କିମ୍ବା ରିସେଟ କରିପାରିବେ, ସେଟିଂସ ପରିବର୍ତ୍ତନ କରିପାରିବେ, ଇନଷ୍ଟଲ କରାଯାଇଥିବା ସମସ୍ତ ଆପ୍ସ ଦେଖିପାରିବେ ଏବଂ ଅନ୍ୟମାନଙ୍କ ପାଇଁ ଆଡମିନଙ୍କ ବିଶେଷ ଅଧିକାରଗୁଡ଼ିକୁ ଅନୁମତି ଦେଇପାରିବେ କିମ୍ବା ପ୍ରତ୍ୟାହାର କରିପାରିବେ।"</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"ଆଡମିନ କରନ୍ତୁ"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ଏବେ ଉପଯୋଗକର୍ତ୍ତା ସେଟଅପ କରିବେ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ ଯେ, ବ୍ୟକ୍ତି ଜଣକ ଡିଭାଇସ୍‌ ଓ ନିଜର ସ୍ଥାନ ସେଟଅପ୍‌ କରିବା ପାଇଁ ଉପଲବ୍ଧ ଅଛନ୍ତି।"</string>
@@ -592,7 +598,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ପ୍ରୋଫାଇଲ୍ ସୂଚନା"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ପ୍ରତିବନ୍ଧିତ ପ୍ରୋଫାଇଲ୍‌ ତିଆରି କରିବାବେଳେ, ନିଜ ଆପ୍‌ ଓ ବ୍ୟକ୍ତିଗତ ତଥ୍ୟର ସୁରକ୍ଷା ପାଇଁ ଏକ ସ୍କ୍ରୀନ୍‌ ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>କୁ ସ୍ୱିଚ୍ କରନ୍ତୁ"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>କୁ ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"ନୂଆ ୟୁଜର ତିଆରି କରାଯାଉଛି…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"ନୂଆ ଅତିଥି ତିଆରି କରାଯାଉଛି…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବାକୁ ବିଫଳ ହେଲା"</string>

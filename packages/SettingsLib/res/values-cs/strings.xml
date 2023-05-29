@@ -545,13 +545,19 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Právě teď"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Tento telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tento tablet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Tento telefon"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Na tomto zařízení média přehrávat nelze"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Pokud chcete přejít, upgradujte účet"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"V zařízení nelze přehrávat"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Účet je třeba upgradovat"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Stažený obsah zde nelze přehrát"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Zkuste to znovu po reklamě"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Pokud zde chcete přehrávat média, probuďte zařízení"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Zařízení není schváleno k přehrávání"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Zařízení je třeba probudit"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Není schváleno k přehrávání"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Tato média zde přehrát nelze"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problém s připojením. Vypněte zařízení a znovu jej zapněte"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kabelové audiozařízení"</string>
