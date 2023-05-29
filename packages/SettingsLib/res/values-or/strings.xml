@@ -586,7 +586,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"ପ୍ରୋଫାଇଲ୍ ସୂଚନା"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ପ୍ରତିବନ୍ଧିତ ପ୍ରୋଫାଇଲ୍‌ ତିଆରି କରିବାବେଳେ, ନିଜ ଆପ୍‌ ଓ ବ୍ୟକ୍ତିଗତ ତଥ୍ୟର ସୁରକ୍ଷା ପାଇଁ ଏକ ସ୍କ୍ରୀନ୍‌ ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>କୁ ସ୍ୱିଚ୍ କରନ୍ତୁ"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>କୁ ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"ନୂଆ ୟୁଜର ତିଆରି କରାଯାଉଛି…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"ନୂଆ ଅତିଥି ତିଆରି କରାଯାଉଛି…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବାକୁ ବିଫଳ ହେଲା"</string>
