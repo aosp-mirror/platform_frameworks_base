@@ -69,7 +69,7 @@
     <string name="permission_notification_summary" msgid="884075314530071011">"Môže čítať všetky upozornenia vrátane informácií, ako sú kontakty, správy a fotky"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streamovať aplikácie telefónu"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Steaming aplikácii a ďalších systémov funkcií zo zariadenia"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Streaming aplikácii a ďalších systémových funkcií zo zariadenia"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefón"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

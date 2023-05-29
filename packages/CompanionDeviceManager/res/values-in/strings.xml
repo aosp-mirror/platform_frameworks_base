@@ -65,7 +65,7 @@
     <string name="permission_contacts_summary" msgid="675861979475628708">"Dapat mengakses kontak Anda"</string>
     <string name="permission_calendar_summary" msgid="6460000922511766226">"Dapat mengakses kalender Anda"</string>
     <string name="permission_microphone_summary" msgid="3692091540613093394">"Dapat merekam audio"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Dapat menemukan, menghubungkan, dan menentukan posisi relatif dari perangkat di sekitar"</string>
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Dapat menemukan, terhubung ke, dan menentukan posisi relatif perangkat di sekitar"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Dapat membaca semua notifikasi, termasuk informasi seperti kontak, pesan, dan foto"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streaming aplikasi ponsel"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
