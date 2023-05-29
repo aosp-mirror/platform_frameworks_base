@@ -1975,6 +1975,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Dette er ikke tilgjengelig på <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på telefonen din i stedet."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Denne appen er utviklet for en eldre Android-versjon. Det er ikke sikkert at den fungerer som den skal, og den mangler det nyeste innen sikkerhet og personvern. Se etter en oppdatering, eller kontakt utvikleren av appen."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Se etter oppdateringer"</string>
+    <!-- no translation found for deprecated_abi_message (6820548011196218091) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nye meldinger"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Åpne SMS-appen for å se"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Enkelte funksjoner kan begrenses"</string>

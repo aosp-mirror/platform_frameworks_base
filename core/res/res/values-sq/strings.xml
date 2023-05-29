@@ -1698,9 +1698,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Do të lejosh që <xliff:g id="SERVICE">%1$s</xliff:g> të ketë kontroll të plotë të pajisjes sate?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrolli i plotë është i përshtatshëm për aplikacionet që të ndihmojnë me nevojat e qasshmërisë, por jo për shumicën e aplikacioneve."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Shiko dhe kontrollo ekranin"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ai mund të lexojë të gjithë përmbajtjen në ekran dhe të shfaqë përmbajtjen mbi aplikacione të tjera."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Mund të lexojë të gjithë përmbajtjen në ekran dhe të shfaqë përmbajtjen mbi aplikacione të tjera."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Shiko dhe kryej veprimet"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ai mund të monitorojë ndërveprimet me një aplikacion ose një sensor hardueri dhe të ndërveprojë me aplikacionet në emrin tënd."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Mund të monitorojë ndërveprimet me një aplikacion ose një sensor hardueri dhe të ndërveprojë me aplikacionet në emrin tënd."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Lejo"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuzo"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Trokit te një veçori për të filluar ta përdorësh atë:"</string>
@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g>. Provoje në telefon më mirë."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Ky aplikacion është krijuar për një version më të vjetër të Android. Mund të mos funksionojë siç duhet dhe nuk përfshin mbrojtjet më të fundit të sigurisë dhe privatësisë. Kontrollo për një përditësim ose kontakto zhvilluesin e aplikacionit."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kontrollo për përditësim"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Ky aplikacion nuk është i përputhshëm me versionin më të fundit të Android. Kontrollo për një përditësim ose kontakto me zhvilluesin e aplikacionit."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Hap aplikacionin SMS për ta parë"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Disa veçori mund të jenë të kufizuara"</string>
