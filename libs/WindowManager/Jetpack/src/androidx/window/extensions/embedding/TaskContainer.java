@@ -51,7 +51,7 @@ class TaskContainer {
 
     /** Active TaskFragments in this Task. */
     @NonNull
-    final List<TaskFragmentContainer> mContainers = new ArrayList<>();
+    private final List<TaskFragmentContainer> mContainers = new ArrayList<>();
 
     /** Active split pairs in this Task. */
     @NonNull
@@ -207,9 +207,13 @@ class TaskContainer {
         return false;
     }
 
+    /**
+     * Returns a list of {@link SplitContainer}. Do not modify the containers directly on the
+     * returned list. Use {@link #addSplitContainer} or {@link #removeSplitContainers} instead.
+     */
     @NonNull
     List<SplitContainer> getSplitContainers() {
-        return new ArrayList<>(mSplitContainers);
+        return mSplitContainers;
     }
 
     void addSplitContainer(@NonNull SplitContainer splitContainer) {
@@ -218,6 +222,36 @@ class TaskContainer {
 
     void removeSplitContainers(@NonNull List<SplitContainer> containers) {
         mSplitContainers.removeAll(containers);
+    }
+
+    void addTaskFragmentContainer(@NonNull TaskFragmentContainer taskFragmentContainer) {
+        mContainers.add(taskFragmentContainer);
+    }
+
+    void addTaskFragmentContainer(int index, @NonNull TaskFragmentContainer taskFragmentContainer) {
+        mContainers.add(index, taskFragmentContainer);
+    }
+
+    void removeTaskFragmentContainer(@NonNull TaskFragmentContainer taskFragmentContainer) {
+        mContainers.remove(taskFragmentContainer);
+    }
+
+    void removeTaskFragmentContainers(@NonNull List<TaskFragmentContainer> taskFragmentContainer) {
+        mContainers.removeAll(taskFragmentContainer);
+    }
+
+    void clearTaskFragmentContainer() {
+        mContainers.clear();
+    }
+
+    /**
+     * Returns a list of {@link TaskFragmentContainer}. Do not modify the containers directly on
+     * the returned list. Use {@link #addTaskFragmentContainer},
+     * {@link #removeTaskFragmentContainer} or other related methods instead.
+     */
+    @NonNull
+    List<TaskFragmentContainer> getTaskFragmentContainers() {
+        return mContainers;
     }
 
     /** Adds the descriptors of split states in this Task to {@code outSplitStates}. */
