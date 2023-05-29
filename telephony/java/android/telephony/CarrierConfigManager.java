@@ -9281,7 +9281,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
         sDefaults.putInt(KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT, 300);
-        sDefaults.putInt(KEY_PREFERRED_IKE_PROTOCOL_INT, 0);
+        sDefaults.putInt(KEY_PREFERRED_IKE_PROTOCOL_INT, -1);
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
