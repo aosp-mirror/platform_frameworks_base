@@ -18,5 +18,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settingslib_category_personal" msgid="1142302328104700620">"వ్యక్తిగతం"</string>
-    <string name="settingslib_category_work" msgid="4867750733682444676">"ఆఫీస్"</string>
+    <string name="settingslib_category_work" msgid="4867750733682444676">"వర్క్"</string>
 </resources>
