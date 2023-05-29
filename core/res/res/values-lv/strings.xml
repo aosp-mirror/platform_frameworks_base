@@ -1691,7 +1691,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"IZSLĒGTA"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vai atļaut pakalpojumam <xliff:g id="SERVICE">%1$s</xliff:g> pilnībā kontrolēt jūsu ierīci?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pilnīga kontrole ir piemērota lietotnēm, kas nepieciešamas lietotājiem ar īpašām vajadzībām, taču ne lielākajai daļai lietotņu."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skatīt un pārvaldīt ekrānu"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekrāna skatīšana un pārvaldīšana"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Tā var nolasīt visu ekrānā esošo saturu un attēlot saturu citām lietotnēm."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Darbību skatīšana un veikšana"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Tā var izsekot jūsu mijiedarbību ar lietotni vai aparatūras sensoru un mijiedarboties ar lietotnēm jūsu vārdā."</string>

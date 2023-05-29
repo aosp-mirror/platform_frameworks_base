@@ -643,8 +643,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"အလင်းရောင် အားနည်းသည်"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ဖုန်းကို အဝေးသို့ခွာပါ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ဖုန်းကို အနားသို့ပိုတိုးပါ"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"ဖုန်းကို ပိုမြှင့်လိုက်ပါ"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"ဖုန်းကို ပိုနှိမ့်လိုက်ပါ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ဖုန်းကို မြှင့်လိုက်ပါ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ဖုန်းကို နှိမ့်လိုက်ပါ"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ဖုန်းကို သင့်ဘယ်ဘက်သို့ ရွှေ့ပါ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"ဖုန်းကို သင့်ညာဘက်သို့ ရွှေ့ပါ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"သင့်စက်ပစ္စည်းကို တည့်တည့်ကြည့်ပါ။"</string>

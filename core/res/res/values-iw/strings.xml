@@ -1689,8 +1689,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"לא להפעיל"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"מופעל"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"כבוי"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"להעניק לשירות <xliff:g id="SERVICE">%1$s</xliff:g> שליטה מלאה במכשיר?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"האפשרות לשליטה מלאה במכשיר לא מתאימה לכל האפליקציות, אלא רק לאפליקציות שעוזרות עם צורכי הנגישות שלך."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"להעניק לשירות \'<xliff:g id="SERVICE">%1$s</xliff:g>\' שליטה מלאה במכשיר?"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"האפשרות לשליטה מלאה במכשיר לא מתאימה לרוב האפליקציות, אלא רק לאפליקציות שעוזרות עם צורכי הנגישות שלך."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"הצגת המסך ושליטה בו"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"אפשרות לקריאת כל התוכן במסך ולהצגת התוכן מעל אפליקציות אחרות."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"הצגה וביצוע של פעולות"</string>

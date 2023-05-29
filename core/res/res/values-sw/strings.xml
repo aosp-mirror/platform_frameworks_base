@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Imeshindwa kuunda muundo wa uso wako. Jaribu tena."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Vioo vyeusi vimetambuliwa. Ni lazima uso wako wote uonekane."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kifuniko cha uso kimetambuliwa. Ni lazima uso wako wote uonekane."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Uso umefunikwa. Lazima uso wako wote uonekane."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imeshindwa kuthibitisha uso. Maunzi hayapatikani."</string>
@@ -797,7 +797,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Ya nyumbani"</item>
     <item msgid="7740243458912727194">"Simu ya mkononi"</item>
-    <item msgid="8526146065496663766">"Ya kazini"</item>
+    <item msgid="8526146065496663766">"Kazini"</item>
     <item msgid="8150904584178569699">"Pepesi ya Kazini"</item>
     <item msgid="4537253139152229577">"Pepesi ya Nyumbani"</item>
     <item msgid="6751245029698664340">"Kurasa anwani"</item>
@@ -840,7 +840,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Maalum"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Ya nyumbani"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"Simu ya mkononi"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"Ya kazini"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"Kazini"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Pepesi ya Kazini"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Pepesi ya Nyumbani"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"Peja"</string>
