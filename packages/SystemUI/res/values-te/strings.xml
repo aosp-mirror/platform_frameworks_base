@@ -152,7 +152,7 @@
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"పాస్‌వర్డ్‌ను ఉపయోగించండి"</string>
-    <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"పిన్ తప్పు"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN తప్పు"</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ఆకృతి తప్పు"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"పాస్‌వర్డ్ తప్పు"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు.\n<xliff:g id="NUMBER">%d</xliff:g> సెకన్ల తర్వాత మళ్లీ ట్రై చేయండి."</string>
@@ -837,7 +837,7 @@
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"అవును"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"పిన్ అక్షరాలను లేదా చిహ్నాలను కలిగి ఉంది"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>ను వెరిఫై చేయండి"</string>
-    <string name="controls_pin_wrong" msgid="6162694056042164211">"పిన్ తప్పు"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN తప్పు"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"పిన్‌ని ఎంటర్ చేయండి"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"మరొక పిన్‌ని ప్రయత్నించండి"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g>కి సంబంధించి మార్పును నిర్ధారించండి"</string>

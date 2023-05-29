@@ -268,7 +268,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"جارٍ التفعيل…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"توفير البيانات مفعّل"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{جهاز واحد}zero{# جهاز}two{جهازان}few{# أجهزة}many{# جهازًا}other{# جهاز}}"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"الفلاش"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"ضوء الفلاش"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"الكاميرا قيد الاستخدام"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"بيانات الجوّال"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"استخدام البيانات"</string>

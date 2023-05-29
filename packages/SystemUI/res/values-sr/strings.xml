@@ -197,7 +197,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Прозор са обавештењима."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Брза подешавања."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Брза подешавања и трака са обавештењима."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Закључан екран."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Закључан екран"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Закључан екран за посао"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Затвори"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"потпуна тишина"</string>
@@ -718,7 +718,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Стрелица удесно"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Мени"</string>
     <string name="tuner_app" msgid="6949280415826686972">"Апликација <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="notification_channel_alerts" msgid="3385787053375150046">"Обавештења"</string>
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Упозорења"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Батерија"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Снимци екрана"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Инстант апликације"</string>
