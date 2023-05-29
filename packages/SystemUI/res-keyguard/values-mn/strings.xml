@@ -64,7 +64,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"SIM картын түгжээг тайлж байна…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4-8 тооноос бүтэх ПИН-г оруулна уу."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK код 8-с цөөнгүй тооноос бүтнэ."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Та ПИН кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу орууллаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Та ПИН кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу орууллаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундийн дараа дахин оролдоно уу."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Та нууц үгээ <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу орууллаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу орууллаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM-н ПИН кодыг буруу оруулсан тул та төхөөрөмжийнхөө түгжээг тайлахын тулд оператор компанитайгаа холбогдоно уу."</string>
