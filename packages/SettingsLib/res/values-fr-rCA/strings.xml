@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Déconnexion…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connexion en cours…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Connecté à <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Association…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Association en cours…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Connecté (aucun téléphone) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Connecté (aucun média) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Connecté (aucun accès aux messages) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -109,7 +109,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"G : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>; D : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Actif"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Active, gauche seulement"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actif, gauche seulement"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Active, droite seulement"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Active, gauche et droite"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Paramètres audio du support"</string>
