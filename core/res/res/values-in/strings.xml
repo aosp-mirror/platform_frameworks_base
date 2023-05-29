@@ -439,7 +439,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Aplikasi ini dapat menambahkan, menghapus, atau mengubah acara kalender di ponsel. Aplikasi ini dapat mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa memberi tahu pemilik."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"akses perintah penyedia lokasi ekstra"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi akurat hanya saat di latar depan"</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi presisi hanya saat di latar depan"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aplikasi ini bisa mendapatkan lokasi pasti Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi. Ini dapat meningkatkan penggunaan baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"akses perkiraan lokasi hanya saat berada di latar depan"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aplikasi ini bisa mendapatkan perkiraan lokasi Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi."</string>
@@ -1680,7 +1680,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Jangan aktifkan"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AKTIF"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"NONAKTIF"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> memiliki kontrol penuh atas perangkat Anda?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> mengontrol perangkat Anda secara penuh?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang mendukung kebutuhan aksesibilitas Anda, tetapi tidak untuk sebagian besar aplikasi."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengontrol layar"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Voice Access dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>

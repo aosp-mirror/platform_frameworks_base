@@ -1681,7 +1681,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"SEES"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"VÄLJAS"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Kas anda teenusele <xliff:g id="SERVICE">%1$s</xliff:g> teie seadme üle täielik kontroll?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täielik haldusõigus sobib rakendustele, mis pakuvad juurdepääsufunktsioone. Enamiku rakenduste puhul seda ei soovitata."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täielik kontroll sobib rakendustele, mis pakuvad juurdepääsufunktsioone. Enamiku rakenduste puhul seda ei soovitata."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekraanikuva vaatamine ja haldamine"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"See saab lugeda kogu ekraanil kuvatud sisu ja kuvada sisu rakenduste peal."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Toimingute vaatamine ja tegemine"</string>

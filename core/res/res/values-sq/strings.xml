@@ -1683,9 +1683,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Do të lejosh që <xliff:g id="SERVICE">%1$s</xliff:g> të ketë kontroll të plotë të pajisjes sate?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrolli i plotë është i përshtatshëm për aplikacionet që të ndihmojnë me nevojat e qasshmërisë, por jo për shumicën e aplikacioneve."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Shiko dhe kontrollo ekranin"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ai mund të lexojë të gjithë përmbajtjen në ekran dhe të shfaqë përmbajtjen mbi aplikacione të tjera."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Mund të lexojë të gjithë përmbajtjen në ekran dhe të shfaqë përmbajtjen mbi aplikacione të tjera."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Shiko dhe kryej veprimet"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ai mund të monitorojë ndërveprimet me një aplikacion ose një sensor hardueri dhe të ndërveprojë me aplikacionet në emrin tënd."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Mund të monitorojë ndërveprimet me një aplikacion ose një sensor hardueri dhe të ndërveprojë me aplikacionet në emrin tënd."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Lejo"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuzo"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Trokit te një veçori për të filluar ta përdorësh atë:"</string>
@@ -1702,7 +1702,7 @@
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Shumë më i zbehtë"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Shtyp dhe mbaj shtypur të dy butonat e volumit për tre sekonda për të përdorur <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Shtyp dhe mbaj shtypur të dyja tastet e volumit për tri sekonda për të përdorur <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Zgjidh një funksion për ta përdorur kur troket butonin e qasshmërisë:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Zgjidh një veçori për ta përdorur me gjestin e qasshmërisë (rrëshqit shpejt lart nga fundi i ekranit me dy gishta):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Zgjidh një veçori për ta përdorur me gjestin e qasshmërisë (rrëshqit shpejt lart nga fundi i ekranit me tre gishta):"</string>
