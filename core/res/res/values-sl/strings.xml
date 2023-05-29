@@ -1702,7 +1702,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ogledovanje in upravljanje zaslona"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Bere lahko vso vsebino na zaslonu ter prikaže vsebino prek drugih aplikacij."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ogledovanje in izvajanje dejanj"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Spremlja lahko vaše interakcije z aplikacijo ali senzorjem strojne opreme ter komunicira z aplikacijami v vašem imenu."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Spremlja lahko vaše interakcije z aplikacijo ali tipalom strojne opreme ter komunicira z aplikacijami v vašem imenu."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Dovoli"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Zavrni"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Če želite začeti uporabljati funkcijo, se je dotaknite:"</string>
@@ -1717,7 +1717,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Popravljanje barv"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enoročni način"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Zelo zatemnjen zaslon"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Slušni aparati"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Slušni pripomočki"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vklopljena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je izklopljena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Spustite gumba za glasnost. Če želite vklopiti storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, znova pritisnite in 3 sekunde pridržite oba gumba za glasnost."</string>
@@ -1977,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"V napravi <xliff:g id="DEVICE">%1$s</xliff:g> ni mogoče dostopati do te vsebine. Poskusite s telefonom."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Ta aplikacija je bila razvita za starejšo različico Androida. Morda ne bo delovala pravilno ter ne vključuje najnovejših varnostnih funkcij in funkcij za varovanje zasebnosti. Preverite, ali je na voljo posodobitev, ali pa se obrnite na razvijalca aplikacije."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Preveri, ali je na voljo posodobitev"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Ta aplikacija ni združljiva z najnovejšo različico Androida. Preverite, ali je na voljo posodobitev, ali pa se obrnite na razvijalca aplikacije."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Imate nova sporočila."</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Za ogled odprite aplikacijo za SMS-je"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Nekatere funkcije bodo morda omejene"</string>
