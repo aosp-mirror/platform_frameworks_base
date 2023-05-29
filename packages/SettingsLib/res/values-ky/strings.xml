@@ -99,7 +99,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Сол: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, оң: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Жигердүү"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Жигердүү, сол кулакчын гана"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Иштеп жатат, сол кулак гана"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Жигердүү, оң кулакчын гана"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Жигердүү, сол жана оң кулакчын"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аудио"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Жок"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Жупташканда байланыштарыңыз менен чалуу таржымалыңызды пайдалана аласыз."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> түзмөгүнө туташуу мүмкүн болгон жок."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"\"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" туташкан жок: PIN-код же сырсөз туура эмес."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"\"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" туташкан жок: PIN код же сырсөз туура эмес."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен байланышуу мүмкүн эмес."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Жупташтырууну <xliff:g id="DEVICE_NAME">%1$s</xliff:g> четке какты."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -545,14 +545,20 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Жаңы эле"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ушул телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ушул планшет"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ушул телефон"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Бул түзмөктө ойнотуу мүмкүн эмес"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Которулуу үчүн аккаунтуңузду жаңыртыңыз"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Жүктөлүп алынгандарды бул жерде ойнотуу мүмкүн эмес"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Жарнамадан кийин кайталап көрүңүз"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Угуу үчүн түзмөктү уйку режиминен чыгарыңыз"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Бул түзмөктө ойнотуу үчүн уруксат алуу керек"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Бул медианы ойнотуу мүмкүн эмес"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Бул түзмөктө ойнотууга болбойт"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Премиум аккаунтка которулуу керек"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Жүктөлүп алынгандар ойнотулбайт"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Жарнамадан кийин кайталаңыз"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Угуу үчүн түзмөктү уйкудан чыгарыңыз"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Ойнотуу үчүн уруксат алышыңыз керек"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Медиа файлды ойното албайсыз"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Туташууда маселе келип чыкты. Түзмөктү өчүрүп, кайра күйгүзүп көрүңүз"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Зымдуу аудио түзмөк"</string>
     <string name="help_label" msgid="3528360748637781274">"Жардам/Пикир билдирүү"</string>

@@ -545,14 +545,20 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Az imént"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ez a telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ez a táblagép"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ez a telefon"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nem lehet tartalmat lejátszani ezen az eszközön"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"A váltáshoz frissítse fiókját magasabb kategóriára"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Itt nem lehet lejátszani a letöltött elemeket"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nem játszható le ezen az eszközön"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"A váltáshoz frissítse fiókját"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Itt nem játszhatók le a letöltések"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Próbálja újra a hirdetés után"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"A tartalom itteni lejátszásához ébressze fel az eszközt"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Az eszköz nem játszhat le tartalmat"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"A médiatartalom nem játszható le itt"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Lejátszáshoz ébressze fel az eszközt"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Az eszköz nem játszhat le"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"A tartalom nem játszható le itt"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Sikertelen csatlakozás. Kapcsolja ki az eszközt, majd kapcsolja be újra."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Vezetékes audioeszköz"</string>
     <string name="help_label" msgid="3528360748637781274">"Súgó és visszajelzés"</string>

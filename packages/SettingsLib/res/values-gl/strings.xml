@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Esta tableta"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Non se pode reproducir contido neste dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Cambia a conta a un plan superior para facer a modificación"</string>
@@ -588,7 +594,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Engadir"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Novo usuario"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Novo perfil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Información usuario"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Información do usuario"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Información do perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restrinxido, precisarás configurar un bloqueo da pantalla para protexer as túas aplicacións e datos persoais."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Establecer bloqueo"</string>
