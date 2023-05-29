@@ -54,7 +54,7 @@
     <string name="accessibility_split_top" msgid="2789329702027147146">"上に分割"</string>
     <string name="accessibility_split_bottom" msgid="8694551025220868191">"下に分割"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"片手モードの使用"</string>
-    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"終了するには、画面を下から上にスワイプするか、アプリの任意の場所をタップします"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"終了するには、画面を下から上にスワイプするか、アプリの上側の任意の場所をタップします"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"片手モードを開始します"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"片手モードを終了します"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> のバブルの設定"</string>
