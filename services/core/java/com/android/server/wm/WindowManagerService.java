@@ -8261,6 +8261,13 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void addTrustedTaskOverlay(int taskId,
                 SurfaceControlViewHost.SurfacePackage overlay) {
+            if (overlay == null) {
+                throw new IllegalArgumentException("Invalid overlay passed in for task=" + taskId);
+            } else if (overlay.getSurfaceControl() == null
+                    || !overlay.getSurfaceControl().isValid()) {
+                throw new IllegalArgumentException(
+                        "Invalid overlay surfacecontrol passed in for task=" + taskId);
+            }
             synchronized (mGlobalLock) {
                 final Task task = mRoot.getRootTask(taskId);
                 if (task == null) {
@@ -8273,6 +8280,13 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void removeTrustedTaskOverlay(int taskId,
                 SurfaceControlViewHost.SurfacePackage overlay) {
+            if (overlay == null) {
+                throw new IllegalArgumentException("Invalid overlay passed in for task=" + taskId);
+            } else if (overlay.getSurfaceControl() == null
+                    || !overlay.getSurfaceControl().isValid()) {
+                throw new IllegalArgumentException(
+                        "Invalid overlay surfacecontrol passed in for task=" + taskId);
+            }
             synchronized (mGlobalLock) {
                 final Task task = mRoot.getRootTask(taskId);
                 if (task == null) {
