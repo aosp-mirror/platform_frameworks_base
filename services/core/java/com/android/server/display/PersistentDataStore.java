@@ -133,6 +133,7 @@ final class PersistentDataStore {
 
     private static final String TAG_BRIGHTNESS_NITS_FOR_DEFAULT_DISPLAY =
             "brightness-nits-for-default-display";
+    public static final int DEFAULT_USER_ID = -1;
 
     // Remembered Wifi display devices.
     private ArrayList<WifiDisplay> mRememberedWifiDisplays = new ArrayList<WifiDisplay>();
@@ -294,7 +295,7 @@ final class PersistentDataStore {
         return false;
     }
 
-    public float getBrightness(DisplayDevice device) {
+    public float getBrightness(DisplayDevice device, int userSerial) {
         if (device == null || !device.hasStableUniqueId()) {
             return Float.NaN;
         }
@@ -302,10 +303,10 @@ final class PersistentDataStore {
         if (state == null) {
             return Float.NaN;
         }
-        return state.getBrightness();
+        return state.getBrightness(userSerial);
     }
 
-    public boolean setBrightness(DisplayDevice displayDevice, float brightness) {
+    public boolean setBrightness(DisplayDevice displayDevice, float brightness, int userSerial) {
         if (displayDevice == null || !displayDevice.hasStableUniqueId()) {
             return false;
         }
@@ -314,7 +315,7 @@ final class PersistentDataStore {
             return false;
         }
         final DisplayState state = getDisplayState(displayDeviceUniqueId, true);
-        if (state.setBrightness(brightness)) {
+        if (state.setBrightness(brightness, userSerial)) {
             setDirty();
             return true;
         }
@@ -611,6 +612,7 @@ final class PersistentDataStore {
             state.saveToXml(serializer);
             serializer.endTag(null, TAG_DISPLAY);
         }
+
         serializer.endTag(null, TAG_DISPLAY_STATES);
         serializer.startTag(null, TAG_STABLE_DEVICE_VALUES);
         mStableDeviceValues.saveToXml(serializer);
@@ -649,7 +651,8 @@ final class PersistentDataStore {
 
     private static final class DisplayState {
         private int mColorMode;
-        private float mBrightness = Float.NaN;
+
+        private SparseArray<Float> mPerUserBrightness = new SparseArray<>();
         private int mWidth;
         private int mHeight;
         private float mRefreshRate;
@@ -670,16 +673,25 @@ final class PersistentDataStore {
             return mColorMode;
         }
 
-        public boolean setBrightness(float brightness) {
-            if (brightness == mBrightness) {
+        public boolean setBrightness(float brightness, int userSerial) {
+            // Remove the default user brightness, before setting a new user-specific value.
+            // This is a one-time operation, required to restructure the config after user-specific
+            // brightness was introduced.
+            mPerUserBrightness.remove(DEFAULT_USER_ID);
+
+            if (getBrightness(userSerial) == brightness) {
                 return false;
             }
-            mBrightness = brightness;
+            mPerUserBrightness.set(userSerial, brightness);
             return true;
         }
 
-        public float getBrightness() {
-            return mBrightness;
+        public float getBrightness(int userSerial) {
+            float brightness = mPerUserBrightness.get(userSerial, Float.NaN);
+            if (Float.isNaN(brightness)) {
+                brightness = mPerUserBrightness.get(DEFAULT_USER_ID, Float.NaN);
+            }
+            return brightness;
         }
 
         public boolean setBrightnessConfiguration(BrightnessConfiguration configuration,
@@ -729,12 +741,7 @@ final class PersistentDataStore {
                         mColorMode = Integer.parseInt(value);
                         break;
                     case TAG_BRIGHTNESS_VALUE:
-                        String brightness = parser.nextText();
-                        try {
-                            mBrightness = Float.parseFloat(brightness);
-                        } catch (NumberFormatException e) {
-                            mBrightness = Float.NaN;
-                        }
+                        loadBrightnessFromXml(parser);
                         break;
                     case TAG_BRIGHTNESS_CONFIGURATIONS:
                         mDisplayBrightnessConfigurations.loadFromXml(parser);
@@ -760,11 +767,12 @@ final class PersistentDataStore {
             serializer.text(Integer.toString(mColorMode));
             serializer.endTag(null, TAG_COLOR_MODE);
 
-            serializer.startTag(null, TAG_BRIGHTNESS_VALUE);
-            if (!Float.isNaN(mBrightness)) {
-                serializer.text(Float.toString(mBrightness));
+            for (int i = 0; i < mPerUserBrightness.size(); i++) {
+                serializer.startTag(null, TAG_BRIGHTNESS_VALUE);
+                serializer.attributeInt(null, ATTR_USER_SERIAL, mPerUserBrightness.keyAt(i));
+                serializer.text(Float.toString(mPerUserBrightness.valueAt(i)));
+                serializer.endTag(null, TAG_BRIGHTNESS_VALUE);
             }
-            serializer.endTag(null, TAG_BRIGHTNESS_VALUE);
 
             serializer.startTag(null, TAG_BRIGHTNESS_CONFIGURATIONS);
             mDisplayBrightnessConfigurations.saveToXml(serializer);
@@ -785,11 +793,32 @@ final class PersistentDataStore {
 
         public void dump(final PrintWriter pw, final String prefix) {
             pw.println(prefix + "ColorMode=" + mColorMode);
-            pw.println(prefix + "BrightnessValue=" + mBrightness);
+            pw.println(prefix + "BrightnessValues: ");
+            for (int i = 0; i < mPerUserBrightness.size(); i++) {
+                pw.println("User: " + mPerUserBrightness.keyAt(i)
+                        + " Value: " + mPerUserBrightness.valueAt(i));
+            }
             pw.println(prefix + "DisplayBrightnessConfigurations: ");
             mDisplayBrightnessConfigurations.dump(pw, prefix);
             pw.println(prefix + "Resolution=" + mWidth + " " + mHeight);
             pw.println(prefix + "RefreshRate=" + mRefreshRate);
+        }
+
+        private void loadBrightnessFromXml(TypedXmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            int userSerial;
+            try {
+                userSerial = parser.getAttributeInt(null, ATTR_USER_SERIAL);
+            } catch (NumberFormatException | XmlPullParserException e) {
+                userSerial = DEFAULT_USER_ID;
+                Slog.e(TAG, "Failed to read user serial", e);
+            }
+            String brightness = parser.nextText();
+            try {
+                mPerUserBrightness.set(userSerial, Float.parseFloat(brightness));
+            } catch (NumberFormatException nfe) {
+                Slog.e(TAG, "Failed to read brightness", nfe);
+            }
         }
     }
 
