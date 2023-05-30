@@ -346,7 +346,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * @return list of MediaDevice
      */
     public List<MediaDevice> getSelectableMediaDevice() {
-        return mInfoMediaManager.getSelectableMediaDevice();
+        return mInfoMediaManager.getSelectableMediaDevices();
     }
 
     /**
@@ -355,7 +355,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * @return list of MediaDevice
      */
     public List<MediaDevice> getDeselectableMediaDevice() {
-        return mInfoMediaManager.getDeselectableMediaDevice();
+        return mInfoMediaManager.getDeselectableMediaDevices();
     }
 
     /**
@@ -371,7 +371,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * @return list of MediaDevice
      */
     public List<MediaDevice> getSelectedMediaDevice() {
-        return mInfoMediaManager.getSelectedMediaDevice();
+        return mInfoMediaManager.getSelectedMediaDevices();
     }
 
     /**
@@ -433,7 +433,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * @return current active session list{@link android.media.RoutingSessionInfo}
      */
     public List<RoutingSessionInfo> getActiveMediaSession() {
-        return mInfoMediaManager.getActiveMediaSession();
+        return mInfoMediaManager.getActiveRoutingSessions();
     }
 
     /**
