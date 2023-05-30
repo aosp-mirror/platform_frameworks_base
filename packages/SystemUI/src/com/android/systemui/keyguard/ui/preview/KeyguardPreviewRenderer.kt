@@ -172,6 +172,10 @@ constructor(
             rootView.translationX = (width - scale * rootView.width) / 2
             rootView.translationY = (height - scale * rootView.height) / 2
 
+            if (isDestroyed) {
+                return@post
+            }
+
             host.setView(rootView, rootView.measuredWidth, rootView.measuredHeight)
         }
     }
