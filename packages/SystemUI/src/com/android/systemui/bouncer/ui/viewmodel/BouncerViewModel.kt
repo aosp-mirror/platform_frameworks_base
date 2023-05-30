@@ -126,7 +126,7 @@ constructor(
                 .map { model ->
                     model?.let {
                         when (interactor.authenticationMethod.value) {
-                            is AuthenticationMethodModel.PIN ->
+                            is AuthenticationMethodModel.Pin ->
                                 R.string.kg_too_many_failed_pin_attempts_dialog_message
                             is AuthenticationMethodModel.Password ->
                                 R.string.kg_too_many_failed_password_attempts_dialog_message
@@ -165,7 +165,7 @@ constructor(
         authMethod: AuthenticationMethodModel,
     ): AuthMethodBouncerViewModel? {
         return when (authMethod) {
-            is AuthenticationMethodModel.PIN -> pin
+            is AuthenticationMethodModel.Pin -> pin
             is AuthenticationMethodModel.Password -> password
             is AuthenticationMethodModel.Pattern -> pattern
             else -> null

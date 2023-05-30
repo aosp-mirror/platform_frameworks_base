@@ -16,6 +16,7 @@
 
 package com.android.systemui.authentication.domain.interactor
 
+import android.app.admin.DevicePolicyManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
@@ -48,7 +49,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun authMethod() =
         testScope.runTest {
             val authMethod by collectLastValue(underTest.authenticationMethod)
-            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.PIN(1234))
+            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.Pin(1234))
 
             underTest.setAuthenticationMethod(AuthenticationMethodModel.Password("password"))
             assertThat(authMethod).isEqualTo(AuthenticationMethodModel.Password("password"))
@@ -147,7 +148,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
-            underTest.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            underTest.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
@@ -160,10 +161,55 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             val isUnlocked by collectLastValue(underTest.isUnlocked)
-            underTest.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            underTest.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(9, 8, 7))).isFalse()
+            assertThat(isUnlocked).isFalse()
+            assertThat(failedAttemptCount).isEqualTo(1)
+        }
+
+    @Test
+    fun authenticate_withEmptyPin_returnsFalseAndDoesNotUnlockDevice() =
+        testScope.runTest {
+            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            underTest.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
+            assertThat(isUnlocked).isFalse()
+
+            assertThat(underTest.authenticate(listOf())).isFalse()
+            assertThat(isUnlocked).isFalse()
+            assertThat(failedAttemptCount).isEqualTo(1)
+        }
+
+    @Test
+    fun authenticate_withCorrectMaxLengthPin_returnsTrueAndUnlocksDevice() =
+        testScope.runTest {
+            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            underTest.setAuthenticationMethod(AuthenticationMethodModel.Pin(9999999999999999))
+            assertThat(isUnlocked).isFalse()
+
+            assertThat(underTest.authenticate(List(16) { 9 })).isTrue()
+            assertThat(isUnlocked).isTrue()
+            assertThat(failedAttemptCount).isEqualTo(0)
+        }
+
+    @Test
+    fun authenticate_withCorrectTooLongPin_returnsFalseAndDoesNotUnlockDevice() =
+        testScope.runTest {
+            // Max pin length is 16 digits. To avoid issues with overflows, this test ensures
+            // that all pins > 16 decimal digits are rejected.
+
+            // If the policy changes, there is work to do in SysUI.
+            assertThat(DevicePolicyManager.MAX_PASSWORD_LENGTH).isLessThan(17)
+
+            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            underTest.setAuthenticationMethod(AuthenticationMethodModel.Pin(99999999999999999))
+            assertThat(isUnlocked).isFalse()
+
+            assertThat(underTest.authenticate(List(17) { 9 })).isFalse()
             assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(1)
         }
