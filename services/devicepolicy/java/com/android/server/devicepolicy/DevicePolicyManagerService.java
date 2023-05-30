@@ -11117,7 +11117,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS);
     }
 
-    private boolean canUserUseLockTaskLocked(int userId) {
+    private boolean canDPCManagedUserUseLockTaskLocked(int userId) {
         if (isUserAffiliatedWithDeviceLocked(userId)) {
             return true;
         }
@@ -11126,19 +11126,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (mOwners.hasDeviceOwner()) {
             return false;
         }
-
-        if (!isPermissionCheckFlagEnabled() && !isPolicyEngineForFinanceFlagEnabled()) {
-            final ComponentName profileOwner = getProfileOwnerAsUser(userId);
-            if (profileOwner == null) {
-                return false;
-            }
+        
+        final ComponentName profileOwner = getProfileOwnerAsUser(userId);
+        if (profileOwner == null) {
+            return false;
         }
-
         // Managed profiles are not allowed to use lock task
         if (isManagedProfile(userId)) {
             return false;
         }
-
+        
         return true;
     }
     private void enforceCanQueryLockTaskLocked(ComponentName who, String callerPackageName) {
@@ -11146,7 +11143,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userId = caller.getUserId();
 
         enforceCanQuery(MANAGE_DEVICE_POLICY_LOCK_TASK, caller.getPackageName(), userId);
-        if (!canUserUseLockTaskLocked(userId)) {
+        if ((isDeviceOwner(caller) || isProfileOwner(caller))
+                && !canDPCManagedUserUseLockTaskLocked(userId)) {
             throw new SecurityException("User " + userId + " is not allowed to use lock task");
         }
     }
@@ -11162,7 +11160,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 caller.getPackageName(),
                 userId
         );
-        if (!canUserUseLockTaskLocked(userId)) {
+        if ((isDeviceOwner(caller) || isProfileOwner(caller))
+                && !canDPCManagedUserUseLockTaskLocked(userId)) {
             throw new SecurityException("User " + userId + " is not allowed to use lock task");
         }
         return enforcingAdmin;
@@ -11173,7 +11172,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 || isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
 
         final int userId =  caller.getUserId();
-        if (!canUserUseLockTaskLocked(userId)) {
+        if (!canDPCManagedUserUseLockTaskLocked(userId)) {
             throw new SecurityException("User " + userId + " is not allowed to use lock task");
         }
     }
@@ -15111,7 +15110,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final List<UserInfo> userInfos = mUserManager.getAliveUsers();
             for (int i = userInfos.size() - 1; i >= 0; i--) {
                 int userId = userInfos.get(i).id;
-                if (canUserUseLockTaskLocked(userId)) {
+                if (canDPCManagedUserUseLockTaskLocked(userId)) {
                     continue;
                 }
 
