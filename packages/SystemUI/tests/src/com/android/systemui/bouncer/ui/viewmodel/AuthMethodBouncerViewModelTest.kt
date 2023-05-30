@@ -55,7 +55,7 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun animateFailure() =
         testScope.runTest {
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             val animateFailure by collectLastValue(underTest.animateFailure)
             assertThat(animateFailure).isFalse()
 

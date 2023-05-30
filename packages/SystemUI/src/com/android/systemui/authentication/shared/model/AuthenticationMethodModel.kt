@@ -32,7 +32,13 @@ sealed class AuthenticationMethodModel(
     /** The most basic authentication method. The lock screen can be swiped away when displayed. */
     object Swipe : AuthenticationMethodModel(isSecure = false)
 
-    data class PIN(val code: Int) : AuthenticationMethodModel(isSecure = true)
+    /**
+     * Authentication method using a PIN.
+     *
+     * In practice, a pin is restricted to 16 decimal digits , see
+     * [android.app.admin.DevicePolicyManager.MAX_PASSWORD_LENGTH]
+     */
+    data class Pin(val code: Long) : AuthenticationMethodModel(isSecure = true)
 
     data class Password(val password: String) : AuthenticationMethodModel(isSecure = true)
 
