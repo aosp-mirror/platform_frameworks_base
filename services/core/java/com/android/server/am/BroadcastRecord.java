@@ -699,6 +699,9 @@ final class BroadcastRecord extends Binder {
                 break;
         }
         switch (newDeliveryState) {
+            case DELIVERY_PENDING:
+                scheduledTime[index] = 0;
+                break;
             case DELIVERY_SCHEDULED:
                 scheduledTime[index] = SystemClock.uptimeMillis();
                 break;
