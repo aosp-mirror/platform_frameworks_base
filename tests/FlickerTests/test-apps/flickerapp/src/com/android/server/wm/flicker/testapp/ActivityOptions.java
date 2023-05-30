@@ -122,6 +122,12 @@ public class ActivityOptions {
             public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".ActivityEmbeddingPlaceholderSecondaryActivity");
         }
+
+        public static class TrampolineActivity {
+            public static final String LABEL = "ActivityEmbeddingTrampolineActivity";
+            public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ActivityEmbeddingTrampolineActivity");
+        }
     }
 
     public static class Notification {

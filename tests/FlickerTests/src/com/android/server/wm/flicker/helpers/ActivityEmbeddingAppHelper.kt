@@ -77,6 +77,25 @@ constructor(
     }
 
     /**
+     * Clicks the button to launch the trampoline activity, which should launch the secondary
+     * activity and finish itself.
+     */
+    fun launchTrampolineActivity(wmHelper: WindowManagerStateHelper) {
+        val launchButton =
+                uiDevice.wait(
+                        Until.findObject(By.res(getPackage(), "launch_trampoline_button")),
+                        FIND_TIMEOUT
+                )
+        require(launchButton != null) { "Can't find launch trampoline activity button on screen." }
+        launchButton.click()
+        wmHelper
+                .StateSyncBuilder()
+                .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .withActivityRemoved(TRAMPOLINE_ACTIVITY_COMPONENT)
+                .waitForAndVerify()
+    }
+
+    /**
      * Clicks the button to finishes the secondary activity launched through
      * [launchSecondaryActivity], waits for the main activity to resume.
      */
@@ -196,6 +215,9 @@ constructor(
         val PLACEHOLDER_SECONDARY_COMPONENT =
             ActivityOptions.ActivityEmbedding.PlaceholderSecondaryActivity.COMPONENT
                 .toFlickerComponent()
+
+        val TRAMPOLINE_ACTIVITY_COMPONENT =
+                ActivityOptions.ActivityEmbedding.TrampolineActivity.COMPONENT.toFlickerComponent()
 
         @JvmStatic
         fun getWindowExtensions(): WindowExtensions? {

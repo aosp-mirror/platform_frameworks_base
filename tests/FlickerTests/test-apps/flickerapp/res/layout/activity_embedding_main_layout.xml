@@ -60,4 +60,12 @@
         android:tag="RIGHT_TO_LEFT"
         android:text="Launch Placeholder Split in RTL" />
 
+    <Button
+        android:id="@+id/launch_trampoline_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:onClick="launchTrampolineActivity"
+        android:tag="LEFT_TO_RIGHT"
+        android:text="Launch Trampoline Activity" />
+
 </LinearLayout>
