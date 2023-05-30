@@ -27,6 +27,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -981,6 +982,7 @@ public class LocalDisplayAdapterTest {
         DisplayDevice displayDevice = mListener.addedDisplays.get(0);
 
         // Turn on / initialize
+        assumeTrue(displayDevice.getDisplayDeviceConfig().hasSdrToHdrRatioSpline());
         Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
                 0);
         changeStateRunnable.run();
