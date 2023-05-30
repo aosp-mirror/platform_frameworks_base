@@ -196,6 +196,9 @@ public class BatteryStatus {
 
     /** Gets the battery level from the intent. */
     public static int getBatteryLevel(Intent batteryChangedIntent) {
+        if (batteryChangedIntent == null) {
+            return -1; /*invalid battery level*/
+        }
         final int level = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         final int scale = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
         return scale == 0
