@@ -5010,7 +5010,7 @@ public class Vpn {
      * Retrieve the VpnProfileState for the profile provisioned by the given package.
      *
      * @return the VpnProfileState with current information, or null if there was no profile
-     *         provisioned by the given package.
+     *         provisioned and started by the given package.
      */
     @Nullable
     public synchronized VpnProfileState getProvisionedVpnProfileState(

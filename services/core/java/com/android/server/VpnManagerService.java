@@ -406,7 +406,7 @@ public class VpnManagerService extends IVpnManager.Stub {
      * Retrieve the VpnProfileState for the profile provisioned by the given package.
      *
      * @return the VpnProfileState with current information, or null if there was no profile
-     *         provisioned by the given package.
+     *         provisioned and started by the given package.
      * @hide
      */
     @Override
