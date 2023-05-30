@@ -317,4 +317,4 @@ private val pinButtonPressedDuration = 100.milliseconds
 private val pinButtonPressedEasing = LinearEasing
 private val pinButtonHoldTime = 33.milliseconds
 private val pinButtonReleasedDuration = 420.milliseconds
-private val pinButtonReleasedEasing = Easings.StandardEasing
+private val pinButtonReleasedEasing = Easings.Standard
