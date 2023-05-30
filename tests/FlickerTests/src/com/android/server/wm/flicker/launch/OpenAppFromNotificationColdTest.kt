@@ -35,8 +35,6 @@ import org.junit.runners.Parameterized
 /**
  * Test cold launching an app from a notification.
  *
- * This test assumes the device doesn't have AOD enabled
- *
  * To run this test: `atest FlickerTests:OpenAppFromNotificationCold`
  */
 @RequiresDevice
@@ -44,8 +42,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Postsubmit
-open class OpenAppFromNotificationCold(flicker: FlickerTest) :
-    OpenAppFromNotificationWarm(flicker) {
+open class OpenAppFromNotificationColdTest(flicker: FlickerTest) :
+    OpenAppFromNotificationWarmTest(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {

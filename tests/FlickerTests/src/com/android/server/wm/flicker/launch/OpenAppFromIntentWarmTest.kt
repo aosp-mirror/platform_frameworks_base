@@ -16,14 +16,13 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.annotation.FlickerServiceCompatible
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder
@@ -33,14 +32,15 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test cold launching an app from launcher
+ * Test warm launching an app from launcher
  *
- * To run this test: `atest FlickerTests:OpenAppColdTest`
+ * To run this test: `atest FlickerTests:OpenAppWarmTest`
  *
  * Actions:
  * ```
- *     Make sure no apps are running on the device
- *     Launch an app [testApp] and wait animation to complete
+ *     Launch [testApp]
+ *     Press home
+ *     Relaunch an app [testApp] and wait animation to complete (only this action is traced)
  * ```
  *
  * Notes:
@@ -58,13 +58,17 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class OpenAppColdTest(flicker: FlickerTest) : OpenAppFromLauncherTransition(flicker) {
-    /** {@inheritDoc} */
+open class OpenAppFromIntentWarmTest(flicker: FlickerTest) :
+    OpenAppFromLauncherTransition(flicker) {
+    /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
             setup {
-                removeAllTasksButHome()
+                tapl.setExpectedRotationCheckEnabled(false)
+                testApp.launchViaIntent(wmHelper)
+                tapl.goHome()
+                wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
                 this.setRotation(flicker.scenario.startRotation)
             }
             teardown { testApp.exit(wmHelper) }
@@ -72,11 +76,19 @@ open class OpenAppColdTest(flicker: FlickerTest) : OpenAppFromLauncherTransition
         }
 
     /** {@inheritDoc} */
-    @Presubmit @Test override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    @Postsubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 
     companion object {
         /**
