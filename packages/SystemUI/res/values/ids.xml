@@ -206,5 +206,9 @@
 
     <!-- keyboard backlight indicator-->
     <item type="id" name="backlight_icon" />
-</resources>
 
+    <item type="id" name="keyguard_root_view" />
+    <item type="id" name="keyguard_indication_area" />
+    <item type="id" name="keyguard_indication_text" />
+    <item type="id" name="keyguard_indication_text_bottom" />
+</resources>

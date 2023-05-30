@@ -21,7 +21,6 @@ import com.android.systemui.statusbar.RemoteInputController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
-import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController
 import java.util.function.Consumer
@@ -119,13 +118,6 @@ interface ShadeViewController {
 
     /** Returns the StatusBarState. */
     val barState: Int
-
-    /**
-     * Returns the bottom part of the keyguard, which contains quick affordances.
-     *
-     * TODO(b/275550429): this should be removed.
-     */
-    val keyguardBottomAreaView: KeyguardBottomAreaView?
 
     /** Returns the NSSL controller. */
     val notificationStackScrollLayoutController: NotificationStackScrollLayoutController
