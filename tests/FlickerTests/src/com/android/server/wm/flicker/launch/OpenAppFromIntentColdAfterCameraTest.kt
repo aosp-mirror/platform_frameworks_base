@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,78 +16,47 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Presubmit
-import android.tools.device.flicker.annotation.FlickerServiceCompatible
+import android.tools.device.apphelpers.CameraAppHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test warm launching an app from launcher
+ * Test launching an app after cold opening camera
  *
- * To run this test: `atest FlickerTests:OpenAppWarmTest`
+ * To run this test: `atest FlickerTests:OpenAppAfterCameraTest`
  *
- * Actions:
- * ```
- *     Launch [testApp]
- *     Press home
- *     Relaunch an app [testApp] and wait animation to complete (only this action is traced)
- * ```
- *
- * Notes:
- * ```
- *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
- *        are inherited [OpenAppTransition]
- *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
- *        including configuring navigation mode, initial orientation and ensuring no
- *        apps are running before setup
- * ```
+ * Notes: Some default assertions are inherited [OpenAppTransition]
  */
 @RequiresDevice
-@FlickerServiceCompatible
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class OpenAppWarmTest(flicker: FlickerTest) : OpenAppFromLauncherTransition(flicker) {
-    /** Defines the transition used to run the test */
+open class OpenAppFromIntentColdAfterCameraTest(flicker: FlickerTest) :
+    OpenAppFromLauncherTransition(flicker) {
+    private val cameraApp = CameraAppHelper(instrumentation)
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
             setup {
                 tapl.setExpectedRotationCheckEnabled(false)
-                testApp.launchViaIntent(wmHelper)
-                tapl.goHome()
-                wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
-                this.setRotation(flicker.scenario.startRotation)
+                // 1. Open camera - cold -> close it first
+                cameraApp.exit(wmHelper)
+                cameraApp.launchViaIntent(wmHelper)
+                // Can't use TAPL due to Recents not showing in 3 Button Nav in full screen mode
+                device.pressHome()
+                tapl.getWorkspace()
             }
             teardown { testApp.exit(wmHelper) }
             transitions { testApp.launchViaIntent(wmHelper) }
         }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 
     companion object {
         /**

@@ -32,7 +32,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppColdFromIconCfArm(flicker: FlickerTest) : OpenAppColdFromIcon(flicker) {
+class OpenAppFromIconColdTestCfArm(flicker: FlickerTest) : OpenAppFromIconColdTest(flicker) {
     @Test
     @FlakyTest
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
