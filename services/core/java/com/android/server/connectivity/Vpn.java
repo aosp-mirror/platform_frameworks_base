@@ -309,6 +309,8 @@ public class Vpn {
      */
     @VisibleForTesting
     static final int DEFAULT_LONG_LIVED_TCP_CONNS_EXPENSIVE_TIMEOUT_SEC = 60;
+
+    private static final int PREFERRED_IKE_PROTOCOL_UNKNOWN = -1;
     /**
      *  Prefer using {@link IkeSessionParams.ESP_IP_VERSION_AUTO} and
      *  {@link IkeSessionParams.ESP_ENCAP_TYPE_AUTO} for ESP packets.
@@ -3643,11 +3645,11 @@ public class Vpn {
 
             final int natKeepalive =
                     carrierConfig.getInt(KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT);
-            final int preferredIpPortocol =
-                    carrierConfig.getInt(KEY_PREFERRED_IKE_PROTOCOL_INT);
+            final int preferredIpProtocol = carrierConfig.getInt(
+                    KEY_PREFERRED_IKE_PROTOCOL_INT, PREFERRED_IKE_PROTOCOL_UNKNOWN);
             final String mccMnc = perSubTm.getSimOperator(subId);
             final CarrierConfigInfo info =
-                    buildCarrierConfigInfo(mccMnc, natKeepalive, preferredIpPortocol);
+                    buildCarrierConfigInfo(mccMnc, natKeepalive, preferredIpProtocol);
             synchronized (Vpn.this) {
                 mCachedCarrierConfigInfoPerSubId.put(subId, info);
             }
