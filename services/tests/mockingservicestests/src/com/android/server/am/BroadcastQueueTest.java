@@ -276,7 +276,11 @@ public class BroadcastQueueTest {
                     switch (behavior) {
                         case SUCCESS:
                         case SUCCESS_PREDECESSOR:
-                            mQueue.onApplicationAttachedLocked(deliverRes);
+                            try {
+                                mQueue.onApplicationAttachedLocked(deliverRes);
+                            } catch (BroadcastDeliveryFailedException e) {
+                                Log.v(TAG, "Error while invoking onApplicationAttachedLocked", e);
+                            }
                             break;
                         case FAIL_TIMEOUT:
                         case FAIL_TIMEOUT_PREDECESSOR:
@@ -1120,6 +1124,7 @@ public class BroadcastQueueTest {
         final ProcessRecord restartedReceiverApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
                 getUidForPackage(PACKAGE_GREEN));
         assertNotEquals(receiverApp, restartedReceiverApp);
+        verifyScheduleReceiver(restartedReceiverApp, airplane);
         verifyScheduleReceiver(restartedReceiverApp, timezone);
     }
 
@@ -1304,12 +1309,7 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverOrangeApp = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
                 getUidForPackage(PACKAGE_ORANGE));
 
-        if (mImpl == Impl.MODERN) {
-            // Modern queue does not retry sending a broadcast once any broadcast delivery fails.
-            assertNull(receiverGreenApp);
-        } else {
-            verifyScheduleReceiver(times(1), receiverGreenApp, airplane);
-        }
+        verifyScheduleReceiver(times(1), receiverGreenApp, airplane);
         verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
         verifyScheduleReceiver(times(1), receiverYellowApp, airplane);
         verifyScheduleReceiver(times(1), receiverOrangeApp, timezone);
