@@ -28,12 +28,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.shade.ShadeFoldAnimator
 import com.android.systemui.shade.ShadeViewController
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.unfold.util.FoldableDeviceStates
@@ -80,8 +78,6 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
     @Mock lateinit var viewTreeObserver: ViewTreeObserver
 
-    @Mock private lateinit var commandQueue: CommandQueue
-
     @Mock lateinit var shadeFoldAnimator: ShadeFoldAnimator
 
     @Captor private lateinit var foldStateListenerCaptor: ArgumentCaptor<FoldStateListener>
@@ -111,15 +107,10 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
             onActionStarted.run()
         }
 
-        keyguardRepository = FakeKeyguardRepository()
         val featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
-        val keyguardInteractor =
-            KeyguardInteractor(
-                repository = keyguardRepository,
-                commandQueue = commandQueue,
-                featureFlags = featureFlags,
-                bouncerRepository = FakeKeyguardBouncerRepository(),
-            )
+        val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
+        val keyguardInteractor = withDeps.keyguardInteractor
+        keyguardRepository = withDeps.repository
 
         // Needs to be run on the main thread
         runBlocking(IMMEDIATE) {

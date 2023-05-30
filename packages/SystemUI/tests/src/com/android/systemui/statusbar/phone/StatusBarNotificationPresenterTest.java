@@ -44,7 +44,6 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeNotificationPresenter;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -122,7 +121,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationShadeWindowController.class),
                 mock(DynamicPrivacyController.class),
                 mKeyguardStateController,
-                mock(KeyguardIndicationController.class),
                 mCentralSurfaces,
                 mock(LockscreenShadeTransitionController.class),
                 mCommandQueue,

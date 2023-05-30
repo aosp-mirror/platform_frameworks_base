@@ -62,6 +62,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import java.util.TimeZone
 import java.util.concurrent.Executor
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
@@ -117,6 +118,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 commandQueue = commandQueue,
                 featureFlags = featureFlags,
                 bouncerRepository = bouncerRepository,
+                configurationRepository = FakeConfigurationRepository(),
             ),
             KeyguardTransitionInteractor(repository = transitionRepository),
             broadcastDispatcher,

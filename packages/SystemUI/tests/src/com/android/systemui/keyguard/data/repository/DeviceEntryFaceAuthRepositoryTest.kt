@@ -47,6 +47,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.AuthenticationStatus
 import com.android.systemui.keyguard.shared.model.DetectionStatus
@@ -159,17 +160,16 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         biometricSettingsRepository = FakeBiometricSettingsRepository()
         deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
         trustRepository = FakeTrustRepository()
-        keyguardRepository = FakeKeyguardRepository()
-        bouncerRepository = FakeKeyguardBouncerRepository()
         featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
-        fakeCommandQueue = FakeCommandQueue()
-        keyguardInteractor =
-            KeyguardInteractor(
-                keyguardRepository,
-                fakeCommandQueue,
-                featureFlags,
-                bouncerRepository
+        val withDeps =
+            KeyguardInteractorFactory.create(
+                featureFlags = featureFlags,
             )
+        keyguardInteractor = withDeps.keyguardInteractor
+        keyguardRepository = withDeps.repository
+        bouncerRepository = withDeps.bouncerRepository
+        fakeCommandQueue = withDeps.commandQueue
+
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
                 bouncerRepository = bouncerRepository,
