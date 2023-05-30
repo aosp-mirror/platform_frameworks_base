@@ -410,7 +410,7 @@ public final class MaterialDynamicColors {
                 (s) -> s.primaryPalette,
                 (s) -> {
                     if (isMonochrome(s)) {
-                        return s.isDark ? 100.0 : 10.0;
+                        return 40.0;
                     }
                     return 90.0;
                 },
@@ -423,7 +423,7 @@ public final class MaterialDynamicColors {
                 (s) -> s.primaryPalette,
                 (s) -> {
                     if (isMonochrome(s)) {
-                        return s.isDark ? 90.0 : 20.0;
+                        return 30.0;
                     }
                     return 80.0;
                 },
@@ -436,7 +436,7 @@ public final class MaterialDynamicColors {
                 (s) -> s.primaryPalette,
                 (s) -> {
                     if (isMonochrome(s)) {
-                        return s.isDark ? 10.0 : 90.0;
+                        return 100.0;
                     }
                     return 10.0;
                 },
@@ -449,7 +449,7 @@ public final class MaterialDynamicColors {
                 (s) -> s.primaryPalette,
                 (s) -> {
                     if (isMonochrome(s)) {
-                        return s.isDark ? 30.0 : 70.0;
+                        return 90.0;
                     }
                     return 30.0;
                 },
@@ -497,13 +497,13 @@ public final class MaterialDynamicColors {
     @NonNull
     public DynamicColor onTertiaryFixed() {
         return DynamicColor.fromPalette(
-                (s) -> s.tertiaryPalette, (s) -> isMonochrome(s) ? 90.0 : 10.0, (s) -> tertiaryFixedDim());
+                (s) -> s.tertiaryPalette, (s) -> isMonochrome(s) ? 100.0 : 10.0, (s) -> tertiaryFixedDim());
     }
 
     @NonNull
     public DynamicColor onTertiaryFixedVariant() {
         return DynamicColor.fromPalette(
-                (s) -> s.tertiaryPalette, (s) -> isMonochrome(s) ? 70.0 : 30.0, (s) -> tertiaryFixedDim());
+                (s) -> s.tertiaryPalette, (s) -> isMonochrome(s) ? 90.0 : 30.0, (s) -> tertiaryFixedDim());
     }
 
     /**
