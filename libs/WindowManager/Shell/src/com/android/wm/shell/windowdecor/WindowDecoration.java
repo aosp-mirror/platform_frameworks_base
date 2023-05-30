@@ -304,6 +304,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
     }
 
+    int getCaptionHeightId() {
+        return Resources.ID_NULL;
+    }
+
     /**
      * Obtains the {@link Display} instance for the display ID in {@link #mTaskInfo} if it exists or
      * registers {@link #mOnDisplaysChangedListener} if it doesn't.
@@ -416,6 +420,21 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         ssg.add(viewHost.getSurfacePackage(), () -> viewHost.setView(v, lp));
         return new AdditionalWindow(windowSurfaceControl, viewHost,
                 mSurfaceControlTransactionSupplier);
+    }
+
+    /**
+     * Adds caption inset source to a WCT
+     */
+    public void addCaptionInset(WindowContainerTransaction wct) {
+        final int captionHeightId = getCaptionHeightId();
+        if (!ViewRootImpl.CAPTION_ON_SHELL || captionHeightId == Resources.ID_NULL) {
+            return;
+        }
+
+        final int captionHeight = loadDimensionPixelSize(mContext.getResources(), captionHeightId);
+        final Rect captionInsets = new Rect(0, 0, 0, captionHeight);
+        wct.addInsetsSource(mTaskInfo.token, mOwner, 0 /* index */, WindowInsets.Type.captionBar(),
+                captionInsets);
     }
 
     static class RelayoutParams {

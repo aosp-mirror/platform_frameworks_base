@@ -53,6 +53,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -323,7 +324,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
             } else if (id == R.id.desktop_button) {
                 mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));
-                mDesktopTasksController.ifPresent(c -> c.moveToDesktop(mTaskId));
+                if (mDesktopTasksController.isPresent()) {
+                    final WindowContainerTransaction wct = new WindowContainerTransaction();
+                    // App sometimes draws before the insets from WindowDecoration#relayout have
+                    // been added, so they must be added here
+                    mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
+                    mDesktopTasksController.get().moveToDesktop(mTaskId, wct);
+                }
                 decoration.closeHandleMenu();
             } else if (id == R.id.fullscreen_button) {
                 mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(false));
