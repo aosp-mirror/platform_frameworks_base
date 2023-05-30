@@ -131,7 +131,7 @@ internal fun PatternBouncer(
                         animationSpec =
                             tween(
                                 durationMillis = SELECTED_DOT_REACTION_ANIMATION_DURATION_MS,
-                                easing = Easings.StandardAccelerateEasing,
+                                easing = Easings.StandardAccelerate,
                             ),
                     )
                 } else {
@@ -140,7 +140,7 @@ internal fun PatternBouncer(
                         animationSpec =
                             tween(
                                 durationMillis = SELECTED_DOT_RETRACT_ANIMATION_DURATION_MS,
-                                easing = Easings.StandardDecelerateEasing,
+                                easing = Easings.StandardDecelerate,
                             ),
                     )
                 }
@@ -333,7 +333,7 @@ private suspend fun showFailureAnimation(
                                         FAILURE_ANIMATION_DOT_SHRINK_ANIMATION_DURATION_MS,
                                     delayMillis =
                                         rowIndex * FAILURE_ANIMATION_DOT_SHRINK_STAGGER_DELAY_MS,
-                                    easing = Easings.LinearEasing,
+                                    easing = Easings.Linear,
                                 ),
                         )
 
@@ -343,7 +343,7 @@ private suspend fun showFailureAnimation(
                                 tween(
                                     durationMillis =
                                         FAILURE_ANIMATION_DOT_REVERT_ANIMATION_DURATION,
-                                    easing = Easings.StandardEasing,
+                                    easing = Easings.Standard,
                                 ),
                         )
                     }
