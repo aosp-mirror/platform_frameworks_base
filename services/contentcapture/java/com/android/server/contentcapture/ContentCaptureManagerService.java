@@ -163,13 +163,35 @@ public final class ContentCaptureManagerService extends
     private boolean mDisabledByDeviceConfig;
 
     // Device-config settings that are cached and passed back to apps
-    @GuardedBy("mLock") int mDevCfgLoggingLevel;
-    @GuardedBy("mLock") int mDevCfgMaxBufferSize;
-    @GuardedBy("mLock") int mDevCfgIdleFlushingFrequencyMs;
-    @GuardedBy("mLock") int mDevCfgTextChangeFlushingFrequencyMs;
-    @GuardedBy("mLock") int mDevCfgLogHistorySize;
-    @GuardedBy("mLock") int mDevCfgIdleUnbindTimeoutMs;
-    @GuardedBy("mLock") boolean mDevCfgDisableFlushForViewTreeAppearing;
+    @GuardedBy("mLock")
+    int mDevCfgLoggingLevel;
+
+    @GuardedBy("mLock")
+    int mDevCfgMaxBufferSize;
+
+    @GuardedBy("mLock")
+    int mDevCfgIdleFlushingFrequencyMs;
+
+    @GuardedBy("mLock")
+    int mDevCfgTextChangeFlushingFrequencyMs;
+
+    @GuardedBy("mLock")
+    int mDevCfgLogHistorySize;
+
+    @GuardedBy("mLock")
+    int mDevCfgIdleUnbindTimeoutMs;
+
+    @GuardedBy("mLock")
+    boolean mDevCfgDisableFlushForViewTreeAppearing;
+
+    @GuardedBy("mLock")
+    boolean mDevCfgEnableContentProtectionReceiver;
+
+    @GuardedBy("mLock")
+    int mDevCfgContentProtectionAppsBlocklistSize;
+
+    @GuardedBy("mLock")
+    int mDevCfgContentProtectionBufferSize;
 
     private final Executor mDataShareExecutor = Executors.newCachedThreadPool();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -362,6 +384,11 @@ public final class ContentCaptureManagerService extends
                 case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT:
                 case ContentCaptureManager
                         .DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING:
+                case ContentCaptureManager
+                        .DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER:
+                case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE:
+                case ContentCaptureManager
+                        .DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE:
                     setFineTuneParamsFromDeviceConfig();
                     return;
                 default:
@@ -372,39 +399,78 @@ public final class ContentCaptureManagerService extends
 
     private void setFineTuneParamsFromDeviceConfig() {
         synchronized (mLock) {
-            mDevCfgMaxBufferSize = DeviceConfig.getInt(
-                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
-                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE,
-                    ContentCaptureManager.DEFAULT_MAX_BUFFER_SIZE);
-            mDevCfgIdleFlushingFrequencyMs = DeviceConfig.getInt(
-                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
-                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY,
-                    ContentCaptureManager.DEFAULT_IDLE_FLUSHING_FREQUENCY_MS);
-            mDevCfgTextChangeFlushingFrequencyMs = DeviceConfig.getInt(
-                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
-                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY,
-                    ContentCaptureManager.DEFAULT_TEXT_CHANGE_FLUSHING_FREQUENCY_MS);
-            mDevCfgLogHistorySize = DeviceConfig.getInt(
-                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
-                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE, 20);
-            mDevCfgIdleUnbindTimeoutMs = DeviceConfig.getInt(
-                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
-                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT,
-                    (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
-            mDevCfgDisableFlushForViewTreeAppearing = DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
-                    ContentCaptureManager
-                        .DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
-                    false);
+            mDevCfgMaxBufferSize =
+                    DeviceConfig.getInt(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            ContentCaptureManager.DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE,
+                            ContentCaptureManager.DEFAULT_MAX_BUFFER_SIZE);
+            mDevCfgIdleFlushingFrequencyMs =
+                    DeviceConfig.getInt(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY,
+                            ContentCaptureManager.DEFAULT_IDLE_FLUSHING_FREQUENCY_MS);
+            mDevCfgTextChangeFlushingFrequencyMs =
+                    DeviceConfig.getInt(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            ContentCaptureManager
+                                    .DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY,
+                            ContentCaptureManager.DEFAULT_TEXT_CHANGE_FLUSHING_FREQUENCY_MS);
+            mDevCfgLogHistorySize =
+                    DeviceConfig.getInt(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE,
+                            20);
+            mDevCfgIdleUnbindTimeoutMs =
+                    DeviceConfig.getInt(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT,
+                            (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
+            mDevCfgDisableFlushForViewTreeAppearing =
+                    DeviceConfig.getBoolean(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            ContentCaptureManager
+                                    .DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
+                            false);
+            mDevCfgEnableContentProtectionReceiver =
+                    DeviceConfig.getBoolean(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            ContentCaptureManager
+                                    .DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER,
+                            ContentCaptureManager.DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER);
+            mDevCfgContentProtectionAppsBlocklistSize =
+                    DeviceConfig.getInt(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            ContentCaptureManager
+                                    .DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE,
+                            ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE);
+            mDevCfgContentProtectionBufferSize =
+                    DeviceConfig.getInt(
+                            DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                            ContentCaptureManager
+                                    .DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE,
+                            ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE);
             if (verbose) {
-                Slog.v(TAG, "setFineTuneParamsFromDeviceConfig(): "
-                        + "bufferSize=" + mDevCfgMaxBufferSize
-                        + ", idleFlush=" + mDevCfgIdleFlushingFrequencyMs
-                        + ", textFluxh=" + mDevCfgTextChangeFlushingFrequencyMs
-                        + ", logHistory=" + mDevCfgLogHistorySize
-                        + ", idleUnbindTimeoutMs=" + mDevCfgIdleUnbindTimeoutMs
-                        + ", disableFlushForViewTreeAppearing="
-                        + mDevCfgDisableFlushForViewTreeAppearing);
+                Slog.v(
+                        TAG,
+                        "setFineTuneParamsFromDeviceConfig(): "
+                                + "bufferSize="
+                                + mDevCfgMaxBufferSize
+                                + ", idleFlush="
+                                + mDevCfgIdleFlushingFrequencyMs
+                                + ", textFluxh="
+                                + mDevCfgTextChangeFlushingFrequencyMs
+                                + ", logHistory="
+                                + mDevCfgLogHistorySize
+                                + ", idleUnbindTimeoutMs="
+                                + mDevCfgIdleUnbindTimeoutMs
+                                + ", disableFlushForViewTreeAppearing="
+                                + mDevCfgDisableFlushForViewTreeAppearing
+                                + ", enableContentProtectionReceiver="
+                                + mDevCfgEnableContentProtectionReceiver
+                                + ", contentProtectionAppsBlocklistSize="
+                                + mDevCfgContentProtectionAppsBlocklistSize
+                                + ", contentProtectionBufferSize="
+                                + mDevCfgContentProtectionBufferSize);
             }
         }
     }
@@ -645,21 +711,46 @@ public final class ContentCaptureManagerService extends
 
         final String prefix2 = prefix + "  ";
 
-        pw.print(prefix); pw.print("Users disabled by Settings: "); pw.println(mDisabledBySettings);
-        pw.print(prefix); pw.println("DeviceConfig Settings: ");
-        pw.print(prefix2); pw.print("disabled: "); pw.println(mDisabledByDeviceConfig);
-        pw.print(prefix2); pw.print("loggingLevel: "); pw.println(mDevCfgLoggingLevel);
-        pw.print(prefix2); pw.print("maxBufferSize: "); pw.println(mDevCfgMaxBufferSize);
-        pw.print(prefix2); pw.print("idleFlushingFrequencyMs: ");
+        pw.print(prefix);
+        pw.print("Users disabled by Settings: ");
+        pw.println(mDisabledBySettings);
+        pw.print(prefix);
+        pw.println("DeviceConfig Settings: ");
+        pw.print(prefix2);
+        pw.print("disabled: ");
+        pw.println(mDisabledByDeviceConfig);
+        pw.print(prefix2);
+        pw.print("loggingLevel: ");
+        pw.println(mDevCfgLoggingLevel);
+        pw.print(prefix2);
+        pw.print("maxBufferSize: ");
+        pw.println(mDevCfgMaxBufferSize);
+        pw.print(prefix2);
+        pw.print("idleFlushingFrequencyMs: ");
         pw.println(mDevCfgIdleFlushingFrequencyMs);
-        pw.print(prefix2); pw.print("textChangeFlushingFrequencyMs: ");
+        pw.print(prefix2);
+        pw.print("textChangeFlushingFrequencyMs: ");
         pw.println(mDevCfgTextChangeFlushingFrequencyMs);
-        pw.print(prefix2); pw.print("logHistorySize: "); pw.println(mDevCfgLogHistorySize);
-        pw.print(prefix2); pw.print("idleUnbindTimeoutMs: ");
+        pw.print(prefix2);
+        pw.print("logHistorySize: ");
+        pw.println(mDevCfgLogHistorySize);
+        pw.print(prefix2);
+        pw.print("idleUnbindTimeoutMs: ");
         pw.println(mDevCfgIdleUnbindTimeoutMs);
-        pw.print(prefix2); pw.print("disableFlushForViewTreeAppearing: ");
+        pw.print(prefix2);
+        pw.print("disableFlushForViewTreeAppearing: ");
         pw.println(mDevCfgDisableFlushForViewTreeAppearing);
-        pw.print(prefix); pw.println("Global Options:");
+        pw.print(prefix2);
+        pw.print("enableContentProtectionReceiver: ");
+        pw.println(mDevCfgEnableContentProtectionReceiver);
+        pw.print(prefix2);
+        pw.print("contentProtectionAppsBlocklistSize: ");
+        pw.println(mDevCfgContentProtectionAppsBlocklistSize);
+        pw.print(prefix2);
+        pw.print("contentProtectionBufferSize: ");
+        pw.println(mDevCfgContentProtectionBufferSize);
+        pw.print(prefix);
+        pw.println("Global Options:");
         mGlobalContentCaptureOptions.dump(prefix2, pw);
     }
 
@@ -1019,11 +1110,19 @@ public final class ContentCaptureManagerService extends
             }
 
             synchronized (mLock) {
-                final ContentCaptureOptions options = new ContentCaptureOptions(mDevCfgLoggingLevel,
-                        mDevCfgMaxBufferSize, mDevCfgIdleFlushingFrequencyMs,
-                        mDevCfgTextChangeFlushingFrequencyMs, mDevCfgLogHistorySize,
-                        mDevCfgDisableFlushForViewTreeAppearing,
-                        whitelistedComponents);
+                final ContentCaptureOptions options =
+                        new ContentCaptureOptions(
+                                mDevCfgLoggingLevel,
+                                mDevCfgMaxBufferSize,
+                                mDevCfgIdleFlushingFrequencyMs,
+                                mDevCfgTextChangeFlushingFrequencyMs,
+                                mDevCfgLogHistorySize,
+                                mDevCfgDisableFlushForViewTreeAppearing,
+                                /* enableReceiver= */ true,
+                                new ContentCaptureOptions.ContentProtectionOptions(
+                                        mDevCfgEnableContentProtectionReceiver,
+                                        mDevCfgContentProtectionBufferSize),
+                                whitelistedComponents);
                 if (verbose) Slog.v(TAG, "getOptionsForPackage(" + packageName + "): " + options);
                 return options;
             }

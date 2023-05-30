@@ -352,6 +352,30 @@ public final class ContentCaptureManager {
     public static final String DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING =
             "disable_flush_for_view_tree_appearing";
 
+    /**
+     * Enables the content protection receiver.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER =
+            "enable_content_protection_receiver";
+
+    /**
+     * Sets the size of the app blocklist for the content protection flow.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE =
+            "content_protection_apps_blocklist_size";
+
+    /**
+     * Sets the size of the in-memory ring buffer for the content protection flow.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE =
+            "content_protection_buffer_size";
+
     /** @hide */
     @TestApi
     public static final int LOGGING_LEVEL_OFF = 0;
@@ -384,6 +408,14 @@ public final class ContentCaptureManager {
     public static final int DEFAULT_LOG_HISTORY_SIZE = 10;
     /** @hide */
     public static final boolean DEFAULT_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING = false;
+    /** @hide */
+    public static final boolean DEFAULT_ENABLE_CONTENT_CAPTURE_RECEIVER = true;
+    /** @hide */
+    public static final boolean DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER = false;
+    /** @hide */
+    public static final int DEFAULT_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE = 1000;
+    /** @hide */
+    public static final int DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE = 150;
 
     private final Object mLock = new Object();
 
@@ -425,11 +457,11 @@ public final class ContentCaptureManager {
 
     /** @hide */
     static class StrippedContext {
-        final String mPackageName;
-        final String mContext;
+        @NonNull final String mPackageName;
+        @NonNull final String mContext;
         final @UserIdInt int mUserId;
 
-        private StrippedContext(Context context) {
+        private StrippedContext(@NonNull Context context) {
             mPackageName = context.getPackageName();
             mContext = context.toString();
             mUserId = context.getUserId();
@@ -440,6 +472,7 @@ public final class ContentCaptureManager {
             return mContext;
         }
 
+        @NonNull
         public String getPackageName() {
             return mPackageName;
         }
