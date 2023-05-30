@@ -531,9 +531,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (clock != null) {
             clock.dump(pw);
         }
-        final RegionSampler regionSampler = mClockEventController.getRegionSampler();
-        if (regionSampler != null) {
-            regionSampler.dump(pw);
+        final RegionSampler smallRegionSampler = mClockEventController.getSmallRegionSampler();
+        if (smallRegionSampler != null) {
+            smallRegionSampler.dump(pw);
+        }
+        final RegionSampler largeRegionSampler = mClockEventController.getLargeRegionSampler();
+        if (largeRegionSampler != null) {
+            largeRegionSampler.dump(pw);
         }
     }
 

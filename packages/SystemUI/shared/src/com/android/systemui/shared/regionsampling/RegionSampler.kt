@@ -263,6 +263,8 @@ constructor(
                 (colors?.colorHints?.and(WallpaperColors.HINT_SUPPORTS_DARK_TEXT)) !=
                     WallpaperColors.HINT_SUPPORTS_DARK_TEXT
             )
+        if (DEBUG)
+            Log.d(TAG, "onColorsChanged() | region darkness = $regionDarkness for region $area")
         updateForegroundColor()
     }
 
