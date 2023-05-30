@@ -146,11 +146,10 @@ class WallpaperController {
             }
         } else {
             final ActivityRecord ar = w.mActivityRecord;
-            final TransitionController tc = w.mTransitionController;
             // The animating window can still be visible on screen if it is in transition, so we
             // should check whether this window can be wallpaper target even when visibleRequested
             // is false.
-            if (ar != null && !ar.isVisibleRequested() && !tc.inTransition(ar)) {
+            if (ar != null && !ar.isVisibleRequested() && !ar.isVisible()) {
                 // An activity that is not going to remain visible shouldn't be the target.
                 return false;
             }
