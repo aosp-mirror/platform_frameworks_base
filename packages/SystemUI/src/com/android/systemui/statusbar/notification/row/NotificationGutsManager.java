@@ -552,6 +552,9 @@ public class NotificationGutsManager implements NotifGutsViewManager {
 
                 Runnable r = () -> mMainHandler.post(
                         () -> openGutsInternal(view, x, y, menuItem));
+                // If the bouncer shows, it will block the TOUCH_UP event from reaching the notif,
+                // so explicitly mark it as unpressed here to reset the touch animation.
+                view.setPressed(false);
                 mActivityStarter.executeRunnableDismissingKeyguard(
                         r,
                         null /* cancelAction */,
