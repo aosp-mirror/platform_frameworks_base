@@ -132,25 +132,8 @@ class DynamicFlagBinderDelegate {
         // about changes coming in from adb, DeviceConfig, or other sources.
         // And also so that we can keep flags relatively consistent across processes.
 
-        // If we already have a value cached, just use that.
-        String value = null;
         DynamicFlagData data = mDynamicFlags.getOrNull(ns, name);
-        if (data != null) {
-            value = data.getValue();
-        } else {
-            // Put the value in the cache for future reference.
-            data = new DynamicFlagData(ns, name);
-            mDynamicFlags.setIfChanged(ns, name, data);
-        }
-        // If we're not in a release build, flags can be overridden locally on device.
-        if (!Build.IS_USER && value == null) {
-            value = mFlagStore.get(ns, name);
-        }
-        // If we still don't have a value, maybe DeviceConfig does?
-        // Fallback to sf.getValue() here as well.
-        if (value == null) {
-            value = DeviceConfig.getString(ns, name, sf.getValue());
-        }
+        String value = getFlagValue(ns, name, sf.getValue());
         // DeviceConfig listeners are per-namespace.
         if (!mDynamicFlags.containsNamespace(ns)) {
             DeviceConfig.addOnPropertiesChangedListener(
@@ -198,6 +181,30 @@ class DynamicFlagBinderDelegate {
                     mCallbacks.computeIfAbsent(pid, NEW_CALLBACK_SET);
             callbacks.remove(callback);
         }
+    }
+
+    String getFlagValue(String namespace, String name, String defaultValue) {
+        // If we already have a value cached, just use that.
+        String value = null;
+        DynamicFlagData data = mDynamicFlags.getOrNull(namespace, name);
+        if (data != null) {
+            value = data.getValue();
+        } else {
+            // Put the value in the cache for future reference.
+            data = new DynamicFlagData(namespace, name);
+            mDynamicFlags.setIfChanged(namespace, name, data);
+        }
+        // If we're not in a release build, flags can be overridden locally on device.
+        if (!Build.IS_USER && value == null) {
+            value = mFlagStore.get(namespace, name);
+        }
+        // If we still don't have a value, maybe DeviceConfig does?
+        // Fallback to sf.getValue() here as well.
+        if (value == null) {
+            value = DeviceConfig.getString(namespace, name, defaultValue);
+        }
+
+        return value;
     }
 
     private static class DynamicFlagData {

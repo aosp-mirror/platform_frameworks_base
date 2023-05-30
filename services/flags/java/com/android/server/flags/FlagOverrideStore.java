@@ -53,7 +53,8 @@ public class FlagOverrideStore {
     }
 
     /** Put a value in the store. */
-    void set(String namespace, String name, String value) {
+    @VisibleForTesting
+    public void set(String namespace, String name, String value) {
         mSettingsProxy.putString(getPropName(namespace, name), value);
         mCallback.onFlagChanged(namespace, name, value);
     }
@@ -65,7 +66,8 @@ public class FlagOverrideStore {
     }
 
     /** Erase a value from the store. */
-    void erase(String namespace, String name) {
+    @VisibleForTesting
+    public void erase(String namespace, String name) {
         set(namespace, name, null);
     }
 

@@ -15,10 +15,15 @@
  */
 package com.android.server.flags;
 
+import static android.Manifest.permission.SYNC_FLAGS;
+import static android.Manifest.permission.WRITE_FLAGS;
+
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.flags.FeatureFlags;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 
 /**
@@ -53,10 +58,56 @@ public class FeatureFlagsService extends SystemService {
     @Override
     public void onStart() {
         Slog.d(TAG, "Started Feature Flag Service");
-        FeatureFlagsBinder service = new FeatureFlagsBinder(mFlagStore, mShellCommand);
+        FeatureFlagsBinder service = new FeatureFlagsBinder(
+                mFlagStore, mShellCommand, new PermissionsChecker(getContext()));
         publishBinderService(
                 Context.FEATURE_FLAGS_SERVICE, service);
         publishLocalService(FeatureFlags.class, new FeatureFlags(service));
     }
 
+    @Override
+    public void onBootPhase(int phase) {
+        super.onBootPhase(phase);
+
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            // Immediately sync our core flags so that they get locked in. We don't want third-party
+            // apps to override them, and syncing immediately is the easiest way to prevent that.
+            FeatureFlags.getInstance().sync();
+        }
+    }
+
+    /**
+     * Delegate for checking flag permissions.
+     */
+    @VisibleForTesting
+    public static class PermissionsChecker {
+        private final Context mContext;
+
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public PermissionsChecker(Context context) {
+            mContext = context;
+        }
+
+        /**
+         * Ensures that the caller has {@link SYNC_FLAGS} permission.
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void assertSyncPermission() {
+            if (mContext.checkCallingOrSelfPermission(SYNC_FLAGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "Non-core flag queried. Requires SYNC_FLAGS permission!");
+            }
+        }
+
+        /**
+         * Ensures that the caller has {@link WRITE_FLAGS} permission.
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void assertWritePermission() {
+            if (mContext.checkCallingPermission(WRITE_FLAGS) != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires WRITE_FLAGS permission!");
+            }
+        }
+    }
 }
