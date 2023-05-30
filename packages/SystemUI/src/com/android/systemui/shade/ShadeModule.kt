@@ -32,6 +32,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.settings.UserTracker
@@ -71,9 +72,9 @@ abstract class ShadeModule {
                 layoutInflater.inflate(R.layout.scene_window_root, null)
             } else {
                 layoutInflater.inflate(R.layout.super_notification_shade, null)
-            } as WindowRootView? ?: throw IllegalStateException(
-                "Window root view could not be properly inflated"
-            )
+            }
+                as WindowRootView?
+                ?: throw IllegalStateException("Window root view could not be properly inflated")
         }
 
         @Provides
@@ -89,9 +90,7 @@ abstract class ShadeModule {
                 return root.findViewById(R.id.legacy_window_root)
             }
             return root as NotificationShadeWindowView?
-                ?: throw IllegalStateException(
-                    "root view not a NotificationShadeWindowView"
-                )
+                ?: throw IllegalStateException("root view not a NotificationShadeWindowView")
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
@@ -118,6 +117,14 @@ abstract class ShadeModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): LightRevealScrim {
             return notificationShadeWindowView.findViewById(R.id.light_reveal_scrim)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesKeyguardRootView(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): KeyguardRootView {
+            return notificationShadeWindowView.findViewById(R.id.keyguard_root_view)
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.

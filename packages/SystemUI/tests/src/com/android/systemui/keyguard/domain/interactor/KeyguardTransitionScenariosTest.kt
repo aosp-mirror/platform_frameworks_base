@@ -21,7 +21,6 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -39,7 +38,6 @@ import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
@@ -74,10 +72,10 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var shadeRepository: ShadeRepository
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var featureFlags: FakeFeatureFlags
 
     // Used to verify transition requests for test output
     @Mock private lateinit var mockTransitionRepository: KeyguardTransitionRepository
-    @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var keyguardSecurityModel: KeyguardSecurityModel
 
     private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
@@ -103,11 +101,11 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
-        val featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, true) }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, true) }
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardInteractor = createKeyguardInteractor(),
                 shadeRepository = shadeRepository,
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
@@ -117,7 +115,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDreamingTransitionInteractor =
             FromDreamingTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardInteractor = createKeyguardInteractor(),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -126,7 +124,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromAodTransitionInteractor =
             FromAodTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardInteractor = createKeyguardInteractor(),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -135,7 +133,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromGoneTransitionInteractor =
             FromGoneTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardInteractor = createKeyguardInteractor(),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -144,7 +142,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDozingTransitionInteractor =
             FromDozingTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardInteractor = createKeyguardInteractor(),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -153,7 +151,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromOccludedTransitionInteractor =
             FromOccludedTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardInteractor = createKeyguardInteractor(),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -162,7 +160,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromAlternateBouncerTransitionInteractor =
             FromAlternateBouncerTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardInteractor = createKeyguardInteractor(),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -171,7 +169,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromPrimaryBouncerTransitionInteractor =
             FromPrimaryBouncerTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardInteractor = createKeyguardInteractor(),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
                 keyguardSecurityModel = keyguardSecurityModel,
@@ -882,13 +880,13 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             WakeSleepReason.OTHER
         )
 
-    private fun createKeyguardInteractor(featureFlags: FeatureFlags): KeyguardInteractor {
-        return KeyguardInteractor(
-            keyguardRepository,
-            commandQueue,
-            featureFlags,
-            bouncerRepository,
-        )
+    private fun createKeyguardInteractor(): KeyguardInteractor {
+        return KeyguardInteractorFactory.create(
+                featureFlags = featureFlags,
+                repository = keyguardRepository,
+                bouncerRepository = bouncerRepository,
+            )
+            .keyguardInteractor
     }
 
     private suspend fun TestScope.runTransition(from: KeyguardState, to: KeyguardState) {

@@ -30,11 +30,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
@@ -79,7 +77,6 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
     @Mock private lateinit var uiEventLogger: UiEventLogger
     @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
-    @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     private lateinit var underTest: UserSwitcherViewModel
@@ -112,7 +109,6 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
             )
         }
 
-        keyguardRepository = FakeKeyguardRepository()
         val refreshUsersScheduler =
             RefreshUsersScheduler(
                 applicationScope = testScope.backgroundScope,
@@ -140,38 +136,35 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
                 set(Flags.FACE_AUTH_REFACTOR, true)
             }
+        val reply = KeyguardInteractorFactory.create(featureFlags = featureFlags)
+        keyguardRepository = reply.repository
+
         underTest =
             UserSwitcherViewModel(
-                    userInteractor =
-                        UserInteractor(
-                            applicationContext = context,
-                            repository = userRepository,
-                            activityStarter = activityStarter,
-                            keyguardInteractor =
-                                KeyguardInteractor(
-                                    repository = keyguardRepository,
-                                    commandQueue = commandQueue,
-                                    featureFlags = featureFlags,
-                                    bouncerRepository = FakeKeyguardBouncerRepository(),
-                                ),
-                            featureFlags = featureFlags,
-                            manager = manager,
-                            headlessSystemUserMode = headlessSystemUserMode,
-                            applicationScope = testScope.backgroundScope,
-                            telephonyInteractor =
-                                TelephonyInteractor(
-                                    repository = FakeTelephonyRepository(),
-                                ),
-                            broadcastDispatcher = fakeBroadcastDispatcher,
-                            keyguardUpdateMonitor = keyguardUpdateMonitor,
-                            backgroundDispatcher = testDispatcher,
-                            activityManager = activityManager,
-                            refreshUsersScheduler = refreshUsersScheduler,
-                            guestUserInteractor = guestUserInteractor,
-                            uiEventLogger = uiEventLogger,
-                        ),
-                    guestUserInteractor = guestUserInteractor,
-                )
+                userInteractor =
+                    UserInteractor(
+                        applicationContext = context,
+                        repository = userRepository,
+                        activityStarter = activityStarter,
+                        keyguardInteractor = reply.keyguardInteractor,
+                        featureFlags = featureFlags,
+                        manager = manager,
+                        headlessSystemUserMode = headlessSystemUserMode,
+                        applicationScope = testScope.backgroundScope,
+                        telephonyInteractor =
+                            TelephonyInteractor(
+                                repository = FakeTelephonyRepository(),
+                            ),
+                        broadcastDispatcher = fakeBroadcastDispatcher,
+                        keyguardUpdateMonitor = keyguardUpdateMonitor,
+                        backgroundDispatcher = testDispatcher,
+                        activityManager = activityManager,
+                        refreshUsersScheduler = refreshUsersScheduler,
+                        guestUserInteractor = guestUserInteractor,
+                        uiEventLogger = uiEventLogger,
+                    ),
+                guestUserInteractor = guestUserInteractor,
+            )
     }
 
     @Test
@@ -323,7 +316,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
             setUsers(count = 2)
             val isFinishRequested = mutableListOf<Boolean>()
             val job =
-                    launch(testDispatcher) { underTest.isFinishRequested.toList(isFinishRequested) }
+                launch(testDispatcher) { underTest.isFinishRequested.toList(isFinishRequested) }
             assertThat(isFinishRequested.last()).isFalse()
 
             underTest.onCancelButtonClicked()

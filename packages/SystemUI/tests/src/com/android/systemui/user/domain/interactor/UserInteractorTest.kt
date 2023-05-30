@@ -39,12 +39,10 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
@@ -97,7 +95,6 @@ class UserInteractorTest : SysuiTestCase() {
     @Mock private lateinit var dialogShower: UserSwitchDialogController.DialogShower
     @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
-    @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     private lateinit var underTest: UserInteractor
@@ -126,8 +123,9 @@ class UserInteractorTest : SysuiTestCase() {
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
                 set(Flags.FACE_AUTH_REFACTOR, true)
             }
+        val reply = KeyguardInteractorFactory.create(featureFlags = featureFlags)
+        keyguardRepository = reply.repository
         userRepository = FakeUserRepository()
-        keyguardRepository = FakeKeyguardRepository()
         telephonyRepository = FakeTelephonyRepository()
         val testDispatcher = StandardTestDispatcher()
         testScope = TestScope(testDispatcher)
@@ -142,13 +140,7 @@ class UserInteractorTest : SysuiTestCase() {
                 applicationContext = context,
                 repository = userRepository,
                 activityStarter = activityStarter,
-                keyguardInteractor =
-                    KeyguardInteractor(
-                        repository = keyguardRepository,
-                        commandQueue = commandQueue,
-                        featureFlags = featureFlags,
-                        bouncerRepository = FakeKeyguardBouncerRepository(),
-                    ),
+                keyguardInteractor = reply.keyguardInteractor,
                 manager = manager,
                 headlessSystemUserMode = headlessSystemUserMode,
                 applicationScope = testScope.backgroundScope,

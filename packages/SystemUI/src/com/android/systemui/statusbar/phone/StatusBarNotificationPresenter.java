@@ -40,7 +40,6 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -86,7 +85,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
-    private final KeyguardIndicationController mKeyguardIndicationController;
     private final CentralSurfaces mCentralSurfaces;
     private final LockscreenShadeTransitionController mShadeTransitionController;
     private final CommandQueue mCommandQueue;
@@ -115,7 +113,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             NotificationShadeWindowController notificationShadeWindowController,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardStateController keyguardStateController,
-            KeyguardIndicationController keyguardIndicationController,
             CentralSurfaces centralSurfaces,
             LockscreenShadeTransitionController shadeTransitionController,
             CommandQueue commandQueue,
@@ -137,7 +134,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         mQsController = quickSettingsController;
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;
-        mKeyguardIndicationController = keyguardIndicationController;
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mCentralSurfaces = centralSurfaces;
         mShadeTransitionController = shadeTransitionController;
@@ -173,7 +169,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
                 mNotificationPanel.getShadeNotificationPresenter().createRemoteInputDelegate());
 
         initController.addPostInitTask(() -> {
-            mKeyguardIndicationController.init();
             mNotifShadeEventSource.setShadeEmptiedCallback(this::maybeClosePanelForShadeEmptied);
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);
             notificationInterruptStateProvider.addSuppressor(mInterruptSuppressor);
