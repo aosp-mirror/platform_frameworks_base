@@ -280,6 +280,25 @@ class BroadcastProcessQueue {
     }
 
     /**
+     * Re-enqueue the active broadcast so that it can be made active and delivered again. In order
+     * to keep its previous position same to avoid issues with reordering, insert it at the head
+     * of the queue.
+     *
+     * Callers are responsible for clearing the active broadcast by calling
+     * {@link #makeActiveIdle()} after re-enqueuing it.
+     */
+    public void reEnqueueActiveBroadcast() {
+        final BroadcastRecord record = getActive();
+        final int recordIndex = getActiveIndex();
+
+        final SomeArgs broadcastArgs = SomeArgs.obtain();
+        broadcastArgs.arg1 = record;
+        broadcastArgs.argi1 = recordIndex;
+        getQueueForBroadcast(record).addFirst(broadcastArgs);
+        onBroadcastEnqueued(record, recordIndex);
+    }
+
+    /**
      * Searches from newest to oldest in the pending broadcast queues, and at the first matching
      * pending broadcast it finds, replaces it in-place and returns -- does not attempt to handle
      * "duplicate" broadcasts in the queue.
