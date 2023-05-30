@@ -104,6 +104,26 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
         assertThat(visibility).isEqualTo(View.VISIBLE)
     }
 
+    @Test
+    fun showDialog_dialogIsShowing() {
+        dialog.show()
+
+        assertThat(dialog.isShowing).isTrue()
+    }
+
+    @Test
+    fun showDialog_cancelClicked_dialogIsDismissed() {
+        dialog.show()
+
+        clickOnCancel()
+
+        assertThat(dialog.isShowing).isFalse()
+    }
+
+    private fun clickOnCancel() {
+        dialog.requireViewById<View>(android.R.id.button2).performClick()
+    }
+
     private fun onSpinnerItemSelected(position: Int) {
         val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
         spinner.onItemSelectedListener.onItemSelected(spinner, mock(), position, /* id= */ 0)
