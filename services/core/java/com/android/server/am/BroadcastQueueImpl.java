@@ -438,7 +438,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         scheduleBroadcastsLocked();
     }
 
-    public boolean onApplicationAttachedLocked(ProcessRecord app) {
+    public boolean onApplicationAttachedLocked(ProcessRecord app)
+            throws BroadcastDeliveryFailedException {
         updateUidReadyForBootCompletedBroadcastLocked(app.uid);
 
         if (mPendingBroadcast != null && mPendingBroadcast.curApp == app) {
@@ -460,7 +461,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         skipCurrentOrPendingReceiverLocked(app);
     }
 
-    public boolean sendPendingBroadcastsLocked(ProcessRecord app) {
+    public boolean sendPendingBroadcastsLocked(ProcessRecord app)
+            throws BroadcastDeliveryFailedException {
         boolean didSomething = false;
         final BroadcastRecord br = mPendingBroadcast;
         if (br != null && br.curApp.getPid() > 0 && br.curApp.getPid() == app.getPid()) {
@@ -483,7 +485,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 scheduleBroadcastsLocked();
                 // We need to reset the state if we failed to start the receiver.
                 br.state = BroadcastRecord.IDLE;
-                throw new RuntimeException(e.getMessage());
+                throw new BroadcastDeliveryFailedException(e);
             }
         }
         return didSomething;

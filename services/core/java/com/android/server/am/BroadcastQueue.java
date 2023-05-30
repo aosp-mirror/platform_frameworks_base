@@ -148,7 +148,8 @@ public abstract class BroadcastQueue {
      *         dispatching a pending broadcast
      */
     @GuardedBy("mService")
-    public abstract boolean onApplicationAttachedLocked(@NonNull ProcessRecord app);
+    public abstract boolean onApplicationAttachedLocked(@NonNull ProcessRecord app)
+            throws BroadcastDeliveryFailedException;
 
     /**
      * Signal from OS internals that the given process has timed out during
