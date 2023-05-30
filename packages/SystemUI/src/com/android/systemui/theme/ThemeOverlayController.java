@@ -659,6 +659,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             Resources res = userHandle.isSystem()
                     ? mResources : mContext.createContextAsUser(userHandle, 0).getResources();
             Resources.Theme theme = mContext.getTheme();
+            MaterialDynamicColors dynamicColors = new MaterialDynamicColors();
             if (!(res.getColor(android.R.color.system_accent1_500, theme)
                     == mColorScheme.getAccent1().getS500()
                     && res.getColor(android.R.color.system_accent2_500, theme)
@@ -670,15 +671,15 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                     && res.getColor(android.R.color.system_neutral2_500, theme)
                     == mColorScheme.getNeutral2().getS500()
                     && res.getColor(android.R.color.system_outline_variant_dark, theme)
-                    == MaterialDynamicColors.outlineVariant().getArgb(mDynamicSchemeDark)
+                    == dynamicColors.outlineVariant().getArgb(mDynamicSchemeDark)
                     && res.getColor(android.R.color.system_outline_variant_light, theme)
-                    == MaterialDynamicColors.outlineVariant().getArgb(mDynamicSchemeLight)
+                    == dynamicColors.outlineVariant().getArgb(mDynamicSchemeLight)
                     && res.getColor(android.R.color.system_primary_container_dark, theme)
-                    == MaterialDynamicColors.primaryContainer().getArgb(mDynamicSchemeDark)
+                    == dynamicColors.primaryContainer().getArgb(mDynamicSchemeDark)
                     && res.getColor(android.R.color.system_primary_container_light, theme)
-                    == MaterialDynamicColors.primaryContainer().getArgb(mDynamicSchemeLight)
+                    == dynamicColors.primaryContainer().getArgb(mDynamicSchemeLight)
                     && res.getColor(android.R.color.system_primary_fixed, theme)
-                    == MaterialDynamicColors.primaryFixed().getArgb(mDynamicSchemeLight))) {
+                    == dynamicColors.primaryFixed().getArgb(mDynamicSchemeLight))) {
                 return false;
             }
         }
