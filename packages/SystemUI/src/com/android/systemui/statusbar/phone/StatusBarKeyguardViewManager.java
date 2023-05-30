@@ -750,7 +750,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onStartedWakingUp() {
-        mCentralSurfaces.getNotificationShadeWindowView().getWindowInsetsController()
+        mNotificationShadeWindowController.getWindowRootView().getWindowInsetsController()
                 .setAnimationsDisabled(false);
         NavigationBarView navBarView = mCentralSurfaces.getNavigationBarView();
         if (navBarView != null) {
@@ -764,7 +764,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onStartedGoingToSleep() {
-        mCentralSurfaces.getNotificationShadeWindowView().getWindowInsetsController()
+        mNotificationShadeWindowController.getWindowRootView().getWindowInsetsController()
                 .setAnimationsDisabled(true);
         NavigationBarView navBarView = mCentralSurfaces.getNavigationBarView();
         if (navBarView != null) {
@@ -1114,7 +1114,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (view != null) {
                 view.setVisibility(View.VISIBLE);
             }
-            mCentralSurfaces.getNotificationShadeWindowView().getWindowInsetsController()
+            mNotificationShadeWindowController.getWindowRootView().getWindowInsetsController()
                     .show(navigationBars());
         }
     };
@@ -1192,7 +1192,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 }
             } else {
                 mNotificationContainer.removeCallbacks(mMakeNavigationBarVisibleRunnable);
-                mCentralSurfaces.getNotificationShadeWindowView().getWindowInsetsController()
+                mNotificationShadeWindowController.getWindowRootView().getWindowInsetsController()
                         .hide(navigationBars());
             }
         }
