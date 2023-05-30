@@ -209,6 +209,7 @@ static jstring columnName(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
     throwIfInvalidColumn(env, stmtPtr, col);
     const jchar* name = static_cast<const jchar*>(sqlite3_column_name16(stmt(stmtPtr), col));
     if (name == nullptr) {
+        throw_sqlite3_exception(env, db(stmtPtr), "error fetching columnName()");
         return NULL;
     }
     size_t length = strlen16(reinterpret_cast<const char16_t*>(name));

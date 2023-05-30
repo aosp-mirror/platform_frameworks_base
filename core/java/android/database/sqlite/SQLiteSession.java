@@ -994,7 +994,7 @@ public final class SQLiteSession {
     }
 
     /**
-     * Like it says on the tin: throw if there is no current transaction.
+     * Throw {@link IllegalStateException} if there is no current transaction.
      */
     void throwIfNoTransaction() {
         if (mTransactionStack == null) {
