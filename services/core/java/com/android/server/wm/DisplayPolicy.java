@@ -2532,7 +2532,10 @@ public class DisplayPolicy {
                 mNavBarBackgroundWindowCandidate,
                 mDisplayContent.mInputMethodWindow,
                 mNavigationBarPosition);
-        final boolean drawBackground = navBackgroundWin != null;
+        final boolean drawBackground = navBackgroundWin != null
+                // There is no app window showing underneath nav bar. (e.g., The screen is locked.)
+                // Let system windows (ex: notification shade) draw nav bar background.
+                || mNavBarBackgroundWindowCandidate == null;
 
         if (mNavBarOpacityMode == NAV_BAR_FORCE_TRANSPARENT) {
             if (drawBackground) {
