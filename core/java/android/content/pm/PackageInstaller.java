@@ -46,10 +46,12 @@ import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.IIntentReceiver;
-import android.content.IIntentSender;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
@@ -62,11 +64,9 @@ import android.graphics.Bitmap;
 import android.icu.util.ULocale;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.Handler;
 import android.os.HandlerExecutor;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -147,6 +147,9 @@ import java.util.function.Consumer;
  */
 public class PackageInstaller {
     private static final String TAG = "PackageInstaller";
+
+    private static final String ACTION_WAIT_INSTALL_CONSTRAINTS =
+            "android.content.pm.action.WAIT_INSTALL_CONSTRAINTS";
 
     /** {@hide} */
     public static final boolean ENABLE_REVOCABLE_FD =
@@ -1073,34 +1076,68 @@ public class PackageInstaller {
             var session = mInstaller.openSession(sessionId);
             session.seal();
             var packageNames = session.fetchPackageNames();
-            var intentSender = new IntentSender((IIntentSender) new IIntentSender.Stub() {
-                @Override
-                public void send(int code, Intent intent, String resolvedType,
-                        IBinder allowlistToken, IIntentReceiver finishedReceiver,
-                        String requiredPermission, Bundle options)  {
-                    var result = intent.getParcelableExtra(
-                            PackageInstaller.EXTRA_INSTALL_CONSTRAINTS_RESULT,
-                            InstallConstraintsResult.class);
-                    try {
-                        if (result.areAllConstraintsSatisfied()) {
-                            session.commit(statusReceiver, false);
-                        } else {
-                            // timeout
-                            final Intent fillIn = new Intent();
-                            fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-                            fillIn.putExtra(PackageInstaller.EXTRA_STATUS, STATUS_FAILURE_TIMEOUT);
-                            fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
-                                    "Install constraints not satisfied within timeout");
-                            statusReceiver.sendIntent(
-                                    ActivityThread.currentApplication(), 0, fillIn, null, null);
-                        }
-                    } catch (Exception ignore) {
-                    }
-                }
-            });
-            waitForInstallConstraints(packageNames, constraints, intentSender, timeoutMillis);
+            var context = ActivityThread.currentApplication();
+            var localIntentSender = new LocalIntentSender(context, sessionId, session,
+                    statusReceiver);
+            waitForInstallConstraints(packageNames, constraints,
+                    localIntentSender.getIntentSender(), timeoutMillis);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static final class LocalIntentSender extends BroadcastReceiver {
+
+        private final Context mContext;
+        private final IntentSender mStatusReceiver;
+        private final int mSessionId;
+        private final IPackageInstallerSession mSession;
+
+        LocalIntentSender(Context context, int sessionId, IPackageInstallerSession session,
+                IntentSender statusReceiver) {
+            mContext = context;
+            mSessionId = sessionId;
+            mSession = session;
+            mStatusReceiver = statusReceiver;
+        }
+
+        private IntentSender getIntentSender() {
+            Intent intent = new Intent(ACTION_WAIT_INSTALL_CONSTRAINTS).setPackage(
+                    mContext.getPackageName());
+            mContext.registerReceiver(this, new IntentFilter(ACTION_WAIT_INSTALL_CONSTRAINTS),
+                    Context.RECEIVER_EXPORTED);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent,
+                    PendingIntent.FLAG_MUTABLE);
+            return pendingIntent.getIntentSender();
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            InstallConstraintsResult result = intent.getParcelableExtra(
+                    PackageInstaller.EXTRA_INSTALL_CONSTRAINTS_RESULT,
+                    InstallConstraintsResult.class);
+            try {
+                if (result.areAllConstraintsSatisfied()) {
+                    mSession.commit(mStatusReceiver, false);
+                } else {
+                    // timeout
+                    final Intent fillIn = new Intent();
+                    fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
+                    fillIn.putExtra(PackageInstaller.EXTRA_STATUS, STATUS_FAILURE_TIMEOUT);
+                    fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
+                            "Install constraints not satisfied within timeout");
+                    mStatusReceiver.sendIntent(ActivityThread.currentApplication(), 0, fillIn, null,
+                            null);
+                }
+            } catch (Exception ignore) {
+                // no-op
+            } finally {
+                unregisterReceiver();
+            }
+        }
+
+        private void unregisterReceiver() {
+            mContext.unregisterReceiver(this);
         }
     }
 
