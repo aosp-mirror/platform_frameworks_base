@@ -95,7 +95,7 @@ public class InfoMediaManagerTest {
     @Mock
     private ComponentName mComponentName;
 
-    private InfoMediaManager mInfoMediaManager;
+    private ManagerInfoMediaManager mInfoMediaManager;
     private Context mContext;
     private ShadowRouter2Manager mShadowRouter2Manager;
 
@@ -107,7 +107,8 @@ public class InfoMediaManagerTest {
         doReturn(mMediaSessionManager).when(mContext).getSystemService(
                 Context.MEDIA_SESSION_SERVICE);
         mInfoMediaManager =
-                new InfoMediaManager(mContext, TEST_PACKAGE_NAME, null, mLocalBluetoothManager);
+                new ManagerInfoMediaManager(
+                        mContext, TEST_PACKAGE_NAME, null, mLocalBluetoothManager);
         mShadowRouter2Manager = ShadowRouter2Manager.getShadow();
         mInfoMediaManager.mRouterManager = MediaRouter2Manager.getInstance(mContext);
     }
