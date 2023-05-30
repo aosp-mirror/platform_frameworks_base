@@ -274,7 +274,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
  *
  * - The entry is under the lib/ directory.
  * - The entry name ends with ".so" and the entry name starts with "lib",
- *   an exception is made for entries whose name is "gdbserver".
+ *   an exception is made for debuggable apps.
  * - The entry filename is "safe" (as determined by isFilenameSafe).
  *
  */
