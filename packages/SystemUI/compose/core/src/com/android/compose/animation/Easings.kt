@@ -59,5 +59,20 @@ object Easings {
     /** The linear interpolator. */
     val Linear = fromInterpolator(InterpolatorsAndroidX.LINEAR)
 
+    /** The default legacy interpolator as defined in Material 1. Also known as FAST_OUT_SLOW_IN. */
+    val Legacy = fromInterpolator(InterpolatorsAndroidX.LEGACY)
+
+    /**
+     * The default legacy accelerating interpolator as defined in Material 1. Also known as
+     * FAST_OUT_LINEAR_IN.
+     */
+    val LegacyAccelerate = fromInterpolator(InterpolatorsAndroidX.LEGACY_ACCELERATE)
+
+    /**
+     * T The default legacy decelerating interpolator as defined in Material 1. Also known as
+     * LINEAR_OUT_SLOW_IN.
+     */
+    val LegacyDecelerate = fromInterpolator(InterpolatorsAndroidX.LEGACY_DECELERATE)
+
     private fun fromInterpolator(source: Interpolator) = Easing { x -> source.getInterpolation(x) }
 }

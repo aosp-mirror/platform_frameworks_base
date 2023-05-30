@@ -16,6 +16,7 @@
 
 package com.android.systemui.authentication.domain.interactor
 
+import android.app.admin.DevicePolicyManager
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.dagger.SysUISingleton
@@ -129,7 +130,7 @@ constructor(
     fun authenticate(input: List<Any>): Boolean {
         val isSuccessful =
             when (val authMethod = this.authenticationMethod.value) {
-                is AuthenticationMethodModel.PIN -> input.asCode() == authMethod.code
+                is AuthenticationMethodModel.Pin -> input.asCode() == authMethod.code
                 is AuthenticationMethodModel.Password -> input.asPassword() == authMethod.password
                 is AuthenticationMethodModel.Pattern -> input.asPattern() == authMethod.coordinates
                 else -> true
@@ -177,15 +178,21 @@ constructor(
 
         /**
          * Returns a PIN code from the given list. It's assumed the given list elements are all
-         * [Int].
+         * [Int] in the range [0-9].
          */
-        private fun List<Any>.asCode(): Int? {
-            if (isEmpty()) {
+        private fun List<Any>.asCode(): Long? {
+            if (isEmpty() || size > DevicePolicyManager.MAX_PASSWORD_LENGTH) {
                 return null
             }
 
-            var code = 0
-            map { it as Int }.forEach { integer -> code = code * 10 + integer }
+            var code = 0L
+            map {
+                    require(it is Int && it in 0..9) {
+                        "Pin is required to be Int in range [0..9], but got $it"
+                    }
+                    it
+                }
+                .forEach { integer -> code = code * 10 + integer }
 
             return code
         }
