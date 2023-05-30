@@ -1825,11 +1825,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public ViewGroup getNotificationScrollLayout() {
-        return mStackScroller;
-    }
-
-    @Override
     public boolean isPulsing() {
         return mDozeServiceHost.isPulsing();
     }
@@ -2253,8 +2248,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 + CameraIntents.getOverrideCameraPackage(mContext));
     }
 
-    @Override
-    public void createAndAddWindows(@Nullable RegisterStatusBarResult result) {
+    private void createAndAddWindows(@Nullable RegisterStatusBarResult result) {
         makeStatusBarView(result);
         mNotificationShadeWindowController.attach();
         mStatusBarWindowController.attach();
@@ -3033,11 +3027,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
             mLightRevealScrim.setRevealAmount(1f - mStatusBarStateController.getDozeAmount());
         }
-    }
-
-    @Override
-    public LightRevealScrim getLightRevealScrim() {
-        return mLightRevealScrim;
     }
 
     // TODO: Figure out way to remove these.
