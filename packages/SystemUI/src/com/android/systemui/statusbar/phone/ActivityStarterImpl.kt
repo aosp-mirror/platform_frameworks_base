@@ -572,6 +572,9 @@ constructor(
                                     // TODO b/221255671: restrict this to only be set for
                                     // notifications
                                     options.isEligibleForLegacyPermissionPrompt = true
+                                    options.setPendingIntentBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                                    )
                                     return intent.sendAndReturnResult(
                                         null,
                                         0,
