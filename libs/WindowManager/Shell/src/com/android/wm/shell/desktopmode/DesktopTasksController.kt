@@ -46,6 +46,7 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.ExecutorUtils
 import com.android.wm.shell.common.ExternalInterfaceBinder
+import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.RemoteCallable
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
@@ -78,6 +79,7 @@ class DesktopTasksController(
         private val enterDesktopTaskTransitionHandler: EnterDesktopTaskTransitionHandler,
         private val exitDesktopTaskTransitionHandler: ExitDesktopTaskTransitionHandler,
         private val desktopModeTaskRepository: DesktopModeTaskRepository,
+        private val launchAdjacentController: LaunchAdjacentController,
         @ShellMainThread private val mainExecutor: ShellExecutor
 ) : RemoteCallable<DesktopTasksController>, Transitions.TransitionHandler {
 
@@ -87,6 +89,11 @@ class DesktopTasksController(
         t: SurfaceControl.Transaction ->
         visualIndicator?.releaseVisualIndicator(t)
         visualIndicator = null
+    }
+    private val taskVisibilityListener = object : VisibleTasksListener {
+        override fun onVisibilityChanged(displayId: Int, hasVisibleFreeformTasks: Boolean) {
+            launchAdjacentController.launchAdjacentEnabled = !hasVisibleFreeformTasks
+        }
     }
 
     init {
@@ -105,6 +112,7 @@ class DesktopTasksController(
             this
         )
         transitions.addHandler(this)
+        desktopModeTaskRepository.addVisibleTasksListener(taskVisibilityListener, mainExecutor)
     }
 
     /** Show all tasks, that are part of the desktop, on top of launcher */

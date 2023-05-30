@@ -123,6 +123,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -196,6 +197,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     // if user is opening another task(s).
     private final ArrayList<Integer> mPausingTasks = new ArrayList<>();
     private final Optional<RecentTasksController> mRecentTasks;
+    private final LaunchAdjacentController mLaunchAdjacentController;
 
     private final Rect mTempRect1 = new Rect();
     private final Rect mTempRect2 = new Rect();
@@ -273,7 +275,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider, ShellExecutor mainExecutor,
-            Optional<RecentTasksController> recentTasks) {
+            Optional<RecentTasksController> recentTasks,
+            LaunchAdjacentController launchAdjacentController) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
@@ -281,6 +284,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLogger = new SplitscreenEventLogger();
         mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
+        mLaunchAdjacentController = launchAdjacentController;
 
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_FULLSCREEN, this /* listener */);
 
@@ -327,7 +331,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
             Transitions transitions, TransactionPool transactionPool,
             ShellExecutor mainExecutor,
-            Optional<RecentTasksController> recentTasks) {
+            Optional<RecentTasksController> recentTasks,
+            LaunchAdjacentController launchAdjacentController) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
@@ -344,6 +349,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLogger = new SplitscreenEventLogger();
         mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
+        mLaunchAdjacentController = launchAdjacentController;
         mDisplayController.addDisplayWindowListener(this);
         mDisplayLayout = new DisplayLayout();
         transitions.addHandler(this);
@@ -1743,7 +1749,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         wct.reparent(mSideStage.mRootTaskInfo.token, mRootTaskInfo.token, true);
         // Make the stages adjacent to each other so they occlude what's behind them.
         wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
-        wct.setLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
         setRootForceTranslucent(true, wct);
         mSplitLayout.getInvisibleBounds(mTempRect1);
         wct.setBounds(mSideStage.mRootTaskInfo.token, mTempRect1);
@@ -1751,6 +1756,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSyncQueue.runInSync(t -> {
             t.setPosition(mSideStage.mRootLeash, mTempRect1.left, mTempRect1.top);
         });
+        mLaunchAdjacentController.setLaunchAdjacentRoot(mSideStage.mRootTaskInfo.token);
     }
 
     /** Callback when split roots have child task appeared under it, this is a little different from
@@ -1780,9 +1786,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void onRootTaskVanished() {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        if (mRootTaskInfo != null) {
-            wct.clearLaunchAdjacentFlagRoot(mRootTaskInfo.token);
-        }
+        mLaunchAdjacentController.clearLaunchAdjacentRoot();
         applyExitSplitScreen(null /* childrenToTop */, wct, EXIT_REASON_ROOT_TASK_VANISHED);
         mDisplayInsetsController.removeInsetsChangedListener(mDisplayId, mSplitLayout);
     }

@@ -76,6 +76,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -170,6 +171,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final TransactionPool mTransactionPool;
     private final IconProvider mIconProvider;
     private final Optional<RecentTasksController> mRecentTasksOptional;
+    private final LaunchAdjacentController mLaunchAdjacentController;
     private final SplitScreenShellCommandHandler mSplitScreenShellCommandHandler;
     private final String[] mAppsSupportMultiInstances;
 
@@ -196,6 +198,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             TransactionPool transactionPool,
             IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
+            LaunchAdjacentController launchAdjacentController,
             ShellExecutor mainExecutor) {
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
@@ -212,6 +215,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mTransactionPool = transactionPool;
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
+        mLaunchAdjacentController = launchAdjacentController;
         mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
@@ -241,6 +245,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             TransactionPool transactionPool,
             IconProvider iconProvider,
             RecentTasksController recentTasks,
+            LaunchAdjacentController launchAdjacentController,
             ShellExecutor mainExecutor,
             StageCoordinator stageCoordinator) {
         mShellCommandHandler = shellCommandHandler;
@@ -258,6 +263,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mTransactionPool = transactionPool;
         mIconProvider = iconProvider;
         mRecentTasksOptional = Optional.of(recentTasks);
+        mLaunchAdjacentController = launchAdjacentController;
         mStageCoordinator = stageCoordinator;
         mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
         shellInit.addInitCallback(this::onInit, this);
@@ -296,7 +302,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool,
-                mIconProvider, mMainExecutor, mRecentTasksOptional);
+                mIconProvider, mMainExecutor, mRecentTasksOptional, mLaunchAdjacentController);
     }
 
     @Override

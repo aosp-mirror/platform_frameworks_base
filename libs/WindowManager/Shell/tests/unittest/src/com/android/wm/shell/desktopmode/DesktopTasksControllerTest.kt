@@ -46,6 +46,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
@@ -88,12 +89,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
     @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
+    @Mock lateinit var launchAdjacentController: LaunchAdjacentController
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var controller: DesktopTasksController
     private lateinit var shellInit: ShellInit
     private lateinit var desktopModeTaskRepository: DesktopModeTaskRepository
 
+    private val shellExecutor = TestShellExecutor()
     // Mock running tasks are registered here so we can get the list from mock shell task organizer
     private val runningTasks = mutableListOf<RunningTaskInfo>()
 
@@ -127,7 +130,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
             enterDesktopTransitionHandler,
             exitDesktopTransitionHandler,
             desktopModeTaskRepository,
-            TestShellExecutor()
+            launchAdjacentController,
+            shellExecutor
         )
     }
 
@@ -351,7 +355,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun moveTaskToFront_postsWctWithReorderOp() {
         val task1 = setUpFreeformTask()
-        val task2 = setUpFreeformTask()
+        setUpFreeformTask()
 
         controller.moveTaskToFront(task1)
 
@@ -612,6 +616,27 @@ class DesktopTasksControllerTest : ShellTestCase() {
         assertThat(desktopModeTaskRepository.isStashed(DEFAULT_DISPLAY)).isFalse()
         // Check that second display is not affected
         assertThat(desktopModeTaskRepository.isStashed(SECOND_DISPLAY)).isTrue()
+    }
+
+    @Test
+    fun desktopTasksVisibilityChange_visible_setLaunchAdjacentDisabled() {
+        val task = setUpFreeformTask()
+        clearInvocations(launchAdjacentController)
+
+        markTaskVisible(task)
+        shellExecutor.flushAll()
+        verify(launchAdjacentController).launchAdjacentEnabled = false
+    }
+
+    @Test
+    fun desktopTasksVisibilityChange_invisible_setLaunchAdjacentEnabled() {
+        val task = setUpFreeformTask()
+        markTaskVisible(task)
+        clearInvocations(launchAdjacentController)
+
+        markTaskHidden(task)
+        shellExecutor.flushAll()
+        verify(launchAdjacentController).launchAdjacentEnabled = true
     }
 
     private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
