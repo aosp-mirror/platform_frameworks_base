@@ -16,17 +16,14 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -36,17 +33,19 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test warm launching an app from a notification from the lock screen.
+ * Test cold launching an app from a notification from the lock screen.
  *
  * This test assumes the device doesn't have AOD enabled
  *
- * To run this test: `atest FlickerTests:OpenAppFromLockNotificationWarm`
+ * To run this test: `atest FlickerTests:OpenAppFromLockNotificationCold`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotificationWarm(flicker) {
+@Postsubmit
+open class OpenAppFromLockscreenNotificationColdTest(flicker: FlickerTest) :
+    OpenAppFromNotificationColdTest(flicker) {
 
     override val openingNotificationsFromLockScreen = true
 
@@ -65,57 +64,27 @@ class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotific
             }
         }
 
-    /**
-     * Checks that we start of with no top windows and then [testApp] becomes the first and only top
-     * window of the transition, with snapshot or splash screen windows optionally showing first.
-     */
-    @Test
-    @Presubmit
-    fun appWindowBecomesFirstAndOnlyTopWindow() {
-        flicker.assertWm {
-            this.hasNoVisibleAppWindow()
-                .then()
-                .isAppWindowOnTop(ComponentNameMatcher.SNAPSHOT, isOptional = true)
-                .then()
-                .isAppWindowOnTop(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
-                .then()
-                .isAppWindowOnTop(testApp)
-        }
-    }
-
-    /** Checks that the screen is locked at the start of the transition */
-    @Test
-    @Presubmit
-    fun screenLockedStart() {
-        flicker.assertWmStart { isKeyguardShowing() }
-    }
+    /** {@inheritDoc} */
+    @Test @Ignore("Display is off at the start") override fun navBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
-    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
-    override fun navBarLayerPositionAtStartAndEnd() {}
-
-    /** {@inheritDoc} */
-    @Test
-    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
-    override fun taskBarWindowIsAlwaysVisible() {}
-
-    /** {@inheritDoc} */
-    @Test
-    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    @Ignore("Display is off at the start")
     override fun statusBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Test
-    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    @Ignore("Display is off at the start")
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test @Ignore("Display is off at the start") override fun taskBarWindowIsAlwaysVisible() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Display is off at the start")
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
         super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    /**
-     * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
-     * transition
-     */
-    @Presubmit @Test fun statusBarLayerPositionAtEnd() = flicker.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Test
@@ -133,7 +102,7 @@ class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotific
     override fun navBarWindowIsAlwaysVisible() {}
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 246284526)
+    @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
@@ -160,7 +129,7 @@ class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotific
         val disableUnseenNotifFilterRule =
             SettingOverrideRule(
                 Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                /* value= */ "0",
+                /* value = */ "0",
             )
     }
 }
