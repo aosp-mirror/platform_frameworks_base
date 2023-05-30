@@ -54,11 +54,13 @@ import com.android.wm.shell.common.annotations.ExternalThread
 import com.android.wm.shell.common.annotations.ShellMainThread
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.ShellSharedConstants
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.KtProtoLog
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
@@ -66,6 +68,7 @@ import java.util.function.Consumer
 class DesktopTasksController(
         private val context: Context,
         shellInit: ShellInit,
+        private val shellCommandHandler: ShellCommandHandler,
         private val shellController: ShellController,
         private val displayController: DisplayController,
         private val shellTaskOrganizer: ShellTaskOrganizer,
@@ -95,6 +98,7 @@ class DesktopTasksController(
 
     private fun onInit() {
         KtProtoLog.d(WM_SHELL_DESKTOP_MODE, "Initialize DesktopTasksController")
+        shellCommandHandler.addDumpCallback(this::dump, this)
         shellController.addExternalInterface(
             ShellSharedConstants.KEY_EXTRA_SHELL_DESKTOP_MODE,
             { createExternalInterface() },
@@ -708,6 +712,12 @@ class DesktopTasksController(
             callbackExecutor: Executor
     ) {
         desktopModeTaskRepository.setTaskCornerListener(listener, callbackExecutor)
+    }
+
+    private fun dump(pw: PrintWriter, prefix: String) {
+        val innerPrefix = "$prefix  "
+        pw.println("${prefix}DesktopTasksController")
+        desktopModeTaskRepository.dump(pw, innerPrefix)
     }
 
     /** The interface for calls from outside the shell, within the host process. */

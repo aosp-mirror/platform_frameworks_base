@@ -25,6 +25,7 @@ import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.util.KtProtoLog
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
@@ -339,6 +340,25 @@ class DesktopModeTaskRepository {
         return displayData[displayId]?.stashed ?: false
     }
 
+    internal fun dump(pw: PrintWriter, prefix: String) {
+        val innerPrefix = "$prefix  "
+        pw.println("${prefix}DesktopModeTaskRepository")
+        dumpDisplayData(pw, innerPrefix)
+        pw.println("${innerPrefix}freeformTasksInZOrder=${freeformTasksInZOrder.toDumpString()}")
+        pw.println("${innerPrefix}activeTasksListeners=${activeTasksListeners.size}")
+        pw.println("${innerPrefix}visibleTasksListeners=${visibleTasksListeners.size}")
+    }
+
+    private fun dumpDisplayData(pw: PrintWriter, prefix: String) {
+        val innerPrefix = "$prefix  "
+        displayData.forEach { displayId, data ->
+            pw.println("${prefix}Display $displayId:")
+            pw.println("${innerPrefix}activeTasks=${data.activeTasks.toDumpString()}")
+            pw.println("${innerPrefix}visibleTasks=${data.visibleTasks.toDumpString()}")
+            pw.println("${innerPrefix}stashed=${data.stashed}")
+        }
+    }
+
     /**
      * Defines interface for classes that can listen to changes for active tasks in desktop mode.
      */
@@ -366,4 +386,8 @@ class DesktopModeTaskRepository {
         @JvmDefault
         fun onStashedChanged(displayId: Int, stashed: Boolean) {}
     }
+}
+
+private fun <T> Iterable<T>.toDumpString(): String {
+    return joinToString(separator = ", ", prefix = "[", postfix = "]")
 }

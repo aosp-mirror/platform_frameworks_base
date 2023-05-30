@@ -679,6 +679,7 @@ public abstract class WMShellModule {
     static DesktopTasksController provideDesktopTasksController(
             Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             DisplayController displayController,
             ShellTaskOrganizer shellTaskOrganizer,
@@ -690,9 +691,9 @@ public abstract class WMShellModule {
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
-        return new DesktopTasksController(context, shellInit, shellController, displayController,
-                shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, transitions,
-                enterDesktopTransitionHandler, exitDesktopTransitionHandler,
+        return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
+                displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
+                transitions, enterDesktopTransitionHandler, exitDesktopTransitionHandler,
                 desktopModeTaskRepository, mainExecutor);
     }
 

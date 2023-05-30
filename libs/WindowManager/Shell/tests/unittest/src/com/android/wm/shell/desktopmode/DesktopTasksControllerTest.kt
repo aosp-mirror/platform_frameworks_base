@@ -51,6 +51,7 @@ import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
+import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -78,6 +79,7 @@ import org.mockito.Mockito.`when` as whenever
 class DesktopTasksControllerTest : ShellTestCase() {
 
     @Mock lateinit var testExecutor: ShellExecutor
+    @Mock lateinit var shellCommandHandler: ShellCommandHandler
     @Mock lateinit var shellController: ShellController
     @Mock lateinit var displayController: DisplayController
     @Mock lateinit var shellTaskOrganizer: ShellTaskOrganizer
@@ -115,6 +117,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         return DesktopTasksController(
             context,
             shellInit,
+            shellCommandHandler,
             shellController,
             displayController,
             shellTaskOrganizer,
