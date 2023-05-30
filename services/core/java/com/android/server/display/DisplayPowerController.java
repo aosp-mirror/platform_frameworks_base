@@ -2664,9 +2664,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     @Override
-    public void setBrightness(float brightnessValue) {
+    public void setBrightness(float brightnessValue, int userSerial) {
         // Update the setting, which will eventually call back into DPC to have us actually update
         // the display with the new value.
+        mBrightnessSetting.setUserSerial(userSerial);
         mBrightnessSetting.setBrightness(brightnessValue);
         if (mDisplayId == Display.DEFAULT_DISPLAY && mPersistBrightnessNitsForDefaultDisplay) {
             float nits = convertToNits(brightnessValue);
