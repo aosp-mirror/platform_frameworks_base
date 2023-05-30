@@ -14907,8 +14907,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 policy = new LockTaskPolicy(currentPolicy);
                 policy.setPackages(Set.of(packages));
             }
-            if (policy.getPackages().isEmpty()
-                    && policy.getFlags() == DevicePolicyManager.LOCK_TASK_FEATURE_NONE) {
+            if (policy.getPackages().isEmpty()) {
                 mDevicePolicyEngine.removeLocalPolicy(
                         PolicyDefinition.LOCK_TASK,
                         enforcingAdmin,
@@ -20690,7 +20689,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void addUserControlDisabledPackages(CallerIdentity caller,
             EnforcingAdmin enforcingAdmin, Set<String> packages) {
-        if (isCallerDeviceOwner(caller)) {
+        if (isDeviceOwner(caller)) {
             mDevicePolicyEngine.setGlobalPolicy(
                     PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
                     enforcingAdmin,
@@ -20706,7 +20705,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void removeUserControlDisabledPackages(CallerIdentity caller,
             EnforcingAdmin enforcingAdmin) {
-        if (isCallerDeviceOwner(caller)) {
+        if (isDeviceOwner(caller)) {
             mDevicePolicyEngine.removeGlobalPolicy(
                     PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
                     enforcingAdmin);
@@ -20715,12 +20714,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
                     enforcingAdmin,
                     caller.getUserId());
-        }
-    }
-
-    private boolean isCallerDeviceOwner(CallerIdentity caller) {
-        synchronized (getLockObject()) {
-            return getDeviceOwnerUserIdUncheckedLocked() == caller.getUserId();
         }
     }
 
