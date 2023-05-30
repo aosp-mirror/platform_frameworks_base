@@ -510,6 +510,17 @@ filegroup {
     ],
 }
 
+// common protolog sources without classes that rely on Android SDK
+filegroup {
+    name: "protolog-common-no-android-src",
+    srcs: [
+        ":protolog-common-src",
+    ],
+    exclude_srcs: [
+        "com/android/internal/protolog/common/ProtoLog.java",
+    ],
+}
+
 java_library {
     name: "protolog-lib",
     platform_apis: true,
