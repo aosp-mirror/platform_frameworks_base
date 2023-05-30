@@ -54,7 +54,7 @@ public class SurfaceControlViewHost {
     private final static String TAG = "SurfaceControlViewHost";
     private final ViewRootImpl mViewRoot;
     private final CloseGuard mCloseGuard = CloseGuard.get();
-    private WindowlessWindowManager mWm;
+    private final WindowlessWindowManager mWm;
 
     private SurfaceControl mSurfaceControl;
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
@@ -67,9 +67,7 @@ public class SurfaceControlViewHost {
                 return;
             }
             mViewRoot.mHandler.post(() -> {
-                if (mWm != null) {
-                    mWm.setConfiguration(configuration);
-                }
+                mWm.setConfiguration(configuration);
                 if (mViewRoot != null) {
                     mViewRoot.forceWmRelayout();
                 }
@@ -115,6 +113,11 @@ public class SurfaceControlViewHost {
                 Log.e(TAG, "Failed to get SurfaceSyncGroup for SCVH", e);
             }
             return null;
+        }
+
+        @Override
+        public void attachParentInterface(@Nullable ISurfaceControlViewHostParent parentInterface) {
+            mViewRoot.mHandler.post(() -> mWm.setParentInterface(parentInterface));
         }
     }
 
