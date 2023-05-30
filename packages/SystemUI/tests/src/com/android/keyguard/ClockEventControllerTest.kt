@@ -53,6 +53,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
@@ -157,9 +158,8 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     @Test
     fun themeChanged_verifyClockPaletteUpdated() = runBlocking(IMMEDIATE) {
-        // TODO(b/266103601): delete this test and add more coverage for updateColors()
-        // verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
-        // verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
+         verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
+         verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 
         val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
         verify(configurationController).addCallback(capture(captor))
