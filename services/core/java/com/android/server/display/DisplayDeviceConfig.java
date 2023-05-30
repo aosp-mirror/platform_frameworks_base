@@ -889,6 +889,13 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @return true if there is sdrHdrRatioMap, false otherwise.
+     */
+    public boolean hasSdrToHdrRatioSpline() {
+        return mSdrToHdrRatioSpline != null;
+    }
+
+    /**
      * Calculate the HDR brightness for the specified SDR brightenss, restricted by the
      * maxDesiredHdrSdrRatio (the ratio between the HDR luminance and SDR luminance)
      *
