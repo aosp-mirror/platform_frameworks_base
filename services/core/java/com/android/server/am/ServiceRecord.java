@@ -177,12 +177,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     @PowerExemptionManager.ReasonCode
     int mAllowWhileInUsePermissionInFgsReason = REASON_DENIED;
 
-    // Integer version of mAllowWhileInUsePermissionInFgs that we keep track to compare
-    // the old and new logics.
-    // TODO: Remove them once we're confident in the new logic.
-    int mDebugWhileInUseReasonInStartForeground = REASON_DENIED;
-    int mDebugWhileInUseReasonInBindService = REASON_DENIED;
-
     // A copy of mAllowWhileInUsePermissionInFgs's value when the service is entering FGS state.
     boolean mAllowWhileInUsePermissionInFgsAtEntering;
     /** Allow scheduling user-initiated jobs from the background. */
@@ -223,13 +217,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // created. (i.e. due to "bound" or "start".) It never decreases, even when stopForeground()
     // is called.
     int mStartForegroundCount;
-
-    // Last time mAllowWhileInUsePermissionInFgs or mAllowStartForeground was set to "allowed"
-    // from "disallowed" when the service was _not_ already a foreground service.
-    // this means they're set in startService(). (not startForegroundService)
-    // In startForeground(), if this timestamp is too old, we can't trust these flags, so
-    // we need to reset them.
-    long mLastUntrustedSetFgsRestrictionAllowedTime;
 
     // This is a service record of a FGS delegate (not a service record of a real service)
     boolean mIsFgsDelegate;
@@ -624,12 +611,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         pw.print(prefix); pw.print("mAllowWhileInUsePermissionInFgsReason=");
         pw.println(PowerExemptionManager.reasonCodeToString(mAllowWhileInUsePermissionInFgsReason));
 
-        pw.print(prefix); pw.print("debugWhileInUseReasonInStartForeground=");
-        pw.println(PowerExemptionManager.reasonCodeToString(
-                mDebugWhileInUseReasonInStartForeground));
-        pw.print(prefix); pw.print("debugWhileInUseReasonInBindService=");
-        pw.println(PowerExemptionManager.reasonCodeToString(mDebugWhileInUseReasonInBindService));
-
         pw.print(prefix); pw.print("allowUiJobScheduling="); pw.println(mAllowUiJobScheduling);
         pw.print(prefix); pw.print("recentCallingPackage=");
                 pw.println(mRecentCallingPackage);
@@ -641,10 +622,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         pw.println(mStartForegroundCount);
         pw.print(prefix); pw.print("infoAllowStartForeground=");
         pw.println(mInfoAllowStartForeground);
-
-        pw.print(prefix); pw.print("lastUntrustedSetFgsRestrictionAllowedTime=");
-        TimeUtils.formatDuration(mLastUntrustedSetFgsRestrictionAllowedTime, now, pw);
-        pw.println();
 
         if (delayed) {
             pw.print(prefix); pw.print("delayed="); pw.println(delayed);
