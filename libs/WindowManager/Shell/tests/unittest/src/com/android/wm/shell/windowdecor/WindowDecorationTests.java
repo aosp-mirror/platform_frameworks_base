@@ -316,7 +316,8 @@ public class WindowDecorationTests extends ShellTestCase {
         releaseOrder.verify(t).remove(captionContainerSurface);
         releaseOrder.verify(t).remove(decorContainerSurface);
         releaseOrder.verify(t).apply();
-        verify(mMockWindowContainerTransaction)
+        // Expect to remove two insets sources, the caption insets and the mandatory gesture insets.
+        verify(mMockWindowContainerTransaction, Mockito.times(2))
                 .removeInsetsSource(eq(taskInfo.token), any(), anyInt(), anyInt());
     }
 
