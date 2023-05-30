@@ -162,7 +162,11 @@ class DetailDialog(
                     broadcastSender.closeSystemDialogs()
                     // not sent as interactive, lest the higher-importance activity launch
                     // be impacted
-                    pendingIntent.send()
+                    val options = ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle()
+                    pendingIntent.send(options)
                     false
                 }
                 if (keyguardStateController.isUnlocked()) {
