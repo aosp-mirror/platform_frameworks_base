@@ -37,8 +37,9 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 270677470)
 class PipPinchInTest(flicker: FlickerTest) : PipTransition(flicker) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition { transitions { pipApp.pinchInPipWindow(wmHelper, 0.4f, 30) } }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { pipApp.pinchInPipWindow(wmHelper, 0.4f, 30) }
+    }
 
     /** Checks that the visible region area of [pipApp] always decreases during the animation. */
     @Postsubmit

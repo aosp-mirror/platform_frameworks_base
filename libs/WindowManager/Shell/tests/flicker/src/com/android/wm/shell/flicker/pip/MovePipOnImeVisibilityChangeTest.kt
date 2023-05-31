@@ -41,23 +41,21 @@ import org.junit.runners.Parameterized
 open class MovePipOnImeVisibilityChangeTest(flicker: FlickerTest) : PipTransition(flicker) {
     private val imeApp = ImeAppHelper(instrumentation)
 
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            setup {
-                imeApp.launchViaIntent(wmHelper)
-                setRotation(flicker.scenario.startRotation)
-            }
-            teardown { imeApp.exit(wmHelper) }
-            transitions {
-                // open the soft keyboard
-                imeApp.openIME(wmHelper)
-                createTag(TAG_IME_VISIBLE)
-
-                // then close it again
-                imeApp.closeIME(wmHelper)
-            }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        setup {
+            imeApp.launchViaIntent(wmHelper)
+            setRotation(flicker.scenario.startRotation)
         }
+        teardown { imeApp.exit(wmHelper) }
+        transitions {
+            // open the soft keyboard
+            imeApp.openIME(wmHelper)
+            createTag(TAG_IME_VISIBLE)
+
+            // then close it again
+            imeApp.closeIME(wmHelper)
+        }
+    }
 
     /** Ensure the pip window remains visible throughout any keyboard interactions */
     @Presubmit
