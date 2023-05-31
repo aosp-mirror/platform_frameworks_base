@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
@@ -30,6 +31,7 @@ import static junit.framework.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,6 +55,7 @@ import android.widget.LinearLayout;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -62,6 +65,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -87,6 +91,11 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     private WindowMagnificationSettings mWindowMagnificationSettings;
     private MotionEventHelper mMotionEventHelper = new MotionEventHelper();
 
+    private ArgumentCaptor<Float> mSecureSettingsScaleCaptor;
+    private ArgumentCaptor<String> mSecureSettingsNameCaptor;
+    private ArgumentCaptor<Integer> mSecureSettingsUserHandleCaptor;
+    private ArgumentCaptor<Float> mCallbackMagnifierScaleCaptor;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -102,6 +111,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
                 mSecureSettings);
 
         mSettingView = mWindowMagnificationSettings.getSettingView();
+        mSecureSettingsScaleCaptor = ArgumentCaptor.forClass(Float.class);
+        mSecureSettingsNameCaptor = ArgumentCaptor.forClass(String.class);
+        mSecureSettingsUserHandleCaptor = ArgumentCaptor.forClass(Integer.class);
+        mCallbackMagnifierScaleCaptor = ArgumentCaptor.forClass(Float.class);
     }
 
     @After
@@ -324,6 +337,20 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     }
 
     @Test
+    public void showSettingsPanel_observerForMagnificationScaleRegistered() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mWindowMagnificationSettings.showSettingPanel();
+
+        verify(mSecureSettings).registerContentObserverForUser(
+                eq(ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE),
+                any(ContentObserver.class),
+                eq(UserHandle.USER_CURRENT));
+    }
+
+    @Test
     public void hideSettingsPanel_observerUnregistered() {
         setupMagnificationCapabilityAndMode(
                 /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
@@ -332,7 +359,162 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         mWindowMagnificationSettings.showSettingPanel();
         mWindowMagnificationSettings.hideSettingPanel();
 
-        verify(mSecureSettings).unregisterContentObserver(any(ContentObserver.class));
+        verify(mSecureSettings, times(2)).unregisterContentObserver(any(ContentObserver.class));
+    }
+
+    @Test
+    public void seekbarProgress_justInflated_maxValueAndProgressSetCorrectly() {
+        setupScaleInSecureSettings(0f);
+        assertThat(mWindowMagnificationSettings.mZoomSeekbar.getProgress()).isEqualTo(0);
+        assertThat(mWindowMagnificationSettings.mZoomSeekbar.getMax()).isEqualTo(70);
+    }
+
+    @Test
+    public void seekbarProgress_minMagnification_seekbarProgressIsCorrect() {
+        setupScaleInSecureSettings(0f);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mWindowMagnificationSettings.showSettingPanel();
+
+        // Seekbar index from 0 to 70. 1.0f scale (A11Y_SCALE_MIN_VALUE) would correspond to 0.
+        assertThat(mWindowMagnificationSettings.mZoomSeekbar.getProgress()).isEqualTo(0);
+    }
+
+    @Test
+    public void seekbarProgress_belowMinMagnification_seekbarProgressIsZero() {
+        setupScaleInSecureSettings(0f);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mWindowMagnificationSettings.showSettingPanel();
+
+        assertThat(mWindowMagnificationSettings.mZoomSeekbar.getProgress()).isEqualTo(0);
+    }
+
+    @Test
+    public void seekbarProgress_magnificationBefore_seekbarProgressIsHalf() {
+        setupScaleInSecureSettings(4f);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mWindowMagnificationSettings.showSettingPanel();
+
+        // float scale : from 1.0f to 8.0f, seekbar index from 0 to 70.
+        // 4.0f would correspond to 30.
+        assertThat(mWindowMagnificationSettings.mZoomSeekbar.getProgress()).isEqualTo(30);
+    }
+
+    @Test
+    public void seekbarProgress_maxMagnificationBefore_seekbarProgressIsMax() {
+        setupScaleInSecureSettings(8f);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mWindowMagnificationSettings.showSettingPanel();
+
+        // 8.0f is max magnification {@link MagnificationScaleProvider#MAX_SCALE}.
+        // Max zoom seek bar is 70.
+        assertThat(mWindowMagnificationSettings.mZoomSeekbar.getProgress()).isEqualTo(70);
+    }
+
+    @Test
+    public void seekbarProgress_aboveMaxMagnificationBefore_seekbarProgressIsMax() {
+        setupScaleInSecureSettings(9f);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mWindowMagnificationSettings.showSettingPanel();
+
+        // Max zoom seek bar is 70.
+        assertThat(mWindowMagnificationSettings.mZoomSeekbar.getProgress()).isEqualTo(70);
+    }
+
+    @Test
+    public void seekbarProgress_progressChangedRoughlyHalf_scaleAndCallbackUpdated() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
+
+        mWindowMagnificationSettings.mZoomSeekbar.setProgress(30);
+
+        verifyScaleUpdatedInSecureSettings(4f);
+        verifyCallbackOnMagnifierScale(4f);
+    }
+
+    @Test
+    public void seekbarProgress_minProgress_callbackUpdated() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
+        // Set progress to non-zero first so onProgressChanged can be triggered upon setting to 0.
+        mWindowMagnificationSettings.mZoomSeekbar.setProgress(30);
+
+        mWindowMagnificationSettings.mZoomSeekbar.setProgress(0);
+
+        // For now, secure settings will not be updated for values < 1.3f. Follow up on this later.
+        verify(mWindowMagnificationSettingsCallback, times(2))
+                .onMagnifierScale(mCallbackMagnifierScaleCaptor.capture());
+        var capturedArgs = mCallbackMagnifierScaleCaptor.getAllValues();
+        assertThat(capturedArgs).hasSize(2);
+        assertThat(capturedArgs.get(1)).isWithin(0.01f).of(1f);
+    }
+
+    @Test
+    public void seekbarProgress_maxProgress_scaleAndCallbackUpdated() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
+
+        mWindowMagnificationSettings.mZoomSeekbar.setProgress(70);
+
+        verifyScaleUpdatedInSecureSettings(8f);
+        verifyCallbackOnMagnifierScale(8f);
+    }
+
+    @Test
+    public void seekbarProgress_scaleUpdatedAfterSettingPanelOpened_progressAlsoUpdated() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        var contentObserverCaptor = ArgumentCaptor.forClass(ContentObserver.class);
+        mWindowMagnificationSettings.showSettingPanel();
+        verify(mSecureSettings).registerContentObserverForUser(
+                eq(ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE),
+                contentObserverCaptor.capture(),
+                eq(UserHandle.USER_CURRENT));
+
+        // Simulate outside changes.
+        setupScaleInSecureSettings(4f);
+        // Simulate callback due to outside change.
+        contentObserverCaptor.getValue().onChange(/* selfChange= */ false);
+
+        assertThat(mWindowMagnificationSettings.mZoomSeekbar.getProgress()).isEqualTo(30);
+    }
+
+    private void verifyScaleUpdatedInSecureSettings(float scale) {
+        verify(mSecureSettings).putFloatForUser(
+                mSecureSettingsNameCaptor.capture(),
+                mSecureSettingsScaleCaptor.capture(),
+                mSecureSettingsUserHandleCaptor.capture());
+        assertThat(mSecureSettingsScaleCaptor.getValue()).isWithin(0.01f).of(scale);
+        assertThat(mSecureSettingsNameCaptor.getValue())
+                .isEqualTo(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE);
+        assertThat(mSecureSettingsUserHandleCaptor.getValue()).isEqualTo(UserHandle.USER_CURRENT);
+    }
+
+    private void verifyCallbackOnMagnifierScale(float scale) {
+        verify(mWindowMagnificationSettingsCallback)
+                .onMagnifierScale(mCallbackMagnifierScaleCaptor.capture());
+        assertThat(mCallbackMagnifierScaleCaptor.getValue()).isWithin(0.01f).of(scale);
     }
 
     private <T extends View> T getInternalView(@IdRes int idRes) {
@@ -350,5 +532,12 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
                 ACCESSIBILITY_MAGNIFICATION_MODE_NONE,
                 UserHandle.USER_CURRENT)).thenReturn(mode);
+    }
+
+    private void setupScaleInSecureSettings(float scale) {
+        when(mSecureSettings.getFloatForUser(
+                ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                MagnificationConstants.SCALE_MIN_VALUE,
+                UserHandle.USER_CURRENT)).thenReturn(scale);
     }
 }

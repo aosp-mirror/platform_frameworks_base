@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 
 /**
@@ -37,12 +38,14 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
 
     private static final int DEFAULT_SEEKBAR_MAX = 6;
     private static final int DEFAULT_SEEKBAR_PROGRESS = 0;
+    private static final int DEFAULT_SEEKBAR_TICK_MARK = 0;
 
     private ViewGroup mIconStartFrame;
     private ViewGroup mIconEndFrame;
     private ImageView mIconStart;
     private ImageView mIconEnd;
     private SeekBar mSeekbar;
+    private int mSeekBarChangeMagnitude = 1;
 
     private SeekBarChangeListener mSeekBarListener = new SeekBarChangeListener();
     private String[] mStateLabels = null;
@@ -102,6 +105,15 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
                         context.getString(iconEndFrameContentDescriptionId);
                 mIconEndFrame.setContentDescription(contentDescription);
             }
+            int tickMarkId = typedArray.getResourceId(
+                    R.styleable.SeekBarWithIconButtonsView_Layout_tickMark,
+                    DEFAULT_SEEKBAR_TICK_MARK);
+            if (tickMarkId != DEFAULT_SEEKBAR_TICK_MARK) {
+                mSeekbar.setTickMark(getResources().getDrawable(tickMarkId));
+            }
+            mSeekBarChangeMagnitude = typedArray.getInt(
+                    R.styleable.SeekBarWithIconButtonsView_Layout_seekBarChangeMagnitude,
+                    /* defValue= */ 1);
         } else {
             mSeekbar.setMax(DEFAULT_SEEKBAR_MAX);
             setProgress(DEFAULT_SEEKBAR_PROGRESS);
@@ -112,7 +124,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
         mIconStartFrame.setOnClickListener((view) -> {
             final int progress = mSeekbar.getProgress();
             if (progress > 0) {
-                mSeekbar.setProgress(progress - 1);
+                mSeekbar.setProgress(progress - mSeekBarChangeMagnitude);
                 setIconViewAndFrameEnabled(mIconStart, mSeekbar.getProgress() > 0);
             }
         });
@@ -120,7 +132,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
         mIconEndFrame.setOnClickListener((view) -> {
             final int progress = mSeekbar.getProgress();
             if (progress < mSeekbar.getMax()) {
-                mSeekbar.setProgress(progress + 1);
+                mSeekbar.setProgress(progress + mSeekBarChangeMagnitude);
                 setIconViewAndFrameEnabled(mIconEnd, mSeekbar.getProgress() < mSeekbar.getMax());
             }
         });
@@ -183,6 +195,20 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
     }
 
     /**
+     * Gets max to the seekbar in the layout.
+     */
+    public int getMax() {
+        return mSeekbar.getMax();
+    }
+
+    /**
+     * @return the magnitude by which seekbar progress changes when start and end icons are clicked.
+     */
+    public int getChangeMagnitude() {
+        return mSeekBarChangeMagnitude;
+    }
+
+    /**
      * Sets progress to the seekbar in the layout.
      * If the progress is smaller than or equals to 0, the IconStart will be disabled. If the
      * progress is larger than or equals to Max, the IconEnd will be disabled. The seekbar progress
@@ -191,6 +217,11 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
     public void setProgress(int progress) {
         mSeekbar.setProgress(progress);
         updateIconViewIfNeeded(progress);
+    }
+
+    @VisibleForTesting
+    public int getProgress() {
+        return mSeekbar.getProgress();
     }
 
     private class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {

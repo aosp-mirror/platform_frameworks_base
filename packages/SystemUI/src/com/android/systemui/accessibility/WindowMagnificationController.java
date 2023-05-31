@@ -76,6 +76,7 @@ import android.widget.ImageView;
 
 import androidx.core.math.MathUtils;
 
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
@@ -101,7 +102,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     // Delay to avoid updating state description too frequently.
     private static final int UPDATE_STATE_DESCRIPTION_DELAY_MS = 100;
     // It should be consistent with the value defined in WindowMagnificationGestureHandler.
-    private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(1.0f, 8.0f);
+    private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(
+            MagnificationConstants.SCALE_MIN_VALUE,
+            MagnificationConstants.SCALE_MAX_VALUE);
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
     private static final float ANIMATION_BOUNCE_EFFECT_SCALE = 1.05f;
     private final SparseArray<Float> mMagnificationSizeScaleOptions = new SparseArray<>();
