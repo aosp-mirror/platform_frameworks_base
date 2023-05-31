@@ -35,6 +35,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IRecentsAnimationController;
@@ -135,8 +136,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     @Override
     public WindowContainerTransaction handleRequest(IBinder transition,
             TransitionRequestInfo request) {
-        // do not directly handle requests. Only entry point should be via startRecentsTransition
-        // TODO: Only log an error if the transition is a recents transition
+        if (mControllers.isEmpty()) {
+            // Ignore if there is no running recents transition
+            return null;
+        }
+        final RecentsController controller = mControllers.get(mControllers.size() - 1);
+        controller.handleMidTransitionRequest(request);
         return null;
     }
 
@@ -239,6 +244,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         /** The latest state that the recents animation is operating in. */
         private int mState = STATE_NORMAL;
 
+        // Snapshots taken when a new display change transition is requested, prior to the display
+        // change being applied.  This pending set of snapshots will only be applied when cancel is
+        // next called.
+        private Pair<int[], TaskSnapshot[]> mPendingPauseSnapshotsForCancel;
+
         RecentsController(IRecentsAnimationRunner listener) {
             mInstanceId = System.identityHashCode(this);
             mListener = listener;
@@ -290,6 +300,16 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
          * "replace-with-screenshot" like behavior.
          */
         private boolean sendCancelWithSnapshots() {
+            Pair<int[], TaskSnapshot[]> snapshots = mPendingPauseSnapshotsForCancel != null
+                    ? mPendingPauseSnapshotsForCancel
+                    : getSnapshotsForPausingTasks();
+            return sendCancel(snapshots.first, snapshots.second);
+        }
+
+        /**
+         * Snapshots the pausing tasks and returns the mapping of the taskId -> snapshot.
+         */
+        private Pair<int[], TaskSnapshot[]> getSnapshotsForPausingTasks() {
             int[] taskIds = null;
             TaskSnapshot[] snapshots = null;
             if (mPausingTasks.size() > 0) {
@@ -298,6 +318,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 try {
                     for (int i = 0; i < mPausingTasks.size(); ++i) {
                         TaskState state = mPausingTasks.get(0);
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "[%d] RecentsController.sendCancel: Snapshotting task=%d",
+                                mInstanceId, state.mTaskInfo.taskId);
                         snapshots[i] = ActivityTaskManager.getService().takeTaskSnapshot(
                                 state.mTaskInfo.taskId, true /* updateCache */);
                     }
@@ -306,7 +329,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     snapshots = null;
                 }
             }
-            return sendCancel(taskIds, snapshots);
+            return new Pair(taskIds, snapshots);
         }
 
         /**
@@ -315,7 +338,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         private boolean sendCancel(@Nullable int[] taskIds,
                 @Nullable TaskSnapshot[] taskSnapshots) {
             try {
-                final String cancelDetails = taskSnapshots != null ? " with snapshots" : "";
+                final String cancelDetails = taskSnapshots != null ? "with snapshots" : "";
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.cancel: calling onAnimationCanceled %s",
                         mInstanceId, cancelDetails);
@@ -348,6 +371,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             mOpeningTasks = null;
             mInfo = null;
             mTransition = null;
+            mPendingPauseSnapshotsForCancel = null;
             mControllers.remove(this);
         }
 
@@ -460,6 +484,22 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             return true;
         }
 
+        /**
+         * Updates this controller when a new transition is requested mid-recents transition.
+         */
+        void handleMidTransitionRequest(TransitionRequestInfo request) {
+            if (request.getType() == TRANSIT_CHANGE && request.getDisplayChange() != null) {
+                final TransitionRequestInfo.DisplayChange dispChange = request.getDisplayChange();
+                if (dispChange.getStartRotation() != dispChange.getEndRotation()) {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                            "[%d] RecentsController.prepareForMerge: "
+                                    + "Snapshot due to requested display change",
+                            mInstanceId);
+                    mPendingPauseSnapshotsForCancel = getSnapshotsForPausingTasks();
+                }
+            }
+        }
+
         @SuppressLint("NewApi")
         void merge(TransitionInfo info, SurfaceControl.Transaction t,
                 Transitions.TransitionFinishCallback finishCallback) {
@@ -526,6 +566,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     // Finish recents animation if the display is changed, so the default
                     // transition handler can play the animation such as rotation effect.
                     if (change.hasFlags(TransitionInfo.FLAG_IS_DISPLAY)) {
+                        // This call to cancel will use the screenshots taken preemptively in
+                        // handleMidTransitionRequest() prior to the display changing
                         cancel(mWillFinishToHome, true /* withScreenshots */, "display change");
                         return;
                     }
