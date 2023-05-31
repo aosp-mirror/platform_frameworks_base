@@ -68,7 +68,7 @@ class AnrController {
     void notifyAppUnresponsive(InputApplicationHandle applicationHandle,
             TimeoutRecord timeoutRecord) {
         try {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "notifyAppUnresponsive()");
+            timeoutRecord.mLatencyTracker.notifyAppUnresponsiveStarted();
             timeoutRecord.mLatencyTracker.preDumpIfLockTooSlowStarted();
             preDumpIfLockTooSlow();
             timeoutRecord.mLatencyTracker.preDumpIfLockTooSlowEnded();
@@ -111,7 +111,6 @@ class AnrController {
                 if (!blamePendingFocusRequest) {
                     Slog.i(TAG_WM, "ANR in " + activity.getName() + ".  Reason: "
                             + timeoutRecord.mReason);
-                    dumpAnrStateAsync(activity, null /* windowState */, timeoutRecord.mReason);
                     mUnresponsiveAppByDisplay.put(activity.getDisplayId(), activity);
                 }
             }
@@ -123,8 +122,13 @@ class AnrController {
             } else {
                 activity.inputDispatchingTimedOut(timeoutRecord, INVALID_PID);
             }
+
+            if (!blamePendingFocusRequest) {
+                dumpAnrStateAsync(activity, null /* windowState */, timeoutRecord.mReason);
+            }
+
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            timeoutRecord.mLatencyTracker.notifyAppUnresponsiveEnded();
         }
     }
 
@@ -139,7 +143,7 @@ class AnrController {
     void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
             @NonNull TimeoutRecord timeoutRecord) {
         try {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "notifyWindowUnresponsive()");
+            timeoutRecord.mLatencyTracker.notifyWindowUnresponsiveStarted();
             if (notifyWindowUnresponsive(token, timeoutRecord)) {
                 return;
             }
@@ -150,7 +154,7 @@ class AnrController {
             }
             notifyWindowUnresponsive(pid.getAsInt(), timeoutRecord);
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            timeoutRecord.mLatencyTracker.notifyWindowUnresponsiveEnded();
         }
     }
 
@@ -168,6 +172,7 @@ class AnrController {
         final int pid;
         final boolean aboveSystem;
         final ActivityRecord activity;
+        final WindowState windowState;
         timeoutRecord.mLatencyTracker.waitingOnGlobalLockStarted();
         synchronized (mService.mGlobalLock) {
             timeoutRecord.mLatencyTracker.waitingOnGlobalLockEnded();
@@ -175,7 +180,7 @@ class AnrController {
             if (target == null) {
                 return false;
             }
-            WindowState windowState = target.getWindowState();
+            windowState = target.getWindowState();
             pid = target.getPid();
             // Blame the activity if the input token belongs to the window. If the target is
             // embedded, then we will blame the pid instead.
@@ -183,13 +188,13 @@ class AnrController {
                     ? windowState.mActivityRecord : null;
             Slog.i(TAG_WM, "ANR in " + target + ". Reason:" + timeoutRecord.mReason);
             aboveSystem = isWindowAboveSystem(windowState);
-            dumpAnrStateAsync(activity, windowState, timeoutRecord.mReason);
         }
         if (activity != null) {
             activity.inputDispatchingTimedOut(timeoutRecord, pid);
         } else {
             mService.mAmInternal.inputDispatchingTimedOut(pid, aboveSystem, timeoutRecord);
         }
+        dumpAnrStateAsync(activity, windowState, timeoutRecord.mReason);
         return true;
     }
 
@@ -199,15 +204,10 @@ class AnrController {
     private void notifyWindowUnresponsive(int pid, TimeoutRecord timeoutRecord) {
         Slog.i(TAG_WM,
                 "ANR in input window owned by pid=" + pid + ". Reason: " + timeoutRecord.mReason);
-        timeoutRecord.mLatencyTracker.waitingOnGlobalLockStarted();
-        synchronized (mService.mGlobalLock) {
-            timeoutRecord.mLatencyTracker.waitingOnGlobalLockEnded();
-            dumpAnrStateAsync(null /* activity */, null /* windowState */, timeoutRecord.mReason);
-        }
-
         // We cannot determine the z-order of the window, so place the anr dialog as high
         // as possible.
         mService.mAmInternal.inputDispatchingTimedOut(pid, true /*aboveSystem*/, timeoutRecord);
+        dumpAnrStateAsync(null /* activity */, null /* windowState */, timeoutRecord.mReason);
     }
 
     /**
