@@ -16,10 +16,8 @@
 
 package com.android.server.companion.datatransfer.contextsync;
 
-import android.annotation.NonNull;
 import android.companion.ContextSyncMessage;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Bundle;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,25 +72,16 @@ class CallMetadataSyncData {
         return mCallFacilitators;
     }
 
-    public static class CallFacilitator implements Parcelable {
+    public static class CallFacilitator {
         private String mName;
         private String mIdentifier;
+        private boolean mIsTel;
 
         CallFacilitator() {}
 
         CallFacilitator(String name, String identifier) {
             mName = name;
             mIdentifier = identifier;
-        }
-
-        CallFacilitator(Parcel parcel) {
-            this(parcel.readString(), parcel.readString());
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int parcelableFlags) {
-            parcel.writeString(mName);
-            parcel.writeString(mIdentifier);
         }
 
         public String getName() {
@@ -103,6 +92,10 @@ class CallMetadataSyncData {
             return mIdentifier;
         }
 
+        public boolean isTel() {
+            return mIsTel;
+        }
+
         public void setName(String name) {
             mName = name;
         }
@@ -111,25 +104,9 @@ class CallMetadataSyncData {
             mIdentifier = identifier;
         }
 
-        @Override
-        public int describeContents() {
-            return 0;
+        public void setIsTel(boolean isTel) {
+            mIsTel = isTel;
         }
-
-        @NonNull
-        public static final Parcelable.Creator<CallFacilitator> CREATOR =
-                new Parcelable.Creator<>() {
-
-                    @Override
-                    public CallFacilitator createFromParcel(Parcel source) {
-                        return new CallFacilitator(source);
-                    }
-
-                    @Override
-                    public CallFacilitator[] newArray(int size) {
-                        return new CallFacilitator[size];
-                    }
-                };
     }
 
     public static class CallControlRequest {
@@ -183,40 +160,57 @@ class CallMetadataSyncData {
         }
     }
 
-    public static class Call implements Parcelable {
+    public static class Call {
+
+        private static final String EXTRA_CALLER_ID =
+                "com.android.server.companion.datatransfer.contextsync.extra.CALLER_ID";
+        private static final String EXTRA_APP_ICON =
+                "com.android.server.companion.datatransfer.contextsync.extra.APP_ICON";
+        private static final String EXTRA_FACILITATOR_NAME =
+                "com.android.server.companion.datatransfer.contextsync.extra.FACILITATOR_NAME";
+        private static final String EXTRA_FACILITATOR_ID =
+                "com.android.server.companion.datatransfer.contextsync.extra.FACILITATOR_ID";
+        private static final String EXTRA_STATUS =
+                "com.android.server.companion.datatransfer.contextsync.extra.STATUS";
+        private static final String EXTRA_DIRECTION =
+                "com.android.server.companion.datatransfer.contextsync.extra.DIRECTION";
+        private static final String EXTRA_CONTROLS =
+                "com.android.server.companion.datatransfer.contextsync.extra.CONTROLS";
         private String mId;
         private String mCallerId;
         private byte[] mAppIcon;
         private CallFacilitator mFacilitator;
         private int mStatus;
+        private int mDirection;
         private final Set<Integer> mControls = new HashSet<>();
 
-        public static Call fromParcel(Parcel parcel) {
+        public static Call fromBundle(Bundle bundle) {
             final Call call = new Call();
-            call.setId(parcel.readString());
-            call.setCallerId(parcel.readString());
-            call.setAppIcon(parcel.readBlob());
-            call.setFacilitator(parcel.readParcelable(CallFacilitator.class.getClassLoader(),
-                    CallFacilitator.class));
-            call.setStatus(parcel.readInt());
-            final int numberOfControls = parcel.readInt();
-            for (int i = 0; i < numberOfControls; i++) {
-                call.addControl(parcel.readInt());
+            if (bundle != null) {
+                call.setId(bundle.getString(CrossDeviceSyncController.EXTRA_CALL_ID));
+                call.setCallerId(bundle.getString(EXTRA_CALLER_ID));
+                call.setAppIcon(bundle.getByteArray(EXTRA_APP_ICON));
+                final String facilitatorName = bundle.getString(EXTRA_FACILITATOR_NAME);
+                final String facilitatorIdentifier = bundle.getString(EXTRA_FACILITATOR_ID);
+                call.setFacilitator(new CallFacilitator(facilitatorName, facilitatorIdentifier));
+                call.setStatus(bundle.getInt(EXTRA_STATUS));
+                call.setDirection(bundle.getInt(EXTRA_DIRECTION));
+                call.setControls(new HashSet<>(bundle.getIntegerArrayList(EXTRA_CONTROLS)));
             }
             return call;
         }
 
-        @Override
-        public void writeToParcel(Parcel parcel, int parcelableFlags) {
-            parcel.writeString(mId);
-            parcel.writeString(mCallerId);
-            parcel.writeBlob(mAppIcon);
-            parcel.writeParcelable(mFacilitator, parcelableFlags);
-            parcel.writeInt(mStatus);
-            parcel.writeInt(mControls.size());
-            for (int control : mControls) {
-                parcel.writeInt(control);
-            }
+        public Bundle writeToBundle() {
+            final Bundle bundle = new Bundle();
+            bundle.putString(CrossDeviceSyncController.EXTRA_CALL_ID, mId);
+            bundle.putString(EXTRA_CALLER_ID, mCallerId);
+            bundle.putByteArray(EXTRA_APP_ICON, mAppIcon);
+            bundle.putString(EXTRA_FACILITATOR_NAME, mFacilitator.getName());
+            bundle.putString(EXTRA_FACILITATOR_ID, mFacilitator.getIdentifier());
+            bundle.putInt(EXTRA_STATUS, mStatus);
+            bundle.putInt(EXTRA_DIRECTION, mDirection);
+            bundle.putIntegerArrayList(EXTRA_CONTROLS, new ArrayList<>(mControls));
+            return bundle;
         }
 
         void setId(String id) {
@@ -237,6 +231,10 @@ class CallMetadataSyncData {
 
         void setStatus(int status) {
             mStatus = status;
+        }
+
+        void setDirection(int direction) {
+            mDirection = direction;
         }
 
         void addControl(int control) {
@@ -268,6 +266,10 @@ class CallMetadataSyncData {
             return mStatus;
         }
 
+        int getDirection() {
+            return mDirection;
+        }
+
         Set<Integer> getControls() {
             return mControls;
         }
@@ -288,23 +290,5 @@ class CallMetadataSyncData {
         public int hashCode() {
             return Objects.hashCode(mId);
         }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @NonNull public static final Parcelable.Creator<Call> CREATOR = new Parcelable.Creator<>() {
-
-            @Override
-            public Call createFromParcel(Parcel source) {
-                return Call.fromParcel(source);
-            }
-
-            @Override
-            public Call[] newArray(int size) {
-                return new Call[size];
-            }
-        };
     }
 }

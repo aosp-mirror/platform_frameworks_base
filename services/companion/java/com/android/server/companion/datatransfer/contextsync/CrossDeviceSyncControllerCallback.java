@@ -21,6 +21,7 @@ import android.companion.AssociationInfo;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Set;
 
 /** Callback for call metadata syncing. */
 public abstract class CrossDeviceSyncControllerCallback {
@@ -40,4 +41,7 @@ public abstract class CrossDeviceSyncControllerCallback {
     void requestCrossDeviceSync(AssociationInfo associationInfo) {}
 
     void updateNumberOfActiveSyncAssociations(int userId, boolean added) {}
+
+    /** Clean up any remaining state for the given calls. */
+    void cleanUpCallIds(Set<String> callIds) {}
 }

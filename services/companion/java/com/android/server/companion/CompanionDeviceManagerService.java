@@ -1433,6 +1433,30 @@ public class CompanionDeviceManagerService extends SystemService {
                 mCrossDeviceSyncController.syncMessageToDevice(associationId, message);
             }
         }
+
+        @Override
+        public void sendCrossDeviceSyncMessageToAllDevices(int userId, byte[] message) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.syncMessageToAllDevicesForUserId(userId, message);
+            }
+        }
+
+        @Override
+        public void addSelfOwnedCallId(String callId) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.addSelfOwnedCallId(callId);
+            }
+        }
+
+        @Override
+        public void removeSelfOwnedCallId(String callId) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.removeSelfOwnedCallId(callId);
+            }
+        }
     }
 
     /**
