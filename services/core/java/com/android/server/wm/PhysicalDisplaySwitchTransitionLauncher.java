@@ -71,7 +71,10 @@ public class PhysicalDisplaySwitchTransitionLauncher {
     }
 
     /**
-     *   Called by the DeviceStateManager callback when the state changes.
+     * Called by the display manager just before it applied the device state, it is guaranteed
+     * that in case of physical display change the
+     * {@link PhysicalDisplaySwitchTransitionLauncher#requestDisplaySwitchTransitionIfNeeded}
+     * method will be invoked *after* this one.
      */
     void foldStateChanged(DeviceState newDeviceState) {
         boolean isUnfolding = mDeviceState == FOLDED
