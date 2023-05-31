@@ -105,7 +105,7 @@ public abstract class AlertingNotificationManager {
 
         alertEntry.mEntry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         if (alert) {
-            alertEntry.updateEntry(true /* updatePostTime */);
+            alertEntry.updateEntry(true /* updatePostTime */, "updateNotification");
         }
     }
 
@@ -273,15 +273,15 @@ public abstract class AlertingNotificationManager {
             mRemoveAlertRunnable = removeAlertRunnable;
 
             mPostTime = calculatePostTime();
-            updateEntry(true /* updatePostTime */);
+            updateEntry(true /* updatePostTime */, "setEntry");
         }
 
         /**
          * Updates an entry's removal time.
          * @param updatePostTime whether or not to refresh the post time
          */
-        public void updateEntry(boolean updatePostTime) {
-            mLogger.logUpdateEntry(mEntry, updatePostTime);
+        public void updateEntry(boolean updatePostTime, @Nullable String reason) {
+            mLogger.logUpdateEntry(mEntry, updatePostTime, reason);
 
             final long now = mClock.currentTimeMillis();
             mEarliestRemovaltime = now + mMinimumDisplayTime;
@@ -289,7 +289,7 @@ public abstract class AlertingNotificationManager {
             if (updatePostTime) {
                 mPostTime = Math.max(mPostTime, now);
             }
-            removeAutoRemovalCallbacks();
+            removeAutoRemovalCallbacks("updateEntry (will be rescheduled)");
 
             if (!isSticky()) {
                 final long finishTime = calculateFinishTime();
@@ -330,15 +330,16 @@ public abstract class AlertingNotificationManager {
 
         public void reset() {
             mEntry = null;
-            removeAutoRemovalCallbacks();
+            removeAutoRemovalCallbacks("reset()");
             mRemoveAlertRunnable = null;
         }
 
         /**
          * Clear any pending removal runnables.
          */
-        public void removeAutoRemovalCallbacks() {
+        public void removeAutoRemovalCallbacks(@Nullable String reason) {
             if (mRemoveAlertRunnable != null) {
+                mLogger.logAutoRemoveCanceled(mEntry, reason);
                 mHandler.removeCallbacks(mRemoveAlertRunnable);
             }
         }
@@ -348,7 +349,7 @@ public abstract class AlertingNotificationManager {
          */
         public void removeAsSoonAsPossible() {
             if (mRemoveAlertRunnable != null) {
-                removeAutoRemovalCallbacks();
+                removeAutoRemovalCallbacks("removeAsSoonAsPossible (will be rescheduled)");
 
                 final long timeLeft = mEarliestRemovaltime - mClock.currentTimeMillis();
                 mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);

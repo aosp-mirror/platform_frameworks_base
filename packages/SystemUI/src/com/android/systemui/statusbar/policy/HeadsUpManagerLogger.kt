@@ -66,6 +66,15 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
+    fun logAutoRemoveCanceled(entry: NotificationEntry, reason: String?) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            str2 = reason ?: "unknown"
+        }, {
+            "cancel auto remove of $str1 reason: $str2"
+        })
+    }
+
     fun logRemoveNotification(key: String, releaseImmediately: Boolean) {
         buffer.log(TAG, INFO, {
             str1 = logKey(key)
@@ -89,16 +98,17 @@ class HeadsUpManagerLogger @Inject constructor(
             bool1 = alert
             bool2 = hasEntry
         }, {
-            "update notification $str1 alert: $bool1 hasEntry: $bool2"
+            "update notification $str1 alert: $bool1 hasEntry: $bool2 reason: $str2"
         })
     }
 
-    fun logUpdateEntry(entry: NotificationEntry, updatePostTime: Boolean) {
+    fun logUpdateEntry(entry: NotificationEntry, updatePostTime: Boolean, reason: String?) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey
             bool1 = updatePostTime
+            str2 = reason ?: "unknown"
         }, {
-            "update entry $str1 updatePostTime: $bool1"
+            "update entry $str1 updatePostTime: $bool1 reason: $str2"
         })
     }
 
