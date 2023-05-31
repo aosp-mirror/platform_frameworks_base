@@ -46,8 +46,6 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.RemoteAnimationRunnerCompat;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -211,10 +209,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
      * Wakes up the device if the device was dozing.
      */
     void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason);
-
-    NotificationShadeWindowView getNotificationShadeWindowView();
-
-    NotificationShadeWindowViewController getNotificationShadeWindowViewController();
 
     /** */
     ShadeViewController getShadeViewController();

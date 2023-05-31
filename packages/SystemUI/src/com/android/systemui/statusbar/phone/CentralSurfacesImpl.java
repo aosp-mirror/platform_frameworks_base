@@ -457,7 +457,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private PhoneStatusBarTransitions mStatusBarTransitions;
     private final AuthRippleController mAuthRippleController;
     @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
-    protected final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarInitializer mStatusBarInitializer;
     private final StatusBarWindowController mStatusBarWindowController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -1143,7 +1143,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     @Override
                     public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
                         mMainExecutor.execute(
-                                () -> plugin.setup(getNotificationShadeWindowView(),
+                                () -> plugin.setup(
+                                        mNotificationShadeWindowController.getWindowRootView(),
                                         getNavigationBarView(),
                                         new Callback(plugin), mDozeParameters));
                     }
@@ -1740,16 +1741,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
         mMediaManager.setBiometricUnlockController(mBiometricUnlockController);
         Trace.endSection();
-    }
-
-    @Override
-    public NotificationShadeWindowView getNotificationShadeWindowView() {
-        return mNotificationShadeWindowView;
-    }
-
-    @Override
-    public NotificationShadeWindowViewController getNotificationShadeWindowViewController() {
-        return mNotificationShadeWindowViewController;
     }
 
     @Override
@@ -3051,9 +3042,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     protected ViewRootImpl getViewRootImpl()  {
-        NotificationShadeWindowView nswv = getNotificationShadeWindowView();
-        if (nswv != null) return nswv.getViewRootImpl();
-
+        View root = mNotificationShadeWindowController.getWindowRootView();
+        if (root != null) return root.getViewRootImpl();
         return null;
     }
     /**
