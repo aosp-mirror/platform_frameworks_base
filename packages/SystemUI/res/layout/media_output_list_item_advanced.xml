@@ -65,6 +65,8 @@
             <TextView
                 android:id="@+id/volume_value"
                 android:animateLayoutChanges="true"
+                android:focusable="false"
+                android:importantForAccessibility="no"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -75,6 +77,8 @@
 
         <TextView
             android:id="@+id/title"
+            android:focusable="false"
+            android:importantForAccessibility="no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
