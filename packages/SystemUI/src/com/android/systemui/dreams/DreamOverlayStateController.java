@@ -19,7 +19,6 @@ package com.android.systemui.dreams;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_ENABLED;
 
 import android.service.dreams.DreamService;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -52,7 +51,6 @@ import javax.inject.Named;
 public class DreamOverlayStateController implements
         CallbackController<DreamOverlayStateController.Callback> {
     private static final String TAG = "DreamOverlayStateCtlr";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final int STATE_DREAM_OVERLAY_ACTIVE = 1 << 0;
     public static final int STATE_LOW_LIGHT_ACTIVE = 1 << 1;
@@ -110,13 +108,17 @@ public class DreamOverlayStateController implements
 
     private final int mSupportedTypes;
 
+    private final DreamLogger mLogger;
+
     @VisibleForTesting
     @Inject
     public DreamOverlayStateController(@Main Executor executor,
             @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            DreamLogger dreamLogger) {
         mExecutor = executor;
         mOverlayEnabled = overlayEnabled;
+        mLogger = dreamLogger;
         mFeatureFlags = featureFlags;
         if (mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)) {
             mSupportedTypes = Complication.COMPLICATION_TYPE_NONE
@@ -124,9 +126,7 @@ public class DreamOverlayStateController implements
         } else {
             mSupportedTypes = Complication.COMPLICATION_TYPE_NONE;
         }
-        if (DEBUG) {
-            Log.d(TAG, "Dream overlay enabled:" + mOverlayEnabled);
-        }
+        mLogger.d(TAG, "Dream overlay enabled: " + mOverlayEnabled);
     }
 
     /**
@@ -134,18 +134,14 @@ public class DreamOverlayStateController implements
      */
     public void addComplication(Complication complication) {
         if (!mOverlayEnabled) {
-            if (DEBUG) {
-                Log.d(TAG,
-                        "Ignoring adding complication due to overlay disabled:" + complication);
-            }
+            mLogger.d(TAG,
+                    "Ignoring adding complication due to overlay disabled: " + complication);
             return;
         }
 
         mExecutor.execute(() -> {
             if (mComplications.add(complication)) {
-                if (DEBUG) {
-                    Log.d(TAG, "addComplication: added " + complication);
-                }
+                mLogger.d(TAG, "Added dream complication: " + complication);
                 mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
             }
         });
@@ -156,18 +152,14 @@ public class DreamOverlayStateController implements
      */
     public void removeComplication(Complication complication) {
         if (!mOverlayEnabled) {
-            if (DEBUG) {
-                Log.d(TAG,
-                        "Ignoring removing complication due to overlay disabled:" + complication);
-            }
+            mLogger.d(TAG,
+                    "Ignoring removing complication due to overlay disabled: " + complication);
             return;
         }
 
         mExecutor.execute(() -> {
             if (mComplications.remove(complication)) {
-                if (DEBUG) {
-                    Log.d(TAG, "removeComplication: removed " + complication);
-                }
+                mLogger.d(TAG, "Removed dream complication: " + complication);
                 mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
             }
         });
@@ -313,6 +305,7 @@ public class DreamOverlayStateController implements
      * @param active {@code true} if overlay is active, {@code false} otherwise.
      */
     public void setOverlayActive(boolean active) {
+        mLogger.d(TAG, "Dream overlay active: " + active);
         modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_DREAM_OVERLAY_ACTIVE);
     }
 
@@ -321,6 +314,8 @@ public class DreamOverlayStateController implements
      * @param active {@code true} if low light mode is active, {@code false} otherwise.
      */
     public void setLowLightActive(boolean active) {
+        mLogger.d(TAG, "Low light mode active: " + active);
+
         if (isLowLightActive() && !active) {
             // Notify that we're exiting low light only on the transition from active to not active.
             mCallbacks.forEach(Callback::onExitLowLight);
@@ -351,6 +346,7 @@ public class DreamOverlayStateController implements
      * @param hasAttention {@code true} if has the user's attention, {@code false} otherwise.
      */
     public void setHasAssistantAttention(boolean hasAttention) {
+        mLogger.d(TAG, "Dream overlay has Assistant attention: " + hasAttention);
         modifyState(hasAttention ? OP_SET_STATE : OP_CLEAR_STATE, STATE_HAS_ASSISTANT_ATTENTION);
     }
 
@@ -359,6 +355,7 @@ public class DreamOverlayStateController implements
      * @param visible {@code true} if the status bar is visible, {@code false} otherwise.
      */
     public void setDreamOverlayStatusBarVisible(boolean visible) {
+        mLogger.d(TAG, "Dream overlay status bar visible: " + visible);
         modifyState(
                 visible ? OP_SET_STATE : OP_CLEAR_STATE, STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE);
     }
@@ -376,6 +373,7 @@ public class DreamOverlayStateController implements
      */
     public void setAvailableComplicationTypes(@Complication.ComplicationType int types) {
         mExecutor.execute(() -> {
+            mLogger.d(TAG, "Available complication types: " + types);
             mAvailableComplicationTypes = types;
             mCallbacks.forEach(Callback::onAvailableComplicationTypesChanged);
         });
@@ -393,6 +391,7 @@ public class DreamOverlayStateController implements
      */
     public void setShouldShowComplications(boolean shouldShowComplications) {
         mExecutor.execute(() -> {
+            mLogger.d(TAG, "Should show complications: " + shouldShowComplications);
             mShouldShowComplications = shouldShowComplications;
             mCallbacks.forEach(Callback::onAvailableComplicationTypesChanged);
         });

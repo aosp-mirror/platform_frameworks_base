@@ -113,6 +113,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     DreamOverlayStateController mDreamOverlayStateController;
     @Mock
     UserTracker mUserTracker;
+    @Mock
+    DreamLogger mLogger;
 
     @Captor
     private ArgumentCaptor<DreamOverlayStateController.Callback> mCallbackCaptor;
@@ -146,7 +148,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarWindowStateController,
                 mDreamOverlayStatusBarItemsProvider,
                 mDreamOverlayStateController,
-                mUserTracker);
+                mUserTracker,
+                mLogger);
     }
 
     @Test
@@ -289,7 +292,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarWindowStateController,
                 mDreamOverlayStatusBarItemsProvider,
                 mDreamOverlayStateController,
-                mUserTracker);
+                mUserTracker,
+                mLogger);
         controller.onViewAttached();
         verify(mView, never()).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());
