@@ -106,7 +106,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.ambientcontext.AmbientContextManagerService;
 import com.android.server.appbinding.AppBindingService;
 import com.android.server.appop.AppOpMigrationHelper;
 import com.android.server.appop.AppOpMigrationHelperImpl;
@@ -356,6 +355,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.selectiontoolbar.SelectionToolbarManagerService";
     private static final String MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.musicrecognition.MusicRecognitionManagerService";
+    private static final String AMBIENT_CONTEXT_MANAGER_SERVICE_CLASS =
+            "com.android.server.ambientcontext.AmbientContextManagerService";
     private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
             "com.android.server.systemcaptions.SystemCaptionsManagerService";
     private static final String TEXT_TO_SPEECH_MANAGER_SERVICE_CLASS =
@@ -1908,8 +1909,16 @@ public final class SystemServer implements Dumpable {
             startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
             startTextToSpeechManagerService(context, t);
-            startAmbientContextService(t);
             startWearableSensingService(t);
+
+            if (deviceHasConfigString(
+                    context, R.string.config_defaultAmbientContextDetectionService)) {
+                t.traceBegin("StartAmbientContextService");
+                mSystemServiceManager.startService(AMBIENT_CONTEXT_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+            } else {
+                Slog.d(TAG, "AmbientContextManagerService not defined by OEM or disabled by flag");
+            }
 
             // System Speech Recognition Service
             t.traceBegin("StartSpeechRecognitionManagerService");
@@ -3309,12 +3318,6 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(RotationResolverManagerService.class);
         t.traceEnd();
 
-    }
-
-    private void startAmbientContextService(@NonNull TimingsTraceAndSlog t) {
-        t.traceBegin("StartAmbientContextService");
-        mSystemServiceManager.startService(AmbientContextManagerService.class);
-        t.traceEnd();
     }
 
     private void startWearableSensingService(@NonNull TimingsTraceAndSlog t) {
