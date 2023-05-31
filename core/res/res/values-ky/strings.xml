@@ -46,7 +46,7 @@
     <string name="badPin" msgid="888372071306274355">"Терилген эски PIN код туура эмес."</string>
     <string name="badPuk" msgid="4232069163733147376">"Терилген PUK код туура эмес."</string>
     <string name="mismatchPin" msgid="2929611853228707473">"Терилген PIN\'дер дал келбейт."</string>
-    <string name="invalidPin" msgid="7542498253319440408">"Узундугу 4төн 8ге чейинки сандан турган PIN-кодду териңиз."</string>
+    <string name="invalidPin" msgid="7542498253319440408">"Узундугу 4төн 8ге чейинки сандан турган PIN кодду териңиз."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Узундугу 8 же көбүрөөк сандан турган PUK-кодду териңиз."</string>
     <string name="needPuk" msgid="7321876090152422918">"SIM картаңыз PUK менен кулпуланган. Кулпусун ачуу үчүн PUK-кодду териңиз."</string>
     <string name="needPuk2" msgid="7032612093451537186">"SIM картаны бөгөттөн чыгаруу үчүн PUK2 кодун териңиз."</string>
@@ -915,7 +915,7 @@
     <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"Сырсөздү терүү үчүн таптаңыз"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"Кулпуну ачуу үчүн сырсөздү териңиз"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Кулпуну ачуу үчүн PIN кодду териңиз"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"PIN-код туура эмес."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"PIN код туура эмес."</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"Кулпусун ачуу үчүн Менюну андан соң 0 баскычын басыңыз."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Өзгөчө кырдаалдар кызматы"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"Интернет жок"</string>
@@ -953,7 +953,7 @@
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM-карта бөгөттөн чыгарылууда…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Сырсөзүңүздү <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"PIN-кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"PIN кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес тартсаңыз, планшетиңиздин кулпусун Google\'га кирип ачууга туура келет.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Графикалык ачкычыңызды <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес чийдиңиз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, Android TV түзмөгүңүздүн кулпусун Google аккаунтуңузга кирип ачышыңыз керек болот.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секунддан кийин кайталап көрүңүз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес тартсаңыз, телефонуңуздун кулпусун Google\'га кирип ачууга туура келет.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
@@ -1001,7 +1001,7 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Үлгү менен ачуу."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Жүзүнөн таанып ачуу."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Пин код менен ачуу."</string>
-    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM-картанын кулпусун PIN-код менен ачуу."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM-картанын кулпусун PIN код менен ачуу."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM-картанын кулпусун PUK-код менен ачуу."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"Сырсөз менен ачуу."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"Үлгү аймагы."</string>
@@ -1404,7 +1404,7 @@
     <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Медиа сактагычты талдоо"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Жаңы <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> иштебей жатат"</string>
-    <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Жөндөө үчүн таптаңыз"</string>
+    <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Орнотуу үчүн басыңыз"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Жөндөө үчүн тандаңыз"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Түзмөктү форматташыңыз керек болушу мүмкүн. Чыгаруу үчүн таптап коюңуз."</string>
     <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Сүрөттөрдү, видеолорду, ырларды жана башкаларды сактоо үчүн керек"</string>
@@ -1640,17 +1640,17 @@
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Үлгү унутулду"</string>
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Графикалык ачкыч туура эмес"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Сырсөз туура эмес"</string>
-    <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN-код туура эмес"</string>
+    <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN код туура эмес"</string>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Бөгөттөн чыгаруу сүрөтүн тартыңыз"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM-картанын PIN\'ин киргизиңиз"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN\'ди киргизиңиз"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Сырсөз киргизиңиз"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM-карта азыр жарактан чыкты. Улантыш үчүн, PUK-кодду киргизиңиз. Көбүрөөк маалымат үчүн операторуңузга кайрылыңыз."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Сиз каалаган PIN-кодду териңиз"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Сиз каалаган PIN-кодду ырастаңыз"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Сиз каалаган PIN кодду териңиз"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Сиз каалаган PIN кодду ырастаңыз"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM-карта бөгөттөн чыгарылууда…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN-код туура эмес."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Узундугу 4төн 8ге чейинки сандан турган PIN-кодду териңиз."</string>
+    <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN код туура эмес."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Узундугу 4төн 8ге чейинки сандан турган PIN кодду териңиз."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-код 8 сандан турушу керек."</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Туура PUK-кодду кайрадан териңиз. Кайталанган аракеттер SIM картаны биротоло жараксыз кылат."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN-коддор туура келбеди"</string>
@@ -1662,7 +1662,7 @@
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Колдонуучу атыңыз же сырсөзүңүз туура эмес."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Колдонуучу атыңызды же сырсөзүңүздү унутуп калдыңызбы?\n"<b>"google.com/accounts/recovery"</b>" дарегине кайрылыңыз."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Эсеп текшерилүүдө…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Сиз PIN-кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин кайталаңыз."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Сиз PIN кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин кайталаңыз."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Сиз сырсөзүңүздү <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин кайталаңыз."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин кайталаңыз."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"Сиз планшетиңизди <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, планшет баштапкы абалына кайтарылат жана бардык берилиштериңиз өчүрүлөт."</string>

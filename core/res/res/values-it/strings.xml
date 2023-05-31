@@ -644,10 +644,10 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Luce insufficiente"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Allontana il telefono"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Avvicina il telefono"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Sposta il telefono più in alto"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Sposta il telefono più in basso"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta il telefono verso sinistra"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta il telefono verso destra"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Sposta lo smartphone più in alto"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Sposta lo smartphone più in basso"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta lo smartphone verso sinistra"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta lo smartphone verso destra"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Guarda più direttamente verso il dispositivo."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Volto non visible. Tieni lo smartphone all\'altezza degli occhi."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Troppo movimento. Tieni fermo il telefono."</string>
