@@ -224,8 +224,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isLaunchingActivityOverLockscreen();
 
-    boolean isWakeUpComingFromTouch();
-
     void onKeyguardViewManagerStatesUpdated();
 
     boolean isPulsing();

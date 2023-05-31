@@ -61,6 +61,7 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -69,6 +70,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEv
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
@@ -170,6 +172,7 @@ public class NotificationStackScrollLayoutController {
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
+    private final KeyguardInteractor mKeyguardInteractor;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     // TODO: CentralSurfaces should be encapsulated behind a Controller
     private final CentralSurfaces mCentralSurfaces;
@@ -558,7 +561,8 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public float getFalsingThresholdFactor() {
-                    return mCentralSurfaces.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
+                    return ShadeViewController.getFalsingThresholdFactor(
+                            mKeyguardInteractor.getWakefulnessModel().getValue());
                 }
 
                 @Override
@@ -622,6 +626,7 @@ public class NotificationStackScrollLayoutController {
             SysuiStatusBarStateController statusBarStateController,
             KeyguardMediaController keyguardMediaController,
             KeyguardBypassController keyguardBypassController,
+            KeyguardInteractor keyguardInteractor,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager lockscreenUserManager,
             Optional<NotificationListViewModel> nsslViewModel,
@@ -669,6 +674,7 @@ public class NotificationStackScrollLayoutController {
         mStatusBarStateController = statusBarStateController;
         mKeyguardMediaController = keyguardMediaController;
         mKeyguardBypassController = keyguardBypassController;
+        mKeyguardInteractor = keyguardInteractor;
         mZenModeController = zenModeController;
         mLockscreenUserManager = lockscreenUserManager;
         mViewModel = nsslViewModel;
