@@ -466,8 +466,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final LightRevealScrim mLightRevealScrim;
     private PowerButtonReveal mPowerButtonReveal;
 
-    private boolean mWakeUpComingFromTouch;
-
     /**
      * Whether we should delay the wakeup animation (which shows the notifications and moves the
      * clock view). This is typically done when waking up from a 'press to unlock' gesture on a
@@ -1625,7 +1623,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mDozing && mScreenOffAnimationController.allowWakeUpIfDozing()) {
             mPowerManager.wakeUp(
                     time, wakeReason, "com.android.systemui:" + why);
-            mWakeUpComingFromTouch = true;
             mFalsingCollector.onScreenOnFromTouch();
         }
     }
@@ -1802,11 +1799,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mIsLaunchingActivityOverLockscreen;
     }
 
-    @Override
-    public boolean isWakeUpComingFromTouch() {
-        return mWakeUpComingFromTouch;
-    }
-
     /**
      * To be called when there's a state change in StatusBarKeyguardViewManager.
      */
@@ -1935,7 +1927,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     SystemClock.uptimeMillis(),
                     PowerManager.WAKE_REASON_APPLICATION,
                     "com.android.systemui:full_screen_intent");
-            mWakeUpComingFromTouch = false;
         }
     }
 
@@ -3116,7 +3107,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             releaseGestureWakeLock();
             mLaunchCameraWhenFinishedWaking = false;
             mDeviceInteractive = false;
-            mWakeUpComingFromTouch = false;
             updateVisibleToUser();
 
             updateNotificationPanelTouchState();

@@ -58,6 +58,9 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
+import com.android.systemui.keyguard.shared.model.WakeSleepReason;
+import com.android.systemui.keyguard.shared.model.WakefulnessModel;
+import com.android.systemui.keyguard.shared.model.WakefulnessState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
@@ -1161,5 +1164,44 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     public void shadeExpanded_whenUnlockedOffscreenAnimationRunning() {
         when(mUnlockedScreenOffAnimationController.isAnimationPlaying()).thenReturn(true);
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void getFalsingThreshold_deviceNotInteractive_isQsThreshold() {
+        mFakeKeyguardRepository.setWakefulnessModel(
+                new WakefulnessModel(
+                        WakefulnessState.ASLEEP,
+                        /* lastWakeReason= */ WakeSleepReason.TAP,
+                        /* lastSleepReason= */ WakeSleepReason.POWER_BUTTON)
+        );
+        when(mQsController.getFalsingThreshold()).thenReturn(14);
+
+        assertThat(mNotificationPanelViewController.getFalsingThreshold()).isEqualTo(14);
+    }
+
+    @Test
+    public void getFalsingThreshold_lastWakeNotDueToTouch_isQsThreshold() {
+        mFakeKeyguardRepository.setWakefulnessModel(
+                new WakefulnessModel(
+                        WakefulnessState.AWAKE,
+                        /* lastWakeReason= */ WakeSleepReason.POWER_BUTTON,
+                        /* lastSleepReason= */ WakeSleepReason.POWER_BUTTON)
+        );
+        when(mQsController.getFalsingThreshold()).thenReturn(14);
+
+        assertThat(mNotificationPanelViewController.getFalsingThreshold()).isEqualTo(14);
+    }
+
+    @Test
+    public void getFalsingThreshold_lastWakeDueToTouch_greaterThanQsThreshold() {
+        mFakeKeyguardRepository.setWakefulnessModel(
+                new WakefulnessModel(
+                        WakefulnessState.AWAKE,
+                        /* lastWakeReason= */ WakeSleepReason.TAP,
+                        /* lastSleepReason= */ WakeSleepReason.POWER_BUTTON)
+        );
+        when(mQsController.getFalsingThreshold()).thenReturn(14);
+
+        assertThat(mNotificationPanelViewController.getFalsingThreshold()).isGreaterThan(14);
     }
 }

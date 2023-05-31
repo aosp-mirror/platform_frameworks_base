@@ -27,7 +27,11 @@ data class WakefulnessModel(
 
     fun isStartingToSleep() = state == WakefulnessState.STARTING_TO_SLEEP
 
-    fun isStartingToSleepOrAsleep() = isStartingToSleep() || state == WakefulnessState.ASLEEP
+    private fun isAsleep() = state == WakefulnessState.ASLEEP
+
+    fun isStartingToSleepOrAsleep() = isStartingToSleep() || isAsleep()
+
+    fun isDeviceInteractive() = !isAsleep()
 
     fun isStartingToSleepFromPowerButton() =
         isStartingToSleep() && lastWakeReason == WakeSleepReason.POWER_BUTTON
@@ -40,6 +44,11 @@ data class WakefulnessModel(
 
     fun isAwakeFromTap() =
         state == WakefulnessState.STARTING_TO_WAKE && lastWakeReason == WakeSleepReason.TAP
+
+    fun isDeviceInteractiveFromTapOrGesture(): Boolean {
+        return isDeviceInteractive() &&
+            (lastWakeReason == WakeSleepReason.TAP || lastWakeReason == WakeSleepReason.GESTURE)
+    }
 
     companion object {
         fun fromWakefulnessLifecycle(wakefulnessLifecycle: WakefulnessLifecycle): WakefulnessModel {
