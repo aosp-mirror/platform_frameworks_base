@@ -175,7 +175,7 @@ IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
 
     {
         ATRACE_NAME("flush commands");
-        surface->flushAndSubmit();
+        skgpu::ganesh::FlushAndSubmit(surface);
     }
     layerUpdateQueue->clear();
 
