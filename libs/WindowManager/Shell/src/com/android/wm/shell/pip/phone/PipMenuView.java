@@ -45,6 +45,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -513,13 +514,19 @@ public class PipMenuView extends FrameLayout {
                     final boolean isCloseAction = mCloseAction != null && Objects.equals(
                             mCloseAction.getActionIntent(), action.getActionIntent());
 
-                    // TODO: Check if the action drawable has changed before we reload it
-                    action.getIcon().loadDrawableAsync(mContext, d -> {
-                        if (d != null) {
-                            d.setTint(Color.WHITE);
-                            actionView.setImageDrawable(d);
-                        }
-                    }, mMainHandler);
+                    final int iconType = action.getIcon().getType();
+                    if (iconType == Icon.TYPE_URI || iconType == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+                        // Disallow loading icon from content URI
+                        actionView.setImageDrawable(null);
+                    } else {
+                        // TODO: Check if the action drawable has changed before we reload it
+                        action.getIcon().loadDrawableAsync(mContext, d -> {
+                            if (d != null) {
+                                d.setTint(Color.WHITE);
+                                actionView.setImageDrawable(d);
+                            }
+                        }, mMainHandler);
+                    }
                     actionView.setCustomCloseBackgroundVisibility(
                             isCloseAction ? View.VISIBLE : View.GONE);
                     actionView.setContentDescription(action.getContentDescription());
