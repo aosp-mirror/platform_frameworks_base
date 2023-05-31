@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Ansiktet er autentisert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bekreftet"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Trykk på Bekreft for å fullføre"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Låst opp med ansiktet."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Låst opp med ansiktet. Trykk for å fortsette."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ansiktet er gjenkjent. Trykk for å fortsette."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ansiktet er gjenkjent. Trykk på lås opp-ikon for å fortsette"</string>
@@ -860,8 +859,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Forstørr hele skjermen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Forstørr en del av skjermen"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Åpne innstillinger for forstørring"</string>
-    <!-- no translation found for magnification_close_settings_click_label (4642477260651704517) -->
-    <skip />
+    <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Lukk forstørringsinnstillingene"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Dra hjørnet for å endre størrelse"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Tillat diagonal rulling"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Endre størrelse"</string>
@@ -1110,7 +1108,10 @@
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistenten lytter"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# varsel}other{# varsler}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <string name="note_task_button_label" msgid="8718616095800343136">"Notatskriving"</string>
+    <!-- no translation found for note_task_button_label (230135078402003532) -->
+    <skip />
+    <!-- no translation found for note_task_shortcut_long_label (7729325091147319409) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Kringkaster"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Vil du stoppe kringkastingen av <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Hvis du kringkaster <xliff:g id="SWITCHAPP">%1$s</xliff:g> eller endrer utgangen, stopper den nåværende kringkastingen din"</string>
