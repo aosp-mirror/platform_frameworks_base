@@ -225,7 +225,6 @@ public class DisplayPolicy {
     /** Currently it can only be non-null when physical display switch happens. */
     private DecorInsets.Cache mCachedDecorInsets;
 
-    @WindowManagerFuncs.LidState
     private volatile int mLidState = LID_ABSENT;
     private volatile int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private volatile boolean mHdmiPlugged;
@@ -753,11 +752,10 @@ public class DisplayPolicy {
         return mNavigationBarCanMove;
     }
 
-    public void setLidState(@WindowManagerFuncs.LidState int lidState) {
+    public void setLidState(int lidState) {
         mLidState = lidState;
     }
 
-    @WindowManagerFuncs.LidState
     public int getLidState() {
         return mLidState;
     }
