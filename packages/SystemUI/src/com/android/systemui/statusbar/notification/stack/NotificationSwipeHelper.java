@@ -34,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -545,14 +546,17 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         private final FeatureFlags mFeatureFlags;
         private NotificationCallback mNotificationCallback;
         private NotificationMenuRowPlugin.OnMenuEventListener mOnMenuEventListener;
+        private DumpManager mDumpManager;
         private NotificationRoundnessManager mNotificationRoundnessManager;
 
         @Inject
         Builder(@Main Resources resources, ViewConfiguration viewConfiguration,
+                DumpManager dumpManager,
                 FalsingManager falsingManager, FeatureFlags featureFlags,
                 NotificationRoundnessManager notificationRoundnessManager) {
             mResources = resources;
             mViewConfiguration = viewConfiguration;
+            mDumpManager = dumpManager;
             mFalsingManager = falsingManager;
             mFeatureFlags = featureFlags;
             mNotificationRoundnessManager = notificationRoundnessManager;
@@ -570,9 +574,12 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         }
 
         NotificationSwipeHelper build() {
-            return new NotificationSwipeHelper(mResources, mViewConfiguration, mFalsingManager,
+            NotificationSwipeHelper swipeHelper = new NotificationSwipeHelper(
+                    mResources, mViewConfiguration, mFalsingManager,
                     mFeatureFlags, mNotificationCallback, mOnMenuEventListener,
                     mNotificationRoundnessManager);
+            mDumpManager.registerDumpable(swipeHelper);
+            return swipeHelper;
         }
     }
 }
