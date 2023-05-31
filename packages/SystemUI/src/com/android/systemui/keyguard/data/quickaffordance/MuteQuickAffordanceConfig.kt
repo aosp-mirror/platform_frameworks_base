@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.RingerModeTracker
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -45,30 +46,32 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @SysUISingleton
-class MuteQuickAffordanceConfig @Inject constructor(
-        context: Context,
-        private val userTracker: UserTracker,
-        private val userFileManager: UserFileManager,
-        private val ringerModeTracker: RingerModeTracker,
-        private val audioManager: AudioManager,
-        @Application private val coroutineScope: CoroutineScope,
-        @Main private val mainDispatcher: CoroutineDispatcher,
-        @Background private val backgroundDispatcher: CoroutineDispatcher,
+class MuteQuickAffordanceConfig
+@Inject
+constructor(
+    private val context: Context,
+    private val userTracker: UserTracker,
+    private val userFileManager: UserFileManager,
+    private val ringerModeTracker: RingerModeTracker,
+    private val audioManager: AudioManager,
+    @Application private val coroutineScope: CoroutineScope,
+    @Main private val mainDispatcher: CoroutineDispatcher,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : KeyguardQuickAffordanceConfig {
 
     private var previousNonSilentMode: Int = DEFAULT_LAST_NON_SILENT_VALUE
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.MUTE
 
-    override val pickerName: String = context.getString(R.string.volume_ringer_status_silent)
+    override fun pickerName(): String = context.getString(R.string.volume_ringer_status_silent)
 
     override val pickerIconResourceId: Int = R.drawable.ic_notifications_silence
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
-        ringerModeTracker.ringerModeInternal.asFlow()
+        ringerModeTracker.ringerModeInternal
+            .asFlow()
             .onStart { getLastNonSilentRingerMode() }
             .distinctUntilChanged()
             .onEach { mode ->
@@ -78,17 +81,14 @@ class MuteQuickAffordanceConfig @Inject constructor(
                 }
             }
             .map { mode ->
-                val (activationState, contentDescriptionRes) = when {
-                    audioManager.isVolumeFixed ->
-                        ActivationState.NotSupported to
-                            R.string.volume_ringer_hint_mute
-                    mode == AudioManager.RINGER_MODE_SILENT ->
-                        ActivationState.Active to
-                            R.string.volume_ringer_hint_mute
-                    else ->
-                        ActivationState.Inactive to
-                            R.string.volume_ringer_hint_unmute
-                }
+                val (activationState, contentDescriptionRes) =
+                    when {
+                        audioManager.isVolumeFixed ->
+                            ActivationState.NotSupported to R.string.volume_ringer_hint_mute
+                        mode == AudioManager.RINGER_MODE_SILENT ->
+                            ActivationState.Active to R.string.volume_ringer_hint_mute
+                        else -> ActivationState.Inactive to R.string.volume_ringer_hint_unmute
+                    }
 
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     Icon.Resource(
@@ -130,28 +130,31 @@ class MuteQuickAffordanceConfig @Inject constructor(
         }
 
     /**
-     * Gets the last non-silent ringer mode from shared-preferences if it exists. This is
-     *  cached by [MuteQuickAffordanceCoreStartable] while this affordance is selected
+     * Gets the last non-silent ringer mode from shared-preferences if it exists. This is cached by
+     * [MuteQuickAffordanceCoreStartable] while this affordance is selected
      */
     private suspend fun getLastNonSilentRingerMode(): Int =
         withContext(backgroundDispatcher) {
-            userFileManager.getSharedPreferences(
+            userFileManager
+                .getSharedPreferences(
                     MUTE_QUICK_AFFORDANCE_PREFS_FILE_NAME,
                     Context.MODE_PRIVATE,
                     userTracker.userId
-            ).getInt(
+                )
+                .getInt(
                     LAST_NON_SILENT_RINGER_MODE_KEY,
                     ringerModeTracker.ringerModeInternal.value ?: DEFAULT_LAST_NON_SILENT_VALUE
-            )
+                )
         }
 
     private fun <T> LiveData<T>.asFlow(): Flow<T?> =
         conflatedCallbackFlow {
-            val observer = Observer { value: T -> trySend(value) }
-            observeForever(observer)
-            send(value)
-            awaitClose { removeObserver(observer) }
-        }.flowOn(mainDispatcher)
+                val observer = Observer { value: T -> trySend(value) }
+                observeForever(observer)
+                send(value)
+                awaitClose { removeObserver(observer) }
+            }
+            .flowOn(mainDispatcher)
 
     companion object {
         const val LAST_NON_SILENT_RINGER_MODE_KEY = "key_last_non_silent_ringer_mode"
