@@ -80,6 +80,7 @@ import java.util.List;
  */
 public class VpnManagerService extends IVpnManager.Stub {
     private static final String TAG = VpnManagerService.class.getSimpleName();
+    private static final String CONTEXT_ATTRIBUTION_TAG = "VPN_MANAGER";
 
     @VisibleForTesting
     protected final HandlerThread mHandlerThread;
@@ -157,7 +158,7 @@ public class VpnManagerService extends IVpnManager.Stub {
     }
 
     public VpnManagerService(Context context, Dependencies deps) {
-        mContext = context;
+        mContext = context.createAttributionContext(CONTEXT_ATTRIBUTION_TAG);
         mDeps = deps;
         mHandlerThread = mDeps.makeHandlerThread();
         mHandlerThread.start();
