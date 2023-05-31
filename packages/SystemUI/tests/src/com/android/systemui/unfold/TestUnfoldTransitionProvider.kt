@@ -4,7 +4,7 @@ import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionPr
 
 class TestUnfoldTransitionProvider : UnfoldTransitionProgressProvider, TransitionProgressListener {
 
-    private val listeners = arrayListOf<TransitionProgressListener>()
+    private val listeners = mutableListOf<TransitionProgressListener>()
 
     override fun destroy() {
         listeners.clear()
