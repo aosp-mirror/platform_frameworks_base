@@ -586,7 +586,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Podatki za profil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Preden lahko ustvarite profil z omejitvami, morate nastaviti zaklepanje zaslona, da zaščitite aplikacije in osebne podatke."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Nastavi zaklepanje"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Preklopi na račun <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Preklopi na uporabnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Ustvarjanje novega uporabnika …"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Ustvarjanje novega gosta …"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Ustvarjanje novega uporabnika ni uspelo."</string>
