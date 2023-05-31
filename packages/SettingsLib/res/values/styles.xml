@@ -17,6 +17,7 @@
 <resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <style name="TextAppearanceSmall">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
     <style name="TextAppearanceMedium">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
@@ -91,7 +92,7 @@
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="DialogButtonPositive"  xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    <style name="DialogButtonPositive">
         <item name="android:buttonCornerRadius">0dp</item>
         <item name="android:background">@drawable/dialog_btn_filled</item>
         <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
@@ -105,7 +106,6 @@
     <style name="DialogButtonNegative">
         <item name="android:buttonCornerRadius">28dp</item>
         <item name="android:background">@drawable/dialog_btn_outline</item>
-        <item name="android:buttonCornerRadius">28dp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
