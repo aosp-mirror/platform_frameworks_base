@@ -36,6 +36,7 @@ import android.widget.FrameLayout
 import com.android.app.animation.Interpolators
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CujType
+import com.android.systemui.animation.view.LaunchableFrameLayout
 import com.android.systemui.util.registerAnimationOnBackInvoked
 import kotlin.math.roundToInt
 

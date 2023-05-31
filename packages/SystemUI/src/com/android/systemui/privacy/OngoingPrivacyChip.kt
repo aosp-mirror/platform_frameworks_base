@@ -25,7 +25,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import com.android.settingslib.Utils
 import com.android.systemui.R
-import com.android.systemui.animation.LaunchableFrameLayout
+import com.android.systemui.animation.view.LaunchableFrameLayout
 import com.android.systemui.statusbar.events.BackgroundAnimatableView
 
 class OngoingPrivacyChip @JvmOverloads constructor(
