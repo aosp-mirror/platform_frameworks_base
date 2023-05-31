@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Üz doğrulandı"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Təsdiqləndi"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tamamlamaq üçün \"Təsdiq edin\" seçiminə toxunun"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Üz ilə kiliddən çıxarılıb."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Üz ilə kiliddən çıxarılıb. Davam etmək üçün basın."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Üz tanınıb. Davam etmək üçün basın."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Üz tanınıb. \"Kiliddən çıxar\" ikonasına basıb davam edin."</string>
