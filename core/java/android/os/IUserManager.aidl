@@ -60,6 +60,7 @@ interface IUserManager {
     ParcelFileDescriptor getUserIcon(int userId);
     UserInfo getPrimaryUser();
     int getMainUserId();
+    int getCommunalProfileId();
     int getPreviousFullUserToEnterForeground();
     List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying, boolean excludePreCreated);
     List<UserInfo> getProfiles(int userId, boolean enabledOnly);

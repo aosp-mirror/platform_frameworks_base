@@ -166,6 +166,12 @@ public class UserManager {
     public static final String USER_TYPE_PROFILE_TEST = "android.os.usertype.profile.TEST";
 
     /**
+     * User type representing a communal profile, which is shared by all users of the device.
+     * @hide
+     */
+    public static final String USER_TYPE_PROFILE_COMMUNAL = "android.os.usertype.profile.COMMUNAL";
+
+    /**
      * User type representing a {@link UserHandle#USER_SYSTEM system} user that is <b>not</b> a
      * human user.
      * This type of user cannot be created; it can only pre-exist on first boot.
@@ -2384,6 +2390,16 @@ public class UserManager {
     }
 
     /**
+     * Returns whether the device is configured to support a Communal Profile.
+     * @hide
+     */
+    public static boolean isCommunalProfileEnabled() {
+        return SystemProperties.getBoolean("persist.fw.omnipresent_communal_user",
+                Resources.getSystem()
+                        .getBoolean(com.android.internal.R.bool.config_omnipresentCommunalUser));
+    }
+
+    /**
      * Returns whether multiple admins are enabled on the device
      * @hide
      */
@@ -2690,6 +2706,38 @@ public class UserManager {
             throw re.rethrowFromSystemServer();
         }
     }
+    /**
+     * Returns the designated "communal profile" of the device, or {@code null} if there is none.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
+    public @Nullable UserHandle getCommunalProfile() {
+        try {
+            final int userId = mService.getCommunalProfileId();
+            if (userId == UserHandle.USER_NULL) {
+                return null;
+            }
+            return UserHandle.of(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@code true} if the given user is the designated "communal profile" of the device.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
+    public boolean isCommunalProfile(@UserIdInt int userId) {
+        final UserInfo user = getUserInfo(userId);
+        return user != null && user.isCommunalProfile();
+    }
 
     /**
      * Used to check if the context user is an admin user. An admin user may be allowed to
@@ -2789,6 +2837,15 @@ public class UserManager {
      */
     public static boolean isUserTypeCloneProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_CLONE.equals(userType);
+    }
+
+    /**
+     * Returns whether the user type is a
+     * {@link UserManager#USER_TYPE_PROFILE_COMMUNAL communal profile}.
+     * @hide
+     */
+    public static boolean isUserTypeCommunalProfile(@Nullable String userType) {
+        return USER_TYPE_PROFILE_COMMUNAL.equals(userType);
     }
 
     /**
@@ -3238,6 +3295,7 @@ public class UserManager {
      *   <li>(Running) profiles of the current foreground user.
      *   <li>Background users assigned to secondary displays (for example, passenger users on
      *   automotive builds, using the display associated with their seats).
+     *   <li>A communal profile, if present.
      * </ol>
      *
      * @return whether the user is visible at the moment, as defined above.

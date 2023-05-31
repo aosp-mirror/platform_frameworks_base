@@ -67,6 +67,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .setMediaSharedWithParent(false)
                 .setCredentialShareableWithParent(true)
                 .setDeleteAppWithParent(false)
+                .setAlwaysVisible(false)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
@@ -78,6 +79,7 @@ public class UserManagerServiceUserPropertiesTest {
         actualProps.setMediaSharedWithParent(true);
         actualProps.setCredentialShareableWithParent(false);
         actualProps.setDeleteAppWithParent(true);
+        actualProps.setAlwaysVisible(true);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -119,6 +121,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .setInheritDevicePolicy(1732)
                 .setMediaSharedWithParent(true)
                 .setDeleteAppWithParent(true)
+                .setAlwaysVisible(true)
                 .build();
         final UserProperties orig = new UserProperties(defaultProps);
         orig.setShowInLauncher(2841);
@@ -126,6 +129,7 @@ public class UserManagerServiceUserPropertiesTest {
         orig.setShowInSettings(1437);
         orig.setInheritDevicePolicy(9456);
         orig.setDeleteAppWithParent(false);
+        orig.setAlwaysVisible(false);
 
         // Test every permission level. (Currently, it's linear so it's easy.)
         for (int permLevel = 0; permLevel < 4; permLevel++) {
@@ -169,6 +173,7 @@ public class UserManagerServiceUserPropertiesTest {
                 copy::getCrossProfileIntentResolutionStrategy, exposeAll);
         assertEqualGetterOrThrows(orig::getDeleteAppWithParent,
                 copy::getDeleteAppWithParent, exposeAll);
+        assertEqualGetterOrThrows(orig::getAlwaysVisible, copy::getAlwaysVisible, exposeAll);
 
         // Items requiring hasManagePermission - put them here using hasManagePermission.
         assertEqualGetterOrThrows(orig::getShowInSettings, copy::getShowInSettings,
@@ -234,5 +239,6 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.isCredentialShareableWithParent())
                 .isEqualTo(actual.isCredentialShareableWithParent());
         assertThat(expected.getDeleteAppWithParent()).isEqualTo(actual.getDeleteAppWithParent());
+        assertThat(expected.getAlwaysVisible()).isEqualTo(actual.getAlwaysVisible());
     }
 }

@@ -62,6 +62,7 @@ public final class UserProperties implements Parcelable {
     private static final String ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT =
             "credentialShareableWithParent";
     private static final String ATTR_DELETE_APP_WITH_PARENT = "deleteAppWithParent";
+    private static final String ATTR_ALWAYS_VISIBLE = "alwaysVisible";
 
     /** Index values of each property (to indicate whether they are present in this object). */
     @IntDef(prefix = "INDEX_", value = {
@@ -76,6 +77,7 @@ public final class UserProperties implements Parcelable {
             INDEX_MEDIA_SHARED_WITH_PARENT,
             INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT,
             INDEX_DELETE_APP_WITH_PARENT,
+            INDEX_ALWAYS_VISIBLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -91,6 +93,7 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_MEDIA_SHARED_WITH_PARENT = 8;
     private static final int INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT = 9;
     private static final int INDEX_DELETE_APP_WITH_PARENT = 10;
+    private static final int INDEX_ALWAYS_VISIBLE = 11;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -316,6 +319,7 @@ public final class UserProperties implements Parcelable {
                     orig.getCrossProfileIntentFilterAccessControl());
             setCrossProfileIntentResolutionStrategy(orig.getCrossProfileIntentResolutionStrategy());
             setDeleteAppWithParent(orig.getDeleteAppWithParent());
+            setAlwaysVisible(orig.getAlwaysVisible());
         }
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
@@ -438,6 +442,24 @@ public final class UserProperties implements Parcelable {
         setPresent(INDEX_DELETE_APP_WITH_PARENT);
     }
     private boolean mDeleteAppWithParent;
+
+    /**
+     * Returns whether the user should always
+     * be {@link android.os.UserManager#isUserVisible() visible}.
+     * The intended usage is for the Communal Profile, which is running and accessible at all times.
+     * @hide
+     */
+    public boolean getAlwaysVisible() {
+        if (isPresent(INDEX_ALWAYS_VISIBLE)) return mAlwaysVisible;
+        if (mDefaultProperties != null) return mDefaultProperties.mAlwaysVisible;
+        throw new SecurityException("You don't have permission to query alwaysVisible");
+    }
+    /** @hide */
+    public void setAlwaysVisible(boolean val) {
+        this.mAlwaysVisible = val;
+        setPresent(INDEX_ALWAYS_VISIBLE);
+    }
+    private boolean mAlwaysVisible;
 
     /**
      * Return whether, and how, select user restrictions or device policies should be inherited
@@ -632,6 +654,7 @@ public final class UserProperties implements Parcelable {
                 + ", mMediaSharedWithParent=" + isMediaSharedWithParent()
                 + ", mCredentialShareableWithParent=" + isCredentialShareableWithParent()
                 + ", mDeleteAppWithParent=" + getDeleteAppWithParent()
+                + ", mAlwaysVisible=" + getAlwaysVisible()
                 + "}";
     }
 
@@ -658,6 +681,7 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mCredentialShareableWithParent="
                 + isCredentialShareableWithParent());
         pw.println(prefix + "    mDeleteAppWithParent=" + getDeleteAppWithParent());
+        pw.println(prefix + "    mAlwaysVisible=" + getAlwaysVisible());
     }
 
     /**
@@ -724,6 +748,9 @@ public final class UserProperties implements Parcelable {
                 case ATTR_DELETE_APP_WITH_PARENT:
                     setDeleteAppWithParent(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_ALWAYS_VISIBLE:
+                    setAlwaysVisible(parser.getAttributeBoolean(i));
+                    break;
                 default:
                     Slog.w(LOG_TAG, "Skipping unknown property " + attributeName);
             }
@@ -783,6 +810,10 @@ public final class UserProperties implements Parcelable {
             serializer.attributeBoolean(null, ATTR_DELETE_APP_WITH_PARENT,
                     mDeleteAppWithParent);
         }
+        if (isPresent(INDEX_ALWAYS_VISIBLE)) {
+            serializer.attributeBoolean(null, ATTR_ALWAYS_VISIBLE,
+                    mAlwaysVisible);
+        }
     }
 
     // For use only with an object that has already had any permission-lacking fields stripped out.
@@ -800,6 +831,7 @@ public final class UserProperties implements Parcelable {
         dest.writeBoolean(mMediaSharedWithParent);
         dest.writeBoolean(mCredentialShareableWithParent);
         dest.writeBoolean(mDeleteAppWithParent);
+        dest.writeBoolean(mAlwaysVisible);
     }
 
     /**
@@ -821,6 +853,7 @@ public final class UserProperties implements Parcelable {
         mMediaSharedWithParent = source.readBoolean();
         mCredentialShareableWithParent = source.readBoolean();
         mDeleteAppWithParent = source.readBoolean();
+        mAlwaysVisible = source.readBoolean();
     }
 
     @Override
@@ -859,6 +892,7 @@ public final class UserProperties implements Parcelable {
         private boolean mMediaSharedWithParent = false;
         private boolean mCredentialShareableWithParent = false;
         private boolean mDeleteAppWithParent = false;
+        private boolean mAlwaysVisible = false;
 
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
@@ -926,6 +960,12 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
+        /** Sets the value for {@link #mAlwaysVisible}*/
+        public Builder setAlwaysVisible(boolean alwaysVisible) {
+            mAlwaysVisible = alwaysVisible;
+            return this;
+        }
+
         /** Builds a UserProperties object with *all* values populated. */
         public UserProperties build() {
             return new UserProperties(
@@ -939,7 +979,8 @@ public final class UserProperties implements Parcelable {
                     mCrossProfileIntentResolutionStrategy,
                     mMediaSharedWithParent,
                     mCredentialShareableWithParent,
-                    mDeleteAppWithParent);
+                    mDeleteAppWithParent,
+                    mAlwaysVisible);
         }
     } // end Builder
 
@@ -954,7 +995,8 @@ public final class UserProperties implements Parcelable {
             @CrossProfileIntentResolutionStrategy int crossProfileIntentResolutionStrategy,
             boolean mediaSharedWithParent,
             boolean credentialShareableWithParent,
-            boolean deleteAppWithParent) {
+            boolean deleteAppWithParent,
+            boolean alwaysVisible) {
         mDefaultProperties = null;
         setShowInLauncher(showInLauncher);
         setStartWithParent(startWithParent);
@@ -967,5 +1009,6 @@ public final class UserProperties implements Parcelable {
         setMediaSharedWithParent(mediaSharedWithParent);
         setCredentialShareableWithParent(credentialShareableWithParent);
         setDeleteAppWithParent(deleteAppWithParent);
+        setAlwaysVisible(alwaysVisible);
     }
 }

@@ -588,4 +588,10 @@ public abstract class UserManagerInternal {
      */
     public abstract @UserIdInt int getBootUser(boolean waitUntilSet)
             throws UserManager.CheckedUserOperationException;
+
+    /**
+     * Returns the user id of the communal profile, or {@link android.os.UserHandle#USER_NULL}
+     * if there is no such user.
+     */
+    public abstract @UserIdInt int getCommunalProfileId();
 }

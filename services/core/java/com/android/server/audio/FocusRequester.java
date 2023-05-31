@@ -18,15 +18,19 @@ package com.android.server.audio;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.UserProperties;
 import android.media.AudioAttributes;
 import android.media.AudioFocusInfo;
 import android.media.AudioManager;
 import android.media.IAudioFocusDispatcher;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalServices;
 import com.android.server.audio.MediaFocusControl.AudioFocusDeathHandler;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.PrintWriter;
 
@@ -164,6 +168,12 @@ public class FocusRequester {
 
     boolean hasSameUid(int uid) {
         return mCallingUid == uid;
+    }
+
+    boolean isAlwaysVisibleUser() {
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final UserProperties properties = umi.getUserProperties(UserHandle.getUserId(mCallingUid));
+        return properties != null && properties.getAlwaysVisible();
     }
 
     int getClientUid() {

@@ -290,6 +290,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConstrainDisplayApisConfig;
 import android.content.pm.PackageManager;
+import android.content.pm.UserProperties;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -366,6 +367,7 @@ import com.android.server.am.AppTimeTracker;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.display.color.ColorDisplayService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
@@ -720,6 +722,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mShowWhenLocked;
     private boolean mInheritShownWhenLocked;
     private boolean mTurnScreenOn;
+
+    /**
+     * Whether the user is always-visible (e.g. a communal profile). Activities for such users
+     * are treated as visible regardless of what user is in the foreground, and can appear
+     * over the lockscreen.
+     */
+    private final boolean mIsUserAlwaysVisible;
 
     /** Allow activity launches which would otherwise be blocked by
      * {@link ActivityTransitionSecurityController#checkActivityAllowedToStart}
@@ -2032,7 +2041,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 .getBoolean(R.bool.config_isCameraCompatControlForStretchedIssuesEnabled);
 
         mTargetSdk = info.applicationInfo.targetSdkVersion;
-        mShowForAllUsers = (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0;
+
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final UserProperties properties = umi.getUserProperties(mUserId);
+        mIsUserAlwaysVisible =  properties != null && properties.getAlwaysVisible();
+
+        mShowForAllUsers = (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0 || mIsUserAlwaysVisible;
         setOrientation(info.screenOrientation);
         mRotationAnimationHint = info.rotationAnimation;
 
@@ -4622,7 +4636,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @return {@code true} if the activity windowing mode is not in
      *         {@link android.app.WindowConfiguration#WINDOWING_MODE_PINNED} and a) activity
      *         contains windows that have {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set or if the
-     *         activity has set {@link #mShowWhenLocked}, or b) if the activity has set
+     *         activity has set {@link #mShowWhenLocked}, or if its user
+     *         is {@link #mIsUserAlwaysVisible always-visible} or b) if the activity has set
      *         {@link #mInheritShownWhenLocked} and the activity behind this satisfies the
      *         conditions a) above.
      *         Multi-windowing mode will be exited if {@code true} is returned.
@@ -4631,15 +4646,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (r == null || r.getTaskFragment() == null) {
             return false;
         }
-        if (!r.inPinnedWindowingMode() && (r.mShowWhenLocked || r.containsShowWhenLockedWindow())) {
+        if (canShowWhenLockedInner(r)) {
             return true;
         } else if (r.mInheritShownWhenLocked) {
             final ActivityRecord activity = r.getTaskFragment().getActivityBelow(r);
-            return activity != null && !activity.inPinnedWindowingMode()
-                    && (activity.mShowWhenLocked || activity.containsShowWhenLockedWindow());
+            return activity != null && canShowWhenLockedInner(activity);
         } else {
             return false;
         }
+    }
+
+    /** @see #canShowWhenLocked(ActivityRecord) */
+    private static boolean canShowWhenLockedInner(@NonNull ActivityRecord r) {
+        return !r.inPinnedWindowingMode() &&
+                (r.mShowWhenLocked || r.containsShowWhenLockedWindow() || r.mIsUserAlwaysVisible);
     }
 
     /**

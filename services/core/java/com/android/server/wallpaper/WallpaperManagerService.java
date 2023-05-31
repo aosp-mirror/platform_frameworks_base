@@ -2116,8 +2116,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     continue;
                 }
 
-                // ignore managed profiles
-                if (user.isManagedProfile()) {
+                // ignore profiles
+                if (user.isProfile()) {
                     continue;
                 }
                 WallpaperData wd = mWallpaperMap.get(user.id);

@@ -297,6 +297,7 @@ class UserController implements Handler.Callback {
 
     /**
      * Mapping from each known user ID to the profile group ID it is associated with.
+     * <p>Users not present in this array have a profile group of NO_PROFILE_GROUP_ID.
      */
     @GuardedBy("mLock")
     private final SparseIntArray mUserProfileGroupIds = new SparseIntArray();
@@ -490,9 +491,7 @@ class UserController implements Handler.Callback {
         mHandler.post(() -> {
             finishUserBoot(uss);
             startProfiles();
-            synchronized (mLock) {
-                stopRunningUsersLU(mMaxRunningUsers);
-            }
+            stopExcessRunningUsers();
         });
     }
 
@@ -516,14 +515,31 @@ class UserController implements Handler.Callback {
         return runningUsers;
     }
 
+    private void stopExcessRunningUsers() {
+        final ArraySet<Integer> exemptedUsers = new ArraySet<>();
+        final List<UserInfo> users = mInjector.getUserManager().getUsers(true);
+        for (int i = 0; i < users.size(); i++) {
+            final int userId = users.get(i).id;
+            if (isAlwaysVisibleUser(userId)) {
+                exemptedUsers.add(userId);
+            }
+        }
+
+        synchronized (mLock) {
+            stopExcessRunningUsersLU(mMaxRunningUsers, exemptedUsers);
+        }
+    }
+
     @GuardedBy("mLock")
-    private void stopRunningUsersLU(int maxRunningUsers) {
+    private void stopExcessRunningUsersLU(int maxRunningUsers, ArraySet<Integer> exemptedUsers) {
         List<Integer> currentlyRunning = getRunningUsersLU();
         Iterator<Integer> iterator = currentlyRunning.iterator();
         while (currentlyRunning.size() > maxRunningUsers && iterator.hasNext()) {
             Integer userId = iterator.next();
-            if (userId == UserHandle.USER_SYSTEM || userId == mCurrentUserId) {
-                // Owner/System user and current user can't be stopped
+            if (userId == UserHandle.USER_SYSTEM
+                    || userId == mCurrentUserId
+                    || exemptedUsers.contains(userId)) {
+                // System and current users can't be stopped, and an exempt user shouldn't be
                 continue;
             }
             // allowDelayedLocking set here as stopping user is done without any explicit request
@@ -601,22 +617,18 @@ class UserController implements Handler.Callback {
             }
         }
 
-        // We need to delay unlocking managed profiles until the parent user
-        // is also unlocked.
-        if (mInjector.getUserManager().isProfile(userId)) {
-            final UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
-            if (parent != null
-                    && isUserRunning(parent.id, ActivityManager.FLAG_AND_UNLOCKED)) {
-                Slogf.d(TAG, "User " + userId + " (parent " + parent.id
-                        + "): attempting unlock because parent is unlocked");
-                maybeUnlockUser(userId);
-            } else {
-                String parentId = (parent == null) ? "<null>" : String.valueOf(parent.id);
-                Slogf.d(TAG, "User " + userId + " (parent " + parentId
-                        + "): delaying unlock because parent is locked");
-            }
-        } else {
+        // We need to delay unlocking profiles until the parent user is also unlocked.
+        final UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
+        if (parent == null) {
+            // Not a profile (or is a parentless profile) so no parent for which to wait.
             maybeUnlockUser(userId);
+        } else if (isUserRunning(parent.id, ActivityManager.FLAG_AND_UNLOCKED)) {
+            Slogf.d(TAG, "User " + userId + " (parent " + parent.id
+                    + "): attempting unlock because parent is unlocked");
+            maybeUnlockUser(userId);
+        } else {
+            Slogf.d(TAG, "User " + userId + " (parent " + parent.id
+                    + "): delaying unlock because parent is locked");
         }
     }
 
@@ -1904,8 +1916,7 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        // We just unlocked a user, so let's now attempt to unlock any
-        // managed profiles under that user.
+        // We just unlocked a user, so let's now attempt to unlock any profiles under that user.
 
         // First, get list of userIds. Requires mLock, so we cannot make external calls, e.g. to UMS
         int[] userIds;
@@ -1948,6 +1959,7 @@ class UserController implements Handler.Callback {
             Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": factory reset in progress");
             return false;
         }
+
         boolean userSwitchUiEnabled;
         synchronized (mLock) {
             if (!mInitialized) {
@@ -2807,6 +2819,12 @@ class UserController implements Handler.Callback {
         return userId == getCurrentOrTargetUserIdLU();
     }
 
+    /** Returns whether the user is always-visible (such as a communal profile). */
+    private boolean isAlwaysVisibleUser(@UserIdInt int userId) {
+        final UserProperties properties = getUserProperties(userId);
+        return properties != null && properties.getAlwaysVisible();
+    }
+
     int[] getUsers() {
         UserManagerService ums = mInjector.getUserManager();
         return ums != null ? ums.getUserIds() : new int[] { 0 };
@@ -2876,6 +2894,7 @@ class UserController implements Handler.Callback {
         return mInjector.getUserManager().hasUserRestriction(restriction, userId);
     }
 
+    /** Returns whether the two users are in the same profile group. */
     boolean isSameProfileGroup(int callingUserId, int targetUserId) {
         if (callingUserId == targetUserId) {
             return true;
@@ -2923,7 +2942,9 @@ class UserController implements Handler.Callback {
             if (user.profileGroupId == mCurrentUserId) {
                 mCurrentProfileIds = ArrayUtils.appendInt(mCurrentProfileIds, user.id);
             }
-            mUserProfileGroupIds.put(user.id, user.profileGroupId);
+            if (user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
+                mUserProfileGroupIds.put(user.id, user.profileGroupId);
+            }
         }
     }
 

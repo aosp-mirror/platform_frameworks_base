@@ -1049,6 +1049,26 @@ public class UserManagerService extends IUserManager.Stub {
         return previousUser;
     }
 
+    @Override
+    public @UserIdInt int getCommunalProfileId() {
+        checkQueryOrCreateUsersPermission("get communal profile user id");
+        return getCommunalProfileIdUnchecked();
+    }
+
+    /** Returns the currently-designated communal profile, or USER_NULL if not present. */
+    private @UserIdInt int getCommunalProfileIdUnchecked() {
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                final UserInfo user = mUsers.valueAt(i).info;
+                if (user.isCommunalProfile() && !mRemovingUserIds.get(user.id)) {
+                    return user.id;
+                }
+            }
+        }
+        return UserHandle.USER_NULL;
+    }
+
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
         return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */
                 true);
@@ -1209,6 +1229,10 @@ public class UserManagerService extends IUserManager.Stub {
         return isSameProfileGroupNoChecks(userId, otherUserId);
     }
 
+    /**
+     * Returns whether users are in the same non-empty profile group.
+     * Currently, false if empty profile group, even if they are the same user, for whatever reason.
+     */
     private boolean isSameProfileGroupNoChecks(@UserIdInt int userId, int otherUserId) {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
@@ -1222,6 +1246,16 @@ public class UserManagerService extends IUserManager.Stub {
             }
             return userInfo.profileGroupId == otherUserInfo.profileGroupId;
         }
+    }
+
+    /**
+     * Returns whether users are in the same profile group, or if the target is a communal profile.
+     */
+    private boolean isSameUserOrProfileGroupOrTargetIsCommunal(UserInfo asker, UserInfo target) {
+        if (asker.id == target.id) return true;
+        if (target.isCommunalProfile()) return true;
+        return (asker.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                && asker.profileGroupId == target.profileGroupId);
     }
 
     @Override
@@ -2607,11 +2641,8 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             final int callingUserId = UserHandle.getCallingUserId();
-            final int callingGroupId = getUserInfoNoChecks(callingUserId).profileGroupId;
-            final int targetGroupId = targetUserInfo.profileGroupId;
-            final boolean sameGroup = (callingGroupId != UserInfo.NO_PROFILE_GROUP_ID
-                    && callingGroupId == targetGroupId);
-            if ((callingUserId != targetUserId) && !sameGroup) {
+            final UserInfo callingUserInfo = getUserInfoNoChecks(callingUserId);
+            if (!isSameUserOrProfileGroupOrTargetIsCommunal(callingUserInfo, targetUserInfo)) {
                 checkManageUsersPermission("get the icon of a user who is not related");
             }
 
@@ -4832,6 +4863,7 @@ public class UserManagerService extends IUserManager.Stub {
         final boolean isRestricted = UserManager.isUserTypeRestricted(userType);
         final boolean isDemo = UserManager.isUserTypeDemo(userType);
         final boolean isManagedProfile = UserManager.isUserTypeManagedProfile(userType);
+        final boolean isCommunalProfile = UserManager.isUserTypeCommunalProfile(userType);
 
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo;
@@ -4866,7 +4898,8 @@ public class UserManagerService extends IUserManager.Stub {
                             UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
                 // TODO(b/142482943): Perhaps let the following code apply to restricted users too.
-                if (isProfile && !canAddMoreProfilesToUser(userType, parentId, false)) {
+                if (isProfile && !isCommunalProfile &&
+                        !canAddMoreProfilesToUser(userType, parentId, false)) {
                     throwCheckedUserOperationException(
                             "Cannot add more profiles of type " + userType
                                     + " for user " + parentId,
@@ -7054,6 +7087,7 @@ public class UserManagerService extends IUserManager.Stub {
                     return false;
                 }
 
+                // TODO(b/276473320): Probably use isSameUserOrProfileGroupOrTargetIsCommunal.
                 if (targetUserInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID ||
                         targetUserInfo.profileGroupId != callingUserInfo.profileGroupId) {
                     if (throwSecurityException) {
@@ -7138,8 +7172,12 @@ public class UserManagerService extends IUserManager.Stub {
         @UserAssignmentResult
         public int assignUserToDisplayOnStart(@UserIdInt int userId,
                 @UserIdInt int profileGroupId, @UserStartMode int userStartMode, int displayId) {
+
+            final UserProperties properties = getUserProperties(userId);
+            final boolean isAlwaysVisible =  properties != null && properties.getAlwaysVisible();
+
             return mUserVisibilityMediator.assignUserToDisplayOnStart(userId, profileGroupId,
-                    userStartMode, displayId);
+                    userStartMode, displayId, isAlwaysVisible);
         }
 
         @Override
@@ -7244,6 +7282,11 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             return getBootUserUnchecked();
+        }
+
+        @Override
+        public @UserIdInt int getCommunalProfileId() {
+            return getCommunalProfileIdUnchecked();
         }
 
     } // class LocalService

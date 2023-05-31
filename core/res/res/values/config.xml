@@ -2872,6 +2872,10 @@
      with admin privileges and admin privileges can be granted/revoked from existing users. -->
     <bool name="config_enableMultipleAdmins">false</bool>
 
+    <!-- Whether there is a communal profile which should always be running.
+         Only relevant for Headless System User Mode (HSUM) devices. -->
+    <bool name="config_omnipresentCommunalUser">false</bool>
+
     <!-- Whether the new Auto Selection Network UI should be shown -->
     <bool name="config_enableNewAutoSelectNetworkUI">false</bool>
 

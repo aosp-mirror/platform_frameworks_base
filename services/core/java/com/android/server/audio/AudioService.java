@@ -17,7 +17,6 @@
 package com.android.server.audio;
 
 import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED;
-import static android.Manifest.permission.REMOTE_AUDIO_PLAYBACK;
 import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
@@ -9527,14 +9526,14 @@ public class AudioService extends IAudioService.Stub
                         0,
                         null, 0);
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                if (mUserSwitchedReceived) {
+                // the current audio focus owner is likely no longer valid
+                final boolean audioDiscarded = mMediaFocusControl.maybeDiscardAudioFocusOwner();
+                if (audioDiscarded && mUserSwitchedReceived) {
                     // attempt to stop music playback for background user except on first user
                     // switch (i.e. first boot)
                     mDeviceBroker.postBroadcastBecomingNoisy();
                 }
                 mUserSwitchedReceived = true;
-                // the current audio focus owner is no longer valid
-                mMediaFocusControl.discardAudioFocusOwner();
 
                 if (mSupportsMicPrivacyToggle) {
                     mMicMuteFromPrivacyToggle = mSensorPrivacyManagerInternal
