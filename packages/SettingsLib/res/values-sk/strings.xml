@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Teraz"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Tento telefón"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tento tablet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Tento telefón"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"V tomto zariadení sa nedá prehrávať obsah"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Inovujte účet a prejdite naň"</string>
@@ -552,7 +558,7 @@
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Skúste to znova po reklame"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Ak chcete prehrávať obsah tu, prebuďte zariadenie"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Prehrávanie v tomto zariadení nie je schválené"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Tu sa toto médium nedá prehrať"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Médium sa tu nedá prehrať"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Pri pripájaní sa vyskytol problém. Zariadenie vypnite a znova zapnite."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio zariadenie s káblom"</string>
     <string name="help_label" msgid="3528360748637781274">"Pomocník a spätná väzba"</string>
@@ -575,8 +581,8 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Používateľ"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Obmedzený profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Pridať nového používateľa?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Vytvorením ďalších používateľov môžete toto zariadenie zdieľať s inými ľuďmi. Každý používateľ má svoje prostredie, ktoré si môže prispôsobiť vlastnými aplikáciami, tapetou atď. Používatelia tiež môžu upraviť nastavenia zariadenia (napr. Wi-Fi), ktoré ovplyvnia všetkých používateľov.\n\nKeď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nAkýkoľvek používateľ môže aktualizovať aplikácie všetkých používateľov. Nastavenia dostupnosti a služby sa nemusia preniesť novému používateľovi."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nAkýkoľvek používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Vytvorením ďalších používateľov môžete toto zariadenie zdieľať s inými ľuďmi. Každý používateľ má svoje prostredie, ktoré si môže prispôsobiť vlastnými aplikáciami, tapetou atď. Používatelia tiež môžu upraviť nastavenia zariadenia (napr. Wi-Fi), ktoré ovplyvnia všetkých používateľov.\n\nKeď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nKaždý používateľ môže aktualizovať aplikácie všetkých používateľov. Nastavenia dostupnosti a služby sa nemusia preniesť novému používateľovi."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nKaždý používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Chcete tohto používateľa nastaviť ako správcu?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Správcovia majú oproti iným používateľom špeciálne oprávnenia. Správca môže ovládať všetkých používateľov, aktualizovať alebo resetovať toto zariadenie, upravovať nastavenia, prezerať všetky nainštalované aplikácie a udeľovať či odoberať správcovské oprávnenia iným používateľom."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Nastaviť ako správcu"</string>

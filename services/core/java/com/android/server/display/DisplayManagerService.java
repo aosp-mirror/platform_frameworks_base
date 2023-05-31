@@ -238,6 +238,7 @@ public final class DisplayManagerService extends SystemService {
     private static final int MSG_LOAD_BRIGHTNESS_CONFIGURATIONS = 6;
     private static final int MSG_DELIVER_DISPLAY_EVENT_FRAME_RATE_OVERRIDE = 7;
     private static final int MSG_DELIVER_DISPLAY_GROUP_EVENT = 8;
+    private static final int MSG_RECEIVED_DEVICE_STATE = 9;
     private static final int[] EMPTY_ARRAY = new int[0];
     private static final HdrConversionMode HDR_CONVERSION_MODE_UNSUPPORTED = new HdrConversionMode(
             HDR_CONVERSION_UNSUPPORTED);
@@ -3213,6 +3214,10 @@ public final class DisplayManagerService extends SystemService {
                     mWindowManagerInternal.requestTraversalFromDisplayManager();
                     break;
 
+                case MSG_RECEIVED_DEVICE_STATE:
+                    mWindowManagerInternal.onDisplayManagerReceivedDeviceState(msg.arg1);
+                    break;
+
                 case MSG_UPDATE_VIEWPORT: {
                     final boolean changed;
                     synchronized (mSyncRoot) {
@@ -4680,6 +4685,14 @@ public final class DisplayManagerService extends SystemService {
         public void onStateChanged(int deviceState) {
             boolean isDeviceStateOverrideActive = deviceState != mBaseState;
             synchronized (mSyncRoot) {
+                // Notify WindowManager that we are about to handle new device state, this should
+                // be sent before any work related to the device state in DisplayManager, so
+                // WindowManager could do implement that depends on the device state and display
+                // changes (serializes device state update and display change events)
+                Message msg = mHandler.obtainMessage(MSG_RECEIVED_DEVICE_STATE);
+                msg.arg1 = deviceState;
+                mHandler.sendMessage(msg);
+
                 mLogicalDisplayMapper
                         .setDeviceStateLocked(deviceState, isDeviceStateOverrideActive);
             }

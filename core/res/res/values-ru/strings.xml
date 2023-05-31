@@ -1977,6 +1977,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"На устройстве <xliff:g id="DEVICE">%1$s</xliff:g> эта функция недоступна. Используйте телефон."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Это приложение было разработано для более ранней версии Android. Оно не соответствует последним требованиям к обеспечению конфиденциальности и безопасности данных и может работать некорректно. Проверьте наличие обновлений или свяжитесь с разработчиком приложения."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверить обновления"</string>
+    <!-- no translation found for deprecated_abi_message (6820548011196218091) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Новые сообщения"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Чтобы просмотреть, откройте приложение для обмена SMS"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Некоторые функции могут не работать"</string>

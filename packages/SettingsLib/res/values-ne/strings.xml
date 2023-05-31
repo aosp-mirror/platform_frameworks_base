@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"अहिले भर्खरै"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"यो फोन"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"यो ट्याब्लेट"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यो फोन"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"यो डिभाइसमा मिडिया प्ले गर्न मिल्दैन"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"आफूले प्रयोग गर्न चाहेको खाता अपग्रेड गर्नुहोस्"</string>
@@ -592,7 +598,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफाइलको जानकारी"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"निषेधयुक्त प्रोफाइल बनाउनु अघि तपाईँको एप र व्यक्तिगत डेटा सुरक्षा गर्नाका लागि तपाईँले स्क्रिन लक सेटअप गर्नु पर्दछ ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लक सेट गर्नुहोस्"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"प्रयोगकर्ता बदलेर <xliff:g id="USER_NAME">%s</xliff:g> पार्नुहोस्"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"प्रयोगकर्ता बदलेर <xliff:g id="USER_NAME">%s</xliff:g> बनाउनुहोस्"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"नयाँ प्रयोगकर्ता बनाइँदै छ…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"नयाँ अतिथि बनाइँदै छ…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"नयाँ प्रयोगकर्ता सिर्जना गर्न सकिएन"</string>

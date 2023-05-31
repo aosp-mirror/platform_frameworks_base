@@ -545,13 +545,19 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ಇದೀಗ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ಈ ಫೋನ್"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ಈ ಟ್ಯಾಬ್ಲೆಟ್"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ಈ ಫೋನ್"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ಈ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ಬದಲಾಯಿಸಲು ಖಾತೆಯನ್ನು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ಇಲ್ಲಿ ಡೌನ್‌ಲೋಡ್‌ಗಳನ್ನು ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ಜಾಹೀರಾತಿನ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ಆ್ಯಡ್‌ನ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧನವನ್ನು ಎಚ್ಚರಿಸಿ"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ಸಾಧನವನ್ನು ಪ್ಲೇ ಮಾಡಲು ಅನುಮೋದಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ಪ್ಲೇ ಮಾಡಲು ಸಾಧನವನ್ನು ಅನುಮೋದಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ಈ ಮಾಧ್ಯಮವನ್ನು ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ಕನೆಕ್ಟ್ ಮಾಡುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ ಸಾಧನವನ್ನು ಆಫ್ ಮಾಡಿ ಹಾಗೂ ನಂತರ ಪುನಃ ಆನ್ ಮಾಡಿ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ವೈರ್ ಹೊಂದಿರುವ ಆಡಿಯೋ ಸಾಧನ"</string>
@@ -574,9 +580,9 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"ನಿಮ್ಮ ಖಾತೆಯಿಂದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವಿಷಯಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ನೀವು ನಿರ್ಬಂಧಿಸಬಹುದು"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ಬಳಕೆದಾರ"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ನಿರ್ಬಂಧಿಸಿದ ಪ್ರೊಫೈಲ್"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸುವುದೇ?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"ನೀವು ಹೆಚ್ಚುವರಿ ಬಳಕೆದಾರರನ್ನು ರಚಿಸುವ ಮೂಲಕ ಇತರ ಜನರ ಜೊತೆಗೆ ಈ ಸಾಧನವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು. ಪ್ರತಿ ಬಳಕೆದಾರರು ತಮ್ಮದೇ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುತ್ತಾರೆ, ಇದರಲ್ಲಿ ಅವರು ತಮ್ಮದೇ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ವಾಲ್‌ಪೇಪರ್ ಮತ್ತು ಮುಂತಾದವುಗಳ ಮೂಲಕ ಕಸ್ಟಮೈಸ್ ಮಾಡಿಕೊಳ್ಳಬಹುದು. ಎಲ್ಲರ ಮೇಲೂ ಪರಿಣಾಮ ಬೀರುವಂತೆ ವೈ-ಫೈ ರೀತಿಯ ಸಾಧನ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬಳಕೆದಾರರು ಸರಿಹೊಂದಿಸಬಹುದು.\n\nನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಹೊಂದಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು. ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಸೇವೆಗಳು ಹೊಸ ಬಳಕೆದಾರರಿಗೆ ವರ್ಗಾವಣೆ ಆಗದಿರಬಹುದು."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಸ್ಥಾಪಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು."</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಬೇಕೆ?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"ನೀವು ಹೆಚ್ಚುವರಿ ಬಳಕೆದಾರರನ್ನು ರಚಿಸುವ ಮೂಲಕ ಇತರ ಜನರ ಜೊತೆಗೆ ಈ ಸಾಧನವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು. ಪ್ರತಿ ಬಳಕೆದಾರರು ತಮ್ಮದೇ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುತ್ತಾರೆ, ಇದರಲ್ಲಿ ಅವರು ತಮ್ಮದೇ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ವಾಲ್‌ಪೇಪರ್ ಮತ್ತು ಮುಂತಾದವುಗಳ ಮೂಲಕ ಕಸ್ಟಮೈಸ್ ಮಾಡಿಕೊಳ್ಳಬಹುದು. ಎಲ್ಲರ ಮೇಲೂ ಪರಿಣಾಮ ಬೀರುವಂತೆ ವೈ-ಫೈ ರೀತಿಯ ಸಾಧನ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬಳಕೆದಾರರು ಸರಿಹೊಂದಿಸಬಹುದು.\n\nನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ತಮ್ಮ ಸ್ಥಳವನ್ನು ಸೆಟಪ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು. ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಸೇವೆಗಳು ಹೊಸ ಬಳಕೆದಾರರಿಗೆ ವರ್ಗಾವಣೆ ಆಗದಿರಬಹುದು."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ತಮ್ಮ ಸ್ಥಳವನ್ನು ಸೆಟಪ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"ಈ ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಾಹಕರನ್ನಾಗಿ ಮಾಡಬೇಕೆ?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"ನಿರ್ವಾಹಕರು ಇತರ ಬಳಕೆದಾರರಿಗೆ ಇಲ್ಲದ ವಿಶೇಷ ಸೌಲಭ್ಯಗಳನ್ನು ಹೊಂದಿದ್ದಾರೆ. ನಿರ್ವಾಹಕರು ಎಲ್ಲಾ ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಹಿಸಬಹುದು, ಈ ಸಾಧನವನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು ಅಥವಾ ರೀಸೆಟ್ ಮಾಡಬಹುದು, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಹೊಂದಿಸಬಹುದು, ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾದ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಮತ್ತು ಇತರರಿಗೆ ನಿರ್ವಾಹಕರಿಗೆ ನೀಡಿರುವ ಸೌಲಭ್ಯಗಳನ್ನು ನೀಡಬಹುದು ಅಥವಾ ಹಿಂತೆಗೆದುಕೊಳ್ಳಬಹುದು."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"ನಿರ್ವಾಹಕರನ್ನಾಗಿ ಮಾಡಿ"</string>
