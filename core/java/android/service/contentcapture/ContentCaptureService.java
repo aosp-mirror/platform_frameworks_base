@@ -88,6 +88,18 @@ public abstract class ContentCaptureService extends Service {
             "android.service.contentcapture.ContentCaptureService";
 
     /**
+     * The {@link Intent} that must be declared as handled by the protection service.
+     *
+     * <p>To be supported, the service must also require the {@link
+     * android.Manifest.permission#BIND_CONTENT_CAPTURE_SERVICE} permission so that other
+     * applications can not abuse it.
+     *
+     * @hide
+     */
+    public static final String PROTECTION_SERVICE_INTERFACE =
+            "android.service.contentcapture.ContentProtectionService";
+
+    /**
      * Name under which a ContentCaptureService component publishes information about itself.
      *
      * <p>This meta-data should reference an XML resource containing a
