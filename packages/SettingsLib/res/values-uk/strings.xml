@@ -545,14 +545,20 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Щойно"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Цей телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Цей планшет"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Цей телефон"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не можна відтворювати медіаконтент на цьому пристрої"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Щоб змінити, перейдіть на платний обліковий запис"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Тут не можна відтворювати завантажений контент"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не можна відтворювати тут"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Потрібний платний обліковий запис"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Завантаження не відтворюватимуться"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Повторіть спробу після реклами"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Виведіть пристрій із режиму сну, щоб відтворювати медіаконтент"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Пристрій не схвалений для відтворення медіаконтенту"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"На пристрої не можна відтворювати цей медіафайл"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Виведіть із режиму сну, щоб відтворювати"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Не схвалено для відтворення"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Цей медіаконтент не підтримується"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Не вдається підключитися. Перезавантажте пристрій."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Дротовий аудіопристрій"</string>
     <string name="help_label" msgid="3528360748637781274">"Довідка й відгуки"</string>
@@ -575,7 +581,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Користувач"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Профіль з обмеженням"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Додати нового користувача?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Цим пристроєм можуть користуватися кілька людей. Для цього потрібно створити додаткові профілі. Власник профілю може налаштувати його на свій смак: вибрати фоновий малюнок, установити потрібні додатки тощо. Користувачі також можуть налаштовувати певні параметри пристрою (як-от Wi-Fi), які застосовуватимуться до решти профілів.\n\nПісля створення новий профіль потрібно налаштувати.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів. Налаштування спеціальних можливостей і сервісів можуть не передаватися новому користувачеві."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Цим пристроєм можуть користуватися кілька людей. Для цього потрібно створити додаткові профілі. Власник профілю може налаштувати його на свій смак: вибрати фоновий малюнок, установити потрібні додатки тощо. Користувачі також можуть налаштовувати певні параметри пристрою (як-от Wi-Fi), які застосовуватимуться до решти профілів.\n\nПісля створення новий профіль потрібно налаштувати.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів. Налаштування й сервіси доступності можуть не передаватися новому користувачеві."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Користувач має налаштувати свій профіль після створення.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Надати цьому користувачу права адміністратора?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Адміністратори, на відміну від звичайних користувачів, мають спеціальні права. Вони можуть керувати всіма користувачами, оновлювати, скидати чи змінювати налаштування цього пристрою, переглядати всі встановлені додатки, а також надавати іншим користувачам права адміністратора або відкликати їх."</string>

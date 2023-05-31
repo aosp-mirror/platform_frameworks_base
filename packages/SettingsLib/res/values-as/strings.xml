@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"এই মাত্ৰ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"এই ফ’নটো"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"এই টেবলেটটো"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফ’নটো"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"এই ডিভাইচটো প্লে\' কৰিব নোৱাৰি"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"সলনি কৰিবলৈ একাউণ্ট আপগ্ৰে’ড কৰক"</string>
@@ -579,7 +585,7 @@
     <string name="user_add_user_message_short" msgid="3295959985795716166">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ ঠাই ছেট আপ কৰাৰ প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে অন্য সকলো ব্যৱহাৰকাৰীৰ বাবে এপ্ আপডে\'ট কৰিব পাৰে।"</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"এই ব্যৱহাৰকাৰীগৰাকীক এগৰাকী প্ৰশাসক বনাবনে?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"প্ৰশাসকৰ ওচৰত কিছুমান বিশেষাধিকাৰ আছে, যিবোৰ অন্য ব্যৱহাৰকাৰীৰ নাই। এগৰাকী প্ৰশাসকে সকলো ব্যৱহাৰকাৰীক পৰিচালনা কৰিব, এই ডিভাইচটো আপডে’ট অথবা ৰিছেট কৰিব, ছেটিং সংশোধন কৰিব, ইনষ্টল কৰি থোৱা আটাইবোৰ এপ্ চাব আৰু অন্য লোকৰ বাবে প্ৰশাসকৰ বিশেষাধিকাৰ প্ৰদান কৰিব অথবা প্ৰত্যাহাৰ কৰিব পাৰে।"</string>
-    <string name="user_grant_admin_button" msgid="5441486731331725756">"প্ৰশাসকৰ বনাওক"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"প্ৰশাসক বনাওক"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ব্যৱহাৰকাৰী এতিয়া ছেট আপ কৰিবনে?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ডিভাইচটো লৈ নিজৰ ঠাই ছেটআপ কৰিবলৈ নতুন ব্যৱহাৰকাৰী উপলব্ধ থকাটো নিশ্চিত কৰক"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"এতিয়া প্ৰ\'ফাইল ছেট আপ কৰিবনে?"</string>
