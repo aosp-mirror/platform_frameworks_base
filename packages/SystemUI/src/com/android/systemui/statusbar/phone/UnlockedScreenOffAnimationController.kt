@@ -22,6 +22,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.notification.AnimatableProperty
@@ -60,6 +61,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val dozeParameters: dagger.Lazy<DozeParameters>,
     private val globalSettings: GlobalSettings,
+    private val notifShadeWindowControllerLazy: dagger.Lazy<NotificationShadeWindowController>,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val powerManager: PowerManager,
     private val handler: Handler = Handler()
@@ -114,7 +116,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
             override fun onAnimationStart(animation: Animator?) {
                 interactionJankMonitor.begin(
-                    mCentralSurfaces.notificationShadeWindowView, CUJ_SCREEN_OFF)
+                        notifShadeWindowControllerLazy.get().windowRootView, CUJ_SCREEN_OFF)
             }
         })
     }
@@ -218,7 +220,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 .setCustomInterpolator(View.ALPHA, Interpolators.FAST_OUT_SLOW_IN),
             true /* animate */)
         interactionJankMonitor.begin(
-            mCentralSurfaces.notificationShadeWindowView,
+                notifShadeWindowControllerLazy.get().windowRootView,
             CUJ_SCREEN_OFF_SHOW_AOD
         )
     }
