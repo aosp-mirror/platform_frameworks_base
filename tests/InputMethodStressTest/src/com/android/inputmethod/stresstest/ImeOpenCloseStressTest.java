@@ -493,6 +493,7 @@ public final class ImeOpenCloseStressTest {
         verifyShowBehavior(activity);
     }
 
+    // TODO: Add tests for activities that don't handle the rotation.
     @Test
     public void testRotateScreenWithKeyboardOn() throws Exception {
         Intent intent =
@@ -514,14 +515,14 @@ public final class ImeOpenCloseStressTest {
         Thread.sleep(1000);
         Log.i(TAG, "Rotate screen right");
         assertThat(uiDevice.isNaturalOrientation()).isFalse();
-        verifyShowBehavior(activity);
+        verifyRotateBehavior(activity);
 
         uiDevice.setOrientationLeft();
         uiDevice.waitForIdle();
         Thread.sleep(1000);
         Log.i(TAG, "Rotate screen left");
         assertThat(uiDevice.isNaturalOrientation()).isFalse();
-        verifyShowBehavior(activity);
+        verifyRotateBehavior(activity);
 
         uiDevice.setOrientationNatural();
         uiDevice.waitForIdle();
@@ -567,6 +568,38 @@ public final class ImeOpenCloseStressTest {
                     editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ false);
             // Ime is shown but with a fallback InputConnection
             waitOnMainUntilImeIsShown(editText);
+        }
+    }
+
+    private static void verifyRotateBehavior(TestActivity activity) {
+        // Get the new TestActivity after recreation.
+        TestActivity newActivity = TestActivity.getLastCreatedInstance();
+        assertThat(newActivity).isNotNull();
+        assertThat(newActivity).isNotEqualTo(activity);
+
+        EditText newEditText = newActivity.getEditText();
+        int softInputMode = newActivity.getWindow().getAttributes().softInputMode;
+        int softInputVisibility = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+
+        if (hasUnfocusableWindowFlags(newActivity)) {
+            verifyImeAlwaysHiddenWithWindowFlagSet(newActivity);
+            return;
+        }
+
+        if (softInputVisibility == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
+            // After rotation, the keyboard would be hidden only when the flag is
+            // SOFT_INPUT_STATE_ALWAYS_HIDDEN. However, SOFT_INPUT_STATE_HIDDEN is different because
+            // it requires appending SOFT_INPUT_IS_FORWARD_NAVIGATION flag, which won't be added
+            // when rotating the devices (rotating doesn't navigate forward to the next app window.)
+            verifyWindowAndViewFocus(newEditText, /*expectWindowFocus*/ true, /*expectViewFocus*/
+                    true);
+            waitOnMainUntilImeIsHidden(newEditText);
+
+        } else {
+            // Other cases, keyboard would be shown.
+            verifyWindowAndViewFocus(newEditText, /*expectWindowFocus*/ true, /*expectViewFocus*/
+                    true);
+            waitOnMainUntilImeIsShown(newEditText);
         }
     }
 }
