@@ -31,8 +31,6 @@ interface KeyguardQuickAffordanceConfig {
     /** Unique identifier for this quick affordance. It must be globally unique. */
     val key: String
 
-    val pickerName: String
-
     val pickerIconResourceId: Int
 
     /**
@@ -41,6 +39,12 @@ interface KeyguardQuickAffordanceConfig {
      * Used to populate the lock screen.
      */
     val lockScreenState: Flow<LockScreenState>
+
+    /**
+     * Returns a user-visible [String] that should be shown as the name for the option in the
+     * wallpaper picker / settings app to select this quick affordance.
+     */
+    fun pickerName(): String
 
     /**
      * Returns the [PickerScreenState] representing the affordance in the settings or selector
