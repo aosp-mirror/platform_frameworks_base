@@ -545,14 +545,20 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Upravo sad"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ovaj telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ovaj tablet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ovaj telefon"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nije moguće reproducirati na ovom uređaju"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Nadogradite račun radi prebacivanja"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Preuzimanja se ne mogu reproducirati ovdje"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Ne može se reproducirati ovdje"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Nadogradite i prebacite se"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Ne može se tu reproducirati"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Pokušajte ponovo nakon oglasa"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Aktivirajte uređaj da biste na njemu reproducirali"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Uređaj nije odobren za reprodukciju"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Ti se mediji ne mogu reproducirati ovdje"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Aktivirajte i reproducirajte ovdje"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Nije odobreno za reprodukciju"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Nemoguća je reprodukcija medija"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem s povezivanjem. Isključite i ponovo uključite uređaj"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Žičani audiouređaj"</string>
     <string name="help_label" msgid="3528360748637781274">"Pomoć i povratne informacije"</string>

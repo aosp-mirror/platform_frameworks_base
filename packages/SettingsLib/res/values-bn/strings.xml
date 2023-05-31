@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"ডিসকানেক্ট হচ্ছে..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"কানেক্ট হচ্ছে..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"কানেক্ট করা আছে<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"যুক্ত করা হচ্ছে..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"পেয়ার করা হচ্ছে..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"কানেক্ট করা আছে (ফোনের অডিও ছাড়া)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"কানেক্ট করা আছে (মিডিয়ার অডিও ছাড়া)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"কানেক্ট করা আছে (ফোনের বা মিডিয়ার অডিও ছাড়া)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"এখনই"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"এই ফোন"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"এই ট্যাবলেট"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফোনটি"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"এই ডিভাইসে চালানো যাবে না"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"পাল্টাতে অ্যাকাউন্ট আপগ্রেড করুন"</string>

@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"अभी-अभी"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"यह फ़ोन"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"यह टैबलेट"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यह फ़ोन"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"इस डिवाइस पर मीडिया नहीं चलाया जा सकता"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"प्रीमियम खाते में स्विच करने के लिए, अपना खाता अपग्रेड करें"</string>
@@ -578,7 +584,7 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"नए उपयोगकर्ता जोड़कर इस डिवाइस को दूसरे लोगों के साथ शेयर किया जा सकता है. हर उपयोगकर्ता के पास अपनी जगह होती है, जिसमें वे ऐप्लिकेशन, वॉलपेपर, और दूसरी चीज़ों में मनमुताबिक बदलाव कर सकते हैं. उपयोगकर्ता, वाई-फ़ाई जैसी डिवाइस सेटिंग में भी बदलाव कर सकते हैं. इसका असर हर किसी पर पड़ता है.\n\nजब किसी नए उपयोगकर्ता को जोड़ा जाता है, तो उसे अपनी जगह सेट अप करनी होती है.\n\nकोई भी उपयोगकर्ता, दूसरे सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है. ऐसा भी हो सकता है कि सुलभता सेटिंग और सेवाएं नए उपयोगकर्ता को ट्रांसफ़र न हो पाएं."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"कोई नया उपयोगकर्ता जोड़ने पर, उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता, बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"क्या इस व्यक्ति को एडमिन बनाना है?"</string>
-    <string name="user_grant_admin_message" msgid="1673791931033486709">"एडमिन, अन्य लोगों के मुकाबले खास अधिकार होते हैं. एडमिन के पास ये अधिकार होते हैं: सभी लोगों को मैनेज करना, इस डिवाइस को अपडेट या रीसेट करना, सेटिंग में बदलाव करना, इंस्टॉल किए गए सभी ऐप्लिकेशन देखना, और अन्य लोगों को एडमिन के खास अधिकार देना या उन्हें वापस लेना."</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"एडमिन के पास अन्य लोगों के मुकाबले खास अधिकार होते हैं. एडमिन के पास ये अधिकार होते हैं: सभी लोगों को मैनेज करना, इस डिवाइस को अपडेट या रीसेट करना, सेटिंग में बदलाव करना, इंस्टॉल किए गए सभी ऐप्लिकेशन देखना, और अन्य लोगों को एडमिन के खास अधिकार देना या उन्हें वापस लेना."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"एडमिन बनाएं"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"उपयोगकर्ता को अभी सेट करें?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"पक्का करें कि व्यक्ति डिवाइस का इस्तेमाल करने और अपनी जगह सेट करने के लिए मौजूद है"</string>

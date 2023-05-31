@@ -545,14 +545,20 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"הטלפון הזה"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"הטאבלט הזה"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"הטלפון הזה"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"לא ניתן להפעיל במכשיר הזה"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"צריך לשדרג את החשבון כדי לעבור"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"לא ניתן להפעיל את ההורדות כאן"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"אפשר לנסות שוב לאחר המודעה"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"צריך להוציא את המכשיר ממצב השינה כדי להפעיל כאן"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"המכשיר לא קיבל אישור להפעלה"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"אי אפשר להפעיל את המדיה הזו כאן"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"לא ניתן להפעיל במכשיר"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"יש לשדרג חשבון כדי לעבור"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"לא ניתן להפעיל הורדות"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"יש לנסות אחרי המודעה"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"צריך להעיר את המכשיר"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"המכשיר לא אושר"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"אי אפשר להפעיל מדיה"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"יש בעיה בחיבור. עליך לכבות את המכשיר ולהפעיל אותו מחדש"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"התקן אודיו חוטי"</string>
     <string name="help_label" msgid="3528360748637781274">"עזרה ומשוב"</string>
@@ -575,7 +581,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"משתמש"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"פרופיל מוגבל"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"להוסיף משתמש חדש?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏ניתן לשתף מכשיר זה עם אנשים אחרים על ידי יצירת משתמשים נוספים. לכל משתמש מרחב משלו, שאותו אפשר להתאים אישית בעזרת אפליקציות, טפט ופריטים נוספים. המשתמשים יכולים גם להתאים הגדרות של המכשיר כגון Wi‑Fi, שמשפיעות על כולם.\n\nכשמוסיפים משתמש חדש, על משתמש זה להגדיר את המרחב שלו.\n\nכל אחד מהמשתמשים יכול לעדכן אפליקציות לכל שאר המשתמשים. ייתכן שהגדרות ושירותים של נגישות לא יועברו למשתמש החדש."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏ניתן לשתף את המכשיר הזה עם אנשים אחרים על ידי יצירת משתמשים נוספים. לכל משתמש מרחב משלו, שאותו אפשר להתאים אישית בעזרת אפליקציות, טפט ופריטים נוספים. המשתמשים יכולים גם להתאים הגדרות של המכשיר כמו Wi‑Fi, שמשפיעות על כולם.\n\nכשמוסיפים משתמש חדש, המשתמש הזה צריך להגדיר את המרחב שלו.\n\nכל אחד מהמשתמשים יכול לעדכן אפליקציות לכל שאר המשתמשים. יכול להיות שהגדרות ושירותים של נגישות לא יועברו למשתמש החדש."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"כשמוסיפים משתמש חדש, הוא צריך להגדיר את המרחב שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"להגדיר את המשתמש הזה כאדמין?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"לאדמינים יש הרשאות מיוחדות שאין למשתמשים אחרים. אדמין יכול לנהל את כל המשתמשים, לעדכן את המכשיר הזה או לאפס אותו, לשנות הגדרות, לראות את כל האפליקציות המותקנות ולהעניק הרשאות אדמין לאחרים או לשלול אותן."</string>

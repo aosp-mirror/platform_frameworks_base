@@ -543,16 +543,22 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"毎回確認"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"OFF にするまで"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"たった今"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"このスマートフォン"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"このデバイス"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"このタブレット"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"このスマートフォン"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"このデバイスで再生できません"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"このデバイスでは再生できません"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"アカウントを更新して切り替えてください"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ダウンロードしたコンテンツをここでは再生できません"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"広告が表示されてから、もう一度試してください"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ここで再生するにはデバイスを起動してください"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"このデバイスでの再生が許可されていません"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"このメディアはここで再生できません"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"再生不可: ダウンロードしたコンテンツ"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"広告の後にもう一度試してください"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"デバイスの起動が必要です"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"再生が許可されていません"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"このメディアは再生できません"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"接続エラーです。デバイスを OFF にしてから ON に戻してください"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線オーディオ デバイス"</string>
     <string name="help_label" msgid="3528360748637781274">"ヘルプとフィードバック"</string>
