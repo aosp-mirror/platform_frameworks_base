@@ -81,6 +81,7 @@ import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.No
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.FSI_FORCE_DEMOTE;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.server.notification.NotificationManagerService.DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_ADJUSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED;
@@ -678,6 +679,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @After
     public void assertAllTrackersFinishedOrCancelled() {
+        waitForIdle(); // Finish async work.
         // Verify that no trackers were left dangling.
         for (PostNotificationTracker tracker : mPostNotificationTrackerFactory.mCreatedTrackers) {
             assertThat(tracker.isOngoing()).isFalse();
@@ -11766,6 +11768,103 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
         assertFalse(n.isUserInitiatedJob());
+    }
+
+    @Test
+    public void enqueue_updatesEnqueueRate() throws Exception {
+        Notification n = generateNotificationRecord(null).getNotification();
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0, n, mUserId);
+        // Don't waitForIdle() here. We want to verify the "intermediate" state.
+
+        verify(mUsageStats).registerEnqueuedByApp(eq(PKG));
+        verify(mUsageStats).registerEnqueuedByAppAndAccepted(eq(PKG));
+        verify(mUsageStats, never()).registerPostedByApp(any());
+
+        waitForIdle();
+    }
+
+    @Test
+    public void enqueue_withPost_updatesEnqueueRateAndPost() throws Exception {
+        Notification n = generateNotificationRecord(null).getNotification();
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0, n, mUserId);
+        waitForIdle();
+
+        verify(mUsageStats).registerEnqueuedByApp(eq(PKG));
+        verify(mUsageStats).registerEnqueuedByAppAndAccepted(eq(PKG));
+        verify(mUsageStats).registerPostedByApp(any());
+    }
+
+    @Test
+    public void enqueueNew_whenOverEnqueueRate_accepts() throws Exception {
+        Notification n = generateNotificationRecord(null).getNotification();
+        when(mUsageStats.getAppEnqueueRate(eq(PKG)))
+                .thenReturn(DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE + 1f);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0, n, mUserId);
+        waitForIdle();
+
+        assertThat(mService.mNotificationsByKey).hasSize(1);
+        verify(mUsageStats).registerEnqueuedByApp(eq(PKG));
+        verify(mUsageStats).registerEnqueuedByAppAndAccepted(eq(PKG));
+        verify(mUsageStats).registerPostedByApp(any());
+    }
+
+    @Test
+    public void enqueueUpdate_whenBelowMaxEnqueueRate_accepts() throws Exception {
+        // Post the first version.
+        Notification original = generateNotificationRecord(null).getNotification();
+        original.when = 111;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0, original, mUserId);
+        waitForIdle();
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getNotification().when).isEqualTo(111);
+
+        reset(mUsageStats);
+        when(mUsageStats.getAppEnqueueRate(eq(PKG)))
+                .thenReturn(DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE - 1f);
+
+        // Post the update.
+        Notification update = generateNotificationRecord(null).getNotification();
+        update.when = 222;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0, update, mUserId);
+        waitForIdle();
+
+        verify(mUsageStats).registerEnqueuedByApp(eq(PKG));
+        verify(mUsageStats).registerEnqueuedByAppAndAccepted(eq(PKG));
+        verify(mUsageStats, never()).registerPostedByApp(any());
+        verify(mUsageStats).registerUpdatedByApp(any(), any());
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getNotification().when).isEqualTo(222);
+    }
+
+    @Test
+    public void enqueueUpdate_whenAboveMaxEnqueueRate_rejects() throws Exception {
+        // Post the first version.
+        Notification original = generateNotificationRecord(null).getNotification();
+        original.when = 111;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0, original, mUserId);
+        waitForIdle();
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getNotification().when).isEqualTo(111);
+
+        reset(mUsageStats);
+        when(mUsageStats.getAppEnqueueRate(eq(PKG)))
+                .thenReturn(DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE + 1f);
+
+        // Post the update.
+        Notification update = generateNotificationRecord(null).getNotification();
+        update.when = 222;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0, update, mUserId);
+        waitForIdle();
+
+        verify(mUsageStats).registerEnqueuedByApp(eq(PKG));
+        verify(mUsageStats, never()).registerEnqueuedByAppAndAccepted(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
+        verify(mUsageStats, never()).registerUpdatedByApp(any(), any());
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getNotification().when).isEqualTo(111); // old
     }
 
     private void setDpmAppOppsExemptFromDismissal(boolean isOn) {
