@@ -62,6 +62,15 @@ open class ViewScreenshotTestRule(
     private val isRobolectric = if (Build.FINGERPRINT.contains("robolectric")) true else false
 
     override fun apply(base: Statement, description: Description): Statement {
+        if (isRobolectric) {
+            // In robolectric mode, we enable NATIVE graphics and unpack font and icu files.
+            // We need to use reflection, as this library is only needed and therefore
+            //  only available in deviceless mode.
+            val nativeLoaderClassName = "org.robolectric.nativeruntime.DefaultNativeRuntimeLoader"
+            val defaultNativeRuntimeLoader = Class.forName(nativeLoaderClassName)
+            System.setProperty("robolectric.graphicsMode", "NATIVE")
+            defaultNativeRuntimeLoader.getMethod("injectAndLoad").invoke(null)
+        }
         val ruleToApply = if (isRobolectric) roboRule else delegateRule
         return ruleToApply.apply(base, description)
     }
