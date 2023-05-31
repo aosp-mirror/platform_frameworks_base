@@ -59,6 +59,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.content.IntentSender;
 
+import java.util.Map;
+
 /**
  *  See {@link PackageManager} for documentation on most of the APIs
  *  here.
@@ -494,15 +496,20 @@ interface IPackageManager {
     void getPackageSizeInfo(in String packageName, int userHandle, IPackageStatsObserver observer);
 
     /**
-     * Get a list of shared libraries that are available on the
-     * system.
+     * Get a list of shared libraries that are available on the system.
+     *
+     * @deprecated use getSystemSharedLibraryNamesAndPaths() instead
      */
     @UnsupportedAppUsage
     String[] getSystemSharedLibraryNames();
 
     /**
-     * Get a list of features that are available on the
-     * system.
+     * Get a list of shared library names (key) and paths (values).
+     */
+    Map<String, String> getSystemSharedLibraryNamesAndPaths();
+
+    /**
+     * Get a list of features that are available on the system.
      */
     ParceledListSlice getSystemAvailableFeatures();
 

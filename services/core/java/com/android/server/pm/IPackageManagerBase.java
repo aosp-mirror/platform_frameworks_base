@@ -57,6 +57,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.permission.PermissionManager;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -67,6 +68,7 @@ import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -810,7 +812,22 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Override
     @Deprecated
     public final String[] getSystemSharedLibraryNames() {
-        return snapshot().getSystemSharedLibraryNames();
+        ArrayMap<String, String> namesAndPaths = snapshot().getSystemSharedLibraryNamesAndPaths();
+        if (namesAndPaths.isEmpty()) {
+            return null;
+        }
+        final int size = namesAndPaths.size();
+        final String[] libs = new String[size];
+        for (int i = 0; i < size; i++) {
+            libs[i] = namesAndPaths.keyAt(i);
+        }
+        return libs;
+    }
+
+    @Override
+    @Deprecated
+    public final Map<String, String> getSystemSharedLibraryNamesAndPaths() {
+        return snapshot().getSystemSharedLibraryNamesAndPaths();
     }
 
     @Override

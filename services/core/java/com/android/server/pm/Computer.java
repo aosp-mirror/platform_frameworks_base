@@ -405,8 +405,7 @@ public interface Computer extends PackageDataSnapshot {
     ProviderInfo getProviderInfo(@NonNull ComponentName component,
             @PackageManager.ComponentInfoFlagsBits long flags, @UserIdInt int userId);
 
-    @Nullable
-    String[] getSystemSharedLibraryNames();
+    ArrayMap<String, String> getSystemSharedLibraryNamesAndPaths();
 
     /**
      * @return the state if the given package is installed and isn't filtered by visibility.
