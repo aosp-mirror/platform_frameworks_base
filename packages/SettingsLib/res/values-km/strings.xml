@@ -545,13 +545,19 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"អម្បាញ់មិញ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ទូរសព្ទនេះ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ថេប្លេតនេះ"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ទូរសព្ទនេះ"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"មិនអាចចាក់នៅលើ​ឧបករណ៍នេះបានទេ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ដំឡើងកម្រិតគណនី ដើម្បីប្ដូរ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"មិនអាចចាក់ខ្លឹមសារដែលបានទាញយកនៅទីនេះបានទេ"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ព្យាយាមម្ដងទៀត បន្ទាប់ពីការផ្សាយពាណិជ្ជកម្ម"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ព្យាយាមម្ដងទៀត បន្ទាប់ពីពាណិជ្ជកម្ម"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ដាស់ឧបករណ៍ឱ្យចាក់នៅទីនេះ"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ឧបករណ៍មិន​យល់ព្រមឱ្យចាក់ទេ"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ឧបករណ៍មិន​ព្រមឱ្យចាក់ទេ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"មិនអាចចាក់មេឌៀនេះ​នៅទីនេះបានទេ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"មាន​បញ្ហា​ក្នុងការ​ភ្ជាប់។ បិទ រួច​បើក​ឧបករណ៍​វិញ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ឧបករណ៍​សំឡេងប្រើខ្សែ"</string>

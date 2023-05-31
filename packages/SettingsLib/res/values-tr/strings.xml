@@ -545,10 +545,16 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Az önce"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Bu telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Bu tablet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Bu telefon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Bu cihazda oynatılamıyor"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Geçiş yapmak için hesabı yükseltin"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"İndirilenler burada oynatılamıyor"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"İndirilenler burada oynatılamaz"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Reklamdan sonra tekrar deneyin"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Burada oynatmak için cihazı uyandırın"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Cihaz, oynatma işlemini onaylamadı"</string>
