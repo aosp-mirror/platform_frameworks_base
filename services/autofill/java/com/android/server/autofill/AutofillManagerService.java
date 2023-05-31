@@ -63,6 +63,7 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArrayMap;
 import android.util.LocalLog;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -1525,20 +1526,26 @@ public final class AutofillManagerService
         public void addClient(IAutoFillManagerClient client, ComponentName componentName,
                 int userId, IResultReceiver receiver) {
             int flags = 0;
-            synchronized (mLock) {
-                final int enabledFlags = getServiceForUserLocked(userId).addClientLocked(client,
-                        componentName);
-                if (enabledFlags != 0) {
-                    flags |= enabledFlags;
+            try {
+                synchronized (mLock) {
+                    final int enabledFlags = getServiceForUserLocked(userId).addClientLocked(client,
+                            componentName);
+                    if (enabledFlags != 0) {
+                        flags |= enabledFlags;
+                    }
+                    if (sDebug) {
+                        flags |= AutofillManager.FLAG_ADD_CLIENT_DEBUG;
+                    }
+                    if (sVerbose) {
+                        flags |= AutofillManager.FLAG_ADD_CLIENT_VERBOSE;
+                    }
                 }
-                if (sDebug) {
-                    flags |= AutofillManager.FLAG_ADD_CLIENT_DEBUG;
-                }
-                if (sVerbose) {
-                    flags |= AutofillManager.FLAG_ADD_CLIENT_VERBOSE;
-                }
+            } catch (Exception ex) {
+                // Don't do anything, send back default flags
+                Log.wtf(TAG, "addClient(): failed " + ex.toString());
+            } finally {
+                send(receiver, flags);
             }
-            send(receiver, flags);
         }
 
         @Override
@@ -1613,50 +1620,67 @@ public final class AutofillManagerService
         @Override
         public void getFillEventHistory(@NonNull IResultReceiver receiver) throws RemoteException {
             final int userId = UserHandle.getCallingUserId();
-
             FillEventHistory fillEventHistory = null;
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    fillEventHistory = service.getFillEventHistory(getCallingUid());
-                } else if (sVerbose) {
-                    Slog.v(TAG, "getFillEventHistory(): no service for " + userId);
+            try {
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        fillEventHistory = service.getFillEventHistory(getCallingUid());
+                    } else if (sVerbose) {
+                        Slog.v(TAG, "getFillEventHistory(): no service for " + userId);
+                    }
                 }
+            } catch (Exception ex) {
+                // Do not raise the exception, just send back the null response
+                Log.wtf(TAG, "getFillEventHistory(): failed " + ex.toString());
+            } finally {
+                send(receiver, fillEventHistory);
             }
-            send(receiver, fillEventHistory);
         }
 
         @Override
         public void getUserData(@NonNull IResultReceiver receiver) throws RemoteException {
-            final int userId = UserHandle.getCallingUserId();
-
             UserData userData = null;
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    userData = service.getUserData(getCallingUid());
-                } else if (sVerbose) {
-                    Slog.v(TAG, "getUserData(): no service for " + userId);
+
+            try {
+                final int userId = UserHandle.getCallingUserId();
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        userData = service.getUserData(getCallingUid());
+                    } else if (sVerbose) {
+                        Slog.v(TAG, "getUserData(): no service for " + userId);
+                    }
                 }
+            } catch (Exception ex) {
+                // Do not raise the exception, just send back the null response
+                Log.wtf(TAG, "getUserData(): failed " + ex.toString());
+            } finally {
+                send(receiver, userData);
             }
-            send(receiver, userData);
         }
 
         @Override
         public void getUserDataId(@NonNull IResultReceiver receiver) throws RemoteException {
-            final int userId = UserHandle.getCallingUserId();
             UserData userData = null;
+            final int userId = UserHandle.getCallingUserId();
 
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    userData = service.getUserData(getCallingUid());
-                } else if (sVerbose) {
-                    Slog.v(TAG, "getUserDataId(): no service for " + userId);
+            try {
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        userData = service.getUserData(getCallingUid());
+                    } else if (sVerbose) {
+                        Slog.v(TAG, "getUserDataId(): no service for " + userId);
+                    }
                 }
+            } catch (Exception ex) {
+                // Do not raie the exception, just send back null
+                Log.wtf(TAG, "getUserDataId(): failed " + ex.toString());
+            } finally {
+                final String userDataId = userData == null ? null : userData.getId();
+                send(receiver, userDataId);
             }
-            final String userDataId = userData == null ? null : userData.getId();
-            send(receiver, userDataId);
         }
 
         @Override
@@ -1676,117 +1700,157 @@ public final class AutofillManagerService
         @Override
         public void isFieldClassificationEnabled(@NonNull IResultReceiver receiver)
                 throws RemoteException {
-            final int userId = UserHandle.getCallingUserId();
             boolean enabled = false;
-
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    enabled = service.isFieldClassificationEnabled(getCallingUid());
-                } else if (sVerbose) {
-                    Slog.v(TAG, "isFieldClassificationEnabled(): no service for " + userId);
+            try {
+                final int userId = UserHandle.getCallingUserId();
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        enabled = service.isFieldClassificationEnabled(getCallingUid());
+                    } else if (sVerbose) {
+                        Slog.v(TAG, "isFieldClassificationEnabled(): no service for " + userId);
+                    }
                 }
+            } catch (Exception ex) {
+                // Do not raise the exception, just send back false
+                Log.wtf(TAG, "isFieldClassificationEnabled(): failed " + ex.toString());
+            } finally {
+                send(receiver, enabled);
             }
-            send(receiver, enabled);
         }
 
         @Override
         public void getDefaultFieldClassificationAlgorithm(@NonNull IResultReceiver receiver)
                 throws RemoteException {
-            final int userId = UserHandle.getCallingUserId();
             String algorithm = null;
 
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    algorithm = service.getDefaultFieldClassificationAlgorithm(getCallingUid());
-                } else {
-                    if (sVerbose) {
-                        Slog.v(TAG, "getDefaultFcAlgorithm(): no service for " + userId);
+            try {
+                final int userId = UserHandle.getCallingUserId();
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        algorithm = service.getDefaultFieldClassificationAlgorithm(getCallingUid());
+                    } else {
+                        if (sVerbose) {
+                            Slog.v(TAG, "getDefaultFcAlgorithm(): no service for " + userId);
+                        }
                     }
-               }
+                }
+            } catch (Exception ex) {
+                // Do not raise the exception, just send back null
+                Log.wtf(TAG, "getDefaultFieldClassificationAlgorithm(): failed " + ex.toString());
+            } finally {
+                send(receiver, algorithm);
             }
-            send(receiver, algorithm);
+
         }
 
         @Override
         public void setAugmentedAutofillWhitelist(@Nullable List<String> packages,
                 @Nullable List<ComponentName> activities, @NonNull IResultReceiver receiver)
                 throws RemoteException {
-            final int userId = UserHandle.getCallingUserId();
+            boolean ok = false;
 
-            boolean ok;
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    ok = service.setAugmentedAutofillWhitelistLocked(packages, activities,
-                            getCallingUid());
-                } else {
-                    if (sVerbose) {
-                        Slog.v(TAG, "setAugmentedAutofillWhitelist(): no service for " + userId);
+            try {
+                final int userId = UserHandle.getCallingUserId();
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        ok = service.setAugmentedAutofillWhitelistLocked(packages, activities,
+                                getCallingUid());
+                    } else {
+                        if (sVerbose) {
+                            Slog.v(TAG, "setAugmentedAutofillWhitelist(): no service for "
+                                    + userId);
+                        }
                     }
-                    ok = false;
                 }
+            } catch (Exception ex) {
+                // Do not raise the exception, return the default value
+                Log.wtf(TAG, "setAugmentedAutofillWhitelist(): failed " + ex.toString());
+            } finally {
+                send(receiver,
+                        ok ? AutofillManager.RESULT_OK
+                            : AutofillManager.RESULT_CODE_NOT_SERVICE);
             }
-            send(receiver,
-                    ok ? AutofillManager.RESULT_OK : AutofillManager.RESULT_CODE_NOT_SERVICE);
         }
 
         @Override
         public void getAvailableFieldClassificationAlgorithms(@NonNull IResultReceiver receiver)
                 throws RemoteException {
-            final int userId = UserHandle.getCallingUserId();
             String[] algorithms = null;
 
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    algorithms = service.getAvailableFieldClassificationAlgorithms(getCallingUid());
-                } else {
-                    if (sVerbose) {
-                        Slog.v(TAG, "getAvailableFcAlgorithms(): no service for " + userId);
+            try {
+                final int userId = UserHandle.getCallingUserId();
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        algorithms = service
+                            .getAvailableFieldClassificationAlgorithms(getCallingUid());
+                    } else {
+                        if (sVerbose) {
+                            Slog.v(TAG, "getAvailableFcAlgorithms(): no service for " + userId);
+                        }
                     }
                 }
+            } catch (Exception ex) {
+                // Do not raise the exception, return null
+                Log.wtf(TAG, "getAvailableFieldClassificationAlgorithms(): failed "
+                        + ex.toString());
+            } finally {
+                send(receiver, algorithms);
             }
-            send(receiver, algorithms);
         }
 
         @Override
         public void getAutofillServiceComponentName(@NonNull IResultReceiver receiver)
                 throws RemoteException {
-            final int userId = UserHandle.getCallingUserId();
-
             ComponentName componentName = null;
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    componentName = service.getServiceComponentName();
-                } else if (sVerbose) {
-                    Slog.v(TAG, "getAutofillServiceComponentName(): no service for " + userId);
+
+            try {
+                final int userId = UserHandle.getCallingUserId();
+
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        componentName = service.getServiceComponentName();
+                    } else if (sVerbose) {
+                        Slog.v(TAG, "getAutofillServiceComponentName(): no service for " + userId);
+                    }
                 }
+            } catch (Exception ex) {
+                Log.wtf(TAG, "getAutofillServiceComponentName(): failed " + ex.toString());
+            } finally {
+                send(receiver, componentName);
             }
-            send(receiver, componentName);
         }
 
         @Override
         public void restoreSession(int sessionId, @NonNull IBinder activityToken,
                 @NonNull IBinder appCallback, @NonNull IResultReceiver receiver)
                 throws RemoteException {
-            final int userId = UserHandle.getCallingUserId();
-            Objects.requireNonNull(activityToken, "activityToken");
-            Objects.requireNonNull(appCallback, "appCallback");
-
             boolean restored = false;
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    restored = service.restoreSession(sessionId, getCallingUid(), activityToken,
-                            appCallback);
-                } else if (sVerbose) {
-                    Slog.v(TAG, "restoreSession(): no service for " + userId);
+
+            try {
+                Objects.requireNonNull(activityToken, "activityToken");
+                Objects.requireNonNull(appCallback, "appCallback");
+
+                final int userId = UserHandle.getCallingUserId();
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        restored = service.restoreSession(sessionId, getCallingUid(), activityToken,
+                                appCallback);
+                    } else if (sVerbose) {
+                        Slog.v(TAG, "restoreSession(): no service for " + userId);
+                    }
                 }
+            } catch (Exception ex) {
+                // Do not propagate exception, send back status
+                Log.wtf(TAG, "restoreSession(): failed " + ex.toString());
+            } finally {
+                send(receiver, restored);
             }
-            send(receiver, restored);
         }
 
         @Override
@@ -1855,21 +1919,35 @@ public final class AutofillManagerService
         @Override
         public void isServiceSupported(int userId, @NonNull IResultReceiver receiver) {
             boolean supported = false;
-            synchronized (mLock) {
-                supported = !isDisabledLocked(userId);
+
+            try {
+                synchronized (mLock) {
+                    supported = !isDisabledLocked(userId);
+                }
+            } catch (Exception ex) {
+                // Do not propagate exception
+                Log.wtf(TAG, "isServiceSupported(): failed " + ex.toString());
+            } finally {
+                send(receiver, supported);
             }
-            send(receiver, supported);
         }
 
         @Override
         public void isServiceEnabled(int userId, @NonNull String packageName,
                 @NonNull IResultReceiver receiver) {
             boolean enabled = false;
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-                enabled = Objects.equals(packageName, service.getServicePackageName());
+
+            try {
+                synchronized (mLock) {
+                    final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+                    enabled = Objects.equals(packageName, service.getServicePackageName());
+                }
+            } catch (Exception ex) {
+                // Do not propagate exception
+                Log.wtf(TAG, "isServiceEnabled(): failed " + ex.toString());
+            } finally {
+                send(receiver, enabled);
             }
-            send(receiver, enabled);
         }
 
         @Override
