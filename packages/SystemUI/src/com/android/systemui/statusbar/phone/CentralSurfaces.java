@@ -43,6 +43,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.RemoteAnimationRunnerCompat;
@@ -197,7 +198,10 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     /**
      * Wakes up the device if the device was dozing.
+     *
+     * @deprecated Use {@link PowerInteractor#wakeUpIfDozing(String, int)} instead.
      */
+    @Deprecated
     void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason);
 
     /** */

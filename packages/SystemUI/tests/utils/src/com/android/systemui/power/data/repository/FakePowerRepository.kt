@@ -17,6 +17,7 @@
 
 package com.android.systemui.power.data.repository
 
+import android.os.PowerManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,7 +29,15 @@ class FakePowerRepository(
     private val _isInteractive = MutableStateFlow(initialInteractive)
     override val isInteractive: Flow<Boolean> = _isInteractive.asStateFlow()
 
+    var lastWakeWhy: String? = null
+    var lastWakeReason: Int? = null
+
     fun setInteractive(value: Boolean) {
         _isInteractive.value = value
+    }
+
+    override fun wakeUp(why: String, @PowerManager.WakeReason wakeReason: Int) {
+        lastWakeWhy = why
+        lastWakeReason = wakeReason
     }
 }
