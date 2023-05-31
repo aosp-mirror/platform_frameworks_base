@@ -92,8 +92,8 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun affordance_walletNotEnabled_modelIsNone() = runBlockingTest {
-        setUpState(isWalletEnabled = false)
+    fun affordance_walletFeatureNotEnabled_modelIsNone() = runBlockingTest {
+        setUpState(isWalletFeatureAvailable = false)
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
         val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
@@ -165,7 +165,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun getPickerScreenState_disabledWhenTheFeatureIsNotEnabled() = runTest {
         setUpState(
-            isWalletEnabled = false,
+            isWalletFeatureAvailable = false,
         )
 
         assertThat(underTest.getPickerScreenState())
@@ -183,16 +183,15 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     private fun setUpState(
-        isWalletEnabled: Boolean = true,
+        isWalletFeatureAvailable: Boolean = true,
         isWalletServiceAvailable: Boolean = true,
         isWalletQuerySuccessful: Boolean = true,
         hasSelectedCard: Boolean = true,
     ) {
-        whenever(walletController.isWalletEnabled).thenReturn(isWalletEnabled)
-
         val walletClient: QuickAccessWalletClient = mock()
         whenever(walletClient.tileIcon).thenReturn(ICON)
         whenever(walletClient.isWalletServiceAvailable).thenReturn(isWalletServiceAvailable)
+        whenever(walletClient.isWalletFeatureAvailable).thenReturn(isWalletFeatureAvailable)
 
         whenever(walletController.walletClient).thenReturn(walletClient)
 

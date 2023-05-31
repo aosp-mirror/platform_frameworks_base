@@ -63,7 +63,7 @@ constructor(
                         val hasCards = response?.walletCards?.isNotEmpty() == true
                         trySendWithFailureLogging(
                             state(
-                                isFeatureEnabled = walletController.isWalletEnabled,
+                                isFeatureEnabled = isWalletAvailable(),
                                 hasCard = hasCards,
                                 tileIcon = walletController.walletClient.tileIcon,
                             ),
@@ -100,7 +100,7 @@ constructor(
         return when {
             !walletController.walletClient.isWalletServiceAvailable ->
                 KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
-            !walletController.isWalletEnabled || queryCards().isEmpty() -> {
+            !isWalletAvailable() || queryCards().isEmpty() -> {
                 KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
                     instructions =
                         listOf(
@@ -145,6 +145,11 @@ constructor(
             walletController.queryWalletCards(callback)
         }
     }
+
+    private fun isWalletAvailable() =
+        with(walletController.walletClient) {
+            isWalletServiceAvailable && isWalletFeatureAvailable
+        }
 
     private fun state(
         isFeatureEnabled: Boolean,
