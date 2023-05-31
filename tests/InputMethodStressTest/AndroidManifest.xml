@@ -19,8 +19,7 @@
           package="com.android.inputmethod.stresstest">
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application>
-        <activity android:name=".ImeStressTestUtil$TestActivity"
-                  android:configChanges="orientation|screenSize"/>
+        <activity android:name=".ImeStressTestUtil$TestActivity"/>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
