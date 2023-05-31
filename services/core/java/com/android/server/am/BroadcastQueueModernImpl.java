@@ -731,8 +731,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (mService.shouldIgnoreDeliveryGroupPolicy(r.intent.getAction())) {
             return;
         }
-        final int policy = (r.options != null)
-                ? r.options.getDeliveryGroupPolicy() : BroadcastOptions.DELIVERY_GROUP_POLICY_ALL;
+        final int policy = r.getDeliveryGroupPolicy();
         final BroadcastConsumer broadcastConsumer;
         switch (policy) {
             case BroadcastOptions.DELIVERY_GROUP_POLICY_ALL:
@@ -1934,7 +1933,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, uid, senderUid, actionName,
                     receiverType, type, dispatchDelay, receiveDelay, finishDelay, packageState,
-                    app != null ? app.info.packageName : null, r.callerPackage);
+                    app != null ? app.info.packageName : null, r.callerPackage,
+                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy());
         }
     }
 

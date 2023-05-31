@@ -17,6 +17,19 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_ALARM;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_BACKGROUND;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_DEFERRABLE_UNTIL_ACTIVE;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_FOREGROUND;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_INITIAL_STICKY;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_INTERACTIVE;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_NONE;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_ORDERED;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_PRIORITIZED;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_PUSH_MESSAGE;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_PUSH_MESSAGE_OVER_QUOTA;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_RESULT_TO;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_STICKY;
 
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_ALL;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
@@ -35,6 +48,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
+import android.app.BroadcastOptions.DeliveryGroupPolicy;
 import android.app.compat.CompatChanges;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
@@ -1018,6 +1032,46 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    int calculateTypeForLogging() {
+        int type = BROADCAST_TYPE_NONE;
+        if (isForeground()) {
+            type |= BROADCAST_TYPE_FOREGROUND;
+        } else {
+            type |= BROADCAST_TYPE_BACKGROUND;
+        }
+        if (alarm) {
+            type |= BROADCAST_TYPE_ALARM;
+        }
+        if (interactive) {
+            type |= BROADCAST_TYPE_INTERACTIVE;
+        }
+        if (ordered) {
+            type |= BROADCAST_TYPE_ORDERED;
+        }
+        if (prioritized) {
+            type |= BROADCAST_TYPE_PRIORITIZED;
+        }
+        if (resultTo != null) {
+            type |= BROADCAST_TYPE_RESULT_TO;
+        }
+        if (deferUntilActive) {
+            type |= BROADCAST_TYPE_DEFERRABLE_UNTIL_ACTIVE;
+        }
+        if (pushMessage) {
+            type |= BROADCAST_TYPE_PUSH_MESSAGE;
+        }
+        if (pushMessageOverQuota) {
+            type |= BROADCAST_TYPE_PUSH_MESSAGE_OVER_QUOTA;
+        }
+        if (sticky) {
+            type |= BROADCAST_TYPE_STICKY;
+        }
+        if (initialSticky) {
+            type |= BROADCAST_TYPE_INITIAL_STICKY;
+        }
+        return type;
+    }
+
     public BroadcastRecord maybeStripForHistory() {
         if (!intent.canStripForHistory()) {
             return this;
@@ -1111,6 +1165,12 @@ final class BroadcastRecord extends Binder {
             }
         }
         return true;
+    }
+
+    @DeliveryGroupPolicy
+    int getDeliveryGroupPolicy() {
+        return (options != null) ? options.getDeliveryGroupPolicy()
+                : BroadcastOptions.DELIVERY_GROUP_POLICY_ALL;
     }
 
     boolean matchesDeliveryGroup(@NonNull BroadcastRecord other) {
