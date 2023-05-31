@@ -581,6 +581,7 @@ public class DevicePolicyManager {
      *     <li>{@link #LOCK_TASK_FEATURE_HOME}</li>
      *     <li>{@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}</li>
      *     <li>{@link #LOCK_TASK_FEATURE_NOTIFICATIONS}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK}</li>
      * </ul>
      * <li>{@link #getLockTaskFeatures(ComponentName)}</li>
      * <li>{@link #setLockTaskPackages(ComponentName, String[])}</li>
