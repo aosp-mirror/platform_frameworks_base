@@ -1374,7 +1374,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
             // The requested visibilities should be delayed as well. Otherwise, we might override
             // the insets visibility before playing animation.
-            setRequestedVisibleTypes(mReportedRequestedVisibleTypes, typesReady);
+            setRequestedVisibleTypes(mReportedRequestedVisibleTypes, types);
 
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
             if (!fromIme) {
