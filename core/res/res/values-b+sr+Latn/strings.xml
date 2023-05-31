@@ -86,7 +86,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Probajte da promenite željenu mrežu. Dodirnite da biste promenili."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hitni pozivi nisu dostupni"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ne možete da upućujete hitne pozive preko Wi‑Fi-ja"</string>
-    <string name="notification_channel_network_alert" msgid="4788053066033851841">"Obaveštenja"</string>
+    <string name="notification_channel_network_alert" msgid="4788053066033851841">"Upozorenja"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Preusmeravanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Režim za hitan povratni poziv"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Status mobilnih podataka"</string>
@@ -284,7 +284,7 @@
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Mreža je dostupna"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Status VPN-a"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Obaveštenja od IT administratora"</string>
-    <string name="notification_channel_alerts" msgid="5070241039583668427">"Obaveštenja"</string>
+    <string name="notification_channel_alerts" msgid="5070241039583668427">"Upozorenja"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Režim demonstracije za maloprodajne objekte"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB veza"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aktivna aplikacija"</string>
@@ -1978,6 +1978,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ovoj aplikaciji ne može da se pristupi sa uređaja <xliff:g id="DEVICE">%1$s</xliff:g>. Probajte na telefonu."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Ova aplikacija je napravljena za stariju verziju Android-a. Možda neće raditi ispravno i ne obuhvata najnovije bezbednosne funkcije i zaštite privatnosti. Proverite da li ima ažuriranja ili se obratite programeru aplikacije."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Potraži ažuriranje"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Ova aplikacija nije kompatibilna sa najnovijom verzijom Android-a. Proverite da li ima ažuriranja ili se obratite programeru aplikacije."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Imate nove poruke"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Otvorite aplikaciju za SMS da biste pregledali"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Neke funkcije su možda ograničene"</string>

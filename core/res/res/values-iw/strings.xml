@@ -1698,8 +1698,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"לא להפעיל"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"מופעל"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"כבוי"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"להעניק לשירות <xliff:g id="SERVICE">%1$s</xliff:g> שליטה מלאה במכשיר?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"האפשרות לשליטה מלאה במכשיר לא מתאימה לכל האפליקציות, אלא רק לאפליקציות שעוזרות עם צורכי הנגישות שלך."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"להעניק לשירות \'<xliff:g id="SERVICE">%1$s</xliff:g>\' שליטה מלאה במכשיר?"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"האפשרות לשליטה מלאה במכשיר לא מתאימה לרוב האפליקציות, אלא רק לאפליקציות שעוזרות עם צורכי הנגישות שלך."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"הצגת המסך ושליטה בו"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"אפשרות לקריאת כל התוכן במסך ולהצגת התוכן מעל אפליקציות אחרות."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"הצגה וביצוע של פעולות"</string>
@@ -1978,6 +1978,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"אי אפשר לגשת להגדרה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g>. במקום זאת, אפשר לנסות בטלפון."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"‏האפליקציה הזו תוכננה לגרסה ישנה יותר של Android. האפליקציה לא כוללת את אמצעי ההגנה האחרונים לאבטחה ופרטיות, ועלולה לא לעבוד כראוי. כדאי לבדוק אם יש עדכון או ליצור קשר עם מפתח האפליקציה."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"יש עדכון חדש?"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"‏האפליקציה הזו לא תואמת לגרסה העדכנית של Android. כדאי לבדוק אם יש עדכון או ליצור קשר עם מפתחי האפליקציה."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"יש לך הודעות חדשות"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏יש לפתוח את אפליקציית ה-SMS כדי להציג"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ייתכן שחלק מהפונקציונליות תהיה מוגבלת"</string>

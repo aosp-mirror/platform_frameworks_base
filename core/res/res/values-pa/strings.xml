@@ -1635,7 +1635,7 @@
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
-    <string name="media_route_status_connecting" msgid="5845597961412010540">"ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
+    <string name="media_route_status_connecting" msgid="5845597961412010540">"ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"ਉਪਲਬਧ"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"ਵਰਤੋਂ ਵਿੱਚ"</string>
@@ -1977,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> \'ਤੇ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ਇਹ ਐਪ Android ਦੇ ਕਿਸੇ ਪੁਰਾਣੇ ਵਰਜਨ ਲਈ ਬਣਾਈ ਗਿਆ ਸੀ। ਸ਼ਾਇਦ ਇਹ ਠੀਕ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ ਅਤੇ ਨਵੀਨਤਮ ਸੁਰੱਖਿਆ ਅਤੇ ਪਰਦੇਦਾਰੀ ਸੰਬੰਧੀ ਸੁਰੱਖਿਆਵਾਂ ਸ਼ਾਮਲ ਨਾ ਹੋਣ। ਅੱਪਡੇਟ ਲਈ ਜਾਂਚ ਕਰੋ ਜਾਂ ਐਪ ਦੇ ਵਿਕਾਸਕਾਰ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ਅੱਪਡੇਟ ਲਈ ਜਾਂਚ ਕਰੋ"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"ਇਹ ਐਪ Android ਦੇ ਨਵੀਨਤਮ ਵਰਜਨ ਦੇ ਅਨੁਰੂਪ ਨਹੀਂ ਹੈ। ਅੱਪਡੇਟ ਲਈ ਜਾਂਚ ਕਰੋ ਜਾਂ ਐਪ ਦੇ ਵਿਕਾਸਕਾਰ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ਤੁਹਾਨੂੰ ਨਵੇਂ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਹੋਏ ਹਨ"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"ਦੇਖਣ ਲਈ SMS ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ਕੁਝ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਸੀਮਤ ਹੋ ਸਕਦੀ ਹੈ"</string>

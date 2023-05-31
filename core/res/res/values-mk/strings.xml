@@ -91,7 +91,7 @@
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Статус на мобилна мрежа"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-пораки"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Пораки од говорна пошта"</string>
-    <string name="notification_channel_wfc" msgid="9048240466765169038">"Повикување преку Wi-Fi"</string>
+    <string name="notification_channel_wfc" msgid="9048240466765169038">"Повици преку Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"Статус на SIM-картичка"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"Статус на SIM-известувања со висок приоритет"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Рамноправен уред го побара режимот на TTY „FULL“"</string>
@@ -122,7 +122,7 @@
     <string name="roamingTextSearching" msgid="5323235489657753486">"Пребарување за услуга"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Не може да се постави функцијата „Повици преку Wi-Fi“"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"За да воспоставувате повици и да испраќате пораки преку Wi-Fi, прво побарајте од операторот да ја постави услугава. Потоа, вклучете ја повторно „Повикување преку Wi-Fi“ во „Поставки“. (Код за грешка: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"За да воспоставувате повици и да испраќате пораки преку Wi-Fi, прво побарајте од операторот да ја постави услугава. Потоа, вклучете ја повторно „Повици преку Wi-Fi“ во „Поставки“. (Код за грешка: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4795145070505729156">"Проблем при регистрирањето на функцијата „Повици преку Wi‑Fi“ со операторот: <xliff:g id="CODE">%1$s</xliff:g>"</item>
@@ -130,15 +130,15 @@
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"Повици преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"Повикување преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"Повици преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="4895315549916165700">"Повик преку WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="255919245825481510">"Повик преку WLAN на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Повици преку Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"Глас преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Повикување преку Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Повици преку Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
-    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Повикување преку Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Повици преку Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"Глас преку Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Повик преку WiFi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Исклучено"</string>
@@ -1725,7 +1725,7 @@
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Изберете ја функцијата што ќе ја користите со движењето за пристапност (повлекување нагоре од дното на екранот со два прста):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Изберете ја функцијата што ќе ја користите со движењето за пристапност (повлекување нагоре од дното на екранот со три прста):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"За префрлање помеѓу функциите, допрете и задржете го копчето за пристапност."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"За префрлање помеѓу функциите, повлечете нагоре со два прста и задржете."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"За да се префрлите на друга функција, повлечете нагоре со два прста и задржете."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"За префрлање помеѓу функциите, повлечете нагоре со три прста и задржете."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Зголемување"</string>
     <string name="user_switched" msgid="7249833311585228097">"Тековен корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1977,6 +1977,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот телефон како алтернатива."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Оваа апликација е создадена за постара верзија на Android. Можеби нема да работи правилно и не ги вклучува најновите мерки за заштита на безбедноста и приватноста. Проверете дали има ажурирање или контактирајте со програмерот на апликацијата."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за ажурирање"</string>
+    <!-- no translation found for deprecated_abi_message (6820548011196218091) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови пораки"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Отворете ја апликацијата за SMS за приказ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Некои функции се ограничени"</string>

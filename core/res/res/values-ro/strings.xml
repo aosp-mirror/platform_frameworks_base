@@ -1978,6 +1978,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încearcă pe telefon."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Aplicația a fost creată pentru o versiune mai veche de Android. Poate să nu funcționeze corect și nu include cele mai recente măsuri de protecție a securității și a confidențialității. Caută o actualizare sau contactează dezvoltatorul aplicației."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Caută actualizări"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Aplicația nu este compatibilă cu cea mai recentă versiune de Android. Caută o actualizare sau contactează dezvoltatorul aplicației."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ai mesaje noi"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Deschide aplicația pentru SMS-uri ca să vezi"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Unele funcții ar putea fi limitate"</string>

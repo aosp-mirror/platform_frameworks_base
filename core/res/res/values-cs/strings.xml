@@ -1979,6 +1979,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> není k dispozici. Zkuste to na telefonu."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Tato aplikace byla vytvořena pro starší verzi Androidu. Nemusí fungovat správně a neobsahuje nejnovější zabezpečení a ochranu soukromí. Zkontrolujte dostupnost aktualizace nebo kontaktujte vývojáře aplikace."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Zkontrolovat aktualizace"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Tato aplikace není kompatibilní s poslední verzí Androidu. Zkontrolujte dostupnost aktualizace nebo kontaktujte vývojáře aplikace."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové zprávy"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Zobrazíte je v aplikaci pro SMS"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Některé funkce mohou být omezeny"</string>
