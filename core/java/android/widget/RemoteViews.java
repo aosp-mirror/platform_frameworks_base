@@ -1830,7 +1830,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public final void visitUris(@NonNull Consumer<Uri> visitor) {
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
             switch (this.type) {
                 case URI:
                     final Uri uri = (Uri) getParameterValue(null);
@@ -2292,6 +2292,14 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return NIGHT_MODE_REFLECTION_ACTION_TAG;
+        }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            if (this.type == ICON) {
+                visitIconUri((Icon) mDarkValue, visitor);
+                visitIconUri((Icon) mLightValue, visitor);
+            }
         }
     }
 
