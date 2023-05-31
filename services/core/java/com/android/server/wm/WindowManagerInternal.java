@@ -370,6 +370,13 @@ public abstract class WindowManagerInternal {
     public abstract void requestTraversalFromDisplayManager();
 
     /**
+     * Called just before display manager has applied the device state to the displays
+     * @param deviceState device state as defined by
+     *        {@link android.hardware.devicestate.DeviceStateManager}
+     */
+    public abstract void onDisplayManagerReceivedDeviceState(int deviceState);
+
+    /**
      * Set by the accessibility layer to observe changes in the magnified region,
      * rotation, and other window transformations related to display magnification
      * as the window manager is responsible for doing the actual magnification
