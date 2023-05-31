@@ -934,10 +934,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     @Override
                     public void onUnlockAnimationStarted(
                             boolean playingCannedAnimation,
-                            boolean isWakeAndUnlock,
+                            boolean isWakeAndUnlockNotFromDream,
                             long startDelay,
                             long unlockAnimationDuration) {
-                        unlockAnimationStarted(playingCannedAnimation, isWakeAndUnlock, startDelay);
+                        unlockAnimationStarted(playingCannedAnimation, isWakeAndUnlockNotFromDream,
+                                startDelay);
                     }
                 });
         mAlternateBouncerInteractor = alternateBouncerInteractor;
@@ -952,7 +953,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void unlockAnimationStarted(
             boolean playingCannedAnimation,
-            boolean isWakeAndUnlock,
+            boolean isWakeAndUnlockNotFromDream,
             long unlockAnimationStartDelay) {
         // Disable blurs while we're unlocking so that panel expansion does not
         // cause blurring. This will eventually be re-enabled by the panel view on
@@ -960,7 +961,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // unlock gesture, and we don't want that to cause blurring either.
         mDepthController.setBlursDisabledForUnlock(mTracking);
 
-        if (playingCannedAnimation && !isWakeAndUnlock) {
+        if (playingCannedAnimation && !isWakeAndUnlockNotFromDream) {
             // Hide the panel so it's not in the way or the surface behind the
             // keyguard, which will be appearing. If we're wake and unlocking, the
             // lock screen is hidden instantly so should not be flung away.
