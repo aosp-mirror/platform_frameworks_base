@@ -1489,12 +1489,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
         static final int CHANGE_FOREGROUND_SERVICES = 1<<1;
-        static final int CHANGE_CAPABILITY = 1<<2;
         int changes;
         int uid;
         int pid;
         int processState;
-        int capability;
         boolean foregroundActivities;
         int foregroundServiceTypes;
     }
