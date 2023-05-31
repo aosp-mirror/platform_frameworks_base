@@ -33,10 +33,10 @@ import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.core.math.MathUtils
+import com.android.app.animation.Interpolators
 import com.android.internal.R
 import com.android.keyguard.KeyguardClockSwitchController
 import com.android.keyguard.KeyguardViewController
-import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -433,7 +433,14 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // animate state.
         if (!keyguardStateController.isKeyguardGoingAway &&
                 willUnlockWithInWindowLauncherAnimations) {
-            launcherUnlockController?.setUnlockAmount(1f, true /* forceIfAnimating */)
+            try {
+                launcherUnlockController?.setUnlockAmount(1f, true /* forceIfAnimating */)
+            } catch (e: DeadObjectException) {
+                Log.e(TAG, "launcherUnlockAnimationController was dead, but non-null in " +
+                        "onKeyguardGoingAwayChanged(). Catching exception as this should mean " +
+                        "Launcher is in the process of being destroyed, but the IPC to System UI " +
+                        "telling us hasn't arrived yet.")
+            }
         }
     }
 
