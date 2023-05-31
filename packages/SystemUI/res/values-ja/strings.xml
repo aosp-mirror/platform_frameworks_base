@@ -926,8 +926,8 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"タイルを追加しない"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ユーザーを選択"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 個のアプリが実行中です</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 個のアプリが実行中です</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 個のアプリが実行中</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 個のアプリが実行中</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"最新情報"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"実行中のアプリ"</string>

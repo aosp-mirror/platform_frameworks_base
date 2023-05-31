@@ -248,7 +248,7 @@
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"बन्द गर्नुहोस्"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"जोडिएको"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"यन्त्र जडान भयो, ब्याट्रीको चार्ज स्तर <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="2381969772953268809">"जडान हुँदै..."</string>
+    <string name="quick_settings_connecting" msgid="2381969772953268809">"कनेक्ट गरिँदै छ..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"हटस्पट"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"सक्रिय गर्दै…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"डेटा सेभर सक्रिय छ"</string>

@@ -264,7 +264,7 @@
       <item quantity="other">‏%d جهاز</item>
       <item quantity="one">‏جهاز واحد (%d)</item>
     </plurals>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"الفلاش"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"ضوء الفلاش"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"الكاميرا قيد الاستخدام"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"بيانات الجوّال"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"استخدام البيانات"</string>

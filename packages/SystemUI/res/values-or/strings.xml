@@ -230,7 +230,7 @@
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ମିଡିଆ ଡିଭାଇସ୍‌"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ଉପଯୋଗକର୍ତ୍ତା‌"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"ୱାଇ-ଫାଇ"</string>
-    <string name="quick_settings_internet_label" msgid="6603068555872455463">"ଇଣ୍ଟରନେଟ୍"</string>
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"ଇଣ୍ଟରନେଟ"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"ନେଟୱାର୍କଗୁଡ଼ିକ ଉପଲବ୍ଧ"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"କୌଣସି ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -461,7 +461,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"ଡେମୋ ମୋଡ୍ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"ଡେମୋ ମୋଡ୍‍ ଦେଖାନ୍ତୁ"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ଇଥରନେଟ୍‌"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"ଆଲାର୍ମ"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"ଆଲାରାମ"</string>
     <string name="wallet_title" msgid="5369767670735827105">"ୱାଲେଟ୍"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ଆପଣଙ୍କ ଫୋନ୍ ମାଧ୍ୟମରେ ଆହୁରି ଶୀଘ୍ର, ଅଧିକ ସୁରକ୍ଷିତ କ୍ରୟ କରିବା ପାଇଁ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ସବୁ ଦେଖାନ୍ତୁ"</string>
