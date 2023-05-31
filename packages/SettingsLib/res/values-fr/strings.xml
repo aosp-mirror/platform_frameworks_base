@@ -545,12 +545,18 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"À l\'instant"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ce téléphone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Cette tablette"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ce téléphone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossible de lire du contenu sur cet appareil"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Mettez à niveau le compte pour changer"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Impossible de lire les téléchargements ici"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Réessayez après l\'annonce"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activer l\'appareil pour lire du contenu ici"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activez l\'appareil pour lire du contenu ici"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Appareil non autorisé à lire du contenu"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Impossible de lire ce contenu multimédia ici"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problème de connexion. Éteignez l\'appareil, puis rallumez-le"</string>

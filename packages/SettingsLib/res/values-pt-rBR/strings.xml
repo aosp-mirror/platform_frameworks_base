@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este telefone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Este tablet"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telefone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Não é possível reproduzir neste dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Faça upgrade da conta para trocar"</string>
@@ -575,9 +581,9 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Usuário"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo usuário?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Você pode compartilhar este dispositivo com outras pessoas, adicionando usuários. Cada usuário tem o próprio espaço, que pode ser personalizado com apps, planos de fundo, etc. Os usuários também podem ajustar as configurações do dispositivo, como o Wi‑Fi, que afetam a todos.\n\nQuando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para todos os outros. Serviços e configurações de acessibilidade podem não ser transferidos para novos usuários."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Você pode compartilhar este dispositivo com outras pessoas, adicionando usuários. Cada um tem o próprio espaço de trabalho, que pode ser personalizado com apps, planos de fundo, etc. Também é possível ajustar as configurações do dispositivo, como o Wi‑Fi, que afetam a todos.\n\nQuando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para todos os outros. Serviços e configurações de acessibilidade podem não ser transferidos para novos usuários."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Quando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para os demais usuários."</string>
-    <string name="user_grant_admin_title" msgid="5157031020083343984">"Transformar esse usuário um administrador?"</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Tornar esse usuário um administrador?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Administradores têm privilégios especiais que outros usuários não têm. Um administrador pode gerenciar todos os usuários, atualizar ou redefinir este dispositivo, modificar configurações, conferir todos os apps instalados e conceder ou revogar privilégios de administrador para outras pessoas."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Transformar o usuário em administrador"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o usuário agora?"</string>
@@ -611,7 +617,7 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Essa ação vai iniciar uma nova Sessão de visitante e excluir todos os apps e dados da sessão atual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sair do modo visitante?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Essa ação vai excluir apps e dados da Sessão de visitante atual"</string>
-    <string name="grant_admin" msgid="4323199171790522574">"Sim, transformar esse usuário em administrador"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Sim, tornar esse usuário um administrador"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"Não, não transformar o usuário em administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sair"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Salvar a atividade do visitante?"</string>
