@@ -87,7 +87,7 @@
     <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"ತಪ್ಪಾದ ಪಿನ್‌ನೊಂದಿಗೆ ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ"</string>
     <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"ತಪ್ಪಾದ ಪ್ಯಾಟರ್ನ್‌ನೊಂದಿಗೆ ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ"</string>
     <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ನೊಂದಿಗೆ ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# ಸೆಕೆಂಡಿನಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.}one{# ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.}other{# ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# ಸೆಕೆಂಡಿನ ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.}one{# ಸೆಕೆಂಡುಗಳ ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.}other{# ಸೆಕೆಂಡುಗಳ ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"ಸಿಮ್‌ ಪಿನ್‌ ನಮೂದಿಸಿ."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" ಗಾಗಿ ಸಿಮ್ ಪಿನ್ ನಮೂದಿಸಿ."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ಮೊಬೈಲ್ ಸೇವೆ ಇಲ್ಲದೆ ಸಾಧನವನ್ನು ಬಳಸಲು eSIM ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ."</string>
@@ -98,9 +98,9 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"SIM ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4 ರಿಂದ 8 ಸಂಖ್ಯೆಗಳಿರುವ ಪಿನ್‌ ಟೈಪ್ ಮಾಡಿ."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK ಕೋಡ್ 8 ಅಥವಾ ಹೆಚ್ಚು ಸಂಖ್ಯೆಗಳನ್ನು ಹೊಂದಿರಬೇಕು."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"ನಿಮ್ಮ ಪಿನ್‌ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿದ್ದೀರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"ನಿಮ್ಮ ಪಾಸ್‍‍ವರ್ಡ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ನಮೂದಿಸಿದ್ದೀರಿ. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್‌ ಅನ್ನು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಎಳೆದಿದ್ದೀರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"ನಿಮ್ಮ ಪಿನ್‌ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿದ್ದೀರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳ ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"ನಿಮ್ಮ ಪಾಸ್‍‍ವರ್ಡ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಟೈಪ್ ಮಾಡಿದ್ದೀರಿ. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳ ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್‌ ಅನ್ನು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಎಳೆದಿದ್ದೀರಿ. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳ ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ಸಿಮ್‌ ಪಿನ್‌ ಕೋಡ್‌ ತಪ್ಪಾಗಿದೆ, ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ನೀವು ಈ ಕೂಡಲೇ ನಿಮ್ಮ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಬೇಕು."</string>
     <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM ಪಿನ್ ಕೋಡ್ ತಪ್ಪಾಗಿದೆ, ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವುದಕ್ಕಾಗಿ ನಿಮ್ಮ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸುವ ಮುನ್ನ ನಿಮ್ಮಲ್ಲಿ # ಪ್ರಯತ್ನ ಬಾಕಿ ಉಳಿದಿದೆ.}one{SIM ಪಿನ್ ಕೋಡ್ ತಪ್ಪಾಗಿದೆ, ನಿಮ್ಮಲ್ಲಿ # ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ. }other{SIM ಪಿನ್ ಕೋಡ್ ತಪ್ಪಾಗಿದೆ, ನಿಮ್ಮಲ್ಲಿ # ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"ಸಿಮ್‌ ನಿಷ್ಪ್ರಯೋಜಕವಾಗಿದೆ. ನಿಮ್ಮ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
