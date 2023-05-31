@@ -1643,6 +1643,26 @@ class MediaRouter2ServiceImpl {
         }
 
         /**
+         * Notifies the corresponding router that it was successfully registered.
+         *
+         * <p>The message sent to the router includes a snapshot of the initial state, including
+         * known routes and the system {@link RoutingSessionInfo}.
+         *
+         * @param currentRoutes All currently known routes, which are filtered according to package
+         *     visibility before being sent to the router.
+         * @param currentSystemSessionInfo The current system {@link RoutingSessionInfo}.
+         */
+        public void notifyRegistered(
+                List<MediaRoute2Info> currentRoutes, RoutingSessionInfo currentSystemSessionInfo) {
+            try {
+                mRouter.notifyRouterRegistered(
+                        getVisibleRoutes(currentRoutes), currentSystemSessionInfo);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify router registered. Router probably died.", ex);
+            }
+        }
+
+        /**
          * Sends the corresponding router an {@link
          * android.media.MediaRouter2.RouteCallback#onRoutesUpdated update} for the given {@code
          * routes}.
@@ -2543,12 +2563,7 @@ class MediaRouter2ServiceImpl {
                 return;
             }
 
-            try {
-                routerRecord.mRouter.notifyRouterRegistered(
-                        currentRoutes, currentSystemSessionInfo);
-            } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to notify router registered. Router probably died.", ex);
-            }
+            routerRecord.notifyRegistered(currentRoutes, currentSystemSessionInfo);
         }
 
         private static void notifyRoutesUpdatedToRouterRecords(
