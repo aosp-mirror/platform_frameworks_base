@@ -213,6 +213,9 @@ public class AuthContainerView extends LinearLayout
                 case AuthBiometricView.Callback.ACTION_START_DELAYED_FINGERPRINT_SENSOR:
                     mConfig.mCallback.onStartFingerprintNow(getRequestId());
                     break;
+                case AuthBiometricView.Callback.ACTION_AUTHENTICATED_AND_CONFIRMED:
+                    animateAway(AuthDialogCallback.DISMISSED_BUTTON_POSITIVE);
+                    break;
                 default:
                     Log.e(TAG, "Unhandled action: " + action);
             }
