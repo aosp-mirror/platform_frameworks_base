@@ -678,7 +678,7 @@ object Flags {
     // TODO(b/283071711): Tracking bug
     @JvmField
     val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
-            unreleasedFlag(2401, "trim_resources_with_background_trim_on_lock")
+            releasedFlag(2401, "trim_resources_with_background_trim_on_lock")
 
     // TODO:(b/283203305): Tracking bug
     @JvmField
