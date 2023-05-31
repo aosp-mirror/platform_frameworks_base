@@ -817,8 +817,8 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"ย้ายไปที่ตำแหน่ง <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"การควบคุม"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"เลือกตัวควบคุมที่ต้องการให้เข้าถึงได้จากการตั้งค่าด่วน"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"แตะตัวควบคุมค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"นำตัวควบคุมทั้งหมดออกแล้ว"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"แตะระบบควบคุมค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"นำระบบควบคุมทั้งหมดออกแล้ว"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ยังไม่ได้บันทึกการเปลี่ยนแปลง"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"ดูแอปอื่นๆ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"โหลดตัวควบคุมไม่ได้ ตรวจสอบแอป <xliff:g id="APP">%s</xliff:g> ให้แน่ใจว่าการตั้งค่าของแอปไม่เปลี่ยนแปลง"</string>
@@ -878,7 +878,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"โหลดสถานะไม่ได้"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"พบข้อผิดพลาด โปรดลองอีกครั้ง"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"เพิ่มตัวควบคุม"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"แก้ไขตัวควบคุม"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"แก้ไขระบบควบคุม"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"เพิ่มแอป"</string>
     <string name="controls_menu_remove" msgid="3006525275966023468">"นำแอปออก"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"เพิ่มเอาต์พุต"</string>

@@ -268,7 +268,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Açılıyor…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Veri Tasarrufu açık"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# cihaz}other{# cihaz}}"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Fener"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"El feneri"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera kullanımda"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobil veri"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Veri kullanımı"</string>
@@ -830,7 +830,7 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> tarafından önerildi"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Cihaz kilitlendi"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Cihazlar kilit ekranında gösterilip buradan kontrol edilsin mi?"</string>
-    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Kilit ekranına harici cihazlarınız için kontroller ekleyebilirsiniz.\n\nCihaz uygulamanız, bazı cihazları telefonunuzun veya tabletinizin kilidini açmadan kontrol etmenize izin verebilir.\n\nAyarlar\'da istediğiniz zaman değişiklik yapabilirsiniz."</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Kilit ekranına harici cihazlarınız için denetimler ekleyebilirsiniz.\n\nCihaz uygulamanız, bazı cihazları telefonunuzun veya tabletinizin kilidini açmadan denetlemenize izin verebilir.\n\nAyarlar\'da istediğiniz zaman değişiklik yapabilirsiniz."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Cihazlar kilit ekranından kontrol edilsin mi?"</string>
     <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Bazı cihazları telefonunuzun veya tabletinizin kilidini açmadan kontrol edebilirsiniz.Hangi cihazların bu şekilde kontrol edilebileceğini cihaz uygulamanız belirler."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Hayır, teşekkürler"</string>
@@ -880,7 +880,7 @@
     <string name="controls_menu_add" msgid="4447246119229920050">"Denetim ekle"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Denetimleri düzenle"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Uygulama ekle"</string>
-    <string name="controls_menu_remove" msgid="3006525275966023468">"Uygulamayı kaldır"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"Uygulama kaldır"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Çıkışlar ekleyin"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grup"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 cihaz seçildi"</string>

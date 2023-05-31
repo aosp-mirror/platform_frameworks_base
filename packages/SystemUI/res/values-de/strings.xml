@@ -231,7 +231,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Eingabe"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hörhilfen"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hörgeräte"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Wird aktiviert…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Autom. drehen"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Bildschirm automatisch drehen"</string>
@@ -807,8 +807,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# Steuerelement hinzugefügt.}other{# Steuerelemente hinzugefügt.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Entfernt"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> hinzufügen?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> darf auswählen, welche Einstellungen und Inhalte hier angezeigt werden."</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Einstellungen für <xliff:g id="APPNAME">%s</xliff:g> entfernen?"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> darf auswählen, welche Steuerelemente und Inhalte hier angezeigt werden."</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Steuerelemente für <xliff:g id="APPNAME">%s</xliff:g> entfernen?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Aus Favoriten entfernt"</string>
