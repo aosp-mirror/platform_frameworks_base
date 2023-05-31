@@ -668,7 +668,7 @@ public class InfoMediaManagerTest {
     public void getSelectableMediaDevice_packageNameIsNull_returnFalse() {
         mInfoMediaManager.mPackageName = null;
 
-        assertThat(mInfoMediaManager.getSelectableMediaDevice()).isEmpty();
+        assertThat(mInfoMediaManager.getSelectableMediaDevices()).isEmpty();
     }
 
     @Test
@@ -680,14 +680,14 @@ public class InfoMediaManagerTest {
         mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
         when(info.getClientPackageName()).thenReturn("com.fake.packagename");
 
-        assertThat(mInfoMediaManager.getSelectableMediaDevice()).isEmpty();
+        assertThat(mInfoMediaManager.getSelectableMediaDevices()).isEmpty();
     }
 
     @Test
     public void getDeselectableMediaDevice_packageNameIsNull_returnFalse() {
         mInfoMediaManager.mPackageName = null;
 
-        assertThat(mInfoMediaManager.getDeselectableMediaDevice()).isEmpty();
+        assertThat(mInfoMediaManager.getDeselectableMediaDevices()).isEmpty();
     }
 
     @Test
@@ -703,7 +703,7 @@ public class InfoMediaManagerTest {
         when(mediaRoute2Info.getName()).thenReturn(TEST_NAME);
         when(mediaRoute2Info.getId()).thenReturn(TEST_ID);
 
-        final List<MediaDevice> mediaDevices = mInfoMediaManager.getDeselectableMediaDevice();
+        final List<MediaDevice> mediaDevices = mInfoMediaManager.getDeselectableMediaDevices();
 
         assertThat(mediaDevices.size()).isEqualTo(1);
         assertThat(mediaDevices.get(0).getName()).isEqualTo(TEST_NAME);
@@ -797,7 +797,7 @@ public class InfoMediaManagerTest {
         mShadowRouter2Manager.setSystemRoutingSession(sysSessionInfo);
         mShadowRouter2Manager.setRemoteSessions(infos);
 
-        assertThat(mInfoMediaManager.getActiveMediaSession())
+        assertThat(mInfoMediaManager.getActiveRoutingSessions())
                 .containsExactlyElementsIn(activeSessionInfos);
     }
 

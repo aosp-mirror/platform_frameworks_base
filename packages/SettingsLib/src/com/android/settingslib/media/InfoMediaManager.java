@@ -142,13 +142,12 @@ public class InfoMediaManager extends MediaManager {
      * Transfer MediaDevice for media without package name.
      */
     boolean connectDeviceWithoutPackageName(MediaDevice device) {
-        boolean isConnected = false;
         final RoutingSessionInfo info = mRouterManager.getSystemRoutingSession(null);
         if (info != null) {
             mRouterManager.transfer(info, device.mRouteInfo);
-            isConnected = true;
+            return true;
         }
-        return isConnected;
+        return false;
     }
 
     /**
@@ -164,15 +163,14 @@ public class InfoMediaManager extends MediaManager {
         }
 
         final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null && info.getSelectableRoutes().contains(device.mRouteInfo.getId())) {
-            mRouterManager.selectRoute(info, device.mRouteInfo);
-            return true;
+        if (info == null || !info.getSelectableRoutes().contains(device.mRouteInfo.getId())) {
+            Log.w(TAG, "addDeviceToPlayMedia() Ignoring selecting a non-selectable device : "
+                    + device.getName());
+            return false;
         }
 
-        Log.w(TAG, "addDeviceToPlayMedia() Ignoring selecting a non-selectable device : "
-                + device.getName());
-
-        return false;
+        mRouterManager.selectRoute(info, device.mRouteInfo);
+        return true;
     }
 
     private RoutingSessionInfo getRoutingSessionInfo() {
@@ -190,8 +188,7 @@ public class InfoMediaManager extends MediaManager {
     }
 
     boolean isRoutingSessionAvailableForVolumeControl() {
-        List<RoutingSessionInfo> sessions =
-                mRouterManager.getRoutingSessions(mPackageName);
+        List<RoutingSessionInfo> sessions = mRouterManager.getRoutingSessions(mPackageName);
 
         for (RoutingSessionInfo session : sessions) {
             if (!session.isSystemSession()
@@ -230,15 +227,14 @@ public class InfoMediaManager extends MediaManager {
         }
 
         final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null && info.getSelectedRoutes().contains(device.mRouteInfo.getId())) {
-            mRouterManager.deselectRoute(info, device.mRouteInfo);
-            return true;
+        if (info == null || !info.getSelectedRoutes().contains(device.mRouteInfo.getId())) {
+            Log.w(TAG, "removeDeviceFromMedia() Ignoring deselecting a non-deselectable device : "
+                    + device.getName());
+            return false;
         }
 
-        Log.w(TAG, "removeDeviceFromMedia() Ignoring deselecting a non-deselectable device : "
-                + device.getName());
-
-        return false;
+        mRouterManager.deselectRoute(info, device.mRouteInfo);
+        return true;
     }
 
     /**
@@ -251,95 +247,92 @@ public class InfoMediaManager extends MediaManager {
         }
 
         final RoutingSessionInfo sessionInfo = getRoutingSessionInfo();
-
-        if (sessionInfo != null) {
-            mRouterManager.releaseSession(sessionInfo);
-            return true;
+        if (sessionInfo == null) {
+            Log.w(TAG, "releaseSession() Ignoring release session : " + mPackageName);
+            return false;
         }
 
-        Log.w(TAG, "releaseSession() Ignoring release session : " + mPackageName);
-
-        return false;
+        mRouterManager.releaseSession(sessionInfo);
+        return true;
     }
 
+
     /**
-     * Get the MediaDevice list that can be added to current media.
-     *
-     * @return list of MediaDevice
+     * Returns the list of {@link MediaDevice media devices} that can be added to the current {@link
+     * RoutingSessionInfo routing session}.
      */
-    List<MediaDevice> getSelectableMediaDevice() {
-        final List<MediaDevice> deviceList = new ArrayList<>();
+    @NonNull
+    List<MediaDevice> getSelectableMediaDevices() {
         if (TextUtils.isEmpty(mPackageName)) {
-            Log.w(TAG, "getSelectableMediaDevice() package name is null or empty!");
-            return deviceList;
+            Log.w(TAG, "getSelectableMediaDevices() package name is null or empty!");
+            return Collections.emptyList();
         }
 
         final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null) {
-            for (MediaRoute2Info route : mRouterManager.getSelectableRoutes(info)) {
-                deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
-                        route, mPackageName, mPreferenceItemMap.get(route.getId())));
-            }
-            return deviceList;
+        if (info == null) {
+            Log.w(TAG, "getSelectableMediaDevices() cannot find selectable MediaDevice from : "
+                    + mPackageName);
+            return Collections.emptyList();
         }
 
-        Log.w(TAG, "getSelectableMediaDevice() cannot found selectable MediaDevice from : "
-                + mPackageName);
-
+        final List<MediaDevice> deviceList = new ArrayList<>();
+        for (MediaRoute2Info route : mRouterManager.getSelectableRoutes(info)) {
+            deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
+                    route, mPackageName, mPreferenceItemMap.get(route.getId())));
+        }
         return deviceList;
     }
 
     /**
-     * Get the MediaDevice list that can be removed from current media session.
-     *
-     * @return list of MediaDevice
+     * Returns the list of {@link MediaDevice media devices} that can be deselected from the current
+     * {@link RoutingSessionInfo routing session}.
      */
-    List<MediaDevice> getDeselectableMediaDevice() {
-        final List<MediaDevice> deviceList = new ArrayList<>();
+    @NonNull
+    List<MediaDevice> getDeselectableMediaDevices() {
         if (TextUtils.isEmpty(mPackageName)) {
-            Log.d(TAG, "getDeselectableMediaDevice() package name is null or empty!");
-            return deviceList;
+            Log.d(TAG, "getDeselectableMediaDevices() package name is null or empty!");
+            return Collections.emptyList();
         }
 
         final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null) {
-            for (MediaRoute2Info route : mRouterManager.getDeselectableRoutes(info)) {
-                deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
-                        route, mPackageName, mPreferenceItemMap.get(route.getId())));
-                Log.d(TAG, route.getName() + " is deselectable for " + mPackageName);
-            }
-            return deviceList;
+        if (info == null) {
+            Log.d(TAG, "getDeselectableMediaDevices() cannot find deselectable MediaDevice from : "
+                    + mPackageName);
+            return Collections.emptyList();
         }
-        Log.d(TAG, "getDeselectableMediaDevice() cannot found deselectable MediaDevice from : "
-                + mPackageName);
 
+        final List<MediaDevice> deviceList = new ArrayList<>();
+        for (MediaRoute2Info route : mRouterManager.getDeselectableRoutes(info)) {
+            deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
+                    route, mPackageName, mPreferenceItemMap.get(route.getId())));
+            Log.d(TAG, route.getName() + " is deselectable for " + mPackageName);
+        }
         return deviceList;
     }
 
     /**
-     * Get the MediaDevice list that has been selected to current media.
-     *
-     * @return list of MediaDevice
+     * Returns the list of {@link MediaDevice media devices} that are selected in the current {@link
+     * RoutingSessionInfo routing session}.
      */
-    List<MediaDevice> getSelectedMediaDevice() {
-        final List<MediaDevice> deviceList = new ArrayList<>();
+    @NonNull
+    List<MediaDevice> getSelectedMediaDevices() {
         if (TextUtils.isEmpty(mPackageName)) {
-            Log.w(TAG, "getSelectedMediaDevice() package name is null or empty!");
-            return deviceList;
+            Log.w(TAG, "getSelectedMediaDevices() package name is null or empty!");
+            return Collections.emptyList();
         }
 
         final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null) {
-            for (MediaRoute2Info route : mRouterManager.getSelectedRoutes(info)) {
-                deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
-                        route, mPackageName, mPreferenceItemMap.get(route.getId())));
-            }
-            return deviceList;
+        if (info == null) {
+            Log.w(TAG, "getSelectedMediaDevices() cannot find selectable MediaDevice from : "
+                    + mPackageName);
+            return Collections.emptyList();
         }
 
-        Log.w(TAG, "getSelectedMediaDevice() cannot found selectable MediaDevice from : "
-                + mPackageName);
-
+        final List<MediaDevice> deviceList = new ArrayList<>();
+        for (MediaRoute2Info route : mRouterManager.getSelectedRoutes(info)) {
+            deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
+                    route, mPackageName, mPreferenceItemMap.get(route.getId())));
+        }
         return deviceList;
     }
 
@@ -364,15 +357,14 @@ public class InfoMediaManager extends MediaManager {
         }
 
         final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null) {
-            Log.d(TAG, "adjustSessionVolume() adjust volume : " + volume + ", with : "
+        if (info == null) {
+            Log.w(TAG, "adjustSessionVolume() can't found corresponding RoutingSession with : "
                     + mPackageName);
-            mRouterManager.setSessionVolume(info, volume);
             return;
         }
 
-        Log.w(TAG, "adjustSessionVolume() can't found corresponding RoutingSession with : "
-                + mPackageName);
+        Log.d(TAG, "adjustSessionVolume() adjust volume: " + volume + ", with : " + mPackageName);
+        mRouterManager.setSessionVolume(info, volume);
     }
 
     /**
@@ -387,13 +379,13 @@ public class InfoMediaManager extends MediaManager {
         }
 
         final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null) {
-            return info.getVolumeMax();
+        if (info == null) {
+            Log.w(TAG, "getSessionVolumeMax() can't find corresponding RoutingSession with : "
+                    + mPackageName);
+            return -1;
         }
 
-        Log.w(TAG, "getSessionVolumeMax() can't found corresponding RoutingSession with : "
-                + mPackageName);
-        return -1;
+        return info.getVolumeMax();
     }
 
     /**
@@ -408,13 +400,13 @@ public class InfoMediaManager extends MediaManager {
         }
 
         final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null) {
-            return info.getVolume();
+        if (info == null) {
+            Log.w(TAG, "getSessionVolume() can't find corresponding RoutingSession with : "
+                    + mPackageName);
+            return -1;
         }
 
-        Log.w(TAG, "getSessionVolume() can't found corresponding RoutingSession with : "
-                + mPackageName);
-        return -1;
+        return info.getVolume();
     }
 
     CharSequence getSessionName() {
@@ -424,12 +416,12 @@ public class InfoMediaManager extends MediaManager {
         }
 
         final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null) {
-            return info.getName();
+        if (info == null) {
+            Log.w(TAG, "Unable to get session name for package: " + mPackageName);
+            return null;
         }
 
-        Log.w(TAG, "Unable to get session name for package: " + mPackageName);
-        return null;
+        return info.getName();
     }
 
     boolean shouldDisableMediaOutput(String packageName) {
@@ -473,7 +465,12 @@ public class InfoMediaManager extends MediaManager {
         }
     }
 
-    List<RoutingSessionInfo> getActiveMediaSession() {
+    /**
+     * Returns the list of currently active {@link RoutingSessionInfo routing sessions} known to the
+     * system.
+     */
+    @NonNull
+    List<RoutingSessionInfo> getActiveRoutingSessions() {
         List<RoutingSessionInfo> infos = new ArrayList<>();
         infos.add(mRouterManager.getSystemRoutingSession(null));
         infos.addAll(mRouterManager.getRemoteSessions());
@@ -631,7 +628,8 @@ public class InfoMediaManager extends MediaManager {
         }
 
         /**
-         * Ignore callback here since we'll also receive {@link onRequestFailed} with reason code.
+         * Ignore callback here since we'll also receive{@link
+         * MediaRouter2Manager.Callback#onRequestFailed onRequestFailed} with reason code.
          */
         @Override
         public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
