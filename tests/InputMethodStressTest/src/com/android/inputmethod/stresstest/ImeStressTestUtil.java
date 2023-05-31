@@ -45,6 +45,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.ThrowingRunnable;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -296,6 +297,8 @@ public final class ImeStressTestUtil {
         private static final String TAG = "ImeStressTestUtil.TestActivity";
         private EditText mEditText;
         private boolean mIsAnimating;
+        private static WeakReference<TestActivity> sLastCreatedInstance =
+                new WeakReference<>(null);
 
         private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
                 new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
@@ -336,6 +339,7 @@ public final class ImeStressTestUtil {
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             Log.i(TAG, "onCreate()");
+            sLastCreatedInstance = new WeakReference<>(this);
             boolean isUnfocusableView = getIntent().getBooleanExtra(UNFOCUSABLE_VIEW, false);
             boolean requestFocus = getIntent().getBooleanExtra(REQUEST_FOCUS_ON_CREATE, false);
             int softInputFlags = getIntent().getIntExtra(SOFT_INPUT_FLAGS, 0);
@@ -376,6 +380,12 @@ public final class ImeStressTestUtil {
             if (hideWithWindowInsetsControllerOnCreate) {
                 hideImeWithWindowInsetsController();
             }
+        }
+
+        /** Get the last created TestActivity instance. */
+        @Nullable
+        public static TestActivity getLastCreatedInstance() {
+            return sLastCreatedInstance.get();
         }
 
         /** Show IME with InputMethodManager. */
