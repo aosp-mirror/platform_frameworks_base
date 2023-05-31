@@ -109,12 +109,7 @@ object MobileIconBinder {
                             viewModel.subscriptionId,
                             icon,
                         )
-                        mobileDrawable.level =
-                            SignalDrawable.getState(
-                                icon.level,
-                                icon.numberOfLevels,
-                                icon.showExclamationMark,
-                            )
+                        mobileDrawable.level = icon.toSignalDrawableState()
                     }
                 }
 
