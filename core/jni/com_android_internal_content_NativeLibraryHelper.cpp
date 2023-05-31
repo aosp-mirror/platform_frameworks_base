@@ -133,6 +133,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     void** args = reinterpret_cast<void**>(arg);
     jstring* javaNativeLibPath = (jstring*) args[0];
     jboolean extractNativeLibs = *(jboolean*) args[1];
+    jboolean debuggable = *(jboolean*) args[2];
 
     ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
 
@@ -148,7 +149,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    if (!extractNativeLibs) {
+    if (!extractNativeLibs && (!debuggable || strcmp(fileName, "wrap.sh") != 0)) {
         // check if library is uncompressed and page-aligned
         if (method != ZipFileRO::kCompressStored) {
             ALOGE("Library '%s' is compressed - will not be able to open it directly from apk.\n",
@@ -431,7 +432,7 @@ com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env,
         jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
         jboolean extractNativeLibs, jboolean debuggable)
 {
-    void* args[] = { &javaNativeLibPath, &extractNativeLibs };
+    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &debuggable };
     return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi, debuggable,
             copyFileIfChanged, reinterpret_cast<void*>(args));
 }
