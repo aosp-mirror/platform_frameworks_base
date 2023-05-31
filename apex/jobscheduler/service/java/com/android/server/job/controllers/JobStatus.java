@@ -231,6 +231,8 @@ public final class JobStatus {
     final String sourceTag;
     @Nullable
     private final String mNamespace;
+    /** An ID that can be used to uniquely identify the job when logging statsd metrics. */
+    private final long mLoggingJobId;
 
     final String tag;
 
@@ -568,6 +570,7 @@ public final class JobStatus {
         this.callingUid = callingUid;
         this.standbyBucket = standbyBucket;
         mNamespace = namespace;
+        mLoggingJobId = generateLoggingId(namespace, job.getId());
 
         int tempSourceUid = -1;
         if (sourceUserId != -1 && sourcePackageName != null) {
@@ -804,6 +807,13 @@ public final class JobStatus {
                 /*innerFlags=*/ 0, /* dynamicConstraints */ 0);
     }
 
+    private long generateLoggingId(@Nullable String namespace, int jobId) {
+        if (namespace == null) {
+            return jobId;
+        }
+        return ((long) namespace.hashCode()) << 31 | jobId;
+    }
+
     public void enqueueWorkLocked(JobWorkItem work) {
         if (pendingWork == null) {
             pendingWork = new ArrayList<>();
@@ -954,6 +964,11 @@ public final class JobStatus {
 
     public int getJobId() {
         return job.getId();
+    }
+
+    /** Returns an ID that can be used to uniquely identify the job when logging statsd metrics. */
+    public long getLoggingJobId() {
+        return mLoggingJobId;
     }
 
     public void printUniqueId(PrintWriter pw) {

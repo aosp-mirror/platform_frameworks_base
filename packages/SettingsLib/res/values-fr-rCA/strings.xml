@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Déconnexion…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connexion en cours…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Connecté à <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Association…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Association en cours…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Connecté (aucun téléphone) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Connecté (aucun média) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Connecté (aucun téléphone ni média) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -99,7 +99,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"G : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>; D : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Actif"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Active, gauche seulement"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actif, gauche seulement"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Active, droite seulement"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Active, gauche et droite"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Paramètres audio du support"</string>
@@ -520,7 +520,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Plus longtemps."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Moins longtemps."</string>
     <string name="cancel" msgid="5665114069455378395">"Annuler"</string>
-    <string name="next" msgid="2699398661093607009">"Suivante"</string>
+    <string name="next" msgid="2699398661093607009">"Suivant"</string>
     <string name="back" msgid="5554327870352703710">"Retour"</string>
     <string name="save" msgid="3745809743277153149">"Enregistrer"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"À l\'instant"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ce téléphone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Cette tablette"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ce téléphone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossible de faire jouer le contenu sur cet appareil"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Mettez à jour le compte pour passer à la version payante"</string>

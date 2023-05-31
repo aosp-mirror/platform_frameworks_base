@@ -545,12 +545,18 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ယခုလေးတင်"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ဤဖုန်း"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ဤတက်ဘလက်"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ဤဖုန်း"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ဤစက်ပစ္စည်းတွင် ဖွင့်၍မရပါ"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"ပြောင်းရန်အကောင့်ကို အဆင့်မြှင့်ပါ"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ဤနေရာတွင် ဒေါင်းလုဒ်များကို ဖွင့်၍မရပါ"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"ပြောင်းရန် အကောင့်အဆင့်ကိုမြှင့်ပါ"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ဤနေရာတွင် ဒေါင်းလုဒ်များ ဖွင့်မရပါ"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ကြော်ငြာအပြီးတွင် ထပ်စမ်းကြည့်ပါ"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ဤနေရာတွင်ဖွင့်ရန် စက်ပစ္စည်းကိုနှိုးပါ"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ဒီမှာဖွင့်ရန် စက်ပစ္စည်းကိုနှိုးပါ"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"စက်ပစ္စည်းက ဖွင့်ခွင့်မပြုပါ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ဤမီဒီယာကို ဒီမှာဖွင့်၍မရပါ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ချိတ်ဆက်ရာတွင် ပြဿနာရှိပါသည်။ စက်ကိုပိတ်ပြီး ပြန်ဖွင့်ပါ"</string>

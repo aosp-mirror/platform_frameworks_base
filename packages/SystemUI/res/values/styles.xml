@@ -1183,12 +1183,6 @@
 
     <style name="TextAppearance.InternetDialog.Secondary.Active"/>
 
-    <style name="InternetDialog.Divider">
-        <item name="android:background">?android:attr/textColorSecondary</item>
-    </style>
-
-    <style name="InternetDialog.Divider.Active"/>
-
     <style name="FgsManagerDialogTitle">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textStyle">bold</item>

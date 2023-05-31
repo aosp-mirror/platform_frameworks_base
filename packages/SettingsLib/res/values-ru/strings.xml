@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Подключение..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Подключено<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Устанавливается соединение..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Подключение..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Подключено (кроме звонков)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Подключено (кроме аудио)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Подключено (кроме звонков и аудио)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Только что"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Этот смартфон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Этот планшет"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Этот смартфон"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Невозможно воспроизвести на этом устройстве."</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Для переключения требуется премиум-аккаунт"</string>
@@ -578,7 +584,7 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Если этим устройством пользуются сразу несколько человек, для каждого из них можно создать профиль – отдельное пространство с выбранными приложениями, обоями и т. д. Новый пользователь настраивает его сам.\n\nИз профиля можно поменять и общие настройки устройства, например сеть Wi-Fi.\n\nОбновлять общие приложения могут все, однако специальные возможности настраиваются индивидуально."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"После создания профиля его потребуется настроить.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Назначить этого пользователя администратором?"</string>
-    <string name="user_grant_admin_message" msgid="1673791931033486709">"У администраторов права шире, чем у других пользователей. Администратор может управлять всеми пользователями, обновлять и сбрасывать это устройство, менять настройки, просматривать установленные приложения, а также предоставлять и отзывать права администратора."</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"У администраторов права шире, чем у других пользователей. Администратор может управлять аккаунтами всех пользователей, обновлять ПО на устройстве, менять и сбрасывать его настройки, просматривать установленные приложения, а также предоставлять и отзывать права администратора."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Назначить администратором"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Настроить профиль?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Вам потребуется передать устройство пользователю, чтобы он мог настроить свой профиль."</string>

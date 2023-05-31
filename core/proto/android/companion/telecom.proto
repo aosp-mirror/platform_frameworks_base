@@ -45,10 +45,18 @@ message Telecom {
       AUDIO_PROCESSING = 5;
       RINGING_SIMULATED = 6;
       DISCONNECTED = 7;
+      DIALING = 8;
     }
     Status status = 3;
 
     repeated Control controls = 4;
+
+    enum Direction {
+      UNKNOWN_DIRECTION = 0;
+      INCOMING = 1;
+      OUTGOING = 2;
+    }
+    Direction direction = 5;
   }
 
   message Request {

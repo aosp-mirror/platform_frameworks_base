@@ -3153,7 +3153,8 @@ public final class QuotaController extends StateController {
         private static final int DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW = 20;
         private static final long DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS = 5000; // 5 seconds
         private static final long DEFAULT_MIN_QUOTA_CHECK_DELAY_MS = MINUTE_IN_MILLIS;
-        private static final long DEFAULT_EJ_LIMIT_EXEMPTED_MS = 45 * MINUTE_IN_MILLIS;
+        // TODO(267949143): set a different limit for headless system apps
+        private static final long DEFAULT_EJ_LIMIT_EXEMPTED_MS = 60 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_ACTIVE_MS = 30 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_WORKING_MS = DEFAULT_EJ_LIMIT_ACTIVE_MS;
         private static final long DEFAULT_EJ_LIMIT_FREQUENT_MS = 10 * MINUTE_IN_MILLIS;

@@ -545,14 +545,20 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Пред малку"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Овој телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Овој таблет"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Овој телефон"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не може да се пушти на уредов"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Надградете ја сметката за да се префрлите"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Не може да се пуштаат преземања тука"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Обидете се повторно по рекламата"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Разбудете го уредот за да пуштате овде"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Разбудете го уредот за да пуштате тука"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Уредот не е одобрен за репродукција"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Не може да се пуштат аудиовизуелните содржини овде"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Овие аудиовизуелни содржини не може да се пуштат тука"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Проблем со поврзување. Исклучете го уредот и повторно вклучете го"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Жичен аудиоуред"</string>
     <string name="help_label" msgid="3528360748637781274">"Помош и повратни информации"</string>
@@ -577,9 +583,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Да се додаде нов корисник?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Уредов може да го споделувате со други лица ако додадете дополнителни корисници. Секој корисник има сопствен простор што може да го приспособува со апликации, тапети и слично. Корисниците може да приспособуваат и поставки за уредот, како на пр., Wi‑Fi, што важат за сите.\n\nКога додавате нов корисник, тоа лице треба да го постави својот простор.\n\nСекој корисник може да ажурира апликации за сите други корисници. Поставките и услугите за пристапност не може да се префрлат на новиот корисник."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Кога додавате нов корисник, тоа лице треба да го постави својот простор.\n\nСекој корисник може да ажурира апликации за сите други корисници."</string>
-    <string name="user_grant_admin_title" msgid="5157031020083343984">"Дали да се направи корисников администратор?"</string>
-    <string name="user_grant_admin_message" msgid="1673791931033486709">"Администраторите имаат посебни привилегии што другите корисници ги немаат. Администраторот може да управува со сите корисници, да го ажурира или ресетира уредов, да ги менува поставките, да ги гледа сите инсталирани апликации и да доделува или одзема администраторски привилегии за други."</string>
-    <string name="user_grant_admin_button" msgid="5441486731331725756">"Направи да биде администратор"</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Да се постави корисников како администратор?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Администраторите имаат посебни привилегии што другите корисници ги немаат. Администраторот може да управува со сите корисници, да го ажурира или ресетира уредов, да ги менува поставките, да ги прегледува сите инсталирани апликации и да доделува или одзема администраторски привилегии на другите корисници."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Постави како администратор"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Ќе поставите корисник сега?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Проверете дали лицето е достапно да го земе уредот и да го постави својот простор"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Постави профил сега?"</string>
@@ -611,8 +617,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Ова ќе започне нова гостинска сесија и ќе ги избрише сите апликации и податоци од тековната сесија"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Да се излезе од режим на гостин?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ова ќе ги избрише апликациите и податоците од тековната гостинска сесија"</string>
-    <string name="grant_admin" msgid="4323199171790522574">"Да, направи да биде администратор"</string>
-    <string name="not_grant_admin" msgid="3557849576157702485">"Не, не прави да биде администратори"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Да, постави како администратор"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Не, не поставувај како администратор"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Излези"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Да се зачува гостинската активност?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Може да ја зачувате активноста од тековната сесија или да ги избришете сите апликации и податоци"</string>

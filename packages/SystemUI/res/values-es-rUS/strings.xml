@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Se autenticó el rostro"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmado"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Presiona Confirmar para completar"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Se desbloqueó con rostro."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Desbloqueo con rostro. Presiona para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Rostro reconocido. Presiona para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Rostro reconocido. Presiona el desbloqueo para continuar."</string>
@@ -270,7 +269,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Invertir colores"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corregir colores"</string>
-    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Tamaño de la fuente"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Tamaño de fuente"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Administrar usuarios"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Listo"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Cerrar"</string>
@@ -906,7 +905,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"quitar de favoritos"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover a la posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
-    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Elige los controles de dispositivos para acceso rápido"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Elige los controles de dispositivos a los que quieres acceder rápido"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén presionado y arrastra un control para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Se quitaron todos los controles"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se guardaron los cambios"</string>

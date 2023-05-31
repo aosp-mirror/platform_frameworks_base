@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Лицето е проверено"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Потврдено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Допрете „Потврди“ за да се заврши"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Отклучено со лице."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Отклучено со лик. Притиснете за да продолжите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лицето е препознаено. Притиснете за да продолжите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицето е препознаено. Притиснете ја иконата за отклучување за да продолжите."</string>
@@ -178,7 +177,7 @@
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Поставете „Отклучување со лик“ повторно"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Отклучување со лик"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Поставување „Отклучување со лик“"</string>
-    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Избришете го моменталниот модел на лице за да поставите „Отклучување со лик“ повторно.\n\nЌе треба повторно да ја поставите функцијава за да го користите ликот за да го отклучите телефонот."</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"За да може одново да поставите „Отклучување со лик“, вашиот сегашен модел на лик ќе се избрише.\n\nЗа да го користите ликот за отклучување на телефонот, ќе треба повторно да ја поставите функцијава."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Не можеше да се постави „Отклучување со лик“. Одете во „Поставки“ за да се обидете повторно."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Допрете го сензорот за отпечатоци"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Не се препознава ликот. Користете отпечаток."</string>
@@ -888,7 +887,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Премести горе десно"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Премести долу лево"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Премести долу десно"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Премести до работ и сокриј"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Премести до работ и скриј"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Премести над работ и прикажи"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Отстрани"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"вклучување/исклучување"</string>
@@ -906,7 +905,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"означите како неомилена"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Преместете на позиција <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
-    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Изберете контроли на уреди за брз пристап"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Изберете контроли за уредите до кои ќе имате брз пристап"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржете и влечете за да ги преуредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Сите контроли се отстранети"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не се зачувани"</string>
@@ -968,7 +967,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"Не е најдено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Контролата не е достапна"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"Не може да се пристапи до <xliff:g id="DEVICE">%1$s</xliff:g>. Проверете ја апликацијата <xliff:g id="APPLICATION">%2$s</xliff:g> за да се уверите дека контролата е сѐ уште достапна и дека поставките за апликацијата не се сменети."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"Отвори апликација"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Отворете ја апликацијата"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Не може да се вчита статусот"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка, обидете се повторно"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додајте контроли"</string>

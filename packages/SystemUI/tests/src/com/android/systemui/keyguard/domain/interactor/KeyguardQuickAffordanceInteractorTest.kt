@@ -435,7 +435,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = homeControls.key,
-                                    name = homeControls.pickerName,
+                                    name = homeControls.pickerName(),
                                     iconResourceId = homeControls.pickerIconResourceId,
                                 ),
                             ),
@@ -469,7 +469,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = quickAccessWallet.key,
-                                    name = quickAccessWallet.pickerName,
+                                    name = quickAccessWallet.pickerName(),
                                     iconResourceId = quickAccessWallet.pickerIconResourceId,
                                 ),
                             ),
@@ -506,7 +506,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = quickAccessWallet.key,
-                                    name = quickAccessWallet.pickerName,
+                                    name = quickAccessWallet.pickerName(),
                                     iconResourceId = quickAccessWallet.pickerIconResourceId,
                                 ),
                             ),
@@ -514,7 +514,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = qrCodeScanner.key,
-                                    name = qrCodeScanner.pickerName,
+                                    name = qrCodeScanner.pickerName(),
                                     iconResourceId = qrCodeScanner.pickerIconResourceId,
                                 ),
                             ),
@@ -570,7 +570,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = quickAccessWallet.key,
-                                    name = quickAccessWallet.pickerName,
+                                    name = quickAccessWallet.pickerName(),
                                     iconResourceId = quickAccessWallet.pickerIconResourceId,
                                 ),
                             ),
@@ -665,7 +665,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = quickAccessWallet.key,
-                                    name = quickAccessWallet.pickerName,
+                                    name = quickAccessWallet.pickerName(),
                                     iconResourceId = quickAccessWallet.pickerIconResourceId,
                                 ),
                             ),

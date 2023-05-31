@@ -545,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‏‎‎‏‏‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‎‎‎‎‏‎‏‏‏‎‏‎‎‎‏‏‏‎‎‏‎‏‏‏‎‏‏‎‎‏‎‎‎‏‏‎Just now‎‏‎‎‏‎"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‎‎‎‎‏‎‏‏‎‏‏‎‏‏‏‎‏‎‏‎‎‏‏‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎‎‎‎‎‏‏‏‎‏‏‎‎‏‏‏‏‎‏‎‎‎‏‎This phone‎‏‎‎‏‎"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‏‎‎‏‏‏‎‎‎‏‏‎‏‎‎‎‏‏‎‎‏‎‏‏‏‎‎‎‏‏‏‎‎‎‎‎‎‎‏‏‎‎‎‏‏‎‎‎‎‏‏‎‎‎‏‏‏‎‎‎‎‎This tablet‎‏‎‎‏‎"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‎‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‎‏‎‎‏‎‎‏‎‏‏‏‎‎‏‏‎‏‏‎‎‏‏‏‏‎‏‏‎‏‏‏‎‏‎‏‎‏‎‏‏‏‏‎‎Dock speaker‎‏‎‎‏‎"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‎‏‏‏‏‏‎‏‏‎‏‎‎‎‎‏‏‎‏‎‏‎‎‎‎‎‏‏‎‎‎‎‏‎‏‎‎‏‎‎‏‎‎‏‎‎External Device‎‏‎‎‏‎"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‏‏‎‏‏‏‏‏‎‎‏‎‎‎‎‎‏‏‎‏‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‎‎‎‏‎‏‏‏‏‎‎‎‏‏‏‎‎‏‎‏‎‏‎‏‎‎‎Connected device‎‏‎‎‏‎"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‏‎‎‎‏‏‏‏‎‏‎‏‏‏‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‏‏‏‎‎‎‎‏‎‎‏‎‏‏‏‎‎‏‏‏‎‏‎‏‏‎This phone‎‏‎‎‏‎"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‎‏‏‎‏‏‎‎‎‎‎‏‏‎‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‏‎‎‏‏‎‎‎‎‏‏‏‏‎‎‏‎‎‏‏‎‎‎‏‎‎‎‏‏‏‎‎Cant play on this device‎‏‎‎‏‎"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‏‏‏‎‎‏‎‏‏‏‏‏‏‎‎‎‏‎‎‏‏‏‎‏‎‎‏‏‎‎Upgrade account to switch‎‏‎‎‏‎"</string>
