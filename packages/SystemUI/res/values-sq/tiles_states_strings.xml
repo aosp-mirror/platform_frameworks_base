@@ -48,7 +48,7 @@
   </string-array>
   <string-array name="tile_states_battery">
     <item msgid="6311253873330062961">"Nuk ofrohet"</item>
-    <item msgid="7838121007534579872">"Joaktiv"</item>
+    <item msgid="7838121007534579872">"Joaktive"</item>
     <item msgid="1578872232501319194">"Aktiv"</item>
   </string-array>
   <string-array name="tile_states_dnd">
@@ -59,7 +59,7 @@
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"Nuk ofrohet"</item>
     <item msgid="5044688398303285224">"Joaktiv"</item>
-    <item msgid="8527389108867454098">"Aktiv"</item>
+    <item msgid="8527389108867454098">"Aktive"</item>
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"Nuk ofrohet"</item>
@@ -88,13 +88,13 @@
   </string-array>
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"Nuk ofrohet"</item>
-    <item msgid="1909756493418256167">"Joaktiv"</item>
-    <item msgid="4531508423703413340">"Aktiv"</item>
+    <item msgid="1909756493418256167">"Joaktive"</item>
+    <item msgid="4531508423703413340">"Aktive"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Nuk ofrohet"</item>
-    <item msgid="9103697205127645916">"Joaktiv"</item>
-    <item msgid="8067744885820618230">"Aktiv"</item>
+    <item msgid="9103697205127645916">"Joaktive"</item>
+    <item msgid="8067744885820618230">"Aktive"</item>
   </string-array>
   <string-array name="tile_states_saver">
     <item msgid="39714521631367660">"Nuk ofrohet"</item>
@@ -108,7 +108,7 @@
   </string-array>
   <string-array name="tile_states_work">
     <item msgid="389523503690414094">"Nuk ofrohet"</item>
-    <item msgid="8045580926543311193">"Joaktiv"</item>
+    <item msgid="8045580926543311193">"Joaktive"</item>
     <item msgid="4913460972266982499">"Aktiv"</item>
   </string-array>
   <string-array name="tile_states_cast">
@@ -123,13 +123,13 @@
   </string-array>
   <string-array name="tile_states_screenrecord">
     <item msgid="1085836626613341403">"Nuk ofrohet"</item>
-    <item msgid="8259411607272330225">"Joaktiv"</item>
+    <item msgid="8259411607272330225">"Joaktive"</item>
     <item msgid="578444932039713369">"Aktiv"</item>
   </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"Nuk ofrohet"</item>
-    <item msgid="8707481475312432575">"Joaktiv"</item>
-    <item msgid="8031106212477483874">"Aktiv"</item>
+    <item msgid="8707481475312432575">"Joaktive"</item>
+    <item msgid="8031106212477483874">"Aktive"</item>
   </string-array>
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"Nuk ofrohet"</item>
@@ -144,7 +144,7 @@
   <string-array name="tile_states_mictoggle">
     <item msgid="6895831614067195493">"Nuk ofrohet"</item>
     <item msgid="3296179158646568218">"Joaktiv"</item>
-    <item msgid="8998632451221157987">"Aktiv"</item>
+    <item msgid="8998632451221157987">"Aktive"</item>
   </string-array>
   <string-array name="tile_states_controls">
     <item msgid="8199009425335668294">"Nuk ofrohet"</item>
@@ -158,13 +158,13 @@
   </string-array>
   <string-array name="tile_states_qr_code_scanner">
     <item msgid="7435143266149257618">"Nuk ofrohet"</item>
-    <item msgid="3301403109049256043">"Joaktiv"</item>
-    <item msgid="8878684975184010135">"Aktiv"</item>
+    <item msgid="3301403109049256043">"Joaktive"</item>
+    <item msgid="8878684975184010135">"Aktive"</item>
   </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"Nuk ofrohet"</item>
     <item msgid="2710157085538036590">"Joaktiv"</item>
-    <item msgid="7809470840976856149">"Aktiv"</item>
+    <item msgid="7809470840976856149">"Aktive"</item>
   </string-array>
   <string-array name="tile_states_onehanded">
     <item msgid="8189342855739930015">"Nuk ofrohet"</item>
@@ -173,12 +173,12 @@
   </string-array>
   <string-array name="tile_states_dream">
     <item msgid="6184819793571079513">"Nuk ofrohet"</item>
-    <item msgid="8014986104355098744">"Joaktiv"</item>
-    <item msgid="5966994759929723339">"Aktiv"</item>
+    <item msgid="8014986104355098744">"Joaktive"</item>
+    <item msgid="5966994759929723339">"Aktive"</item>
   </string-array>
   <string-array name="tile_states_font_scaling">
     <item msgid="3173069902082305985">"Nuk ofrohet"</item>
-    <item msgid="2478289035899842865">"Joaktiv"</item>
-    <item msgid="5137565285664080143">"Aktiv"</item>
+    <item msgid="2478289035899842865">"Joaktive"</item>
+    <item msgid="5137565285664080143">"Aktive"</item>
   </string-array>
 </resources>
