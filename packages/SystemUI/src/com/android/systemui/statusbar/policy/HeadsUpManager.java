@@ -343,7 +343,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
             HeadsUpEntry entry = getHeadsUpEntry(key);
             setEntryPinned(entry, false /* isPinned */);
             // maybe it got un sticky
-            entry.updateEntry(false /* updatePostTime */);
+            entry.updateEntry(false /* updatePostTime */, "unpinAll");
 
             // when the user unpinned all of HUNs by moving one HUN, all of HUNs should not stay
             // on the screen.

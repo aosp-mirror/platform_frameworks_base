@@ -263,9 +263,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         if (headsUpEntry != null && headsUpEntry.remoteInputActive != remoteInputActive) {
             headsUpEntry.remoteInputActive = remoteInputActive;
             if (remoteInputActive) {
-                headsUpEntry.removeAutoRemovalCallbacks();
+                headsUpEntry.removeAutoRemovalCallbacks("setRemoteInputActive(true)");
             } else {
-                headsUpEntry.updateEntry(false /* updatePostTime */);
+                headsUpEntry.updateEntry(false /* updatePostTime */, "setRemoteInputActive(false)");
             }
         }
     }
@@ -446,8 +446,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         }
 
         @Override
-        public void updateEntry(boolean updatePostTime) {
-            super.updateEntry(updatePostTime);
+        public void updateEntry(boolean updatePostTime, String reason) {
+            super.updateEntry(updatePostTime, reason);
 
             if (mEntriesToRemoveAfterExpand.contains(mEntry)) {
                 mEntriesToRemoveAfterExpand.remove(mEntry);
@@ -465,9 +465,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
             this.expanded = expanded;
             if (expanded) {
-                removeAutoRemovalCallbacks();
+                removeAutoRemovalCallbacks("setExpanded(true)");
             } else {
-                updateEntry(false /* updatePostTime */);
+                updateEntry(false /* updatePostTime */, "setExpanded(false)");
             }
         }
 
@@ -478,9 +478,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
             mGutsShownPinned = gutsShownPinned;
             if (gutsShownPinned) {
-                removeAutoRemovalCallbacks();
+                removeAutoRemovalCallbacks("setGutsShownPinned(true)");
             } else {
-                updateEntry(false /* updatePostTime */);
+                updateEntry(false /* updatePostTime */, "setGutsShownPinned(false)");
             }
         }
 
@@ -494,7 +494,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         private void extendPulse() {
             if (!extended) {
                 extended = true;
-                updateEntry(false);
+                updateEntry(false, "extendPulse()");
             }
         }
 
@@ -544,7 +544,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 // Let's make sure all huns we got while dozing time out within the normal timeout
                 // duration. Otherwise they could get stuck for a very long time
                 for (AlertEntry entry : mAlertEntries.values()) {
-                    entry.updateEntry(true /* updatePostTime */);
+                    entry.updateEntry(true /* updatePostTime */, "onDozingChanged(false)");
                 }
             }
         }
