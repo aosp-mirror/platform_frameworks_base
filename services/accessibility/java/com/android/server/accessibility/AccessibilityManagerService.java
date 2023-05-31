@@ -4014,9 +4014,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (displayId < 0) {
             throw new IllegalArgumentException("The display id " + displayId + " is invalid.");
         }
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("The default display cannot be proxy-ed.");
-        }
         if (!isTrackedDisplay(displayId)) {
             throw new IllegalArgumentException("The display " + displayId + " does not exist or is"
                     + " not tracked by accessibility.");
@@ -4024,6 +4021,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (mProxyManager.isProxyedDisplay(displayId)) {
             throw new IllegalArgumentException("The display " + displayId + " is already being"
                     + " proxy-ed");
+        }
+        if (!mProxyManager.displayBelongsToCaller(Binder.getCallingUid(), displayId)) {
+            throw new SecurityException("The display " + displayId + " does not belong to"
+                    + " the caller.");
         }
 
         final long identity = Binder.clearCallingIdentity();
