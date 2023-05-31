@@ -18,6 +18,7 @@ package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_BY_ADMIN;
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -25,6 +26,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.app.role.RoleManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -671,6 +673,42 @@ public class AccessibilitySecurityPolicy {
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold permission "
                     + permission);
+        }
+    }
+
+    /**
+     * Throws a SecurityException if the caller has neither the MANAGE_ACCESSIBILITY permission nor
+     * the COMPANION_DEVICE_APP_STREAMING role.
+     */
+    public void checkForAccessibilityPermissionOrRole() {
+        final boolean canManageAccessibility =
+                mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+                        == PackageManager.PERMISSION_GRANTED;
+        if (canManageAccessibility) {
+            return;
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+            if (roleManager != null) {
+                final List<String> holders = roleManager.getRoleHoldersAsUser(
+                        DEVICE_PROFILE_APP_STREAMING, UserHandle.getUserHandleForUid(callingUid));
+                final String[] packageNames = mPackageManager.getPackagesForUid(callingUid);
+                if (packageNames != null) {
+                    for (String packageName : packageNames) {
+                        if (holders.contains(packageName)) {
+                            return;
+                        }
+                    }
+                }
+            }
+            throw new SecurityException(
+                    "Cannot register a proxy for a device without the "
+                            + "android.app.role.COMPANION_DEVICE_APP_STREAMING role or the"
+                            + " MANAGE_ACCESSIBILITY permission.");
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
