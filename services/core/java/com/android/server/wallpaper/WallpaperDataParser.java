@@ -87,7 +87,7 @@ class WallpaperDataParser {
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
         mIsLockscreenLiveWallpaperEnabled =
-                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", false);
+                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", true);
     }
 
     private JournaledFile makeJournaledFile(int userId) {
