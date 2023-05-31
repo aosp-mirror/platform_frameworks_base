@@ -273,6 +273,27 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun icon_usesCarrierNetworkState_whenInCarrierNetworkChangeMode() =
+        testScope.runTest {
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
+
+            interactor.carrierNetworkChangeActive.value = true
+            interactor.level.value = 1
+
+            assertThat(latest!!.level).isEqualTo(1)
+            assertThat(latest!!.carrierNetworkChange).isTrue()
+
+            // SignalIconModel respects the current level
+            interactor.level.value = 2
+
+            assertThat(latest!!.level).isEqualTo(2)
+            assertThat(latest!!.carrierNetworkChange).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
     fun contentDescription_notInService_usesNoPhone() =
         testScope.runTest {
             var latest: ContentDescription? = null
@@ -328,6 +349,20 @@ class MobileIconViewModelTest : SysuiTestCase() {
         testScope.runTest {
             interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.setIsDataEnabled(false)
+            interactor.mobileIsDefault.value = true
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_null_whenCarrierNetworkChangeActive() =
+        testScope.runTest {
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
+            interactor.carrierNetworkChangeActive.value = true
             interactor.mobileIsDefault.value = true
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
@@ -617,13 +652,14 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     private fun createAndSetViewModel() {
-        underTest = MobileIconViewModel(
-            SUB_1_ID,
-            interactor,
-            airplaneModeInteractor,
-            constants,
-            testScope.backgroundScope,
-        )
+        underTest =
+            MobileIconViewModel(
+                SUB_1_ID,
+                interactor,
+                airplaneModeInteractor,
+                constants,
+                testScope.backgroundScope,
+            )
     }
 
     companion object {
@@ -632,10 +668,20 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
         /** Convenience constructor for these tests */
         fun defaultSignal(level: Int = 1): SignalIconModel {
-            return SignalIconModel(level, NUM_LEVELS, showExclamationMark = false)
+            return SignalIconModel(
+                level,
+                NUM_LEVELS,
+                showExclamationMark = false,
+                carrierNetworkChange = false,
+            )
         }
 
         fun emptySignal(): SignalIconModel =
-            SignalIconModel(level = 0, numberOfLevels = NUM_LEVELS, showExclamationMark = true)
+            SignalIconModel(
+                level = 0,
+                numberOfLevels = NUM_LEVELS,
+                showExclamationMark = true,
+                carrierNetworkChange = false,
+            )
     }
 }
