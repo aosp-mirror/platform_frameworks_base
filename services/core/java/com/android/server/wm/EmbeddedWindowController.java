@@ -23,6 +23,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowStateProto.IDENTIFIER;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -217,10 +218,10 @@ class EmbeddedWindowController {
                     mHostWindowState.mInputWindowHandle.getInputApplicationHandle());
         }
 
-        InputChannel openInputChannel() {
+        void openInputChannel(@NonNull InputChannel outInputChannel) {
             final String name = toString();
             mInputChannel = mWmService.mInputManager.createInputChannel(name);
-            return mInputChannel;
+            mInputChannel.copyTo(outInputChannel);
         }
 
         void onRemoved() {
