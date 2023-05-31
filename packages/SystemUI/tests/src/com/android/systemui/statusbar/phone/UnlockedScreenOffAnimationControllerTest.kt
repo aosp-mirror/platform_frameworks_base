@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.eq
@@ -65,6 +66,8 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var shadeViewController: ShadeViewController
     @Mock
+    private lateinit var notifShadeWindowController: NotificationShadeWindowController
+    @Mock
     private lateinit var lightRevealScrim: LightRevealScrim
     @Mock
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
@@ -89,6 +92,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 keyguardStateController,
                 dagger.Lazy<DozeParameters> { dozeParameters },
                 globalSettings,
+                dagger.Lazy<NotificationShadeWindowController> { notifShadeWindowController },
                 interactionJankMonitor,
                 powerManager,
                 handler = handler

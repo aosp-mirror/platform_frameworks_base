@@ -135,6 +135,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private BouncerView mBouncerView;
     @Mock private BouncerViewDelegate mBouncerViewDelegate;
     @Mock private OnBackAnimationCallback mBouncerViewDelegateBackCallback;
+    @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private WindowInsetsController mWindowInsetsController;
     @Mock private TaskbarDelegate mTaskbarDelegate;
@@ -168,7 +169,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM))
                 .thenReturn(true);
 
-        when(mCentralSurfaces.getNotificationShadeWindowView())
+        when(mNotificationShadeWindowController.getWindowRootView())
                 .thenReturn(mNotificationShadeWindowView);
         when(mNotificationShadeWindowView.getWindowInsetsController())
                 .thenReturn(mWindowInsetsController);
@@ -184,7 +185,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mDreamOverlayStateController,
                         mock(NavigationModeController.class),
                         mock(DockManager.class),
-                        mock(NotificationShadeWindowController.class),
+                        mNotificationShadeWindowController,
                         mKeyguardStateController,
                         mock(NotificationMediaManager.class),
                         mKeyguardMessageAreaFactory,
