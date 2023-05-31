@@ -254,7 +254,7 @@ class WallpaperController {
                 resources.getBoolean(
                         com.android.internal.R.bool.config_offsetWallpaperToCenterOfLargestDisplay);
         mIsLockscreenLiveWallpaperEnabled =
-                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", false);
+                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", true);
     }
 
     void resetLargestDisplay(Display display) {

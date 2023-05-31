@@ -853,7 +853,7 @@ public class WallpaperManager {
     private static boolean isLockscreenLiveWallpaperEnabledHelper() {
         if (sGlobals == null) {
             sIsLockscreenLiveWallpaperEnabled = SystemProperties.getBoolean(
-                    "persist.wm.debug.lockscreen_live_wallpaper", false);
+                    "persist.wm.debug.lockscreen_live_wallpaper", true);
         }
         if (sIsLockscreenLiveWallpaperEnabled == null) {
             try {
