@@ -264,7 +264,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 if (oldRecord.resultTo != null) {
                     try {
                         oldRecord.mIsReceiverAppRunning = true;
-                        performReceiveLocked(oldRecord.resultToApp, oldRecord.resultTo,
+                        performReceiveLocked(oldRecord, oldRecord.resultToApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
                                 false, false, oldRecord.shareIdentity, oldRecord.userId,
@@ -615,7 +615,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     finishTime - r.receiverTime,
                     packageState,
                     r.curApp.info.packageName,
-                    r.callerPackage);
+                    r.callerPackage,
+                    r.calculateTypeForLogging(),
+                    r.getDeliveryGroupPolicy());
         }
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG_BROADCAST, "finishReceiver [" + mQueueName + "] called but state is IDLE");
@@ -742,7 +744,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         }
     }
 
-    public void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
+    public void performReceiveLocked(BroadcastRecord r, ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
             boolean ordered, boolean sticky, boolean shareIdentity, int sendingUser,
             int receiverUid, int callingUid, String callingPackage,
@@ -795,7 +797,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                     dispatchDelay, receiveDelay, 0 /* finish_delay */,
                     SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
-                    app != null ? app.info.packageName : null, callingPackage);
+                    app != null ? app.info.packageName : null, callingPackage,
+                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy());
         }
     }
 
@@ -871,7 +874,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 maybeAddBackgroundStartPrivileges(filter.receiverList.app, r);
                 maybeScheduleTempAllowlistLocked(filter.owningUid, r, r.options);
                 maybeReportBroadcastDispatchedEventLocked(r, filter.owningUid);
-                performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
+                performReceiveLocked(r, filter.receiverList.app, filter.receiverList.receiver,
                         prepareReceiverIntent(r.intent, filteredExtras), r.resultCode, r.resultData,
                         r.resultExtras, r.ordered, r.initialSticky, r.shareIdentity, r.userId,
                         filter.receiverList.uid, r.callingUid, r.callerPackage,
@@ -1162,7 +1165,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                                 r.dispatchTime = now;
                             }
                             r.mIsReceiverAppRunning = true;
-                            performReceiveLocked(r.resultToApp, r.resultTo,
+                            performReceiveLocked(r, r.resultToApp, r.resultTo,
                                     new Intent(r.intent), r.resultCode,
                                     r.resultData, r.resultExtras, false, false, r.shareIdentity,
                                     r.userId, r.callingUid, r.callingUid, r.callerPackage,
