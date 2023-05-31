@@ -134,6 +134,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.shared.model.WakefulnessModel;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
@@ -2150,8 +2151,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     int getFalsingThreshold() {
-        float factor = mCentralSurfaces.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
+        float factor = ShadeViewController.getFalsingThresholdFactor(getWakefulness());
         return (int) (mQsController.getFalsingThreshold() * factor);
+    }
+
+    private WakefulnessModel getWakefulness() {
+        return mKeyguardInteractor.getWakefulnessModel().getValue();
     }
 
     private void maybeAnimateBottomAreaAlpha() {
@@ -3587,8 +3592,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 expand = flingExpands(vel, vectorVel, x, y);
             }
 
-            mDozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
-                    mCentralSurfaces.isWakeUpComingFromTouch());
+            mDozeLog.traceFling(
+                    expand,
+                    mTouchAboveFalsingThreshold,
+                    /* screenOnFromTouch=*/ getWakefulness().isDeviceInteractiveFromTapOrGesture());
             // Log collapse gesture if on lock screen.
             if (!expand && onKeyguard) {
                 float displayDensity = mCentralSurfaces.getDisplayDensity();

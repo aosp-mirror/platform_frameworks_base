@@ -81,7 +81,7 @@ class FakeKeyguardRepository : KeyguardRepository {
         MutableStateFlow(
             WakefulnessModel(WakefulnessState.ASLEEP, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
         )
-    override val wakefulness: Flow<WakefulnessModel> = _wakefulnessModel
+    override val wakefulness = _wakefulnessModel
 
     private val _isUdfpsSupported = MutableStateFlow(false)
 
