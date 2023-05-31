@@ -8432,10 +8432,20 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (mSurfaceControl.isValid() && !HardwareRenderer.isDrawingEnabled()) {
-            // When drawing is disabled the window layer won't have a valid buffer.
-            // Set a window crop so input can get delivered to the window.
-            mTransaction.setWindowCrop(mSurfaceControl, mSurfaceSize.x, mSurfaceSize.y).apply();
+        if (mSurfaceControl.isValid()) {
+            if (mPendingDragResizing && !mSurfaceSize.equals(
+                    mWinFrameInScreen.width(), mWinFrameInScreen.height())) {
+                // During drag-resize, a single fullscreen-sized surface is reused for optimization.
+                // Crop to the content size instead of the surface size to avoid exposing garbage
+                // content that is still on the surface from previous re-layouts (e.g. when
+                // resizing to a larger size).
+                mTransaction.setWindowCrop(mSurfaceControl,
+                        mWinFrameInScreen.width(), mWinFrameInScreen.height());
+            } else if (!HardwareRenderer.isDrawingEnabled()) {
+                // When drawing is disabled the window layer won't have a valid buffer.
+                // Set a window crop so input can get delivered to the window.
+                mTransaction.setWindowCrop(mSurfaceControl, mSurfaceSize.x, mSurfaceSize.y).apply();
+            }
         }
 
         mLastTransformHint = transformHint;
