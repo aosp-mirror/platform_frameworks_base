@@ -99,7 +99,7 @@ constructor(
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.DO_NOT_DISTURB
 
-    override val pickerName: String = context.getString(R.string.quick_settings_dnd_label)
+    override fun pickerName(): String = context.getString(R.string.quick_settings_dnd_label)
 
     override val pickerIconResourceId: Int = R.drawable.ic_do_not_disturb
 
