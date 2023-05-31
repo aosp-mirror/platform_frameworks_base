@@ -280,6 +280,7 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testRegisterProxy() throws Exception {
+        when(mProxyManager.displayBelongsToCaller(anyInt(), anyInt())).thenReturn(true);
         mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY);
         verify(mProxyManager).registerProxy(eq(mMockServiceClient), eq(TEST_DISPLAY), anyInt(),
                 eq(mMockSecurityPolicy),
@@ -314,7 +315,7 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testRegisterProxyForDefaultDisplay() throws Exception {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(SecurityException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, Display.DEFAULT_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), anyInt(), any(),
                 any(), any(), any());
@@ -332,6 +333,7 @@ public class AccessibilityManagerServiceTest {
     @SmallTest
     @Test
     public void testUnRegisterProxyWithPermission() throws Exception {
+        when(mProxyManager.displayBelongsToCaller(anyInt(), anyInt())).thenReturn(true);
         mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY);
         mA11yms.unregisterProxyForDisplay(TEST_DISPLAY);
 
