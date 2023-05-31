@@ -121,15 +121,14 @@ public class TransitionUtil {
         @Override
         public boolean test(TransitionInfo.Change change) {
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            if (taskInfo == null) return false;
             // Children always come before parent since changes are in top-to-bottom z-order.
-            if ((taskInfo == null) || mChildTaskTargets.get(taskInfo.taskId)) {
-                // has children, so not a leaf. Skip.
-                return false;
-            }
+            boolean hasChildren = mChildTaskTargets.get(taskInfo.taskId);
             if (taskInfo.hasParentTask()) {
                 mChildTaskTargets.put(taskInfo.parentTaskId, true);
             }
-            return true;
+            // If it has children, it's not a leaf.
+            return !hasChildren;
         }
     }
 
