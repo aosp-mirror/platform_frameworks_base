@@ -482,7 +482,7 @@ class DesktopTasksController(
         val cornerRadius = ta.getDimensionPixelSize(0, 0).toFloat()
         ta.recycle()
         info.changes
-                .filter { it.taskInfo.windowingMode == WINDOWING_MODE_FREEFORM }
+                .filter { it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM }
                 .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
     }
 
