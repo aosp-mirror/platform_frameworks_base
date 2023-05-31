@@ -2168,8 +2168,8 @@
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"कामसम्बन्धी <xliff:g id="APP">%s</xliff:g> मा खोल्ने हो?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"कामसम्बन्धी एपबाट कल गर्ने हो?"</string>
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"कामसम्बन्धी एप प्रयोग गर्ने हो?"</string>
-    <string name="miniresolver_call_information" msgid="6739417525304184083">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र कल गर्ने अनुमति दिन्छ"</string>
-    <string name="miniresolver_sms_information" msgid="4311292661329483088">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र म्यासेज पठाउने अनुमति दिन्छ"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र कल गर्ने अनुमति दिएको छ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र म्यासेज पठाउने अनुमति दिएको छ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"व्यक्तिगत ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"कल गर्नुहोस्"</string>

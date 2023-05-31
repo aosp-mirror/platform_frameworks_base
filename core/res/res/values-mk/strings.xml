@@ -1975,8 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот телефон како алтернатива."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Оваа апликација е создадена за постара верзија на Android. Можеби нема да работи правилно и не ги вклучува најновите мерки за заштита на безбедноста и приватноста. Проверете дали има ажурирање или контактирајте со програмерот на апликацијата."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за ажурирање"</string>
-    <!-- no translation found for deprecated_abi_message (6820548011196218091) -->
-    <skip />
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Апликацијава не е компатибилна со најновата верзија на Android. Проверете дали има ажурирање или контактирајте со програмерот на апликацијата."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови пораки"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Отворете ја апликацијата за SMS за приказ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Некои функции се ограничени"</string>
@@ -2169,8 +2168,8 @@
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Да се отвори во работната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"Да се повика од работна апликација?"</string>
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Да се префрли на работна апликација?"</string>
-    <string name="miniresolver_call_information" msgid="6739417525304184083">"Вашата организацијата ви дозволува да упатувате повици само од работни апликации"</string>
-    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Вашата организацијата ви дозволува да испраќате пораки само од работни апликации"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Вашата организација ви дозволува да упатувате повици само од работни апликации"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Вашата организација ви дозволува да испраќате пораки само од работни апликации"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Користи личен прелистувач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Користи работен прелистувач"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Повикај"</string>
@@ -2331,7 +2330,7 @@
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Двојниот екран е недостапен бидејќи вашиот телефон станува претопол"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"„Двојниот екран“ е недостапен"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Двојниот екран е недостапен бидејќи е вклучен „Штедач на батерија“. Ова може да се исклучи во „Поставки“."</string>
-    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Одете во „Поставките“"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Отворете „Поставки“"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Исклучи"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> е конфигуриран"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Распоредот на тастатурата е поставен на <xliff:g id="LAYOUT_1">%s</xliff:g>. Допрете за да промените."</string>
