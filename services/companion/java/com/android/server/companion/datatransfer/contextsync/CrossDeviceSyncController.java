@@ -154,6 +154,7 @@ public class CrossDeviceSyncController {
                                 Slog.w(TAG, "No callback to report removed transport");
                             }
                         }
+                        clearInProgressCalls(associationInfo.getId());
                     } else {
                         // Stable association!
                         final boolean systemBlocked = isAssociationBlocked(associationInfo);
@@ -187,6 +188,7 @@ public class CrossDeviceSyncController {
                                 // will get stale)
                                 syncMessageToDevice(associationInfo.getId(),
                                         createEmptyMessage());
+                                clearInProgressCalls(associationInfo.getId());
                             }
                         }
                     }
@@ -201,9 +203,14 @@ public class CrossDeviceSyncController {
                             return;
                         }
                         final CallMetadataSyncData processedData = processTelecomDataFromSync(data);
-                        mPhoneAccountManager.updateFacilitators(associationId, processedData);
-                        mCallManager.updateCalls(associationId, processedData);
-                        processCallCreateRequests(processedData);
+                        final boolean isRequest = processedData.getCallControlRequests().size() != 0
+                                || processedData.getCallCreateRequests().size() != 0;
+                        if (!isRequest) {
+                            mPhoneAccountManager.updateFacilitators(associationId, processedData);
+                            mCallManager.updateCalls(associationId, processedData);
+                        } else {
+                            processCallCreateRequests(processedData);
+                        }
                         if (mInCallServiceCallbackRef == null
                                 && mConnectionServiceCallbackRef == null) {
                             Slog.w(TAG, "No callback to process context sync message");
@@ -213,8 +220,10 @@ public class CrossDeviceSyncController {
                                 mInCallServiceCallbackRef != null ? mInCallServiceCallbackRef.get()
                                         : null;
                         if (inCallServiceCallback != null) {
-                            inCallServiceCallback.processContextSyncMessage(associationId,
-                                    processedData);
+                            if (isRequest) {
+                                inCallServiceCallback.processContextSyncMessage(associationId,
+                                        processedData);
+                            }
                         } else {
                             // This is dead; get rid of it lazily
                             mInCallServiceCallbackRef = null;
@@ -224,8 +233,10 @@ public class CrossDeviceSyncController {
                                 mConnectionServiceCallbackRef != null
                                         ? mConnectionServiceCallbackRef.get() : null;
                         if (connectionServiceCallback != null) {
-                            connectionServiceCallback.processContextSyncMessage(associationId,
-                                    processedData);
+                            if (!isRequest) {
+                                connectionServiceCallback.processContextSyncMessage(associationId,
+                                        processedData);
+                            }
                         } else {
                             // This is dead; get rid of it lazily
                             mConnectionServiceCallbackRef = null;
@@ -234,6 +245,15 @@ public class CrossDeviceSyncController {
                 });
         mPhoneAccountManager = new PhoneAccountManager(mContext);
         mCallManager = new CallManager(mContext, mPhoneAccountManager);
+    }
+
+    private void clearInProgressCalls(int associationId) {
+        final Set<String> removedIds = mCallManager.clearCallIdsForAssociationId(associationId);
+        final CrossDeviceSyncControllerCallback connectionServiceCallback =
+                mConnectionServiceCallbackRef != null ? mConnectionServiceCallbackRef.get() : null;
+        if (connectionServiceCallback != null) {
+            connectionServiceCallback.cleanUpCallIds(removedIds);
+        }
     }
 
     private static boolean isAssociationBlocked(AssociationInfo info) {
@@ -274,6 +294,7 @@ public class CrossDeviceSyncController {
             if (FACILITATOR_ID_SYSTEM.equals(request.getFacilitator().getIdentifier())) {
                 if (request.getAddress() != null && request.getAddress().startsWith(
                         PhoneAccount.SCHEME_TEL)) {
+                    mCallManager.addSelfOwnedCallId(request.getId());
                     // Remove all the non-numbers (dashes, parens, scheme)
                     final Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL,
                             request.getAddress().replaceAll("\\D+", ""), /* fragment= */ null);
@@ -382,6 +403,38 @@ public class CrossDeviceSyncController {
                 new int[]{associationId});
     }
 
+    /** Sync message to all associated devices. */
+    public void syncMessageToAllDevicesForUserId(int userId, byte[] message) {
+        final Set<Integer> associationIds = new HashSet<>();
+        for (AssociationInfo associationInfo : mConnectedAssociations) {
+            if (associationInfo.getUserId() == userId && !isAssociationBlocked(associationInfo)) {
+                associationIds.add(associationInfo.getId());
+            }
+        }
+        if (associationIds.isEmpty()) {
+            Slog.w(TAG, "No eligible devices to sync to");
+            return;
+        }
+
+        mCompanionTransportManager.sendMessage(MESSAGE_REQUEST_CONTEXT_SYNC, message,
+                associationIds.stream().mapToInt(Integer::intValue).toArray());
+    }
+
+    /**
+     * Mark a call id as owned (i.e. this device owns the canonical call). Note that both sides will
+     * own outgoing calls that were placed on behalf of another device.
+     */
+    public void addSelfOwnedCallId(String callId) {
+        mCallManager.addSelfOwnedCallId(callId);
+    }
+
+    /** Unmark a call id as owned (i.e. this device no longer owns the canonical call). */
+    public void removeSelfOwnedCallId(String callId) {
+        if (callId != null) {
+            mCallManager.removeSelfOwnedCallId(callId);
+        }
+    }
+
     @VisibleForTesting
     CallMetadataSyncData processTelecomDataFromSync(byte[] data) {
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
@@ -430,8 +483,10 @@ public class CrossDeviceSyncController {
                                     pis.end(requestsToken);
                                 } else if (pis.getFieldNumber() == (int) Telecom.FACILITATORS) {
                                     final long facilitatorsToken = pis.start(Telecom.FACILITATORS);
-                                    callMetadataSyncData.addFacilitator(
-                                            processFacilitatorDataFromSync(pis));
+                                    final CallMetadataSyncData.CallFacilitator facilitator =
+                                            processFacilitatorDataFromSync(pis);
+                                    facilitator.setIsTel(true);
+                                    callMetadataSyncData.addFacilitator(facilitator);
                                     pis.end(facilitatorsToken);
                                 } else {
                                     Slog.e(TAG, "Unhandled field in Telecom:"
@@ -561,6 +616,9 @@ public class CrossDeviceSyncController {
                 case (int) Telecom.Call.STATUS:
                     call.setStatus(pis.readInt(Telecom.Call.STATUS));
                     break;
+                case (int) Telecom.Call.DIRECTION:
+                    call.setDirection(pis.readInt(Telecom.Call.DIRECTION));
+                    break;
                 case (int) Telecom.Call.CONTROLS:
                     call.addControl(pis.readInt(Telecom.Call.CONTROLS));
                     break;
@@ -578,15 +636,15 @@ public class CrossDeviceSyncController {
         pos.write(ContextSyncMessage.VERSION, CURRENT_VERSION);
         final long telecomToken = pos.start(ContextSyncMessage.TELECOM);
         for (CrossDeviceCall call : calls) {
-            if (call.isCallPlacedByContextSync()) {
-                // Do not sync any calls which our "ours" as that would be duplicative.
+            if (call.isCallPlacedByContextSync() || mCallManager.isExternallyOwned(call.getId())) {
+                // Do not sync any of "our" calls, nor external calls, as that would be duplicative.
                 continue;
             }
             final long callsToken = pos.start(Telecom.CALLS);
             pos.write(Telecom.Call.ID, call.getId());
             final long originToken = pos.start(Telecom.Call.ORIGIN);
             pos.write(Telecom.Call.Origin.CALLER_ID,
-                    call.getReadableCallerId(isAdminBlocked(userId)));
+                    call.getReadableCallerId(isAdminBlocked(call.getUserId())));
             pos.write(Telecom.Call.Origin.APP_ICON, call.getCallingAppIcon());
             final long facilitatorToken = pos.start(Telecom.Call.Origin.FACILITATOR);
             pos.write(Telecom.CallFacilitator.NAME, call.getCallingAppName());
@@ -594,6 +652,7 @@ public class CrossDeviceSyncController {
             pos.end(facilitatorToken);
             pos.end(originToken);
             pos.write(Telecom.Call.STATUS, call.getStatus());
+            pos.write(Telecom.Call.DIRECTION, call.getDirection());
             for (int control : call.getControls()) {
                 pos.write(Telecom.Call.CONTROLS, control);
             }
@@ -658,6 +717,9 @@ public class CrossDeviceSyncController {
     @VisibleForTesting
     static class CallManager {
 
+        @VisibleForTesting final Set<String> mSelfOwnedCalls = new HashSet<>();
+        @VisibleForTesting final Set<String> mExternallyOwnedCalls = new HashSet<>();
+
         @VisibleForTesting final Map<Integer, Set<String>> mCallIds = new HashMap<>();
         private final TelecomManager mTelecomManager;
         private final PhoneAccountManager mPhoneAccountManager;
@@ -678,19 +740,62 @@ public class CrossDeviceSyncController {
 
             for (CallMetadataSyncData.Call currentCall : data.getCalls()) {
                 if (!oldCallIds.contains(currentCall.getId())
-                        && currentCall.getFacilitator() != null) {
+                        && currentCall.getFacilitator() != null
+                        && !isSelfOwned(currentCall.getId())) {
+                    mExternallyOwnedCalls.add(currentCall.getId());
                     final Bundle extras = new Bundle();
                     extras.putInt(EXTRA_ASSOCIATION_ID, associationId);
                     extras.putBoolean(EXTRA_IS_REMOTE_ORIGIN, true);
-                    extras.putParcelable(EXTRA_CALL, currentCall);
+                    extras.putBundle(EXTRA_CALL, currentCall.writeToBundle());
                     extras.putString(EXTRA_CALL_ID, currentCall.getId());
                     extras.putByteArray(EXTRA_FACILITATOR_ICON, currentCall.getAppIcon());
-                    final PhoneAccountHandle handle = mPhoneAccountManager.getPhoneAccountHandle(
-                            associationId, currentCall.getFacilitator().getIdentifier());
-                    mTelecomManager.addNewIncomingCall(handle, extras);
+                    final PhoneAccountHandle handle =
+                            mPhoneAccountManager.getPhoneAccountHandle(
+                                    associationId,
+                                    currentCall.getFacilitator().getIdentifier());
+                    if (currentCall.getDirection() == android.companion.Telecom.Call.INCOMING) {
+                        mTelecomManager.addNewIncomingCall(handle, extras);
+                    } else if (currentCall.getDirection()
+                            == android.companion.Telecom.Call.OUTGOING) {
+                        final Bundle wrappedExtras = new Bundle();
+                        wrappedExtras.putParcelable(TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS,
+                                extras);
+                        wrappedExtras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE,
+                                handle);
+                        final String address = currentCall.getCallerId();
+                        if (address != null) {
+                            mTelecomManager.placeCall(Uri.fromParts(PhoneAccount.SCHEME_SIP,
+                                    address, /* fragment= */ null), wrappedExtras);
+                        }
+                    }
                 }
             }
             mCallIds.put(associationId, newCallIds);
+        }
+
+        Set<String> clearCallIdsForAssociationId(int associationId) {
+            return mCallIds.remove(associationId);
+        }
+
+        void addSelfOwnedCallId(String callId) {
+            mSelfOwnedCalls.add(callId);
+        }
+
+        void removeSelfOwnedCallId(String callId) {
+            mSelfOwnedCalls.remove(callId);
+        }
+
+        boolean isExternallyOwned(String callId) {
+            return mExternallyOwnedCalls.contains(callId);
+        }
+
+        private boolean isSelfOwned(String currentCallId) {
+            for (String selfOwnedCallId : mSelfOwnedCalls) {
+                if (currentCallId.endsWith(selfOwnedCallId)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -745,7 +850,8 @@ public class CrossDeviceSyncController {
                         new PhoneAccountHandleIdentifier(associationId,
                                 facilitator.getIdentifier());
                 if (!mPhoneAccountHandles.containsKey(phoneAccountHandleIdentifier)) {
-                    registerPhoneAccount(phoneAccountHandleIdentifier, facilitator.getName());
+                    registerPhoneAccount(phoneAccountHandleIdentifier, facilitator.getName(),
+                            facilitator.isTel());
                 }
             }
         }
@@ -755,7 +861,7 @@ public class CrossDeviceSyncController {
          * synced device, and records it in the local {@link #mPhoneAccountHandles} map.
          */
         private void registerPhoneAccount(PhoneAccountHandleIdentifier handleIdentifier,
-                String humanReadableAppName) {
+                String humanReadableAppName, boolean isTel) {
             if (mPhoneAccountHandles.containsKey(handleIdentifier)) {
                 // Already exists!
                 return;
@@ -765,7 +871,8 @@ public class CrossDeviceSyncController {
                     UUID.randomUUID().toString());
             mPhoneAccountHandles.put(handleIdentifier, handle);
             final PhoneAccount phoneAccount = createPhoneAccount(handle, humanReadableAppName,
-                    handleIdentifier.getAppIdentifier());
+                    handleIdentifier.getAppIdentifier(), handleIdentifier.getAssociationId(),
+                    isTel);
             mTelecomManager.registerPhoneAccount(phoneAccount);
             mTelecomManager.enablePhoneAccount(mPhoneAccountHandles.get(handleIdentifier), true);
         }
@@ -781,11 +888,16 @@ public class CrossDeviceSyncController {
         @VisibleForTesting
         static PhoneAccount createPhoneAccount(PhoneAccountHandle handle,
                 String humanReadableAppName,
-                String appIdentifier) {
+                String appIdentifier,
+                int associationId,
+                boolean isTel) {
             final Bundle extras = new Bundle();
             extras.putString(EXTRA_CALL_FACILITATOR_ID, appIdentifier);
+            extras.putInt(EXTRA_ASSOCIATION_ID, associationId);
             return new PhoneAccount.Builder(handle, humanReadableAppName)
                     .setExtras(extras)
+                    .setSupportedUriSchemes(List.of(isTel ? PhoneAccount.SCHEME_TEL
+                            : PhoneAccount.SCHEME_SIP))
                     .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER
                             | PhoneAccount.CAPABILITY_CONNECTION_MANAGER).build();
         }
