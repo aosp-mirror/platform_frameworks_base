@@ -73,6 +73,7 @@ import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -233,6 +234,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mCentralSurfaces,
                         mock(NotificationPresenter.class),
                         mock(ShadeViewController.class),
+                        mock(NotificationShadeWindowController.class),
                         mActivityLaunchAnimator,
                         notificationAnimationProvider,
                         mock(LaunchFullScreenIntentProvider.class),
