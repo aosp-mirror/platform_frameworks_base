@@ -70,7 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ಮೂರು ಮಾರ್ಗದಲ್ಲಿ ಕರೆ ಮಾಡುವಿಕೆ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"ಅನಪೇಕ್ಷಿತ ಕಿರಿಕಿರಿ ಮಾಡುವ ಕರೆಗಳ ತಿರಸ್ಕಾರ"</string>
     <string name="CndMmi" msgid="185136449405618437">"ಕರೆ ಮಾಡುವ ಸಂಖ್ಯೆಯ ಡೆಲಿವರಿ"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಿಲ್ಲ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
@@ -597,8 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ಪ್ರತಿ ಬಾರಿಯೂ ನಿಮ್ಮ ಬೆರಳಿನ ಸ್ಥಾನವನ್ನು ಸ್ವಲ್ಪ ಮಟ್ಟಿಗೆ ಬದಲಾಯಿಸಿ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪ್ರಮಾಣೀಕರಣ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ, ದೃಢೀಕರಣವನ್ನು ಒತ್ತಿ"</string>
@@ -1680,10 +1680,10 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ಆನ್ ಮಾಡಬೇಡಿ"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ಆನ್ ಆಗಿದೆ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ನಿಮ್ಮ ಸಾಧನದ ಸಂಪೂರ್ಣ ನಿಯಂತ್ರಣವನ್ನು ಹೊಂದಲು <xliff:g id="SERVICE">%1$s</xliff:g>ಗೆ ಅನುಮತಿಸಬೇಕೆ?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ನಿಮ್ಮ ಸಾಧನದ ಸಂಪೂರ್ಣ ನಿಯಂತ್ರಣವನ್ನು ಹೊಂದಲು <xliff:g id="SERVICE">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸಬೇಕೆ?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಅವಶ್ಯಕತೆಗಳ ಕುರಿತು ನಿಮಗೆ ಸಹಾಯ ಮಾಡುವ ಆ್ಯಪ್‌ಗಳಿಗೆ ಸಂಪೂರ್ಣ ನಿಯಂತ್ರಣ ನೀಡುವುದು ಸೂಕ್ತವಾಗಿರುತ್ತದೆ, ಆದರೆ ಬಹುತೇಕ ಆ್ಯಪ್‌ಗಳಿಗೆ ಇದು ಸೂಕ್ತವಲ್ಲ."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ಸ್ಕ್ರೀನ್ ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ಇದು ಪರದೆಯ ಮೇಲಿನ ಎಲ್ಲಾ ವಿಷಯವನ್ನು ಓದಬಹುದು ಮತ್ತು ಇತರ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ವಿಷಯವನ್ನು ಪ್ರದರ್ಶಿಸಬಹುದು."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ಇದು ಪರದೆಯ ಮೇಲಿನ ಎಲ್ಲಾ ಕಂಟೆಂಟ್‌ ಅನ್ನು ಓದಬಹುದು ಮತ್ತು ಇತರ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ಕಂಟೆಂಟ್‌ ಅನ್ನು ಪ್ರದರ್ಶಿಸಬಹುದು."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ಕ್ರಿಯೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ಇದು ಆ್ಯಪ್ ಅಥವಾ ಹಾರ್ಡ್‌ವೇರ್ ಸೆನ್ಸರ್‌ನ ಜೊತೆಗಿನ ನಿಮ್ಮ ಸಂವಹನಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಬಹುದು, ಮತ್ತು ನಿಮ್ಮ ಪರವಾಗಿ ಆ್ಯಪ್‌ಗಳ ಜೊತೆ ಸಂವಹನ ನಡೆಸಬಹುದು."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ಅನುಮತಿಸಿ"</string>

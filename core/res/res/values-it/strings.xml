@@ -640,8 +640,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Troppo buio. Prova con più luce."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Sposta il telefono più lontano."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Avvicina il telefono."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Sposta il telefono più in alto."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Sposta il telefono più in basso."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Sposta lo smartphone più in alto."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Sposta lo smartphone più in basso."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Sposta il telefono verso sinistra."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Sposta il telefono verso destra."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Guarda più direttamente verso il dispositivo."</string>

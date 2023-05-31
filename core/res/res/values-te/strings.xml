@@ -914,7 +914,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"అన్‌లాక్ చేయడానికి లేదా అత్యవసర కాల్ చేయడానికి మెనూ నొక్కండి."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"అన్‌లాక్ చేయడానికి మెనూ నొక్కండి."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"అన్‌లాక్ చేయడానికి నమూనాను గీయండి"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"అత్యవసరం"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ఎమర్జెన్సీ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"కాల్‌కు తిరిగి వెళ్లు"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"సరైనది!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ట్రై చేయండి"</string>
@@ -1683,11 +1683,11 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>కి మీ పరికరంపై పూర్తి కంట్రోల్‌ను ఇవ్వాలనుకుంటున్నారా?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"అవసరమైన యాక్సెసిబిలిటీ కోసం యాప్‌లకు పూర్తి కంట్రోల్ ఇవ్వడం తగిన పనే అయినా, అన్ని యాప్‌లకు అలా ఇవ్వడం సరికాదు."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"స్క్రీన్‌ను చూసి, కంట్రోల్ చేయగలగడం"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది మరియు ఇతర యాప్‌లలో కూడా ఈ కంటెంట్‌ను ప్రదర్శిస్తుంది."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది. అంతే కాక, ఇతర యాప్‌లపై కంటెంట్‌ను డిస్‌ప్లే చేస్తుంది."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"చర్యలను చూసి, అమలు చేయగలగడం"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"మీరు ఒక యాప్‌‌తో చేసే ఇంటరాక్షన్‌లను లేదా హార్డ్‌వేర్ సెన్సార్‌ను ట్రాక్ చేస్తూ మీ త‌ర‌ఫున యాప్‌లతో ఇంటరాక్ట్ చేయగలదు."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించండి"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"నిరాకరించు"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"వద్దు"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"వాల్యూమ్ కీ షార్ట్‌కట్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
