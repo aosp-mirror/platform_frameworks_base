@@ -76,7 +76,7 @@ import java.util.function.Function;
  */
 public final class AuthSession implements IBinder.DeathRecipient {
     private static final String TAG = "BiometricService/AuthSession";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     /*
      * Defined in biometrics.proto
@@ -118,6 +118,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     @VisibleForTesting final IBinder mToken;
     // Info to be shown on BiometricDialog when all cookies are returned.
     @VisibleForTesting final PromptInfo mPromptInfo;
+    @VisibleForTesting final BiometricFrameworkStatsLogger mBiometricFrameworkStatsLogger;
     private final long mRequestId;
     private final long mOperationId;
     private final int mUserId;
@@ -164,6 +165,32 @@ public final class AuthSession implements IBinder.DeathRecipient {
             @NonNull PromptInfo promptInfo,
             boolean debugEnabled,
             @NonNull List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties) {
+        this(context, biometricContext, statusBarService, sysuiReceiver, keystore, random,
+                clientDeathReceiver, preAuthInfo, token, requestId, operationId, userId,
+                sensorReceiver, clientReceiver, opPackageName, promptInfo, debugEnabled,
+                fingerprintSensorProperties, BiometricFrameworkStatsLogger.getInstance());
+    }
+
+    @VisibleForTesting
+    AuthSession(@NonNull Context context,
+            @NonNull BiometricContext biometricContext,
+            @NonNull IStatusBarService statusBarService,
+            @NonNull IBiometricSysuiReceiver sysuiReceiver,
+            @NonNull KeyStore keystore,
+            @NonNull Random random,
+            @NonNull ClientDeathReceiver clientDeathReceiver,
+            @NonNull PreAuthInfo preAuthInfo,
+            @NonNull IBinder token,
+            long requestId,
+            long operationId,
+            int userId,
+            @NonNull IBiometricSensorReceiver sensorReceiver,
+            @NonNull IBiometricServiceReceiver clientReceiver,
+            @NonNull String opPackageName,
+            @NonNull PromptInfo promptInfo,
+            boolean debugEnabled,
+            @NonNull List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties,
+            @NonNull BiometricFrameworkStatsLogger logger) {
         Slog.d(TAG, "Creating AuthSession with: " + preAuthInfo);
         mContext = context;
         mBiometricContext = biometricContext;
@@ -184,6 +211,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mDebugEnabled = debugEnabled;
         mFingerprintSensorProperties = fingerprintSensorProperties;
         mCancelled = false;
+        mBiometricFrameworkStatsLogger = logger;
 
         try {
             mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
@@ -708,7 +736,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
 
-            BiometricFrameworkStatsLogger.getInstance().authenticate(
+            mBiometricFrameworkStatsLogger.authenticate(
                     mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
                             isCrypto()),
                     statsModality(),
@@ -723,11 +751,17 @@ public final class AuthSession implements IBinder.DeathRecipient {
         } else {
             final long latency = System.currentTimeMillis() - mStartTimeMs;
 
-            int error = reason == BiometricPrompt.DISMISSED_REASON_NEGATIVE
-                    ? BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON
-                    : reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL
-                            ? BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED
-                            : 0;
+            int error = 0;
+            switch(reason) {
+                case BiometricPrompt.DISMISSED_REASON_NEGATIVE:
+                    error = BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON;
+                    break;
+                case BiometricPrompt.DISMISSED_REASON_USER_CANCEL:
+                    error = BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED;
+                    break;
+                default:
+            }
+
             if (DEBUG) {
                 Slog.v(TAG, "Dismissed! Modality: " + statsModality()
                         + ", User: " + mUserId
@@ -739,17 +773,19 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
             // Auth canceled
-            BiometricFrameworkStatsLogger.getInstance().error(
-                    mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
-                            isCrypto()),
-                    statsModality(),
-                    BiometricsProtoEnums.ACTION_AUTHENTICATE,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    mDebugEnabled,
-                    latency,
-                    error,
-                    0 /* vendorCode */,
-                    mUserId);
+            if (error != 0) {
+                mBiometricFrameworkStatsLogger.error(
+                        mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
+                                isCrypto()),
+                        statsModality(),
+                        BiometricsProtoEnums.ACTION_AUTHENTICATE,
+                        BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                        mDebugEnabled,
+                        latency,
+                        error,
+                        0 /* vendorCode */,
+                        mUserId);
+            }
         }
     }
 
