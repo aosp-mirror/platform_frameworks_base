@@ -187,12 +187,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
         return contextForUser.getPackageManager();
     }
 
-    void animateExpandNotificationsPanel();
-
-    void animateExpandSettingsPanel(@Nullable String subpanel);
-
-    void togglePanel();
-
     void start();
 
     boolean updateIsKeyguard();
@@ -232,12 +226,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     NotificationPresenter getPresenter();
 
-    void postAnimateCollapsePanels();
-
-    void postAnimateForceCollapsePanels();
-
-    void postAnimateOpenPanels();
-
     boolean isPanelExpanded();
 
     /**
@@ -254,8 +242,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
      * initial threshold.
      */
     default void onStatusBarTrackpadEvent(MotionEvent event) {}
-
-    void animateCollapseQuickSettings();
 
     /** */
     boolean getCommandQueuePanelsEnabled();

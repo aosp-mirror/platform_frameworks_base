@@ -833,7 +833,7 @@ constructor(
                                 shadeControllerLazy.get().isExpandedVisible &&
                                     !statusBarKeyguardViewManagerLazy.get().isBouncerShowing
                             ) {
-                                shadeControllerLazy.get().animateCollapseShadeDelayed()
+                                shadeControllerLazy.get().animateCollapseShadeForcedDelayed()
                             } else {
                                 // Do it after DismissAction has been processed to conserve the
                                 // needed ordering.

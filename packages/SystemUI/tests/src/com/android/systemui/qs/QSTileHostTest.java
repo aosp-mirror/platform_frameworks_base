@@ -67,8 +67,8 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.FakeSharedPreferences;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -86,7 +86,6 @@ import org.mockito.stubbing.Answer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Provider;
@@ -110,7 +109,7 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private Provider<AutoTileManager> mAutoTiles;
     @Mock
-    private CentralSurfaces mCentralSurfaces;
+    private ShadeController mShadeController;
     @Mock
     private QSLogger mQSLogger;
     @Mock
@@ -161,7 +160,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mSecureSettings = new FakeSettings();
         saveSetting("");
         mQSTileHost = new TestQSTileHost(mContext, mDefaultFactory, mMainExecutor,
-                mPluginManager, mTunerService, mAutoTiles, mCentralSurfaces,
+                mPluginManager, mTunerService, mAutoTiles, mShadeController,
                 mQSLogger, mUserTracker, mSecureSettings, mCustomTileStatePersister,
                 mTileLifecycleManagerFactory, mUserFileManager, mFeatureFlags);
 
@@ -682,13 +681,13 @@ public class QSTileHostTest extends SysuiTestCase {
                 QSFactory defaultFactory, Executor mainExecutor,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles,
-                CentralSurfaces centralSurfaces, QSLogger qsLogger,
+                ShadeController shadeController, QSLogger qsLogger,
                 UserTracker userTracker, SecureSettings secureSettings,
                 CustomTileStatePersister customTileStatePersister,
                 TileLifecycleManager.Factory tileLifecycleManagerFactory,
                 UserFileManager userFileManager, FeatureFlags featureFlags) {
             super(context, defaultFactory, mainExecutor, pluginManager,
-                    tunerService, autoTiles,  Optional.of(centralSurfaces), qsLogger,
+                    tunerService, autoTiles,  shadeController, qsLogger,
                     userTracker, secureSettings, customTileStatePersister,
                     tileLifecycleManagerFactory, userFileManager, featureFlags);
         }

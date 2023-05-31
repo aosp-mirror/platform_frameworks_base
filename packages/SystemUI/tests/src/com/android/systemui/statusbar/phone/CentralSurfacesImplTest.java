@@ -436,6 +436,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mStatusBarKeyguardViewManager,
                 mStatusBarWindowController,
+                mDeviceProvisionedController,
                 mNotificationShadeWindowController,
                 mContext.getSystemService(WindowManager.class),
                 () -> mAssistManager,

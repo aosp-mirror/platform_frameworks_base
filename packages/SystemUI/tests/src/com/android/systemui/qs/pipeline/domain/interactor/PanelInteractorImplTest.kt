@@ -18,8 +18,7 @@ package com.android.systemui.qs.pipeline.domain.interactor
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.phone.CentralSurfaces
-import java.util.Optional
+import com.android.systemui.shade.ShadeController
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +30,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class PanelInteractorImplTest : SysuiTestCase() {
 
-    @Mock private lateinit var centralSurfaces: CentralSurfaces
+    @Mock private lateinit var shadeController: ShadeController
 
     @Before
     fun setup() {
@@ -40,37 +39,28 @@ class PanelInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun openPanels_callsCentralSurfaces() {
-        val underTest = PanelInteractorImpl(Optional.of(centralSurfaces))
+        val underTest = PanelInteractorImpl(shadeController)
 
         underTest.openPanels()
 
-        verify(centralSurfaces).postAnimateOpenPanels()
+        verify(shadeController).postAnimateExpandQs()
     }
 
     @Test
     fun collapsePanels_callsCentralSurfaces() {
-        val underTest = PanelInteractorImpl(Optional.of(centralSurfaces))
+        val underTest = PanelInteractorImpl(shadeController)
 
         underTest.collapsePanels()
 
-        verify(centralSurfaces).postAnimateCollapsePanels()
+        verify(shadeController).postAnimateCollapseShade()
     }
 
     @Test
     fun forceCollapsePanels_callsCentralSurfaces() {
-        val underTest = PanelInteractorImpl(Optional.of(centralSurfaces))
+        val underTest = PanelInteractorImpl(shadeController)
 
         underTest.forceCollapsePanels()
 
-        verify(centralSurfaces).postAnimateForceCollapsePanels()
-    }
-
-    @Test
-    fun whenOptionalEmpty_doesnThrow() {
-        val underTest = PanelInteractorImpl(Optional.empty())
-
-        underTest.openPanels()
-        underTest.collapsePanels()
-        underTest.forceCollapsePanels()
+        verify(shadeController).postAnimateForceCollapseShade()
     }
 }

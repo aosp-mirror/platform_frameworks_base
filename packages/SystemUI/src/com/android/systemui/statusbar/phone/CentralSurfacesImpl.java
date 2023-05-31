@@ -411,24 +411,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mQSPanelController;
     }
 
-    /** */
-    @Override
-    public void animateExpandNotificationsPanel() {
-        mCommandQueueCallbacks.animateExpandNotificationsPanel();
-    }
-
-    /** */
-    @Override
-    public void animateExpandSettingsPanel(@Nullable String subpanel) {
-        mCommandQueueCallbacks.animateExpandSettingsPanel(subpanel);
-    }
-
-    /** */
-    @Override
-    public void togglePanel() {
-        mCommandQueueCallbacks.togglePanel();
-    }
-
     /**
      * The {@link StatusBarState} of the status bar.
      */
@@ -1878,21 +1860,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public void postAnimateCollapsePanels() {
-        mMainExecutor.execute(mShadeController::animateCollapseShade);
-    }
-
-    @Override
-    public void postAnimateForceCollapsePanels() {
-        mMainExecutor.execute(mShadeController::animateCollapseShadeForced);
-    }
-
-    @Override
-    public void postAnimateOpenPanels() {
-        mMessageRouter.sendMessage(MSG_OPEN_SETTINGS_PANEL);
-    }
-
-    @Override
     public boolean isPanelExpanded() {
         return mPanelExpanded;
     }
@@ -1916,14 +1883,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void onStatusBarTrackpadEvent(MotionEvent event) {
         mCentralSurfacesComponent.getNotificationPanelViewController().handleExternalTouch(event);
-    }
-
-    @Override
-    public void animateCollapseQuickSettings() {
-        if (mState == StatusBarState.SHADE) {
-            mShadeSurface.collapse(
-                    true, false /* delayed */, 1.0f /* speedUpFactor */);
-        }
     }
 
     private void onExpandedInvisible() {
@@ -3714,8 +3673,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
             if (userSetup != mUserSetup) {
                 mUserSetup = userSetup;
-                if (!mUserSetup) {
-                    animateCollapseQuickSettings();
+                if (!mUserSetup && mState == StatusBarState.SHADE) {
+                    mShadeSurface.collapse(true /* animate */, false  /* delayed */,
+                            1.0f  /* speedUpFactor */);
                 }
                 updateQsExpansionEnabled();
             }

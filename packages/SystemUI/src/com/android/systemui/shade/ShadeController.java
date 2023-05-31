@@ -38,23 +38,38 @@ public interface ShadeController {
     /** Collapse the shade instantly with no animation. */
     void instantCollapseShade();
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
     void animateCollapseShade();
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
     void animateCollapseShade(int flags);
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
     void animateCollapseShadeForced();
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
-    void animateCollapseShadeDelayed();
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
+    void animateCollapseShadeForcedDelayed();
 
     /**
      * Collapse the shade animated, showing the bouncer when on {@link StatusBarState#KEYGUARD} or
      * dismissing status bar when on {@link StatusBarState#SHADE}.
      */
-    void animateCollapsePanels(int flags, boolean force, boolean delayed, float speedUpFactor);
+    void animateCollapseShade(int flags, boolean force, boolean delayed, float speedUpFactor);
+
+    /** Expand the shade with an animation. */
+    void animateExpandShade();
+
+    /** Expand the shade with quick settings expanded with an animation. */
+    void animateExpandQs();
+
+    /** Posts a request to collapse the shade. */
+    void postAnimateCollapseShade();
+
+    /** Posts a request to force collapse the shade. */
+    void postAnimateForceCollapseShade();
+
+    /** Posts a request to expand the shade to quick settings. */
+    void postAnimateExpandQs();
 
     /**
      * If the shade is not fully expanded, collapse it animated.

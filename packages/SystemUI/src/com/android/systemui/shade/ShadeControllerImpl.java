@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
@@ -60,6 +61,7 @@ public final class ShadeControllerImpl implements ShadeController {
     private final StatusBarStateController mStatusBarStateController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final StatusBarWindowController mStatusBarWindowController;
+    private final DeviceProvisionedController mDeviceProvisionedController;
 
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<NotificationGutsManager> mGutsManager;
@@ -81,6 +83,7 @@ public final class ShadeControllerImpl implements ShadeController {
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             StatusBarWindowController statusBarWindowController,
+            DeviceProvisionedController deviceProvisionedController,
             NotificationShadeWindowController notificationShadeWindowController,
             WindowManager windowManager,
             Lazy<AssistManager> assistManagerLazy,
@@ -90,6 +93,7 @@ public final class ShadeControllerImpl implements ShadeController {
         mMainExecutor = mainExecutor;
         mStatusBarStateController = statusBarStateController;
         mStatusBarWindowController = statusBarWindowController;
+        mDeviceProvisionedController = deviceProvisionedController;
         mGutsManager = gutsManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -113,21 +117,21 @@ public final class ShadeControllerImpl implements ShadeController {
 
     @Override
     public void animateCollapseShade(int flags) {
-        animateCollapsePanels(flags, false, false, 1.0f);
+        animateCollapseShade(flags, false, false, 1.0f);
     }
 
     @Override
     public void animateCollapseShadeForced() {
-        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true, false, 1.0f);
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE, true, false, 1.0f);
     }
 
     @Override
-    public void animateCollapseShadeDelayed() {
-        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true, true, 1.0f);
+    public void animateCollapseShadeForcedDelayed() {
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true, true, 1.0f);
     }
 
     @Override
-    public void animateCollapsePanels(int flags, boolean force, boolean delayed,
+    public void animateCollapseShade(int flags, boolean force, boolean delayed,
             float speedUpFactor) {
         if (!force && mStatusBarStateController.getState() != StatusBarState.SHADE) {
             runPostCollapseRunnables();
@@ -146,6 +150,25 @@ public final class ShadeControllerImpl implements ShadeController {
             mNotificationShadeWindowViewController.cancelExpandHelper();
             mNotificationPanelViewController.collapse(true, delayed, speedUpFactor);
         }
+    }
+
+    @Override
+    public void animateExpandShade() {
+        if (!mCommandQueue.panelsEnabled()) {
+            return;
+        }
+        mNotificationPanelViewController.expandToNotifications();
+    }
+
+    @Override
+    public void animateExpandQs() {
+        if (!mCommandQueue.panelsEnabled()) {
+            return;
+        }
+        // Settings are not available in setup
+        if (!mDeviceProvisionedController.isCurrentUserSetup()) return;
+
+        mNotificationPanelViewController.expandToQs();
     }
 
     @Override
@@ -172,6 +195,20 @@ public final class ShadeControllerImpl implements ShadeController {
     @Override
     public boolean isExpandingOrCollapsing() {
         return mNotificationPanelViewController.isExpandingOrCollapsing();
+    }
+    @Override
+    public void postAnimateCollapseShade() {
+        mMainExecutor.execute(this::animateCollapseShade);
+    }
+
+    @Override
+    public void postAnimateForceCollapseShade() {
+        mMainExecutor.execute(this::animateCollapseShadeForced);
+    }
+
+    @Override
+    public void postAnimateExpandQs() {
+        mMainExecutor.execute(this::animateExpandQs);
     }
 
     @Override
@@ -208,7 +245,7 @@ public final class ShadeControllerImpl implements ShadeController {
     public boolean collapseShade() {
         if (!mNotificationPanelViewController.isFullyCollapsed()) {
             // close the shade if it was open
-            animateCollapseShadeDelayed();
+            animateCollapseShadeForcedDelayed();
             notifyVisibilityChanged(false);
 
             return true;
