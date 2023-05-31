@@ -36,7 +36,7 @@ import com.android.server.companion.CompanionDeviceManagerServiceInternal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Set;
 
 /** Service for Telecom to bind to when call metadata is synced between devices. */
 public class CallMetadataSyncConnectionService extends ConnectionService {
@@ -65,12 +65,44 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
                                         associationId, call.getId()));
                         if (existingConnection != null) {
                             existingConnection.update(call);
+                        } else {
+                            // Check if this is an in-progress id being finalized.
+                            CallMetadataSyncConnectionIdentifier key = null;
+                            for (Map.Entry<CallMetadataSyncConnectionIdentifier,
+                                    CallMetadataSyncConnection> e : mActiveConnections.entrySet()) {
+                                if (e.getValue().getAssociationId() == associationId
+                                        && !e.getValue().isIdFinalized()
+                                        && call.getId().endsWith(e.getValue().getCallId())) {
+                                    key = e.getKey();
+                                    break;
+                                }
+                            }
+                            if (key != null) {
+                                final CallMetadataSyncConnection connection =
+                                        mActiveConnections.remove(key);
+                                connection.update(call);
+                                mActiveConnections.put(
+                                        new CallMetadataSyncConnectionIdentifier(associationId,
+                                                call.getId()), connection);
+                            }
                         }
                     }
                     // Remove obsolete calls.
                     mActiveConnections.values().removeIf(connection -> {
-                        if (associationId == connection.getAssociationId()
+                        if (connection.isIdFinalized()
+                                && associationId == connection.getAssociationId()
                                 && !callMetadataSyncData.hasCall(connection.getCallId())) {
+                            connection.setDisconnected(new DisconnectCause(DisconnectCause.REMOTE));
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+
+                @Override
+                void cleanUpCallIds(Set<String> callIds) {
+                    mActiveConnections.values().removeIf(connection -> {
+                        if (callIds.contains(connection.getCallId())) {
                             connection.setDisconnected(new DisconnectCause(DisconnectCause.REMOTE));
                             return true;
                         }
@@ -95,10 +127,9 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
             ConnectionRequest connectionRequest) {
         final int associationId = connectionRequest.getExtras().getInt(
                 CrossDeviceSyncController.EXTRA_ASSOCIATION_ID);
-        final CallMetadataSyncData.Call call = connectionRequest.getExtras().getParcelable(
-                CrossDeviceSyncController.EXTRA_CALL, CallMetadataSyncData.Call.class);
-        // InCallServices outside of framework (like Dialer's) might try to read this, and crash
-        // when they can't. Remove it once we're done with it, as well as the other internal ones.
+        final CallMetadataSyncData.Call call = CallMetadataSyncData.Call.fromBundle(
+                connectionRequest.getExtras().getBundle(CrossDeviceSyncController.EXTRA_CALL));
+        call.setDirection(android.companion.Telecom.Call.INCOMING);
         connectionRequest.getExtras().remove(CrossDeviceSyncController.EXTRA_CALL);
         connectionRequest.getExtras().remove(CrossDeviceSyncController.EXTRA_CALL_FACILITATOR_ID);
         connectionRequest.getExtras().remove(CrossDeviceSyncController.EXTRA_ASSOCIATION_ID);
@@ -130,18 +161,26 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
     @Override
     public Connection onCreateOutgoingConnection(PhoneAccountHandle phoneAccountHandle,
             ConnectionRequest connectionRequest) {
-        final PhoneAccount phoneAccount = mTelecomManager.getPhoneAccount(phoneAccountHandle);
+        final PhoneAccountHandle handle = phoneAccountHandle != null ? phoneAccountHandle
+                : connectionRequest.getAccountHandle();
+        final PhoneAccount phoneAccount = mTelecomManager.getPhoneAccount(handle);
 
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
-        call.setId(UUID.randomUUID().toString());
+        call.setId(
+                connectionRequest.getExtras().getString(CrossDeviceSyncController.EXTRA_CALL_ID));
         call.setStatus(android.companion.Telecom.Call.UNKNOWN_STATUS);
         final CallMetadataSyncData.CallFacilitator callFacilitator =
-                new CallMetadataSyncData.CallFacilitator(phoneAccount.getLabel().toString(),
-                        phoneAccount.getExtras().getString(
-                                CrossDeviceSyncController.EXTRA_CALL_FACILITATOR_ID));
+                new CallMetadataSyncData.CallFacilitator(phoneAccount != null
+                        ? phoneAccount.getLabel().toString()
+                        : handle.getComponentName().getShortClassName(),
+                        phoneAccount != null ? phoneAccount.getExtras().getString(
+                                CrossDeviceSyncController.EXTRA_CALL_FACILITATOR_ID)
+                                : handle.getComponentName().getPackageName());
         call.setFacilitator(callFacilitator);
+        call.setDirection(android.companion.Telecom.Call.OUTGOING);
+        call.setCallerId(connectionRequest.getAddress().getSchemeSpecificPart());
 
-        final int associationId = connectionRequest.getExtras().getInt(
+        final int associationId = phoneAccount.getExtras().getInt(
                 CrossDeviceSyncController.EXTRA_ASSOCIATION_ID);
 
         connectionRequest.getExtras().remove(CrossDeviceSyncController.EXTRA_CALL);
@@ -160,13 +199,15 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
                                 CrossDeviceSyncController.createCallControlMessage(callId, action));
                     }
                 });
-        connection.setConnectionProperties(Connection.PROPERTY_IS_EXTERNAL_CALL);
+        connection.setCallerDisplayName(call.getCallerId(), TelecomManager.PRESENTATION_ALLOWED);
 
+        mCdmsi.addSelfOwnedCallId(call.getId());
         mCdmsi.sendCrossDeviceSyncMessage(associationId,
                 CrossDeviceSyncController.createCallCreateMessage(call.getId(),
                         connectionRequest.getAddress().toString(),
                         call.getFacilitator().getIdentifier()));
 
+        connection.setInitializing();
         return connection;
     }
 
@@ -240,6 +281,7 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
         private final int mAssociationId;
         private final CallMetadataSyncData.Call mCall;
         private final CallMetadataSyncConnectionCallback mCallback;
+        private boolean mIsIdFinalized;
 
         CallMetadataSyncConnection(TelecomManager telecomManager, AudioManager audioManager,
                 int associationId, CallMetadataSyncData.Call call,
@@ -259,6 +301,10 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
             return mAssociationId;
         }
 
+        public boolean isIdFinalized() {
+            return mIsIdFinalized;
+        }
+
         private void initialize() {
             final int status = mCall.getStatus();
             if (status == android.companion.Telecom.Call.RINGING_SILENCED) {
@@ -273,6 +319,8 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
                 setOnHold();
             } else if (state == Call.STATE_DISCONNECTED) {
                 setDisconnected(new DisconnectCause(DisconnectCause.REMOTE));
+            } else if (state == Call.STATE_DIALING) {
+                setDialing();
             } else {
                 setInitialized();
             }
@@ -307,6 +355,10 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
         }
 
         private void update(CallMetadataSyncData.Call call) {
+            if (!mIsIdFinalized) {
+                mCall.setId(call.getId());
+                mIsIdFinalized = true;
+            }
             final int status = call.getStatus();
             if (status == android.companion.Telecom.Call.RINGING_SILENCED
                     && mCall.getStatus() != android.companion.Telecom.Call.RINGING_SILENCED) {
@@ -323,6 +375,8 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
                     setOnHold();
                 } else if (state == Call.STATE_DISCONNECTED) {
                     setDisconnected(new DisconnectCause(DisconnectCause.REMOTE));
+                } else if (state == Call.STATE_DIALING) {
+                    setDialing();
                 } else {
                     Slog.e(TAG, "Could not update call to unknown state");
                 }
