@@ -3188,7 +3188,6 @@ public class OomAdjuster {
         }
 
         if (state.getCurCapability() != state.getSetCapability()) {
-            changes |= ActivityManagerService.ProcessChangeItem.CHANGE_CAPABILITY;
             state.setSetCapability(state.getCurCapability());
         }
 
@@ -3212,13 +3211,12 @@ public class OomAdjuster {
                     mProcessList.enqueueProcessChangeItemLocked(app.getPid(), app.info.uid);
             item.changes |= changes;
             item.foregroundActivities = state.hasRepForegroundActivities();
-            item.capability = state.getSetCapability();
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
                     "Item " + Integer.toHexString(System.identityHashCode(item))
                             + " " + app.toShortString() + ": changes=" + item.changes
                             + " foreground=" + item.foregroundActivities
                             + " type=" + state.getAdjType() + " source=" + state.getAdjSource()
-                            + " target=" + state.getAdjTarget() + " capability=" + item.capability);
+                            + " target=" + state.getAdjTarget());
         }
 
         if (state.isCached() && !state.shouldNotKillOnBgRestrictedAndIdle()) {
