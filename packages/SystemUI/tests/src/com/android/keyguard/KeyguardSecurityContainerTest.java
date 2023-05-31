@@ -253,11 +253,11 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                 getViewConstraint(mSecurityViewFlipper.getId());
         ConstraintSet.Constraint userSwitcherConstraint =
                 getViewConstraint(R.id.keyguard_bouncer_user_switcher);
-        assertThat(viewFlipperConstraint.layout.rightToRight).isEqualTo(PARENT_ID);
-        assertThat(viewFlipperConstraint.layout.leftToRight).isEqualTo(
+        assertThat(viewFlipperConstraint.layout.endToEnd).isEqualTo(PARENT_ID);
+        assertThat(viewFlipperConstraint.layout.startToEnd).isEqualTo(
                 R.id.keyguard_bouncer_user_switcher);
-        assertThat(userSwitcherConstraint.layout.leftToLeft).isEqualTo(PARENT_ID);
-        assertThat(userSwitcherConstraint.layout.rightToLeft).isEqualTo(
+        assertThat(userSwitcherConstraint.layout.startToStart).isEqualTo(PARENT_ID);
+        assertThat(userSwitcherConstraint.layout.endToStart).isEqualTo(
                 mSecurityViewFlipper.getId());
         assertThat(viewFlipperConstraint.layout.topToTop).isEqualTo(PARENT_ID);
         assertThat(viewFlipperConstraint.layout.bottomToBottom).isEqualTo(PARENT_ID);
@@ -377,7 +377,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
         ConstraintSet.Constraint viewFlipperConstraint = getViewConstraint(
                 mSecurityViewFlipper.getId());
-        assertThat(viewFlipperConstraint.layout.leftToLeft).isEqualTo(PARENT_ID);
+        assertThat(viewFlipperConstraint.layout.startToStart).isEqualTo(PARENT_ID);
     }
 
     @Test
