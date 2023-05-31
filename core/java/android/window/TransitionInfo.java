@@ -424,8 +424,8 @@ public final class TransitionInfo implements Parcelable {
             case TRANSIT_NONE: return "NONE";
             case TRANSIT_OPEN: return "OPEN";
             case TRANSIT_CLOSE: return "CLOSE";
-            case TRANSIT_TO_FRONT: return "SHOW";
-            case TRANSIT_TO_BACK: return "HIDE";
+            case TRANSIT_TO_FRONT: return "TO_FRONT";
+            case TRANSIT_TO_BACK: return "TO_BACK";
             case TRANSIT_CHANGE: return "CHANGE";
             default: return "<unknown:" + mode + ">";
         }
