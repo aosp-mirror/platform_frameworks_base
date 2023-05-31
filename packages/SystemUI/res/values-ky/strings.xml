@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Жүздүн аныктыгы текшерилди"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Ырасталды"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Бүтүрүү үчүн \"Ырастоо\" баскычын басыңыз"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Түзмөгүңүздү жүзүңүз менен ачтыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Кулпуну жүзүңүз менен ачтыңыз. Улантуу үчүн басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Жүз таанылды. Улантуу үчүн басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Жүз таанылды. Улантуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз."</string>
@@ -995,7 +994,7 @@
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Кабарлоо кантип иштейт"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Кабарлоо"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Шайкеш Bluetooth түзмөктөрү болгон жакын жердеги кишилер кабарлап жаткан медиаңызды уга алышат"</string>
-    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Кабарыңызды угуу үчүн жакын жердеги кишилер шайкеш Bluetooth түзмөктөрү менен QR кодун скандап же кабарлоонун аталышын жана сырсөзүн колдоно алышат"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Кабарыңызды угуу үчүн жакын жердеги кишилер шайкеш Bluetooth түзмөктөрү менен QR кодду скандап же кабарлоонун аталышын жана сырсөзүн колдоно алышат"</string>
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Кабарлоонун аталышы"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Сырсөз"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Сактоо"</string>
