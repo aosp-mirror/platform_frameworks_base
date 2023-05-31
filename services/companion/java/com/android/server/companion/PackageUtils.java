@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
 import static android.content.pm.PackageManager.GET_CONFIGURATIONS;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
+import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
 import static com.android.server.companion.CompanionDeviceManagerService.TAG;
 
 import android.Manifest;
@@ -35,20 +36,28 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.Signature;
 import android.os.Binder;
+import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Utility methods for working with {@link PackageInfo}-s.
  */
-final class PackageUtils {
+public final class PackageUtils {
     private static final Intent COMPANION_SERVICE_INTENT =
             new Intent(CompanionDeviceService.SERVICE_INTERFACE);
     private static final String PROPERTY_PRIMARY_TAG =
@@ -140,5 +149,70 @@ final class PackageUtils {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * Check if the package is allowlisted in the overlay config.
+     * For this we'll check to config arrays:
+     *   - com.android.internal.R.array.config_companionDevicePackages
+     * and
+     *   - com.android.internal.R.array.config_companionDeviceCerts.
+     * Both arrays are expected to contain similar number of entries.
+     * config_companionDevicePackages contains package names of the allowlisted packages.
+     * config_companionDeviceCerts contains SHA256 digests of the signatures of the
+     * corresponding packages.
+     * If a package is signed with one of several certificates, its package name would
+     * appear multiple times in the config_companionDevicePackages, with different entries
+     * (one for each of the valid signing certificates) at the corresponding positions in
+     * config_companionDeviceCerts.
+     */
+    public static boolean isPackageAllowlisted(Context context,
+            PackageManagerInternal packageManagerInternal, @NonNull String packageName) {
+        final String[] allowlistedPackages = context.getResources()
+                .getStringArray(com.android.internal.R.array.config_companionDevicePackages);
+        if (!ArrayUtils.contains(allowlistedPackages, packageName)) {
+            if (DEBUG) {
+                Log.d(TAG, packageName + " is not allowlisted.");
+            }
+            return false;
+        }
+
+        final String[] allowlistedPackagesSignatureDigests = context.getResources()
+                .getStringArray(com.android.internal.R.array.config_companionDeviceCerts);
+        final Set<String> allowlistedSignatureDigestsForRequestingPackage = new HashSet<>();
+        for (int i = 0; i < allowlistedPackages.length; i++) {
+            if (allowlistedPackages[i].equals(packageName)) {
+                final String digest = allowlistedPackagesSignatureDigests[i].replaceAll(":", "");
+                allowlistedSignatureDigestsForRequestingPackage.add(digest);
+            }
+        }
+
+        final Signature[] requestingPackageSignatures = packageManagerInternal.getPackage(
+                        packageName)
+                .getSigningDetails().getSignatures();
+        final String[] requestingPackageSignatureDigests =
+                android.util.PackageUtils.computeSignaturesSha256Digests(
+                        requestingPackageSignatures);
+
+        boolean requestingPackageSignatureAllowlisted = false;
+        for (String signatureDigest : requestingPackageSignatureDigests) {
+            if (allowlistedSignatureDigestsForRequestingPackage.contains(signatureDigest)) {
+                requestingPackageSignatureAllowlisted = true;
+                break;
+            }
+        }
+
+        if (!requestingPackageSignatureAllowlisted) {
+            Slog.w(TAG, "Certificate mismatch for allowlisted package " + packageName);
+            if (DEBUG) {
+                Log.d(TAG, "  > allowlisted signatures for " + packageName + ": ["
+                        + String.join(", ", allowlistedSignatureDigestsForRequestingPackage)
+                        + "]");
+                Log.d(TAG, "  > actual signatures for " + packageName + ": "
+                        + Arrays.toString(requestingPackageSignatureDigests));
+            }
+        }
+
+        return requestingPackageSignatureAllowlisted;
     }
 }
