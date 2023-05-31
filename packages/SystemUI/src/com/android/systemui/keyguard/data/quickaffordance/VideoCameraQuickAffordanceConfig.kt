@@ -62,8 +62,7 @@ constructor(
     override val key: String
         get() = BuiltInKeyguardQuickAffordanceKeys.VIDEO_CAMERA
 
-    override val pickerName: String
-        get() = context.getString(R.string.video_camera)
+    override fun pickerName(): String = context.getString(R.string.video_camera)
 
     override val pickerIconResourceId: Int
         get() = R.drawable.ic_videocam

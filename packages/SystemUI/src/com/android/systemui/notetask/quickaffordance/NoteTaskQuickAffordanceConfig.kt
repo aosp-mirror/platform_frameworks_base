@@ -73,7 +73,7 @@ constructor(
 
     private val pickerNameResourceId = R.string.note_task_button_label
 
-    override val pickerName: String = context.getString(pickerNameResourceId)
+    override fun pickerName(): String = context.getString(pickerNameResourceId)
 
     override val pickerIconResourceId = R.drawable.ic_note_task_shortcut_keyguard
 
