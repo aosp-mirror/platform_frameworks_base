@@ -16,6 +16,7 @@
 
 package com.android.systemui.navigationbar.gestural;
 
+import static android.view.MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT;
 import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
 import static android.view.MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE;
 
@@ -29,21 +30,10 @@ public final class Utilities {
                 && event.getClassification() == CLASSIFICATION_TWO_FINGER_SWIPE;
     }
 
-    public static boolean isTrackpadMultiFingerSwipe(boolean isTrackpadGestureFeaturesEnabled,
-            MotionEvent event) {
-        return isTrackpadGestureFeaturesEnabled
-                && event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE;
-    }
-
     public static boolean isTrackpadThreeFingerSwipe(boolean isTrackpadGestureFeaturesEnabled,
             MotionEvent event) {
-        return isTrackpadMultiFingerSwipe(isTrackpadGestureFeaturesEnabled, event)
-                && event.getPointerCount() == 3;
-    }
-
-    public static boolean isTrackpadFourFingerSwipe(boolean isTrackpadGestureFeaturesEnabled,
-            MotionEvent event) {
-        return isTrackpadMultiFingerSwipe(isTrackpadGestureFeaturesEnabled, event)
-                && event.getPointerCount() == 4;
+        return isTrackpadGestureFeaturesEnabled
+                && event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE
+                && event.getAxisValue(AXIS_GESTURE_SWIPE_FINGER_COUNT) == 3;
     }
 }
