@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.Postsubmit
 import android.tools.common.NavBar
-import android.tools.common.Rotation
 import android.tools.common.flicker.subject.region.RegionSubject
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -105,8 +104,6 @@ class UnlockKeyguardToSplitScreen(override val flicker: FlickerTest) :
         @JvmStatic
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                    // TODO(b/283963801) address entireScreenCovered test faliure in landscape.
-                    supportedRotations = listOf(Rotation.ROTATION_0),
                     supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
         }
