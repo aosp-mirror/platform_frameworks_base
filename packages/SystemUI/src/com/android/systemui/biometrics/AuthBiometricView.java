@@ -109,6 +109,7 @@ public abstract class AuthBiometricView extends LinearLayout implements AuthBiom
         int ACTION_ERROR = 5;
         int ACTION_USE_DEVICE_CREDENTIAL = 6;
         int ACTION_START_DELAYED_FINGERPRINT_SENSOR = 7;
+        int ACTION_AUTHENTICATED_AND_CONFIRMED = 8;
 
         /**
          * When an action has occurred. The caller will only invoke this when the callback should
@@ -509,7 +510,8 @@ public abstract class AuthBiometricView extends LinearLayout implements AuthBiom
     }
 
     public void updateState(@BiometricState int newState) {
-        Log.v(TAG, "newState: " + newState);
+        Log.d(TAG, "newState: " + newState);
+
         mIconController.updateState(mState, newState);
 
         switch (newState) {
@@ -533,8 +535,14 @@ public abstract class AuthBiometricView extends LinearLayout implements AuthBiom
                 }
                 announceForAccessibility(getResources()
                         .getString(R.string.biometric_dialog_authenticated));
-                mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_AUTHENTICATED),
-                        getDelayAfterAuthenticatedDurationMs());
+                if (mState == STATE_PENDING_CONFIRMATION) {
+                    mHandler.postDelayed(() -> mCallback.onAction(
+                            Callback.ACTION_AUTHENTICATED_AND_CONFIRMED),
+                            getDelayAfterAuthenticatedDurationMs());
+                } else {
+                    mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_AUTHENTICATED),
+                            getDelayAfterAuthenticatedDurationMs());
+                }
                 break;
 
             case STATE_PENDING_CONFIRMATION:
