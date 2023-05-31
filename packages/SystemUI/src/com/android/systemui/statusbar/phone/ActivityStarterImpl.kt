@@ -389,6 +389,35 @@ constructor(
     }
 
     /**
+     * Whether we should animate an activity launch.
+     *
+     * Note: This method must be called *before* dismissing the keyguard.
+     */
+    private fun shouldAnimateLaunch(
+        isActivityIntent: Boolean,
+        showOverLockscreen: Boolean,
+    ): Boolean {
+        // TODO(b/184121838): Support launch animations when occluded.
+        if (keyguardStateController.isOccluded) {
+            return false
+        }
+
+        // Always animate if we are not showing the keyguard or if we animate over the lockscreen
+        // (without unlocking it).
+        if (showOverLockscreen || !keyguardStateController.isShowing) {
+            return true
+        }
+
+        // We don't animate non-activity launches as they can break the animation.
+        // TODO(b/184121838): Support non activity launches on the lockscreen.
+        return isActivityIntent
+    }
+
+    override fun shouldAnimateLaunch(isActivityIntent: Boolean): Boolean {
+        return shouldAnimateLaunch(isActivityIntent, false)
+    }
+
+    /**
      * Encapsulates the activity logic for activity starter.
      *
      * Logic is duplicated in {@link CentralSurfacesImpl}
@@ -419,7 +448,7 @@ constructor(
             val animate =
                 animationController != null &&
                     !willLaunchResolverActivity &&
-                    centralSurfaces?.shouldAnimateLaunch(true /* isActivityIntent */) == true
+                    shouldAnimateLaunch(isActivityIntent = true)
             val animController =
                 wrapAnimationController(
                     animationController = animationController,
@@ -538,7 +567,7 @@ constructor(
             val animate =
                 !willLaunchResolverActivity &&
                     animationController != null &&
-                    centralSurfaces?.shouldAnimateLaunch(intent.isActivity) == true
+                    shouldAnimateLaunch(intent.isActivity)
 
             // If we animate, don't collapse the shade and defer the keyguard dismiss (in case we
             // run the animation on the keyguard). The animation will take care of (instantly)
@@ -595,7 +624,7 @@ constructor(
                         Log.w(TAG, "Sending intent failed: $e")
                         if (!collapse) {
                             // executeRunnableDismissingKeyguard did not collapse for us already.
-                            centralSurfaces?.collapsePanelOnMainThread()
+                            shadeControllerLazy.get().collapseOnMainThread()
                         }
                         // TODO: Dismiss Keyguard.
                     }
@@ -637,7 +666,7 @@ constructor(
 
             val animate =
                 animationController != null &&
-                    centralSurfaces?.shouldAnimateLaunch(
+                    shouldAnimateLaunch(
                         /* isActivityIntent= */ true,
                         showOverLockscreenWhenLocked
                     ) == true
@@ -867,7 +896,8 @@ constructor(
                 if (dismissShade) {
                     return StatusBarLaunchAnimatorController(
                         animationController,
-                        it,
+                        it.shadeViewController,
+                        shadeControllerLazy.get(),
                         notifShadeWindowControllerLazy.get(),
                         isLaunchForActivity
                     )

@@ -115,6 +115,9 @@ public interface ShadeController {
      */
     void collapseShade(boolean animate);
 
+    /** Calls #collapseShade if already on the main thread. If not, posts a call to it. */
+    void collapseOnMainThread();
+
     /** Makes shade expanded but not visible. */
     void makeExpandedInvisible();
 
@@ -127,8 +130,11 @@ public interface ShadeController {
     /** Handle status bar touch event. */
     void onStatusBarTouch(MotionEvent event);
 
-    /** Called when the shade finishes collapsing. */
-    void onClosingFinished();
+    /** Called when a launch animation was cancelled. */
+    void onLaunchAnimationCancelled(boolean isLaunchForActivity);
+
+    /** Called when a launch animation ends. */
+    void onLaunchAnimationEnd(boolean launchIsFullScreen);
 
     /** Sets the listener for when the visibility of the shade changes. */
     void setVisibilityListener(ShadeVisibilityListener listener);

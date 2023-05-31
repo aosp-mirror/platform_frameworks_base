@@ -69,7 +69,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -1823,58 +1822,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mKeyguardStateController.isOccluded();
     }
 
-    /** A launch animation was cancelled. */
-    //TODO: These can / should probably be moved to NotificationPresenter or ShadeController
-    @Override
-    public void onLaunchAnimationCancelled(boolean isLaunchForActivity) {
-        if (mPresenter.isPresenterFullyCollapsed() && !mPresenter.isCollapsing()
-                && isLaunchForActivity) {
-            mShadeController.onClosingFinished();
-        } else {
-            mShadeController.collapseShade(true /* animate */);
-        }
-    }
-
-    /** A launch animation ended. */
-    @Override
-    public void onLaunchAnimationEnd(boolean launchIsFullScreen) {
-        if (!mPresenter.isCollapsing()) {
-            mShadeController.onClosingFinished();
-        }
-        if (launchIsFullScreen) {
-            mShadeController.instantCollapseShade();
-        }
-    }
-
-    /**
-     * Whether we should animate an activity launch.
-     *
-     * Note: This method must be called *before* dismissing the keyguard.
-     */
-    @Override
-    public boolean shouldAnimateLaunch(boolean isActivityIntent, boolean showOverLockscreen) {
-        // TODO(b/184121838): Support launch animations when occluded.
-        if (isOccluded()) {
-            return false;
-        }
-
-        // Always animate if we are not showing the keyguard or if we animate over the lockscreen
-        // (without unlocking it).
-        if (showOverLockscreen || !mKeyguardStateController.isShowing()) {
-            return true;
-        }
-
-        // We don't animate non-activity launches as they can break the animation.
-        // TODO(b/184121838): Support non activity launches on the lockscreen.
-        return isActivityIntent;
-    }
-
-    /** Whether we should animate an activity launch. */
-    @Override
-    public boolean shouldAnimateLaunch(boolean isActivityIntent) {
-        return shouldAnimateLaunch(isActivityIntent, false /* showOverLockscreen */);
-    }
-
     @Override
     public boolean isDeviceInVrMode() {
         return mPresenter.isDeviceInVrMode();
@@ -2959,19 +2906,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     false /* afterKeyguardGone */);
         } else if (cancelAction != null) {
             cancelAction.run();
-        }
-    }
-
-    /**
-     * Collapse the panel directly if we are on the main thread, post the collapsing on the main
-     * thread if we are not.
-     */
-    @Override
-    public void collapsePanelOnMainThread() {
-        if (Looper.getMainLooper().isCurrentThread()) {
-            mShadeController.collapseShade();
-        } else {
-            mContext.getMainExecutor().execute(mShadeController::collapseShade);
         }
     }
 

@@ -17,6 +17,7 @@
 package com.android.systemui.shade;
 
 import android.content.ComponentCallbacks2;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
@@ -25,6 +26,7 @@ import android.view.WindowManagerGlobal;
 
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -38,6 +40,7 @@ import com.android.systemui.statusbar.window.StatusBarWindowController;
 import dagger.Lazy;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -51,6 +54,7 @@ public final class ShadeControllerImpl implements ShadeController {
     private final int mDisplayId;
 
     private final CommandQueue mCommandQueue;
+    private final Executor mMainExecutor;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarStateController mStatusBarStateController;
@@ -72,6 +76,7 @@ public final class ShadeControllerImpl implements ShadeController {
     @Inject
     public ShadeControllerImpl(
             CommandQueue commandQueue,
+            @Main Executor mainExecutor,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -82,6 +87,7 @@ public final class ShadeControllerImpl implements ShadeController {
             Lazy<NotificationGutsManager> gutsManager
     ) {
         mCommandQueue = commandQueue;
+        mMainExecutor = mainExecutor;
         mStatusBarStateController = statusBarStateController;
         mStatusBarWindowController = statusBarWindowController;
         mGutsManager = gutsManager;
@@ -227,6 +233,15 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
+    public void collapseOnMainThread() {
+        if (Looper.getMainLooper().isCurrentThread()) {
+            collapseShade();
+        } else {
+            mMainExecutor.execute(this::collapseShade);
+        }
+    }
+
+    @Override
     public void onStatusBarTouch(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
             if (mExpandedVisible) {
@@ -235,13 +250,33 @@ public final class ShadeControllerImpl implements ShadeController {
         }
     }
 
-    @Override
-    public void onClosingFinished() {
+    private void onClosingFinished() {
         runPostCollapseRunnables();
         if (!mPresenter.isPresenterFullyCollapsed()) {
             // if we set it not to be focusable when collapsing, we have to undo it when we aborted
             // the closing
             mNotificationShadeWindowController.setNotificationShadeFocusable(true);
+        }
+    }
+
+    @Override
+    public void onLaunchAnimationCancelled(boolean isLaunchForActivity) {
+        if (mPresenter.isPresenterFullyCollapsed()
+                && !mPresenter.isCollapsing()
+                && isLaunchForActivity) {
+            onClosingFinished();
+        } else {
+            collapseShade(true /* animate */);
+        }
+    }
+
+    @Override
+    public void onLaunchAnimationEnd(boolean launchIsFullScreen) {
+        if (!mPresenter.isCollapsing()) {
+            onClosingFinished();
+        }
+        if (launchIsFullScreen) {
+            instantCollapseShade();
         }
     }
 

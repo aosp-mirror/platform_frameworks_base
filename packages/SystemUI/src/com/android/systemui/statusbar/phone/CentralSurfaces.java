@@ -191,8 +191,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void animateExpandSettingsPanel(@Nullable String subpanel);
 
-    void collapsePanelOnMainThread();
-
     void togglePanel();
 
     void start();
@@ -229,15 +227,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean isPulsing();
 
     boolean isOccluded();
-
-    //TODO: These can / should probably be moved to NotificationPresenter or ShadeController
-    void onLaunchAnimationCancelled(boolean isLaunchForActivity);
-
-    void onLaunchAnimationEnd(boolean launchIsFullScreen);
-
-    boolean shouldAnimateLaunch(boolean isActivityIntent, boolean showOverLockscreen);
-
-    boolean shouldAnimateLaunch(boolean isActivityIntent);
 
     boolean isDeviceInVrMode();
 
