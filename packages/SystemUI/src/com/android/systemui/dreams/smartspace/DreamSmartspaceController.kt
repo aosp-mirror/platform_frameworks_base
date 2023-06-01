@@ -33,10 +33,10 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.UI_SURFACE_DREAM
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
-import com.android.systemui.smartspace.dagger.SmartspaceModule
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_PRECONDITION
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_TARGET_FILTER
+import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_WEATHER_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.smartspace.dagger.SmartspaceViewComponent
 import com.android.systemui.util.concurrency.Execution
 import java.util.Optional
@@ -58,7 +58,7 @@ class DreamSmartspaceController @Inject constructor(
     @Named(DREAM_SMARTSPACE_TARGET_FILTER)
     private val optionalTargetFilter: Optional<SmartspaceTargetFilter>,
     @Named(DREAM_SMARTSPACE_DATA_PLUGIN) optionalPlugin: Optional<BcSmartspaceDataPlugin>,
-    @Named(SmartspaceModule.WEATHER_SMARTSPACE_DATA_PLUGIN)
+    @Named(DREAM_WEATHER_SMARTSPACE_DATA_PLUGIN)
     optionalWeatherPlugin: Optional<BcSmartspaceDataPlugin>,
 ) {
     companion object {
