@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -2406,6 +2407,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (change.getMode() == TRANSIT_CHANGE
                         && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
                     mSplitLayout.update(startTransaction);
+                    record.mContainDisplayChange = true;
                 }
 
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
@@ -2435,7 +2437,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     continue;
                 }
                 final StageTaskListener stage = getStageOfTask(taskInfo);
-                if (stage == null) continue;
+                if (stage == null) {
+                    if (change.getParent() == null && !isClosingType(change.getMode())
+                            && taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+                        record.mContainShowPipChange = true;
+                    }
+                    continue;
+                }
                 if (isOpeningType(change.getMode())) {
                     if (!stage.containsTask(taskInfo.taskId)) {
                         Log.w(TAG, "Expected onTaskAppeared on " + stage + " to have been called"
@@ -2450,13 +2458,22 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     }
                 }
             }
-            // If the size of dismissStages == 1, one of the task is closed without prepare pending
-            // transition, which could happen if all activities were finished after finish top
-            // activity in a task, so the trigger task is null when handleRequest.
-            // Note if the size of dismissStages == 2, it's starting a new task, so don't handle it.
             final ArraySet<StageTaskListener> dismissStages = record.getShouldDismissedStage();
-            if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0
+            if (!record.mContainDisplayChange && record.mContainShowPipChange) {
+                // This occurred when split enter pip by open another fullscreen app so let
+                // pip tranistion handler to handle this but also start our dismiss transition.
+                // TODO(b/282894249): Should improve this case animation on pip.
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
+                mSplitTransitions.startDismissTransition(wct, this, STAGE_TYPE_UNDEFINED,
+                        EXIT_REASON_CHILD_TASK_ENTER_PIP);
+            } else if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0
                     || dismissStages.size() == 1) {
+                // If the size of dismissStages == 1, one of the task is closed without prepare
+                // pending transition, which could happen if all activities were finished after
+                // finish top activity in a task, so the trigger task is null when handleRequest.
+                // Note if the size of dismissStages == 2, it's starting a new task,
+                // so don't handle it.
                 Log.e(TAG, "Somehow removed the last task in a stage outside of a proper "
                         + "transition.");
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -2473,7 +2490,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 // TODO(b/184679596): Find a way to either include task-org information in
                 //                    the transition, or synchronize task-org callbacks.
             }
-
             // Use normal animations.
             return false;
         } else if (mMixedHandler != null && TransitionUtil.hasDisplayChange(info)) {
@@ -2490,6 +2506,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     static class StageChangeRecord {
+        boolean mContainDisplayChange = false;
+        boolean mContainShowPipChange = false;
         static class StageChange {
             final StageTaskListener mStageTaskListener;
             final IntArray mAddedTaskId = new IntArray();
