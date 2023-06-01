@@ -70,6 +70,7 @@ import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_FGS_PERMI
 import static android.os.PowerExemptionManager.REASON_OPT_OUT_REQUESTED;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
+import static android.os.PowerExemptionManager.REASON_OTHER;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_INSTALLER;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
@@ -85,7 +86,6 @@ import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.PowerExemptionManager.REASON_TEMP_ALLOWED_WHILE_IN_USE;
 import static android.os.PowerExemptionManager.REASON_UID_VISIBLE;
-import static android.os.PowerExemptionManager.REASON_UNKNOWN;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerExemptionManager.getReasonCodeFromProcState;
 import static android.os.PowerExemptionManager.reasonCodeToString;
@@ -7428,33 +7428,34 @@ public final class ActiveServices {
             boolean isStartService) {
         // Check DeviceConfig flag.
         if (!mAm.mConstants.mFlagBackgroundFgsStartRestrictionEnabled) {
+            if (!r.mAllowWhileInUsePermissionInFgs) {
+                // BGFGS start restrictions are disabled. We're allowing while-in-use permissions.
+                // Note REASON_OTHER since there's no other suitable reason.
+                r.mAllowWhileInUsePermissionInFgsReason = REASON_OTHER;
+            }
             r.mAllowWhileInUsePermissionInFgs = true;
         }
-
-        final @ReasonCode int allowWhileInUse;
 
         // Either (or both) mAllowWhileInUsePermissionInFgs or mAllowStartForeground is
         // newly allowed?
         boolean newlyAllowed = false;
         if (!r.mAllowWhileInUsePermissionInFgs
                 || (r.mAllowStartForeground == REASON_DENIED)) {
-            allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
+            @ReasonCode final int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
                     callingPackage, callingPid, callingUid, r.app, backgroundStartPrivileges,
                     isBindService);
             // We store them to compare the old and new while-in-use logics to each other.
             // (They're not used for any other purposes.)
             if (!r.mAllowWhileInUsePermissionInFgs) {
                 r.mAllowWhileInUsePermissionInFgs = (allowWhileInUse != REASON_DENIED);
+                r.mAllowWhileInUsePermissionInFgsReason = allowWhileInUse;
             }
             if (r.mAllowStartForeground == REASON_DENIED) {
                 r.mAllowStartForeground = shouldAllowFgsStartForegroundWithBindingCheckLocked(
                         allowWhileInUse, callingPackage, callingPid, callingUid, intent, r,
                         backgroundStartPrivileges, isBindService);
             }
-        } else {
-            allowWhileInUse = REASON_UNKNOWN;
         }
-        r.mAllowWhileInUsePermissionInFgsReason = allowWhileInUse;
     }
 
     /**
