@@ -2426,7 +2426,7 @@ public final class ViewRootImpl implements ViewParent,
      *
      * @hide
      */
-    void notifyRendererOfExpensiveFrame() {
+    public void notifyRendererOfExpensiveFrame() {
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.notifyExpensiveFrame();
         }
