@@ -742,7 +742,7 @@ public class UserManager {
      * The default value is <code>false</code>.
      *
      * <p>Holders of the permission
-     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USERS}
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MODIFY_USERS}
      * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
@@ -947,7 +947,7 @@ public class UserManager {
      * this restriction will be set as a base restriction which cannot be removed by any admin.
      *
      * <p>Holders of the permission
-     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USERS}
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MODIFY_USERS}
      * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
@@ -1457,7 +1457,7 @@ public class UserManager {
      * affected. The default value is <code>false</code>.
      *
      * <p>Holders of the permission
-     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USERS}
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MODIFY_USERS}
      * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>Key for user restrictions.
@@ -1603,7 +1603,7 @@ public class UserManager {
      * set.
      *
      * <p>Holders of the permission
-     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USERS}
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MODIFY_USERS}
      * can set this restriction using the DevicePolicyManager APIs mentioned below.
      *
      * <p>The default value is <code>false</code>.
