@@ -649,6 +649,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
     @VisibleForTesting
     fun unlockToLauncherWithInWindowAnimations() {
+        surfaceBehindAlpha = 1f
         setSurfaceBehindAppearAmount(1f, wallpapers = false)
 
         try {
