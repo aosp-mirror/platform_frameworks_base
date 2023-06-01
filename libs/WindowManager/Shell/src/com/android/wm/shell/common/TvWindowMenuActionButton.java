@@ -94,6 +94,10 @@ public class TvWindowMenuActionButton extends RelativeLayout {
         mCurrentIcon = icon;
         // Remove old image while waiting for the new one to load.
         mIconImageView.setImageDrawable(null);
+        if (icon.getType() == Icon.TYPE_URI || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+            // Disallow loading icon from content URI
+            return;
+        }
         icon.loadDrawableAsync(mContext, d -> {
             // The image hasn't been set any other way and the drawable belongs to the most
             // recently set Icon.
