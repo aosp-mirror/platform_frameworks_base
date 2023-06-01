@@ -149,7 +149,12 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    if (!extractNativeLibs && (!debuggable || strcmp(fileName, "wrap.sh") != 0)) {
+    // Always extract wrap.sh for debuggable, even if extractNativeLibs=false. This makes it
+    // easier to use wrap.sh because it only works when it is extracted, see
+    // frameworks/base/services/core/java/com/android/server/am/ProcessList.java.
+    bool forceExtractCurrentFile = debuggable && strcmp(fileName, "wrap.sh") == 0;
+
+    if (!extractNativeLibs && !forceExtractCurrentFile) {
         // check if library is uncompressed and page-aligned
         if (method != ZipFileRO::kCompressStored) {
             ALOGE("Library '%s' is compressed - will not be able to open it directly from apk.\n",
