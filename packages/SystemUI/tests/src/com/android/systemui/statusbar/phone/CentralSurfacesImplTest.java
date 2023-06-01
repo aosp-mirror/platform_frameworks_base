@@ -1059,7 +1059,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // GIVEN device occluded and panel is NOT expanded
         mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
         when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        mCentralSurfaces.mPanelExpanded = false;
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
 
         mCentralSurfaces.updateScrimController();
 
@@ -1073,7 +1073,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // GIVEN device occluded and qs IS expanded
         mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
         when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        mCentralSurfaces.mPanelExpanded = true;
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
 
         mCentralSurfaces.updateScrimController();
 
@@ -1144,7 +1144,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void collapseShade_callsanimateCollapseShade_whenExpanded() {
         // GIVEN the shade is expanded
-        mCentralSurfaces.onShadeExpansionFullyChanged(true);
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
         mCentralSurfaces.setBarStateForTest(SHADE);
 
         // WHEN collapseShade is called
@@ -1155,9 +1155,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void collapseShade_doesNotCallanimateCollapseShade_whenCollapsed() {
+    public void collapseShade_doesNotCallAnimateCollapseShade_whenCollapsed() {
         // GIVEN the shade is collapsed
-        mCentralSurfaces.onShadeExpansionFullyChanged(false);
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
         mCentralSurfaces.setBarStateForTest(SHADE);
 
         // WHEN collapseShade is called
