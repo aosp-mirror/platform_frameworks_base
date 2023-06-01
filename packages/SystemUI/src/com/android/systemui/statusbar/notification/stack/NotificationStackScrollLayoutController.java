@@ -100,6 +100,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
+import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -146,6 +147,7 @@ public class NotificationStackScrollLayoutController {
 
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
+    private final NotificationsController mNotificationsController;
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
@@ -431,7 +433,7 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onSnooze(StatusBarNotification sbn,
                                      NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
-                    mCentralSurfaces.setNotificationSnoozed(sbn, snoozeOption);
+                    mNotificationsController.setNotificationSnoozed(sbn, snoozeOption);
                 }
 
                 @Override
@@ -616,6 +618,7 @@ public class NotificationStackScrollLayoutController {
             NotificationStackScrollLayout view,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationGutsManager notificationGutsManager,
+            NotificationsController notificationsController,
             NotificationVisibilityProvider visibilityProvider,
             HeadsUpManagerPhone headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
@@ -664,6 +667,7 @@ public class NotificationStackScrollLayoutController {
         mLogger = logger;
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
+        mNotificationsController = notificationsController;
         mVisibilityProvider = visibilityProvider;
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
@@ -714,7 +718,7 @@ public class NotificationStackScrollLayoutController {
         mView.setController(this);
         mView.setLogger(mLogger);
         mView.setTouchHandler(new TouchHandler());
-        mView.setCentralSurfaces(mCentralSurfaces);
+        mView.setNotificationsController(mNotificationsController);
         mView.setActivityStarter(mActivityStarter);
         mView.setClearAllAnimationListener(this::onAnimationEnd);
         mView.setClearAllListener((selection) -> mUiEventLogger.log(

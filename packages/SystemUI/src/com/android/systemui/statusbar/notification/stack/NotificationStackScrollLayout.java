@@ -104,13 +104,13 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -315,7 +315,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     };
     private NotificationStackScrollLogger mLogger;
-    private CentralSurfaces mCentralSurfaces;
+    private NotificationsController mNotificationsController;
     private ActivityStarter mActivityStarter;
     private final int[] mTempInt2 = new int[2];
     private boolean mGenerateChildOrderChangedEvent;
@@ -3989,7 +3989,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setExpansionChanging(false);
         if (!mIsExpanded) {
             resetScrollPosition();
-            mCentralSurfaces.resetUserExpandedStates();
+            mNotificationsController.resetUserExpandedStates();
             clearTemporaryViews();
             clearUserLockedViews();
             cancelActiveSwipe();
@@ -4570,8 +4570,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return max + getStackTranslation();
     }
 
-    public void setCentralSurfaces(CentralSurfaces centralSurfaces) {
-        this.mCentralSurfaces = centralSurfaces;
+    public void setNotificationsController(NotificationsController notificationsController) {
+        this.mNotificationsController = notificationsController;
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
