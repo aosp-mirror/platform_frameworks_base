@@ -38,23 +38,38 @@ public interface ShadeController {
     /** Collapse the shade instantly with no animation. */
     void instantCollapseShade();
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
     void animateCollapseShade();
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
     void animateCollapseShade(int flags);
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
     void animateCollapseShadeForced();
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
-    void animateCollapseShadeDelayed();
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
+    void animateCollapseShadeForcedDelayed();
 
     /**
      * Collapse the shade animated, showing the bouncer when on {@link StatusBarState#KEYGUARD} or
      * dismissing status bar when on {@link StatusBarState#SHADE}.
      */
-    void animateCollapsePanels(int flags, boolean force, boolean delayed, float speedUpFactor);
+    void animateCollapseShade(int flags, boolean force, boolean delayed, float speedUpFactor);
+
+    /** Expand the shade with an animation. */
+    void animateExpandShade();
+
+    /** Expand the shade with quick settings expanded with an animation. */
+    void animateExpandQs();
+
+    /** Posts a request to collapse the shade. */
+    void postAnimateCollapseShade();
+
+    /** Posts a request to force collapse the shade. */
+    void postAnimateForceCollapseShade();
+
+    /** Posts a request to expand the shade to quick settings. */
+    void postAnimateExpandQs();
 
     /**
      * If the shade is not fully expanded, collapse it animated.
@@ -115,6 +130,9 @@ public interface ShadeController {
      */
     void collapseShade(boolean animate);
 
+    /** Calls #collapseShade if already on the main thread. If not, posts a call to it. */
+    void collapseOnMainThread();
+
     /** Makes shade expanded but not visible. */
     void makeExpandedInvisible();
 
@@ -127,8 +145,11 @@ public interface ShadeController {
     /** Handle status bar touch event. */
     void onStatusBarTouch(MotionEvent event);
 
-    /** Called when the shade finishes collapsing. */
-    void onClosingFinished();
+    /** Called when a launch animation was cancelled. */
+    void onLaunchAnimationCancelled(boolean isLaunchForActivity);
+
+    /** Called when a launch animation ends. */
+    void onLaunchAnimationEnd(boolean launchIsFullScreen);
 
     /** Sets the listener for when the visibility of the shade changes. */
     void setVisibilityListener(ShadeVisibilityListener listener);

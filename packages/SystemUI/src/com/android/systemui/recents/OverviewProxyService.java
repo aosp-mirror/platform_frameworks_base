@@ -360,7 +360,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void toggleNotificationPanel() {
             verifyCallerAndClearCallingIdentityPostMain("toggleNotificationPanel", () ->
-                    mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::togglePanel));
+                    mCommandQueue.togglePanel());
         }
 
         private boolean verifyCaller(String reason) {

@@ -208,7 +208,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void animateCollapsePanels(int flags, boolean force) {
-        mShadeController.animateCollapsePanels(flags, force, false /* delayed */,
+        mShadeController.animateCollapseShade(flags, force, false /* delayed */,
                 1.0f /* speedUpFactor */);
     }
 
@@ -218,11 +218,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             Log.d(CentralSurfaces.TAG,
                     "animateExpand: mExpandedVisible=" + mShadeController.isExpandedVisible());
         }
-        if (!mCommandQueue.panelsEnabled()) {
-            return;
-        }
-
-        mShadeViewController.expandToNotifications();
+        mShadeController.animateExpandShade();
     }
 
     @Override
@@ -231,14 +227,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             Log.d(CentralSurfaces.TAG,
                     "animateExpand: mExpandedVisible=" + mShadeController.isExpandedVisible());
         }
-        if (!mCommandQueue.panelsEnabled()) {
-            return;
-        }
-
-        // Settings are not available in setup
-        if (!mDeviceProvisionedController.isCurrentUserSetup()) return;
-
-        mShadeViewController.expandToQs();
+        mShadeController.animateExpandQs();
     }
 
     @Override
@@ -559,7 +548,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         if (mCentralSurfaces.isPanelExpanded()) {
             mShadeController.animateCollapseShade();
         } else {
-            animateExpandNotificationsPanel();
+            mShadeController.animateExpandShade();
         }
     }
 

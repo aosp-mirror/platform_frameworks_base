@@ -133,6 +133,9 @@ public interface ActivityStarter {
             boolean willAnimateOnKeyguard,
             @Nullable String customMessage);
 
+    /** Whether we should animate an activity launch. */
+    boolean shouldAnimateLaunch(boolean isActivityIntent);
+
     interface Callback {
         void onActivityStarted(int resultCode);
     }
