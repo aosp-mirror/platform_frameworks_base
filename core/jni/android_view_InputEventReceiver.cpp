@@ -278,7 +278,7 @@ int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data)
 
     if (events & ALOOPER_EVENT_INPUT) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        status_t status = consumeEvents(env, false /*consumeBatches*/, -1, nullptr);
+        status_t status = consumeEvents(env, /*consumeBatches=*/false, -1, nullptr);
         mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
         return status == OK || status == NO_MEMORY ? KEEP_CALLBACK : REMOVE_CALLBACK;
     }
@@ -398,7 +398,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     env->CallVoidMethod(receiverObj.get(),
                                         gInputEventReceiverClassInfo.onFocusEvent,
                                         jboolean(focusEvent->getHasFocus()));
-                    finishInputEvent(seq, true /* handled */);
+                    finishInputEvent(seq, /*handled=*/true);
                     continue;
                 }
                 case InputEventType::CAPTURE: {
@@ -411,7 +411,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     env->CallVoidMethod(receiverObj.get(),
                                         gInputEventReceiverClassInfo.onPointerCaptureEvent,
                                         jboolean(captureEvent->getPointerCaptureEnabled()));
-                    finishInputEvent(seq, true /* handled */);
+                    finishInputEvent(seq, /*handled=*/true);
                     continue;
                 }
                 case InputEventType::DRAG: {
@@ -423,7 +423,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onDragEvent,
                                         jboolean(dragEvent->isExiting()), dragEvent->getX(),
                                         dragEvent->getY());
-                    finishInputEvent(seq, true /* handled */);
+                    finishInputEvent(seq, /*handled=*/true);
                     continue;
                 }
                 case InputEventType::TOUCH_MODE: {
@@ -436,7 +436,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     env->CallVoidMethod(receiverObj.get(),
                                         gInputEventReceiverClassInfo.onTouchModeChanged,
                                         jboolean(touchModeEvent->isInTouchMode()));
-                    finishInputEvent(seq, true /* handled */);
+                    finishInputEvent(seq, /*handled=*/true);
                     continue;
                 }
 
@@ -571,8 +571,8 @@ static jboolean nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jlong
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
     bool consumedBatch;
-    status_t status = receiver->consumeEvents(env, true /*consumeBatches*/, frameTimeNanos,
-            &consumedBatch);
+    status_t status =
+            receiver->consumeEvents(env, /*consumeBatches=*/true, frameTimeNanos, &consumedBatch);
     if (status && status != DEAD_OBJECT && !env->ExceptionCheck()) {
         std::string message =
                 android::base::StringPrintf("Failed to consume batched input event.  status=%s(%d)",
