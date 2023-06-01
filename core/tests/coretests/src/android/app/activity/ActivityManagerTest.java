@@ -128,6 +128,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 0x222222,                // colorBackground
                 0x333333,                // statusBarColor
                 0x444444,                // navigationBarColor
+                0,                       // statusBarAppearance
                 true,                    // ensureStatusBarContrastWhenTransparent
                 true,                    // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_RESIZEABLE,  // resizeMode
@@ -152,6 +153,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 0x222222,                  // colorBackground
                 0x333333,                  // statusBarColor
                 0x444444,                  // navigationBarColor
+                0,                         // statusBarAppearance
                 false,                     // ensureStatusBarContrastWhenTransparent
                 false,                     // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_UNRESIZEABLE,  // resizeMode
@@ -167,6 +169,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 0x2222222,               // colorBackground
                 0x3333332,               // statusBarColor
                 0x4444442,               // navigationBarColor
+                0,                       // statusBarAppearance
                 true,                    // ensureStatusBarContrastWhenTransparent
                 true,                    // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_RESIZEABLE,  // resizeMode
@@ -197,6 +200,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 0x222222,                  // colorBackground
                 0x333333,                  // statusBarColor
                 0x444444,                  // navigationBarColor
+                0,                         // statusBarAppearance
                 false,                     // ensureStatusBarContrastWhenTransparent
                 false,                     // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_UNRESIZEABLE,  // resizeMode
@@ -219,6 +223,7 @@ public class ActivityManagerTest extends AndroidTestCase {
                 0x222222,                  // colorBackground
                 0x333333,                  // statusBarColor
                 0x444444,                  // navigationBarColor
+                0,                         // statusBarAppearance
                 false,                     // ensureStatusBarContrastWhenTransparent
                 false,                     // ensureNavigationBarContrastWhenTransparent
                 RESIZE_MODE_UNRESIZEABLE,  // resizeMode
@@ -250,6 +255,7 @@ public class ActivityManagerTest extends AndroidTestCase {
             assertEquals(td1.getBackgroundColor(), td2.getBackgroundColor());
             assertEquals(td1.getStatusBarColor(), td2.getStatusBarColor());
             assertEquals(td1.getNavigationBarColor(), td2.getNavigationBarColor());
+            assertEquals(td1.getStatusBarAppearance(), td2.getStatusBarAppearance());
             assertEquals(td1.getResizeMode(), td2.getResizeMode());
             assertEquals(td1.getMinWidth(), td2.getMinWidth());
             assertEquals(td1.getMinHeight(), td2.getMinHeight());
