@@ -2622,6 +2622,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 Log.w(TAG, "Launched a task in split, but didn't receive any task in transition.");
                 mSplitTransitions.mPendingEnter.cancel((cancelWct, cancelT)
                         -> prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, cancelWct));
+                mSplitUnsupportedToast.show();
                 return true;
             }
         } else {
@@ -2632,6 +2633,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         (sideChild != null ? STAGE_TYPE_SIDE : STAGE_TYPE_UNDEFINED);
                 mSplitTransitions.mPendingEnter.cancel(
                         (cancelWct, cancelT) -> prepareExitSplitScreen(dismissTop, cancelWct));
+                mSplitUnsupportedToast.show();
                 return true;
             }
         }
