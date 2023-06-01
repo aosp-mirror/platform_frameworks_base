@@ -5445,14 +5445,14 @@ public class Activity extends ContextThemeWrapper
      * the signature of the app declaring the permissions.
      * </p>
      * <p>
-     * Call {@link #shouldShowRequestPermissionRationale(String)} before calling this API to
+     * Call {@link #shouldShowRequestPermissionRationale} before calling this API to
      * check if the system recommends to show a rationale UI before asking for a permission.
      * </p>
      * <p>
      * If your app does not have the requested permissions the user will be presented
      * with UI for accepting them. After the user has accepted or rejected the
      * requested permissions you will receive a callback on {@link
-     * #onRequestPermissionsResult(int, String[], int[])} reporting whether the
+     * #onRequestPermissionsResult} reporting whether the
      * permissions were granted or not.
      * </p>
      * <p>
@@ -5464,8 +5464,7 @@ public class Activity extends ContextThemeWrapper
      * to grant and which to reject. Hence, you should be prepared that your activity
      * may be paused and resumed. Further, granting some permissions may require
      * a restart of you application. In such a case, the system will recreate the
-     * activity stack before delivering the result to {@link
-     * #onRequestPermissionsResult(int, String[], int[])}.
+     * activity stack before delivering the result to {@link #onRequestPermissionsResult}.
      * </p>
      * <p>
      * When checking whether you have a permission you should use {@link
@@ -5475,7 +5474,7 @@ public class Activity extends ContextThemeWrapper
      * You cannot request a permission if your activity sets {@link
      * android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
      * <code>true</code> because in this case the activity would not receive
-     * result callbacks including {@link #onRequestPermissionsResult(int, String[], int[])}.
+     * result callbacks including {@link #onRequestPermissionsResult}.
      * </p>
      * <p>
      * The <a href="https://github.com/android/platform-samples/tree/main/samples/privacy/permissions">
@@ -5483,18 +5482,89 @@ public class Activity extends ContextThemeWrapper
      * request permissions at run time.
      * </p>
      *
-     * @param permissions The requested permissions. Must me non-null and not empty.
+     * @param permissions The requested permissions. Must be non-null and not empty.
      * @param requestCode Application specific request code to match with a result
-     *    reported to {@link #onRequestPermissionsResult(int, String[], int[])}.
-     *    Should be >= 0.
+     *                    reported to {@link #onRequestPermissionsResult}.
+     *                    Should be >= 0.
      *
      * @throws IllegalArgumentException if requestCode is negative.
      *
-     * @see #onRequestPermissionsResult(int, String[], int[])
-     * @see #checkSelfPermission(String)
-     * @see #shouldShowRequestPermissionRationale(String)
+     * @see #onRequestPermissionsResult
+     * @see #checkSelfPermission
+     * @see #shouldShowRequestPermissionRationale
      */
     public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
+        requestPermissions(permissions, requestCode, getDeviceId());
+    }
+
+    /**
+     * Requests permissions to be granted to this application. These permissions
+     * must be requested in your manifest, they should not be granted to your app,
+     * and they should have protection level {@link
+     * android.content.pm.PermissionInfo#PROTECTION_DANGEROUS dangerous}, regardless
+     * whether they are declared by the platform or a third-party app.
+     * <p>
+     * Normal permissions {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL}
+     * are granted at install time if requested in the manifest. Signature permissions
+     * {@link android.content.pm.PermissionInfo#PROTECTION_SIGNATURE} are granted at
+     * install time if requested in the manifest and the signature of your app matches
+     * the signature of the app declaring the permissions.
+     * </p>
+     * <p>
+     * Call {@link #shouldShowRequestPermissionRationale} before calling this API to
+     * check if the system recommends to show a rationale UI before asking for a permission.
+     * </p>
+     * <p>
+     * If your app does not have the requested permissions the user will be presented
+     * with UI for accepting them. After the user has accepted or rejected the
+     * requested permissions you will receive a callback on {@link #onRequestPermissionsResult}
+     * reporting whether the permissions were granted or not.
+     * </p>
+     * <p>
+     * Note that requesting a permission does not guarantee it will be granted and
+     * your app should be able to run without having this permission.
+     * </p>
+     * <p>
+     * This method may start an activity allowing the user to choose which permissions
+     * to grant and which to reject. Hence, you should be prepared that your activity
+     * may be paused and resumed. Further, granting some permissions may require
+     * a restart of you application. In such a case, the system will recreate the
+     * activity stack before delivering the result to {@link #onRequestPermissionsResult}.
+     * </p>
+     * <p>
+     * When checking whether you have a permission you should use {@link
+     * #checkSelfPermission(String)}.
+     * </p>
+     * <p>
+     * You cannot request a permission if your activity sets {@link
+     * android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
+     * <code>true</code> because in this case the activity would not receive
+     * result callbacks including {@link #onRequestPermissionsResult}.
+     * </p>
+     * <p>
+     * The <a href="https://github.com/android/platform-samples/tree/main/samples/privacy/permissions">
+     * permissions samples</a> repo demonstrates how to use this method to
+     * request permissions at run time.
+     * </p>
+     *
+     * @param permissions The requested permissions. Must be non-null and not empty.
+     * @param requestCode Application specific request code to match with a result
+     *                    reported to {@link #onRequestPermissionsResult}.
+     *                    Should be >= 0.
+     * @param deviceId The app is requesting permissions for this device. The primary/physical
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and {@link
+     *                 android.companion.virtual.VirtualDeviceManager.VirtualDevice virtual devices}
+     *                 are assigned unique device Ids.
+     *
+     * @throws IllegalArgumentException if requestCode is negative.
+     *
+     * @see #onRequestPermissionsResult
+     * @see #checkSelfPermission
+     * @see #shouldShowRequestPermissionRationale
+     * @see Context#DEVICE_ID_DEFAULT
+     */
+    public final void requestPermissions(@NonNull String[] permissions, int requestCode,
+            int deviceId) {
         if (requestCode < 0) {
             throw new IllegalArgumentException("requestCode should be >= 0");
         }
@@ -5502,7 +5572,7 @@ public class Activity extends ContextThemeWrapper
         if (mHasCurrentPermissionsRequest) {
             Log.w(TAG, "Can request only one set of permissions at a time");
             // Dispatch the callback with empty arrays which means a cancellation.
-            onRequestPermissionsResult(requestCode, new String[0], new int[0]);
+            onRequestPermissionsResult(requestCode, new String[0], new int[0], deviceId);
             return;
         }
 
@@ -5516,31 +5586,59 @@ public class Activity extends ContextThemeWrapper
             }
         }
 
-        final Intent intent = getPackageManager().buildRequestPermissionsIntent(permissions);
+        PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
+                : createDeviceContext(deviceId).getPackageManager();
+        final Intent intent = packageManager.buildRequestPermissionsIntent(permissions);
         startActivityForResult(REQUEST_PERMISSIONS_WHO_PREFIX, intent, requestCode, null);
         mHasCurrentPermissionsRequest = true;
     }
 
     /**
      * Callback for the result from requesting permissions. This method
-     * is invoked for every call on {@link #requestPermissions(String[], int)}.
+     * is invoked for every call on {@link #requestPermissions}
      * <p>
      * <strong>Note:</strong> It is possible that the permissions request interaction
      * with the user is interrupted. In this case you will receive empty permissions
      * and results arrays which should be treated as a cancellation.
      * </p>
      *
-     * @param requestCode The request code passed in {@link #requestPermissions(String[], int)}.
+     * @param requestCode The request code passed in {@link #requestPermissions}.
      * @param permissions The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions
-     *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
-     *     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either
+     *                     {@link android.content.pm.PackageManager#PERMISSION_GRANTED} or
+     *                     {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
      *
-     * @see #requestPermissions(String[], int)
+     * @see #requestPermissions
      */
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults) {
         /* callback - no nothing */
+    }
+
+    /**
+     * Callback for the result from requesting permissions. This method
+     * is invoked for every call on {@link #requestPermissions}.
+     * <p>
+     * <strong>Note:</strong> It is possible that the permissions request interaction
+     * with the user is interrupted. In this case you will receive empty permissions
+     * and results arrays which should be treated as a cancellation.
+     * </p>
+     *
+     * @param requestCode The request code passed in {@link #requestPermissions}.
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either
+     *                     {@link android.content.pm.PackageManager#PERMISSION_GRANTED} or
+     *                     {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     * @param deviceId The deviceId for which permissions were requested. The primary/physical
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and {@link
+     *                 android.companion.virtual.VirtualDeviceManager.VirtualDevice virtual devices}
+     *                 are assigned unique device Ids.
+     *
+     * @see #requestPermissions
+     */
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults, int deviceId) {
+        onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /**
@@ -5549,12 +5647,32 @@ public class Activity extends ContextThemeWrapper
      * @param permission A permission your app wants to request.
      * @return Whether you should show permission rationale UI.
      *
-     * @see #checkSelfPermission(String)
-     * @see #requestPermissions(String[], int)
-     * @see #onRequestPermissionsResult(int, String[], int[])
+     * @see #checkSelfPermission
+     * @see #requestPermissions
+     * @see #onRequestPermissionsResult
      */
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
         return getPackageManager().shouldShowRequestPermissionRationale(permission);
+    }
+
+    /**
+     * Gets whether you should show UI with rationale before requesting a permission.
+     *
+     * @param permission A permission your app wants to request.
+     * @param deviceId The app is requesting permissions for this device. The primary/physical
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and {@link
+     *                 android.companion.virtual.VirtualDeviceManager.VirtualDevice virtual devices}
+     *                 are assigned unique device Ids.
+     * @return Whether you should show permission rationale UI.
+     *
+     * @see #checkSelfPermission
+     * @see #requestPermissions
+     * @see #onRequestPermissionsResult
+     */
+    public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
+        final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
+                : createDeviceContext(deviceId).getPackageManager();
+        return packageManager.shouldShowRequestPermissionRationale(permission);
     }
 
     /**
@@ -9107,12 +9225,15 @@ public class Activity extends ContextThemeWrapper
 
     private void dispatchRequestPermissionsResult(int requestCode, Intent data) {
         mHasCurrentPermissionsRequest = false;
-        // If the package installer crashed we may have not data - best effort.
+        // If the package installer crashed we may have no data - best effort.
         String[] permissions = (data != null) ? data.getStringArrayExtra(
                 PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES) : new String[0];
         final int[] grantResults = (data != null) ? data.getIntArrayExtra(
                 PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS) : new int[0];
-        onRequestPermissionsResult(requestCode, permissions, grantResults);
+        final int deviceId = (data != null) ? data.getIntExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_DEVICE_ID, Context.DEVICE_ID_DEFAULT
+        ) : Context.DEVICE_ID_DEFAULT;
+        onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId);
     }
 
     private void dispatchRequestPermissionsResultToFragment(int requestCode, Intent data,

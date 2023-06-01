@@ -942,6 +942,13 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public Intent buildRequestPermissionsIntent(@NonNull String[] permissions) {
+        Intent intent = super.buildRequestPermissionsIntent(permissions);
+        intent.putExtra(EXTRA_REQUEST_PERMISSIONS_DEVICE_ID, mContext.getDeviceId());
+        return intent;
+    }
+
+    @Override
     public CharSequence getBackgroundPermissionOptionLabel() {
         try {
 

@@ -3924,6 +3924,7 @@ package android.content.pm {
     field public static final int DELETE_FAILED_OWNER_BLOCKED = -4; // 0xfffffffc
     field public static final int DELETE_KEEP_DATA = 1; // 0x1
     field public static final int DELETE_SUCCEEDED = 1; // 0x1
+    field public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID = "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
     field public static final String EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
