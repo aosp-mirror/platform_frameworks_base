@@ -41,6 +41,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -575,10 +576,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.inflateFooterView();
 
         // add notification
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
-        NotificationEntry entry = mock(NotificationEntry.class);
-        when(row.getEntry()).thenReturn(entry);
-        when(entry.isClearable()).thenReturn(true);
+        ExpandableNotificationRow row = createClearableRow();
         mStackScroller.addContainerView(row);
 
         mStackScroller.onUpdateRowStates();
@@ -645,6 +643,50 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.clearNotifications(NotificationStackScrollLayout.ROWS_GENTLE, false);
         assertEquals(1, numCalls[0]);
         assertEquals(ROWS_GENTLE, selected[0]);
+    }
+
+    @Test
+    public void testClearNotifications_clearAllInProgress() {
+        ExpandableNotificationRow row = createClearableRow();
+        when(row.getEntry().hasFinishedInitialization()).thenReturn(true);
+        doReturn(true).when(mStackScroller).isVisible(row);
+        mStackScroller.addContainerView(row);
+
+        mStackScroller.clearNotifications(ROWS_ALL, false);
+
+        assertClearAllInProgress(true);
+        verify(mNotificationRoundnessManager).setClearAllInProgress(true);
+    }
+
+    @Test
+    public void testOnChildAnimationFinished_resetsClearAllInProgress() {
+        mStackScroller.setClearAllInProgress(true);
+
+        mStackScroller.onChildAnimationFinished();
+
+        assertClearAllInProgress(false);
+        verify(mNotificationRoundnessManager).setClearAllInProgress(false);
+    }
+
+    @Test
+    public void testShadeCollapsed_resetsClearAllInProgress() {
+        mStackScroller.setClearAllInProgress(true);
+
+        mStackScroller.setIsExpanded(false);
+
+        assertClearAllInProgress(false);
+        verify(mNotificationRoundnessManager).setClearAllInProgress(false);
+    }
+
+    @Test
+    public void testShadeExpanded_doesntChangeClearAllInProgress() {
+        mStackScroller.setClearAllInProgress(true);
+        clearInvocations(mNotificationRoundnessManager);
+
+        mStackScroller.setIsExpanded(true);
+
+        assertClearAllInProgress(true);
+        verify(mNotificationRoundnessManager, never()).setClearAllInProgress(anyBoolean());
     }
 
     @Test
@@ -894,6 +936,21 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // Can't inject this through the listener or we end up on the actual implementation
         // rather than the mock because the spy just coppied the anonymous inner /shruggie.
         mStackScroller.setStatusBarState(state);
+    }
+
+    private ExpandableNotificationRow createClearableRow() {
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        NotificationEntry entry = mock(NotificationEntry.class);
+        when(row.canViewBeCleared()).thenReturn(true);
+        when(row.getEntry()).thenReturn(entry);
+        when(entry.isClearable()).thenReturn(true);
+
+        return row;
+    }
+
+    private void assertClearAllInProgress(boolean expected) {
+        assertEquals(expected, mStackScroller.getClearAllInProgress());
+        assertEquals(expected, mAmbientState.isClearAllInProgress());
     }
 
     private static void mockBoundsOnScreen(View view, Rect bounds) {
