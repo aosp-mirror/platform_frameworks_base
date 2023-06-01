@@ -33,10 +33,36 @@ import java.lang.ref.WeakReference;
  * @param <T> type of data to cache
  */
 abstract class ThemedResourceCache<T> {
+    public static final int UNDEFINED_GENERATION = -1;
     @UnsupportedAppUsage
     private ArrayMap<ThemeKey, LongSparseArray<WeakReference<T>>> mThemedEntries;
     private LongSparseArray<WeakReference<T>> mUnthemedEntries;
     private LongSparseArray<WeakReference<T>> mNullThemedEntries;
+
+    private int mGeneration;
+
+    public static class Entry<S> {
+        private S mValue;
+        private int mGeneration;
+
+
+        public S getValue() {
+            return mValue;
+        }
+
+        public boolean hasValue() {
+            return mValue != null;
+        }
+
+        public int getGeneration() {
+            return mGeneration;
+        }
+
+        Entry(S value, int generation) {
+            this.mValue = value;
+            this.mGeneration = generation;
+        }
+    }
 
     /**
      * Adds a new theme-dependent entry to the cache.
@@ -45,9 +71,10 @@ abstract class ThemedResourceCache<T> {
      * @param theme the theme against which this entry was inflated, or
      *              {@code null} if the entry has no theme applied
      * @param entry the entry to cache
+     * @param generation The generation of the cache to compare against before storing
      */
-    public void put(long key, @Nullable Theme theme, @NonNull T entry) {
-        put(key, theme, entry, true);
+    public void put(long key, @Nullable Theme theme, @NonNull T entry, int generation) {
+        put(key, theme, entry, generation, true);
     }
 
     /**
@@ -57,10 +84,12 @@ abstract class ThemedResourceCache<T> {
      * @param theme the theme against which this entry was inflated, or
      *              {@code null} if the entry has no theme applied
      * @param entry the entry to cache
+     * @param generation The generation of the cache to compare against before storing
      * @param usesTheme {@code true} if the entry is affected theme changes,
      *                  {@code false} otherwise
      */
-    public void put(long key, @Nullable Theme theme, @NonNull T entry, boolean usesTheme) {
+    public void put(long key, @Nullable Theme theme, @NonNull T entry, int generation,
+            boolean usesTheme) {
         if (entry == null) {
             return;
         }
@@ -72,7 +101,8 @@ abstract class ThemedResourceCache<T> {
             } else {
                 entries = getThemedLocked(theme, true);
             }
-            if (entries != null) {
+            if (entries != null
+                    && ((generation == mGeneration) || (generation == UNDEFINED_GENERATION)))  {
                 entries.put(key, new WeakReference<>(entry));
             }
         }
@@ -86,7 +116,7 @@ abstract class ThemedResourceCache<T> {
      * @return a cached entry, or {@code null} if not in the cache
      */
     @Nullable
-    public T get(long key, @Nullable Theme theme) {
+    public Entry get(long key, @Nullable Theme theme) {
         // The themed (includes null-themed) and unthemed caches are mutually
         // exclusive, so we'll give priority to whichever one we think we'll
         // hit first. Since most of the framework drawables are themed, that's
@@ -96,7 +126,7 @@ abstract class ThemedResourceCache<T> {
             if (themedEntries != null) {
                 final WeakReference<T> themedEntry = themedEntries.get(key);
                 if (themedEntry != null) {
-                    return themedEntry.get();
+                    return new Entry(themedEntry.get(), mGeneration);
                 }
             }
 
@@ -104,12 +134,12 @@ abstract class ThemedResourceCache<T> {
             if (unthemedEntries != null) {
                 final WeakReference<T> unthemedEntry = unthemedEntries.get(key);
                 if (unthemedEntry != null) {
-                    return unthemedEntry.get();
+                    return new Entry(unthemedEntry.get(), mGeneration);
                 }
             }
         }
 
-        return null;
+        return new Entry(null, mGeneration);
     }
 
     /**
@@ -121,6 +151,7 @@ abstract class ThemedResourceCache<T> {
     @UnsupportedAppUsage
     public void onConfigurationChange(@Config int configChanges) {
         prune(configChanges);
+        mGeneration++;
     }
 
     /**
