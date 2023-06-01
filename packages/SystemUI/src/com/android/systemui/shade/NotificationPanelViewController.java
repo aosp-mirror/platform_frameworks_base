@@ -222,6 +222,8 @@ import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -232,7 +234,6 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import kotlin.Unit;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 @CentralSurfacesComponent.CentralSurfacesScope
@@ -3450,6 +3451,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @VisibleForTesting
     void notifyExpandingStarted() {
         if (!mExpanding) {
+            DejankUtils.notifyRendererOfExpensiveFrame(mView, "notifyExpandingStarted");
             mExpanding = true;
             mIsExpandingOrCollapsing = true;
             mQsController.onExpandingStarted(mQsController.getFullyExpanded());
