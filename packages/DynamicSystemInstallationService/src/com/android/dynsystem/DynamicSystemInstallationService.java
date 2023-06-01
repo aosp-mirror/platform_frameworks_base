@@ -16,11 +16,10 @@
 
 package com.android.dynsystem;
 
-import static android.os.AsyncTask.Status.FINISHED;
-import static android.os.AsyncTask.Status.PENDING;
 import static android.os.AsyncTask.Status.RUNNING;
 import static android.os.image.DynamicSystemClient.ACTION_HIDE_NOTIFICATION;
 import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_IF_IN_USE;
+import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_KEYGUARD_DISMISSED;
 import static android.os.image.DynamicSystemClient.ACTION_START_INSTALL;
 import static android.os.image.DynamicSystemClient.CAUSE_ERROR_EXCEPTION;
 import static android.os.image.DynamicSystemClient.CAUSE_ERROR_INVALID_URL;
@@ -234,6 +233,8 @@ public class DynamicSystemInstallationService extends Service
             executeNotifyIfInUseCommand();
         } else if (ACTION_HIDE_NOTIFICATION.equals(action)) {
             executeHideNotificationCommand();
+        } else if (ACTION_NOTIFY_KEYGUARD_DISMISSED.equals(action)) {
+            executeNotifyKeyguardDismissed();
         }
 
         return Service.START_NOT_STICKY;
@@ -475,6 +476,10 @@ public class DynamicSystemInstallationService extends Service
                 stopForeground(STOP_FOREGROUND_REMOVE);
                 break;
         }
+    }
+
+    private void executeNotifyKeyguardDismissed() {
+        postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
     }
 
     private void resetTaskAndStop() {
