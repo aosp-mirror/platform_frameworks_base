@@ -4700,6 +4700,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (v instanceof ExpandableNotificationRow && !mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
+            mController.updateImportantForAccessibility();
         }
 
         updateSpeedBumpIndex();
@@ -4711,6 +4712,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
+            mController.updateImportantForAccessibility();
         }
 
         updateSpeedBumpIndex();
@@ -4723,6 +4725,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
+            mController.updateImportantForAccessibility();
         }
 
         updateSpeedBumpIndex();
