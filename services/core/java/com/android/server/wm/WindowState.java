@@ -1445,6 +1445,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Slog.v(TAG_WM, "Win " + this + " config changed: " + getConfiguration());
         }
 
+        final boolean dragResizingChanged = !mDragResizingChangeReported && isDragResizeChanged();
+
         final boolean attachedFrameChanged = LOCAL_LAYOUT
                 && mLayoutAttached && getParentWindow().frameChanged();
 
@@ -1458,6 +1460,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (didFrameInsetsChange
                 || configChanged
                 || insetsChanged
+                || dragResizingChanged
                 || shouldSendRedrawForSync()
                 || attachedFrameChanged) {
             ProtoLog.v(WM_DEBUG_RESIZE,
@@ -1478,7 +1481,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             // Reset the drawn state if the window need to redraw for the change, so the transition
             // can wait until it has finished drawing to start.
-            if ((configChanged || getOrientationChanging()) && isVisibleRequested()) {
+            if ((configChanged || getOrientationChanging() || dragResizingChanged)
+                    && isVisibleRequested()) {
                 winAnimator.mDrawState = DRAW_PENDING;
                 if (mActivityRecord != null) {
                     mActivityRecord.clearAllDrawn();
