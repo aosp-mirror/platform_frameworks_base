@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
+import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
@@ -106,6 +107,7 @@ import java.util.Optional;
 public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Mock private NotificationGutsManager mNotificationGutsManager;
+    @Mock private NotificationsController mNotificationsController;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
@@ -455,6 +457,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotificationStackScrollLayout,
                 true,
                 mNotificationGutsManager,
+                mNotificationsController,
                 mVisibilityProvider,
                 mHeadsUpManager,
                 mNotificationRoundnessManager,
