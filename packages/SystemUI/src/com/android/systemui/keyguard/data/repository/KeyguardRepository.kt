@@ -25,6 +25,7 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
@@ -44,13 +45,16 @@ import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
 
 /** Defines interface for classes that encapsulate application state for the keyguard. */
 interface KeyguardRepository {
@@ -138,7 +142,7 @@ interface KeyguardRepository {
     val statusBarState: Flow<StatusBarState>
 
     /** Observable for device wake/sleep state */
-    val wakefulness: Flow<WakefulnessModel>
+    val wakefulness: StateFlow<WakefulnessModel>
 
     /** Observable for biometric unlock modes */
     val biometricUnlockState: Flow<BiometricUnlockModel>
@@ -202,7 +206,8 @@ constructor(
     private val dozeParameters: DozeParameters,
     private val authController: AuthController,
     private val dreamOverlayCallbackController: DreamOverlayCallbackController,
-    @Main private val mainDispatcher: CoroutineDispatcher
+    @Main private val mainDispatcher: CoroutineDispatcher,
+    @Application private val scope: CoroutineScope,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -486,47 +491,48 @@ constructor(
         awaitClose { biometricUnlockController.removeListener(callback) }
     }
 
-    override val wakefulness: Flow<WakefulnessModel> = conflatedCallbackFlow {
-        val observer =
-            object : WakefulnessLifecycle.Observer {
-                override fun onStartedWakingUp() {
-                    dispatchNewState()
-                }
+    override val wakefulness: StateFlow<WakefulnessModel> =
+        conflatedCallbackFlow {
+                val observer =
+                    object : WakefulnessLifecycle.Observer {
+                        override fun onStartedWakingUp() {
+                            dispatchNewState()
+                        }
 
-                override fun onFinishedWakingUp() {
-                    dispatchNewState()
-                }
+                        override fun onFinishedWakingUp() {
+                            dispatchNewState()
+                        }
 
-                override fun onPostFinishedWakingUp() {
-                    dispatchNewState()
-                }
+                        override fun onPostFinishedWakingUp() {
+                            dispatchNewState()
+                        }
 
-                override fun onStartedGoingToSleep() {
-                    dispatchNewState()
-                }
+                        override fun onStartedGoingToSleep() {
+                            dispatchNewState()
+                        }
 
-                override fun onFinishedGoingToSleep() {
-                    dispatchNewState()
-                }
+                        override fun onFinishedGoingToSleep() {
+                            dispatchNewState()
+                        }
 
-                private fun dispatchNewState() {
-                    trySendWithFailureLogging(
-                        WakefulnessModel.fromWakefulnessLifecycle(wakefulnessLifecycle),
-                        TAG,
-                        "updated wakefulness state"
-                    )
-                }
+                        private fun dispatchNewState() {
+                            trySendWithFailureLogging(
+                                WakefulnessModel.fromWakefulnessLifecycle(wakefulnessLifecycle),
+                                TAG,
+                                "updated wakefulness state",
+                            )
+                        }
+                    }
+
+                wakefulnessLifecycle.addObserver(observer)
+                awaitClose { wakefulnessLifecycle.removeObserver(observer) }
             }
-
-        wakefulnessLifecycle.addObserver(observer)
-        trySendWithFailureLogging(
-            WakefulnessModel.fromWakefulnessLifecycle(wakefulnessLifecycle),
-            TAG,
-            "initial wakefulness state"
-        )
-
-        awaitClose { wakefulnessLifecycle.removeObserver(observer) }
-    }
+            .stateIn(
+                scope,
+                // Use Eagerly so that we're always listening and never miss an event.
+                SharingStarted.Eagerly,
+                initialValue = WakefulnessModel.fromWakefulnessLifecycle(wakefulnessLifecycle),
+            )
 
     override val fingerprintSensorLocation: Flow<Point?> = conflatedCallbackFlow {
         fun sendFpLocation() {

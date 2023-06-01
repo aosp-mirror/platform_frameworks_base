@@ -17,6 +17,7 @@ package com.android.systemui.shade
 
 import android.view.MotionEvent
 import android.view.ViewGroup
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.RemoteInputController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -218,6 +219,16 @@ interface ShadeViewController {
     val shadeNotificationPresenter: ShadeNotificationPresenter
 
     companion object {
+        /**
+         * Returns a multiplicative factor to use when determining the falsing threshold for touches
+         * on the shade. The factor will be larger when the device is waking up due to a touch or
+         * gesture.
+         */
+        @JvmStatic
+        fun getFalsingThresholdFactor(wakefulness: WakefulnessModel): Float {
+            return if (wakefulness.isDeviceInteractiveFromTapOrGesture()) 1.5f else 1.0f
+        }
+
         const val WAKEUP_ANIMATION_DELAY_MS = 250
         const val FLING_MAX_LENGTH_SECONDS = 0.6f
         const val FLING_SPEED_UP_FACTOR = 0.6f
