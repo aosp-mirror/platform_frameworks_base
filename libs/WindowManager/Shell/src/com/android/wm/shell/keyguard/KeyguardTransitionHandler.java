@@ -185,6 +185,9 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                         @Override
                         public void onTransitionFinished(
                                 WindowContainerTransaction wct, SurfaceControl.Transaction sct) {
+                            if (sct != null) {
+                                finishTransaction.merge(sct);
+                            }
                             mMainExecutor.execute(() -> {
                                 mStartedTransitions.remove(transition);
                                 finishCallback.onTransitionFinished(wct, null);

@@ -682,10 +682,10 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Luce insufficiente"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Allontana il telefono"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Avvicina il telefono"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Sposta il telefono più in alto"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Sposta il telefono più in basso"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta il telefono verso sinistra"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta il telefono verso destra"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Sposta lo smartphone più in alto"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Sposta lo smartphone più in basso"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta lo smartphone verso sinistra"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta lo smartphone verso destra"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Guarda più direttamente verso il dispositivo."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Volto non visible. Tieni lo smartphone all\'altezza degli occhi."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Troppo movimento. Tieni fermo il telefono."</string>
@@ -1716,7 +1716,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correzione del colore"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modalità a una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Attenuazione extra"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Apparecchi acustici"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Protesi uditive"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> attivato."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> disattivato."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Rilascia i tasti del volume. Per attivare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tieni di nuovo premuti entrambi i tasti del volume per 3 secondi."</string>
@@ -1976,6 +1976,8 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Non è possibile accedere su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il telefono."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Questa app è stata progettata per una versione precedente di Android. Potrebbe non funzionare correttamente e non include le protezioni della sicurezza e della privacy più recenti. Verifica la presenza di un aggiornamento o contatta lo sviluppatore dell\'app."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca aggiornamenti"</string>
+    <!-- no translation found for deprecated_abi_message (6820548011196218091) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Hai nuovi messaggi"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Apri l\'app SMS per la visualizzazione"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Alcune funzionalità sono limitate"</string>

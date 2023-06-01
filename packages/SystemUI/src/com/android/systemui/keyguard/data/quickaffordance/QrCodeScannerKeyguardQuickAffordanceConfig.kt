@@ -42,7 +42,7 @@ constructor(
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
 
-    override val pickerName = context.getString(R.string.qr_code_scanner_title)
+    override fun pickerName(): String = context.getString(R.string.qr_code_scanner_title)
 
     override val pickerIconResourceId = R.drawable.ic_qr_code_scanner
 
@@ -53,6 +53,7 @@ constructor(
                     override fun onQRCodeScannerActivityChanged() {
                         trySendWithFailureLogging(state(), TAG)
                     }
+
                     override fun onQRCodeScannerPreferenceChanged() {
                         trySendWithFailureLogging(state(), TAG)
                     }

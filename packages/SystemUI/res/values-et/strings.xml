@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Nägu on autenditud"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Kinnitatud"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Lõpuleviimiseks puudutage nuppu Kinnita"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Avati näoga."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Avati näoga. Vajutage jätkamiseks."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Nägu tuvastati. Vajutage jätkamiseks."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Nägu tuvastati. Jätkamiseks vajutage avamise ikooni."</string>
@@ -1145,7 +1144,7 @@
     <string name="stylus_battery_low" msgid="7134370101603167096">"Elektronpliiatsi akutase on madal"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokaamera"</string>
     <string name="call_from_work_profile_title" msgid="5418253516453177114">"Isiklikust rakendusest ei saa helistada"</string>
-    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Teie organisatsioon lubab helistada ainult töörakendustest"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Teie organisatsioon lubab helistada ainult töörakendustest."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Lülitu tööprofiilile"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"• Installige töö telefonirakendus"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Tühista"</string>

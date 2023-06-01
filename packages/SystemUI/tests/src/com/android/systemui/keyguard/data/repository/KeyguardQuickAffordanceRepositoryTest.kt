@@ -189,12 +189,12 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                     listOf(
                         KeyguardQuickAffordancePickerRepresentation(
                             id = config1.key,
-                            name = config1.pickerName,
+                            name = config1.pickerName(),
                             iconResourceId = config1.pickerIconResourceId,
                         ),
                         KeyguardQuickAffordancePickerRepresentation(
                             id = config2.key,
-                            name = config2.pickerName,
+                            name = config2.pickerName(),
                             iconResourceId = config2.pickerIconResourceId,
                         ),
                     )

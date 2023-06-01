@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"चेहरे की पुष्टि हो गई"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"पुष्टि हो गई"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"\'पुष्टि करें\' पर टैप करके पूरा करें"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"चेहरे से अनलॉक किया गया."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"चेहरे से अनलॉक किया गया. जारी रखने के लिए टैप करें."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"चेहरे की पहचान हो गई. जारी रखने के लिए टैप करें."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"चेहरे की पहचान हो गई. जारी रखने के लिए अनलॉक आइकॉन को टैप करें."</string>
@@ -290,7 +289,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> उपयोग किया गया"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी"</string>
-    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"वर्क ऐप्लिकेशन"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"नाइट लाइट"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"शाम को चालू की जाएगी"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सुबह तक चालू रहेगी"</string>
@@ -912,7 +911,7 @@
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदलाव सेव नहीं किए गए"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"दूसरे ऐप्लिकेशन देखें"</string>
     <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"फिर से व्यवस्थित करें"</string>
-    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"कंट्रोल बटन जोड़ें"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"कंट्रोल जोड़ें"</string>
     <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"बदलाव करने के लिए वापस जाएं"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"कंट्रोल लोड नहीं किए जा सके. <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन देखें, ताकि यह पक्का किया जा सके कि ऐप्लिकेशन की सेटिंग में कोई बदलाव नहीं हुआ है."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"इस सेटिंग के साथ काम करने वाले कंट्रोल उपलब्ध नहीं हैं"</string>

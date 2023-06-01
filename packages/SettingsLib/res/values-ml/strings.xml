@@ -545,12 +545,18 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ഇപ്പോൾ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ഈ ഫോൺ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ഈ ടാബ്‌ലെറ്റ്"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ഈ ഫോൺ"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ഈ ഉപകരണത്തിൽ പ്ലേ ചെയ്യാൻ കഴിയില്ല"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"അക്കൗണ്ട് മാറുന്നതിന്, അത് അപ്‌ഗ്രേഡ് ചെയ്യുക"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ഡൗൺലോഡ് ചെയ്തവ ഇവിടെ പ്ലേ ചെയ്യാനാകില്ല"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"അക്കൗണ്ട് മാറാൻ അപ്‌ഗ്രേഡ് ചെയ്യുക"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ഡൗൺലോഡുകൾ പ്ലേ ചെയ്യാനാകില്ല"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"പരസ്യത്തിന് ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ഇവിടെ പ്ലേ ചെയ്യാൻ ഉപകരണം സജീവമാക്കുക"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"പ്ലേ ചെയ്യാൻ ഉപകരണം സജീവമാക്കുക"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ഉപകരണത്തിന് പ്ലേ ചെയ്യാനുള്ള അനുമതിയില്ല"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ഈ മീഡിയ ഇവിടെ പ്ലേ ചെയ്യാൻ കഴിയില്ല"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"കണക്‌റ്റ് ചെയ്യുന്നതിൽ പ്രശ്‌നമുണ്ടായി. ഉപകരണം ഓഫാക്കി വീണ്ടും ഓണാക്കുക"</string>
