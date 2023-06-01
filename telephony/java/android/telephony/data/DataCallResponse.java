@@ -461,10 +461,6 @@ public final class DataCallResponse implements Parcelable {
 
         DataCallResponse other = (DataCallResponse) o;
 
-        final boolean isQosSame = (mDefaultQos == null || other.mDefaultQos == null)
-                ? mDefaultQos == other.mDefaultQos
-                : mDefaultQos.equals(other.mDefaultQos);
-
         final boolean isQosBearerSessionsSame =
                 (mQosBearerSessions == null || other.mQosBearerSessions == null)
                 ? mQosBearerSessions == other.mQosBearerSessions
@@ -496,7 +492,7 @@ public final class DataCallResponse implements Parcelable {
                 && mMtuV6 == other.mMtuV6
                 && mHandoverFailureMode == other.mHandoverFailureMode
                 && mPduSessionId == other.mPduSessionId
-                && isQosSame
+                && Objects.equals(mDefaultQos, other.mDefaultQos)
                 && isQosBearerSessionsSame
                 && Objects.equals(mSliceInfo, other.mSliceInfo)
                 && isTrafficDescriptorsSame;
@@ -557,15 +553,7 @@ public final class DataCallResponse implements Parcelable {
         dest.writeInt(mMtuV6);
         dest.writeInt(mHandoverFailureMode);
         dest.writeInt(mPduSessionId);
-        if (mDefaultQos != null) {
-            if (mDefaultQos.getType() == Qos.QOS_TYPE_EPS) {
-                dest.writeParcelable((EpsQos) mDefaultQos, flags);
-            } else {
-                dest.writeParcelable((NrQos) mDefaultQos, flags);
-            }
-        } else {
-            dest.writeParcelable(null, flags);
-        }
+        dest.writeParcelable(mDefaultQos, flags);
         dest.writeList(mQosBearerSessions);
         dest.writeParcelable(mSliceInfo, flags);
         dest.writeList(mTrafficDescriptors);
