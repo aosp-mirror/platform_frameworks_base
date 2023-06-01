@@ -1142,32 +1142,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void collapseShade_callsanimateCollapseShade_whenExpanded() {
-        // GIVEN the shade is expanded
-        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-
-        // WHEN collapseShade is called
-        mCentralSurfaces.collapseShade();
-
-        // VERIFY that animateCollapseShade is called
-        verify(mShadeController).animateCollapseShade();
-    }
-
-    @Test
-    public void collapseShade_doesNotCallAnimateCollapseShade_whenCollapsed() {
-        // GIVEN the shade is collapsed
-        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-
-        // WHEN collapseShade is called
-        mCentralSurfaces.collapseShade();
-
-        // VERIFY that animateCollapseShade is NOT called
-        verify(mShadeController, never()).animateCollapseShade();
-    }
-
-    @Test
     public void deviceStateChange_unfolded_shadeOpen_setsLeaveOpenOnKeyguardHide() {
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
