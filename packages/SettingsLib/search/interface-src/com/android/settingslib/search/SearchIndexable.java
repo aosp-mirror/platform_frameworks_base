@@ -27,7 +27,7 @@ public @interface SearchIndexable {
     /**
      * Bitfield for the form factors this class should be considered indexable for.
      * Default is {@link #ALL}.
-     *
+     * <p>
      * TODO: actually use this value somehow
      */
     int forTarget() default ALL;
@@ -35,27 +35,27 @@ public @interface SearchIndexable {
     /**
      * Indicates that the class should be considered indexable for Mobile.
      */
-    int MOBILE = 1<<0;
+    int MOBILE = 1 << 0;
 
     /**
      * Indicates that the class should be considered indexable for TV.
      */
-    int TV = 1<<1;
+    int TV = 1 << 1;
 
     /**
      * Indicates that the class should be considered indexable for Wear.
      */
-    int WEAR = 1<<2;
+    int WEAR = 1 << 2;
 
     /**
      * Indicates that the class should be considered indexable for Auto.
      */
-    int AUTO = 1<<3;
+    int AUTO = 1 << 3;
 
     /**
      * Indicates that the class should be considered indexable for ARC++.
      */
-    int ARC = 1<<4;
+    int ARC = 1 << 4;
 
     /**
      * Indicates that the class should be considered indexable for all targets.
