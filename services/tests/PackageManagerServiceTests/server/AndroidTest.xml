@@ -23,6 +23,9 @@
         <option name="install-arg" value="-g" />
         <option name="test-file-name" value="PackageManagerServiceServerTests.apk" />
     </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="settings put global verifier_engprod 1" />
+    </target_preparer>
 
     <option name="test-tag" value="PackageManagerServiceServerTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
