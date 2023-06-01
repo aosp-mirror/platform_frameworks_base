@@ -231,6 +231,114 @@ public class ActivityManager {
     final ArrayMap<OnUidImportanceListener, UidObserver> mImportanceListeners = new ArrayMap<>();
 
     /**
+     * Callback object for {@link #registerUidFrozenStateChangedCallback}
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public interface UidFrozenStateChangedCallback {
+        /**
+         * Indicates that the UID was frozen.
+         *
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @TestApi
+        int UID_FROZEN_STATE_FROZEN = 1;
+
+        /**
+         * Indicates that the UID was unfrozen.
+         *
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @TestApi
+        int UID_FROZEN_STATE_UNFROZEN = 2;
+
+        /**
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = false, prefix = {"UID_FROZEN_STATE_"}, value = {
+                UID_FROZEN_STATE_FROZEN,
+                UID_FROZEN_STATE_UNFROZEN,
+        })
+        public @interface UidFrozenState {}
+
+        /**
+         * Notify the client that the frozen states of an array of UIDs have changed.
+         *
+         * @param uids The UIDs for which the frozen state has changed
+         * @param frozenStates Frozen state for each UID index, Will be set to
+         *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_FROZEN}
+         *               when the UID is frozen. When the UID is unfrozen,
+         *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_UNFROZEN}
+         *               will be set.
+         *
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @TestApi
+        void onUidFrozenStateChanged(@NonNull int[] uids,
+                @NonNull @UidFrozenState int[] frozenStates);
+    }
+
+    /**
+     * Register a {@link UidFrozenStateChangedCallback} object to receive notification
+     * when a UID is frozen or unfrozen. Will throw an exception if the same
+     * callback object is registered more than once.
+     *
+     * @param executor The executor that the callback will be run from.
+     * @param callback The callback to be registered. Callbacks for previous frozen/unfrozen
+     *                 UID changes will not be delivered. Only changes in state from the point of
+     *                 registration onward will be reported.
+     * @throws IllegalStateException if the {@code callback} is already registered.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public void registerUidFrozenStateChangedCallback(
+            @NonNull Executor executor,
+            @NonNull UidFrozenStateChangedCallback callback) {
+    }
+
+    /**
+     * Unregister a {@link UidFrozenStateChangedCallback} callback.
+     * @param callback The callback to be unregistered.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public void unregisterUidFrozenStateChangedCallback(
+            @NonNull UidFrozenStateChangedCallback callback) {
+    }
+
+    /**
+     * Query the frozen state of a list of UIDs.
+     *
+     * @param uids the array of UIDs which the client would like to know the frozen state of.
+     * @return An array containing the frozen state for each requested UID, by index. Will be set
+     *               to {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_FROZEN}
+     *               if the UID is frozen. If the UID is not frozen or not found,
+     *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_UNFROZEN}
+     *               will be set.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public @NonNull @UidFrozenStateChangedCallback.UidFrozenState
+            int[] getUidFrozenState(@NonNull int[] uids) {
+        return new int[uids.length];
+    }
+
+    /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
      * <meta-data>}</a> name for a 'home' Activity that declares a package that is to be
      * uninstalled in lieu of the declaring one.  The package named here must be

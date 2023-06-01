@@ -2928,7 +2928,9 @@ public final class ActiveServices {
             final ProcessServiceRecord clientPsr = b.client.mServices;
             clientPsr.addConnection(c);
             c.startAssociationIfNeeded();
-            if ((c.flags&Context.BIND_ABOVE_CLIENT) != 0) {
+            // Don't set hasAboveClient if binding to self to prevent modifyRawOomAdj() from
+            // dropping the process' adjustment level.
+            if (b.client != s.app && (c.flags & Context.BIND_ABOVE_CLIENT) != 0) {
                 clientPsr.setHasAboveClient(true);
             }
             if ((c.flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {

@@ -229,6 +229,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         super.disableDevice(initiatedByCec, callback);
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
+        // Removing actions and invoking the callback is similar to
+        // HdmiCecLocalDevicePlayback#disableDevice and HdmiCecLocalDeviceTv#disableDevice,
+        // with the difference that in those classes only specific actions are removed and
+        // here we remove all actions. We don't expect any issues with removing all actions
+        // at this time, but we have to pay attention in the future.
+        removeAllActions();
+        // Call the callback instantly or else it will be called 5 seconds later.
+        checkIfPendingActionsCleared();
     }
 
     @Override

@@ -636,9 +636,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private void initOperatorName() {
         int subId = SubscriptionManager.getDefaultDataSubscriptionId();
         if (mCarrierConfigTracker.getShowOperatorNameInStatusBarConfig(subId)) {
-            ViewStub stub = mStatusBar.findViewById(R.id.operator_name);
+            View view = mStatusBar.findViewById(R.id.operator_name);
             mOperatorNameViewController =
-                    mOperatorNameViewControllerFactory.create((OperatorNameView) stub.inflate());
+                    mOperatorNameViewControllerFactory.create((OperatorNameView) view);
             mOperatorNameViewController.init();
             // This view should not be visible on lock-screen
             if (mKeyguardStateController.isShowing()) {

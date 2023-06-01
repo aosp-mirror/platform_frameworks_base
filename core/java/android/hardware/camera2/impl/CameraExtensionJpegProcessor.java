@@ -46,6 +46,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     public final static String TAG = "CameraExtensionJpeg";
     private final static int JPEG_QUEUE_SIZE = 1;
+    private final static int JPEG_APP_SEGMENT_SIZE = 64 * 1024;
 
     private final Handler mHandler;
     private final HandlerThread mHandlerThread;
@@ -225,9 +226,10 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     private void initializePipeline() throws RemoteException {
         if ((mFormat != -1) && (mOutputSurface != null) && (mResolution != null) &&
                 (mYuvReader == null)) {
-            // Jpeg/blobs are expected to be configured with (w*h)x1
+            // Jpeg/blobs are expected to be configured with (w*h)x1.5 + 64k Jpeg APP1 segment
             mOutputWriter = ImageWriter.newInstance(mOutputSurface, 1 /*maxImages*/,
-                    ImageFormat.JPEG, mResolution.width * mResolution.height, 1);
+                    ImageFormat.JPEG,
+                    (mResolution.width * mResolution.height * 3)/2 + JPEG_APP_SEGMENT_SIZE, 1);
             mYuvReader = ImageReader.newInstance(mResolution.width, mResolution.height, mFormat,
                     JPEG_QUEUE_SIZE);
             mYuvReader.setOnImageAvailableListener(new YuvCallback(), mHandler);

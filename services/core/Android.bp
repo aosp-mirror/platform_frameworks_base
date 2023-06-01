@@ -155,6 +155,7 @@ java_library_static {
         "android.hardware.health-V2-java", // AIDL
         "android.hardware.health-translate-java",
         "android.hardware.light-V1-java",
+        "android.hardware.security.rkp-V3-java",
         "android.hardware.tv.cec-V1.1-java",
         "android.hardware.tv.hdmi.cec-V1-java",
         "android.hardware.tv.hdmi.connection-V1-java",
@@ -163,6 +164,7 @@ java_library_static {
         "android.hardware.biometrics.fingerprint-V2.3-java",
         "android.hardware.biometrics.fingerprint-V2-java",
         "android.hardware.oemlock-V1.0-java",
+        "android.hardware.oemlock-V1-java",
         "android.hardware.configstore-V1.1-java",
         "android.hardware.ir-V1-java",
         "android.hardware.rebootescrow-V1-java",
@@ -171,6 +173,7 @@ java_library_static {
         "android.hardware.power-V3-java",
         "android.hidl.manager-V1.2-java",
         "capture_state_listener-aidl-java",
+        "cbor-java",
         "icu4j_calendar_astronomer",
         "netd-client",
         "overlayable_policy_aidl-java",

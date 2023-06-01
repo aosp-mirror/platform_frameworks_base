@@ -63,6 +63,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -362,6 +363,22 @@ public final class Parcel {
     // EX_TRANSACTION_FAILED is used exclusively in native code.
     // see libbinder's binder/Status.h
     private static final int EX_TRANSACTION_FAILED = -129;
+
+    // Allow limit of 1 MB for allocating arrays
+    private static final int ARRAY_ALLOCATION_LIMIT = 1000000;
+
+    // Following type size are used to determine allocation size while creating arrays
+    private static final int SIZE_BYTE = 1;
+    private static final int SIZE_CHAR = 2;
+    private static final int SIZE_SHORT = 2;
+    private static final int SIZE_BOOLEAN = 4;
+    private static final int SIZE_INT = 4;
+    private static final int SIZE_FLOAT = 4;
+    private static final int SIZE_DOUBLE = 8;
+    private static final int SIZE_LONG = 8;
+
+    // Assume the least possible size for complex objects
+    private static final int SIZE_COMPLEX_TYPE = 1;
 
     @CriticalNative
     private static native void nativeMarkSensitive(long nativePtr);
@@ -1503,9 +1520,71 @@ public final class Parcel {
         }
     }
 
+    private static <T> int getItemTypeSize(@NonNull Class<T> arrayClass) {
+        final Class<?> componentType = arrayClass.getComponentType();
+        // typeSize has been referred from respective create*Array functions
+        if (componentType == boolean.class) {
+            return SIZE_BOOLEAN;
+        } else if (componentType == byte.class) {
+            return SIZE_BYTE;
+        } else if (componentType == char.class) {
+            return SIZE_CHAR;
+        } else if (componentType == int.class) {
+            return SIZE_INT;
+        } else if (componentType == long.class) {
+            return SIZE_LONG;
+        } else if (componentType == float.class) {
+            return SIZE_FLOAT;
+        } else if (componentType == double.class) {
+            return SIZE_DOUBLE;
+        }
+
+        return SIZE_COMPLEX_TYPE;
+    }
+
+    private void ensureWithinMemoryLimit(int typeSize, @NonNull int... dimensions) {
+        // For Multidimensional arrays, Calculate total object
+        // which will be allocated.
+        int totalObjects = 1;
+        try {
+            for (int dimension : dimensions) {
+                totalObjects = Math.multiplyExact(totalObjects, dimension);
+            }
+        } catch (ArithmeticException e) {
+            Log.e(TAG, "ArithmeticException occurred while multiplying dimensions " + e);
+            BadParcelableException badParcelableException = new BadParcelableException("Estimated "
+                    + "array length is too large. Array Dimensions:" + Arrays.toString(dimensions));
+            SneakyThrow.sneakyThrow(badParcelableException);
+        }
+        ensureWithinMemoryLimit(typeSize, totalObjects);
+    }
+
+    private void ensureWithinMemoryLimit(int typeSize, @NonNull int length) {
+        int estimatedAllocationSize = 0;
+        try {
+            estimatedAllocationSize = Math.multiplyExact(typeSize, length);
+        } catch (ArithmeticException e) {
+            Log.e(TAG, "ArithmeticException occurred while multiplying values " + typeSize
+                    + " and "  + length + " Exception: " + e);
+            BadParcelableException badParcelableException = new BadParcelableException("Estimated "
+                    + "allocation size is too large. typeSize: " + typeSize + " length: " + length);
+            SneakyThrow.sneakyThrow(badParcelableException);
+        }
+
+        boolean isInBinderTransaction = Binder.isDirectlyHandlingTransaction();
+        if (isInBinderTransaction && (estimatedAllocationSize > ARRAY_ALLOCATION_LIMIT)) {
+            Log.e(TAG, "Trying to Allocate " + estimatedAllocationSize
+                    + " memory, In Binder Transaction : " + isInBinderTransaction);
+            BadParcelableException e = new BadParcelableException("Allocation of size "
+                    + estimatedAllocationSize + " is above allowed limit of 1MB");
+            SneakyThrow.sneakyThrow(e);
+        }
+    }
+
     @Nullable
     public final boolean[] createBooleanArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_BOOLEAN, N);
         // >>2 as a fast divide-by-4 works in the create*Array() functions
         // because dataAvail() will never return a negative number.  4 is
         // the size of a stored boolean in the stream.
@@ -1548,6 +1627,7 @@ public final class Parcel {
     @Nullable
     public short[] createShortArray() {
         int n = readInt();
+        ensureWithinMemoryLimit(SIZE_SHORT, n);
         if (n >= 0 && n <= (dataAvail() >> 2)) {
             short[] val = new short[n];
             for (int i = 0; i < n; i++) {
@@ -1586,6 +1666,7 @@ public final class Parcel {
     @Nullable
     public final char[] createCharArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_CHAR, N);
         if (N >= 0 && N <= (dataAvail() >> 2)) {
             char[] val = new char[N];
             for (int i=0; i<N; i++) {
@@ -1623,6 +1704,7 @@ public final class Parcel {
     @Nullable
     public final int[] createIntArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_INT, N);
         if (N >= 0 && N <= (dataAvail() >> 2)) {
             int[] val = new int[N];
             for (int i=0; i<N; i++) {
@@ -1660,6 +1742,7 @@ public final class Parcel {
     @Nullable
     public final long[] createLongArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_LONG, N);
         // >>3 because stored longs are 64 bits
         if (N >= 0 && N <= (dataAvail() >> 3)) {
             long[] val = new long[N];
@@ -1698,6 +1781,7 @@ public final class Parcel {
     @Nullable
     public final float[] createFloatArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_FLOAT, N);
         // >>2 because stored floats are 4 bytes
         if (N >= 0 && N <= (dataAvail() >> 2)) {
             float[] val = new float[N];
@@ -1736,6 +1820,7 @@ public final class Parcel {
     @Nullable
     public final double[] createDoubleArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_DOUBLE, N);
         // >>3 because stored doubles are 8 bytes
         if (N >= 0 && N <= (dataAvail() >> 3)) {
             double[] val = new double[N];
@@ -1789,6 +1874,7 @@ public final class Parcel {
     @Nullable
     public final String[] createString8Array() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
             String[] val = new String[N];
             for (int i=0; i<N; i++) {
@@ -1829,6 +1915,7 @@ public final class Parcel {
     @Nullable
     public final String[] createString16Array() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
             String[] val = new String[N];
             for (int i=0; i<N; i++) {
@@ -1921,6 +2008,7 @@ public final class Parcel {
     @Nullable
     public final IBinder[] createBinderArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
             IBinder[] val = new IBinder[N];
             for (int i=0; i<N; i++) {
@@ -1955,6 +2043,7 @@ public final class Parcel {
     public final <T extends IInterface> T[] createInterfaceArray(
             @NonNull IntFunction<T[]> newArray, @NonNull Function<IBinder, T> asInterface) {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
             T[] val = newArray.apply(N);
             for (int i=0; i<N; i++) {
@@ -3201,6 +3290,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         FileDescriptor[] f = new FileDescriptor[N];
         for (int i = 0; i < N; i++) {
             f[i] = readRawFileDescriptor();
@@ -3667,6 +3757,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         ArrayList<T> l = new ArrayList<T>(N);
         while (N > 0) {
             l.add(readTypedObject(c));
@@ -3721,6 +3812,7 @@ public final class Parcel {
         if (count < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, count);
         final SparseArray<T> array = new SparseArray<>(count);
         for (int i = 0; i < count; i++) {
             final int index = readInt();
@@ -3749,6 +3841,7 @@ public final class Parcel {
         if (count < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, count);
         final ArrayMap<String, T> map = new ArrayMap<>(count);
         for (int i = 0; i < count; i++) {
             final String key = readString();
@@ -3775,6 +3868,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         ArrayList<String> l = new ArrayList<String>(N);
         while (N > 0) {
             l.add(readString());
@@ -3800,6 +3894,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         ArrayList<IBinder> l = new ArrayList<IBinder>(N);
         while (N > 0) {
             l.add(readStrongBinder());
@@ -3826,6 +3921,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         ArrayList<T> l = new ArrayList<T>(N);
         while (N > 0) {
             l.add(asInterface.apply(readStrongBinder()));
@@ -3985,6 +4081,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         T[] l = c.newArray(N);
         for (int i=0; i<N; i++) {
             l[i] = readTypedObject(c);
@@ -4213,6 +4310,10 @@ public final class Parcel {
             while (innermost.isArray()) {
                 innermost = innermost.getComponentType();
             }
+
+            int typeSize = getItemTypeSize(innermost);
+            ensureWithinMemoryLimit(typeSize, dimensions);
+
             val = (T) Array.newInstance(innermost, dimensions);
             for (int i = 0; i < length; i++) {
                 readFixedArray(Array.get(val, i));
@@ -4269,6 +4370,10 @@ public final class Parcel {
             while (innermost.isArray()) {
                 innermost = innermost.getComponentType();
             }
+
+            int typeSize = getItemTypeSize(innermost);
+            ensureWithinMemoryLimit(typeSize, dimensions);
+
             val = (T) Array.newInstance(innermost, dimensions);
             for (int i = 0; i < length; i++) {
                 readFixedArray(Array.get(val, i), asInterface);
@@ -4324,6 +4429,10 @@ public final class Parcel {
             while (innermost.isArray()) {
                 innermost = innermost.getComponentType();
             }
+
+            int typeSize = getItemTypeSize(innermost);
+            ensureWithinMemoryLimit(typeSize, dimensions);
+
             val = (T) Array.newInstance(innermost, dimensions);
             for (int i = 0; i < length; i++) {
                 readFixedArray(Array.get(val, i), c);
@@ -5069,6 +5178,7 @@ public final class Parcel {
         if (n < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, n);
         T[] p = (T[]) ((clazz == null) ? new Parcelable[n] : Array.newInstance(clazz, n));
         for (int i = 0; i < n; i++) {
             p[i] = readParcelableInternal(loader, clazz);

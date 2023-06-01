@@ -13,9 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <fuzzbinder/libbinder_driver.h>
+#include <utils/Looper.h>
 
-package com.android.internal.expresslog;
+#include "IncidentService.h"
 
-final class Utils {
-    static native long hashString(String stringToHash);
+using ::android::fuzzService;
+using ::android::os::incidentd::IncidentService;
+using ::android::Looper;
+using ::android::sp;
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+    sp<Looper> looper(Looper::prepare(0));
+    sp<IncidentService> service = sp<IncidentService>::make(looper);
+    fuzzService(service, FuzzedDataProvider(data, size));
+    return 0;
 }

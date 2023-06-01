@@ -47,6 +47,10 @@ public class FakePermissionEnforcer extends PermissionEnforcer {
         mGranted.remove(permission);
     }
 
+    public void revokeAll() {
+        mGranted.clear();
+    }
+
     private boolean granted(String permission) {
         return mGranted.contains(permission);
     }

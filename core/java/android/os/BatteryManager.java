@@ -20,6 +20,7 @@ import android.Manifest.permission;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -232,6 +233,7 @@ public class BatteryManager {
                                             OsProtoEnums.CHARGING_POLICY_ADAPTIVE_LONGLIFE; // = 4
 
     /** @hide */
+    @TestApi
     public static final int BATTERY_PLUGGED_ANY =
             BATTERY_PLUGGED_AC | BATTERY_PLUGGED_USB | BATTERY_PLUGGED_WIRELESS
                     | BATTERY_PLUGGED_DOCK;

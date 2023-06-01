@@ -195,8 +195,7 @@ extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
 extern int register_android_security_Scrypt(JNIEnv *env);
 extern int register_com_android_internal_content_F2fsUtils(JNIEnv* env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
-extern int register_com_android_internal_content_om_OverlayConfig(JNIEnv *env);
-extern int register_com_android_internal_expresslog_Utils(JNIEnv* env);
+extern int register_com_android_internal_content_om_OverlayConfig(JNIEnv* env);
 extern int register_com_android_internal_net_NetworkUtilsInternal(JNIEnv* env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
@@ -213,6 +212,7 @@ extern int register_com_android_internal_os_ZygoteCommandBuffer(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv *env);
 extern int register_com_android_internal_security_VerityUtils(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
+extern int register_com_android_modules_expresslog_Utils(JNIEnv* env);
 extern int register_android_window_WindowInfosListener(JNIEnv* env);
 
 // Namespace for Android Runtime flags applied during boot time.
@@ -646,9 +646,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char saveResolvedClassesDelayMsOptsBuf[
             sizeof("-Xps-save-resolved-classes-delay-ms:")-1 + PROPERTY_VALUE_MAX];
     char profileMinSavePeriodOptsBuf[sizeof("-Xps-min-save-period-ms:")-1 + PROPERTY_VALUE_MAX];
-    char profileMinFirstSaveOptsBuf[
-            sizeof("-Xps-min-first-save-ms:")-1 + PROPERTY_VALUE_MAX];
-    char madviseRandomOptsBuf[sizeof("-XX:MadviseRandomAccess:")-1 + PROPERTY_VALUE_MAX];
+    char profileMinFirstSaveOptsBuf[sizeof("-Xps-min-first-save-ms:") - 1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeVdex[
             sizeof("-XMadviseWillNeedVdexFileSize:")-1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeOdex[
@@ -861,13 +859,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
                        jitprithreadweightOptBuf,
                        "-Xjitprithreadweight:");
 
-    parseRuntimeOption("dalvik.vm.jittransitionweight",
-                       jittransitionweightOptBuf,
+    parseRuntimeOption("dalvik.vm.jittransitionweight", jittransitionweightOptBuf,
                        "-Xjittransitionweight:");
-    /*
-     * Madvise related options.
-     */
-    parseRuntimeOption("dalvik.vm.madvise-random", madviseRandomOptsBuf, "-XX:MadviseRandomAccess:");
 
     /*
      * Use default platform configuration as limits for madvising,
@@ -1591,7 +1584,6 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_SharedMemory),
         REG_JNI(register_android_os_incremental_IncrementalManager),
         REG_JNI(register_com_android_internal_content_om_OverlayConfig),
-        REG_JNI(register_com_android_internal_expresslog_Utils),
         REG_JNI(register_com_android_internal_net_NetworkUtilsInternal),
         REG_JNI(register_com_android_internal_os_ClassLoaderFactory),
         REG_JNI(register_com_android_internal_os_LongArrayMultiStateCounter),
@@ -1601,6 +1593,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_com_android_internal_os_ZygoteInit),
         REG_JNI(register_com_android_internal_security_VerityUtils),
         REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),
+        REG_JNI(register_com_android_modules_expresslog_Utils),
         REG_JNI(register_android_hardware_Camera),
         REG_JNI(register_android_hardware_camera2_CameraMetadata),
         REG_JNI(register_android_hardware_camera2_DngCreator),
