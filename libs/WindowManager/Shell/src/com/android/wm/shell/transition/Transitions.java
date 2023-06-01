@@ -29,6 +29,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -554,7 +555,10 @@ public class Transitions implements RemoteCallable<Transitions>,
                     layer = -zSplitLine - i;
                 }
             } else if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
-                if (isOpening) {
+                if (isOpening
+                        // This is for when an activity launches while a different transition is
+                        // collecting.
+                        || change.hasFlags(FLAG_MOVED_TO_TOP)) {
                     // put on top
                     layer = zSplitLine + numChanges - i;
                 } else {
