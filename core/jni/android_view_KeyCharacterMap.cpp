@@ -76,7 +76,7 @@ jobject android_view_KeyCharacterMap_create(JNIEnv* env, int32_t deviceId,
                           reinterpret_cast<jlong>(nativeMap));
 }
 
-static jobject nativeObtainEmptyKeyCharacterMap(JNIEnv* env, jobject /* clazz */, jint deviceId) {
+static jobject nativeObtainEmptyKeyCharacterMap(JNIEnv* env, /*clazz=*/jobject, jint deviceId) {
     return android_view_KeyCharacterMap_create(env, deviceId, nullptr);
 }
 
@@ -202,7 +202,7 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
         jcharArray charsArray) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     if (!map || !map->getMap()) {
-        return env->NewObjectArray(0 /* size */, gKeyEventClassInfo.clazz, NULL);
+        return env->NewObjectArray(/*size=*/0, gKeyEventClassInfo.clazz, NULL);
     }
     jchar* chars = env->GetCharArrayElements(charsArray, NULL);
     if (!chars) {

@@ -239,7 +239,7 @@ static jlong nativeSendMotionEvent(JNIEnv* env, jobject clazz, jlong ptr, jobjec
         return -1;
     }
     MotionEvent* event = queue->createMotionEvent();
-    event->copyFrom(originalEvent, true /* keepHistory */);
+    event->copyFrom(originalEvent, /*keepHistory=*/true);
     queue->enqueueEvent(event);
     return reinterpret_cast<jlong>(event);
 }
