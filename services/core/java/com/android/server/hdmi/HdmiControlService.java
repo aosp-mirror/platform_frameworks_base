@@ -1579,6 +1579,10 @@ public class HdmiControlService extends SystemService {
             // If the device is not TV, we can't convert path to port-id, so stop here.
             return true;
         }
+        // Invalidate the physical address if parameters length is too short.
+        if (params.length < offset + 2) {
+            return false;
+        }
         int path = HdmiUtils.twoBytesToInt(params, offset);
         if (path != Constants.INVALID_PHYSICAL_ADDRESS && path == getPhysicalAddress()) {
             return true;
