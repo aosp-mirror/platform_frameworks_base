@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
+import android.os.Build;
 import android.permission.IOnPermissionsChangeListener;
 
 import com.android.server.pm.pkg.AndroidPackage;
@@ -481,6 +482,26 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
             @NonNull LegacyPermissionSettings legacyPermissionSettings) {
         mOldImplementation.writeLegacyPermissionsTEMP(legacyPermissionSettings);
         mNewImplementation.writeLegacyPermissionsTEMP(legacyPermissionSettings);
+    }
+
+    @Nullable
+    @Override
+    public String getDefaultPermissionGrantFingerprint(@UserIdInt int userId) {
+        String oldVal = mOldImplementation.getDefaultPermissionGrantFingerprint(userId);
+        String newVal = mNewImplementation.getDefaultPermissionGrantFingerprint(userId);
+
+        if (Objects.equals(oldVal, Build.FINGERPRINT)
+                != Objects.equals(newVal, Build.FINGERPRINT)) {
+            signalImplDifference("getDefaultPermissionGrantFingerprint");
+        }
+        return newVal;
+    }
+
+    @Override
+    public void setDefaultPermissionGrantFingerprint(@NonNull String fingerprint,
+            @UserIdInt int userId) {
+        mOldImplementation.setDefaultPermissionGrantFingerprint(fingerprint, userId);
+        mNewImplementation.setDefaultPermissionGrantFingerprint(fingerprint, userId);
     }
 
     @Override

@@ -348,6 +348,7 @@ sealed class UserState(
     internal val appIdPermissionFlagsReference: AppIdPermissionFlagsReference,
     internal val appIdAppOpModesReference: AppIdAppOpModesReference,
     internal val packageAppOpModesReference: PackageAppOpModesReference,
+    defaultPermissionGrantFingerprint: String?,
     writeMode: Int
 ) : WritableState, Immutable<MutableUserState> {
     val packageVersions: IndexedMap<String, Int>
@@ -362,6 +363,9 @@ sealed class UserState(
     val packageAppOpModes: PackageAppOpModes
         get() = packageAppOpModesReference.get()
 
+    var defaultPermissionGrantFingerprint: String? = defaultPermissionGrantFingerprint
+        protected set
+
     override var writeMode: Int = writeMode
         protected set
 
@@ -373,12 +377,14 @@ class MutableUserState private constructor(
     appIdPermissionFlagsReference: AppIdPermissionFlagsReference,
     appIdAppOpModesReference: AppIdAppOpModesReference,
     packageAppOpModesReference: PackageAppOpModesReference,
+    defaultPermissionGrantFingerprint: String?,
     writeMode: Int
 ) : UserState(
     packageVersionsReference,
     appIdPermissionFlagsReference,
     appIdAppOpModesReference,
     packageAppOpModesReference,
+    defaultPermissionGrantFingerprint,
     writeMode
 ), MutableWritableState {
     constructor() : this(
@@ -386,6 +392,7 @@ class MutableUserState private constructor(
         AppIdPermissionFlagsReference(MutableAppIdPermissionFlags()),
         AppIdAppOpModesReference(MutableAppIdAppOpModes()),
         PackageAppOpModesReference(MutablePackageAppOpModes()),
+        null,
         WriteMode.NONE
     )
 
@@ -394,6 +401,7 @@ class MutableUserState private constructor(
         userState.appIdPermissionFlagsReference.toImmutable(),
         userState.appIdAppOpModesReference.toImmutable(),
         userState.packageAppOpModesReference.toImmutable(),
+        userState.defaultPermissionGrantFingerprint,
         WriteMode.NONE
     )
 
@@ -405,6 +413,11 @@ class MutableUserState private constructor(
     fun mutateAppIdAppOpModes(): MutableAppIdAppOpModes = appIdAppOpModesReference.mutate()
 
     fun mutatePackageAppOpModes(): MutablePackageAppOpModes = packageAppOpModesReference.mutate()
+
+    @JvmName("setDefaultPermissionGrantFingerprintPublic")
+    fun setDefaultPermissionGrantFingerprint(defaultPermissionGrantFingerprint: String?) {
+        this.defaultPermissionGrantFingerprint = defaultPermissionGrantFingerprint
+    }
 
     override fun requestWriteMode(writeMode: Int) {
         this.writeMode = maxOf(this.writeMode, writeMode)

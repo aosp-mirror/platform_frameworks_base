@@ -4110,7 +4110,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         final int livingUserCount = livingUsers.size();
         for (int i = 0; i < livingUserCount; i++) {
             final int userId = livingUsers.get(i).id;
-            if (mSettings.isPermissionUpgradeNeeded(userId)) {
+            final boolean isPermissionUpgradeNeeded = !Objects.equals(
+                    mPermissionManager.getDefaultPermissionGrantFingerprint(userId),
+                    Build.FINGERPRINT);
+            if (isPermissionUpgradeNeeded) {
                 grantPermissionsUserIds = ArrayUtils.appendInt(
                         grantPermissionsUserIds, userId);
             }
@@ -4118,6 +4121,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         // If we upgraded grant all default permissions before kicking off.
         for (int userId : grantPermissionsUserIds) {
             mLegacyPermissionManager.grantDefaultPermissions(userId);
+            mPermissionManager.setDefaultPermissionGrantFingerprint(Build.FINGERPRINT, userId);
         }
         if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
             // If we did not grant default permissions, we preload from this the
@@ -4286,6 +4290,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         if (!convertedFromPreCreated || !readPermissionStateForUser(userId)) {
             mPermissionManager.onUserCreated(userId);
             mLegacyPermissionManager.grantDefaultPermissions(userId);
+            mPermissionManager.setDefaultPermissionGrantFingerprint(Build.FINGERPRINT, userId);
             mDomainVerificationManager.clearUser(userId);
         }
     }
@@ -4295,7 +4300,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mPermissionManager.writeLegacyPermissionStateTEMP();
             mSettings.readPermissionStateForUserSyncLPr(userId);
             mPermissionManager.readLegacyPermissionStateTEMP();
-            return mSettings.isPermissionUpgradeNeeded(userId);
+            final boolean isPermissionUpgradeNeeded = !Objects.equals(
+                    mPermissionManager.getDefaultPermissionGrantFingerprint(userId),
+                    Build.FINGERPRINT);
+            return isPermissionUpgradeNeeded;
         }
     }
 

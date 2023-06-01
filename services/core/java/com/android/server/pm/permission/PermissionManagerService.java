@@ -687,6 +687,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             mPermissionManagerServiceImpl.writeLegacyPermissionsTEMP(legacyPermissionSettings);
         }
 
+        @Nullable
+        @Override
+        public String getDefaultPermissionGrantFingerprint(@UserIdInt int userId) {
+            return mPermissionManagerServiceImpl.getDefaultPermissionGrantFingerprint(userId);
+        }
+
+        @Override
+        public void setDefaultPermissionGrantFingerprint(@NonNull String fingerprint,
+                @UserIdInt int userId) {
+            mPermissionManagerServiceImpl.setDefaultPermissionGrantFingerprint(fingerprint, userId);
+        }
+
         @Override
         public void onPackageAdded(@NonNull PackageState packageState, boolean isInstantApp,
                 @Nullable AndroidPackage oldPkg) {

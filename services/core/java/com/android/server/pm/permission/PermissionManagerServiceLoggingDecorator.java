@@ -356,6 +356,20 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
         mService.writeLegacyPermissionsTEMP(legacyPermissionSettings);
     }
 
+    @Nullable
+    @Override
+    public String getDefaultPermissionGrantFingerprint(int userId) {
+        Log.i(LOG_TAG, "getDefaultPermissionGrantFingerprint(userId = " + userId + ")");
+        return mService.getDefaultPermissionGrantFingerprint(userId);
+    }
+
+    @Override
+    public void setDefaultPermissionGrantFingerprint(@NonNull String fingerprint, int userId) {
+        Log.i(LOG_TAG, "setDefaultPermissionGrantFingerprint(fingerprint = " + fingerprint
+                + ", userId = " + userId + ")");
+        mService.setDefaultPermissionGrantFingerprint(fingerprint, userId);
+    }
+
     @Override
     public void onSystemReady() {
         Log.i(LOG_TAG, "onSystemReady()");
@@ -412,7 +426,7 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
 
     @Override
     public void onPackageUninstalled(@NonNull String packageName, int appId,
-            @NonNull PackageState packageState, @NonNull AndroidPackage pkg,
+            @NonNull PackageState packageState, @Nullable AndroidPackage pkg,
             @NonNull List<AndroidPackage> sharedUserPkgs, int userId) {
         Log.i(LOG_TAG, "onPackageUninstalled(packageName = " + packageName + ", appId = " + appId
                 + ", packageState = " + packageState + ", pkg = " + pkg + ", sharedUserPkgs = "

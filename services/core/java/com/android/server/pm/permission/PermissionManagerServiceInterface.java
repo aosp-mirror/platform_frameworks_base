@@ -523,6 +523,17 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
     void writeLegacyPermissionsTEMP(@NonNull LegacyPermissionSettings legacyPermissionSettings);
 
     /**
+     * Get the fingerprint for default permission grants.
+     */
+    @Nullable
+    String getDefaultPermissionGrantFingerprint(@UserIdInt int userId);
+
+    /**
+     * Set the fingerprint for default permission grants.
+     */
+    void setDefaultPermissionGrantFingerprint(@NonNull String fingerprint, @UserIdInt int userId);
+
+    /**
      * Callback when the system is ready.
      */
     void onSystemReady();
@@ -603,6 +614,6 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @param userId the user ID the package is uninstalled for
      */
     void onPackageUninstalled(@NonNull String packageName, int appId,
-            @NonNull PackageState packageState, @NonNull AndroidPackage pkg,
+            @NonNull PackageState packageState, @Nullable AndroidPackage pkg,
             @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId);
 }
