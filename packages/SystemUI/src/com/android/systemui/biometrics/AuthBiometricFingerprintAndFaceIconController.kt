@@ -21,6 +21,7 @@ import android.content.Context
 import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthBiometricView.BiometricState
+import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATED
 import com.android.systemui.biometrics.AuthBiometricView.STATE_ERROR
 import com.android.systemui.biometrics.AuthBiometricView.STATE_HELP
 import com.android.systemui.biometrics.AuthBiometricView.STATE_PENDING_CONFIRMATION
@@ -47,13 +48,16 @@ open class AuthBiometricFingerprintAndFaceIconController(
         @BiometricState oldState: Int,
         @BiometricState newState: Int
     ): Int? = when (newState) {
+        STATE_AUTHENTICATED -> {
+           if (oldState == STATE_PENDING_CONFIRMATION) {
+               R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie
+           } else {
+               super.getAnimationForTransition(oldState, newState)
+           }
+        }
         STATE_PENDING_CONFIRMATION -> {
             if (oldState == STATE_ERROR || oldState == STATE_HELP) {
                 R.raw.fingerprint_dialogue_error_to_unlock_lottie
-            } else if (oldState == STATE_PENDING_CONFIRMATION) {
-                // TODO(jbolinger): missing asset for this transition
-                // (unlocked icon to success checkmark)
-                R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie
             } else {
                 R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie
             }
