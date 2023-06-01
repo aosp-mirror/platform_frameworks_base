@@ -804,7 +804,7 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
-    public void getEntry_validUserId_shouldReturnEntry() {
+    public void getEntry_hasCache_shouldReturnCacheEntry() {
         mApplicationsState.mEntriesMap.put(/* userId= */ 0, new HashMap<>());
         addApp(PKG_1, /* id= */ 1);
 
@@ -813,10 +813,13 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
-    public void getEntry_invalidUserId_shouldReturnNull() {
-        mApplicationsState.mEntriesMap.put(/* userId= */ 0, new HashMap<>());
-        addApp(PKG_1, /* id= */ 1);
+    public void getEntry_hasNoCache_shouldReturnEntry() {
+        mApplicationsState.mEntriesMap.clear();
+        ApplicationInfo appInfo = createApplicationInfo(PKG_1, /* uid= */ 0);
+        mApplicationsState.mApplications.add(appInfo);
+        mApplicationsState.mSystemModules.put(PKG_1, /* value= */ false);
 
-        assertThat(mApplicationsState.getEntry(PKG_1, /* userId= */ -1)).isNull();
+        assertThat(mApplicationsState.getEntry(PKG_1, /* userId= */ 0).info.packageName)
+                .isEqualTo(PKG_1);
     }
 }
