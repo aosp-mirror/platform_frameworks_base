@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  *
  * @hide
  */
-class ContentProtectionBlocklistManager {
+public class ContentProtectionBlocklistManager {
 
     private static final String TAG = "ContentProtectionBlocklistManager";
 
@@ -46,7 +46,7 @@ class ContentProtectionBlocklistManager {
 
     @Nullable private Set<String> mPackageNameBlocklist;
 
-    protected ContentProtectionBlocklistManager(
+    public ContentProtectionBlocklistManager(
             @NonNull ContentProtectionPackageManager contentProtectionPackageManager) {
         mContentProtectionPackageManager = contentProtectionPackageManager;
     }
