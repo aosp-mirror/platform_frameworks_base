@@ -206,6 +206,7 @@
             android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
             android:theme="@style/CutoutShortEdges"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:supportsPictureInPicture="true"
             android:exported="false"/>
         <activity
             android:name=".ActivityEmbeddingThirdActivity"
