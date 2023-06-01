@@ -70,6 +70,7 @@ public class PipResizeGestureHandler {
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final PipMotionHelper mMotionHelper;
     private final PipBoundsState mPipBoundsState;
+    private final PipTouchState mPipTouchState;
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final PhonePipMenuController mPhonePipMenuController;
     private final PipDismissTargetHandler mPipDismissTargetHandler;
@@ -104,7 +105,6 @@ public class PipResizeGestureHandler {
     private boolean mAllowGesture;
     private boolean mIsAttached;
     private boolean mIsEnabled;
-    private boolean mEnableTouch;
     private boolean mEnablePinchResize;
     private boolean mEnableDragCornerResize;
     private boolean mIsSysUiStateValid;
@@ -122,7 +122,8 @@ public class PipResizeGestureHandler {
 
     public PipResizeGestureHandler(Context context, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
-            PipTaskOrganizer pipTaskOrganizer, PipDismissTargetHandler pipDismissTargetHandler,
+            PipTouchState pipTouchState, PipTaskOrganizer pipTaskOrganizer,
+            PipDismissTargetHandler pipDismissTargetHandler,
             Function<Rect, Rect> movementBoundsSupplier, Runnable updateMovementBoundsRunnable,
             PipUiEventLogger pipUiEventLogger, PhonePipMenuController menuActivityController,
             ShellExecutor mainExecutor) {
@@ -132,6 +133,7 @@ public class PipResizeGestureHandler {
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
         mMotionHelper = motionHelper;
+        mPipTouchState = pipTouchState;
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipDismissTargetHandler = pipDismissTargetHandler;
         mMovementBoundsSupplier = movementBoundsSupplier;
@@ -139,7 +141,6 @@ public class PipResizeGestureHandler {
         mPhonePipMenuController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
         mPinchResizingAlgorithm = new PipPinchResizingAlgorithm();
-        mEnableTouch = true;
 
         mUpdateResizeBoundsCallback = (rect) -> {
             mUserResizeBounds.set(rect);
@@ -250,8 +251,8 @@ public class PipResizeGestureHandler {
             return;
         }
 
-        if (!mEnableTouch) {
-            // No need to handle anything if touches are not enabled for resizing.
+        if (!mPipTouchState.getAllowInputEvents()) {
+            // No need to handle anything if touches are not enabled
             return;
         }
 
@@ -588,13 +589,13 @@ public class PipResizeGestureHandler {
                         mLastResizeBounds, movementBounds);
                 mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds, snapFraction);
 
-                // disable the resizing until the final bounds are updated
-                mEnableTouch = false;
+                // disable any touch events beyond resizing too
+                mPipTouchState.setAllowInputEvents(false);
 
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
                         PINCH_RESIZE_SNAP_DURATION, mAngle, mUpdateResizeBoundsCallback, () -> {
-                            // reset the pinch resizing to its default state
-                            mEnableTouch = true;
+                            // enable touch events
+                            mPipTouchState.setAllowInputEvents(true);
                         });
             } else {
                 mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
