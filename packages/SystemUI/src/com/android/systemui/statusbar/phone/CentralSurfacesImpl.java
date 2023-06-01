@@ -457,7 +457,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private PhoneStatusBarTransitions mStatusBarTransitions;
     private final AuthRippleController mAuthRippleController;
     @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
-    protected final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarInitializer mStatusBarInitializer;
     private final StatusBarWindowController mStatusBarWindowController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -1143,7 +1143,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     @Override
                     public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
                         mMainExecutor.execute(
-                                () -> plugin.setup(getNotificationShadeWindowView(),
+                                () -> plugin.setup(
+                                        mNotificationShadeWindowController.getWindowRootView(),
                                         getNavigationBarView(),
                                         new Callback(plugin), mDozeParameters));
                     }
@@ -1743,16 +1744,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public NotificationShadeWindowView getNotificationShadeWindowView() {
-        return mNotificationShadeWindowView;
-    }
-
-    @Override
-    public NotificationShadeWindowViewController getNotificationShadeWindowViewController() {
-        return mNotificationShadeWindowViewController;
-    }
-
-    @Override
     public ShadeViewController getShadeViewController() {
         return mShadeSurface;
     }
@@ -1822,11 +1813,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void onKeyguardViewManagerStatesUpdated() {
         logStateToEventlog();
-    }
-
-    @Override
-    public ViewGroup getNotificationScrollLayout() {
-        return mStackScroller;
     }
 
     @Override
@@ -2253,8 +2239,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 + CameraIntents.getOverrideCameraPackage(mContext));
     }
 
-    @Override
-    public void createAndAddWindows(@Nullable RegisterStatusBarResult result) {
+    private void createAndAddWindows(@Nullable RegisterStatusBarResult result) {
         makeStatusBarView(result);
         mNotificationShadeWindowController.attach();
         mStatusBarWindowController.attach();
@@ -3035,11 +3020,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    @Override
-    public LightRevealScrim getLightRevealScrim() {
-        return mLightRevealScrim;
-    }
-
     // TODO: Figure out way to remove these.
     @Override
     public NavigationBarView getNavigationBarView() {
@@ -3062,9 +3042,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     protected ViewRootImpl getViewRootImpl()  {
-        NotificationShadeWindowView nswv = getNotificationShadeWindowView();
-        if (nswv != null) return nswv.getViewRootImpl();
-
+        View root = mNotificationShadeWindowController.getWindowRootView();
+        if (root != null) return root.getViewRootImpl();
         return null;
     }
     /**

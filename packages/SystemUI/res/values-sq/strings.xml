@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Fytyra u vërtetua"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Konfirmuar"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Trokit \"Konfirmo\" për ta përfunduar"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"U shkyç me fytyrë."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"U shkyç me fytyrë. Shtyp për të vazhduar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Fytyra u njoh. Shtyp për të vazhduar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Fytyra u njoh. Shtyp ikonën e shkyçjes për të vazhduar."</string>
@@ -860,8 +859,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zmadho ekranin e plotë"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zmadho një pjesë të ekranit"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Hap cilësimet e zmadhimit"</string>
-    <!-- no translation found for magnification_close_settings_click_label (4642477260651704517) -->
-    <skip />
+    <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Mbyll cilësimet e zmadhimit"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Zvarrit këndin për të ndryshuar përmasat"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Lejo lëvizjen diagonale"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Ndrysho përmasat"</string>
@@ -1110,7 +1108,10 @@
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"\"Asistenti\" po dëgjon"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# njoftim}other{# njoftime}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <string name="note_task_button_label" msgid="8718616095800343136">"Mbajtja e shënimeve"</string>
+    <!-- no translation found for note_task_button_label (230135078402003532) -->
+    <skip />
+    <!-- no translation found for note_task_shortcut_long_label (7729325091147319409) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Po transmeton"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Të ndalohet transmetimi i <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Nëse transmeton <xliff:g id="SWITCHAPP">%1$s</xliff:g> ose ndryshon daljen, transmetimi yt aktual do të ndalojë"</string>

@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Volto autenticato"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confermato"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tocca Conferma per completare"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Sbloccato con il volto."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Sbloccato con il volto. Premi per continuare."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Volto riconosciuto. Premi per continuare."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Volto riconosciuto. Premi l\'icona Sblocca e continua."</string>
@@ -860,8 +859,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ingrandisci l\'intero schermo"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ingrandisci parte dello schermo"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Apri le impostazioni di ingrandimento"</string>
-    <!-- no translation found for magnification_close_settings_click_label (4642477260651704517) -->
-    <skip />
+    <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Chiudi impostazioni di ingrandimento"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Trascina l\'angolo per ridimensionare"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Scorrimento diagonale"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Ridimensiona"</string>
@@ -976,7 +974,7 @@
     <string name="controls_menu_add" msgid="4447246119229920050">"Aggiungi controlli"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Modifica controlli"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Aggiungi app"</string>
-    <string name="controls_menu_remove" msgid="3006525275966023468">"Rimuovi l\'app"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"Rimuovi app"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Aggiungi uscite"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Gruppo"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 dispositivo selezionato"</string>
@@ -1110,7 +1108,10 @@
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"L\'assistente è in ascolto"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notifica}many{# notifiche}other{# notifiche}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <string name="note_task_button_label" msgid="8718616095800343136">"Aggiunta di note"</string>
+    <!-- no translation found for note_task_button_label (230135078402003532) -->
+    <skip />
+    <!-- no translation found for note_task_shortcut_long_label (7729325091147319409) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Trasmissione in corso…"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Vuoi interrompere la trasmissione dell\'app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Se trasmetti l\'app <xliff:g id="SWITCHAPP">%1$s</xliff:g> o cambi l\'uscita, la trasmissione attuale viene interrotta"</string>

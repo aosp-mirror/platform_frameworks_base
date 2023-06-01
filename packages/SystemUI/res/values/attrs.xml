@@ -216,6 +216,8 @@
         <attr name="progress" format="integer" />
         <attr name="iconStartContentDescription" format="reference" />
         <attr name="iconEndContentDescription" format="reference" />
+        <attr name="tickMark" format="reference" />
+        <attr name="seekBarChangeMagnitude" format="integer" />
     </declare-styleable>
 </resources>
 

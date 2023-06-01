@@ -31,6 +31,7 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -68,6 +69,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
     @Mock private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
     @Mock private lateinit var lockScreenUserManager: NotificationLockscreenUserManager
     @Mock private lateinit var statusBarWindowController: StatusBarWindowController
+    @Mock private lateinit var notifShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
@@ -90,6 +92,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
                 Lazy { keyguardViewMediator },
                 Lazy { shadeController },
                 Lazy { statusBarKeyguardViewManager },
+                Lazy { notifShadeWindowController },
                 activityLaunchAnimator,
                 context,
                 lockScreenUserManager,

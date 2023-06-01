@@ -27,7 +27,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ActivitiesTransitionTestCfArm(flicker: FlickerTest) : ActivitiesTransitionTest(flicker) {
+class ActivityTransitionTestCfArm(flicker: FlickerTest) : ActivityTransitionTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.

@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
@@ -50,6 +51,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private lateinit var underTest: KeyguardInteractor
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
+    private lateinit var configurationRepository: FakeConfigurationRepository
 
     @Before
     fun setUp() {
@@ -59,12 +61,14 @@ class KeyguardInteractorTest : SysuiTestCase() {
         testScope = TestScope()
         repository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
+        configurationRepository = FakeConfigurationRepository()
         underTest =
             KeyguardInteractor(
                 repository,
                 commandQueue,
                 featureFlags,
                 bouncerRepository,
+                configurationRepository,
             )
     }
 

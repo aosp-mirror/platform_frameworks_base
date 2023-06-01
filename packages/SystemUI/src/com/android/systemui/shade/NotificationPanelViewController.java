@@ -17,8 +17,6 @@
 package com.android.systemui.shade;
 
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
-import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
-import static android.view.MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
@@ -30,6 +28,8 @@ import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
+import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
+import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPEN;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPENING;
@@ -125,6 +125,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.KeyguardViewConfigurator;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
@@ -598,6 +599,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
+    private final KeyguardViewConfigurator mKeyguardViewConfigurator;
     private final @Nullable MultiShadeInteractor mMultiShadeInteractor;
     private final CoroutineDispatcher mMainDispatcher;
     private boolean mIsAnyMultiShadeExpanded;
@@ -740,6 +742,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             KeyguardLongPressViewModel keyguardLongPressViewModel,
             KeyguardInteractor keyguardInteractor,
             ActivityStarter activityStarter,
+            KeyguardViewConfigurator keyguardViewConfigurator,
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor) {
         mInteractionJankMonitor = interactionJankMonitor;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
@@ -762,6 +765,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mLockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mKeyguardInteractor = keyguardInteractor;
+        mKeyguardViewConfigurator = keyguardViewConfigurator;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -1319,7 +1323,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardBottomArea.initFrom(oldBottomArea);
         mView.addView(mKeyguardBottomArea, index);
         initBottomArea();
-        mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
         mStatusBarStateListener.onDozeAmountChanged(mStatusBarStateController.getDozeAmount(),
                 mStatusBarStateController.getInterpolatedDozeAmount());
 
@@ -1361,6 +1364,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                         mKeyguardIndicationController.showTransientIndication(stringResourceId),
                 mVibratorHelper,
                 mActivityStarter);
+
+        // Rebind (for now), as a new bottom area and indication area may have been created
+        mKeyguardViewConfigurator.bindIndicationArea(mKeyguardBottomArea);
     }
 
     @VisibleForTesting
@@ -1398,7 +1404,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void setKeyguardBottomArea(KeyguardBottomAreaView keyguardBottomArea) {
         mKeyguardBottomArea = keyguardBottomArea;
-        mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
     }
 
     void setOpenCloseListener(OpenCloseListener openCloseListener) {
@@ -2568,7 +2573,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                                         this);
                                 return;
                             }
-                            if (mCentralSurfaces.getNotificationShadeWindowView()
+                            if (mNotificationShadeWindowController.getWindowRootView()
                                     .isVisibleToUser()) {
                                 mView.getViewTreeObserver().removeOnGlobalLayoutListener(
                                         this);
@@ -3021,12 +3026,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     void setStatusAccessibilityImportance(int mode) {
         mKeyguardStatusViewController.setStatusAccessibilityImportance(mode);
-    }
-
-    //TODO(b/254875405): this should be removed.
-    @Override
-    public KeyguardBottomAreaView getKeyguardBottomAreaView() {
-        return mKeyguardBottomArea;
     }
 
     @Override
@@ -4656,6 +4655,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             final float x = event.getX(pointerIndex);
             final float y = event.getY(pointerIndex);
             boolean canCollapsePanel = canCollapsePanelOnTouch();
+            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(
+                    mTrackpadGestureFeaturesEnabled, event) || isTrackpadThreeFingerSwipe(
+                    mTrackpadGestureFeaturesEnabled, event);
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
@@ -4688,7 +4690,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     addMovement(event);
                     break;
                 case MotionEvent.ACTION_POINTER_UP:
-                    if (isTrackpadMotionEvent(event)) {
+                    if (isTrackpadTwoOrThreeFingerSwipe) {
                         break;
                     }
                     final int upPointer = event.getPointerId(event.getActionIndex());
@@ -4704,7 +4706,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mShadeLog.logMotionEventStatusBarState(event,
                             mStatusBarStateController.getState(),
                             "onInterceptTouchEvent: pointer down action");
-                    if (!isTrackpadMotionEvent(event)
+                    if (!isTrackpadTwoOrThreeFingerSwipe
                             && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                         mMotionAborted = true;
                         mVelocityTracker.clear();
@@ -4853,9 +4855,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 return false;
             }
 
+            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(
+                    mTrackpadGestureFeaturesEnabled, event) || isTrackpadThreeFingerSwipe(
+                    mTrackpadGestureFeaturesEnabled, event);
+
             // On expanding, single mouse click expands the panel instead of dragging.
             if (isFullyCollapsed() && (event.isFromSource(InputDevice.SOURCE_MOUSE)
-                    && !isTrackpadMotionEvent(event))) {
+                    && !isTrackpadTwoOrThreeFingerSwipe)) {
                 if (event.getAction() == MotionEvent.ACTION_UP) {
                     expand(true /* animate */);
                 }
@@ -4915,7 +4921,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     break;
 
                 case MotionEvent.ACTION_POINTER_UP:
-                    if (isTrackpadMotionEvent(event)) {
+                    if (isTrackpadTwoOrThreeFingerSwipe) {
                         break;
                     }
                     final int upPointer = event.getPointerId(event.getActionIndex());
@@ -4934,7 +4940,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mShadeLog.logMotionEventStatusBarState(event,
                             mStatusBarStateController.getState(),
                             "handleTouch: pointer down action");
-                    if (!isTrackpadMotionEvent(event)
+                    if (!isTrackpadTwoOrThreeFingerSwipe
                             && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                         mMotionAborted = true;
                         endMotionEvent(event, x, y, true /* forceCancel */);
@@ -5008,12 +5014,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
             mShadeLog.logHandleTouchLastReturn(event, !mGestureWaitForTouchSlop, mTracking);
             return !mGestureWaitForTouchSlop || mTracking;
-        }
-
-        private boolean isTrackpadMotionEvent(MotionEvent ev) {
-            return mTrackpadGestureFeaturesEnabled && (
-                    ev.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE
-                            || ev.getClassification() == CLASSIFICATION_TWO_FINGER_SWIPE);
         }
     }
 

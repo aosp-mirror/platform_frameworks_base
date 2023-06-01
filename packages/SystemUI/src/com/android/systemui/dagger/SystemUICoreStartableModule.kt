@@ -34,6 +34,7 @@ import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyguard.KeyguardViewMediator
+import com.android.systemui.keyguard.KeyguardViewConfigurator
 import com.android.systemui.keyguard.data.quickaffordance.MuteQuickAffordanceCoreStartable
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.media.RingtonePlayer
@@ -295,4 +296,9 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(AssistantAttentionMonitor::class)
     abstract fun bindAssistantAttentionMonitor(sysui: AssistantAttentionMonitor): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardViewConfigurator::class)
+    abstract fun bindKeyguardViewConfigurator(impl: KeyguardViewConfigurator): CoreStartable
 }

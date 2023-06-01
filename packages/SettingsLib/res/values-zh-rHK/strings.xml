@@ -545,12 +545,18 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"剛剛"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"此手機"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"此平板電腦"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"這部手機"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"無法在此裝置上播放"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"請升級要切換的帳戶"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"無法在此播放下載內容"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"請在廣告結束後再試一次"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"喚醒裝置即可在此播放"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"必須喚醒裝置才能在此播放"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"裝置未獲核准播放"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"無法在此播放此媒體內容"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"無法連接，請關閉裝置然後重新開機"</string>

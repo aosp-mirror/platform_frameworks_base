@@ -51,7 +51,7 @@ constructor(
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
 
-    override val pickerName: String = context.getString(R.string.accessibility_wallet_button)
+    override fun pickerName(): String = context.getString(R.string.accessibility_wallet_button)
 
     override val pickerIconResourceId = R.drawable.ic_wallet_lockscreen
 

@@ -20,9 +20,8 @@ import static android.view.InputDevice.SOURCE_TOUCHPAD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
-import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadFourFingerSwipe;
-import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadMultiFingerSwipe;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
+import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -989,7 +988,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     private void onMotionEvent(MotionEvent ev) {
         int action = ev.getActionMasked();
-        boolean isTrackpadMultiFingerSwipe = isTrackpadMultiFingerSwipe(
+        boolean isTrackpadThreeFingerSwipe = isTrackpadThreeFingerSwipe(
                 mIsTrackpadGestureFeaturesEnabled, ev);
         if (action == MotionEvent.ACTION_DOWN) {
             if (DEBUG_MISSING_GESTURE) {
@@ -1003,7 +1002,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             mInputEventReceiver.setBatchingEnabled(false);
-            if (isTrackpadMultiFingerSwipe) {
+            if (isTrackpadThreeFingerSwipe) {
                 // Since trackpad gestures don't have zones, this will be determined later by the
                 // direction of the gesture. {@code mIsOnLeftEdge} is set to false to begin with.
                 mDeferSetIsOnLeftEdge = true;
@@ -1019,11 +1018,11 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     && !mGestureBlockingActivityRunning
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
                     && !isTrackpadScroll(mIsTrackpadGestureFeaturesEnabled, ev);
-            if (isTrackpadMultiFingerSwipe) {
+            if (isTrackpadThreeFingerSwipe) {
                 // Trackpad back gestures don't have zones, so we don't need to check if the down
                 // event is within insets.
                 mAllowGesture = isBackAllowedCommon && isValidTrackpadBackGesture(
-                        isTrackpadMultiFingerSwipe);
+                        isTrackpadThreeFingerSwipe);
             } else {
                 mAllowGesture = isBackAllowedCommon && !mUsingThreeButtonNav && isWithinInsets
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY())
@@ -1034,7 +1033,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 mEdgeBackPlugin.onMotionEvent(ev);
                 dispatchToBackAnimation(ev);
             }
-            if (mLogGesture || isTrackpadMultiFingerSwipe) {
+            if (mLogGesture || isTrackpadThreeFingerSwipe) {
                 mDownPoint.set(ev.getX(), ev.getY());
                 mEndPoint.set(-1, -1);
                 mThresholdCrossed = false;
@@ -1045,10 +1044,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mTmpLogDate.setTime(curTime);
             String curTimeStr = mLogDateFormat.format(mTmpLogDate);
             (isWithinInsets ? mGestureLogInsideInsets : mGestureLogOutsideInsets).log(String.format(
-                    "Gesture [%d [%s],alw=%B, mltf=%B, left=%B, defLeft=%B, backAlw=%B, disbld=%B,"
+                    "Gesture [%d [%s],alw=%B, t3fs=%B, left=%B, defLeft=%B, backAlw=%B, disbld=%B,"
                             + " qsDisbld=%b, blkdAct=%B, pip=%B,"
                             + " disp=%s, wl=%d, il=%d, wr=%d, ir=%d, excl=%s]",
-                    curTime, curTimeStr, mAllowGesture, isTrackpadMultiFingerSwipe,
+                    curTime, curTimeStr, mAllowGesture, isTrackpadThreeFingerSwipe,
                     mIsOnLeftEdge, mDeferSetIsOnLeftEdge, mIsBackGestureAllowed,
                     QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisabledForQuickstep,
                     mGestureBlockingActivityRunning, mIsInPip, mDisplaySize,
@@ -1057,8 +1056,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             if (!mThresholdCrossed) {
                 mEndPoint.x = (int) ev.getX();
                 mEndPoint.y = (int) ev.getY();
-                if (action == MotionEvent.ACTION_POINTER_DOWN && (!isTrackpadMultiFingerSwipe
-                        || isTrackpadFourFingerSwipe(mIsTrackpadGestureFeaturesEnabled, ev))) {
+                if (action == MotionEvent.ACTION_POINTER_DOWN && !isTrackpadThreeFingerSwipe) {
                     if (mAllowGesture) {
                         logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_MULTI_TOUCH);
                         if (DEBUG_MISSING_GESTURE) {
@@ -1070,11 +1068,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     mLogGesture = false;
                     return;
                 } else if (action == MotionEvent.ACTION_MOVE) {
-                    if (isTrackpadFourFingerSwipe(isTrackpadMultiFingerSwipe, ev)) {
-                        cancelGesture(ev);
-                        return;
-                    }
-                    if (isTrackpadMultiFingerSwipe && mDeferSetIsOnLeftEdge) {
+                    if (isTrackpadThreeFingerSwipe && mDeferSetIsOnLeftEdge) {
                         // mIsOnLeftEdge is determined by the relative position between the down
                         // and the current motion event for trackpad gestures instead of zoning.
                         mIsOnLeftEdge = mEndPoint.x > mDownPoint.x;

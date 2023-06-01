@@ -60,6 +60,114 @@ public class PersistentDataStoreTest {
     }
 
     @Test
+    public void testLoadBrightness() {
+        final String uniqueDisplayId = "test:123";
+        final DisplayDevice testDisplayDevice = new DisplayDevice(
+                null, null, uniqueDisplayId, null) {
+            @Override
+            public boolean hasStableUniqueId() {
+                return true;
+            }
+
+            @Override
+            public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+                return null;
+            }
+        };
+
+        String contents = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<display-manager-state>\n"
+                + "  <display-states>\n"
+                + "    <display unique-id=\"test:123\">\n"
+                + "      <brightness-value user-serial=\"1\">0.1</brightness-value>\n"
+                + "      <brightness-value user-serial=\"2\">0.2</brightness-value>\n"
+                + "    </display>\n"
+                + "  </display-states>\n"
+                + "</display-manager-state>\n";
+
+        InputStream is = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
+        mInjector.setReadStream(is);
+        mDataStore.loadIfNeeded();
+
+        float brightness = mDataStore.getBrightness(testDisplayDevice, 1);
+        assertEquals(0.1, brightness, 0.01);
+
+        brightness = mDataStore.getBrightness(testDisplayDevice, 2);
+        assertEquals(0.2, brightness, 0.01);
+    }
+
+    @Test
+    public void testSetBrightness_brightnessTagWithNoUserId_updatesToBrightnessTagWithUserId() {
+        final String uniqueDisplayId = "test:123";
+        final DisplayDevice testDisplayDevice =
+                new DisplayDevice(null, null, uniqueDisplayId, null) {
+            @Override
+            public boolean hasStableUniqueId() {
+                return true;
+            }
+
+            @Override
+            public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+                return null;
+            }
+        };
+
+        String contents = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<display-manager-state>\n"
+                + "  <display-states>\n"
+                + "    <color-mode>0</color-mode>\n"
+                + "    <display unique-id=\"test:123\">\n"
+                + "      <brightness-value>0.5</brightness-value>\n"
+                + "    </display>\n"
+                + "  </display-states>\n"
+                + "</display-manager-state>\n";
+
+        InputStream is = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
+        mInjector.setReadStream(is);
+        mDataStore.loadIfNeeded();
+
+        float user1Brightness = mDataStore.getBrightness(testDisplayDevice, 1 /* userSerial */);
+        float user2Brightness = mDataStore.getBrightness(testDisplayDevice, 2 /* userSerial */);
+        assertEquals(0.5, user1Brightness, 0.01);
+        assertEquals(0.5, user2Brightness, 0.01);
+
+        // Override the value for user 2. Default user must have been removed.
+        mDataStore.setBrightness(testDisplayDevice, 0.2f, 2 /* userSerial */  /* brightness*/);
+
+        user1Brightness = mDataStore.getBrightness(testDisplayDevice, 1 /* userSerial */);
+        user2Brightness = mDataStore.getBrightness(testDisplayDevice, 2 /* userSerial */);
+        assertTrue(Float.isNaN(user1Brightness));
+        assertEquals(0.2f, user2Brightness, 0.01);
+
+        // Override the value for user 1. User-specific brightness values should co-exist.
+        mDataStore.setBrightness(testDisplayDevice, 0.1f, 1 /* userSerial */  /* brightness*/);
+        user1Brightness = mDataStore.getBrightness(testDisplayDevice, 1 /* userSerial */);
+        user2Brightness = mDataStore.getBrightness(testDisplayDevice, 2 /* userSerial */);
+        assertEquals(0.1f, user1Brightness, 0.01);
+        assertEquals(0.2f, user2Brightness, 0.01);
+
+        // Validate saveIfNeeded writes user-specific brightnes.
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        mInjector.setWriteStream(baos);
+        mDataStore.saveIfNeeded();
+        mTestLooper.dispatchAll();
+        assertTrue(mInjector.wasWriteSuccessful());
+        TestInjector newInjector = new TestInjector();
+        PersistentDataStore newDataStore = new PersistentDataStore(newInjector);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        newInjector.setReadStream(bais);
+        newDataStore.loadIfNeeded();
+
+        user1Brightness = newDataStore.getBrightness(testDisplayDevice, 1 /* userSerial */);
+        user2Brightness = newDataStore.getBrightness(testDisplayDevice, 2 /* userSerial */);
+        float unknownUserBrightness =
+                newDataStore.getBrightness(testDisplayDevice, 999 /* userSerial */);
+        assertEquals(0.1f, user1Brightness, 0.01);
+        assertEquals(0.2f, user2Brightness, 0.01);
+        assertTrue(Float.isNaN(unknownUserBrightness));
+    }
+
+    @Test
     public void testLoadingBrightnessConfigurations() {
         String contents = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<display-manager-state>\n"
@@ -374,7 +482,7 @@ public class PersistentDataStoreTest {
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         newInjector.setReadStream(bais);
         newDataStore.loadIfNeeded();
-        assertTrue(Float.isNaN(mDataStore.getBrightness(testDisplayDevice)));
+        assertTrue(Float.isNaN(mDataStore.getBrightness(testDisplayDevice, 1 /* userSerial */)));
     }
 
     @Test

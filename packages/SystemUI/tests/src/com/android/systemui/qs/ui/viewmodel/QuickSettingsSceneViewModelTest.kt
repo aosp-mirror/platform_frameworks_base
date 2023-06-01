@@ -70,7 +70,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.unlockDevice()
             runCurrent()
 
@@ -83,7 +83,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             runCurrent()
 

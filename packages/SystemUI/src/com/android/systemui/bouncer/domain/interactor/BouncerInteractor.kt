@@ -197,7 +197,7 @@ constructor(
 
     private fun promptMessage(authMethod: AuthenticationMethodModel): String {
         return when (authMethod) {
-            is AuthenticationMethodModel.PIN ->
+            is AuthenticationMethodModel.Pin ->
                 applicationContext.getString(R.string.keyguard_enter_your_pin)
             is AuthenticationMethodModel.Password ->
                 applicationContext.getString(R.string.keyguard_enter_your_password)
@@ -209,7 +209,7 @@ constructor(
 
     private fun errorMessage(authMethod: AuthenticationMethodModel): String {
         return when (authMethod) {
-            is AuthenticationMethodModel.PIN -> applicationContext.getString(R.string.kg_wrong_pin)
+            is AuthenticationMethodModel.Pin -> applicationContext.getString(R.string.kg_wrong_pin)
             is AuthenticationMethodModel.Password ->
                 applicationContext.getString(R.string.kg_wrong_password)
             is AuthenticationMethodModel.Pattern ->

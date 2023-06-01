@@ -31,7 +31,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
-import android.view.ViewGroup;
 import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
@@ -40,7 +39,6 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -48,11 +46,8 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.RemoteAnimationRunnerCompat;
-import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.Compile;
@@ -70,14 +65,11 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     String TAG = "CentralSurfaces";
     boolean DEBUG = false;
     boolean SPEW = false;
-    boolean DUMPTRUCK = true; // extra dumpsys info
     boolean DEBUG_GESTURES = false;
     boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
     boolean DEBUG_CAMERA_LIFT = false;
     boolean DEBUG_WINDOW_STATE = false;
     boolean DEBUG_WAKEUP_DELAY = Compile.IS_DEBUG;
-    // additional instrumentation for testing purposes; intended to be left on during development
-    boolean CHATTY = DEBUG;
     boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
     String ACTION_FAKE_ARTWORK = "fake_artwork";
     int FADE_KEYGUARD_START_DELAY = 100;
@@ -218,10 +210,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
      */
     void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason);
 
-    NotificationShadeWindowView getNotificationShadeWindowView();
-
-    NotificationShadeWindowViewController getNotificationShadeWindowViewController();
-
     /** */
     ShadeViewController getShadeViewController();
 
@@ -239,8 +227,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean isWakeUpComingFromTouch();
 
     void onKeyguardViewManagerStatesUpdated();
-
-    ViewGroup getNotificationScrollLayout();
 
     boolean isPulsing();
 
@@ -303,8 +289,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @Override
     void dump(PrintWriter pwOriginal, String[] args);
 
-    void createAndAddWindows(@Nullable RegisterStatusBarResult result);
-
     float getDisplayWidth();
 
     float getDisplayHeight();
@@ -353,8 +337,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void showBouncerWithDimissAndCancelIfKeyguard(OnDismissAction performAction,
             Runnable cancelAction);
-
-    LightRevealScrim getLightRevealScrim();
 
     // TODO: Figure out way to remove these.
     NavigationBarView getNavigationBarView();
@@ -468,8 +450,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     float getDisplayDensity();
 
     void extendDozePulse();
-
-    boolean shouldDelayWakeUpAnimation();
 
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;

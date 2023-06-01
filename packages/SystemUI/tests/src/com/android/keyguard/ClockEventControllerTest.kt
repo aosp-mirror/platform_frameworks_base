@@ -53,6 +53,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
@@ -62,6 +63,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import java.util.TimeZone
 import java.util.concurrent.Executor
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
@@ -117,6 +119,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 commandQueue = commandQueue,
                 featureFlags = featureFlags,
                 bouncerRepository = bouncerRepository,
+                configurationRepository = FakeConfigurationRepository(),
             ),
             KeyguardTransitionInteractor(repository = transitionRepository),
             broadcastDispatcher,
@@ -155,9 +158,8 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     @Test
     fun themeChanged_verifyClockPaletteUpdated() = runBlocking(IMMEDIATE) {
-        // TODO(b/266103601): delete this test and add more coverage for updateColors()
-        // verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
-        // verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
+         verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
+         verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 
         val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
         verify(configurationController).addCallback(capture(captor))

@@ -25,12 +25,12 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -85,8 +85,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
-            val pinLengths by collectLastValue(underTest.pinLengths)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            val entries by collectLastValue(underTest.pinEntries)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
@@ -95,7 +95,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onShown()
 
             assertThat(message?.text).isEqualTo(ENTER_YOUR_PIN)
-            assertThat(pinLengths).isEqualTo(0 to 0)
+            assertThat(entries).hasSize(0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
@@ -106,8 +106,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
-            val pinLengths by collectLastValue(underTest.pinLengths)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            val entries by collectLastValue(underTest.pinEntries)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
@@ -117,7 +117,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onPinButtonClicked(1)
 
             assertThat(message?.text).isEmpty()
-            assertThat(pinLengths).isEqualTo(0 to 1)
+            assertThat(entries).hasSize(1)
+            assertThat(entries?.map { it.input }).containsExactly(1)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
@@ -128,22 +129,49 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
-            val pinLengths by collectLastValue(underTest.pinLengths)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            val entries by collectLastValue(underTest.pinEntries)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onPinButtonClicked(1)
-            assertThat(pinLengths).isEqualTo(0 to 1)
+            assertThat(entries).hasSize(1)
 
             underTest.onBackspaceButtonClicked()
 
             assertThat(message?.text).isEmpty()
-            assertThat(pinLengths).isEqualTo(1 to 0)
+            assertThat(entries).hasSize(0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+        }
+
+    @Test
+    fun onPinEdit() =
+        testScope.runTest {
+            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
+            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
+            val message by collectLastValue(bouncerViewModel.message)
+            val entries by collectLastValue(underTest.pinEntries)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
+            authenticationInteractor.lockDevice()
+            sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            underTest.onShown()
+
+            underTest.onPinButtonClicked(1)
+            underTest.onPinButtonClicked(2)
+            underTest.onPinButtonClicked(3)
+            underTest.onBackspaceButtonClicked()
+            underTest.onBackspaceButtonClicked()
+            underTest.onPinButtonClicked(4)
+            underTest.onPinButtonClicked(5)
+
+            assertThat(entries).hasSize(3)
+            assertThat(entries?.map { it.input }).containsExactly(1, 4, 5).inOrder()
+            assertThat(entries?.map { it.sequenceNumber }).isInStrictOrder()
         }
 
     @Test
@@ -152,8 +180,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
-            val pinLengths by collectLastValue(underTest.pinLengths)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            val entries by collectLastValue(underTest.pinEntries)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
@@ -165,13 +193,9 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onPinButtonClicked(4)
 
             underTest.onBackspaceButtonLongPressed()
-            repeat(4) { index ->
-                assertThat(pinLengths).isEqualTo(4 - index to 3 - index)
-                advanceTimeBy(PinBouncerViewModel.BACKSPACE_LONG_PRESS_DELAY_MS)
-            }
 
             assertThat(message?.text).isEmpty()
-            assertThat(pinLengths).isEqualTo(1 to 0)
+            assertThat(entries).hasSize(0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
@@ -181,7 +205,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
@@ -204,8 +228,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
-            val pinLengths by collectLastValue(underTest.pinLengths)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            val entries by collectLastValue(underTest.pinEntries)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
@@ -219,7 +243,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onAuthenticateButtonClicked()
 
-            assertThat(pinLengths).isEqualTo(0 to 0)
+            assertThat(entries).hasSize(0)
             assertThat(message?.text).isEqualTo(WRONG_PIN)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -231,8 +255,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
-            val pinLengths by collectLastValue(underTest.pinLengths)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            val entries by collectLastValue(underTest.pinEntries)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
@@ -245,7 +269,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onPinButtonClicked(5) // PIN is now wrong!
             underTest.onAuthenticateButtonClicked()
             assertThat(message?.text).isEqualTo(WRONG_PIN)
-            assertThat(pinLengths).isEqualTo(0 to 0)
+            assertThat(entries).hasSize(0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -266,5 +290,11 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         private const val CONTAINER_NAME = "container1"
         private const val ENTER_YOUR_PIN = "Enter your pin"
         private const val WRONG_PIN = "Wrong pin"
+
+        val KEY_CODE =
+            Correspondence.transforming<EnteredKey, Int>(
+                { it?.input },
+                "has a eventId of",
+            )
     }
 }

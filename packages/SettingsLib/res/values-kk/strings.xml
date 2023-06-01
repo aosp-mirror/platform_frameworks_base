@@ -545,12 +545,18 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Дәл қазір"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Осы телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Осы планшет"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Осы телефон"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Осы құрылғыда ойнату мүмкін емес."</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Ауысу үшін аккаунтты жаңартыңыз."</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Жүктеп алынғандарды осы жерде ойнату мүмкін емес."</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Жарнамадан кейін қайталап көріңіз."</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Осы жерде ойнату үшін құрылғыны оятыңыз."</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Осы жерде ойнату үшін құрылғыны ұйқы режимінен шығарыңыз."</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Ойнату үшін авторизация керек."</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Бұл мультимедиа файлын осы жерде ойнату мүмкін емес."</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Байланыс орнату қатесі шығуып жатыр. Құрылғыны өшіріп, қайта қосыңыз."</string>
@@ -575,7 +581,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Пайдаланушы"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Шектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңа пайдаланушы қосылсын ба?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша профильдер жасай отырып, бұл құрылғыны басқалармен ортақ пайдалануға болады. Әр пайдаланушы қолданбаларды, тұсқағаздарды орнатып, профилін өз қалауынша реттей алады. Сондай-ақ барлығы ортақ қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы енгізілгенде, ол өз профилін реттеуі керек болады.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға өтпейді."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша пайдаланушылар жасай отырып, бұл құрылғыны басқалармен бөлісуге болады. Әр пайдаланушы қолданбалар, тұсқағаздар орнатып, профилін қалауынша реттей алады. Барлық пайдаланушы қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы қосылғанда, ол өз профилін реттеуі керек.\n\nКез келген пайдаланушы басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға берілмейді."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңадан қосылған пайдаланушы өз профилін реттеуі керек.\n\nКез келген пайдаланушы басқалар үшін қолданбаларды жаңарта алады."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Осы пайдаланушыны әкімші ету керек пе?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Әкімшілер басқа пайдаланушыларда болмайтын арнайы өкілеттерге ие. Әкімші мына әрекеттерді орындай алады: барлық пайдаланушыны басқару, осы құрылғыны жаңарту не бастапқы күйге қайтару, параметрлерді өзгерту, орнатылған құрылғының барлығын көру және әкімші өкілеттерін басқа пайдаланушыларға беру не қайтару."</string>
@@ -611,8 +617,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Мұндайда жаңа қонақ сеансы басталады және ағымдағы сеанстағы барлық қолданба мен дерек жойылады."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Қонақ режимінен шығу керек пе?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ағымдағы қонақ сеансындағы барлық қолданба мен дерек жойылады."</string>
-    <string name="grant_admin" msgid="4323199171790522574">"Иә, пайдаланушы әкімші етілсін"</string>
-    <string name="not_grant_admin" msgid="3557849576157702485">"Жоқ, пайдаланушы әкімші етілмесін"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Иә, әкімші болсын"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Жоқ, әкімші болмасын"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Шығу"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Қонақ әрекетін сақтау керек пе?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ағымдағы сеанс тарихын сақтауға не барлық қолданба мен деректі жоюға болады."</string>

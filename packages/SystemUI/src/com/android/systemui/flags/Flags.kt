@@ -134,7 +134,7 @@ object Flags {
 
     // TODO(b/275694445): Tracking Bug
     @JvmField
-    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = unreleasedFlag(208,
+    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = releasedFlag(208,
         "lockscreen_without_secure_lock_when_dreaming")
 
     /**
@@ -535,7 +535,7 @@ object Flags {
     // TODO(b/273443374): Tracking Bug
     @Keep
     @JvmField val LOCKSCREEN_LIVE_WALLPAPER =
-        sysPropBooleanFlag(1117, "persist.wm.debug.lockscreen_live_wallpaper", default = false)
+        sysPropBooleanFlag(1117, "persist.wm.debug.lockscreen_live_wallpaper", default = true)
 
     // TODO(b/281648899): Tracking bug
     @Keep
@@ -678,7 +678,7 @@ object Flags {
     // TODO(b/283071711): Tracking bug
     @JvmField
     val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
-            unreleasedFlag(2401, "trim_resources_with_background_trim_on_lock")
+            releasedFlag(2401, "trim_resources_with_background_trim_on_lock")
 
     // TODO:(b/283203305): Tracking bug
     @JvmField

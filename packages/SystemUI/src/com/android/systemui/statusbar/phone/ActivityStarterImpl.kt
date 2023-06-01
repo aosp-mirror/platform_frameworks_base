@@ -45,6 +45,7 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -68,6 +69,7 @@ constructor(
     private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val shadeControllerLazy: Lazy<ShadeController>,
     private val statusBarKeyguardViewManagerLazy: Lazy<StatusBarKeyguardViewManager>,
+    private val notifShadeWindowControllerLazy: Lazy<NotificationShadeWindowController>,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
     private val context: Context,
     private val lockScreenUserManager: NotificationLockscreenUserManager,
@@ -572,6 +574,9 @@ constructor(
                                     // TODO b/221255671: restrict this to only be set for
                                     // notifications
                                     options.isEligibleForLegacyPermissionPrompt = true
+                                    options.setPendingIntentBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                                    )
                                     return intent.sendAndReturnResult(
                                         null,
                                         0,
@@ -863,6 +868,7 @@ constructor(
                     return StatusBarLaunchAnimatorController(
                         animationController,
                         it,
+                        notifShadeWindowControllerLazy.get(),
                         isLaunchForActivity
                     )
                 }

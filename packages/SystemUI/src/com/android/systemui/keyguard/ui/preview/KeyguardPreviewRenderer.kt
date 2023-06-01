@@ -17,7 +17,7 @@
 
 package com.android.systemui.keyguard.ui.preview
 
-import android.annotation.ColorInt
+import android.app.WallpaperColors
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -47,6 +47,7 @@ import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBind
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewSmartspaceViewModel
+import com.android.systemui.monet.ColorScheme
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.shared.clocks.DefaultClockController
@@ -91,6 +92,7 @@ constructor(
     /** [shouldHideClock] here means that we never create and bind the clock views */
     private val shouldHideClock: Boolean =
         bundle.getBoolean(ClockPreviewConstants.KEY_HIDE_CLOCK, false)
+    private val wallpaperColors: WallpaperColors? = bundle.getParcelable(KEY_COLORS)
 
     private var host: SurfaceControlViewHost
 
@@ -100,7 +102,6 @@ constructor(
     private lateinit var largeClockHostView: FrameLayout
     private lateinit var smallClockHostView: FrameLayout
     private var smartSpaceView: View? = null
-    private var colorOverride: Int? = null
 
     private val disposables = mutableSetOf<DisposableHandle>()
     private var isDestroyed = false
@@ -172,6 +173,10 @@ constructor(
             rootView.translationX = (width - scale * rootView.width) / 2
             rootView.translationY = (height - scale * rootView.height) / 2
 
+            if (isDestroyed) {
+                return@post
+            }
+
             host.setView(rootView, rootView.measuredWidth, rootView.measuredHeight)
         }
     }
@@ -193,14 +198,6 @@ constructor(
      */
     fun hideSmartspace(hide: Boolean) {
         mainHandler.post { smartSpaceView?.visibility = if (hide) View.INVISIBLE else View.VISIBLE }
-    }
-
-    /** Sets the clock's color to the overridden seed color. */
-    fun onColorOverridden(@ColorInt color: Int?) {
-        mainHandler.post {
-            colorOverride = color
-            clockController.clock?.run { events.onSeedColorChanged(color) }
-        }
     }
 
     /**
@@ -395,7 +392,24 @@ constructor(
         val clock = clockRegistry.createCurrentClock()
         clockController.clock = clock
 
-        colorOverride?.let { clock.events.onSeedColorChanged(it) }
+        if (clockRegistry.seedColor == null) {
+            // Seed color null means users do override any color on the clock. The default color
+            // will need to use wallpaper's extracted color and consider if the wallpaper's color
+            // is dark or a light.
+            // TODO(b/277832214) we can potentially simplify this code by checking for
+            // wallpaperColors being null in the if clause above and removing the many ?.
+            val wallpaperColorScheme =
+                wallpaperColors?.let { ColorScheme(it, /* darkTheme= */ false) }
+            val lightClockColor = wallpaperColorScheme?.accent1?.s100
+            val darkClockColor = wallpaperColorScheme?.accent2?.s600
+            /** Note that when [wallpaperColors] is null, isWallpaperDark is true. */
+            val isWallpaperDark: Boolean =
+                (wallpaperColors?.colorHints?.and(WallpaperColors.HINT_SUPPORTS_DARK_TEXT)) !=
+                    WallpaperColors.HINT_SUPPORTS_DARK_TEXT
+            clock.events.onSeedColorChanged(
+                if (isWallpaperDark) lightClockColor else darkClockColor
+            )
+        }
 
         updateLargeClock(clock)
         updateSmallClock(clock)
@@ -428,6 +442,7 @@ constructor(
         private const val KEY_VIEW_WIDTH = "width"
         private const val KEY_VIEW_HEIGHT = "height"
         private const val KEY_DISPLAY_ID = "display_id"
+        private const val KEY_COLORS = "wallpaper_colors"
 
         private const val DIM_ALPHA = 0.3f
     }

@@ -22,6 +22,9 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import static com.android.internal.accessibility.common.MagnificationConstants.SCALE_MAX_VALUE;
+import static com.android.internal.accessibility.common.MagnificationConstants.SCALE_MIN_VALUE;
+
 import android.annotation.IntDef;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -87,7 +90,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private final MagnificationGestureDetector mGestureDetector;
     private boolean mSingleTapDetected = false;
 
-    private SeekBarWithIconButtonsView mZoomSeekbar;
+    @VisibleForTesting
+    SeekBarWithIconButtonsView mZoomSeekbar;
     private LinearLayout mAllowDiagonalScrollingView;
     private TextView mAllowDiagonalScrollingTitle;
     private Switch mAllowDiagonalScrollingSwitch;
@@ -102,11 +106,15 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private ImageButton mFullScreenButton;
     private int mLastSelectedButtonIndex = MagnificationSize.NONE;
     private boolean mAllowDiagonalScrolling = false;
-    private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
-    private static final float A11Y_SCALE_MIN_VALUE = 1.0f;
+    /**
+     * Amount by which magnification scale changes compared to seekbar in settings.
+     * magnitude = 10 means, for every 1 scale increase, 10 progress increase in seekbar.
+     */
+    private int mSeekBarMagnitude;
     private WindowMagnificationSettingsCallback mCallback;
 
     private ContentObserver mMagnificationCapabilityObserver;
+    private ContentObserver mMagnificationScaleObserver;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
@@ -156,18 +164,26 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 });
             }
         };
+        mMagnificationScaleObserver = new ContentObserver(
+                mContext.getMainThreadHandler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                setScaleSeekbar(getMagnificationScale());
+            }
+        };
     }
 
     private class ZoomSeekbarChangeListener implements SeekBar.OnSeekBarChangeListener {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            float scale = progress * A11Y_CHANGE_SCALE_DIFFERENCE + A11Y_SCALE_MIN_VALUE;
+            float scale = (progress / (float) mSeekBarMagnitude) + SCALE_MIN_VALUE;
             // Update persisted scale only when scale >= PERSISTED_SCALE_MIN_VALUE const.
             // We assume if the scale is lower than the PERSISTED_SCALE_MIN_VALUE, there will be
             // no obvious magnification effect.
             if (scale >= MagnificationConstants.PERSISTED_SCALE_MIN_VALUE) {
-                Settings.Secure.putFloatForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale,
+                mSecureSettings.putFloatForUser(
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                        scale,
                         UserHandle.USER_CURRENT);
             }
             mCallback.onMagnifierScale(scale);
@@ -301,6 +317,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
         // Unregister observer before removing view
         mSecureSettings.unregisterContentObserver(mMagnificationCapabilityObserver);
+        mSecureSettings.unregisterContentObserver(mMagnificationScaleObserver);
         mWindowManager.removeView(mSettingView);
         mIsVisible = false;
         if (resetPosition) {
@@ -329,7 +346,13 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     }
 
     public void setScaleSeekbar(float scale) {
-        setSeekbarProgress(scale);
+        int index = (int) ((scale - SCALE_MIN_VALUE) * mSeekBarMagnitude);
+        if (index < 0) {
+            index = 0;
+        } else if (index > mZoomSeekbar.getMax()) {
+            index = mZoomSeekbar.getMax();
+        }
+        mZoomSeekbar.setProgress(index);
     }
 
     private void transitToMagnificationMode(int mode) {
@@ -346,6 +369,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private void showSettingPanel(boolean resetPosition) {
         if (!mIsVisible) {
             updateUIControlsIfNeeded();
+            setScaleSeekbar(getMagnificationScale());
             if (resetPosition) {
                 mDraggableWindowBounds.set(getDraggableWindowBounds());
                 mParams.x = mDraggableWindowBounds.right;
@@ -357,6 +381,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             mSecureSettings.registerContentObserverForUser(
                     Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
                     mMagnificationCapabilityObserver,
+                    UserHandle.USER_CURRENT);
+            mSecureSettings.registerContentObserverForUser(
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                    mMagnificationScaleObserver,
                     UserHandle.USER_CURRENT);
 
             // Exclude magnification switch button from system gesture area.
@@ -390,9 +418,15 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 UserHandle.USER_CURRENT);
     }
 
+    private float getMagnificationScale() {
+        return mSecureSettings.getFloatForUser(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                SCALE_MIN_VALUE,
+                UserHandle.USER_CURRENT);
+    }
+
     private void updateUIControlsIfNeeded() {
         int capability = getMagnificationCapability();
-
         int selectedButtonIndex = mLastSelectedButtonIndex;
         switch (capability) {
             case ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW:
@@ -453,14 +487,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
     };
 
-    private void setSeekbarProgress(float scale) {
-        int index = (int) ((scale - A11Y_SCALE_MIN_VALUE) / A11Y_CHANGE_SCALE_DIFFERENCE);
-        if (index < 0) {
-            index = 0;
-        }
-        mZoomSeekbar.setProgress(index);
-    }
-
     void inflateView() {
         mSettingView = (LinearLayout) View.inflate(mContext,
                 R.layout.window_magnification_settings_view, null);
@@ -482,10 +508,13 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 mSettingView.findViewById(R.id.magnifier_horizontal_lock_title);
 
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
+        mZoomSeekbar.setMax((int) (mZoomSeekbar.getChangeMagnitude()
+                * (SCALE_MAX_VALUE - SCALE_MIN_VALUE)));
+        mSeekBarMagnitude = mZoomSeekbar.getChangeMagnitude();
         float scale = mSecureSettings.getFloatForUser(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 0,
                 UserHandle.USER_CURRENT);
-        setSeekbarProgress(scale);
+        setScaleSeekbar(scale);
         mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
 
         mAllowDiagonalScrollingView =
@@ -601,7 +630,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     @VisibleForTesting
     void setDiagonalScrolling(boolean enabled) {
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+        mSecureSettings.putIntForUser(
                 Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
 

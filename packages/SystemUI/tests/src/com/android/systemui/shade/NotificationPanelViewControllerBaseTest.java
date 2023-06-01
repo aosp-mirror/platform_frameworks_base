@@ -89,12 +89,13 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository;
+import com.android.systemui.keyguard.KeyguardViewConfigurator;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
@@ -253,6 +254,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected UserManager mUserManager;
     @Mock protected UiEventLogger mUiEventLogger;
     @Mock protected LockIconViewController mLockIconViewController;
+    @Mock protected KeyguardViewConfigurator mKeyguardViewConfigurator;
     @Mock protected KeyguardMediaController mKeyguardMediaController;
     @Mock protected NavigationModeController mNavigationModeController;
     @Mock protected NavigationBarController mNavigationBarController;
@@ -342,8 +344,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mMainDispatcher = getMainDispatcher();
         mKeyguardBottomAreaInteractor = new KeyguardBottomAreaInteractor(
                 new FakeKeyguardRepository());
-        mKeyguardInteractor = new KeyguardInteractor(new FakeKeyguardRepository(), mCommandQueue,
-                mFeatureFlags, new FakeKeyguardBouncerRepository());
+
+        mKeyguardInteractor = KeyguardInteractorFactory.create().getKeyguardInteractor();
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
                 mInteractionJankMonitor, mShadeExpansionStateManager);
@@ -611,6 +613,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyuardLongPressViewModel,
                 mKeyguardInteractor,
                 mActivityStarter,
+                mKeyguardViewConfigurator,
                 mKeyguardFaceAuthInteractor);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,

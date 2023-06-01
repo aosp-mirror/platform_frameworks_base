@@ -166,7 +166,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                     "unocclude",
                     transition, info, startTransaction, finishTransaction, finishCallback);
         } else {
-            Log.wtf(TAG, "Failed to play: " + info);
+            Log.w(TAG, "Failed to play: " + info);
             return false;
         }
     }
@@ -185,6 +185,9 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                         @Override
                         public void onTransitionFinished(
                                 WindowContainerTransaction wct, SurfaceControl.Transaction sct) {
+                            if (sct != null) {
+                                finishTransaction.merge(sct);
+                            }
                             mMainExecutor.execute(() -> {
                                 mStartedTransitions.remove(transition);
                                 finishCallback.onTransitionFinished(wct, null);

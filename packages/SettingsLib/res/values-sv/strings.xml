@@ -545,6 +545,12 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nyss"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Den här telefonen"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Den här surfplattan"</string>
+    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
+    <skip />
+    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
+    <skip />
+    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
+    <skip />
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Den här telefonen"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan inte spelas på denna enhet"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Uppgradera kontot för att byta"</string>
@@ -576,7 +582,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begränsad profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Lägga till ny användare?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dela enheten med andra om du skapar flera användare. Alla användare får sitt eget utrymme som de kan anpassa som de vill med appar, bakgrund och så vidare. Användarna kan även ändra enhetsinställningar som påverkar alla, till exempel wifi.\n\nNär du lägger till en ny användare måste han eller hon konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användares räkning. Tillgänglighetsinställningar och tjänster kanske inte överförs till den nya användaren."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"När du lägger till en ny användare måste den personen konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användares räkning."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"När du lägger till en ny användare måste den personen konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användare."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Vill du göra denna användare till administratör?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratörer har särskilda behörigheter som andra användare inte har. En administratör kan hantera alla användare, uppdatera eller återställa den här enheten, ändra inställningar, se alla installerade appar och bevilja eller återkalla administratörsbehörigheter för andra."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Gör till administratör"</string>

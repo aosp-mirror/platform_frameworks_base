@@ -97,7 +97,7 @@ class BouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val message by collectLastValue(underTest.message)
             val throttling by collectLastValue(bouncerInteractor.throttling)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             assertThat(message?.isUpdateAnimated).isTrue()
 
             repeat(BouncerInteractor.THROTTLE_EVERY) {
@@ -120,7 +120,7 @@ class BouncerViewModelTest : SysuiTestCase() {
                     }
                 )
             val throttling by collectLastValue(bouncerInteractor.throttling)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
             assertThat(isInputEnabled).isTrue()
 
             repeat(BouncerInteractor.THROTTLE_EVERY) {
@@ -137,7 +137,7 @@ class BouncerViewModelTest : SysuiTestCase() {
     fun throttlingDialogMessage() =
         testScope.runTest {
             val throttlingDialogMessage by collectLastValue(underTest.throttlingDialogMessage)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
 
             repeat(BouncerInteractor.THROTTLE_EVERY) {
                 // Wrong PIN.
@@ -154,7 +154,7 @@ class BouncerViewModelTest : SysuiTestCase() {
         return listOf(
             AuthenticationMethodModel.None,
             AuthenticationMethodModel.Swipe,
-            AuthenticationMethodModel.PIN(1234),
+            AuthenticationMethodModel.Pin(1234),
             AuthenticationMethodModel.Password("password"),
             AuthenticationMethodModel.Pattern(
                 listOf(AuthenticationMethodModel.Pattern.PatternCoordinate(1, 1))

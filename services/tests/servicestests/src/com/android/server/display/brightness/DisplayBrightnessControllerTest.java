@@ -19,6 +19,7 @@ package com.android.server.display.brightness;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -247,6 +248,7 @@ public final class DisplayBrightnessControllerTest {
                 0.0f);
         verify(mBrightnessChangeExecutor).execute(mOnBrightnessChangeRunnable);
         verify(mBrightnessSetting).setBrightness(brightnessValue);
+        verify(mBrightnessSetting).setUserSerial(anyInt());
 
         // Does nothing if the value is invalid
         mDisplayBrightnessController.updateScreenBrightnessSetting(Float.NaN);
@@ -357,5 +359,29 @@ public final class DisplayBrightnessControllerTest {
         verifyZeroInteractions(automaticBrightnessController);
         verify(mBrightnessSetting, never()).getBrightnessNitsForDefaultDisplay();
         verify(mBrightnessSetting, never()).setBrightness(brightness);
+    }
+
+    @Test
+    public void testChangeBrightnessNitsWhenUserChanges() {
+        float brightnessValue1 = 0.3f;
+        float nits1 = 200f;
+        float brightnessValue2 = 0.5f;
+        float nits2 = 300f;
+        AutomaticBrightnessController automaticBrightnessController =
+                mock(AutomaticBrightnessController.class);
+        when(automaticBrightnessController.convertToNits(brightnessValue1)).thenReturn(nits1);
+        when(automaticBrightnessController.convertToNits(brightnessValue2)).thenReturn(nits2);
+        mDisplayBrightnessController.setAutomaticBrightnessController(
+                automaticBrightnessController);
+
+        mDisplayBrightnessController.setBrightness(brightnessValue1, 1 /* user-serial */);
+        verify(mBrightnessSetting).setUserSerial(1);
+        verify(mBrightnessSetting).setBrightness(brightnessValue1);
+        verify(mBrightnessSetting).setBrightnessNitsForDefaultDisplay(nits1);
+
+        mDisplayBrightnessController.setBrightness(brightnessValue2, 2 /* user-serial */);
+        verify(mBrightnessSetting).setUserSerial(2);
+        verify(mBrightnessSetting).setBrightness(brightnessValue2);
+        verify(mBrightnessSetting).setBrightnessNitsForDefaultDisplay(nits2);
     }
 }

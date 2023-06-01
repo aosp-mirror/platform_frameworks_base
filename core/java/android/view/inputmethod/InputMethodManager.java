@@ -4361,15 +4361,14 @@ public final class InputMethodManager {
      * @param icProto {@link InputConnection} call data in proto format.
      * @hide
      */
-    @GuardedBy("mH")
     public void dumpDebug(ProtoOutputStream proto, @Nullable byte[] icProto) {
-        if (!isImeSessionAvailableLocked()) {
-            return;
-        }
-
-        proto.write(DISPLAY_ID, mDisplayId);
-        final long token = proto.start(INPUT_METHOD_MANAGER);
         synchronized (mH) {
+            if (!isImeSessionAvailableLocked()) {
+                return;
+            }
+
+            proto.write(DISPLAY_ID, mDisplayId);
+            final long token = proto.start(INPUT_METHOD_MANAGER);
             proto.write(CUR_ID, mCurBindState.mImeId);
             proto.write(FULLSCREEN_MODE, mFullscreenMode);
             proto.write(ACTIVE, mActive);

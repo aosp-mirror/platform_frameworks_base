@@ -149,8 +149,8 @@ android_test {
     name: "FlickerTestsQuickswitch",
     defaults: ["FlickerTestsDefault"],
     additional_manifests: ["manifests/AndroidManifestQuickswitch.xml"],
-    package_name: "com.android.server.wm.flicker.rotation",
-    instrumentation_target_package: "com.android.server.wm.flicker.rotation",
+    package_name: "com.android.server.wm.flicker.quickswitch",
+    instrumentation_target_package: "com.android.server.wm.flicker.quickswitch",
     srcs: [
         ":FlickerTestsBase-src",
         ":FlickerTestsQuickswitch-src",

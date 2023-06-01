@@ -307,6 +307,8 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
 
                             BroadcastOptions options = BroadcastOptions.makeBasic();
                             options.setInteractive(true);
+                            options.setPendingIntentBackgroundActivityStartMode(
+                                    BroadcastOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
                             walletCard.getPendingIntent().send(options.toBundle());
                         } catch (PendingIntent.CanceledException e) {
                             Log.w(TAG, "Error sending pending intent for wallet card.");
