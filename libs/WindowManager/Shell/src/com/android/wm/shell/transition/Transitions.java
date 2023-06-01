@@ -68,6 +68,7 @@ import androidx.annotation.BinderThread;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
@@ -264,7 +265,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor) {
         this(context, shellInit, shellController, organizer, pool, displayController, mainExecutor,
-                mainHandler, animExecutor, null);
+                mainHandler, animExecutor, null,
+                new RootTaskDisplayAreaOrganizer(mainExecutor, context));
     }
 
     public Transitions(@NonNull Context context,
@@ -276,7 +278,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull ShellExecutor mainExecutor,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor,
-            @Nullable ShellCommandHandler shellCommandHandler) {
+            @Nullable ShellCommandHandler shellCommandHandler,
+            @NonNull RootTaskDisplayAreaOrganizer rootTDAOrganizer) {
         mOrganizer = organizer;
         mContext = context;
         mMainExecutor = mainExecutor;
@@ -284,7 +287,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         mDisplayController = displayController;
         mPlayerImpl = new TransitionPlayerImpl();
         mDefaultTransitionHandler = new DefaultTransitionHandler(context, shellInit,
-                displayController, pool, mainExecutor, mainHandler, animExecutor);
+                displayController, pool, mainExecutor, mainHandler, animExecutor, rootTDAOrganizer);
         mRemoteTransitionHandler = new RemoteTransitionHandler(mMainExecutor);
         mShellController = shellController;
         // The very last handler (0 in the list) should be the default one.
