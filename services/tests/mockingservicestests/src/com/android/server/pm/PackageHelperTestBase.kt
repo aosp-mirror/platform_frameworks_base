@@ -48,6 +48,7 @@ open class PackageHelperTestBase {
         const val UNINSTALLER_PACKAGE = "com.android.test.known.uninstaller"
         const val VERIFIER_PACKAGE = "com.android.test.known.verifier"
         const val PERMISSION_CONTROLLER_PACKAGE = "com.android.test.known.permission"
+        const val MGMT_ROLE_HOLDER_PACKAGE = "com.android.test.know.device_management"
         const val TEST_USER_ID = 0
     }
 
@@ -119,6 +120,8 @@ open class PackageHelperTestBase {
         Mockito.doReturn(arrayOf(PERMISSION_CONTROLLER_PACKAGE)).`when`(pms)
                 .getKnownPackageNamesInternal(any(),
                         eq(KnownPackages.PACKAGE_PERMISSION_CONTROLLER), eq(TEST_USER_ID))
+        Mockito.doReturn(MGMT_ROLE_HOLDER_PACKAGE).`when`(pms)
+                .getDevicePolicyManagementRoleHolderPackageName(eq(TEST_USER_ID))
     }
 
     private fun createPackageManagerService(vararg stageExistingPackages: String):
