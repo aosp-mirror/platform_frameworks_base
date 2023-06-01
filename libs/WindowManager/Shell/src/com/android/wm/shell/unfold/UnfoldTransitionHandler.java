@@ -173,6 +173,17 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
         mTransition = null;
     }
 
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull TransitionFinishCallback finishCallback) {
+        if (info.getType() == TRANSIT_CHANGE) {
+            // Apply changes happening during the unfold animation immediately
+            t.apply();
+            finishCallback.onTransitionFinished(null, null);
+        }
+    }
+
     @Nullable
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
