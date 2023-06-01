@@ -25,6 +25,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.database.ContentObserver
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -40,6 +41,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
+import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -73,6 +75,7 @@ import com.android.systemui.media.controls.models.player.MediaButton
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.models.player.MediaViewHolder
+import com.android.systemui.media.controls.models.player.SeekBarObserver
 import com.android.systemui.media.controls.models.player.SeekBarViewModel
 import com.android.systemui.media.controls.models.recommendation.KEY_SMARTSPACE_APP_NAME
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
@@ -97,6 +100,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
@@ -109,6 +113,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
@@ -233,6 +238,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
             this.set(Flags.MEDIA_EXPLICIT_INDICATOR, true)
             this.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, false)
         }
+    @Mock private lateinit var globalSettings: GlobalSettings
+    @Captor private lateinit var settingsObserverCaptor: ArgumentCaptor<ContentObserver>
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -273,7 +280,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     activityIntentHelper,
                     lockscreenUserManager,
                     broadcastDialogController,
-                    fakeFeatureFlag
+                    fakeFeatureFlag,
+                    globalSettings,
                 ) {
                 override fun loadAnimator(
                     animId: Int,
@@ -283,6 +291,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     return mockAnimator
                 }
             }
+
+        verify(globalSettings)
+            .registerContentObserver(
+                eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
+                settingsObserverCaptor.capture()
+            )
 
         initGutsViewHolderMocks()
         initMediaViewHolderMocks()
@@ -952,6 +966,30 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state, PACKAGE)
 
         verify(seekBarViewModel).updateStaticProgress(progress)
+    }
+
+    @Test
+    fun animationSettingChange_updateSeekbar() {
+        // When animations are enabled
+        globalSettings.putFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+        val progress = 0.5
+        val state = mediaData.copy(resumption = true, resumeProgress = progress)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        val captor = argumentCaptor<SeekBarObserver>()
+        verify(seekBarData).observeForever(captor.capture())
+        val seekBarObserver = captor.value!!
+
+        // Then the seekbar is set to animate
+        assertThat(seekBarObserver.animationEnabled).isTrue()
+
+        // When the setting changes,
+        globalSettings.putFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
+        settingsObserverCaptor.value!!.onChange(false)
+
+        // Then the seekbar is set to not animate
+        assertThat(seekBarObserver.animationEnabled).isFalse()
     }
 
     @Test

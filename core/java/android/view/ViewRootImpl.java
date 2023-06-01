@@ -2426,7 +2426,7 @@ public final class ViewRootImpl implements ViewParent,
      *
      * @hide
      */
-    void notifyRendererOfExpensiveFrame() {
+    public void notifyRendererOfExpensiveFrame() {
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.notifyExpensiveFrame();
         }
@@ -7017,6 +7017,10 @@ public final class ViewRootImpl implements ViewParent,
         private int processPointerEvent(QueuedInputEvent q) {
             final MotionEvent event = (MotionEvent)q.mEvent;
             boolean handled = mHandwritingInitiator.onTouchEvent(event);
+            if (handled) {
+                // If handwriting is started, toolkit doesn't receive ACTION_UP.
+                mLastClickToolType = event.getToolType(event.getActionIndex());
+            }
 
             mAttachInfo.mUnbufferedDispatchRequested = false;
             mAttachInfo.mHandlingPointerEvent = true;

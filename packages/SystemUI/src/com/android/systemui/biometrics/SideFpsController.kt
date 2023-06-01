@@ -15,8 +15,6 @@
  */
 package com.android.systemui.biometrics
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.app.ActivityTaskManager
 import android.content.Context
 import android.content.res.Configuration
@@ -43,7 +41,6 @@ import android.view.Surface
 import android.view.View
 import android.view.View.AccessibilityDelegate
 import android.view.ViewPropertyAnimator
-import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
@@ -61,7 +58,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.traceSection
 import java.io.PrintWriter
@@ -83,7 +79,6 @@ constructor(
     fingerprintManager: FingerprintManager?,
     private val windowManager: WindowManager,
     private val activityTaskManager: ActivityTaskManager,
-    overviewProxyService: OverviewProxyService,
     displayManager: DisplayManager,
     private val displayStateInteractor: DisplayStateInteractor,
     @Main private val mainExecutor: DelayableExecutor,
@@ -112,19 +107,6 @@ constructor(
 
     @VisibleForTesting val orientationListener = orientationReasonListener.orientationListener
 
-    @VisibleForTesting
-    val overviewProxyListener =
-        object : OverviewProxyService.OverviewProxyListener {
-            override fun onTaskbarStatusUpdated(visible: Boolean, stashed: Boolean) {
-                overlayView?.let { view ->
-                    handler.postDelayed({ updateOverlayVisibility(view) }, 500)
-                }
-            }
-        }
-
-    private val animationDuration =
-        context.resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
-
     private val isReverseDefaultRotation =
         context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
 
@@ -142,7 +124,6 @@ constructor(
             field = value
             field?.let { newView ->
                 windowManager.addView(newView, overlayViewParams)
-                updateOverlayVisibility(newView)
                 orientationListener.enable()
             }
         }
@@ -181,7 +162,6 @@ constructor(
                 override fun hide(sensorId: Int) = hide(SideFpsUiRequestSource.AUTO_SHOW)
             }
         )
-        overviewProxyService.addCallback(overviewProxyListener)
         listenForAlternateBouncerVisibility()
 
         dumpManager.registerDumpable(this)
@@ -340,45 +320,6 @@ constructor(
         windowManager.updateViewLayout(overlayView, overlayViewParams)
     }
 
-    private fun updateOverlayVisibility(view: View) {
-        if (view != overlayView) {
-            return
-        }
-        // hide after a few seconds if the sensor is oriented down and there are
-        // large overlapping system bars
-        var rotation = context.display?.rotation
-
-        if (rotation != null) {
-            rotation = getRotationFromDefault(rotation)
-        }
-
-        if (
-            windowManager.currentWindowMetrics.windowInsets.hasBigNavigationBar() &&
-                ((rotation == Surface.ROTATION_270 && overlayOffsets.isYAligned()) ||
-                    (rotation == Surface.ROTATION_180 && !overlayOffsets.isYAligned()))
-        ) {
-            overlayHideAnimator =
-                view
-                    .animate()
-                    .alpha(0f)
-                    .setStartDelay(3_000)
-                    .setDuration(animationDuration)
-                    .setListener(
-                        object : AnimatorListenerAdapter() {
-                            override fun onAnimationEnd(animation: Animator) {
-                                view.visibility = View.GONE
-                                overlayHideAnimator = null
-                            }
-                        }
-                    )
-        } else {
-            overlayHideAnimator?.cancel()
-            overlayHideAnimator = null
-            view.alpha = 1f
-            view.visibility = View.VISIBLE
-        }
-    }
-
     private fun getRotationFromDefault(rotation: Int): Int =
         if (isReverseDefaultRotation) (rotation + 1) % 4 else rotation
 }
@@ -425,9 +366,6 @@ private fun SensorLocationInternal.isYAligned(): Boolean = sensorLocationY != 0
 
 private fun Display.isNaturalOrientation(): Boolean =
     rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
-
-private fun WindowInsets.hasBigNavigationBar(): Boolean =
-    getInsets(WindowInsets.Type.navigationBars()).bottom >= 70
 
 private fun LottieAnimationView.addOverlayDynamicColor(
     context: Context,

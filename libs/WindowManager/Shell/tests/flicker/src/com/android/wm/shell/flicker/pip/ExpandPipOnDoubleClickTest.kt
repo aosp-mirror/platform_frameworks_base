@@ -56,8 +56,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class ExpandPipOnDoubleClickTest(flicker: FlickerTest) : PipTransition(flicker) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition { transitions { pipApp.doubleClickPipWindow(wmHelper) } }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { pipApp.doubleClickPipWindow(wmHelper) }
+    }
 
     /**
      * Checks that the pip app window remains inside the display bounds throughout the whole

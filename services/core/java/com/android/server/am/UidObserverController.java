@@ -429,21 +429,23 @@ public class UidObserverController {
                 }
             }
 
-            pw.println();
-            pw.print("  mUidChangeDispatchCount=");
-            pw.print(mUidChangeDispatchCount);
-            pw.println();
-            pw.println("  Slow UID dispatches:");
-            for (int i = 0; i < count; i++) {
-                final UidObserverRegistration reg = (UidObserverRegistration)
-                        mUidObservers.getRegisteredCallbackCookie(i);
-                pw.print("    ");
-                pw.print(mUidObservers.getRegisteredCallbackItem(i).getClass().getTypeName());
-                pw.print(": ");
-                pw.print(reg.mSlowDispatchCount);
-                pw.print(" / Max ");
-                pw.print(reg.mMaxDispatchTime);
-                pw.println("ms");
+            if (dumpPackage == null) {
+                pw.println();
+                pw.print("  mUidChangeDispatchCount=");
+                pw.print(mUidChangeDispatchCount);
+                pw.println();
+                pw.println("  Slow UID dispatches:");
+                for (int i = 0; i < count; i++) {
+                    final UidObserverRegistration reg = (UidObserverRegistration)
+                            mUidObservers.getRegisteredCallbackCookie(i);
+                    pw.print("    ");
+                    pw.print(mUidObservers.getRegisteredCallbackItem(i).getClass().getTypeName());
+                    pw.print(": ");
+                    pw.print(reg.mSlowDispatchCount);
+                    pw.print(" / Max ");
+                    pw.print(reg.mMaxDispatchTime);
+                    pw.println("ms");
+                }
             }
         }
     }

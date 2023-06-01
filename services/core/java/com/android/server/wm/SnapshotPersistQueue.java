@@ -314,6 +314,11 @@ class SnapshotPersistQueue {
             }
 
             final Bitmap swBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false /* isMutable */);
+            if (swBitmap == null) {
+                Slog.e(TAG, "Bitmap conversion from (config=" + bitmap.getConfig() + ", isMutable="
+                        + bitmap.isMutable() + ") to (config=ARGB_8888, isMutable=false) failed.");
+                return false;
+            }
 
             final File file = mPersistInfoProvider.getHighResolutionBitmapFile(mId, mUserId);
             try {
