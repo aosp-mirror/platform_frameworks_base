@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -548,9 +549,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             relevantDecor.mTaskInfo.configuration.windowConfiguration.getBounds());
                     boolean dragFromStatusBarAllowed = false;
                     if (DesktopModeStatus.isProto2Enabled()) {
-                        // In proto2 any full screen task can be dragged to freeform
-                        dragFromStatusBarAllowed = relevantDecor.mTaskInfo.getWindowingMode()
-                                == WINDOWING_MODE_FULLSCREEN;
+                        // In proto2 any full screen or multi-window task can be dragged to
+                        // freeform.
+                        final int windowingMode = relevantDecor.mTaskInfo.getWindowingMode();
+                        dragFromStatusBarAllowed = windowingMode == WINDOWING_MODE_FULLSCREEN
+                                || windowingMode == WINDOWING_MODE_MULTI_WINDOW;
                     }
 
                     if (dragFromStatusBarAllowed && relevantDecor.checkTouchEventInHandle(ev)) {
