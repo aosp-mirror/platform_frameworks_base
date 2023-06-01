@@ -34,6 +34,11 @@ abstract class SmartspaceModule {
         const val DREAM_SMARTSPACE_DATA_PLUGIN = "dreams_smartspace_data_plugin"
 
         /**
+         * The BcSmartspaceDataPlugin for the standalone weather on dream.
+         */
+        const val DREAM_WEATHER_SMARTSPACE_DATA_PLUGIN = "dream_weather_smartspace_data_plugin"
+
+        /**
          * The dream smartspace target filter.
          */
         const val DREAM_SMARTSPACE_TARGET_FILTER = "dream_smartspace_target_filter"
@@ -61,6 +66,10 @@ abstract class SmartspaceModule {
     @BindsOptionalOf
     @Named(DREAM_SMARTSPACE_DATA_PLUGIN)
     abstract fun optionalDreamsBcSmartspaceDataPlugin(): BcSmartspaceDataPlugin?
+
+    @BindsOptionalOf
+    @Named(DREAM_WEATHER_SMARTSPACE_DATA_PLUGIN)
+    abstract fun optionalDreamWeatherSmartspaceDataPlugin(): BcSmartspaceDataPlugin?
 
     @Binds
     @Named(DREAM_SMARTSPACE_PRECONDITION)
