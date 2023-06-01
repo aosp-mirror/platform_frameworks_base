@@ -48,6 +48,7 @@ import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.permission.PermissionManager;
@@ -169,6 +170,7 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(UsageStatsManagerInternal.class), mock(TelecomManager.class),
                     mock(NotificationChannelLogger.class), new TestableFlagResolver(),
                     mock(PermissionManager.class),
+                    mock(PowerManager.class),
                     new NotificationManagerService.PostNotificationTrackerFactory() {});
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
