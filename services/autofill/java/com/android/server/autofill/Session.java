@@ -3063,76 +3063,91 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         // Then use the results, asynchronously
-        final RemoteCallback callback = new RemoteCallback((result) -> {
-            if (result == null) {
-                if (sDebug) Slog.d(TAG, "setFieldClassificationScore(): no results");
-                logContextCommitted(null, null, saveDialogNotShowReason, commitReason);
-                return;
-            }
-            final Scores scores = result.getParcelable(EXTRA_SCORES, android.service.autofill.AutofillFieldClassificationService.Scores.class);
-            if (scores == null) {
-                Slog.w(TAG, "No field classification score on " + result);
-                return;
-            }
-            int i = 0, j = 0;
-            try {
-                // Iteract over all autofill fields first
-                for (i = 0; i < viewsSize; i++) {
-                    final AutofillId autofillId = autofillIds[i];
-
-                    // Search the best scores for each category (as some categories could have
-                    // multiple user values
-                    ArrayMap<String, Float> scoresByField = null;
-                    for (j = 0; j < userValues.length; j++) {
-                        final String categoryId = categoryIds[j];
-                        final float score = scores.scores[i][j];
-                        if (score > 0) {
-                            if (scoresByField == null) {
-                                scoresByField = new ArrayMap<>(userValues.length);
-                            }
-                            final Float currentScore = scoresByField.get(categoryId);
-                            if (currentScore != null && currentScore > score) {
-                                if (sVerbose) {
-                                    Slog.v(TAG, "skipping score " + score
-                                            + " because it's less than " + currentScore);
-                                }
-                                continue;
-                            }
-                            if (sVerbose) {
-                                Slog.v(TAG, "adding score " + score + " at index " + j + " and id "
-                                        + autofillId);
-                            }
-                            scoresByField.put(categoryId, score);
-                        } else if (sVerbose) {
-                            Slog.v(TAG, "skipping score 0 at index " + j + " and id " + autofillId);
-                        }
-                    }
-                    if (scoresByField == null) {
-                        if (sVerbose) Slog.v(TAG, "no score for autofillId=" + autofillId);
-                        continue;
-                    }
-
-                    // Then create the matches for that autofill id
-                    final ArrayList<Match> matches = new ArrayList<>(scoresByField.size());
-                    for (j = 0; j < scoresByField.size(); j++) {
-                        final String fieldId = scoresByField.keyAt(j);
-                        final float score = scoresByField.valueAt(j);
-                        matches.add(new Match(fieldId, score));
-                    }
-                    detectedFieldIds.add(autofillId);
-                    detectedFieldClassifications.add(new FieldClassification(matches));
-                } // for i
-            } catch (ArrayIndexOutOfBoundsException e) {
-                wtf(e, "Error accessing FC score at [%d, %d] (%s): %s", i, j, scores, e);
-                return;
-            }
-
-            logContextCommitted(detectedFieldIds, detectedFieldClassifications,
-                    saveDialogNotShowReason, commitReason);
-        });
+        final RemoteCallback callback = new RemoteCallback(
+                new LogFieldClassificationScoreOnResultListener(
+                        this,
+                        saveDialogNotShowReason,
+                        commitReason,
+                        viewsSize,
+                        autofillIds,
+                        userValues,
+                        categoryIds,
+                        detectedFieldIds,
+                        detectedFieldClassifications));
 
         fcStrategy.calculateScores(callback, currentValues, userValues, categoryIds,
                 defaultAlgorithm, defaultArgs, algorithms, args);
+    }
+
+    void handleLogFieldClassificationScore(@Nullable Bundle result, int saveDialogNotShowReason,
+            int commitReason, int viewsSize, AutofillId[] autofillIds, String[] userValues,
+            String[] categoryIds, ArrayList<AutofillId> detectedFieldIds,
+            ArrayList<FieldClassification> detectedFieldClassifications) {
+        if (result == null) {
+            if (sDebug) Slog.d(TAG, "setFieldClassificationScore(): no results");
+            logContextCommitted(null, null, saveDialogNotShowReason, commitReason);
+            return;
+        }
+        final Scores scores = result.getParcelable(EXTRA_SCORES,
+                android.service.autofill.AutofillFieldClassificationService.Scores.class);
+        if (scores == null) {
+            Slog.w(TAG, "No field classification score on " + result);
+            return;
+        }
+        int i = 0, j = 0;
+        try {
+            // Iteract over all autofill fields first
+            for (i = 0; i < viewsSize; i++) {
+                final AutofillId autofillId = autofillIds[i];
+
+                // Search the best scores for each category (as some categories could have
+                // multiple user values
+                ArrayMap<String, Float> scoresByField = null;
+                for (j = 0; j < userValues.length; j++) {
+                    final String categoryId = categoryIds[j];
+                    final float score = scores.scores[i][j];
+                    if (score > 0) {
+                        if (scoresByField == null) {
+                            scoresByField = new ArrayMap<>(userValues.length);
+                        }
+                        final Float currentScore = scoresByField.get(categoryId);
+                        if (currentScore != null && currentScore > score) {
+                            if (sVerbose) {
+                                Slog.v(TAG, "skipping score " + score
+                                        + " because it's less than " + currentScore);
+                            }
+                            continue;
+                        }
+                        if (sVerbose) {
+                            Slog.v(TAG, "adding score " + score + " at index " + j + " and id "
+                                    + autofillId);
+                        }
+                        scoresByField.put(categoryId, score);
+                    } else if (sVerbose) {
+                        Slog.v(TAG, "skipping score 0 at index " + j + " and id " + autofillId);
+                    }
+                }
+                if (scoresByField == null) {
+                    if (sVerbose) Slog.v(TAG, "no score for autofillId=" + autofillId);
+                    continue;
+                }
+
+                // Then create the matches for that autofill id
+                final ArrayList<Match> matches = new ArrayList<>(scoresByField.size());
+                for (j = 0; j < scoresByField.size(); j++) {
+                    final String fieldId = scoresByField.keyAt(j);
+                    final float score = scoresByField.valueAt(j);
+                    matches.add(new Match(fieldId, score));
+                }
+                detectedFieldIds.add(autofillId);
+                detectedFieldClassifications.add(new FieldClassification(matches));
+            } // for i
+        } catch (ArrayIndexOutOfBoundsException e) {
+            wtf(e, "Error accessing FC score at [%d, %d] (%s): %s", i, j, scores, e);
+            return;
+        }
+        logContextCommitted(detectedFieldIds, detectedFieldClassifications,
+                saveDialogNotShowReason, commitReason);
     }
 
     /**
