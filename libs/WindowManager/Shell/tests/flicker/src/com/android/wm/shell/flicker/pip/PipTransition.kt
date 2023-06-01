@@ -56,27 +56,37 @@ abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
         }
     }
 
-    /**
-     * Gets a configuration that handles basic setup and teardown of pip tests and that launches the
-     * Pip app for test
-     *
-     * @param stringExtras Arguments to pass to the PIP launch intent
-     * @param extraSpec Additional segment of flicker specification
-     */
-    @JvmOverloads
-    protected open fun buildTransition(
-        stringExtras: Map<String, String> = mapOf(ActivityOptions.Pip.EXTRA_ENTER_PIP to "true"),
-        extraSpec: FlickerBuilder.() -> Unit = {}
-    ): FlickerBuilder.() -> Unit {
-        return {
-            setup {
-                setRotation(Rotation.ROTATION_0)
-                removeAllTasksButHome()
-                pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
-            }
-            teardown { pipApp.exit(wmHelper) }
+    /** Defines the transition used to run the test */
+    protected open val thisTransition: FlickerBuilder.() -> Unit = {}
 
-            extraSpec(this)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            defaultSetup(this)
+            defaultEnterPip(this)
+            thisTransition(this)
+            defaultTeardown(this)
+        }
+
+    /** Defines the default setup steps required by the test */
+    protected open val defaultSetup: FlickerBuilder.() -> Unit = {
+        setup {
+            setRotation(Rotation.ROTATION_0)
+            removeAllTasksButHome()
+        }
+    }
+
+    /** Defines the default method of entering PiP */
+    protected open val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            pipApp.launchViaIntentAndWaitForPip(wmHelper,
+                    stringExtras = mapOf(ActivityOptions.Pip.EXTRA_ENTER_PIP to "true"))
+        }
+    }
+
+    /** Defines the default teardown required to clean up after the test */
+    protected open val defaultTeardown: FlickerBuilder.() -> Unit = {
+        teardown {
+            pipApp.exit(wmHelper)
         }
     }
 
