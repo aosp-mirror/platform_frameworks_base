@@ -45,20 +45,24 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTransition(flicker) {
-    /** Defines the transition used to run the test */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup {
-                pipApp.launchViaIntent(wmHelper)
-                pipApp.enableEnterPipOnUserLeaveHint()
-            }
-            teardown {
-                // close gracefully so that onActivityUnpinned() can be called before force exit
-                pipApp.closePipWindow(wmHelper)
-                pipApp.exit(wmHelper)
-            }
-            transitions { tapl.goHome() }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { tapl.goHome() }
+    }
+
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            pipApp.launchViaIntent(wmHelper)
+            pipApp.enableEnterPipOnUserLeaveHint()
         }
+    }
+
+    override val defaultTeardown: FlickerBuilder.() -> Unit = {
+        teardown {
+            // close gracefully so that onActivityUnpinned() can be called before force exit
+            pipApp.closePipWindow(wmHelper)
+            pipApp.exit(wmHelper)
+        }
+    }
 
     @Presubmit
     @Test
