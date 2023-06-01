@@ -37,4 +37,12 @@
         android:onClick="launchPlaceholderSplit"
         android:text="Launch Placeholder Split" />
 
+    <Button
+        android:id="@+id/launch_always_expand_activity_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_centerHorizontal="true"
+        android:onClick="launchAlwaysExpandActivity"
+        android:text="Launch Always Expand Activity" />
+
 </LinearLayout>

@@ -23,6 +23,9 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.view.View;
 
+import androidx.window.embedding.ActivityFilter;
+import androidx.window.embedding.ActivityRule;
+import androidx.window.embedding.RuleController;
 import androidx.window.extensions.embedding.ActivityEmbeddingComponent;
 import androidx.window.extensions.embedding.EmbeddingRule;
 import androidx.window.extensions.embedding.SplitPairRule;
@@ -30,6 +33,7 @@ import androidx.window.extensions.embedding.SplitPlaceholderRule;
 
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /** Main activity of the ActivityEmbedding test app to launch other embedding activities. */
@@ -48,6 +52,23 @@ public class ActivityEmbeddingMainActivity extends Activity {
         initializeSplitRules(createSplitPairRules());
         startActivity(new Intent().setComponent(
                 ActivityOptions.ActivityEmbedding.SecondaryActivity.COMPONENT));
+    }
+
+    /** R.id.launch_always_expand_activity_button onClick */
+    public void launchAlwaysExpandActivity(View view) {
+        final Set<ActivityFilter> activityFilters = new HashSet<>();
+        activityFilters.add(
+                new ActivityFilter(ActivityOptions.ActivityEmbedding.AlwaysExpandActivity.COMPONENT,
+                        null));
+        final ActivityRule activityRule = new ActivityRule.Builder(activityFilters)
+                .setAlwaysExpand(true)
+                .build();
+
+        RuleController rc = RuleController.getInstance(this);
+
+        rc.addRule(activityRule);
+        startActivity(new Intent().setComponent(
+                ActivityOptions.ActivityEmbedding.AlwaysExpandActivity.COMPONENT));
     }
 
     /** R.id.launch_placeholder_split_button onClick */
