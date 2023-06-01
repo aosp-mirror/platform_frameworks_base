@@ -54,40 +54,38 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class ClosePipBySwipingDownTest(flicker: FlickerTest) : ClosePipTransition(flicker) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            super.transition(this)
-            transitions {
-                val pipRegion = wmHelper.getWindowRegion(pipApp).bounds
-                val pipCenterX = pipRegion.centerX()
-                val pipCenterY = pipRegion.centerY()
-                val displayCenterX = device.displayWidth / 2
-                val barComponent =
-                    if (flicker.scenario.isTablet) {
-                        ComponentNameMatcher.TASK_BAR
-                    } else {
-                        ComponentNameMatcher.NAV_BAR
-                    }
-                val barLayerHeight =
-                    wmHelper.currentState.layerState
-                        .getLayerWithBuffer(barComponent)
-                        ?.visibleRegion
-                        ?.height
-                        ?: error("Couldn't find Nav or Task bar layer")
-                // The dismiss button doesn't appear at the complete bottom of the screen,
-                // it appears above the hot seat but `hotseatBarSize` is not available outside
-                // the platform
-                val displayY = (device.displayHeight * 0.9).toInt() - barLayerHeight
-                device.swipe(pipCenterX, pipCenterY, displayCenterX, displayY, 50)
-                // Wait until the other app is no longer visible
-                wmHelper
-                    .StateSyncBuilder()
-                    .withPipGone()
-                    .withWindowSurfaceDisappeared(pipApp)
-                    .withAppTransitionIdle()
-                    .waitForAndVerify()
-            }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions {
+            val pipRegion = wmHelper.getWindowRegion(pipApp).bounds
+            val pipCenterX = pipRegion.centerX()
+            val pipCenterY = pipRegion.centerY()
+            val displayCenterX = device.displayWidth / 2
+            val barComponent =
+                if (flicker.scenario.isTablet) {
+                    ComponentNameMatcher.TASK_BAR
+                } else {
+                    ComponentNameMatcher.NAV_BAR
+                }
+            val barLayerHeight =
+                wmHelper.currentState.layerState
+                    .getLayerWithBuffer(barComponent)
+                    ?.visibleRegion
+                    ?.height
+                    ?: error("Couldn't find Nav or Task bar layer")
+            // The dismiss button doesn't appear at the complete bottom of the screen,
+            // it appears above the hot seat but `hotseatBarSize` is not available outside
+            // the platform
+            val displayY = (device.displayHeight * 0.9).toInt() - barLayerHeight
+            device.swipe(pipCenterX, pipCenterY, displayCenterX, displayY, 50)
+            // Wait until the other app is no longer visible
+            wmHelper
+                .StateSyncBuilder()
+                .withPipGone()
+                .withWindowSurfaceDisappeared(pipApp)
+                .withAppTransitionIdle()
+                .waitForAndVerify()
         }
+    }
 
     /** Checks that the focus doesn't change between windows during the transition */
     @Presubmit
