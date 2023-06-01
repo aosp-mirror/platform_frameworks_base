@@ -77,7 +77,11 @@ class InputSettingsObserver extends ContentObserver {
                                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH),
                         (reason) -> updateMaximumObscuringOpacityForTouch()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_KEY_PRESSES),
-                        (reason) -> updateShowKeyPresses()));
+                        (reason) -> updateShowKeyPresses()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_TIMEOUT_MS),
+                        (reason) -> updateKeyRepeatInfo(getLatestLongPressTimeoutValue())),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_DELAY_MS),
+                        (reason) -> updateKeyRepeatInfo(getLatestLongPressTimeoutValue())));
     }
 
     /**
@@ -163,25 +167,42 @@ class InputSettingsObserver extends ContentObserver {
     }
 
     private void updateLongPressTimeout(String reason) {
-        // Some key gesture timeouts are based on the long press timeout, so update key gesture
-        // timeouts when the value changes. See ViewConfiguration#getKeyRepeatTimeout().
-        mNative.notifyKeyGestureTimeoutsChanged();
+        final int longPressTimeoutValue = getLatestLongPressTimeoutValue();
 
-        // Update the deep press status.
-        // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value.
-        final int timeout = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.LONG_PRESS_TIMEOUT, ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT,
-                UserHandle.USER_CURRENT);
+        // Before the key repeat timeout was introduced, some users relied on changing
+        // LONG_PRESS_TIMEOUT settings to also change the key repeat timeout. To support this
+        // backward compatibility, we'll preemptively update key repeat info here, in case where
+        // key repeat timeout was never set, and user is still relying on long press timeout value.
+        updateKeyRepeatInfo(longPressTimeoutValue);
+
         final boolean featureEnabledFlag =
                 DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
                         DEEP_PRESS_ENABLED, true /* default */);
         final boolean enabled =
-                featureEnabledFlag && timeout <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
-        Log.i(TAG,
-                (enabled ? "Enabling" : "Disabling") + " motion classifier because " + reason
+                featureEnabledFlag
+                        && longPressTimeoutValue <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
+        Log.i(TAG, (enabled ? "Enabling" : "Disabling") + " motion classifier because " + reason
                 + ": feature " + (featureEnabledFlag ? "enabled" : "disabled")
-                + ", long press timeout = " + timeout);
+                + ", long press timeout = " + longPressTimeoutValue);
         mNative.setMotionClassifierEnabled(enabled);
+    }
+
+    private void updateKeyRepeatInfo(int fallbackKeyRepeatTimeoutValue) {
+        // Not using ViewConfiguration.getKeyRepeatTimeout here because it may return a stale value.
+        final int timeoutMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_TIMEOUT_MS, fallbackKeyRepeatTimeoutValue,
+                UserHandle.USER_CURRENT);
+        final int delayMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_DELAY_MS, ViewConfiguration.getKeyRepeatDelay(),
+                UserHandle.USER_CURRENT);
+        mNative.setKeyRepeatConfiguration(timeoutMs, delayMs);
+    }
+
+    // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value.
+    private int getLatestLongPressTimeoutValue() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LONG_PRESS_TIMEOUT, ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT,
+                UserHandle.USER_CURRENT);
     }
 
     private void updateMaximumObscuringOpacityForTouch() {

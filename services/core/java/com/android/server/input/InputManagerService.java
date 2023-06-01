@@ -2630,18 +2630,6 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
-    private int getKeyRepeatTimeout() {
-        return ViewConfiguration.getKeyRepeatTimeout();
-    }
-
-    // Native callback.
-    @SuppressWarnings("unused")
-    private int getKeyRepeatDelay() {
-        return ViewConfiguration.getKeyRepeatDelay();
-    }
-
-    // Native callback.
-    @SuppressWarnings("unused")
     private int getHoverTapTimeout() {
         return ViewConfiguration.getHoverTapTimeout();
     }

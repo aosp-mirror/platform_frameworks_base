@@ -8551,6 +8551,18 @@ public final class Settings {
         public static final String MULTI_PRESS_TIMEOUT = "multi_press_timeout";
 
         /**
+         * The duration before a key repeat begins in milliseconds.
+         * @hide
+         */
+        public static final String KEY_REPEAT_TIMEOUT_MS = "key_repeat_timeout";
+
+        /**
+         * The duration between successive key repeats in milliseconds.
+         * @hide
+         */
+        public static final String KEY_REPEAT_DELAY_MS = "key_repeat_delay";
+
+        /**
          * Setting that specifies recommended timeout in milliseconds for controls
          * which don't need user's interactions.
          *

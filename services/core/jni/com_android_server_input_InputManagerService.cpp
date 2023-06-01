@@ -122,8 +122,6 @@ static struct {
     jmethodID getInputUniqueIdAssociations;
     jmethodID getDeviceTypeAssociations;
     jmethodID getKeyboardLayoutAssociations;
-    jmethodID getKeyRepeatTimeout;
-    jmethodID getKeyRepeatDelay;
     jmethodID getHoverTapTimeout;
     jmethodID getHoverTapSlop;
     jmethodID getDoubleTapTimeout;
@@ -343,7 +341,6 @@ public:
                               InputDeviceSensorAccuracy accuracy) override;
     void notifyVibratorState(int32_t deviceId, bool isOn) override;
     bool filterInputEvent(const InputEvent& inputEvent, uint32_t policyFlags) override;
-    InputDispatcherConfiguration getDispatcherConfiguration() override;
     void interceptKeyBeforeQueueing(const KeyEvent& keyEvent, uint32_t& policyFlags) override;
     void interceptMotionBeforeQueueing(int32_t displayId, nsecs_t when,
                                        uint32_t& policyFlags) override;
@@ -1005,24 +1002,6 @@ void NativeInputManager::notifyVibratorState(int32_t deviceId, bool isOn) {
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyVibratorState,
                         static_cast<jint>(deviceId), static_cast<jboolean>(isOn));
     checkAndClearExceptionFromCallback(env, "notifyVibratorState");
-}
-
-InputDispatcherConfiguration NativeInputManager::getDispatcherConfiguration() {
-    ATRACE_CALL();
-    InputDispatcherConfiguration config;
-    JNIEnv* env = jniEnv();
-
-    jint keyRepeatTimeout = env->CallIntMethod(mServiceObj, gServiceClassInfo.getKeyRepeatTimeout);
-    if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatTimeout")) {
-        config.keyRepeatTimeout = milliseconds_to_nanoseconds(keyRepeatTimeout);
-    }
-
-    jint keyRepeatDelay = env->CallIntMethod(mServiceObj, gServiceClassInfo.getKeyRepeatDelay);
-    if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatDelay")) {
-        config.keyRepeatDelay = milliseconds_to_nanoseconds(keyRepeatDelay);
-    }
-
-    return config;
 }
 
 void NativeInputManager::displayRemoved(JNIEnv* env, int32_t displayId) {
@@ -2435,6 +2414,16 @@ static void nativeSetMotionClassifierEnabled(JNIEnv* env, jobject nativeImplObj,
     im->setMotionClassifierEnabled(enabled);
 }
 
+static void nativeSetKeyRepeatConfiguration(JNIEnv* env, jobject nativeImplObj, jint timeoutMs,
+                                            jint delayMs) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->getInputManager()->getDispatcher().setKeyRepeatConfiguration(static_cast<nsecs_t>(
+                                                                             timeoutMs) *
+                                                                             1000000,
+                                                                     static_cast<nsecs_t>(delayMs) *
+                                                                             1000000);
+}
+
 static jobject createInputSensorInfo(JNIEnv* env, jstring name, jstring vendor, jint version,
                                      jint handle, jint type, jfloat maxRange, jfloat resolution,
                                      jfloat power, jfloat minDelay, jint fifoReservedEventCount,
@@ -2565,11 +2554,6 @@ static void nativeSetStylusPointerIconEnabled(JNIEnv* env, jobject nativeImplObj
     im->setStylusPointerIconEnabled(enabled);
 }
 
-static void nativeNotifyKeyGestureTimeoutsChanged(JNIEnv* env, jobject nativeImplObj) {
-    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    im->getInputManager()->getDispatcher().requestRefreshConfiguration();
-}
-
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2654,6 +2638,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setDisplayEligibilityForPointerCapture", "(IZ)V",
          (void*)nativeSetDisplayEligibilityForPointerCapture},
         {"setMotionClassifierEnabled", "(Z)V", (void*)nativeSetMotionClassifierEnabled},
+        {"setKeyRepeatConfiguration", "(II)V", (void*)nativeSetKeyRepeatConfiguration},
         {"getSensorList", "(I)[Landroid/hardware/input/InputSensorInfo;",
          (void*)nativeGetSensorList},
         {"enableSensor", "(IIII)Z", (void*)nativeEnableSensor},
@@ -2666,7 +2651,6 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetStylusButtonMotionEventsEnabled},
         {"getMouseCursorPosition", "()[F", (void*)nativeGetMouseCursorPosition},
         {"setStylusPointerIconEnabled", "(Z)V", (void*)nativeSetStylusPointerIconEnabled},
-        {"notifyKeyGestureTimeoutsChanged", "()V", (void*)nativeNotifyKeyGestureTimeoutsChanged},
 };
 
 #define FIND_CLASS(var, className) \
@@ -2782,12 +2766,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.getKeyboardLayoutAssociations, clazz,
                   "getKeyboardLayoutAssociations", "()[Ljava/lang/String;");
-
-    GET_METHOD_ID(gServiceClassInfo.getKeyRepeatTimeout, clazz,
-            "getKeyRepeatTimeout", "()I");
-
-    GET_METHOD_ID(gServiceClassInfo.getKeyRepeatDelay, clazz,
-            "getKeyRepeatDelay", "()I");
 
     GET_METHOD_ID(gServiceClassInfo.getHoverTapTimeout, clazz,
             "getHoverTapTimeout", "()I");

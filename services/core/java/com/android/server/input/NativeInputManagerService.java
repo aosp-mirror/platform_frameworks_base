@@ -28,7 +28,6 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
-import android.view.ViewConfiguration;
 
 import java.util.List;
 
@@ -203,6 +202,8 @@ interface NativeInputManagerService {
 
     void setMotionClassifierEnabled(boolean enabled);
 
+    void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
+
     InputSensorInfo[] getSensorList(int deviceId);
 
     boolean flushSensor(int deviceId, int sensorType);
@@ -241,15 +242,6 @@ interface NativeInputManagerService {
      * The recreated device may contain new associated peripheral devices like Light, Battery, etc.
      */
     void sysfsNodeChanged(String sysfsNodePath);
-
-    /**
-     * Notify there is a change in any of the key gesture timeouts, such as the key
-     * repeat timeout or key repeat delay.
-     *
-     * @see ViewConfiguration#getKeyRepeatTimeout()
-     * @see ViewConfiguration#getKeyRepeatDelay()
-     */
-    void notifyKeyGestureTimeoutsChanged();
 
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
@@ -466,6 +458,9 @@ interface NativeInputManagerService {
         public native void setMotionClassifierEnabled(boolean enabled);
 
         @Override
+        public native void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
+
+        @Override
         public native InputSensorInfo[] getSensorList(int deviceId);
 
         @Override
@@ -498,8 +493,5 @@ interface NativeInputManagerService {
 
         @Override
         public native void sysfsNodeChanged(String sysfsNodePath);
-
-        @Override
-        public native void notifyKeyGestureTimeoutsChanged();
     }
 }
