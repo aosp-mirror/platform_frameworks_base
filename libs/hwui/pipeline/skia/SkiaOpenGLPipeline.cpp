@@ -66,12 +66,15 @@ MakeCurrentResult SkiaOpenGLPipeline::makeCurrent() {
         return MakeCurrentResult::AlreadyCurrent;
     }
 
-    // Make sure read/draw buffer state of default framebuffer is GL_BACK. Vendor implementations
+    EGLint majorVersion = 0;
+    eglQueryContext(eglGetCurrentDisplay(), eglGetCurrentContext(), EGL_CONTEXT_CLIENT_VERSION, &majorVersion);
+
+    // Make sure read/draw buffer state of default framebuffer is GL_BACK for ES 3.X. Vendor implementations
     // disagree on the draw/read buffer state if the default framebuffer transitions from a surface
     // to EGL_NO_SURFACE and vice-versa. There was a related discussion within Khronos on this topic.
     // See https://cvs.khronos.org/bugzilla/show_bug.cgi?id=13534.
     // The discussion was not resolved with a clear consensus
-    if (error == 0 && wasSurfaceless && mEglSurface != EGL_NO_SURFACE) {
+    if (error == 0 && (majorVersion > 2) && wasSurfaceless && mEglSurface != EGL_NO_SURFACE) {
         GLint curReadFB = 0;
         GLint curDrawFB = 0;
         glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &curReadFB);

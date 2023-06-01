@@ -423,7 +423,10 @@ public class DynamicSystemInstallationService extends Service
             Log.e(TAG, "It's already running in normal system.");
             return;
         }
-
+        if (mDynSystem.getActiveDsuSlot().endsWith(".lock")) {
+            Log.e(TAG, "Ignore the reboot intent for a locked DSU slot");
+            return;
+        }
         if (!mDynSystem.setEnable(/* enable = */ false, /* oneShot = */ false)) {
             Log.e(TAG, "Failed to disable DynamicSystem.");
 

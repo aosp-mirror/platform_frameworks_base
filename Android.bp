@@ -345,6 +345,7 @@ java_defaults {
         "framework-permission-aidl-java",
         "spatializer-aidl-java",
         "audiopolicy-types-aidl-java",
+        "modules-utils-expresslog",
     ],
 }
 
@@ -531,7 +532,7 @@ filegroup {
         "core/java/**/*.logtags",
         "**/package.html",
     ],
-    visibility: ["//visibility:private"],
+    visibility: ["//frameworks/base/api"],
 }
 
 // Defaults for all stubs that include the non-updatable framework. These defaults do not include
@@ -545,12 +546,10 @@ stubs_defaults {
     java_version: "1.8",
     arg_files: [":frameworks-base-core-AndroidManifest.xml"],
     aidl: {
-        local_include_dirs: [
-            "media/aidl",
-            "telephony/java",
-        ],
         include_dirs: [
             "frameworks/av/aidl",
+            "frameworks/base/media/aidl",
+            "frameworks/base/telephony/java",
             "frameworks/native/libs/permission/aidl",
             "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
@@ -582,7 +581,7 @@ stubs_defaults {
     annotations_enabled: true,
     previous_api: ":android.api.public.latest",
     merge_annotations_dirs: ["metalava-manual"],
-    defaults_visibility: ["//visibility:private"],
+    defaults_visibility: ["//frameworks/base/api"],
     visibility: ["//frameworks/base/api"],
 }
 
@@ -610,12 +609,9 @@ stubs_defaults {
         // NOTE: The below can be removed once the prebuilt stub contains IKE.
         "sdk_system_current_android.net.ipsec.ike",
     ],
-    defaults_visibility: ["//visibility:private"],
 }
 
 build = [
-    "StubLibraries.bp",
-    "ApiDocs.bp",
     "ProtoLibraries.bp",
     "TestProtoLibraries.bp",
 ]

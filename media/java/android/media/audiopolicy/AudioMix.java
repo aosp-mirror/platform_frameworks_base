@@ -25,6 +25,8 @@ import android.media.AudioFormat;
 import android.media.AudioSystem;
 import android.os.Build;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
@@ -252,10 +254,10 @@ public class AudioMix {
         if (o == null || getClass() != o.getClass()) return false;
 
         final AudioMix that = (AudioMix) o;
-        return (this.mRouteFlags == that.mRouteFlags)
-                && (this.mRule == that.mRule)
-                && (this.mMixType == that.mMixType)
-                && (this.mFormat == that.mFormat);
+        return Objects.equals(this.mRouteFlags, that.mRouteFlags)
+            && Objects.equals(this.mRule, that.mRule)
+            && Objects.equals(this.mMixType, that.mMixType)
+            && Objects.equals(this.mFormat, that.mFormat);
     }
 
     /** @hide */
@@ -340,7 +342,8 @@ public class AudioMix {
          * @param address
          * @return the same Builder instance.
          */
-        Builder setDevice(int deviceType, String address) {
+        @VisibleForTesting
+        public Builder setDevice(int deviceType, String address) {
             mDeviceSystemType = deviceType;
             mDeviceAddress = address;
             return this;

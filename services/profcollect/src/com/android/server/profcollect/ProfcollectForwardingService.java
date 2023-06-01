@@ -20,9 +20,11 @@ import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
@@ -32,6 +34,8 @@ import android.os.SystemProperties;
 import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -53,7 +57,8 @@ public final class ProfcollectForwardingService extends SystemService {
     public static final String LOG_TAG = "ProfcollectForwardingService";
 
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
-
+    private static final String INTENT_UPLOAD_PROFILES =
+            "com.android.server.profcollect.UPLOAD_PROFILES";
     private static final long BG_PROCESS_PERIOD = TimeUnit.HOURS.toMillis(4); // every 4 hours.
 
     private IProfCollectd mIProfcollect;
@@ -66,6 +71,16 @@ public final class ProfcollectForwardingService extends SystemService {
         }
     };
 
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (INTENT_UPLOAD_PROFILES.equals(intent.getAction())) {
+                Log.d(LOG_TAG, "Received broadcast to pack and upload reports");
+                packAndUploadReport();
+            }
+        }
+    };
+
     public ProfcollectForwardingService(Context context) {
         super(context);
 
@@ -73,6 +88,10 @@ public final class ProfcollectForwardingService extends SystemService {
             throw new AssertionError("only one service instance allowed");
         }
         sSelfService = this;
+
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(INTENT_UPLOAD_PROFILES);
+        context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
     }
 
     /**
@@ -296,7 +315,7 @@ public final class ProfcollectForwardingService extends SystemService {
                 }
 
                 if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
-                    packProfileReport();
+                    packAndUploadReport();
                 }
             }
 
@@ -307,7 +326,7 @@ public final class ProfcollectForwardingService extends SystemService {
         });
     }
 
-    private void packProfileReport() {
+    private void packAndUploadReport() {
         if (mIProfcollect == null) {
             return;
         }
@@ -315,8 +334,17 @@ public final class ProfcollectForwardingService extends SystemService {
         Context context = getContext();
         BackgroundThread.get().getThreadHandler().post(() -> {
             try {
+                int usageSetting = -1;
+                try {
+                    // Get "Usage & diagnostics" checkbox status. 1 is for enabled, 0 is for
+                    // disabled.
+                    usageSetting = Settings.Global.getInt(context.getContentResolver(), "multi_cb");
+                } catch (SettingNotFoundException e) {
+                    Log.i(LOG_TAG, "Usage setting not found: " + e.getMessage());
+                }
+
                 // Prepare profile report
-                String reportName = mIProfcollect.report() + ".zip";
+                String reportName = mIProfcollect.report(usageSetting) + ".zip";
 
                 if (!context.getResources().getBoolean(
                         R.bool.config_profcollectReportUploaderEnabled)) {

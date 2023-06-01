@@ -324,6 +324,7 @@ class LicenseHtmlGeneratorFromXml {
 
         if (!TextUtils.isEmpty(noticeHeader)) {
             writer.println(noticeHeader);
+            writer.println("<br/>");
         }
 
         int count = 0;

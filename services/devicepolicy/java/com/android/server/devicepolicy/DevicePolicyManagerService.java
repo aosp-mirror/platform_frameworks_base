@@ -12166,17 +12166,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Caller is not managed profile owner or device owner;"
                         + " only managed profile owner or device owner may control the preferential"
                         + " network service");
-        synchronized (getLockObject()) {
-            final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
-                    caller.getUserId());
-            if (!requiredAdmin.mPreferentialNetworkServiceConfigs.equals(
-                    preferentialNetworkServiceConfigs)) {
-                requiredAdmin.mPreferentialNetworkServiceConfigs =
-                        new ArrayList<>(preferentialNetworkServiceConfigs);
-                saveSettingsLocked(caller.getUserId());
+
+        try {
+            updateNetworkPreferenceForUser(caller.getUserId(), preferentialNetworkServiceConfigs);
+            synchronized (getLockObject()) {
+                final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
+                        caller.getUserId());
+                if (!requiredAdmin.mPreferentialNetworkServiceConfigs.equals(
+                        preferentialNetworkServiceConfigs)) {
+                    requiredAdmin.mPreferentialNetworkServiceConfigs =
+                            new ArrayList<>(preferentialNetworkServiceConfigs);
+                    saveSettingsLocked(caller.getUserId());
+                }
             }
+        } catch (Exception e) {
+            Slogf.e(LOG_TAG, "Failed to set preferential network service configs");
+            throw e;
         }
-        updateNetworkPreferenceForUser(caller.getUserId(), preferentialNetworkServiceConfigs);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PREFERENTIAL_NETWORK_SERVICE_ENABLED)
                 .setBoolean(preferentialNetworkServiceConfigs

@@ -71,6 +71,7 @@ public final class UsbAlsaManager {
     private static final int USB_VENDORID_SONY = 0x054C;
     private static final int USB_PRODUCTID_PS4CONTROLLER_ZCT1 = 0x05C4;
     private static final int USB_PRODUCTID_PS4CONTROLLER_ZCT2 = 0x09CC;
+    private static final int USB_PRODUCTID_PS5CONTROLLER = 0x0CE6;
 
     private static final int USB_DENYLIST_OUTPUT = 0x0001;
     private static final int USB_DENYLIST_INPUT  = 0x0002;
@@ -93,6 +94,9 @@ public final class UsbAlsaManager {
                     USB_DENYLIST_OUTPUT),
             new DenyListEntry(USB_VENDORID_SONY,
                     USB_PRODUCTID_PS4CONTROLLER_ZCT2,
+                    USB_DENYLIST_OUTPUT),
+            new DenyListEntry(USB_VENDORID_SONY,
+                    USB_PRODUCTID_PS5CONTROLLER,
                     USB_DENYLIST_OUTPUT));
 
     private static boolean isDeviceDenylisted(int vendorId, int productId, int flags) {

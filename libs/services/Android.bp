@@ -26,8 +26,6 @@ package {
 cc_library_shared {
     name: "libservices",
     srcs: [
-        ":IDropBoxManagerService.aidl",
-        ":ILogcatManagerService_aidl",
         "src/content/ComponentName.cpp",
         "src/os/DropBoxManager.cpp",
     ],
@@ -42,7 +40,10 @@ cc_library_shared {
         "libbase_headers",
     ],
     aidl: {
-        include_dirs: ["frameworks/base/core/java/"],
+        libs: [
+            "ILogcatManagerService_aidl",
+            "IDropBoxManagerService_aidl",
+        ],
     },
 
     export_include_dirs: ["include"],

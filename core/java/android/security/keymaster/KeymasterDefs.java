@@ -337,8 +337,22 @@ public final class KeymasterDefs {
             ErrorCode.ROLLBACK_RESISTANCE_UNAVAILABLE; // -67;
     public static final int KM_ERROR_HARDWARE_TYPE_UNAVAILABLE =
             ErrorCode.HARDWARE_TYPE_UNAVAILABLE; // -68;
+    public static final int KM_ERROR_PROOF_OF_PRESENCE_REQUIRED =
+            ErrorCode.PROOF_OF_PRESENCE_REQUIRED; // -69;
+    public static final int KM_ERROR_CONCURRENT_PROOF_OF_PRESENCE_REQUESTED =
+            ErrorCode.CONCURRENT_PROOF_OF_PRESENCE_REQUESTED; // -70;
+    public static final int KM_ERROR_NO_USER_CONFIRMATION =
+            ErrorCode.NO_USER_CONFIRMATION; // -71;
     public static final int KM_ERROR_DEVICE_LOCKED =
             ErrorCode.DEVICE_LOCKED; // -72;
+    public static final int KM_ERROR_EARLY_BOOT_ENDED =
+            ErrorCode.EARLY_BOOT_ENDED; // -73;
+    public static final int KM_ERROR_ATTESTATION_KEYS_NOT_PROVISIONED =
+            ErrorCode.ATTESTATION_KEYS_NOT_PROVISIONED; // -74;
+    public static final int KM_ERROR_ATTESTATION_IDS_NOT_PROVISIONED =
+            ErrorCode.ATTESTATION_IDS_NOT_PROVISIONED; // -75;
+    public static final int KM_ERROR_INVALID_OPERATION =
+            ErrorCode.INVALID_OPERATION; // -76;
     public static final int KM_ERROR_STORAGE_KEY_UNSUPPORTED =
             ErrorCode.STORAGE_KEY_UNSUPPORTED; // -77,
     public static final int KM_ERROR_INCOMPATIBLE_MGF_DIGEST =
@@ -348,7 +362,13 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_MISSING_NOT_BEFORE =
             ErrorCode.MISSING_NOT_BEFORE; // -80;
     public static final int KM_ERROR_MISSING_NOT_AFTER =
-            ErrorCode.MISSING_NOT_AFTER; // -80;
+            ErrorCode.MISSING_NOT_AFTER; // -81;
+    public static final int KM_ERROR_MISSING_ISSUER_SUBJECT =
+            ErrorCode.MISSING_ISSUER_SUBJECT; // -82;
+    public static final int KM_ERROR_INVALID_ISSUER_SUBJECT =
+            ErrorCode.INVALID_ISSUER_SUBJECT; // -83;
+    public static final int KM_ERROR_BOOT_LEVEL_EXCEEDED =
+            ErrorCode.BOOT_LEVEL_EXCEEDED; // -84;
     public static final int KM_ERROR_HARDWARE_NOT_YET_AVAILABLE =
             ErrorCode.HARDWARE_NOT_YET_AVAILABLE; // -85
     public static final int KM_ERROR_UNIMPLEMENTED =

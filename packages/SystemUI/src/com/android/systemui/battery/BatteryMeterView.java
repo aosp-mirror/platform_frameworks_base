@@ -325,7 +325,9 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         // TODO(b/140051051)
         final boolean systemSetting = 0 != whitelistIpcs(() -> Settings.System
                 .getIntForUser(getContext().getContentResolver(),
-                SHOW_BATTERY_PERCENT, 0, UserHandle.USER_CURRENT));
+                SHOW_BATTERY_PERCENT, getContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_defaultBatteryPercentageSetting)
+                ? 1 : 0, UserHandle.USER_CURRENT));
         boolean shouldShow =
                 (mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
                 || mShowPercentMode == MODE_ON

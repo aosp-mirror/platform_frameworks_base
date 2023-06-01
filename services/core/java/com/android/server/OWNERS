@@ -1,3 +1,6 @@
+# BootReceiver
+per-file BootReceiver.java = gaillard@google.com
+
 # Connectivity / Networking
 per-file ConnectivityService.java,ConnectivityServiceInitializer.java,NetworkManagementService.java,NsdService.java,VpnManagerService.java = file:/services/core/java/com/android/server/net/OWNERS
 
