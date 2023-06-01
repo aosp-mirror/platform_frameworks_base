@@ -61,6 +61,7 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.ShellSharedConstants
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.KtProtoLog
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -614,14 +615,17 @@ class DesktopTasksController(
      * @param taskInfo the task being dragged.
      * @param position position of surface when drag ends.
      * @param y the Y position of the motion event.
+     * @param windowDecor the window decoration for the task being dragged
      */
     fun onDragPositioningEnd(
             taskInfo: RunningTaskInfo,
             position: Point,
-            y: Float
+            y: Float,
+            windowDecor: DesktopModeWindowDecoration
     ) {
         val statusBarHeight = getStatusBarHeight(taskInfo)
         if (y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+            windowDecor.incrementRelayoutBlock()
             moveToFullscreenWithAnimation(taskInfo, position)
         }
     }

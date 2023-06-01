@@ -193,7 +193,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             @NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change) {
         if (change.getMode() == WindowManager.TRANSIT_CHANGE
-                && (info.getType() == Transitions.TRANSIT_ENTER_DESKTOP_MODE)) {
+                && (info.getType() == Transitions.TRANSIT_ENTER_DESKTOP_MODE
+                || info.getType() == Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
+                || info.getType() == Transitions.TRANSIT_EXIT_DESKTOP_MODE)) {
             mWindowDecorByTaskId.get(change.getTaskInfo().taskId)
                     .addTransitionPausingRelayout(transition);
         }
@@ -411,7 +413,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mDesktopTasksController.ifPresent(c -> c.onDragPositioningEnd(taskInfo,
-                            position, e.getRawY()));
+                            position, e.getRawY(), mWindowDecorByTaskId.get(mTaskId)));
                     final boolean wasDragging = mIsDragging;
                     mIsDragging = false;
                     return wasDragging;
@@ -577,9 +579,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         return;
                     } else if (mDragToDesktopAnimationStarted) {
                         Point position = new Point((int) ev.getX(), (int) ev.getY());
+                        relevantDecor.incrementRelayoutBlock();
                         mDesktopTasksController.ifPresent(
-                                c -> c.cancelMoveToFreeform(relevantDecor.mTaskInfo,
-                                        position));
+                                c -> c.cancelMoveToFreeform(relevantDecor.mTaskInfo, position));
                         mDragToDesktopAnimationStarted = false;
                         return;
                     }
