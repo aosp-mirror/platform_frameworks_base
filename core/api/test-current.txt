@@ -2167,6 +2167,10 @@ package android.net.wifi.sharedconnectivity.service {
 
 package android.os {
 
+  public class BatteryManager {
+    field public static final int BATTERY_PLUGGED_ANY = 15; // 0xf
+  }
+
   public final class BatteryStatsManager {
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void resetBattery(boolean);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void setBatteryLevel(int, boolean);
