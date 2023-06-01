@@ -99,6 +99,12 @@ public class ActivityOptions {
                     FLICKER_APP_PACKAGE + ".ActivityEmbeddingSecondaryActivity");
         }
 
+        public static class AlwaysExpandActivity {
+            public static final String LABEL = "ActivityEmbeddingAlwaysExpandActivity";
+            public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".ActivityEmbeddingAlwaysExpandActivity");
+        }
+
         public static class PlaceholderPrimaryActivity {
             public static final String LABEL = "ActivityEmbeddingPlaceholderPrimaryActivity";
             public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,

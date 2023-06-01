@@ -75,6 +75,29 @@ constructor(
             .StateSyncBuilder()
             .withActivityRemoved(SECONDARY_ACTIVITY_COMPONENT)
             .waitForAndVerify()
+     }
+
+    /**
+     * Clicks the button to launch a secondary activity with alwaysExpand enabled, which will launch
+     * a fullscreen window on top of the visible region.
+     */
+    fun launchAlwaysExpandActivity(wmHelper: WindowManagerStateHelper) {
+        val launchButton =
+                uiDevice.wait(
+                        Until.findObject(
+                                By.res(getPackage(),
+                                        "launch_always_expand_activity_button")),
+                        FIND_TIMEOUT
+                )
+        require(launchButton != null) {
+            "Can't find launch always expand activity button on screen."
+        }
+        launchButton.click()
+        wmHelper
+                .StateSyncBuilder()
+                .withActivityState(ALWAYS_EXPAND_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_PAUSED)
+                .waitForAndVerify()
     }
 
     /**
@@ -104,6 +127,9 @@ constructor(
 
         val SECONDARY_ACTIVITY_COMPONENT =
             ActivityOptions.ActivityEmbedding.SecondaryActivity.COMPONENT.toFlickerComponent()
+
+        val ALWAYS_EXPAND_ACTIVITY_COMPONENT =
+            ActivityOptions.ActivityEmbedding.AlwaysExpandActivity.COMPONENT.toFlickerComponent()
 
         val PLACEHOLDER_PRIMARY_COMPONENT =
             ActivityOptions.ActivityEmbedding.PlaceholderPrimaryActivity.COMPONENT
