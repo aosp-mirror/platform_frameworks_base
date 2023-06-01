@@ -1,6 +1,7 @@
 package com.android.systemui.unfold
 
 import android.os.SystemProperties
+import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import com.android.systemui.dagger.qualifiers.Main
@@ -22,6 +23,8 @@ constructor(
 ) : TransitionProgressListener {
 
     private var isFirstAnimationAfterUnfold = false
+    private val touchVibrationAttributes =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK)
 
     init {
         if (vibrator != null) {
@@ -71,7 +74,7 @@ constructor(
     }
 
     private fun playHaptics() {
-        vibrator?.vibrate(effect)
+        vibrator?.vibrate(effect, touchVibrationAttributes)
     }
 
     private val hapticsScale: Float
