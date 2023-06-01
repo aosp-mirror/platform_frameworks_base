@@ -19,6 +19,7 @@ package com.android.systemui.keyguard
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
@@ -148,7 +149,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
-    private val powerManager: PowerManager
+    private val powerManager: PowerManager,
+    private val wallpaperManager: WallpaperManager
 ) : KeyguardStateController.Callback, ISysuiUnlockAnimationController.Stub() {
 
     interface KeyguardUnlockAnimationListener {
@@ -686,8 +688,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 return@postDelayed
             }
 
-            if (wallpaperTargets != null) {
-              fadeInWallpaper()
+            if ((wallpaperTargets?.isNotEmpty() == true) &&
+                    wallpaperManager.isLockscreenLiveWallpaperEnabled()) {
+                fadeInWallpaper()
+                hideKeyguardViewAfterRemoteAnimation()
             } else {
                 keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                     false /* cancelled */)
@@ -961,7 +965,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 0 /* fadeOutDuration */
             )
         } else {
-            Log.e(TAG, "#hideKeyguardViewAfterRemoteAnimation called when keyguard view is not " +
+            Log.i(TAG, "#hideKeyguardViewAfterRemoteAnimation called when keyguard view is not " +
                     "showing. Ignoring...")
         }
     }
