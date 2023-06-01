@@ -823,7 +823,7 @@ public class AudioDeviceInventory {
         return status;
     }
     // Only used for internal requests
-    /*package*/ int removePreferredDevicesForStrategInt(int strategy) {
+    /*package*/ int removePreferredDevicesForStrategyInt(int strategy) {
         return clearDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_PREFERRED, true /*internal */);
     }
