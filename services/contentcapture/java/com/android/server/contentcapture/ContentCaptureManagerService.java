@@ -50,6 +50,7 @@ import android.content.Context;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Binder;
@@ -69,6 +70,7 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.service.contentcapture.ActivityEvent.ActivityEventType;
+import android.service.contentcapture.ContentCaptureServiceInfo;
 import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.IDataShareReadAdapter;
 import android.service.voice.VoiceInteractionManagerInternal;
@@ -79,6 +81,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.contentcapture.ContentCaptureCondition;
+import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.ContentCaptureHelper;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.DataRemovalRequest;
@@ -96,6 +99,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.contentprotection.ContentProtectionBlocklistManager;
 import com.android.server.contentprotection.ContentProtectionPackageManager;
+import com.android.server.contentprotection.RemoteContentProtectionService;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 
@@ -208,6 +212,8 @@ public class ContentCaptureManagerService extends
     final GlobalContentCaptureOptions mGlobalContentCaptureOptions =
             new GlobalContentCaptureOptions();
 
+    @Nullable private final ComponentName mContentProtectionServiceComponentName;
+
     @Nullable private final ContentProtectionBlocklistManager mContentProtectionBlocklistManager;
 
     public ContentCaptureManagerService(@NonNull Context context) {
@@ -249,10 +255,16 @@ public class ContentCaptureManagerService extends
         }
 
         if (getEnableContentProtectionReceiverLocked()) {
-            mContentProtectionBlocklistManager = createContentProtectionBlocklistManager(context);
-            mContentProtectionBlocklistManager.updateBlocklist(
-                    mDevCfgContentProtectionAppsBlocklistSize);
+            mContentProtectionServiceComponentName = getContentProtectionServiceComponentName();
+            if (mContentProtectionServiceComponentName != null) {
+                mContentProtectionBlocklistManager = createContentProtectionBlocklistManager();
+                mContentProtectionBlocklistManager.updateBlocklist(
+                        mDevCfgContentProtectionAppsBlocklistSize);
+            } else {
+                mContentProtectionBlocklistManager = null;
+            }
         } else {
+            mContentProtectionServiceComponentName = null;
             mContentProtectionBlocklistManager = null;
         }
     }
@@ -785,9 +797,82 @@ public class ContentCaptureManagerService extends
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @NonNull
-    protected ContentProtectionBlocklistManager createContentProtectionBlocklistManager(
-            @NonNull Context context) {
-        return new ContentProtectionBlocklistManager(new ContentProtectionPackageManager(context));
+    protected ContentProtectionBlocklistManager createContentProtectionBlocklistManager() {
+        return new ContentProtectionBlocklistManager(
+                new ContentProtectionPackageManager(getContext()));
+    }
+
+    @Nullable
+    private ComponentName getContentProtectionServiceComponentName() {
+        String flatComponentName = getContentProtectionServiceFlatComponentName();
+        ComponentName componentName = ComponentName.unflattenFromString(flatComponentName);
+        if (componentName == null) {
+            return null;
+        }
+
+        // Check permissions by trying to construct {@link ContentCaptureServiceInfo}
+        try {
+            createContentProtectionServiceInfo(componentName);
+        } catch (Exception ex) {
+            // Swallow, exception was already logged
+            return null;
+        }
+
+        return componentName;
+    }
+
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @Nullable
+    protected String getContentProtectionServiceFlatComponentName() {
+        return getContext()
+                .getString(com.android.internal.R.string.config_defaultContentProtectionService);
+    }
+
+    /**
+     * Can also throw runtime exceptions such as {@link SecurityException}.
+     *
+     * @hide
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @NonNull
+    protected ContentCaptureServiceInfo createContentProtectionServiceInfo(
+            @NonNull ComponentName componentName) throws PackageManager.NameNotFoundException {
+        return new ContentCaptureServiceInfo(
+                getContext(), componentName, /* isTemp= */ false, UserHandle.getCallingUserId());
+    }
+
+    @Nullable
+    private RemoteContentProtectionService createRemoteContentProtectionService() {
+        if (mContentProtectionServiceComponentName == null) {
+            // This case should not be possible but make sure
+            return null;
+        }
+        synchronized (mLock) {
+            if (!mDevCfgEnableContentProtectionReceiver) {
+                return null;
+            }
+        }
+        return createRemoteContentProtectionService(mContentProtectionServiceComponentName);
+    }
+
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @NonNull
+    protected RemoteContentProtectionService createRemoteContentProtectionService(
+            @NonNull ComponentName componentName) {
+        return new RemoteContentProtectionService(
+                getContext(),
+                componentName,
+                UserHandle.getCallingUserId(),
+                isBindInstantServiceAllowed());
+    }
+
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @NonNull
+    protected ContentCaptureManagerServiceStub getContentCaptureManagerServiceStub() {
+        return mContentCaptureManagerServiceStub;
     }
 
     final class ContentCaptureManagerServiceStub extends IContentCaptureManager.Stub {
@@ -1023,6 +1108,19 @@ public class ContentCaptureManagerService extends
         public void setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
             ContentCaptureManagerService.this.setDefaultServiceEnabled(userId, enabled);
         }
+
+        @Override
+        public void onLoginDetected(@NonNull ParceledListSlice<ContentCaptureEvent> events) {
+            RemoteContentProtectionService service = createRemoteContentProtectionService();
+            if (service == null) {
+                return;
+            }
+            try {
+                service.onLoginDetected(events);
+            } catch (Exception ex) {
+                Slog.e(TAG, "Failed to call remote service", ex);
+            }
+        }
     }
 
     private final class LocalService extends ContentCaptureManagerInternal {
@@ -1205,7 +1303,8 @@ public class ContentCaptureManagerService extends
         }
 
         private boolean isContentProtectionReceiverEnabled(@NonNull String packageName) {
-            if (mContentProtectionBlocklistManager == null) {
+            if (mContentProtectionServiceComponentName == null
+                    || mContentProtectionBlocklistManager == null) {
                 return false;
             }
             synchronized (mLock) {

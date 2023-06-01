@@ -37,7 +37,8 @@ import java.time.Duration;
  *
  * @hide
  */
-class RemoteContentProtectionService extends ServiceConnector.Impl<IContentCaptureDirectManager> {
+public class RemoteContentProtectionService
+        extends ServiceConnector.Impl<IContentCaptureDirectManager> {
 
     private static final String TAG = RemoteContentProtectionService.class.getSimpleName();
 
@@ -45,7 +46,7 @@ class RemoteContentProtectionService extends ServiceConnector.Impl<IContentCaptu
 
     @NonNull private final ComponentName mComponentName;
 
-    protected RemoteContentProtectionService(
+    public RemoteContentProtectionService(
             @NonNull Context context,
             @NonNull ComponentName componentName,
             int userId,

@@ -26,10 +26,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
@@ -51,6 +53,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -81,6 +84,9 @@ public class ContentProtectionEventProcessorTest {
     private static final String SAFE_TEXT = "SAFE TEXT";
 
     private static final ContentCaptureEvent PROCESS_EVENT = createProcessEvent();
+
+    private static final ContentCaptureEvent[] BUFFERED_EVENTS =
+            new ContentCaptureEvent[] {PROCESS_EVENT};
 
     private static final Set<Integer> EVENT_TYPES_TO_STORE =
             ImmutableSet.of(TYPE_VIEW_APPEARED, TYPE_VIEW_DISAPPEARED, TYPE_VIEW_TEXT_CHANGED);
@@ -165,11 +171,12 @@ public class ContentProtectionEventProcessorTest {
 
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
-    public void processEvent_loginDetected() {
-        when(mMockEventBuffer.toArray()).thenReturn(new ContentCaptureEvent[0]);
+    public void processEvent_loginDetected() throws Exception {
+        when(mMockEventBuffer.toArray()).thenReturn(BUFFERED_EVENTS);
         mContentProtectionEventProcessor.mPasswordFieldDetected = true;
         mContentProtectionEventProcessor.mSuspiciousTextDetected = true;
 
@@ -179,6 +186,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isFalse();
         verify(mMockEventBuffer).clear();
         verify(mMockEventBuffer).toArray();
+        assertOnLoginDetected();
     }
 
     @Test
@@ -192,6 +200,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isTrue();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -205,6 +214,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isFalse();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -218,11 +228,12 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isFalse();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
-    public void processEvent_multipleLoginsDetected_belowFlushThreshold() {
-        when(mMockEventBuffer.toArray()).thenReturn(new ContentCaptureEvent[0]);
+    public void processEvent_multipleLoginsDetected_belowFlushThreshold() throws Exception {
+        when(mMockEventBuffer.toArray()).thenReturn(BUFFERED_EVENTS);
 
         mContentProtectionEventProcessor.mPasswordFieldDetected = true;
         mContentProtectionEventProcessor.mSuspiciousTextDetected = true;
@@ -236,11 +247,12 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isFalse();
         verify(mMockEventBuffer).clear();
         verify(mMockEventBuffer).toArray();
+        assertOnLoginDetected();
     }
 
     @Test
-    public void processEvent_multipleLoginsDetected_aboveFlushThreshold() {
-        when(mMockEventBuffer.toArray()).thenReturn(new ContentCaptureEvent[0]);
+    public void processEvent_multipleLoginsDetected_aboveFlushThreshold() throws Exception {
+        when(mMockEventBuffer.toArray()).thenReturn(BUFFERED_EVENTS);
 
         mContentProtectionEventProcessor.mPasswordFieldDetected = true;
         mContentProtectionEventProcessor.mSuspiciousTextDetected = true;
@@ -256,6 +268,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isFalse();
         verify(mMockEventBuffer, times(2)).clear();
         verify(mMockEventBuffer, times(2)).toArray();
+        assertOnLoginDetected(PROCESS_EVENT, /* times= */ 2);
     }
 
     @Test
@@ -269,6 +282,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isTrue();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -282,6 +296,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -296,6 +311,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -309,21 +325,22 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
-    public void isPasswordField_webView() {
-        when(mMockEventBuffer.toArray()).thenReturn(new ContentCaptureEvent[0]);
-
+    public void isPasswordField_webView() throws Exception {
         ContentCaptureEvent event =
                 createWebViewPasswordFieldEvent(
                         /* className= */ null, /* eventText= */ null, PASSWORD_TEXT);
+        when(mMockEventBuffer.toArray()).thenReturn(new ContentCaptureEvent[] {event});
 
         mContentProtectionEventProcessor.processEvent(event);
 
         assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
         verify(mMockEventBuffer).clear();
         verify(mMockEventBuffer).toArray();
+        assertOnLoginDetected(event, /* times= */ 1);
     }
 
     @Test
@@ -337,6 +354,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -350,6 +368,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -362,6 +381,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -373,6 +393,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isFalse();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -384,6 +405,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isTrue();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -395,6 +417,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isTrue();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -406,6 +429,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isTrue();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     @Test
@@ -420,6 +444,7 @@ public class ContentProtectionEventProcessorTest {
         assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isTrue();
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
+        verifyZeroInteractions(mMockContentCaptureManager);
     }
 
     private static ContentCaptureEvent createEvent(int type) {
@@ -473,5 +498,19 @@ public class ContentProtectionEventProcessorTest {
             @Nullable String eventText, @Nullable String viewNodeText) {
         return createProcessEvent(
                 /* className= */ null, /* inputType= */ 0, eventText, viewNodeText);
+    }
+
+    private void assertOnLoginDetected() throws Exception {
+        assertOnLoginDetected(PROCESS_EVENT, /* times= */ 1);
+    }
+
+    private void assertOnLoginDetected(ContentCaptureEvent event, int times) throws Exception {
+        ArgumentCaptor<ParceledListSlice> captor = ArgumentCaptor.forClass(ParceledListSlice.class);
+        verify(mMockContentCaptureManager, times(times)).onLoginDetected(captor.capture());
+
+        assertThat(captor.getValue()).isNotNull();
+        List<ContentCaptureEvent> actual = captor.getValue().getList();
+        assertThat(actual).isNotNull();
+        assertThat(actual).containsExactly(event);
     }
 }

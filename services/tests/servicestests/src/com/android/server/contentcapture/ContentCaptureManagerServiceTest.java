@@ -30,7 +30,11 @@ import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
+import android.service.contentcapture.ContentCaptureServiceInfo;
+import android.view.contentcapture.ContentCaptureEvent;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -38,6 +42,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.contentprotection.ContentProtectionBlocklistManager;
+import com.android.server.contentprotection.RemoteContentProtectionService;
 import com.android.server.pm.UserManagerInternal;
 
 import com.google.common.collect.ImmutableList;
@@ -68,6 +73,12 @@ public class ContentCaptureManagerServiceTest {
     private static final ComponentName COMPONENT_NAME =
             new ComponentName(PACKAGE_NAME, "TestClass");
 
+    private static final ContentCaptureEvent EVENT =
+            new ContentCaptureEvent(/* sessionId= */ 100, /* type= */ 200);
+
+    private static final ParceledListSlice<ContentCaptureEvent> PARCELED_EVENTS =
+            new ParceledListSlice<>(ImmutableList.of(EVENT));
+
     private static final Context sContext = ApplicationProvider.getApplicationContext();
 
     @Rule public final MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -76,9 +87,21 @@ public class ContentCaptureManagerServiceTest {
 
     @Mock private ContentProtectionBlocklistManager mMockContentProtectionBlocklistManager;
 
+    @Mock private ContentCaptureServiceInfo mMockContentCaptureServiceInfo;
+
+    @Mock private RemoteContentProtectionService mMockRemoteContentProtectionService;
+
     private boolean mDevCfgEnableContentProtectionReceiver;
 
     private int mContentProtectionBlocklistManagersCreated;
+
+    private int mContentProtectionServiceInfosCreated;
+
+    private int mRemoteContentProtectionServicesCreated;
+
+    private String mConfigDefaultContentProtectionService = COMPONENT_NAME.flattenToString();
+
+    private boolean mContentProtectionServiceInfoConstructorShouldThrow;
 
     private ContentCaptureManagerService mContentCaptureManagerService;
 
@@ -91,24 +114,54 @@ public class ContentCaptureManagerServiceTest {
     }
 
     @Test
-    public void constructor_default_doesNotCreateContentProtectionBlocklistManager() {
+    public void constructor_contentProtection_flagDisabled_noBlocklistManager() {
         assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(0);
+        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(0);
         verifyZeroInteractions(mMockContentProtectionBlocklistManager);
     }
 
     @Test
-    public void constructor_flagDisabled_doesNotContentProtectionBlocklistManager() {
+    public void constructor_contentProtection_componentNameNull_noBlocklistManager() {
+        mConfigDefaultContentProtectionService = null;
+
+        mContentCaptureManagerService = new TestContentCaptureManagerService();
+
         assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(0);
+        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(0);
         verifyZeroInteractions(mMockContentProtectionBlocklistManager);
     }
 
     @Test
-    public void constructor_flagEnabled_createsContentProtectionBlocklistManager() {
+    public void constructor_contentProtection_componentNameBlank_noBlocklistManager() {
+        mConfigDefaultContentProtectionService = "   ";
+
+        mContentCaptureManagerService = new TestContentCaptureManagerService();
+
+        assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(0);
+        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(0);
+        verifyZeroInteractions(mMockContentProtectionBlocklistManager);
+    }
+
+    @Test
+    public void constructor_contentProtection_serviceInfoThrows_noBlocklistManager() {
+        mDevCfgEnableContentProtectionReceiver = true;
+        mContentProtectionServiceInfoConstructorShouldThrow = true;
+
+        mContentCaptureManagerService = new TestContentCaptureManagerService();
+
+        assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(0);
+        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(1);
+        verifyZeroInteractions(mMockContentProtectionBlocklistManager);
+    }
+
+    @Test
+    public void constructor_contentProtection_enabled_createsBlocklistManager() {
         mDevCfgEnableContentProtectionReceiver = true;
 
         mContentCaptureManagerService = new TestContentCaptureManagerService();
 
         assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(1);
+        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(1);
         verify(mMockContentProtectionBlocklistManager).updateBlocklist(anyInt());
     }
 
@@ -298,6 +351,35 @@ public class ContentCaptureManagerServiceTest {
         verify(mMockContentProtectionBlocklistManager, never()).isAllowed(anyString());
     }
 
+    @Test
+    public void onLoginDetected_disabledAfterConstructor() {
+        mDevCfgEnableContentProtectionReceiver = true;
+        mContentCaptureManagerService = new TestContentCaptureManagerService();
+        mContentCaptureManagerService.mDevCfgEnableContentProtectionReceiver = false;
+
+        mContentCaptureManagerService
+                .getContentCaptureManagerServiceStub()
+                .onLoginDetected(PARCELED_EVENTS);
+
+        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(1);
+        assertThat(mRemoteContentProtectionServicesCreated).isEqualTo(0);
+        verifyZeroInteractions(mMockRemoteContentProtectionService);
+    }
+
+    @Test
+    public void onLoginDetected_enabled() {
+        mDevCfgEnableContentProtectionReceiver = true;
+        mContentCaptureManagerService = new TestContentCaptureManagerService();
+
+        mContentCaptureManagerService
+                .getContentCaptureManagerServiceStub()
+                .onLoginDetected(PARCELED_EVENTS);
+
+        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(1);
+        assertThat(mRemoteContentProtectionServicesCreated).isEqualTo(1);
+        verify(mMockRemoteContentProtectionService).onLoginDetected(PARCELED_EVENTS);
+    }
+
     private class TestContentCaptureManagerService extends ContentCaptureManagerService {
 
         TestContentCaptureManagerService() {
@@ -312,10 +394,31 @@ public class ContentCaptureManagerServiceTest {
         }
 
         @Override
-        protected ContentProtectionBlocklistManager createContentProtectionBlocklistManager(
-                @NonNull Context context) {
+        protected ContentProtectionBlocklistManager createContentProtectionBlocklistManager() {
             mContentProtectionBlocklistManagersCreated++;
             return mMockContentProtectionBlocklistManager;
+        }
+
+        @Override
+        protected String getContentProtectionServiceFlatComponentName() {
+            return mConfigDefaultContentProtectionService;
+        }
+
+        @Override
+        protected ContentCaptureServiceInfo createContentProtectionServiceInfo(
+                @NonNull ComponentName componentName) throws PackageManager.NameNotFoundException {
+            mContentProtectionServiceInfosCreated++;
+            if (mContentProtectionServiceInfoConstructorShouldThrow) {
+                throw new RuntimeException("TEST RUNTIME EXCEPTION");
+            }
+            return mMockContentCaptureServiceInfo;
+        }
+
+        @Override
+        protected RemoteContentProtectionService createRemoteContentProtectionService(
+                @NonNull ComponentName componentName) {
+            mRemoteContentProtectionServicesCreated++;
+            return mMockRemoteContentProtectionService;
         }
     }
 }

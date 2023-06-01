@@ -162,7 +162,7 @@ public class ContentProtectionEventProcessor {
 
     private void handlerOnLoginDetected(@NonNull ParceledListSlice<ContentCaptureEvent> events) {
         try {
-            // TODO(b/275732576): Call mContentCaptureManager
+            mContentCaptureManager.onLoginDetected(events);
         } catch (Exception ex) {
             Log.e(TAG, "Failed to flush events for: " + mPackageName, ex);
         }
