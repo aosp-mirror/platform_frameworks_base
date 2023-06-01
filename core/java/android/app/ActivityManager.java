@@ -81,6 +81,7 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
+import android.view.WindowInsetsController.Appearance;
 import android.window.TaskSnapshot;
 
 import com.android.internal.app.LocalePicker;
@@ -1558,6 +1559,8 @@ public class ActivityManager {
         private int mColorBackgroundFloating;
         private int mStatusBarColor;
         private int mNavigationBarColor;
+        @Appearance
+        private int mStatusBarAppearance;
         private boolean mEnsureStatusBarContrastWhenTransparent;
         private boolean mEnsureNavigationBarContrastWhenTransparent;
         private int mResizeMode;
@@ -1658,8 +1661,8 @@ public class ActivityManager {
                 final Icon icon = mIconRes == Resources.ID_NULL ? null :
                         Icon.createWithResource(ActivityThread.currentPackageName(), mIconRes);
                 return new TaskDescription(mLabel, icon, mPrimaryColor, mBackgroundColor,
-                        mStatusBarColor, mNavigationBarColor, false, false, RESIZE_MODE_RESIZEABLE,
-                        -1, -1, 0);
+                        mStatusBarColor, mNavigationBarColor, 0, false, false,
+                        RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             }
         }
 
@@ -1677,7 +1680,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
-                    colorPrimary, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+                    colorPrimary, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1695,7 +1698,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
-                    0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+                    0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1707,7 +1710,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label) {
-            this(label, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+            this(label, null, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1717,7 +1720,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription() {
-            this(null, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+            this(null, null, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1733,7 +1736,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
             this(label, icon != null ? Icon.createWithBitmap(icon) : null, colorPrimary, 0, 0, 0,
-                    false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+                    0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1749,14 +1752,15 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon) {
-            this(label, icon != null ? Icon.createWithBitmap(icon) : null, 0, 0, 0, 0, false, false,
-                    RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+            this(label, icon != null ? Icon.createWithBitmap(icon) : null, 0, 0, 0, 0, 0, false,
+                    false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /** @hide */
         public TaskDescription(@Nullable String label, @Nullable Icon icon,
                 int colorPrimary, int colorBackground,
                 int statusBarColor, int navigationBarColor,
+                @Appearance int statusBarAppearance,
                 boolean ensureStatusBarContrastWhenTransparent,
                 boolean ensureNavigationBarContrastWhenTransparent, int resizeMode, int minWidth,
                 int minHeight, int colorBackgroundFloating) {
@@ -1766,6 +1770,7 @@ public class ActivityManager {
             mColorBackground = colorBackground;
             mStatusBarColor = statusBarColor;
             mNavigationBarColor = navigationBarColor;
+            mStatusBarAppearance = statusBarAppearance;
             mEnsureStatusBarContrastWhenTransparent = ensureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     ensureNavigationBarContrastWhenTransparent;
@@ -1794,6 +1799,7 @@ public class ActivityManager {
             mColorBackground = other.mColorBackground;
             mStatusBarColor = other.mStatusBarColor;
             mNavigationBarColor = other.mNavigationBarColor;
+            mStatusBarAppearance = other.mStatusBarAppearance;
             mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     other.mEnsureNavigationBarContrastWhenTransparent;
@@ -1822,6 +1828,9 @@ public class ActivityManager {
             }
             if (other.mNavigationBarColor != 0) {
                 mNavigationBarColor = other.mNavigationBarColor;
+            }
+            if (other.mStatusBarAppearance != 0) {
+                mStatusBarAppearance = other.mStatusBarAppearance;
             }
 
             mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
@@ -2094,9 +2103,24 @@ public class ActivityManager {
         /**
          * @hide
          */
+        @Appearance
+        public int getStatusBarAppearance() {
+            return mStatusBarAppearance;
+        }
+
+        /**
+         * @hide
+         */
         public void setEnsureStatusBarContrastWhenTransparent(
                 boolean ensureStatusBarContrastWhenTransparent) {
             mEnsureStatusBarContrastWhenTransparent = ensureStatusBarContrastWhenTransparent;
+        }
+
+        /**
+         * @hide
+         */
+        public void setStatusBarAppearance(@Appearance int statusBarAppearance) {
+            mStatusBarAppearance = statusBarAppearance;
         }
 
         /**
@@ -2223,6 +2247,7 @@ public class ActivityManager {
             dest.writeInt(mColorBackground);
             dest.writeInt(mStatusBarColor);
             dest.writeInt(mNavigationBarColor);
+            dest.writeInt(mStatusBarAppearance);
             dest.writeBoolean(mEnsureStatusBarContrastWhenTransparent);
             dest.writeBoolean(mEnsureNavigationBarContrastWhenTransparent);
             dest.writeInt(mResizeMode);
@@ -2246,6 +2271,7 @@ public class ActivityManager {
             mColorBackground = source.readInt();
             mStatusBarColor = source.readInt();
             mNavigationBarColor = source.readInt();
+            mStatusBarAppearance = source.readInt();
             mEnsureStatusBarContrastWhenTransparent = source.readBoolean();
             mEnsureNavigationBarContrastWhenTransparent = source.readBoolean();
             mResizeMode = source.readInt();
@@ -2294,6 +2320,7 @@ public class ActivityManager {
                     && mColorBackground == other.mColorBackground
                     && mStatusBarColor == other.mStatusBarColor
                     && mNavigationBarColor == other.mNavigationBarColor
+                    && mStatusBarAppearance == other.mStatusBarAppearance
                     && mEnsureStatusBarContrastWhenTransparent
                             == other.mEnsureStatusBarContrastWhenTransparent
                     && mEnsureNavigationBarContrastWhenTransparent
