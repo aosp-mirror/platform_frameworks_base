@@ -35,6 +35,8 @@ import android.media.session.MediaSessionManager;
 import android.os.PowerExemptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -57,6 +59,8 @@ import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+
+import com.google.common.base.Strings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -251,5 +255,107 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
         // It will be the MAX Retry Count = 3
         mMediaOutputBroadcastDialog.updateBroadcastInfo(true, BROADCAST_CODE_UPDATE_TEST);
         assertThat(mMediaOutputBroadcastDialog.getRetryCount()).isEqualTo(0);
+    }
+
+    @Test
+    public void afterTextChanged_nameLengthMoreThanMax_showErrorMessage() {
+        ImageView broadcastNameEdit = mMediaOutputBroadcastDialog.mDialogView
+                .requireViewById(R.id.broadcast_name_edit);
+        TextView broadcastName = mMediaOutputBroadcastDialog.mDialogView.requireViewById(
+                R.id.broadcast_name_summary);
+        broadcastName.setText(BROADCAST_NAME_TEST);
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        broadcastNameEdit.callOnClick();
+        EditText editText = mMediaOutputBroadcastDialog.mAlertDialog.findViewById(
+                R.id.broadcast_edit_text);
+        TextView broadcastErrorMessage = mMediaOutputBroadcastDialog.mAlertDialog.findViewById(
+                R.id.broadcast_error_message);
+        assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.INVISIBLE);
+
+        // input the invalid text
+        String moreThanMax = Strings.repeat("a",
+                MediaOutputBroadcastDialog.BROADCAST_NAME_MAX_LENGTH + 3);
+        editText.setText(moreThanMax);
+
+        assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void afterTextChanged_enterValidNameAfterLengthMoreThanMax_noErrorMessage() {
+        ImageView broadcastNameEdit = mMediaOutputBroadcastDialog.mDialogView
+                .requireViewById(R.id.broadcast_name_edit);
+        TextView broadcastName = mMediaOutputBroadcastDialog.mDialogView.requireViewById(
+                R.id.broadcast_name_summary);
+        broadcastName.setText(BROADCAST_NAME_TEST);
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        broadcastNameEdit.callOnClick();
+        EditText editText = mMediaOutputBroadcastDialog.mAlertDialog.findViewById(
+                R.id.broadcast_edit_text);
+        TextView broadcastErrorMessage = mMediaOutputBroadcastDialog.mAlertDialog.findViewById(
+                R.id.broadcast_error_message);
+        assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.INVISIBLE);
+
+        // input the invalid text
+        String testString = Strings.repeat("a",
+                MediaOutputBroadcastDialog.BROADCAST_NAME_MAX_LENGTH + 2);
+        editText.setText(testString);
+        assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.VISIBLE);
+
+        // input the valid text
+        testString = Strings.repeat("b",
+                MediaOutputBroadcastDialog.BROADCAST_NAME_MAX_LENGTH - 100);
+        editText.setText(testString);
+
+        assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    public void afterTextChanged_codeLengthMoreThanMax_showErrorMessage() {
+        ImageView broadcastCodeEdit = mMediaOutputBroadcastDialog.mDialogView
+                .requireViewById(R.id.broadcast_code_edit);
+        TextView broadcastCode = mMediaOutputBroadcastDialog.mDialogView.requireViewById(
+                R.id.broadcast_code_summary);
+        broadcastCode.setText(BROADCAST_CODE_UPDATE_TEST);
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        broadcastCodeEdit.callOnClick();
+        EditText editText = mMediaOutputBroadcastDialog.mAlertDialog.findViewById(
+                R.id.broadcast_edit_text);
+        TextView broadcastErrorMessage = mMediaOutputBroadcastDialog.mAlertDialog.findViewById(
+                R.id.broadcast_error_message);
+        assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.INVISIBLE);
+
+        // input the invalid text
+        String moreThanMax = Strings.repeat("a",
+                MediaOutputBroadcastDialog.BROADCAST_CODE_MAX_LENGTH + 1);
+        editText.setText(moreThanMax);
+
+        assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void afterTextChanged_codeLengthLessThanMin_showErrorMessage() {
+        ImageView broadcastCodeEdit = mMediaOutputBroadcastDialog.mDialogView
+                .requireViewById(R.id.broadcast_code_edit);
+        TextView broadcastCode = mMediaOutputBroadcastDialog.mDialogView.requireViewById(
+                R.id.broadcast_code_summary);
+        broadcastCode.setText(BROADCAST_CODE_UPDATE_TEST);
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        broadcastCodeEdit.callOnClick();
+        EditText editText = mMediaOutputBroadcastDialog.mAlertDialog.findViewById(
+                R.id.broadcast_edit_text);
+        TextView broadcastErrorMessage = mMediaOutputBroadcastDialog.mAlertDialog.findViewById(
+                R.id.broadcast_error_message);
+        assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.INVISIBLE);
+
+        // input the invalid text
+        String moreThanMax = Strings.repeat("a",
+                MediaOutputBroadcastDialog.BROADCAST_CODE_MIN_LENGTH - 1);
+        editText.setText(moreThanMax);
+
+        assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.VISIBLE);
     }
 }
