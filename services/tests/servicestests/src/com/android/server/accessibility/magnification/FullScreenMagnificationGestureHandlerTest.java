@@ -589,51 +589,91 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
-    public void testScroll_zoomedStateAndAtEdge_delegatingState() {
-        goFromStateIdleTo(STATE_ACTIVATED);
+    @FlakyTest
+    public void testScroll_singleHorizontalPanningAndAtEdge_leftEdgeOverscroll() {
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
         mFullScreenMagnificationController.setCenter(
-                DISPLAY_0,
-                INITIAL_MAGNIFICATION_BOUNDS.left,
-                INITIAL_MAGNIFICATION_BOUNDS.top / 2,
-                false,
-                1);
+                DISPLAY_0, INITIAL_MAGNIFICATION_BOUNDS.left, centerY, false, 1);
         final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
         PointF initCoords =
                 new PointF(
                         mFullScreenMagnificationController.getCenterX(DISPLAY_0),
                         mFullScreenMagnificationController.getCenterY(DISPLAY_0));
-        PointF endCoords = new PointF(initCoords.x, initCoords.y);
-        endCoords.offset(swipeMinDistance, 0);
-        allowEventDelegation();
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(swipeMinDistance, 0);
 
-        swipeAndHold(initCoords, endCoords);
+        swipeAndHold(initCoords, edgeCoords);
 
-        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        assertTrue(mMgh.mCurrentState == mMgh.mSinglePanningState);
+        assertTrue(mMgh.mSinglePanningState.mOverscrollState == mMgh.OVERSCROLL_LEFT_EDGE);
         assertTrue(isZoomed());
     }
 
     @Test
     @FlakyTest
-    public void testScroll_singlePanningAndAtEdge_delegatingState() {
+    public void testScroll_singleHorizontalPanningAndAtEdge_rightEdgeOverscroll() {
         goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
         mFullScreenMagnificationController.setCenter(
-                DISPLAY_0,
-                INITIAL_MAGNIFICATION_BOUNDS.left,
-                INITIAL_MAGNIFICATION_BOUNDS.top / 2,
-                false,
-                1);
+                DISPLAY_0, INITIAL_MAGNIFICATION_BOUNDS.right, centerY, false, 1);
         final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
         PointF initCoords =
                 new PointF(
                         mFullScreenMagnificationController.getCenterX(DISPLAY_0),
                         mFullScreenMagnificationController.getCenterY(DISPLAY_0));
-        PointF endCoords = new PointF(initCoords.x, initCoords.y);
-        endCoords.offset(swipeMinDistance, 0);
-        allowEventDelegation();
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(-swipeMinDistance, 0);
 
-        swipeAndHold(initCoords, endCoords);
+        swipeAndHold(initCoords, edgeCoords);
 
-        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        assertTrue(mMgh.mCurrentState == mMgh.mSinglePanningState);
+        assertTrue(mMgh.mSinglePanningState.mOverscrollState == mMgh.OVERSCROLL_RIGHT_EDGE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    @FlakyTest
+    public void testScroll_singleVerticalPanningAndAtEdge_verticalOverscroll() {
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, centerX, INITIAL_MAGNIFICATION_BOUNDS.top, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(0, swipeMinDistance);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mSinglePanningState.mOverscrollState == mMgh.OVERSCROLL_VERTICAL_EDGE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void testScroll_singlePanningAndAtEdge_noOverscroll() {
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, INITIAL_MAGNIFICATION_BOUNDS.left, centerY, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(-swipeMinDistance, 0);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mSinglePanningState.mOverscrollState == mMgh.OVERSCROLL_NONE);
         assertTrue(isZoomed());
     }
 
@@ -1103,6 +1143,11 @@ public class FullScreenMagnificationGestureHandlerTest {
     private void swipe() {
         swipeAndHold();
         send(upEvent());
+    }
+
+    private void swipe(PointF start, PointF end) {
+        swipeAndHold(start, end);
+        send(upEvent(end.x, end.y));
     }
 
     private void swipeAndHold() {
