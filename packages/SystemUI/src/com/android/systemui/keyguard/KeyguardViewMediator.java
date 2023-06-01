@@ -1352,12 +1352,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             setShowingLocked(false /* showing */, true /* forceCallbacks */);
         }
 
-        boolean isLockscreenLwpEnabled = getWallpaperManager().isLockscreenLiveWallpaperEnabled();
+        boolean isLLwpEnabled = getWallpaperManager().isLockscreenLiveWallpaperEnabled();
         mKeyguardTransitions.register(
-                KeyguardService.wrap(getExitAnimationRunner(), isLockscreenLwpEnabled),
-                KeyguardService.wrap(getOccludeAnimationRunner(), isLockscreenLwpEnabled),
-                KeyguardService.wrap(getOccludeByDreamAnimationRunner(), isLockscreenLwpEnabled),
-                KeyguardService.wrap(getUnoccludeAnimationRunner(), isLockscreenLwpEnabled));
+                KeyguardService.wrap(this, getExitAnimationRunner(), isLLwpEnabled),
+                KeyguardService.wrap(this, getOccludeAnimationRunner(), isLLwpEnabled),
+                KeyguardService.wrap(this, getOccludeByDreamAnimationRunner(), isLLwpEnabled),
+                KeyguardService.wrap(this, getUnoccludeAnimationRunner(), isLLwpEnabled));
 
         final ContentResolver cr = mContext.getContentResolver();
 
@@ -2906,6 +2906,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             // re-locking. We should just end the surface-behind animation without exiting the
             // keyguard. The pending lock will be handled by onFinishedGoingToSleep().
             finishSurfaceBehindRemoteAnimation(true);
+            maybeHandlePendingLock();
         } else {
             Log.d(TAG, "#handleCancelKeyguardExitAnimation: keyguard exit animation cancelled. "
                     + "No pending lock, we should end up unlocked with the app/launcher visible.");
@@ -3261,8 +3262,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     /**
      * Cancel the keyguard exit animation, usually because we were swiping to unlock but WM starts
      * a new remote animation before finishing the keyguard exit animation.
-     *
-     * This will dismiss the keyguard.
      */
     public void cancelKeyguardExitAnimation() {
         Trace.beginSection("KeyguardViewMediator#cancelKeyguardExitAnimation");
@@ -3435,7 +3434,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
     }
 
-    private void setPendingLock(boolean hasPendingLock) {
+    public void setPendingLock(boolean hasPendingLock) {
         mPendingLock = hasPendingLock;
         Trace.traceCounter(Trace.TRACE_TAG_APP, "pendingLock", mPendingLock ? 1 : 0);
     }
