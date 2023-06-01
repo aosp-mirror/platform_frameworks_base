@@ -18,8 +18,8 @@ package com.android.systemui.media.controls.pipeline
 
 import android.content.Context
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.media.InfoMediaManager
 import com.android.settingslib.media.LocalMediaManager
+import com.android.settingslib.media.ManagerInfoMediaManager
 import javax.inject.Inject
 
 /** Factory to create [LocalMediaManager] objects. */
@@ -31,7 +31,7 @@ constructor(
 ) {
     /** Creates a [LocalMediaManager] for the given package. */
     fun create(packageName: String): LocalMediaManager {
-        return InfoMediaManager(context, packageName, null, localBluetoothManager).run {
+        return ManagerInfoMediaManager(context, packageName, null, localBluetoothManager).run {
             LocalMediaManager(context, localBluetoothManager, this, packageName)
         }
     }
