@@ -18,6 +18,7 @@ package com.android.systemui.animation
 
 import android.graphics.fonts.Font
 import android.graphics.fonts.FontVariationAxis
+import android.util.Log
 import android.util.LruCache
 import android.util.MathUtils
 import android.util.MathUtils.abs
@@ -114,6 +115,9 @@ class FontInterpolator {
         tmpInterpKey.set(start, end, progress)
         val cachedFont = interpCache[tmpInterpKey]
         if (cachedFont != null) {
+            if (DEBUG) {
+                Log.d(LOG_TAG, "[$progress] Interp. cache hit for $tmpInterpKey")
+            }
             return cachedFont
         }
 
@@ -159,6 +163,9 @@ class FontInterpolator {
         val axesCachedFont = verFontCache[tmpVarFontKey]
         if (axesCachedFont != null) {
             interpCache.put(InterpKey(start, end, progress), axesCachedFont)
+            if (DEBUG) {
+                Log.d(LOG_TAG, "[$progress] Axis cache hit for $tmpVarFontKey")
+            }
             return axesCachedFont
         }
 
@@ -168,6 +175,9 @@ class FontInterpolator {
         val newFont = Font.Builder(start).setFontVariationSettings(newAxes.toTypedArray()).build()
         interpCache.put(InterpKey(start, end, progress), newFont)
         verFontCache.put(VarFontKey(start, newAxes), newFont)
+        if (DEBUG) {
+            Log.d(LOG_TAG, "[$progress] Cache MISS for $tmpInterpKey / $tmpVarFontKey")
+        }
         return newFont
     }
 
@@ -233,6 +243,8 @@ class FontInterpolator {
         (v.coerceIn(min, max) / step).toInt() * step
 
     companion object {
+        private const val LOG_TAG = "FontInterpolator"
+        private val DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG)
         private val EMPTY_AXES = arrayOf<FontVariationAxis>()
 
         // Returns true if given two font instance can be interpolated.
