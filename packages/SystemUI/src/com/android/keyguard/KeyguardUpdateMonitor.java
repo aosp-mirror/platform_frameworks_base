@@ -3565,7 +3565,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     private void handleTimeUpdate() {
         Assert.isMainThread();
-        mLogger.d("handleTimeUpdate");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -3630,9 +3629,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private void handleBatteryUpdate(BatteryStatus status) {
         Assert.isMainThread();
         final boolean batteryUpdateInteresting = isBatteryUpdateInteresting(mBatteryStatus, status);
-        mLogger.logHandleBatteryUpdate(batteryUpdateInteresting);
         mBatteryStatus = status;
         if (batteryUpdateInteresting) {
+            mLogger.logHandleBatteryUpdate(mBatteryStatus);
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
