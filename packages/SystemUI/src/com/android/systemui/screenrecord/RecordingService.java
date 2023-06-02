@@ -427,6 +427,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 Log.e(TAG, "stopRecording called, but there was an error when ending"
                         + "recording");
                 exception.printStackTrace();
+                createErrorNotification();
             } catch (Throwable throwable) {
                 // Something unexpected happen, SystemUI will crash but let's delete
                 // the temporary files anyway
