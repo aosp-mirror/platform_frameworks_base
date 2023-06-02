@@ -1843,7 +1843,7 @@ public class NotificationManagerService extends SystemService {
                 }
             } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                if (userHandle >= 0) {
+                if (userHandle >= 0 && !mDpm.isKeepProfilesRunningEnabled()) {
                     cancelAllNotificationsInt(MY_UID, MY_PID, null, null, 0, 0, true, userHandle,
                             REASON_PROFILE_TURNED_OFF, null);
                     mSnoozeHelper.clearData(userHandle);
