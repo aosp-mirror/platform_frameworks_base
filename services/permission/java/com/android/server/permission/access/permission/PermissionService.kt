@@ -1992,6 +1992,15 @@ class PermissionService(
 
     override fun writeLegacyPermissionStateTEMP() {}
 
+    override fun getDefaultPermissionGrantFingerprint(userId: Int): String? =
+        service.getState { state.userStates[userId]!!.defaultPermissionGrantFingerprint }
+
+    override fun setDefaultPermissionGrantFingerprint(fingerprint: String, userId: Int) {
+        service.mutateState {
+            newState.mutateUserState(userId)!!.setDefaultPermissionGrantFingerprint(fingerprint)
+        }
+    }
+
     override fun onSystemReady() {
         service.onSystemReady()
         permissionControllerManager = PermissionControllerManager(

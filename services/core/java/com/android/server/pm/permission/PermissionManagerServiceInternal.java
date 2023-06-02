@@ -215,6 +215,17 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     void writeLegacyPermissionsTEMP(@NonNull LegacyPermissionSettings legacyPermissionSettings);
 
     /**
+     * Get the fingerprint for default permission grants.
+     */
+    @Nullable
+    String getDefaultPermissionGrantFingerprint(@UserIdInt int userId);
+
+    /**
+     * Set the fingerprint for default permission grants.
+     */
+    void setDefaultPermissionGrantFingerprint(@NonNull String fingerprint, @UserIdInt int userId);
+
+    /**
      * Callback when the system is ready.
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
