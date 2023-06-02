@@ -185,14 +185,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
         return contextForUser.getPackageManager();
     }
 
-    void animateExpandNotificationsPanel();
-
-    void animateExpandSettingsPanel(@Nullable String subpanel);
-
-    void collapsePanelOnMainThread();
-
-    void togglePanel();
-
     void start();
 
     boolean updateIsKeyguard();
@@ -228,24 +220,9 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isOccluded();
 
-    //TODO: These can / should probably be moved to NotificationPresenter or ShadeController
-    void onLaunchAnimationCancelled(boolean isLaunchForActivity);
-
-    void onLaunchAnimationEnd(boolean launchIsFullScreen);
-
-    boolean shouldAnimateLaunch(boolean isActivityIntent, boolean showOverLockscreen);
-
-    boolean shouldAnimateLaunch(boolean isActivityIntent);
-
     boolean isDeviceInVrMode();
 
     NotificationPresenter getPresenter();
-
-    void postAnimateCollapsePanels();
-
-    void postAnimateForceCollapsePanels();
-
-    void postAnimateOpenPanels();
 
     boolean isPanelExpanded();
 
@@ -263,8 +240,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
      * initial threshold.
      */
     default void onStatusBarTrackpadEvent(MotionEvent event) {}
-
-    void animateCollapseQuickSettings();
 
     /** */
     boolean getCommandQueuePanelsEnabled();

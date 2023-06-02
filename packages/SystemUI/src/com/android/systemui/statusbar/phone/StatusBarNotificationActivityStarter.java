@@ -122,7 +122,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
 
     private final CentralSurfaces mCentralSurfaces;
     private final NotificationPresenter mPresenter;
-    private final ShadeViewController mNotificationPanel;
+    private final ShadeViewController mShadeViewController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
@@ -158,7 +158,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             OnUserInteractionCallback onUserInteractionCallback,
             CentralSurfaces centralSurfaces,
             NotificationPresenter presenter,
-            ShadeViewController panel,
+            ShadeViewController shadeViewController,
             NotificationShadeWindowController notificationShadeWindowController,
             ActivityLaunchAnimator activityLaunchAnimator,
             NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
@@ -193,7 +193,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mCentralSurfaces = centralSurfaces;
         mPresenter = presenter;
-        mNotificationPanel = panel;
+        mShadeViewController = shadeViewController;
         mActivityLaunchAnimator = activityLaunchAnimator;
         mNotificationAnimationProvider = notificationAnimationProvider;
         mUserTracker = userTracker;
@@ -237,7 +237,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                 && mActivityIntentHelper.wouldPendingLaunchResolverActivity(intent,
                 mLockscreenUserManager.getCurrentUserId());
         final boolean animate = !willLaunchResolverActivity
-                && mCentralSurfaces.shouldAnimateLaunch(isActivityIntent);
+                && mActivityStarter.shouldAnimateLaunch(isActivityIntent);
         boolean showOverLockscreen = mKeyguardStateController.isShowing() && intent != null
                 && mActivityIntentHelper.wouldPendingShowOverLockscreen(intent,
                 mLockscreenUserManager.getCurrentUserId());
@@ -288,7 +288,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         }
 
         // Always defer the keyguard dismiss when animating.
-        return animate || !mNotificationPanel.isFullyCollapsed();
+        return animate || !mShadeViewController.isFullyCollapsed();
     }
 
     private void handleNotificationClickAfterPanelCollapsed(
@@ -323,7 +323,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                     removeHunAfterClick(row);
                     // Show work challenge, do not run PendingIntent and
                     // remove notification
-                    collapseOnMainThread();
+                    mShadeController.collapseOnMainThread();
                     return;
                 }
             }
@@ -440,7 +440,8 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             ActivityLaunchAnimator.Controller animationController =
                     new StatusBarLaunchAnimatorController(
                             mNotificationAnimationProvider.getAnimatorController(row, null),
-                            mCentralSurfaces,
+                            mShadeViewController,
+                            mShadeController,
                             mNotificationShadeWindowController,
                             isActivityIntent);
             mActivityLaunchAnimator.startPendingIntentWithAnimation(
@@ -472,7 +473,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     @Override
     public void startNotificationGutsIntent(final Intent intent, final int appUid,
             ExpandableNotificationRow row) {
-        boolean animate = mCentralSurfaces.shouldAnimateLaunch(true /* isActivityIntent */);
+        boolean animate = mActivityStarter.shouldAnimateLaunch(true /* isActivityIntent */);
         ActivityStarter.OnDismissAction onDismissAction = new ActivityStarter.OnDismissAction() {
             @Override
             public boolean onDismiss() {
@@ -480,7 +481,8 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                     ActivityLaunchAnimator.Controller animationController =
                             new StatusBarLaunchAnimatorController(
                                     mNotificationAnimationProvider.getAnimatorController(row),
-                                    mCentralSurfaces,
+                                    mShadeViewController,
+                                    mShadeController,
                                     mNotificationShadeWindowController,
                                     true /* isActivityIntent */);
 
@@ -507,7 +509,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
 
     @Override
     public void startHistoryIntent(View view, boolean showHistory) {
-        boolean animate = mCentralSurfaces.shouldAnimateLaunch(true /* isActivityIntent */);
+        boolean animate = mActivityStarter.shouldAnimateLaunch(true /* isActivityIntent */);
         ActivityStarter.OnDismissAction onDismissAction = new ActivityStarter.OnDismissAction() {
             @Override
             public boolean onDismiss() {
@@ -529,7 +531,8 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                             viewController == null ? null
                                 : new StatusBarLaunchAnimatorController(
                                         viewController,
-                                        mCentralSurfaces,
+                                        mShadeViewController,
+                                        mShadeController,
                                         mNotificationShadeWindowController,
                                         true /* isActivityIntent */);
 
@@ -630,11 +633,4 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         return true;
     }
 
-    private void collapseOnMainThread() {
-        if (Looper.getMainLooper().isCurrentThread()) {
-            mShadeController.collapseShade();
-        } else {
-            mMainThreadHandler.post(mShadeController::collapseShade);
-        }
-    }
 }

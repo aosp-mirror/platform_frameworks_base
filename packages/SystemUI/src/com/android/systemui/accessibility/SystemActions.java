@@ -485,13 +485,11 @@ public class SystemActions implements CoreStartable {
     }
 
     private void handleNotifications() {
-        mCentralSurfacesOptionalLazy.get().ifPresent(
-                CentralSurfaces::animateExpandNotificationsPanel);
+        mShadeController.animateExpandShade();
     }
 
     private void handleQuickSettings() {
-        mCentralSurfacesOptionalLazy.get().ifPresent(
-                centralSurfaces -> centralSurfaces.animateExpandSettingsPanel(null));
+        mShadeController.animateExpandQs();
     }
 
     private void handlePowerDialog() {

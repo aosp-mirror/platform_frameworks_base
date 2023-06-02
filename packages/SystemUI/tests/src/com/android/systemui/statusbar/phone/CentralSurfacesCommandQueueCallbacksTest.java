@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -153,12 +152,6 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         verify(mCentralSurfaces).updateQsExpansionEnabled();
         verify(mShadeController).animateCollapseShade();
-
-        // Trying to open it does nothing.
-        mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mShadeViewController, never()).expandToNotifications();
-        mSbcqCallbacks.animateExpandSettingsPanel(null);
-        verify(mShadeViewController, never()).expand(anyBoolean());
     }
 
     @Test
@@ -171,12 +164,6 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 StatusBarManager.DISABLE2_NONE, false);
         verify(mCentralSurfaces).updateQsExpansionEnabled();
         verify(mShadeController, never()).animateCollapseShade();
-
-        // Can now be opened.
-        mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mShadeViewController).expandToNotifications();
-        mSbcqCallbacks.animateExpandSettingsPanel(null);
-        verify(mShadeViewController).expandToQs();
     }
 
     @Test
