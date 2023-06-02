@@ -48,7 +48,7 @@ import android.os.ServiceManager;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
-import com.android.server.ExtendedMockitoRule;
+import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 
