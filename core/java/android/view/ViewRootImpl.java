@@ -1899,9 +1899,10 @@ public final class ViewRootImpl implements ViewParent,
                 && !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
         final boolean compatScaleChanged = mTmpFrames.compatScale != compatScale;
+        final boolean dragResizingChanged = mPendingDragResizing != dragResizing;
         if (msg == MSG_RESIZED && !frameChanged && !configChanged && !attachedFrameChanged
                 && !displayChanged && !forceNextWindowRelayout
-                && !compatScaleChanged) {
+                && !compatScaleChanged && !dragResizingChanged) {
             return;
         }
 
