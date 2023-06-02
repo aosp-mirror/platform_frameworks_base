@@ -1573,8 +1573,10 @@ class ActivityStarter {
             // existence change.
             transitionController.collectExistenceChange(started);
         } else if (result == START_DELIVERED_TO_TOP && newTransition != null
-                // An activity has changed order/visibility so this isn't just deliver-to-top
-                && mMovedToTopActivity == null) {
+                // An activity has changed order/visibility or the task is occluded by a transient
+                // activity, so this isn't just deliver-to-top
+                && mMovedToTopActivity == null
+                && !transitionController.isTransientHide(startedActivityRootTask)) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
                 newTransition.abort();
