@@ -16,10 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
@@ -619,9 +619,9 @@ class TransitionController {
             }
             // Make the collecting transition wait until this request is ready.
             mCollectingTransition.setReady(readyGroupRef, false);
-            if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
-                // Add keyguard flag to dismiss keyguard
-                mCollectingTransition.addFlag(flags);
+            if ((flags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
+                // Add keyguard flags to affect keyguard visibility
+                mCollectingTransition.addFlag(flags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS);
             }
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
