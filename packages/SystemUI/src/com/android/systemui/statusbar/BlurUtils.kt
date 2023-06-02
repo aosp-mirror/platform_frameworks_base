@@ -83,7 +83,8 @@ open class BlurUtils @Inject constructor(
             return
         }
         if (lastAppliedBlur == 0 && radius != 0) {
-            Trace.asyncTraceForTrackBegin(TRACE_TAG_APP, TRACK_NAME, EARLY_WAKEUP_SLICE_NAME, 0)
+            Trace.asyncTraceForTrackBegin(
+                    TRACE_TAG_APP, TRACK_NAME, "eEarlyWakeup (prepareBlur)", 0)
             earlyWakeupEnabled = true
             createTransaction().use {
                 it.setEarlyWakeupStart()
@@ -110,7 +111,7 @@ open class BlurUtils @Inject constructor(
                     Trace.asyncTraceForTrackBegin(
                         TRACE_TAG_APP,
                         TRACK_NAME,
-                        EARLY_WAKEUP_SLICE_NAME,
+                        "eEarlyWakeup (applyBlur)",
                         0
                     )
                     it.setEarlyWakeupStart()
@@ -159,6 +160,5 @@ open class BlurUtils @Inject constructor(
 
     companion object {
         const val TRACK_NAME = "BlurUtils"
-        const val EARLY_WAKEUP_SLICE_NAME = "eEarlyWakeup"
     }
 }
