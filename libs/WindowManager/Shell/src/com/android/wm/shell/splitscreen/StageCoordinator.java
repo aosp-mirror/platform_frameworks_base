@@ -579,6 +579,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mRecentTasks.get().removeSplitPair(taskId1);
             }
             options1 = options1 != null ? options1 : new Bundle();
+            addActivityOptions(options1, null);
             wct.startTask(taskId1, options1);
             mSplitTransitions.startFullscreenTransition(wct, remoteTransition);
             return;
@@ -600,6 +601,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskId == INVALID_TASK_ID) {
             options1 = options1 != null ? options1 : new Bundle();
+            addActivityOptions(options1, null);
             wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
             mSplitTransitions.startFullscreenTransition(wct, remoteTransition);
             return;
@@ -620,6 +622,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskId == INVALID_TASK_ID) {
             options1 = options1 != null ? options1 : new Bundle();
+            addActivityOptions(options1, null);
             wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
             mSplitTransitions.startFullscreenTransition(wct, remoteTransition);
             return;
@@ -678,6 +681,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (pendingIntent2 == null) {
             options1 = options1 != null ? options1 : new Bundle();
+            addActivityOptions(options1, null);
             if (shortcutInfo1 != null) {
                 wct.startShortcut(mContext.getPackageName(), shortcutInfo1, options1);
             } else {
