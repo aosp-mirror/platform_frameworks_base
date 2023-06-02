@@ -223,6 +223,10 @@ public class InsetsFrameProvider implements Parcelable {
         if (mArbitraryRectangle != null) {
             sb.append(", mArbitraryRectangle=").append(mArbitraryRectangle.toShortString());
         }
+        if (mMinimalInsetsSizeInDisplayCutoutSafe != null) {
+            sb.append(", mMinimalInsetsSizeInDisplayCutoutSafe=")
+                    .append(mMinimalInsetsSizeInDisplayCutoutSafe);
+        }
         sb.append("}");
         return sb.toString();
     }
@@ -248,6 +252,7 @@ public class InsetsFrameProvider implements Parcelable {
         mInsetsSize = in.readTypedObject(Insets.CREATOR);
         mInsetsSizeOverrides = in.createTypedArray(InsetsSizeOverride.CREATOR);
         mArbitraryRectangle = in.readTypedObject(Rect.CREATOR);
+        mMinimalInsetsSizeInDisplayCutoutSafe = in.readTypedObject(Insets.CREATOR);
     }
 
     @Override
@@ -258,6 +263,7 @@ public class InsetsFrameProvider implements Parcelable {
         out.writeTypedObject(mInsetsSize, flags);
         out.writeTypedArray(mInsetsSizeOverrides, flags);
         out.writeTypedObject(mArbitraryRectangle, flags);
+        out.writeTypedObject(mMinimalInsetsSizeInDisplayCutoutSafe, flags);
     }
 
     public boolean idEquals(InsetsFrameProvider o) {
@@ -276,13 +282,16 @@ public class InsetsFrameProvider implements Parcelable {
         return mId == other.mId && mSource == other.mSource && mFlags == other.mFlags
                 && Objects.equals(mInsetsSize, other.mInsetsSize)
                 && Arrays.equals(mInsetsSizeOverrides, other.mInsetsSizeOverrides)
-                && Objects.equals(mArbitraryRectangle, other.mArbitraryRectangle);
+                && Objects.equals(mArbitraryRectangle, other.mArbitraryRectangle)
+                && Objects.equals(mMinimalInsetsSizeInDisplayCutoutSafe,
+                        other.mMinimalInsetsSizeInDisplayCutoutSafe);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mId, mSource, mFlags, mInsetsSize,
-                Arrays.hashCode(mInsetsSizeOverrides), mArbitraryRectangle);
+                Arrays.hashCode(mInsetsSizeOverrides), mArbitraryRectangle,
+                mMinimalInsetsSizeInDisplayCutoutSafe);
     }
 
     public static final @NonNull Parcelable.Creator<InsetsFrameProvider> CREATOR =
