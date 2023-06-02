@@ -167,6 +167,9 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     }
 
     final TaskSnapshot recordSnapshotInner(TYPE source, boolean allowSnapshotHome) {
+        if (shouldDisableSnapshots()) {
+            return null;
+        }
         final boolean snapshotHome = allowSnapshotHome && source.isActivityTypeHome();
         final TaskSnapshot snapshot = captureSnapshot(source, snapshotHome);
         if (snapshot == null) {
