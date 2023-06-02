@@ -43,6 +43,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.text.format.DateFormat;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
@@ -51,6 +52,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -65,10 +67,12 @@ import com.android.server.job.JobStatusShortInfoProto;
 import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.Predicate;
 
 /**
@@ -87,6 +91,13 @@ import java.util.function.Predicate;
 public final class JobStatus {
     private static final String TAG = "JobScheduler.JobStatus";
     static final boolean DEBUG = JobSchedulerService.DEBUG;
+
+    private static MessageDigest sMessageDigest;
+    /** Cache of namespace to hash to reduce how often we need to generate the namespace hash. */
+    @GuardedBy("sNamespaceHashCache")
+    private static final ArrayMap<String, String> sNamespaceHashCache = new ArrayMap<>();
+    /** Maximum size of {@link #sNamespaceHashCache}. */
+    private static final int MAX_NAMESPACE_CACHE_SIZE = 128;
 
     private static final int NUM_CONSTRAINT_CHANGE_HISTORY = 10;
 
@@ -231,6 +242,8 @@ public final class JobStatus {
     final String sourceTag;
     @Nullable
     private final String mNamespace;
+    @Nullable
+    private final String mNamespaceHash;
     /** An ID that can be used to uniquely identify the job when logging statsd metrics. */
     private final long mLoggingJobId;
 
@@ -570,6 +583,7 @@ public final class JobStatus {
         this.callingUid = callingUid;
         this.standbyBucket = standbyBucket;
         mNamespace = namespace;
+        mNamespaceHash = generateNamespaceHash(namespace);
         mLoggingJobId = generateLoggingId(namespace, job.getId());
 
         int tempSourceUid = -1;
@@ -812,6 +826,56 @@ public final class JobStatus {
             return jobId;
         }
         return ((long) namespace.hashCode()) << 31 | jobId;
+    }
+
+    @Nullable
+    private static String generateNamespaceHash(@Nullable String namespace) {
+        if (namespace == null) {
+            return null;
+        }
+        if (namespace.trim().isEmpty()) {
+            // Input is composed of all spaces (or nothing at all).
+            return namespace;
+        }
+        synchronized (sNamespaceHashCache) {
+            final int idx = sNamespaceHashCache.indexOfKey(namespace);
+            if (idx >= 0) {
+                return sNamespaceHashCache.valueAt(idx);
+            }
+        }
+        String hash = null;
+        try {
+            // .hashCode() can result in conflicts that would make distinguishing between
+            // namespaces hard and reduce the accuracy of certain metrics. Use SHA-256
+            // to generate the hash since the probability of collision is extremely low.
+            if (sMessageDigest == null) {
+                sMessageDigest = MessageDigest.getInstance("SHA-256");
+            }
+            final byte[] digest = sMessageDigest.digest(namespace.getBytes());
+            // Convert to hexadecimal representation
+            StringBuilder hexBuilder = new StringBuilder(digest.length);
+            for (byte byteChar : digest) {
+                hexBuilder.append(String.format("%02X", byteChar));
+            }
+            hash = hexBuilder.toString();
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Couldn't hash input", e);
+        }
+        if (hash == null) {
+            // If we get to this point, something went wrong with the MessageDigest above.
+            // Don't return the raw input value (which would defeat the purpose of hashing).
+            return "failed_namespace_hash";
+        }
+        hash = hash.intern();
+        synchronized (sNamespaceHashCache) {
+            if (sNamespaceHashCache.size() >= MAX_NAMESPACE_CACHE_SIZE) {
+                // Drop a random mapping instead of dropping at a predefined index to avoid
+                // potentially always dropping the same mapping.
+                sNamespaceHashCache.removeAt((new Random()).nextInt(MAX_NAMESPACE_CACHE_SIZE));
+            }
+            sNamespaceHashCache.put(namespace, hash);
+        }
+        return hash;
     }
 
     public void enqueueWorkLocked(JobWorkItem work) {
@@ -1117,8 +1181,14 @@ public final class JobStatus {
         return true;
     }
 
+    @Nullable
     public String getNamespace() {
         return mNamespace;
+    }
+
+    @Nullable
+    public String getNamespaceHash() {
+        return mNamespaceHash;
     }
 
     public String getSourceTag() {
