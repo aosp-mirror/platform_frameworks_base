@@ -195,6 +195,34 @@ public final class LongArrayMultiStateCounter implements Parcelable {
      * is distributed among the state according to the time the object spent in those states
      * since the previous call to updateValues.
      */
+    public void updateValues(long[] values, long timestampMs) {
+        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
+        if (container == null || container.mLength != values.length) {
+            container = new LongArrayContainer(values.length);
+        }
+        container.setValues(values);
+        updateValues(container, timestampMs);
+        sTmpArrayContainer.set(container);
+    }
+
+    /**
+     * Adds the supplied values to the current accumulated values in the counter.
+     */
+    public void incrementValues(long[] values, long timestampMs) {
+        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
+        if (container == null || container.mLength != values.length) {
+            container = new LongArrayContainer(values.length);
+        }
+        container.setValues(values);
+        native_incrementValues(mNativeObject, container.mNativeObject, timestampMs);
+        sTmpArrayContainer.set(container);
+    }
+
+    /**
+     * Sets the new values.  The delta between the previously set values and these values
+     * is distributed among the state according to the time the object spent in those states
+     * since the previous call to updateValues.
+     */
     public void updateValues(LongArrayContainer longArrayContainer, long timestampMs) {
         if (longArrayContainer.mLength != mLength) {
             throw new IllegalArgumentException(
@@ -290,6 +318,10 @@ public final class LongArrayMultiStateCounter implements Parcelable {
 
     @CriticalNative
     private static native void native_updateValues(long nativeObject,
+            long longArrayContainerNativeObject, long timestampMs);
+
+    @CriticalNative
+    private static native void native_incrementValues(long nativeObject,
             long longArrayContainerNativeObject, long timestampMs);
 
     @CriticalNative

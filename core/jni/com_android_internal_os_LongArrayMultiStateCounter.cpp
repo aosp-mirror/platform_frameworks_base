@@ -65,6 +65,16 @@ static void native_updateValues(jlong nativePtr, jlong longArrayContainerNativeP
     counter->updateValue(*vector, timestamp);
 }
 
+static void native_incrementValues(jlong nativePtr, jlong longArrayContainerNativePtr,
+                                   jlong timestamp) {
+    battery::LongArrayMultiStateCounter *counter =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
+    std::vector<uint64_t> *vector =
+            reinterpret_cast<std::vector<uint64_t> *>(longArrayContainerNativePtr);
+
+    counter->incrementValue(*vector, timestamp);
+}
+
 static void native_addCounts(jlong nativePtr, jlong longArrayContainerNativePtr) {
     battery::LongArrayMultiStateCounter *counter =
             reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
@@ -201,6 +211,8 @@ static const JNINativeMethod g_LongArrayMultiStateCounter_methods[] = {
         {"native_setState", "(JIJ)V", (void *)native_setState},
         // @CriticalNative
         {"native_updateValues", "(JJJ)V", (void *)native_updateValues},
+        // @CriticalNative
+        {"native_incrementValues", "(JJJ)V", (void *)native_incrementValues},
         // @CriticalNative
         {"native_addCounts", "(JJ)V", (void *)native_addCounts},
         // @CriticalNative
