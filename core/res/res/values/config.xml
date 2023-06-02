@@ -1675,16 +1675,56 @@
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
+
          This must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessButtonBacklightValues">
     </integer-array>
 
-    <!-- Array of output values for keyboard backlight corresponding to the lux values
-         in the config_autoBrightnessLevels array.  This array should have size one greater
-         than the size of the config_autoBrightnessLevels array.
-         The brightness values must be between 0 and 255 and be non-decreasing.
+    <!-- Smoothing constant for Ambient keyboard backlight change. It should contain value
+         in the range (0.0, 1.0] that will be used to calculate smoothed lux values using
+         simple exponential smoothing. This value indicated how quickly we transition to
+         the lux values provided by the Ambient light sensor.
+         Simple formula for newLuxValue = (1-constant)*currLuxValue + constant*rawLuxValue, where
+         rawLuxValue is the value provided by the Ambient light sensor. (e.g. value of 1.0 means we
+         immediately start using the value provided by the Ambient light sensor)
          This must be overridden in platform specific overlays -->
-    <integer-array name="config_autoBrightnessKeyboardBacklightValues">
+    <item name="config_autoKeyboardBrightnessSmoothingConstant" format="float" type="dimen">
+        1.0
+    </item>
+
+    <!-- Array of output values for keyboard backlight corresponding to the lux values
+         in the config_autoKeyboardBacklight(Increase/Decrease)LuxThreshold arrays.
+         The brightness values must be between 0 and 255 and be non-decreasing.
+
+         This can be overridden in platform specific overlays -->
+    <integer-array name="config_autoKeyboardBacklightBrightnessValues">
+        <item>102</item>
+        <item>153</item>
+        <item>0</item>
+    </integer-array>
+
+    <!-- Array of threshold values for keyboard backlight corresponding to the values
+         in the config_autoKeyboardBacklightBrightnessValues array.
+         These lux values indicate when to move to a lower keyboard backlight value,
+         as defined in config_autoKeyboardBacklightBrightnessValues array.
+
+         This can be overridden in platform specific overlays -->
+    <integer-array name="config_autoKeyboardBacklightDecreaseLuxThreshold">
+        <item>-1</item>
+        <item>40</item>
+        <item>150</item>
+    </integer-array>
+
+    <!-- Array of threshold values for keyboard backlight corresponding to the values
+         in the config_autoKeyboardBacklightBrightnessValues array.
+         These lux values indicate when to move to a higher keyboard backlight value,
+         as defined in config_autoKeyboardBacklightBrightnessValues array.
+
+         This can be overridden in platform specific overlays -->
+    <integer-array name="config_autoKeyboardBacklightIncreaseLuxThreshold">
+        <item>55</item>
+        <item>200</item>
+        <item>-1</item>
     </integer-array>
 
     <!-- An array describing the screen's backlight values corresponding to the brightness
