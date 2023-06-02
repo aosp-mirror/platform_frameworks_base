@@ -41,6 +41,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
@@ -334,11 +335,12 @@ public abstract class WMShellModule {
             TransactionPool transactionPool,
             IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
+            LaunchAdjacentController launchAdjacentController,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new SplitScreenController(context, shellInit, shellCommandHandler, shellController,
                 shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, displayController,
                 displayImeController, displayInsetsController, dragAndDropController, transitions,
-                transactionPool, iconProvider, recentTasks, mainExecutor);
+                transactionPool, iconProvider, recentTasks, launchAdjacentController, mainExecutor);
     }
 
     //
@@ -679,6 +681,7 @@ public abstract class WMShellModule {
     static DesktopTasksController provideDesktopTasksController(
             Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             DisplayController displayController,
             ShellTaskOrganizer shellTaskOrganizer,
@@ -688,12 +691,13 @@ public abstract class WMShellModule {
             EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
             ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
+            LaunchAdjacentController launchAdjacentController,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
-        return new DesktopTasksController(context, shellInit, shellController, displayController,
-                shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, transitions,
-                enterDesktopTransitionHandler, exitDesktopTransitionHandler,
-                desktopModeTaskRepository, mainExecutor);
+        return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
+                displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
+                transitions, enterDesktopTransitionHandler, exitDesktopTransitionHandler,
+                desktopModeTaskRepository, launchAdjacentController, mainExecutor);
     }
 
     @WMSingleton

@@ -2152,7 +2152,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     pw.println("   suppressing: " + key);
                 }
 
-                pw.print("mAppBubbleTaskIds: " + mAppBubbleTaskIds.values());
+                pw.println("mAppBubbleTaskIds: " + mAppBubbleTaskIds.values());
             }
         }
 

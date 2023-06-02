@@ -46,6 +46,7 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
@@ -70,6 +71,8 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
+import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -77,8 +80,6 @@ import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
-import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
-import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
@@ -273,6 +274,13 @@ public abstract class WMShellBaseModule {
     static WindowManagerShellWrapper provideWindowManagerShellWrapper(
             @ShellMainThread ShellExecutor mainExecutor) {
         return new WindowManagerShellWrapper(mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static LaunchAdjacentController provideLaunchAdjacentController(
+            SyncTransactionQueue syncQueue) {
+        return new LaunchAdjacentController(syncQueue);
     }
 
     //
