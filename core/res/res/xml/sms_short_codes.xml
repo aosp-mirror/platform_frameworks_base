@@ -162,7 +162,7 @@
     <shortcode country="jp" pattern="\\d{1,5}" free="8083" />
 
     <!-- Kenya: 5 digits, known premium codes listed -->
-    <shortcode country="ke" pattern="\\d{5}" free="21725|21562|40520" />
+    <shortcode country="ke" pattern="\\d{5}" free="21725|21562|40520|23342" />
 
     <!-- Kyrgyzstan: 4 digits, known premium codes listed -->
     <shortcode country="kg" pattern="\\d{4}" premium="415[2367]|444[69]" />
@@ -234,6 +234,9 @@
 
     <!-- Russia: 4 digits, known premium codes listed: http://smscoin.net/info/pricing-russia/ -->
     <shortcode country="ru" pattern="\\d{4}" premium="1(?:1[56]1|899)|2(?:09[57]|322|47[46]|880|990)|3[589]33|4161|44(?:4[3-9]|81)|77(?:33|81)|8424" free="6954|8501" standard="2037|2044"/>
+
+    <!-- Rwanda: 4 digits -->
+    <shortcode country="rw" pattern="\\d{4}" free="5060" />
 
     <!-- Saudi Arabia -->
     <shortcode country="sa" pattern="\\d{1,5}" free="8145" />
