@@ -85,22 +85,17 @@ public final class CachedAppOptimizerTest {
     @Mock
     private PackageManagerInternal mPackageManagerInt;
 
-    private final TestableDeviceConfig mDeviceConfig = new TestableDeviceConfig();
-
     @Rule
     public final ApplicationExitInfoTest.ServiceThreadRule
             mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
 
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
-            .configureSessionBuilder(
-                    sessionBuilder -> mDeviceConfig.setUpMockedClasses(sessionBuilder))
-            .build();
+            .addStaticMockFixtures(TestableDeviceConfig::new).build();
 
     @Before
     public void setUp() {
         System.loadLibrary("mockingservicestestjni");
-        mDeviceConfig.setUpMockBehaviors();
         mHandlerThread = new HandlerThread("");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
@@ -131,7 +126,6 @@ public final class CachedAppOptimizerTest {
         mHandlerThread.quit();
         mThread.quit();
         mCountDown = null;
-        mDeviceConfig.tearDown();
     }
 
     private ProcessRecord makeProcessRecord(int pid, int uid, int packageUid, String processName,
