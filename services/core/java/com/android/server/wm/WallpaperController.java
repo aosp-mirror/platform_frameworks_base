@@ -339,12 +339,12 @@ class WallpaperController {
     }
 
     /**
-     * Change the visibility if wallpaper is home screen only.
+     * Make one wallpaper visible, according to {@attr showHome}.
      * This is called during the keyguard unlocking transition
-     * (see {@link KeyguardController#keyguardGoingAway(int, int)}) and thus assumes that if the
-     * system wallpaper is shared with lock, then it needs no animation.
+     * (see {@link KeyguardController#keyguardGoingAway(int, int)}),
+     * or when a keyguard unlock is cancelled (see {@link KeyguardController})
      */
-    public void showHomeWallpaperInTransition() {
+    public void showWallpaperInTransition(boolean showHome) {
         updateWallpaperWindowsTarget(mFindResults);
 
         if (!mFindResults.hasTopShowWhenLockedWallpaper()) {
@@ -357,9 +357,9 @@ class WallpaperController {
             // Shared wallpaper, ensure its visibility
             showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindows(true);
         } else {
-            // Separate lock and home wallpapers: show home wallpaper and hide lock
-            hideWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(true);
-            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(false);
+            // Separate lock and home wallpapers: show the correct wallpaper in transition
+            hideWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(showHome);
+            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(!showHome);
         }
     }
 
