@@ -1688,6 +1688,19 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
     void readDefaultAppsLPw(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
+        String defaultBrowser = readDefaultApps(parser);
+        if (defaultBrowser != null) {
+            mDefaultBrowserApp.put(userId, defaultBrowser);
+        }
+    }
+
+    /**
+     * @return the package name for the default browser app, or {@code null} if none.
+     */
+    @Nullable
+    static String readDefaultApps(@NonNull XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        String defaultBrowser = null;
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -1697,8 +1710,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             }
             String tagName = parser.getName();
             if (tagName.equals(TAG_DEFAULT_BROWSER)) {
-                String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                mDefaultBrowserApp.put(userId, packageName);
+                defaultBrowser = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
             } else if (tagName.equals(TAG_DEFAULT_DIALER)) {
                 // Ignored.
             } else {
@@ -1708,6 +1720,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 XmlUtils.skipCurrentTag(parser);
             }
         }
+        return defaultBrowser;
     }
 
     void readBlockUninstallPackagesLPw(TypedXmlPullParser parser, int userId)
@@ -2087,8 +2100,13 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
     void writeDefaultAppsLPr(XmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
-        serializer.startTag(null, TAG_DEFAULT_APPS);
         String defaultBrowser = mDefaultBrowserApp.get(userId);
+        writeDefaultApps(serializer, defaultBrowser);
+    }
+
+    static void writeDefaultApps(@NonNull XmlSerializer serializer, @Nullable String defaultBrowser)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        serializer.startTag(null, TAG_DEFAULT_APPS);
         if (!TextUtils.isEmpty(defaultBrowser)) {
             serializer.startTag(null, TAG_DEFAULT_BROWSER);
             serializer.attribute(null, ATTR_PACKAGE_NAME, defaultBrowser);
