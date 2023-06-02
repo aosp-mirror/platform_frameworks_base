@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Context;
@@ -301,7 +302,8 @@ public final class TextClassification implements Parcelable {
         Objects.requireNonNull(intent);
         return v -> {
             try {
-                intent.send();
+                intent.send(ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle());
             } catch (PendingIntent.CanceledException e) {
                 Log.e(LOG_TAG, "Error sending PendingIntent", e);
             }
