@@ -26,8 +26,10 @@ import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_CRITICAL
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_NORMAL
 import com.android.systemui.dump.DumpsysEntry.DumpableEntry
 import com.android.systemui.dump.DumpsysEntry.LogBufferEntry
+import com.android.systemui.dump.DumpsysEntry.TableLogBufferEntry
 import com.android.systemui.dump.nano.SystemUIProtoDump
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.table.TableLogBuffer
 import com.google.protobuf.nano.MessageNano
 import java.io.BufferedOutputStream
 import java.io.FileDescriptor
@@ -41,7 +43,7 @@ import javax.inject.Provider
  *
  * Dump output is split into two sections, CRITICAL and NORMAL. In general, the CRITICAL section
  * contains all dumpables that were registered to the [DumpManager], while the NORMAL sections
- * contains all [LogBuffer]s (due to their length).
+ * contains all [LogBuffer]s and [TableLogBuffer]s (due to their length).
  *
  * The CRITICAL and NORMAL sections can be found within a bug report by searching for "SERVICE
  * com.android.systemui/.SystemUIService" and "SERVICE
@@ -74,6 +76,7 @@ import javax.inject.Provider
  * # To dump all dumpables or all buffers:
  * $ <invocation> dumpables
  * $ <invocation> buffers
+ * $ <invocation> tables
  *
  * # Finally, the following will simulate what we dump during the CRITICAL and NORMAL sections of a
  * # bug report:
@@ -125,6 +128,7 @@ constructor(
             "bugreport-normal" -> dumpNormal(pw, args)
             "dumpables" -> dumpDumpables(pw, args)
             "buffers" -> dumpBuffers(pw, args)
+            "tables" -> dumpTables(pw, args)
             "config" -> dumpConfig(pw)
             "help" -> dumpHelp(pw)
             else -> {
@@ -160,26 +164,22 @@ constructor(
             dumpBuffer(buffer, pw, args.tailLength)
         }
 
+        val tableBuffers = dumpManager.getTableLogBuffers()
+        for (table in tableBuffers) {
+            dumpTableBuffer(table, pw, args.rawArgs)
+        }
+
         logBufferEulogizer.readEulogyIfPresent(pw)
     }
 
     private fun dumpDumpables(pw: PrintWriter, args: ParsedArgs) =
-        dumpManager.getDumpables().run {
-            if (args.listOnly) {
-                listTargetNames(this, pw)
-            } else {
-                forEach { dumpable -> dumpDumpable(dumpable, pw, args.rawArgs) }
-            }
-        }
+        dumpManager.getDumpables().listOrDumpEntries(pw, args)
 
     private fun dumpBuffers(pw: PrintWriter, args: ParsedArgs) =
-        dumpManager.getLogBuffers().run {
-            if (args.listOnly) {
-                listTargetNames(this, pw)
-            } else {
-                forEach { buf -> dumpBuffer(buf, pw, args.tailLength) }
-            }
-        }
+        dumpManager.getLogBuffers().listOrDumpEntries(pw, args)
+
+    private fun dumpTables(pw: PrintWriter, args: ParsedArgs) =
+        dumpManager.getTableLogBuffers().listOrDumpEntries(pw, args)
 
     private fun listTargetNames(targets: Collection<DumpsysEntry>, pw: PrintWriter) {
         for (target in targets) {
@@ -215,9 +215,10 @@ constructor(
         if (targets.isNotEmpty()) {
             val dumpables = dumpManager.getDumpables()
             val buffers = dumpManager.getLogBuffers()
+            val tableBuffers = dumpManager.getTableLogBuffers()
 
             targets.forEach { target ->
-                findTargetInCollection(target, dumpables, buffers)?.dump(pw, args)
+                findTargetInCollection(target, dumpables, buffers, tableBuffers)?.dump(pw, args)
             }
         } else {
             if (args.listOnly) {
@@ -240,10 +241,12 @@ constructor(
         target: String,
         dumpables: Collection<DumpableEntry>,
         logBuffers: Collection<LogBufferEntry>,
+        tableBuffers: Collection<TableLogBufferEntry>,
     ) =
         sequence {
                 findBestTargetMatch(dumpables, target)?.let { yield(it) }
                 findBestTargetMatch(logBuffers, target)?.let { yield(it) }
+                findBestTargetMatch(tableBuffers, target)?.let { yield(it) }
             }
             .sortedBy { it.name }
             .minByOrNull { it.name.length }
@@ -256,6 +259,11 @@ constructor(
     private fun dumpBuffer(entry: LogBufferEntry, pw: PrintWriter, tailLength: Int) {
         pw.preamble(entry)
         entry.buffer.dump(pw, tailLength)
+    }
+
+    private fun dumpTableBuffer(buffer: TableLogBufferEntry, pw: PrintWriter, args: Array<String>) {
+        pw.preamble(buffer)
+        buffer.table.dump(pw, args)
     }
 
     private fun dumpConfig(pw: PrintWriter) {
@@ -307,6 +315,7 @@ constructor(
         pw.println("Special commands:")
         pw.println("$ <invocation> dumpables")
         pw.println("$ <invocation> buffers")
+        pw.println("$ <invocation> tables")
         pw.println("$ <invocation> bugreport-critical")
         pw.println("$ <invocation> bugreport-normal")
         pw.println("$ <invocation> config")
@@ -316,6 +325,7 @@ constructor(
         pw.println("$ <invocation> --list")
         pw.println("$ <invocation> dumpables --list")
         pw.println("$ <invocation> buffers --list")
+        pw.println("$ <invocation> tables --list")
         pw.println()
 
         pw.println("Show only the most recent N lines of buffers")
@@ -393,6 +403,14 @@ constructor(
         when (this) {
             is DumpableEntry -> dumpDumpable(this, pw, args.rawArgs)
             is LogBufferEntry -> dumpBuffer(this, pw, args.tailLength)
+            is TableLogBufferEntry -> dumpTableBuffer(this, pw, args.rawArgs)
+        }
+
+    private fun Collection<DumpsysEntry>.listOrDumpEntries(pw: PrintWriter, args: ParsedArgs) =
+        if (args.listOnly) {
+            listTargetNames(this, pw)
+        } else {
+            forEach { it.dump(pw, args) }
         }
 
     companion object {
@@ -432,7 +450,8 @@ constructor(
             when (entry) {
                 // Historically TableLogBuffer was not separate from dumpables, so they have the
                 // same header
-                is DumpableEntry -> {
+                is DumpableEntry,
+                is TableLogBufferEntry -> {
                     println()
                     println(entry.name)
                     println(DUMPSYS_DUMPABLE_DIVIDER)
@@ -464,6 +483,15 @@ constructor(
         }
 
         /**
+         * Zero-arg utility to write a [TableLogBufferEntry] to the given [PrintWriter] in a
+         * dumpsys-appropriate format.
+         */
+        private fun dumpTableBuffer(entry: TableLogBufferEntry, pw: PrintWriter) {
+            pw.preamble(entry)
+            entry.table.dump(pw, arrayOf())
+        }
+
+        /**
          * Zero-arg utility to write a [DumpsysEntry] to the given [PrintWriter] in a
          * dumpsys-appropriate format.
          */
@@ -471,6 +499,7 @@ constructor(
             when (this) {
                 is DumpableEntry -> dumpDumpable(this, pw)
                 is LogBufferEntry -> dumpBuffer(this, pw)
+                is TableLogBufferEntry -> dumpTableBuffer(this, pw)
             }
         }
 
@@ -484,7 +513,15 @@ constructor(
 private val PRIORITY_OPTIONS = arrayOf(PRIORITY_ARG_CRITICAL, PRIORITY_ARG_NORMAL)
 
 private val COMMANDS =
-    arrayOf("bugreport-critical", "bugreport-normal", "buffers", "dumpables", "config", "help")
+    arrayOf(
+        "bugreport-critical",
+        "bugreport-normal",
+        "buffers",
+        "dumpables",
+        "tables",
+        "config",
+        "help"
+    )
 
 private class ParsedArgs(val rawArgs: Array<String>, val nonFlagArgs: List<String>) {
     var dumpPriority: String? = null
