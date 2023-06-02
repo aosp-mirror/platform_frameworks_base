@@ -638,12 +638,12 @@ public class AuthContainerView extends LinearLayout
 
             case Surface.ROTATION_90:
                 mPanelController.setPosition(AuthPanelController.POSITION_RIGHT);
-                setScrollViewGravity(Gravity.BOTTOM | Gravity.RIGHT);
+                setScrollViewGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
                 break;
 
             case Surface.ROTATION_270:
                 mPanelController.setPosition(AuthPanelController.POSITION_LEFT);
-                setScrollViewGravity(Gravity.BOTTOM | Gravity.LEFT);
+                setScrollViewGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
                 break;
 
             case Surface.ROTATION_180:
