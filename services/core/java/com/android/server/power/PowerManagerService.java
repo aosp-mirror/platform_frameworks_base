@@ -40,13 +40,17 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.SynchronousUserSwitchObserver;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
+import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -62,6 +66,7 @@ import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatterySaverPolicyConfig;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -277,6 +282,18 @@ public final class PowerManagerService extends SystemService
      */
     private static final long ENHANCED_DISCHARGE_PREDICTION_BROADCAST_MIN_DELAY_MS = 60 * 1000L;
 
+    /**
+     * Apps targeting Android U and above need to define
+     * {@link android.Manifest.permission#TURN_SCREEN_ON} in their manifest for
+     * {@link android.os.PowerManager#ACQUIRE_CAUSES_WAKEUP} to have any effect.
+     * Note that most applications should use {@link android.R.attr#turnScreenOn} or
+     * {@link android.app.Activity#setTurnScreenOn(boolean)} instead, as this prevents the
+     * previous foreground app from being resumed first when the screen turns on.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long REQUIRE_TURN_SCREEN_ON_PERMISSION = 216114297L;
+
     /** Reason ID for holding display suspend blocker. */
     private static final String HOLDING_DISPLAY_SUSPEND_BLOCKER = "holding display";
 
@@ -304,8 +321,9 @@ public final class PowerManagerService extends SystemService
     private final SystemPropertiesWrapper mSystemProperties;
     private final Clock mClock;
     private final Injector mInjector;
+    private final PermissionCheckerWrapper mPermissionCheckerWrapper;
+    private final PowerPropertiesWrapper mPowerPropertiesWrapper;
 
-    private AppOpsManager mAppOpsManager;
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
     private DisplayManagerInternal mDisplayManagerInternal;
@@ -1029,9 +1047,64 @@ public final class PowerManagerService extends SystemService
             return new LowPowerStandbyController(context, looper);
         }
 
-        AppOpsManager createAppOpsManager(Context context) {
-            return context.getSystemService(AppOpsManager.class);
+        PermissionCheckerWrapper createPermissionCheckerWrapper() {
+            return PermissionChecker::checkPermissionForDataDelivery;
         }
+
+        PowerPropertiesWrapper createPowerPropertiesWrapper() {
+            return new PowerPropertiesWrapper() {
+                @Override
+                public boolean waive_target_sdk_check_for_turn_screen_on() {
+                    return PowerProperties.waive_target_sdk_check_for_turn_screen_on().orElse(
+                            false);
+                }
+
+                @Override
+                public boolean permissionless_turn_screen_on() {
+                    return PowerProperties.permissionless_turn_screen_on().orElse(false);
+                }
+            };
+        }
+    }
+
+    /** Interface for checking an app op permission */
+    @VisibleForTesting
+    interface PermissionCheckerWrapper {
+        /**
+         * Checks whether a given data access chain described by the given {@link AttributionSource}
+         * has a given permission and whether the app op that corresponds to this permission
+         * is allowed.
+         * See {@link PermissionChecker#checkPermissionForDataDelivery} for more details.
+         *
+         * @param context Context for accessing resources.
+         * @param permission The permission to check.
+         * @param pid The process id for which to check. Use {@link PermissionChecker#PID_UNKNOWN}
+         *    if the PID is not known.
+         * @param attributionSource the permission identity
+         * @param message A message describing the reason the permission was checked
+         * @return The permission check result which is any of
+         *     {@link PermissionChecker#PERMISSION_GRANTED},
+         *     {@link PermissionChecker#PERMISSION_SOFT_DENIED},
+         *     or {@link PermissionChecker#PERMISSION_HARD_DENIED}.
+         */
+        int checkPermissionForDataDelivery(@NonNull Context context, @NonNull String permission,
+                int pid, @NonNull AttributionSource attributionSource, @Nullable String message);
+    }
+
+    /** Interface for querying {@link PowerProperties} */
+    @VisibleForTesting
+    interface PowerPropertiesWrapper {
+        /**
+         * Waives the minimum target-sdk check for android.os.PowerManager#ACQUIRE_CAUSES_WAKEUP
+         * and only allows the flag for apps holding android.permission.TURN_SCREEN_ON
+         */
+        boolean waive_target_sdk_check_for_turn_screen_on();
+
+        /**
+         * Allows apps to turn the screen on with android.os.PowerManager#ACQUIRE_CAUSES_WAKEUP
+         * without being granted android.app.AppOpsManager#OP_TURN_SCREEN_ON.
+         */
+        boolean permissionless_turn_screen_on();
     }
 
     final Constants mConstants;
@@ -1086,8 +1159,8 @@ public final class PowerManagerService extends SystemService
                 Looper.getMainLooper());
         mInattentiveSleepWarningOverlayController =
                 mInjector.createInattentiveSleepWarningController();
-
-        mAppOpsManager = injector.createAppOpsManager(mContext);
+        mPermissionCheckerWrapper = mInjector.createPermissionCheckerWrapper();
+        mPowerPropertiesWrapper = mInjector.createPowerPropertiesWrapper();
 
         mPowerGroupWakefulnessChangeListener = new PowerGroupWakefulnessChangeListener();
 
@@ -1562,19 +1635,29 @@ public final class PowerManagerService extends SystemService
     }
 
     @RequiresPermission(value = android.Manifest.permission.TURN_SCREEN_ON, conditional = true)
-    private boolean isAcquireCausesWakeupFlagAllowed(String opPackageName, int opUid) {
+    private boolean isAcquireCausesWakeupFlagAllowed(String opPackageName, int opUid, int opPid) {
         if (opPackageName == null) {
             return false;
         }
-        if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName)
-                == AppOpsManager.MODE_ALLOWED) {
-            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.TURN_SCREEN_ON)
-                    == PackageManager.PERMISSION_GRANTED) {
-                Slog.i(TAG, "Allowing device wake-up from app " + opPackageName);
-                return true;
-            }
+        if (PermissionChecker.PERMISSION_GRANTED
+                == mPermissionCheckerWrapper.checkPermissionForDataDelivery(mContext,
+                android.Manifest.permission.TURN_SCREEN_ON, opPid,
+                new AttributionSource(opUid, opPackageName, /* attributionTag= */ null),
+                /* message= */ "ACQUIRE_CAUSES_WAKEUP for " + opPackageName)) {
+            Slog.i(TAG, "Allowing device wake-up from app " + opPackageName);
+            return true;
         }
-        if (PowerProperties.permissionless_turn_screen_on().orElse(false)) {
+        // CompatChanges#isChangeEnabled() returns false for apps with targetSdk < UDC and ensures
+        // backwards compatibility.
+        // waive_target_sdk_check_for_turn_screen_on() returns false by default and may be set to
+        // true on form factors with a more strict policy (e.g. TV)
+        if (!CompatChanges.isChangeEnabled(REQUIRE_TURN_SCREEN_ON_PERMISSION, opUid)
+                && !mPowerPropertiesWrapper.waive_target_sdk_check_for_turn_screen_on()) {
+            Slog.i(TAG, "Allowing device wake-up without android.permission.TURN_SCREEN_ON for "
+                    + opPackageName);
+            return true;
+        }
+        if (mPowerPropertiesWrapper.permissionless_turn_screen_on()) {
             Slog.d(TAG, "Device wake-up allowed by debug.power.permissionless_turn_screen_on");
             return true;
         }
@@ -1589,6 +1672,7 @@ public final class PowerManagerService extends SystemService
                 && isScreenLock(wakeLock)) {
             String opPackageName;
             int opUid;
+            int opPid = PermissionChecker.PID_UNKNOWN;
             if (wakeLock.mWorkSource != null && !wakeLock.mWorkSource.isEmpty()) {
                 WorkSource workSource = wakeLock.mWorkSource;
                 WorkChain workChain = getFirstNonEmptyWorkChain(workSource);
@@ -1603,10 +1687,12 @@ public final class PowerManagerService extends SystemService
             } else {
                 opPackageName = wakeLock.mPackageName;
                 opUid = wakeLock.mOwnerUid;
+                opPid = wakeLock.mOwnerPid;
             }
             Integer powerGroupId = wakeLock.getPowerGroupId();
             // powerGroupId is null if the wakelock associated display is no longer available
-            if (powerGroupId != null && isAcquireCausesWakeupFlagAllowed(opPackageName, opUid)) {
+            if (powerGroupId != null
+                    && isAcquireCausesWakeupFlagAllowed(opPackageName, opUid, opPid)) {
                 if (powerGroupId == Display.INVALID_DISPLAY_GROUP) {
                     // wake up all display groups
                     if (DEBUG_SPEW) {
