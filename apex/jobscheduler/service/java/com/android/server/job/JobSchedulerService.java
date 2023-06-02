@@ -1631,7 +1631,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     jobStatus.getEstimatedNetworkDownloadBytes(),
                     jobStatus.getEstimatedNetworkUploadBytes(),
                     jobStatus.getWorkCount(),
-                    ActivityManager.processStateAmToProto(mUidProcStates.get(jobStatus.getUid())));
+                    ActivityManager.processStateAmToProto(mUidProcStates.get(jobStatus.getUid())),
+                    jobStatus.getNamespaceHash());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -2059,7 +2060,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.getEstimatedNetworkDownloadBytes(),
                     cancelled.getEstimatedNetworkUploadBytes(),
                     cancelled.getWorkCount(),
-                    ActivityManager.processStateAmToProto(mUidProcStates.get(cancelled.getUid())));
+                    ActivityManager.processStateAmToProto(mUidProcStates.get(cancelled.getUid())),
+                    cancelled.getNamespaceHash());
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
