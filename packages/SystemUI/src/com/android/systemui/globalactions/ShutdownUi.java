@@ -98,7 +98,7 @@ public class ShutdownUi {
         window.setBackgroundDrawable(background);
         window.setWindowAnimations(com.android.systemui.R.style.Animation_ShutdownUi);
 
-        d.setContentView(getShutdownDialogContent());
+        d.setContentView(getShutdownDialogContent(isReboot));
         d.setCancelable(false);
 
         int color;
@@ -129,7 +129,12 @@ public class ShutdownUi {
         d.show();
     }
 
-    public int getShutdownDialogContent() {
+    /**
+     * Returns the layout resource to use for UI while shutting down.
+     * @param isReboot Whether this is a reboot or a shutdown.
+     * @return
+     */
+    public int getShutdownDialogContent(boolean isReboot) {
         return R.layout.shutdown_dialog;
     }
 
