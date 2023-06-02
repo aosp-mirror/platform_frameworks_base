@@ -276,11 +276,13 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Action that gives input focus to the node.
+     * See {@link AccessibilityAction#ACTION_FOCUS}
      */
     public static final int ACTION_FOCUS =  1 /* << 0 */;
 
     /**
      * Action that clears input focus of the node.
+     * See {@link AccessibilityAction#ACTION_CLEAR_FOCUS}
      */
     public static final int ACTION_CLEAR_FOCUS = 1 << 1;
 
@@ -310,11 +312,13 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Action that gives accessibility focus to the node.
+     * See {@link AccessibilityAction#ACTION_ACCESSIBILITY_FOCUS}
      */
     public static final int ACTION_ACCESSIBILITY_FOCUS = 1 << 6;
 
     /**
      * Action that clears accessibility focus of the node.
+     * See {@link AccessibilityAction#ACTION_CLEAR_ACCESSIBILITY_FOCUS}
      */
     public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 1 << 7;
 
@@ -2343,6 +2347,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets whether this node is focusable.
      *
+     * <p>In the View system, this typically maps to {@link View#isFocusable()}.
      * @return True if the node is focusable.
      */
     public boolean isFocusable() {
@@ -2356,6 +2361,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     * <p>To mark a node as explicitly focusable for a screen reader, consider using
+     * {@link #setScreenReaderFocusable(boolean)} instead.
      *
      * @param focusable True if the node is focusable.
      *
@@ -2367,6 +2374,9 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Gets whether this node is focused.
+     *
+     * <p>This is distinct from {@link #isAccessibilityFocused()}, which is used by screen readers.
+     * See {@link AccessibilityAction#ACTION_ACCESSIBILITY_FOCUS} for details.
      *
      * @return True if the node is focused.
      */
@@ -2424,6 +2434,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets whether this node is accessibility focused.
      *
+     * <p>This is distinct from {@link #isFocused()}, which is used to track system focus.
+     * See {@link #ACTION_ACCESSIBILITY_FOCUS} for details.
      * @return True if the node is accessibility focused.
      */
     public boolean isAccessibilityFocused() {
@@ -2437,7 +2449,10 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
-     *
+     * <p>The UI element updating this property should send an event of
+     * {@link AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUSED}
+     * or {@link AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED} if its
+     * accessibility-focused state changes.
      * @param focused True if the node is accessibility focused.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -3112,6 +3127,10 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   <strong>Note:</strong> Cannot be called from an
      *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     * <p>This can be used to
+     * <a href="{@docRoot}guide/topics/ui/accessibility/principles#content-groups">group related
+     * content.</a>
      * </p>
      *
      * @param screenReaderFocusable {@code true} if the node is a focusable unit for screen readers,
@@ -5157,12 +5176,22 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Action that gives input focus to the node.
+         * <p>The focus request send an event of {@link AccessibilityEvent#TYPE_VIEW_FOCUSED}
+         * if successful. In the View system, this is handled by {@link View#requestFocus}.
+         *
+         * <p>The node that is focused should return {@code true} for
+         * {@link AccessibilityNodeInfo#isFocused()}.
+         *
+         * @see #ACTION_ACCESSIBILITY_FOCUS for the difference between system and accessibility
+         * focus.
          */
         public static final AccessibilityAction ACTION_FOCUS =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_FOCUS);
 
         /**
          * Action that clears input focus of the node.
+         * <p>The node that is cleared should return {@code false} for
+         * {@link AccessibilityNodeInfo#isFocused)}.
          */
         public static final AccessibilityAction ACTION_CLEAR_FOCUS =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
@@ -5193,15 +5222,27 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Action that gives accessibility focus to the node.
-         * <p>
-         * This is intended to be used by screen readers. Apps changing focus can confuse screen
-         * readers, so the resulting behavior can vary by device and screen reader version.
+         *
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUSED} event
+         * if successful. The node that is focused should return {@code true} for
+         * {@link AccessibilityNodeInfo#isAccessibilityFocused()}.
+         *
+         * <p>This is intended to be used by screen readers to assist with user navigation. Apps
+         * changing focus can confuse screen readers, so the resulting behavior can vary by device
+         * and screen reader version.
+         * <p>This is distinct from {@link #ACTION_FOCUS}, which refers to system focus. System
+         * focus is typically used to convey targets for keyboard navigation.
          */
         public static final AccessibilityAction ACTION_ACCESSIBILITY_FOCUS =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
 
         /**
          * Action that clears accessibility focus of the node.
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED} event if successful. The
+         * node that is cleared should return {@code false} for
+         * {@link AccessibilityNodeInfo#isAccessibilityFocused()}.
          */
         public static final AccessibilityAction ACTION_CLEAR_ACCESSIBILITY_FOCUS =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
