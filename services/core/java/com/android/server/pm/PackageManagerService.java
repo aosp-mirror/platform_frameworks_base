@@ -7408,6 +7408,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 callback);
     }
 
+    @Nullable
+    String getDefaultBrowser(@UserIdInt int userId) {
+        return mDefaultAppProvider.getDefaultBrowser(userId);
+    }
+
     void setDefaultBrowser(@Nullable String packageName, boolean async, @UserIdInt int userId) {
         mDefaultAppProvider.setDefaultBrowser(packageName, async, userId);
     }
