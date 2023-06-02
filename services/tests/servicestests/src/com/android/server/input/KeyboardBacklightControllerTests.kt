@@ -37,6 +37,8 @@ import com.android.server.input.KeyboardBacklightController.MAX_BRIGHTNESS_CHANG
 import com.android.server.input.KeyboardBacklightController.USER_INACTIVITY_THRESHOLD_MILLIS
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -154,7 +156,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardBacklightIncrementDecrement() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = false).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
@@ -168,7 +174,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardWithoutBacklight() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = false).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithoutBacklight = createKeyboard(DEVICE_ID)
             val keyboardInputLight = createLight(LIGHT_ID, Light.LIGHT_TYPE_INPUT)
             `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithoutBacklight)
@@ -182,7 +192,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardWithMultipleLight() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = false).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             val keyboardInputLight = createLight(SECOND_LIGHT_ID, Light.LIGHT_TYPE_INPUT)
@@ -204,7 +218,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testRestoreBacklightOnInputDeviceAdded() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = false).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
@@ -233,7 +251,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testRestoreBacklightOnInputDeviceChanged() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = false).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
@@ -265,7 +287,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardBacklight_registerUnregisterListener() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = false).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             val maxLevel = DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL.size - 1
@@ -314,7 +340,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardBacklight_userActivity() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = false).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
@@ -346,7 +376,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardBacklight_displayOnOff() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = false).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
@@ -436,7 +470,11 @@ class KeyboardBacklightControllerTests {
     @Test
     @UiThreadTest
     fun testKeyboardBacklightAnimation_onChangeLevels() {
-        KeyboardBacklightFlags(animationEnabled = true, customLevelsEnabled = false).use {
+        KeyboardBacklightFlags(
+            animationEnabled = true,
+            customLevelsEnabled = false,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
@@ -459,7 +497,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardBacklightPreferredLevels() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = true).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = true,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val suggestedLevels = intArrayOf(0, 22, 63, 135, 196, 255)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT,
@@ -475,7 +517,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardBacklightPreferredLevels_moreThanMax_shouldUseDefault() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = true).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = true,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val suggestedLevels = IntArray(MAX_BRIGHTNESS_CHANGE_STEPS + 1) { 10 * (it + 1) }
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT,
@@ -491,7 +537,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardBacklightPreferredLevels_mustHaveZeroAndMaxBrightnessAsBounds() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = true).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = true,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val suggestedLevels = intArrayOf(22, 63, 135, 196)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT,
@@ -508,7 +558,11 @@ class KeyboardBacklightControllerTests {
 
     @Test
     fun testKeyboardBacklightPreferredLevels_dropsOutOfBoundsLevels() {
-        KeyboardBacklightFlags(animationEnabled = false, customLevelsEnabled = true).use {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = true,
+            ambientControlEnabled = false
+        ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val suggestedLevels = intArrayOf(22, 63, 135, 400, 196, 1000)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT,
@@ -523,10 +577,148 @@ class KeyboardBacklightControllerTests {
         }
     }
 
+    @Test
+    fun testAmbientBacklightControl_doesntRestoreBacklightLevel() {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = true
+        ).use {
+            val keyboardWithBacklight = createKeyboard(DEVICE_ID)
+            val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
+            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
+            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+
+            dataStore.setKeyboardBacklightBrightness(
+                keyboardWithBacklight.descriptor,
+                LIGHT_ID,
+                DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL[1]
+            )
+
+            keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+            keyboardBacklightController.notifyUserActivity()
+            testLooper.dispatchNext()
+            assertNull(
+                "Keyboard backlight level should not be restored to the saved level",
+                lightColorMap[LIGHT_ID]
+            )
+        }
+    }
+
+    @Test
+    fun testAmbientBacklightControl_doesntBackupBacklightLevel() {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = true
+        ).use {
+            val keyboardWithBacklight = createKeyboard(DEVICE_ID)
+            val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
+            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
+            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+
+            keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+            incrementKeyboardBacklight(DEVICE_ID)
+            assertFalse(
+                "Light value should not be backed up if ambient control is enabled",
+                dataStore.getKeyboardBacklightBrightness(
+                    keyboardWithBacklight.descriptor, LIGHT_ID
+                ).isPresent
+            )
+        }
+    }
+
+    @Test
+    fun testAmbientBacklightControl_incrementLevel_afterAmbientChange() {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = true
+        ).use {
+            val keyboardWithBacklight = createKeyboard(DEVICE_ID)
+            val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
+            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
+            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+            sendAmbientBacklightValue(1)
+            assertEquals(
+                "Light value should be changed to ambient provided value",
+                Color.argb(1, 0, 0, 0),
+                lightColorMap[LIGHT_ID]
+            )
+
+            incrementKeyboardBacklight(DEVICE_ID)
+
+            assertEquals(
+                "Light value for level after increment post Ambient change is mismatched",
+                Color.argb(DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL[1], 0, 0, 0),
+                lightColorMap[LIGHT_ID]
+            )
+        }
+    }
+
+    @Test
+    fun testAmbientBacklightControl_decrementLevel_afterAmbientChange() {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = true
+        ).use {
+            val keyboardWithBacklight = createKeyboard(DEVICE_ID)
+            val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
+            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
+            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+            sendAmbientBacklightValue(254)
+            assertEquals(
+                "Light value should be changed to ambient provided value",
+                Color.argb(254, 0, 0, 0),
+                lightColorMap[LIGHT_ID]
+            )
+
+            decrementKeyboardBacklight(DEVICE_ID)
+
+            val numLevels = DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL.size
+            assertEquals(
+                "Light value for level after decrement post Ambient change is mismatched",
+                Color.argb(DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL[numLevels - 2], 0, 0, 0),
+                lightColorMap[LIGHT_ID]
+            )
+        }
+    }
+
+    @Test
+    fun testAmbientBacklightControl_ambientChanges_afterManualChange() {
+        KeyboardBacklightFlags(
+            animationEnabled = false,
+            customLevelsEnabled = false,
+            ambientControlEnabled = true
+        ).use {
+            val keyboardWithBacklight = createKeyboard(DEVICE_ID)
+            val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
+            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
+            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+            incrementKeyboardBacklight(DEVICE_ID)
+            assertEquals(
+                "Light value should be changed to the first level",
+                Color.argb(DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL[1], 0, 0, 0),
+                lightColorMap[LIGHT_ID]
+            )
+
+            sendAmbientBacklightValue(100)
+            assertNotEquals(
+                "Light value should not change based on ambient changes after manual changes",
+                Color.argb(100, 0, 0, 0),
+                lightColorMap[LIGHT_ID]
+            )
+        }
+    }
+
     private fun assertIncrementDecrementForLevels(
-            device: InputDevice,
-            light: Light,
-            expectedLevels: IntArray
+        device: InputDevice,
+        light: Light,
+        expectedLevels: IntArray
     ) {
         val deviceId = device.id
         val lightId = light.id
@@ -612,6 +804,12 @@ class KeyboardBacklightControllerTests {
         testLooper.dispatchAll()
     }
 
+    private fun sendAmbientBacklightValue(brightnessValue: Int) {
+        keyboardBacklightController.handleAmbientLightValueChanged(brightnessValue)
+        keyboardBacklightController.notifyUserActivity()
+        testLooper.dispatchAll()
+    }
+
     class KeyboardBacklightState(
         val deviceId: Int,
         val brightnessLevel: Int,
@@ -620,12 +818,15 @@ class KeyboardBacklightControllerTests {
     )
 
     private inner class KeyboardBacklightFlags constructor(
-            animationEnabled: Boolean,
-            customLevelsEnabled: Boolean
+        animationEnabled: Boolean,
+        customLevelsEnabled: Boolean,
+        ambientControlEnabled: Boolean
     ) : AutoCloseable {
         init {
             InputFeatureFlagProvider.setKeyboardBacklightAnimationEnabled(animationEnabled)
             InputFeatureFlagProvider.setKeyboardBacklightCustomLevelsEnabled(customLevelsEnabled)
+            InputFeatureFlagProvider
+                .setAmbientKeyboardBacklightControlEnabled(ambientControlEnabled)
         }
 
         override fun close() {

@@ -413,6 +413,15 @@ public abstract class DisplayManagerInternal {
     public abstract HostUsiVersion getHostUsiVersion(int displayId);
 
     /**
+     * Get the ALS data for a particular display.
+     *
+     * @param displayId The id of the display.
+     * @return {@link AmbientLightSensorData}
+     */
+    @Nullable
+    public abstract AmbientLightSensorData getAmbientLightSensorData(int displayId);
+
+    /**
      * Get all available DisplayGroupIds.
      */
     public abstract IntArray getDisplayGroupIds();
@@ -667,6 +676,25 @@ public abstract class DisplayManagerInternal {
         @Override
         public String toString() {
             return "RefreshRateLimitation(" + type + ": " + range + ")";
+        }
+    }
+
+    /**
+     * Class to provide Ambient sensor data using the API
+     * {@link DisplayManagerInternal#getAmbientLightSensorData(int)}
+     */
+    public static final class AmbientLightSensorData {
+        public String sensorName;
+        public String sensorType;
+
+        public AmbientLightSensorData(String name, String type) {
+            sensorName = name;
+            sensorType = type;
+        }
+
+        @Override
+        public String toString() {
+            return "AmbientLightSensorData(" + sensorName + ", " + sensorType + ")";
         }
     }
 }
