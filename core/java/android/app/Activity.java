@@ -1084,6 +1084,16 @@ public class Activity extends ContextThemeWrapper
         }
 
         /**
+         * Update the forced status bar appearance.
+         * @hide
+         */
+        @Override
+        public void updateStatusBarAppearance(int appearance) {
+            mTaskDescription.setStatusBarAppearance(appearance);
+            setTaskDescription(mTaskDescription);
+        }
+
+        /**
          * Update the forced navigation bar color.
          * @hide
          */

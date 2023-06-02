@@ -1226,15 +1226,16 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 constraintSet.constrainHeight(mViewFlipper.getId(), MATCH_CONSTRAINT);
                 constraintSet.applyTo(mView);
             } else {
-                int leftElement = leftAlign ? mViewFlipper.getId() : mUserSwitcherViewGroup.getId();
-                int rightElement =
+                int startElement =
+                        leftAlign ? mViewFlipper.getId() : mUserSwitcherViewGroup.getId();
+                int endElement =
                         leftAlign ? mUserSwitcherViewGroup.getId() : mViewFlipper.getId();
 
                 ConstraintSet constraintSet = new ConstraintSet();
-                constraintSet.connect(leftElement, LEFT, PARENT_ID, LEFT);
-                constraintSet.connect(leftElement, RIGHT, rightElement, LEFT);
-                constraintSet.connect(rightElement, LEFT, leftElement, RIGHT);
-                constraintSet.connect(rightElement, RIGHT, PARENT_ID, RIGHT);
+                constraintSet.connect(startElement, START, PARENT_ID, START);
+                constraintSet.connect(startElement, END, endElement, START);
+                constraintSet.connect(endElement, START, startElement, END);
+                constraintSet.connect(endElement, END, PARENT_ID, END);
                 constraintSet.connect(mUserSwitcherViewGroup.getId(), TOP, PARENT_ID, TOP);
                 constraintSet.connect(mUserSwitcherViewGroup.getId(), BOTTOM, PARENT_ID, BOTTOM);
                 constraintSet.connect(mViewFlipper.getId(), TOP, PARENT_ID, TOP);

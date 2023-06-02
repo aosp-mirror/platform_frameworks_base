@@ -315,6 +315,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
+    protected FakeKeyguardRepository mFakeKeyguardRepository;
     protected KeyguardInteractor mKeyguardInteractor;
     protected NotificationPanelViewController.TouchHandler mTouchHandler;
     protected ConfigurationController mConfigurationController;
@@ -342,10 +343,12 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mMainDispatcher = getMainDispatcher();
-        mKeyguardBottomAreaInteractor = new KeyguardBottomAreaInteractor(
-                new FakeKeyguardRepository());
+        KeyguardInteractorFactory.WithDependencies keyguardInteractorDeps =
+                KeyguardInteractorFactory.create();
+        mFakeKeyguardRepository = keyguardInteractorDeps.getRepository();
+        mKeyguardBottomAreaInteractor = new KeyguardBottomAreaInteractor(mFakeKeyguardRepository);
+        mKeyguardInteractor = keyguardInteractorDeps.getKeyguardInteractor();
 
-        mKeyguardInteractor = KeyguardInteractorFactory.create().getKeyguardInteractor();
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
                 mInteractionJankMonitor, mShadeExpansionStateManager);

@@ -58,6 +58,9 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     @Mock
     private FeatureFlags mFeatureFlags;
 
+    @Mock
+    private DreamLogger mLogger;
+
     final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
@@ -405,6 +408,6 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     private DreamOverlayStateController getDreamOverlayStateController(boolean overlayEnabled) {
-        return new DreamOverlayStateController(mExecutor, overlayEnabled, mFeatureFlags);
+        return new DreamOverlayStateController(mExecutor, overlayEnabled, mFeatureFlags, mLogger);
     }
 }

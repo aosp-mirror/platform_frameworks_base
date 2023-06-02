@@ -61,6 +61,7 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -69,6 +70,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEv
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
@@ -98,6 +100,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
+import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -144,6 +147,7 @@ public class NotificationStackScrollLayoutController {
 
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
+    private final NotificationsController mNotificationsController;
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
@@ -170,6 +174,7 @@ public class NotificationStackScrollLayoutController {
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
+    private final KeyguardInteractor mKeyguardInteractor;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     // TODO: CentralSurfaces should be encapsulated behind a Controller
     private final CentralSurfaces mCentralSurfaces;
@@ -428,7 +433,7 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onSnooze(StatusBarNotification sbn,
                                      NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
-                    mCentralSurfaces.setNotificationSnoozed(sbn, snoozeOption);
+                    mNotificationsController.setNotificationSnoozed(sbn, snoozeOption);
                 }
 
                 @Override
@@ -558,7 +563,8 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public float getFalsingThresholdFactor() {
-                    return mCentralSurfaces.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
+                    return ShadeViewController.getFalsingThresholdFactor(
+                            mKeyguardInteractor.getWakefulnessModel().getValue());
                 }
 
                 @Override
@@ -612,6 +618,7 @@ public class NotificationStackScrollLayoutController {
             NotificationStackScrollLayout view,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationGutsManager notificationGutsManager,
+            NotificationsController notificationsController,
             NotificationVisibilityProvider visibilityProvider,
             HeadsUpManagerPhone headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
@@ -622,6 +629,7 @@ public class NotificationStackScrollLayoutController {
             SysuiStatusBarStateController statusBarStateController,
             KeyguardMediaController keyguardMediaController,
             KeyguardBypassController keyguardBypassController,
+            KeyguardInteractor keyguardInteractor,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager lockscreenUserManager,
             Optional<NotificationListViewModel> nsslViewModel,
@@ -659,6 +667,7 @@ public class NotificationStackScrollLayoutController {
         mLogger = logger;
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
+        mNotificationsController = notificationsController;
         mVisibilityProvider = visibilityProvider;
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
@@ -669,6 +678,7 @@ public class NotificationStackScrollLayoutController {
         mStatusBarStateController = statusBarStateController;
         mKeyguardMediaController = keyguardMediaController;
         mKeyguardBypassController = keyguardBypassController;
+        mKeyguardInteractor = keyguardInteractor;
         mZenModeController = zenModeController;
         mLockscreenUserManager = lockscreenUserManager;
         mViewModel = nsslViewModel;
@@ -708,7 +718,7 @@ public class NotificationStackScrollLayoutController {
         mView.setController(this);
         mView.setLogger(mLogger);
         mView.setTouchHandler(new TouchHandler());
-        mView.setCentralSurfaces(mCentralSurfaces);
+        mView.setNotificationsController(mNotificationsController);
         mView.setActivityStarter(mActivityStarter);
         mView.setClearAllAnimationListener(this::onAnimationEnd);
         mView.setClearAllListener((selection) -> mUiEventLogger.log(

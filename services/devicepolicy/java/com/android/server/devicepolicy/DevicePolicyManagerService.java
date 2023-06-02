@@ -49,6 +49,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_TASK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MTE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
@@ -73,7 +74,6 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_TIME;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER;
-import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USERS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_VPN;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WALLPAPER;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
@@ -139,6 +139,7 @@ import static android.app.admin.DevicePolicyManager.ID_TYPE_INDIVIDUAL_ATTESTATI
 import static android.app.admin.DevicePolicyManager.ID_TYPE_MEID;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_SERIAL;
 import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLED;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD;
@@ -13720,7 +13721,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ADD_CLONE_PROFILE, new String[]{MANAGE_DEVICE_POLICY_PROFILES});
         USER_RESTRICTION_PERMISSIONS.put(
-                UserManager.DISALLOW_ADD_USER, new String[]{MANAGE_DEVICE_POLICY_USERS});
+                UserManager.DISALLOW_ADD_USER, new String[]{MANAGE_DEVICE_POLICY_MODIFY_USERS});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ADD_WIFI_CONFIG, new String[]{MANAGE_DEVICE_POLICY_WIFI});
         USER_RESTRICTION_PERMISSIONS.put(
@@ -13810,13 +13811,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_PRINTING, new String[]{MANAGE_DEVICE_POLICY_PRINTING});
         USER_RESTRICTION_PERMISSIONS.put(
-                UserManager.DISALLOW_REMOVE_USER, new String[]{MANAGE_DEVICE_POLICY_USERS});
+                UserManager.DISALLOW_REMOVE_USER, new String[]{MANAGE_DEVICE_POLICY_MODIFY_USERS});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_RUN_IN_BACKGROUND, new String[]{MANAGE_DEVICE_POLICY_RUN_IN_BACKGROUND});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_SAFE_BOOT, new String[]{MANAGE_DEVICE_POLICY_SAFE_BOOT});
         USER_RESTRICTION_PERMISSIONS.put(
-                UserManager.DISALLOW_SET_USER_ICON, new String[]{MANAGE_DEVICE_POLICY_USERS});
+                UserManager.DISALLOW_SET_USER_ICON, new String[]{MANAGE_DEVICE_POLICY_MODIFY_USERS});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_SET_WALLPAPER, new String[]{MANAGE_DEVICE_POLICY_WALLPAPER});
         USER_RESTRICTION_PERMISSIONS.put(
@@ -13842,7 +13843,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_USB_FILE_TRANSFER, new String[]{MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER});
         USER_RESTRICTION_PERMISSIONS.put(
-                UserManager.DISALLOW_USER_SWITCH, new String[]{MANAGE_DEVICE_POLICY_USERS});
+                UserManager.DISALLOW_USER_SWITCH, new String[]{MANAGE_DEVICE_POLICY_MODIFY_USERS});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_WIFI_DIRECT, new String[]{MANAGE_DEVICE_POLICY_WIFI});
         USER_RESTRICTION_PERMISSIONS.put(
@@ -14836,17 +14837,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 "Caller is not managed profile owner or device owner;"
                         + " only managed profile owner or device owner may control the preferential"
                         + " network service");
-        synchronized (getLockObject()) {
-            final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
-                    caller.getUserId());
-            if (!requiredAdmin.mPreferentialNetworkServiceConfigs.equals(
-                    preferentialNetworkServiceConfigs)) {
-                requiredAdmin.mPreferentialNetworkServiceConfigs =
-                        new ArrayList<>(preferentialNetworkServiceConfigs);
-                saveSettingsLocked(caller.getUserId());
+
+        try {
+            updateNetworkPreferenceForUser(caller.getUserId(), preferentialNetworkServiceConfigs);
+            synchronized (getLockObject()) {
+                final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
+                        caller.getUserId());
+                if (!requiredAdmin.mPreferentialNetworkServiceConfigs.equals(
+                        preferentialNetworkServiceConfigs)) {
+                    requiredAdmin.mPreferentialNetworkServiceConfigs =
+                            new ArrayList<>(preferentialNetworkServiceConfigs);
+                    saveSettingsLocked(caller.getUserId());
+                }
             }
+        } catch (Exception e) {
+            Slogf.e(LOG_TAG, "Failed to set preferential network service configs");
+            throw e;
         }
-        updateNetworkPreferenceForUser(caller.getUserId(), preferentialNetworkServiceConfigs);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PREFERENTIAL_NETWORK_SERVICE_ENABLED)
                 .setBoolean(preferentialNetworkServiceConfigs
@@ -15139,7 +15146,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void enforceCanSetLockTaskFeaturesOnFinancedDevice(CallerIdentity caller, int flags) {
         int allowedFlags = LOCK_TASK_FEATURE_SYSTEM_INFO | LOCK_TASK_FEATURE_KEYGUARD
                 | LOCK_TASK_FEATURE_HOME | LOCK_TASK_FEATURE_GLOBAL_ACTIONS
-                | LOCK_TASK_FEATURE_NOTIFICATIONS;
+                | LOCK_TASK_FEATURE_NOTIFICATIONS | LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK;
 
         if (!isFinancedDeviceOwner(caller)) {
             return;
@@ -15150,7 +15157,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     "Permitted lock task features when managing a financed device: "
                             + "LOCK_TASK_FEATURE_SYSTEM_INFO, LOCK_TASK_FEATURE_KEYGUARD, "
                             + "LOCK_TASK_FEATURE_HOME, LOCK_TASK_FEATURE_GLOBAL_ACTIONS, "
-                            + "or LOCK_TASK_FEATURE_NOTIFICATIONS");
+                            + "LOCK_TASK_FEATURE_NOTIFICATIONS"
+                            + " or LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK");
         }
     }
 
@@ -23019,6 +23027,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_LOCK_TASK,
             MANAGE_DEVICE_POLICY_MICROPHONE,
             MANAGE_DEVICE_POLICY_MOBILE_NETWORK,
+            MANAGE_DEVICE_POLICY_MODIFY_USERS,
             MANAGE_DEVICE_POLICY_MTE,
             MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION,
             MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
@@ -23042,7 +23051,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_TIME,
             MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING,
             MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER,
-            MANAGE_DEVICE_POLICY_USERS,
             MANAGE_DEVICE_POLICY_VPN,
             MANAGE_DEVICE_POLICY_WALLPAPER,
             MANAGE_DEVICE_POLICY_WIFI,
@@ -23063,12 +23071,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_KEYGUARD,
             MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
             MANAGE_DEVICE_POLICY_LOCK_TASK,
+            MANAGE_DEVICE_POLICY_MODIFY_USERS,
             MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
             MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS,
             MANAGE_DEVICE_POLICY_SAFE_BOOT,
             MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE,
             MANAGE_DEVICE_POLICY_TIME,
-            MANAGE_DEVICE_POLICY_USERS,
             MANAGE_DEVICE_POLICY_WIPE_DATA
     );
 
@@ -23154,6 +23162,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_FUN,
                     MANAGE_DEVICE_POLICY_LOCK_TASK,
                     MANAGE_DEVICE_POLICY_MOBILE_NETWORK,
+                    MANAGE_DEVICE_POLICY_MODIFY_USERS,
                     MANAGE_DEVICE_POLICY_PHYSICAL_MEDIA,
                     MANAGE_DEVICE_POLICY_PRINTING,
                     MANAGE_DEVICE_POLICY_PROFILES,
@@ -23162,7 +23171,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_SMS,
                     MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS,
                     MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER,
-                    MANAGE_DEVICE_POLICY_USERS,
                     MANAGE_DEVICE_POLICY_WINDOWS,
                     SET_TIME,
                     SET_TIME_ZONE
@@ -23352,6 +23360,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_LOCK_TASK,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
+        CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_MODIFY_USERS,
+                MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
@@ -23371,8 +23381,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS,
-                MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
-        CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_USERS,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_VPN,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);

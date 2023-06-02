@@ -201,7 +201,9 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskStackChanged() {
-            mHandler.post(AuthController.this::cancelIfOwnerIsNotInForeground);
+            if (!isOwnerInForeground()) {
+                mHandler.post(AuthController.this::cancelIfOwnerIsNotInForeground);
+            }
         }
     };
 
@@ -239,33 +241,37 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         }
     }
 
+    private boolean isOwnerInForeground() {
+        final String clientPackage = mCurrentDialog.getOpPackageName();
+        final List<ActivityManager.RunningTaskInfo> runningTasks =
+                mActivityTaskManager.getTasks(1);
+        if (!runningTasks.isEmpty()) {
+            final String topPackage = runningTasks.get(0).topActivity.getPackageName();
+            if (!topPackage.contentEquals(clientPackage)
+                    && !Utils.isSystem(mContext, clientPackage)) {
+                Log.w(TAG, "Evicting client due to: " + topPackage);
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void cancelIfOwnerIsNotInForeground() {
         mExecution.assertIsMainThread();
         if (mCurrentDialog != null) {
             try {
-                final String clientPackage = mCurrentDialog.getOpPackageName();
-                Log.w(TAG, "Task stack changed, current client: " + clientPackage);
-                final List<ActivityManager.RunningTaskInfo> runningTasks =
-                        mActivityTaskManager.getTasks(1);
-                if (!runningTasks.isEmpty()) {
-                    final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                    if (!topPackage.contentEquals(clientPackage)
-                            && !Utils.isSystem(mContext, clientPackage)) {
-                        Log.e(TAG, "Evicting client due to: " + topPackage);
-                        mCurrentDialog.dismissWithoutCallback(true /* animate */);
-                        mCurrentDialog = null;
+                mCurrentDialog.dismissWithoutCallback(true /* animate */);
+                mCurrentDialog = null;
 
-                        for (Callback cb : mCallbacks) {
-                            cb.onBiometricPromptDismissed();
-                        }
+                for (Callback cb : mCallbacks) {
+                    cb.onBiometricPromptDismissed();
+                }
 
-                        if (mReceiver != null) {
-                            mReceiver.onDialogDismissed(
-                                    BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
-                                    null /* credentialAttestation */);
-                            mReceiver = null;
-                        }
-                    }
+                if (mReceiver != null) {
+                    mReceiver.onDialogDismissed(
+                            BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
+                            null /* credentialAttestation */);
+                    mReceiver = null;
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote exception", e);
@@ -1253,10 +1259,11 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             cb.onBiometricPromptShown();
         }
         mCurrentDialog = newDialog;
-        mCurrentDialog.show(mWindowManager, savedState);
 
-        if (!promptInfo.isAllowBackgroundAuthentication()) {
-            mHandler.post(this::cancelIfOwnerIsNotInForeground);
+        if (!promptInfo.isAllowBackgroundAuthentication() && !isOwnerInForeground()) {
+            cancelIfOwnerIsNotInForeground();
+        } else {
+            mCurrentDialog.show(mWindowManager, savedState);
         }
     }
 

@@ -47,6 +47,7 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -70,6 +71,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
+import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
@@ -105,6 +107,7 @@ import java.util.Optional;
 public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Mock private NotificationGutsManager mNotificationGutsManager;
+    @Mock private NotificationsController mNotificationsController;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
@@ -117,6 +120,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private SysuiStatusBarStateController mSysuiStatusBarStateController;
     @Mock private KeyguardBypassController mKeyguardBypassController;
+    @Mock private KeyguardInteractor mKeyguardInteractor;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private DumpManager mDumpManager;
@@ -453,6 +457,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotificationStackScrollLayout,
                 true,
                 mNotificationGutsManager,
+                mNotificationsController,
                 mVisibilityProvider,
                 mHeadsUpManager,
                 mNotificationRoundnessManager,
@@ -463,6 +468,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mSysuiStatusBarStateController,
                 mKeyguardMediaController,
                 mKeyguardBypassController,
+                mKeyguardInteractor,
                 mZenModeController,
                 mNotificationLockscreenUserManager,
                 Optional.<NotificationListViewModel>empty(),

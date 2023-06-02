@@ -431,10 +431,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         mShadeController = spy(new ShadeControllerImpl(
                 mCommandQueue,
+                mMainExecutor,
                 mKeyguardStateController,
                 mStatusBarStateController,
                 mStatusBarKeyguardViewManager,
                 mStatusBarWindowController,
+                mDeviceProvisionedController,
                 mNotificationShadeWindowController,
                 mContext.getSystemService(WindowManager.class),
                 () -> mAssistManager,

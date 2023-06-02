@@ -20,7 +20,6 @@ import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -58,7 +57,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.settingslib.Utils;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -415,14 +413,6 @@ public class InternetDialog extends SystemUIDialog implements
                     mSignalIcon.setImageDrawable(drawable);
                 });
             });
-
-            TypedArray array = mContext.obtainStyledAttributes(
-                    R.style.InternetDialog_Divider_Active, new int[]{android.R.attr.background});
-            int dividerColor = Utils.getColorAttrDefaultColor(mContext,
-                    android.R.attr.textColorSecondary);
-            mMobileToggleDivider.setBackgroundColor(isNetworkConnected
-                    ? array.getColor(0, dividerColor) : dividerColor);
-            array.recycle();
 
             mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
             mMobileToggleDivider.setVisibility(

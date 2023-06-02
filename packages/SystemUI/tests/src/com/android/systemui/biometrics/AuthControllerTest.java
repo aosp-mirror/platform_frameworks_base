@@ -954,6 +954,25 @@ public class AuthControllerTest extends SysuiTestCase {
                 eq(null) /* credentialAttestation */);
     }
 
+    @Test
+    public void testShowDialog_whenOwnerNotInForeground() {
+        PromptInfo promptInfo = createTestPromptInfo();
+        promptInfo.setAllowBackgroundAuthentication(false);
+        switchTask("other_package");
+        mAuthController.showAuthenticationDialog(promptInfo,
+                mReceiver /* receiver */,
+                new int[]{1} /* sensorIds */,
+                false /* credentialAllowed */,
+                true /* requireConfirmation */,
+                0 /* userId */,
+                0 /* operationId */,
+                "testPackage",
+                REQUEST_ID);
+
+        assertNull(mAuthController.mCurrentDialog);
+        verify(mDialog1, never()).show(any(), any());
+    }
+
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
         mAuthController.showAuthenticationDialog(createTestPromptInfo(),
                 mReceiver /* receiver */,

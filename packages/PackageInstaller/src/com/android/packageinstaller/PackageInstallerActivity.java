@@ -16,8 +16,9 @@
 */
 package com.android.packageinstaller;
 
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
-import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
+import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.Manifest;
@@ -789,7 +790,8 @@ public class PackageInstallerActivity extends AlertActivity {
             }
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (!isDestroyed()) {
-                    startActivity(getIntent().addFlags(FLAG_ACTIVITY_REORDER_TO_FRONT));
+                    startActivity(getIntent().addFlags(
+                            FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP));
                 }
             }, 500);
 

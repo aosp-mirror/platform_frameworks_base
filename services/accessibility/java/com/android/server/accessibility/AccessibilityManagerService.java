@@ -4006,16 +4006,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public boolean registerProxyForDisplay(IAccessibilityServiceClient client, int displayId)
             throws RemoteException {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
+        mSecurityPolicy.checkForAccessibilityPermissionOrRole();
         if (client == null) {
             return false;
         }
         if (displayId < 0) {
             throw new IllegalArgumentException("The display id " + displayId + " is invalid.");
-        }
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("The default display cannot be proxy-ed.");
         }
         if (!isTrackedDisplay(displayId)) {
             throw new IllegalArgumentException("The display " + displayId + " does not exist or is"
@@ -4024,6 +4021,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (mProxyManager.isProxyedDisplay(displayId)) {
             throw new IllegalArgumentException("The display " + displayId + " is already being"
                     + " proxy-ed");
+        }
+        if (!mProxyManager.displayBelongsToCaller(Binder.getCallingUid(), displayId)) {
+            throw new SecurityException("The display " + displayId + " does not belong to"
+                    + " the caller.");
         }
 
         final long identity = Binder.clearCallingIdentity();
@@ -4042,8 +4043,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public boolean unregisterProxyForDisplay(int displayId) {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
+        mSecurityPolicy.checkForAccessibilityPermissionOrRole();
         final long identity = Binder.clearCallingIdentity();
         try {
             return mProxyManager.unregisterProxy(displayId);

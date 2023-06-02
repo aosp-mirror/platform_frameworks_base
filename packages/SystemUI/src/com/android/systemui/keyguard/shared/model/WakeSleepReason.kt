@@ -23,8 +23,11 @@ enum class WakeSleepReason {
     /** The physical power button was pressed to wake up or sleep the device. */
     POWER_BUTTON,
 
-    /** The user has taped or double tapped to wake the screen */
+    /** The user has tapped or double tapped to wake the screen. */
     TAP,
+
+    /** The user performed some sort of gesture to wake the screen. */
+    GESTURE,
 
     /** Something else happened to wake up or sleep the device. */
     OTHER;
@@ -34,6 +37,7 @@ enum class WakeSleepReason {
             return when (reason) {
                 PowerManager.WAKE_REASON_POWER_BUTTON -> POWER_BUTTON
                 PowerManager.WAKE_REASON_TAP -> TAP
+                PowerManager.WAKE_REASON_GESTURE -> GESTURE
                 else -> OTHER
             }
         }

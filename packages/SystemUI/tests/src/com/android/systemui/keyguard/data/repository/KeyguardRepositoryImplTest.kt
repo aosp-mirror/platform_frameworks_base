@@ -97,7 +97,8 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 dozeParameters,
                 authController,
                 dreamOverlayCallbackController,
-                mainDispatcher
+                mainDispatcher,
+                testScope.backgroundScope,
             )
     }
 
@@ -343,8 +344,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 )
 
             job.cancel()
-            runCurrent()
-            verify(wakefulnessLifecycle).removeObserver(captor.value)
         }
 
     @Test

@@ -69,7 +69,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -173,7 +172,6 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
@@ -412,24 +410,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mQSPanelController;
     }
 
-    /** */
-    @Override
-    public void animateExpandNotificationsPanel() {
-        mCommandQueueCallbacks.animateExpandNotificationsPanel();
-    }
-
-    /** */
-    @Override
-    public void animateExpandSettingsPanel(@Nullable String subpanel) {
-        mCommandQueueCallbacks.animateExpandSettingsPanel(subpanel);
-    }
-
-    /** */
-    @Override
-    public void togglePanel() {
-        mCommandQueueCallbacks.togglePanel();
-    }
-
     /**
      * The {@link StatusBarState} of the status bar.
      */
@@ -465,8 +445,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     DozeServiceHost mDozeServiceHost;
     private final LightRevealScrim mLightRevealScrim;
     private PowerButtonReveal mPowerButtonReveal;
-
-    private boolean mWakeUpComingFromTouch;
 
     /**
      * Whether we should delay the wakeup animation (which shows the notifications and moves the
@@ -1625,7 +1603,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mDozing && mScreenOffAnimationController.allowWakeUpIfDozing()) {
             mPowerManager.wakeUp(
                     time, wakeReason, "com.android.systemui:" + why);
-            mWakeUpComingFromTouch = true;
             mFalsingCollector.onScreenOnFromTouch();
         }
     }
@@ -1802,11 +1779,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mIsLaunchingActivityOverLockscreen;
     }
 
-    @Override
-    public boolean isWakeUpComingFromTouch() {
-        return mWakeUpComingFromTouch;
-    }
-
     /**
      * To be called when there's a state change in StatusBarKeyguardViewManager.
      */
@@ -1829,58 +1801,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean isOccluded() {
         return mKeyguardStateController.isOccluded();
-    }
-
-    /** A launch animation was cancelled. */
-    //TODO: These can / should probably be moved to NotificationPresenter or ShadeController
-    @Override
-    public void onLaunchAnimationCancelled(boolean isLaunchForActivity) {
-        if (mPresenter.isPresenterFullyCollapsed() && !mPresenter.isCollapsing()
-                && isLaunchForActivity) {
-            mShadeController.onClosingFinished();
-        } else {
-            mShadeController.collapseShade(true /* animate */);
-        }
-    }
-
-    /** A launch animation ended. */
-    @Override
-    public void onLaunchAnimationEnd(boolean launchIsFullScreen) {
-        if (!mPresenter.isCollapsing()) {
-            mShadeController.onClosingFinished();
-        }
-        if (launchIsFullScreen) {
-            mShadeController.instantCollapseShade();
-        }
-    }
-
-    /**
-     * Whether we should animate an activity launch.
-     *
-     * Note: This method must be called *before* dismissing the keyguard.
-     */
-    @Override
-    public boolean shouldAnimateLaunch(boolean isActivityIntent, boolean showOverLockscreen) {
-        // TODO(b/184121838): Support launch animations when occluded.
-        if (isOccluded()) {
-            return false;
-        }
-
-        // Always animate if we are not showing the keyguard or if we animate over the lockscreen
-        // (without unlocking it).
-        if (showOverLockscreen || !mKeyguardStateController.isShowing()) {
-            return true;
-        }
-
-        // We don't animate non-activity launches as they can break the animation.
-        // TODO(b/184121838): Support non activity launches on the lockscreen.
-        return isActivityIntent;
-    }
-
-    /** Whether we should animate an activity launch. */
-    @Override
-    public boolean shouldAnimateLaunch(boolean isActivityIntent) {
-        return shouldAnimateLaunch(isActivityIntent, false /* showOverLockscreen */);
     }
 
     @Override
@@ -1935,23 +1855,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     SystemClock.uptimeMillis(),
                     PowerManager.WAKE_REASON_APPLICATION,
                     "com.android.systemui:full_screen_intent");
-            mWakeUpComingFromTouch = false;
         }
-    }
-
-    @Override
-    public void postAnimateCollapsePanels() {
-        mMainExecutor.execute(mShadeController::animateCollapseShade);
-    }
-
-    @Override
-    public void postAnimateForceCollapsePanels() {
-        mMainExecutor.execute(mShadeController::animateCollapseShadeForced);
-    }
-
-    @Override
-    public void postAnimateOpenPanels() {
-        mMessageRouter.sendMessage(MSG_OPEN_SETTINGS_PANEL);
     }
 
     @Override
@@ -1978,14 +1882,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void onStatusBarTrackpadEvent(MotionEvent event) {
         mCentralSurfacesComponent.getNotificationPanelViewController().handleExternalTouch(event);
-    }
-
-    @Override
-    public void animateCollapseQuickSettings() {
-        if (mState == StatusBarState.SHADE) {
-            mShadeSurface.collapse(
-                    true, false /* delayed */, 1.0f /* speedUpFactor */);
-        }
     }
 
     private void onExpandedInvisible() {
@@ -2323,7 +2219,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     mNotificationShadeWindowController.setNotTouchable(false);
                 }
                 finishBarAnimations();
-                resetUserExpandedStates();
+                mNotificationsController.resetUserExpandedStates();
             }
             Trace.endSection();
         }
@@ -2341,11 +2237,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         }
     };
-
-    @Override
-    public void resetUserExpandedStates() {
-        mNotificationsController.resetUserExpandedStates();
-    }
 
     /**
      * Notify the shade controller that the current user changed
@@ -2972,19 +2863,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     /**
-     * Collapse the panel directly if we are on the main thread, post the collapsing on the main
-     * thread if we are not.
-     */
-    @Override
-    public void collapsePanelOnMainThread() {
-        if (Looper.getMainLooper().isCurrentThread()) {
-            mShadeController.collapseShade();
-        } else {
-            mContext.getMainExecutor().execute(mShadeController::collapseShade);
-        }
-    }
-
-    /**
      * Updates the light reveal effect to reflect the reason we're waking or sleeping (for example,
      * from the power button).
      * @param wakingUp Whether we're updating because we're waking up (true) or going to sleep
@@ -3116,7 +2994,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             releaseGestureWakeLock();
             mLaunchCameraWhenFinishedWaking = false;
             mDeviceInteractive = false;
-            mWakeUpComingFromTouch = false;
             updateVisibleToUser();
 
             updateNotificationPanelTouchState();
@@ -3587,12 +3464,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     };
 
     @Override
-    public void setNotificationSnoozed(StatusBarNotification sbn, SnoozeOption snoozeOption) {
-        mNotificationsController.setNotificationSnoozed(sbn, snoozeOption);
-    }
-
-
-    @Override
     public void awakenDreams() {
         mUiBgExecutor.execute(() -> {
             try {
@@ -3790,8 +3661,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
             if (userSetup != mUserSetup) {
                 mUserSetup = userSetup;
-                if (!mUserSetup) {
-                    animateCollapseQuickSettings();
+                if (!mUserSetup && mState == StatusBarState.SHADE) {
+                    mShadeSurface.collapse(true /* animate */, false  /* delayed */,
+                            1.0f  /* speedUpFactor */);
                 }
                 updateQsExpansionEnabled();
             }
