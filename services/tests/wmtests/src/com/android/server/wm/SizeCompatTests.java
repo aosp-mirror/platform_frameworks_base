@@ -4655,14 +4655,6 @@ public class SizeCompatTests extends WindowTestsBase {
         return c;
     }
 
-    private static void resizeDisplay(DisplayContent displayContent, int width, int height) {
-        displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity,
-                displayContent.mBaseDisplayPhysicalXDpi, displayContent.mBaseDisplayPhysicalYDpi);
-        final Configuration c = new Configuration();
-        displayContent.computeScreenConfiguration(c);
-        displayContent.onRequestedOverrideConfigurationChanged(c);
-    }
-
     private static void setNeverConstrainDisplayApisFlag(@Nullable String value,
             boolean makeDefault) {
         DeviceConfig.setProperty(NAMESPACE_CONSTRAIN_DISPLAY_APIS,
