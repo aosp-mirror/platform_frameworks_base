@@ -1962,7 +1962,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 startKeyguardExitAnimation(0, 0);
             }
 
-            mPowerGestureIntercepted = mUpdateMonitor.isSecureCameraLaunchedOverKeyguard();
+            mPowerGestureIntercepted =
+                    isOccluded && mUpdateMonitor.isSecureCameraLaunchedOverKeyguard();
 
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
