@@ -366,12 +366,6 @@ final class InstallRequest {
     public String getApexModuleName() {
         return mApexModuleName;
     }
-
-    @Nullable
-    public String getSourceInstallerPackageName() {
-        return mInstallArgs.mInstallSource.mInstallerPackageName;
-    }
-
     public boolean isRollback() {
         return mInstallArgs != null
                 && mInstallArgs.mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK;
