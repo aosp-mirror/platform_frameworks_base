@@ -221,16 +221,35 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun hunExtensionCancelledWhenHunActionPressed() {
+    fun actionPressCancelsExistingLifetimeExtension() {
         whenever(headsUpManager.isSticky(anyString())).thenReturn(true)
         addHUN(entry)
+
         whenever(headsUpManager.canRemoveImmediately(anyString())).thenReturn(false)
         whenever(headsUpManager.getEarliestRemovalTime(anyString())).thenReturn(1000L)
-        assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
+        assertTrue(notifLifetimeExtender.maybeExtendLifetime(entry, /* reason = */ 0))
+
         actionPressListener.accept(entry)
-        executor.advanceClockToLast()
         executor.runAllReady()
-        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), eq(true))
+        verify(endLifetimeExtension, times(1)).onEndLifetimeExtension(notifLifetimeExtender, entry)
+
+        collectionListener.onEntryRemoved(entry, /* reason = */ 0)
+        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any())
+    }
+
+    @Test
+    fun actionPressPreventsFutureLifetimeExtension() {
+        whenever(headsUpManager.isSticky(anyString())).thenReturn(true)
+        addHUN(entry)
+
+        actionPressListener.accept(entry)
+        verify(headsUpManager, times(1)).setUserActionMayIndirectlyRemove(entry)
+
+        whenever(headsUpManager.canRemoveImmediately(anyString())).thenReturn(true)
+        assertFalse(notifLifetimeExtender.maybeExtendLifetime(entry, 0))
+
+        collectionListener.onEntryRemoved(entry, /* reason = */ 0)
+        verify(headsUpManager, times(1)).removeNotification(eq(entry.key), any())
     }
 
     @Test
