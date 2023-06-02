@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,23 +28,29 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.debug.AdbManagerInternal;
+import android.debug.AdbTransportType;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -68,6 +75,8 @@ public class UsbHandlerTest {
     private SharedPreferences mSharedPreferences;
     @Mock
     private SharedPreferences.Editor mEditor;
+    @Mock
+    private AdbManagerInternal mAdbManagerInternal;
 
     private MockUsbHandler mUsbHandler;
 
@@ -83,6 +92,7 @@ public class UsbHandlerTest {
 
     private Map<String, String> mMockProperties;
     private Map<String, Integer> mMockGlobalSettings;
+    private MockitoSession mStaticMockSession;
 
     private class MockUsbHandler extends UsbDeviceManager.UsbHandler {
         boolean mIsUsbTransferAllowed;
@@ -157,6 +167,10 @@ public class UsbHandlerTest {
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
+        mStaticMockSession = ExtendedMockito.mockitoSession()
+                .mockStatic(LocalServices.class)
+                .strictness(Strictness.WARN)
+                .startMocking();
         mMockProperties = new HashMap<>();
         mMockGlobalSettings = new HashMap<>();
         when(mSharedPreferences.edit()).thenReturn(mEditor);
@@ -164,6 +178,16 @@ public class UsbHandlerTest {
         mUsbHandler = new MockUsbHandler(FgThread.get().getLooper(),
                 InstrumentationRegistry.getContext(), mUsbDeviceManager, mUsbAlsaManager,
                 mUsbSettingsManager, mUsbPermissionManager);
+
+        when(LocalServices.getService(eq(AdbManagerInternal.class)))
+                .thenReturn(mAdbManagerInternal);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (mStaticMockSession != null) {
+            mStaticMockSession.finishMocking();
+        }
     }
 
     @SmallTest
@@ -234,8 +258,8 @@ public class UsbHandlerTest {
         assertEquals(mUsbHandler.getEnabledFunctions(), UsbManager.FUNCTION_NONE);
         assertEquals(mMockProperties.get(UsbDeviceManager.UsbHandler
                 .USB_PERSISTENT_CONFIG_PROPERTY), UsbManager.USB_FUNCTION_ADB);
-        assertTrue(mUsbHandler.isAdbEnabled());
 
+        when(mAdbManagerInternal.isAdbEnabled(eq(AdbTransportType.USB))).thenReturn(true);
         mUsbHandler.handleMessage(mUsbHandler.obtainMessage(MSG_UPDATE_STATE, 1, 1));
 
         assertTrue(mUsbHandler.mBroadcastedIntent.getBooleanExtra(UsbManager.USB_CONNECTED, false));
@@ -267,20 +291,6 @@ public class UsbHandlerTest {
     public void bootCompletedCharging() {
         sendBootCompleteMessages(mUsbHandler);
         assertEquals(mUsbHandler.getEnabledFunctions(), UsbManager.FUNCTION_NONE);
-    }
-
-    @SmallTest
-    @Test
-    public void bootCompletedAdbEnabled() {
-        mMockProperties.put(UsbDeviceManager.UsbHandler.USB_PERSISTENT_CONFIG_PROPERTY, "adb");
-        mUsbHandler = new MockUsbHandler(FgThread.get().getLooper(),
-                InstrumentationRegistry.getContext(), mUsbDeviceManager, mUsbAlsaManager,
-                mUsbSettingsManager, mUsbPermissionManager);
-
-        sendBootCompleteMessages(mUsbHandler);
-        assertEquals(mUsbHandler.getEnabledFunctions(), UsbManager.FUNCTION_NONE);
-        assertEquals(mMockGlobalSettings.get(Settings.Global.ADB_ENABLED).intValue(), 1);
-        assertTrue(mUsbHandler.isAdbEnabled());
     }
 
     @SmallTest
