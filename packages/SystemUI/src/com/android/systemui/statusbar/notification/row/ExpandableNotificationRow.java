@@ -556,6 +556,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void onNotificationUpdated() {
+        if (mIsSummaryWithChildren) {
+            Trace.beginSection("ExpNotRow#onNotifUpdated (summary)");
+        } else {
+            Trace.beginSection("ExpNotRow#onNotifUpdated (leaf)");
+        }
         for (NotificationContentView l : mLayouts) {
             l.onNotificationUpdated(mEntry);
         }
@@ -591,6 +596,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mUpdateSelfBackgroundOnUpdate = false;
             updateBackgroundColorsOfSelf();
         }
+        Trace.endSection();
     }
 
     private void updateBackgroundColorsOfSelf() {
@@ -2588,6 +2594,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mIsSummaryWithChildren = mChildrenContainer != null
                 && mChildrenContainer.getNotificationChildCount() > 0;
         if (mIsSummaryWithChildren) {
+            Trace.beginSection("ExpNotRow#onChildCountChanged (summary)");
             NotificationViewWrapper wrapper = mChildrenContainer.getNotificationViewWrapper();
             if (wrapper == null || wrapper.getNotificationHeader() == null) {
                 mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
@@ -2599,6 +2606,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateChildrenAppearance();
         updateChildrenVisibility();
         applyChildrenRoundness();
+        if (mIsSummaryWithChildren) {
+            Trace.endSection();
+        }
     }
 
     protected void expandNotification() {
