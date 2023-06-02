@@ -55,6 +55,9 @@ public class PipTouchState {
     private final PointF mLastDelta = new PointF();
     private final PointF mVelocity = new PointF();
     private boolean mAllowTouches = true;
+
+    // Set to false to block both PipTouchHandler and PipResizeGestureHandler's input processing
+    private boolean mAllowInputEvents = true;
     private boolean mIsUserInteracting = false;
     // Set to true only if the multiple taps occur within the double tap timeout
     private boolean mIsDoubleTap = false;
@@ -74,6 +77,20 @@ public class PipTouchState {
         mDoubleTapTimeoutCallback = doubleTapTimeoutCallback;
         mHoverExitTimeoutCallback = hoverExitTimeoutCallback;
         mMainExecutor = mainExecutor;
+    }
+
+    /**
+     * @return true if input processing is enabled for PiP in general.
+     */
+    public boolean getAllowInputEvents() {
+        return mAllowInputEvents;
+    }
+
+    /**
+     * @param allowInputEvents true to enable input processing for PiP in general.
+     */
+    public void setAllowInputEvents(boolean allowInputEvents) {
+        mAllowInputEvents = allowInputEvents;
     }
 
     /**

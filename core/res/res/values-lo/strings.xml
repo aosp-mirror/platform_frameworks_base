@@ -2168,8 +2168,8 @@
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"ເປີດໃນ <xliff:g id="APP">%s</xliff:g> ສຳລັບວຽກບໍ?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"ໂທຈາກແອັບບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ສະຫຼັບໄປເປັນແອັບບ່ອນເຮັດວຽກບໍ?"</string>
-    <string name="miniresolver_call_information" msgid="6739417525304184083">"ອົງການຈັດຕັ້ງຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານໂທຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
-    <string name="miniresolver_sms_information" msgid="4311292661329483088">"ອົງການຈັດຕັ້ງຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານສົ່ງຂໍ້ຄວາມໄດ້ຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"ອົງການຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານໂທຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"ອົງການຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານສົ່ງຂໍ້ຄວາມໄດ້ຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບສ່ວນຕົວ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບບ່ອນເຮັດວຽກ"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"ໂທ"</string>

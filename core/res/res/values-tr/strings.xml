@@ -1975,8 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Bu uygulama Android\'in daha eski bir sürümü için geliştirildi. Bu nedenle, düzgün çalışmayabilir ve son güvenlik ile gizlilik korumalarını içermemektedir. Güncelleme olup olmadığını kontrol edin veya uygulamanın geliştiricisiyle iletişime geçin."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncellemeleri denetle"</string>
-    <!-- no translation found for deprecated_abi_message (6820548011196218091) -->
-    <skip />
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Bu uygulama Android\'in son sürümüyle uyumlu değil. Güncelleme olup olmadığını kontrol edin veya uygulamanın geliştiricisiyle iletişime geçin."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Görüntülemek için SMS uygulamasını açın"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Bazı işlevler sınırlanabilir"</string>
@@ -2167,7 +2166,7 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"İş uygulaması (<xliff:g id="APP">%s</xliff:g>) açılsın mı?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Kişisel uygulamada (<xliff:g id="APP">%s</xliff:g>) açılsın mı?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"İş uygulamasında (<xliff:g id="APP">%s</xliff:g>) açılsın mı?"</string>
-    <string name="miniresolver_call_in_work" msgid="528779988307529039">"İş uygulamasından telefon edilsin mi?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"İş uygulamasından aransın mı?"</string>
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"İş uygulamasına geçilsin mi?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Kuruluşunuz yalnızca iş uygulamalarından telefon etmenize izin veriyor"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Kuruluşunuz yalnızca iş uygulamalarından mesaj göndermenize izin veriyor"</string>

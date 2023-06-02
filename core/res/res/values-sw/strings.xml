@@ -2167,7 +2167,7 @@
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Ungependa kufungua <xliff:g id="APP">%s</xliff:g> ukitumia wasifu wa binafsi?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Ungependa kufungua <xliff:g id="APP">%s</xliff:g> ukitumia wasifu wa kazini?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"Ungependa kupiga simu ukitumia programu ya kazini?"</string>
-    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Ungependa kubadilisha ili utumie programu ya kazini?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Ungependa kutumia programu ya kazini?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Shirika lako linakuruhusu upige simu ukitumia programu za kazini pekee"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Shirika lako linakuruhusu utume ujumbe ukitumia programu za kazini pekee"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Tumia kivinjari cha binafsi"</string>

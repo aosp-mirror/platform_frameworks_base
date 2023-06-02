@@ -484,8 +484,9 @@ public class ApplicationsState {
         if (DEBUG_LOCKING) Log.v(TAG, "getEntry about to acquire lock...");
         synchronized (mEntriesMap) {
             AppEntry entry = null;
-            if (mEntriesMap.contains(userId)) {
-                entry = mEntriesMap.get(userId).get(packageName);
+            HashMap<String, AppEntry> userEntriesMap = mEntriesMap.get(userId);
+            if (userEntriesMap != null) {
+                entry = userEntriesMap.get(packageName);
             }
             if (entry == null) {
                 ApplicationInfo info = getAppInfoLocked(packageName, userId);
@@ -735,8 +736,9 @@ public class ApplicationsState {
     private AppEntry getEntryLocked(ApplicationInfo info) {
         int userId = UserHandle.getUserId(info.uid);
         AppEntry entry = null;
-        if (mEntriesMap.contains(userId)) {
-            entry = mEntriesMap.get(userId).get(info.packageName);
+        HashMap<String, AppEntry> userEntriesMap = mEntriesMap.get(userId);
+        if (userEntriesMap != null) {
+            entry = userEntriesMap.get(info.packageName);
         }
         if (DEBUG) {
             Log.i(TAG, "Looking up entry of pkg " + info.packageName + ": " + entry);
@@ -752,8 +754,11 @@ public class ApplicationsState {
                 Log.i(TAG, "Creating AppEntry for " + info.packageName);
             }
             entry = new AppEntry(mContext, info, mCurId++);
-            mEntriesMap.get(userId).put(info.packageName, entry);
-            mAppEntries.add(entry);
+            userEntriesMap = mEntriesMap.get(userId);
+            if (userEntriesMap != null) {
+                userEntriesMap.put(info.packageName, entry);
+                mAppEntries.add(entry);
+            }
         } else if (entry.info != info) {
             entry.info = info;
         }
