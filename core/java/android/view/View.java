@@ -8414,6 +8414,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * for the matching <activity> entry in your application’s manifest or updating the title at
      * runtime with{@link android.app.Activity#setTitle(CharSequence)}.
      *
+     * <p>
+     * <b>Note:</b> Use
+     * {@link androidx.core.view.ViewCompat#setAccessibilityPaneTitle(View, CharSequence)}
+     * for backwards-compatibility. </aside>
      * @param accessibilityPaneTitle The pane's title. Setting to {@code null} indicates that this
      *                               View is not a pane.
      *
@@ -13717,6 +13721,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Returns whether the view should be treated as a focusable unit by screen reader
      * accessibility tools.
+     * <p>
+     * <b>Note:</b> Use
+     * {@link androidx.core.view.ViewCompat#setScreenReaderFocusable(View, boolean)}
+     * for backwards-compatibility. </aside>
      * @see #setScreenReaderFocusable(boolean)
      *
      * @return Whether the view should be treated as a focusable unit by screen reader.
@@ -13762,6 +13770,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Users of some accessibility services can choose to navigate between headings
      * instead of between paragraphs, words, etc. Apps that provide headings on
      * sections of text can help the text navigation experience.
+     * <p>
+     * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#setAccessibilityHeading(View, boolean)}
+     * for backwards-compatibility. </aside>
      *
      * @param isHeading {@code true} if the view is a heading, {@code false} otherwise.
      *
@@ -14622,6 +14633,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * If the view's changes should interrupt ongoing speech and notify the user
      * immediately, use {@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}.
+     * <p>
+     * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#setAccessibilityLiveRegion(View, int)}
+     * for backwards-compatibility. </aside>
      *
      * @param mode The live region mode for this view, one of:
      *        <ul>
@@ -31419,6 +31433,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Starting in {@link android.os.Build.VERSION_CODES#M API 23}, delegate
      * methods are called <i>after</i> host methods, which all properties to be
      * modified without being overwritten by the host class.
+     * <aside class="note">
+     * <b>Note:</b> Use a {@link androidx.core.view.AccessibilityDelegateCompat}
+     * wrapper instead of this class for backwards-compatibility.
+     * </aside>
+     *
      */
     public static class AccessibilityDelegate {
 
