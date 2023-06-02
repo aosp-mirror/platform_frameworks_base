@@ -17,6 +17,7 @@
 package com.android.systemui.shade;
 
 import android.content.ComponentCallbacks2;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
@@ -25,6 +26,7 @@ import android.view.WindowManagerGlobal;
 
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -32,12 +34,14 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
 import dagger.Lazy;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -51,11 +55,13 @@ public final class ShadeControllerImpl implements ShadeController {
     private final int mDisplayId;
 
     private final CommandQueue mCommandQueue;
+    private final Executor mMainExecutor;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarStateController mStatusBarStateController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final StatusBarWindowController mStatusBarWindowController;
+    private final DeviceProvisionedController mDeviceProvisionedController;
 
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<NotificationGutsManager> mGutsManager;
@@ -72,18 +78,22 @@ public final class ShadeControllerImpl implements ShadeController {
     @Inject
     public ShadeControllerImpl(
             CommandQueue commandQueue,
+            @Main Executor mainExecutor,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             StatusBarWindowController statusBarWindowController,
+            DeviceProvisionedController deviceProvisionedController,
             NotificationShadeWindowController notificationShadeWindowController,
             WindowManager windowManager,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<NotificationGutsManager> gutsManager
     ) {
         mCommandQueue = commandQueue;
+        mMainExecutor = mainExecutor;
         mStatusBarStateController = statusBarStateController;
         mStatusBarWindowController = statusBarWindowController;
+        mDeviceProvisionedController = deviceProvisionedController;
         mGutsManager = gutsManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -107,21 +117,21 @@ public final class ShadeControllerImpl implements ShadeController {
 
     @Override
     public void animateCollapseShade(int flags) {
-        animateCollapsePanels(flags, false, false, 1.0f);
+        animateCollapseShade(flags, false, false, 1.0f);
     }
 
     @Override
     public void animateCollapseShadeForced() {
-        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true, false, 1.0f);
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE, true, false, 1.0f);
     }
 
     @Override
-    public void animateCollapseShadeDelayed() {
-        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true, true, 1.0f);
+    public void animateCollapseShadeForcedDelayed() {
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true, true, 1.0f);
     }
 
     @Override
-    public void animateCollapsePanels(int flags, boolean force, boolean delayed,
+    public void animateCollapseShade(int flags, boolean force, boolean delayed,
             float speedUpFactor) {
         if (!force && mStatusBarStateController.getState() != StatusBarState.SHADE) {
             runPostCollapseRunnables();
@@ -140,6 +150,25 @@ public final class ShadeControllerImpl implements ShadeController {
             mNotificationShadeWindowViewController.cancelExpandHelper();
             mNotificationPanelViewController.collapse(true, delayed, speedUpFactor);
         }
+    }
+
+    @Override
+    public void animateExpandShade() {
+        if (!mCommandQueue.panelsEnabled()) {
+            return;
+        }
+        mNotificationPanelViewController.expandToNotifications();
+    }
+
+    @Override
+    public void animateExpandQs() {
+        if (!mCommandQueue.panelsEnabled()) {
+            return;
+        }
+        // Settings are not available in setup
+        if (!mDeviceProvisionedController.isCurrentUserSetup()) return;
+
+        mNotificationPanelViewController.expandToQs();
     }
 
     @Override
@@ -166,6 +195,20 @@ public final class ShadeControllerImpl implements ShadeController {
     @Override
     public boolean isExpandingOrCollapsing() {
         return mNotificationPanelViewController.isExpandingOrCollapsing();
+    }
+    @Override
+    public void postAnimateCollapseShade() {
+        mMainExecutor.execute(this::animateCollapseShade);
+    }
+
+    @Override
+    public void postAnimateForceCollapseShade() {
+        mMainExecutor.execute(this::animateCollapseShadeForced);
+    }
+
+    @Override
+    public void postAnimateExpandQs() {
+        mMainExecutor.execute(this::animateExpandQs);
     }
 
     @Override
@@ -202,7 +245,7 @@ public final class ShadeControllerImpl implements ShadeController {
     public boolean collapseShade() {
         if (!mNotificationPanelViewController.isFullyCollapsed()) {
             // close the shade if it was open
-            animateCollapseShadeDelayed();
+            animateCollapseShadeForcedDelayed();
             notifyVisibilityChanged(false);
 
             return true;
@@ -227,6 +270,15 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
+    public void collapseOnMainThread() {
+        if (Looper.getMainLooper().isCurrentThread()) {
+            collapseShade();
+        } else {
+            mMainExecutor.execute(this::collapseShade);
+        }
+    }
+
+    @Override
     public void onStatusBarTouch(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
             if (mExpandedVisible) {
@@ -235,13 +287,33 @@ public final class ShadeControllerImpl implements ShadeController {
         }
     }
 
-    @Override
-    public void onClosingFinished() {
+    private void onClosingFinished() {
         runPostCollapseRunnables();
         if (!mPresenter.isPresenterFullyCollapsed()) {
             // if we set it not to be focusable when collapsing, we have to undo it when we aborted
             // the closing
             mNotificationShadeWindowController.setNotificationShadeFocusable(true);
+        }
+    }
+
+    @Override
+    public void onLaunchAnimationCancelled(boolean isLaunchForActivity) {
+        if (mPresenter.isPresenterFullyCollapsed()
+                && !mPresenter.isCollapsing()
+                && isLaunchForActivity) {
+            onClosingFinished();
+        } else {
+            collapseShade(true /* animate */);
+        }
+    }
+
+    @Override
+    public void onLaunchAnimationEnd(boolean launchIsFullScreen) {
+        if (!mPresenter.isCollapsing()) {
+            onClosingFinished();
+        }
+        if (launchIsFullScreen) {
+            instantCollapseShade();
         }
     }
 
