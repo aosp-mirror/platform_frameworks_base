@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_TARGET_USER_ID;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
 import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
@@ -176,6 +177,16 @@ final class DevicePolicyEngine {
                 }
                 boolean policyEnforced = Objects.equals(
                         localPolicyState.getCurrentResolvedPolicy(), value);
+                // TODO(b/285532044): remove hack and handle properly
+                if (!policyEnforced
+                        && policyDefinition.getPolicyKey().getIdentifier().equals(
+                        USER_CONTROL_DISABLED_PACKAGES_POLICY)) {
+                    PolicyValue<Set<String>> parsedValue = (PolicyValue<Set<String>>) value;
+                    PolicyValue<Set<String>> parsedResolvedValue =
+                            (PolicyValue<Set<String>>) localPolicyState.getCurrentResolvedPolicy();
+                    policyEnforced = (parsedResolvedValue != null && parsedValue != null
+                            && parsedResolvedValue.getValue().containsAll(parsedValue.getValue()));
+                }
                 sendPolicyResultToAdmin(
                         enforcingAdmin,
                         policyDefinition,
@@ -418,6 +429,17 @@ final class DevicePolicyEngine {
 
                 boolean policyAppliedGlobally = Objects.equals(
                         globalPolicyState.getCurrentResolvedPolicy(), value);
+                // TODO(b/285532044): remove hack and handle properly
+                if (!policyAppliedGlobally
+                        && policyDefinition.getPolicyKey().getIdentifier().equals(
+                                USER_CONTROL_DISABLED_PACKAGES_POLICY)) {
+                    PolicyValue<Set<String>> parsedValue = (PolicyValue<Set<String>>) value;
+                    PolicyValue<Set<String>> parsedResolvedValue =
+                            (PolicyValue<Set<String>>) globalPolicyState.getCurrentResolvedPolicy();
+                    policyAppliedGlobally = (parsedResolvedValue != null && parsedValue != null
+                            && parsedResolvedValue.getValue().containsAll(parsedValue.getValue()));
+                }
+
                 boolean policyApplied = policyAppliedGlobally && policyAppliedOnAllUsers;
 
                 sendPolicyResultToAdmin(
@@ -539,8 +561,20 @@ final class DevicePolicyEngine {
                         userId);
 
             }
-            isAdminPolicyApplied &= Objects.equals(
-                    value, localPolicyState.getCurrentResolvedPolicy());
+            // TODO(b/285532044): remove hack and handle properly
+            if (policyDefinition.getPolicyKey().getIdentifier().equals(
+                    USER_CONTROL_DISABLED_PACKAGES_POLICY)) {
+                if (!Objects.equals(value, localPolicyState.getCurrentResolvedPolicy())) {
+                    PolicyValue<Set<String>> parsedValue = (PolicyValue<Set<String>>) value;
+                    PolicyValue<Set<String>> parsedResolvedValue =
+                            (PolicyValue<Set<String>>) localPolicyState.getCurrentResolvedPolicy();
+                    isAdminPolicyApplied &= (parsedResolvedValue != null && parsedValue != null
+                            && parsedResolvedValue.getValue().containsAll(parsedValue.getValue()));
+                }
+            } else {
+                isAdminPolicyApplied &= Objects.equals(
+                        value, localPolicyState.getCurrentResolvedPolicy());
+            }
         }
         return isAdminPolicyApplied;
     }
