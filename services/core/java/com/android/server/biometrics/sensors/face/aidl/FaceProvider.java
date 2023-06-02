@@ -475,7 +475,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         BaseClientMonitor clientMonitor,
                         boolean success) {
                     mAuthSessionCoordinator.authEndedFor(userId, Utils.getCurrentStrength(sensorId),
-                            sensorId, requestId, client.wasAuthSuccessful());
+                            sensorId, requestId, success);
                 }
             });
         });
