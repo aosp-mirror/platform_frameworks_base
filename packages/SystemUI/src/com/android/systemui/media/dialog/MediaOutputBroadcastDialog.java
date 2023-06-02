@@ -41,6 +41,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.graphics.drawable.IconCompat;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.qrcode.QrCodeGenerator;
@@ -420,7 +421,8 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         return mMediaOutputController.getBroadcastMetadata();
     }
 
-    private void updateBroadcastInfo(boolean isBroadcastCode, String updatedString) {
+    @VisibleForTesting
+    void updateBroadcastInfo(boolean isBroadcastCode, String updatedString) {
         Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
         if (positiveBtn != null) {
             positiveBtn.setEnabled(false);
@@ -523,16 +525,33 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     }
 
     private void handleUpdateFailedUi() {
-        final Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        mBroadcastErrorMessage.setVisibility(View.VISIBLE);
+        if (mAlertDialog == null) {
+            Log.d(TAG, "handleUpdateFailedUi: mAlertDialog is null");
+            return;
+        }
+        int errorMessageStringId = -1;
+        boolean enablePositiveBtn = false;
         if (mRetryCount < MAX_BROADCAST_INFO_UPDATE) {
-            if (positiveBtn != null) {
-                positiveBtn.setEnabled(true);
-            }
-            mBroadcastErrorMessage.setText(R.string.media_output_broadcast_update_error);
+            enablePositiveBtn = true;
+            errorMessageStringId = R.string.media_output_broadcast_update_error;
         } else {
             mRetryCount = 0;
-            mBroadcastErrorMessage.setText(R.string.media_output_broadcast_last_update_error);
+            errorMessageStringId = R.string.media_output_broadcast_last_update_error;
         }
+
+        // update UI
+        final Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positiveBtn != null && enablePositiveBtn) {
+            positiveBtn.setEnabled(true);
+        }
+        if (mBroadcastErrorMessage != null) {
+            mBroadcastErrorMessage.setVisibility(View.VISIBLE);
+            mBroadcastErrorMessage.setText(errorMessageStringId);
+        }
+    }
+
+    @VisibleForTesting
+    int getRetryCount() {
+        return mRetryCount;
     }
 }

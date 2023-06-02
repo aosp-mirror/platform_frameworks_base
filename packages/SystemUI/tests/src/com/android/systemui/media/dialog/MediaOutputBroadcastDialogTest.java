@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.dialog;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -33,6 +35,8 @@ import android.media.session.MediaSessionManager;
 import android.os.PowerExemptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
@@ -44,6 +48,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -58,6 +63,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -68,6 +74,9 @@ import java.util.Optional;
 public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
 
     private static final String TEST_PACKAGE = "test_package";
+    private static final String BROADCAST_NAME_TEST = "Broadcast_name_test";
+    private static final String BROADCAST_CODE_TEST = "112233";
+    private static final String BROADCAST_CODE_UPDATE_TEST = "11223344";
 
     // Mock
     private final MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
@@ -106,6 +115,9 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalBluetoothProfileManager);
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(null);
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(null);
+        when(mLocalBluetoothLeBroadcast.getProgramInfo()).thenReturn(BROADCAST_NAME_TEST);
+        when(mLocalBluetoothLeBroadcast.getBroadcastCode()).thenReturn(
+                BROADCAST_CODE_TEST.getBytes(StandardCharsets.UTF_8));
 
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
@@ -193,5 +205,51 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
         mMediaOutputBroadcastDialog.connectBroadcastWithActiveDevice();
 
         verify(mLocalBluetoothLeBroadcastAssistant, times(1)).addSource(any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void handleLeBroadcastMetadataChanged_checkBroadcastName() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        final TextView broadcastName = mMediaOutputBroadcastDialog.mDialogView
+                .requireViewById(R.id.broadcast_name_summary);
+
+        mMediaOutputBroadcastDialog.handleLeBroadcastMetadataChanged();
+
+        assertThat(broadcastName.getText().toString()).isEqualTo(BROADCAST_NAME_TEST);
+    }
+
+    @Test
+    public void handleLeBroadcastMetadataChanged_checkBroadcastCode() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+
+        final TextView broadcastCode = mMediaOutputBroadcastDialog.mDialogView
+                .requireViewById(R.id.broadcast_code_summary);
+
+        mMediaOutputBroadcastDialog.handleLeBroadcastMetadataChanged();
+
+        assertThat(broadcastCode.getText().toString()).isEqualTo(BROADCAST_CODE_TEST);
+    }
+
+    @Test
+    public void updateBroadcastInfo_stopBroadcastFailed_handleFailedUi() {
+        ImageView broadcastCodeEdit = mMediaOutputBroadcastDialog.mDialogView
+                .requireViewById(R.id.broadcast_code_edit);
+        TextView broadcastCode = mMediaOutputBroadcastDialog.mDialogView.requireViewById(
+                R.id.broadcast_code_summary);
+        broadcastCode.setText(BROADCAST_CODE_UPDATE_TEST);
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(null);
+        broadcastCodeEdit.callOnClick();
+
+        mMediaOutputBroadcastDialog.updateBroadcastInfo(true, BROADCAST_CODE_UPDATE_TEST);
+        assertThat(mMediaOutputBroadcastDialog.getRetryCount()).isEqualTo(1);
+
+        mMediaOutputBroadcastDialog.updateBroadcastInfo(true, BROADCAST_CODE_UPDATE_TEST);
+        assertThat(mMediaOutputBroadcastDialog.getRetryCount()).isEqualTo(2);
+
+        // It will be the MAX Retry Count = 3
+        mMediaOutputBroadcastDialog.updateBroadcastInfo(true, BROADCAST_CODE_UPDATE_TEST);
+        assertThat(mMediaOutputBroadcastDialog.getRetryCount()).isEqualTo(0);
     }
 }
