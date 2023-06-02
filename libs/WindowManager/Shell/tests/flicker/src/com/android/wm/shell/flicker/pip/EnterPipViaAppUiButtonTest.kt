@@ -51,11 +51,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class EnterPipViaAppUiButtonTest(flicker: FlickerTest) : EnterPipTransition(flicker) {
-
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            super.transition(this)
-            transitions { pipApp.clickEnterPipButton(wmHelper) }
-        }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { pipApp.clickEnterPipButton(wmHelper) }
+    }
 }
