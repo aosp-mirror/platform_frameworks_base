@@ -1005,7 +1005,6 @@
             android:name=".notetask.shortcut.LaunchNoteTaskActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" >
 
             <intent-filter>
@@ -1018,7 +1017,6 @@
             android:name=".notetask.LaunchNotesRoleSettingsTrampolineActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" >
             <intent-filter>
                 <action android:name="com.android.systemui.action.MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE" />

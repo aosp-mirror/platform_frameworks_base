@@ -46,7 +46,6 @@ import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolder
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
-import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles.BubbleExpandListener
@@ -219,7 +218,7 @@ constructor(
                     debugLog { "onShowNoteTask - opened as app bubble: $info" }
                 }
                 is NoteTaskLaunchMode.Activity -> {
-                    if (activityManager.isInForeground(info.packageName)) {
+                    if (info.isKeyguardLocked && activityManager.isInForeground(info.packageName)) {
                         // Force note task into background by calling home.
                         val intent = createHomeIntent()
                         context.startActivityAsUser(intent, user)

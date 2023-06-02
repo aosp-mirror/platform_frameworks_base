@@ -244,8 +244,38 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     // endregion
 
     // region showNoteTask
+    fun showNoteTaskAsUser_keyguardIsLocked_shouldStartActivityWithExpectedUserAndLogUiEvent() {
+        val user10 = UserHandle.of(/* userId= */ 10)
+        val expectedInfo =
+            NOTE_TASK_INFO.copy(
+                entryPoint = TAIL_BUTTON,
+                isKeyguardLocked = true,
+                user = user10,
+            )
+        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
+
+        createNoteTaskController()
+            .showNoteTaskAsUser(entryPoint = expectedInfo.entryPoint!!, user = user10)
+
+        val intentCaptor = argumentCaptor<Intent>()
+        val userCaptor = argumentCaptor<UserHandle>()
+        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
+        assertThat(intentCaptor.value).run {
+            hasAction(ACTION_CREATE_NOTE)
+            hasPackage(NOTE_TASK_PACKAGE_NAME)
+            hasFlags(FLAG_ACTIVITY_NEW_TASK)
+            hasFlags(FLAG_ACTIVITY_MULTIPLE_TASK)
+            hasFlags(FLAG_ACTIVITY_NEW_DOCUMENT)
+            extras().bool(EXTRA_USE_STYLUS_MODE).isTrue()
+        }
+        assertThat(userCaptor.value).isEqualTo(user10)
+        verify(eventLogger).logNoteTaskOpened(expectedInfo)
+        verifyZeroInteractions(bubbles)
+    }
+
     @Test
-    fun showNoteTask_keyguardIsLocked_shouldStartActivityAndLogUiEvent() {
+    fun showNoteTask_keyguardIsLocked_notesIsClosed_shouldStartActivityAndLogUiEvent() {
         val expectedInfo = NOTE_TASK_INFO.copy(entryPoint = TAIL_BUTTON, isKeyguardLocked = true)
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
         whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
@@ -266,6 +296,59 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
         verifyZeroInteractions(bubbles)
+    }
+
+    @Test
+    fun showNoteTask_keyguardIsLocked_noteIsOpen_shouldCloseActivityAndLogUiEvent() {
+        val expectedInfo = NOTE_TASK_INFO.copy(entryPoint = TAIL_BUTTON, isKeyguardLocked = true)
+        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
+        whenever(activityManager.getRunningTasks(anyInt()))
+            .thenReturn(listOf(NOTE_RUNNING_TASK_INFO))
+
+        createNoteTaskController().showNoteTask(entryPoint = expectedInfo.entryPoint!!)
+
+        val intentCaptor = argumentCaptor<Intent>()
+        val userCaptor = argumentCaptor<UserHandle>()
+        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
+        assertThat(intentCaptor.value).run {
+            hasAction(ACTION_MAIN)
+            categories().contains(CATEGORY_HOME)
+            hasFlags(FLAG_ACTIVITY_NEW_TASK)
+        }
+        assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
+        verify(eventLogger).logNoteTaskClosed(expectedInfo)
+        verifyZeroInteractions(bubbles)
+    }
+
+    @Test
+    fun showNoteTask_keyguardIsUnlocked_noteIsClosed_shouldStartBubblesWithoutLoggingUiEvent() {
+        val expectedInfo = NOTE_TASK_INFO.copy(entryPoint = TAIL_BUTTON, isKeyguardLocked = false)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
+        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
+
+        createNoteTaskController().showNoteTask(entryPoint = expectedInfo.entryPoint!!)
+
+        // Context package name used to create bubble icon from drawable resource id
+        verify(context, atLeastOnce()).packageName
+        verifyNoteTaskOpenInBubbleInUser(userTracker.userHandle)
+        verifyZeroInteractions(eventLogger)
+    }
+
+    @Test
+    fun showNoteTask_keyguardIsUnlocked_noteIsOpen_shouldStartBubblesWithoutLoggingUiEvent() {
+        val expectedInfo = NOTE_TASK_INFO.copy(entryPoint = TAIL_BUTTON, isKeyguardLocked = false)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
+        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
+        whenever(activityManager.getRunningTasks(anyInt()))
+            .thenReturn(listOf(NOTE_RUNNING_TASK_INFO))
+
+        createNoteTaskController().showNoteTask(entryPoint = expectedInfo.entryPoint!!)
+
+        // Context package name used to create bubble icon from drawable resource id
+        verify(context, atLeastOnce()).packageName
+        verifyNoteTaskOpenInBubbleInUser(userTracker.userHandle)
+        verifyZeroInteractions(eventLogger)
     }
 
     @Test
@@ -304,70 +387,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         assertThat(userCaptor.value).isEqualTo(user10)
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
         verifyZeroInteractions(bubbles)
-    }
-
-    @Test
-    fun showNoteTaskWithUser_keyguardIsLocked_shouldStartActivityWithExpectedUserAndLogUiEvent() {
-        val user10 = UserHandle.of(/* userId= */ 10)
-        val expectedInfo =
-            NOTE_TASK_INFO.copy(entryPoint = TAIL_BUTTON, isKeyguardLocked = true, user = user10)
-        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
-        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
-
-        createNoteTaskController()
-            .showNoteTaskAsUser(entryPoint = expectedInfo.entryPoint!!, user = user10)
-
-        val intentCaptor = argumentCaptor<Intent>()
-        val userCaptor = argumentCaptor<UserHandle>()
-        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
-        assertThat(intentCaptor.value).run {
-            hasAction(ACTION_CREATE_NOTE)
-            hasPackage(NOTE_TASK_PACKAGE_NAME)
-            hasFlags(FLAG_ACTIVITY_NEW_TASK)
-            hasFlags(FLAG_ACTIVITY_MULTIPLE_TASK)
-            hasFlags(FLAG_ACTIVITY_NEW_DOCUMENT)
-            extras().bool(EXTRA_USE_STYLUS_MODE).isTrue()
-        }
-        assertThat(userCaptor.value).isEqualTo(user10)
-        verify(eventLogger).logNoteTaskOpened(expectedInfo)
-        verifyZeroInteractions(bubbles)
-    }
-
-    @Test
-    fun showNoteTask_keyguardIsLocked_noteIsOpen_shouldCloseActivityAndLogUiEvent() {
-        val expectedInfo = NOTE_TASK_INFO.copy(entryPoint = TAIL_BUTTON, isKeyguardLocked = true)
-        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
-        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
-        whenever(activityManager.getRunningTasks(anyInt()))
-            .thenReturn(listOf(NOTE_RUNNING_TASK_INFO))
-
-        createNoteTaskController().showNoteTask(entryPoint = expectedInfo.entryPoint!!)
-
-        val intentCaptor = argumentCaptor<Intent>()
-        val userCaptor = argumentCaptor<UserHandle>()
-        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
-        assertThat(intentCaptor.value).run {
-            hasAction(ACTION_MAIN)
-            categories().contains(CATEGORY_HOME)
-            hasFlags(FLAG_ACTIVITY_NEW_TASK)
-        }
-        assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
-        verify(eventLogger).logNoteTaskClosed(expectedInfo)
-        verifyZeroInteractions(bubbles)
-    }
-
-    @Test
-    fun showNoteTask_keyguardIsUnlocked_shouldStartBubblesWithoutLoggingUiEvent() {
-        val expectedInfo = NOTE_TASK_INFO.copy(entryPoint = TAIL_BUTTON, isKeyguardLocked = false)
-        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
-        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
-
-        createNoteTaskController().showNoteTask(entryPoint = expectedInfo.entryPoint!!)
-
-        // Context package name used to create bubble icon from drawable resource id
-        verify(context, atLeastOnce()).packageName
-        verifyNoteTaskOpenInBubbleInUser(userTracker.userHandle)
-        verifyZeroInteractions(eventLogger)
     }
 
     @Test
