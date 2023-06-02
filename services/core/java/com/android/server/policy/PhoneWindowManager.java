@@ -5933,7 +5933,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.CONTEXT_CLICK:
             case HapticFeedbackConstants.GESTURE_END:
             case HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE:
-            case HapticFeedbackConstants.ROTARY_SCROLL_TICK:
+            case HapticFeedbackConstants.SCROLL_TICK:
             case HapticFeedbackConstants.SEGMENT_TICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
 
@@ -5958,8 +5958,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.CALENDAR_DATE:
             case HapticFeedbackConstants.CONFIRM:
             case HapticFeedbackConstants.GESTURE_START:
-            case HapticFeedbackConstants.ROTARY_SCROLL_ITEM_FOCUS:
-            case HapticFeedbackConstants.ROTARY_SCROLL_LIMIT:
+            case HapticFeedbackConstants.SCROLL_ITEM_FOCUS:
+            case HapticFeedbackConstants.SCROLL_LIMIT:
                 return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
 
             case HapticFeedbackConstants.LONG_PRESS:
@@ -6037,9 +6037,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return PHYSICAL_EMULATION_VIBRATION_ATTRIBUTES;
             case HapticFeedbackConstants.ASSISTANT_BUTTON:
             case HapticFeedbackConstants.LONG_PRESS_POWER_BUTTON:
-            case HapticFeedbackConstants.ROTARY_SCROLL_TICK:
-            case HapticFeedbackConstants.ROTARY_SCROLL_ITEM_FOCUS:
-            case HapticFeedbackConstants.ROTARY_SCROLL_LIMIT:
+            case HapticFeedbackConstants.SCROLL_TICK:
+            case HapticFeedbackConstants.SCROLL_ITEM_FOCUS:
+            case HapticFeedbackConstants.SCROLL_LIMIT:
                 return HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES;
             default:
                 return TOUCH_VIBRATION_ATTRIBUTES;
