@@ -649,19 +649,20 @@ public class WallpaperBackupAgentTest {
     }
 
     @Test
-    public void testOnRestore_lockWallpaperImgMissingAndNoLive_logsFailure() throws Exception {
+    public void testOnRestore_wallpaperImgMissingAndNoLive_logsFailure() throws Exception {
         mockStagedWallpaperFile(WALLPAPER_INFO_STAGE);
-        mockStagedWallpaperFile(SYSTEM_WALLPAPER_STAGE);
         mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
                 BackupAnnotations.OperationType.RESTORE);
 
         mWallpaperBackupAgent.onRestoreFinished();
 
-        DataTypeResult result = getLoggingResult(WALLPAPER_IMG_LOCK,
-                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
-        assertThat(result).isNotNull();
-        assertThat(result.getFailCount()).isEqualTo(1);
-        assertThat(result.getErrors()).containsKey(ERROR_NO_WALLPAPER);
+        for (String wallpaper: List.of(WALLPAPER_IMG_LOCK, WALLPAPER_IMG_SYSTEM)) {
+            DataTypeResult result = getLoggingResult(wallpaper,
+                    mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+            assertThat(result).isNotNull();
+            assertThat(result.getFailCount()).isEqualTo(1);
+            assertThat(result.getErrors()).containsKey(ERROR_NO_WALLPAPER);
+        }
     }
 
     @Test

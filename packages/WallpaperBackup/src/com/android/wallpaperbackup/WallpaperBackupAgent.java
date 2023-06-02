@@ -359,11 +359,12 @@ public class WallpaperBackupAgent extends BackupAgent {
         final File infoStage = new File(filesDir, WALLPAPER_INFO_STAGE);
         final File imageStage = new File(filesDir, SYSTEM_WALLPAPER_STAGE);
         final File lockImageStage = new File(filesDir, LOCK_WALLPAPER_STAGE);
+        boolean lockImageStageExists = lockImageStage.exists();
 
         // If we restored separate lock imagery, the system wallpaper should be
         // applied as system-only; but if there's no separate lock image, make
         // sure to apply the restored system wallpaper as both.
-        final int sysWhich = FLAG_SYSTEM | (lockImageStage.exists() ? 0 : FLAG_LOCK);
+        final int sysWhich = FLAG_SYSTEM | (lockImageStageExists ? 0 : FLAG_LOCK);
 
         try {
             // First parse the live component name so that we know for logging if we care about
@@ -374,11 +375,14 @@ public class WallpaperBackupAgent extends BackupAgent {
             // It is valid for the imagery to be absent; it means that we were not permitted
             // to back up the original image on the source device, or there was no user-supplied
             // wallpaper image present.
+
             restoreFromStage(imageStage, infoStage, "wp", sysWhich);
-            restoreFromStage(lockImageStage, infoStage, "kwp", FLAG_LOCK);
+            if (lockImageStageExists) {
+                restoreFromStage(lockImageStage, infoStage, "kwp", FLAG_LOCK);
+            }
 
             // And reset to the wallpaper service we should be using
-            updateWallpaperComponent(wpService, !lockImageStage.exists());
+            updateWallpaperComponent(wpService, !lockImageStageExists);
         } catch (Exception e) {
             Slog.e(TAG, "Unable to restore wallpaper: " + e.getMessage());
             mEventLogger.onRestoreException(e);
@@ -437,7 +441,8 @@ public class WallpaperBackupAgent extends BackupAgent {
                     // And log the success
                     if ((which & FLAG_SYSTEM) > 0) {
                         mEventLogger.onSystemImageWallpaperRestored();
-                    } else {
+                    }
+                    if ((which & FLAG_LOCK) > 0) {
                         mEventLogger.onLockImageWallpaperRestored();
                     }
                 }
@@ -460,7 +465,8 @@ public class WallpaperBackupAgent extends BackupAgent {
     private void logRestoreError(int which, String error) {
         if ((which & FLAG_SYSTEM) == FLAG_SYSTEM) {
             mEventLogger.onSystemImageWallpaperRestoreFailed(error);
-        } else if ((which & FLAG_LOCK) == FLAG_LOCK) {
+        }
+        if ((which & FLAG_LOCK) == FLAG_LOCK) {
             mEventLogger.onLockImageWallpaperRestoreFailed(error);
         }
     }
