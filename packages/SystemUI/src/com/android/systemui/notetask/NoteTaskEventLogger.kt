@@ -22,6 +22,8 @@ import com.android.systemui.notetask.NoteTaskEntryPoint.KEYBOARD_SHORTCUT
 import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
 import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
+import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE
+import com.android.systemui.notetask.NoteTaskEventLogger.NoteTaskUiEvent
 import com.android.systemui.notetask.NoteTaskEventLogger.NoteTaskUiEvent.NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE
 import com.android.systemui.notetask.NoteTaskEventLogger.NoteTaskUiEvent.NOTE_OPENED_VIA_SHORTCUT
 import com.android.systemui.notetask.NoteTaskEventLogger.NoteTaskUiEvent.NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON
@@ -41,40 +43,45 @@ class NoteTaskEventLogger @Inject constructor(private val uiEventLogger: UiEvent
     /** Logs a [NoteTaskInfo] as an **open** [NoteTaskUiEvent], including package name and uid. */
     fun logNoteTaskOpened(info: NoteTaskInfo) {
         val event =
-            when (info.entryPoint) {
-                TAIL_BUTTON -> {
-                    if (info.isKeyguardLocked) {
-                        NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON_LOCKED
-                    } else {
-                        NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON
+                when (info.entryPoint) {
+                    TAIL_BUTTON -> {
+                        if (info.isKeyguardLocked) {
+                            NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON_LOCKED
+                        } else {
+                            NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON
+                        }
                     }
+
+                    WIDGET_PICKER_SHORTCUT,
+                    WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE -> NOTE_OPENED_VIA_SHORTCUT
+
+                    QUICK_AFFORDANCE -> NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE
+                    APP_CLIPS,
+                    KEYBOARD_SHORTCUT,
+                    null -> return
                 }
-                WIDGET_PICKER_SHORTCUT -> NOTE_OPENED_VIA_SHORTCUT
-                QUICK_AFFORDANCE -> NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE
-                APP_CLIPS -> return
-                KEYBOARD_SHORTCUT -> return
-                null -> return
-            }
         uiEventLogger.log(event, info.uid, info.packageName)
     }
 
     /** Logs a [NoteTaskInfo] as a **closed** [NoteTaskUiEvent], including package name and uid. */
     fun logNoteTaskClosed(info: NoteTaskInfo) {
         val event =
-            when (info.entryPoint) {
-                TAIL_BUTTON -> {
-                    if (info.isKeyguardLocked) {
-                        NoteTaskUiEvent.NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON_LOCKED
-                    } else {
-                        NoteTaskUiEvent.NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON
+                when (info.entryPoint) {
+                    TAIL_BUTTON -> {
+                        if (info.isKeyguardLocked) {
+                            NoteTaskUiEvent.NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON_LOCKED
+                        } else {
+                            NoteTaskUiEvent.NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON
+                        }
                     }
+
+                    WIDGET_PICKER_SHORTCUT,
+                    WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE,
+                    QUICK_AFFORDANCE,
+                    APP_CLIPS,
+                    KEYBOARD_SHORTCUT,
+                    null -> return
                 }
-                WIDGET_PICKER_SHORTCUT -> return
-                QUICK_AFFORDANCE -> return
-                APP_CLIPS -> return
-                KEYBOARD_SHORTCUT -> return
-                null -> return
-            }
         uiEventLogger.log(event, info.uid, info.packageName)
     }
 
