@@ -1,6 +1,7 @@
 package com.android.systemui.keyguard
 
 import android.app.ActivityManager
+import android.app.WallpaperManager
 import android.app.WindowConfiguration
 import android.graphics.Point
 import android.graphics.Rect
@@ -64,6 +65,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock
     private lateinit var powerManager: PowerManager
+    @Mock
+    private lateinit var wallpaperManager: WallpaperManager
 
     @Mock
     private lateinit var launcherUnlockAnimationController: ILauncherUnlockAnimationController.Stub
@@ -94,13 +97,14 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController = KeyguardUnlockAnimationController(
             context, keyguardStateController, { keyguardViewMediator }, keyguardViewController,
             featureFlags, { biometricUnlockController }, statusBarStateController,
-            notificationShadeWindowController, powerManager
+            notificationShadeWindowController, powerManager, wallpaperManager
         )
         keyguardUnlockAnimationController.setLauncherUnlockController(
             launcherUnlockAnimationController)
 
         whenever(keyguardViewController.viewRootImpl).thenReturn(mock(ViewRootImpl::class.java))
         whenever(powerManager.isInteractive).thenReturn(true)
+        whenever(wallpaperManager.isLockscreenLiveWallpaperEnabled).thenReturn(false)
 
         // All of these fields are final, so we can't mock them, but are needed so that the surface
         // appear amount setter doesn't short circuit.
