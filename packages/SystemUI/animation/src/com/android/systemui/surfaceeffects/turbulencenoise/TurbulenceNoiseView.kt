@@ -215,10 +215,12 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
         noiseConfig = config
         with(turbulenceNoiseShader) {
             setGridCount(config.gridCount)
-            setColor(ColorUtils.setAlphaComponent(config.color, config.opacity))
+            setColor(config.color)
             setBackgroundColor(config.backgroundColor)
             setSize(config.width, config.height)
             setPixelDensity(config.pixelDensity)
+            setInverseNoiseLuminosity(inverse = false)
+            setLumaMatteFactors(config.lumaMatteBlendFactor, config.lumaMatteOverallBrightness)
         }
         paint.blendMode = config.blendMode
     }
