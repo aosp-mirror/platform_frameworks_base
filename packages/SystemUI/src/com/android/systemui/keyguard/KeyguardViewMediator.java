@@ -94,7 +94,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.window.IRemoteTransition;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -162,7 +161,6 @@ import dagger.Lazy;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
@@ -1913,19 +1911,19 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     public IRemoteAnimationRunner getExitAnimationRunner() {
-        return mExitAnimationRunner;
+        return validatingRemoteAnimationRunner(mExitAnimationRunner);
     }
 
     public IRemoteAnimationRunner getOccludeAnimationRunner() {
-        return mOccludeAnimationRunner;
+        return validatingRemoteAnimationRunner(mOccludeAnimationRunner);
     }
 
     public IRemoteAnimationRunner getOccludeByDreamAnimationRunner() {
-        return mOccludeByDreamAnimationRunner;
+        return validatingRemoteAnimationRunner(mOccludeByDreamAnimationRunner);
     }
 
     public IRemoteAnimationRunner getUnoccludeAnimationRunner() {
-        return mUnoccludeAnimationRunner;
+        return validatingRemoteAnimationRunner(mUnoccludeAnimationRunner);
     }
 
     public boolean isHiding() {
@@ -3439,6 +3437,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         Trace.traceCounter(Trace.TRACE_TAG_APP, "pendingLock", mPendingLock ? 1 : 0);
     }
 
+    private boolean isViewRootReady() {
+        return mKeyguardViewControllerLazy.get().getViewRootImpl() != null;
+    }
+
     public void addStateMonitorCallback(IKeyguardStateCallback callback) {
         synchronized (this) {
             mKeyguardStateCallbacks.add(callback);
@@ -3540,5 +3542,28 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             Log.d(TAG, "Occlude animation cancelled by WM.");
             mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_OCCLUSION);
         }
+    }
+
+    private IRemoteAnimationRunner validatingRemoteAnimationRunner(IRemoteAnimationRunner wrapped) {
+        return new IRemoteAnimationRunner.Stub() {
+            @Override
+            public void onAnimationCancelled() throws RemoteException {
+                wrapped.onAnimationCancelled();
+            }
+
+            @Override
+            public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                                         RemoteAnimationTarget[] wallpapers,
+                                         RemoteAnimationTarget[] nonApps,
+                                         IRemoteAnimationFinishedCallback finishedCallback)
+                    throws RemoteException {
+                if (!isViewRootReady()) {
+                    Log.w(TAG, "Skipping remote animation - view root not ready");
+                    return;
+                }
+
+                wrapped.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
+            }
+        };
     }
 }
