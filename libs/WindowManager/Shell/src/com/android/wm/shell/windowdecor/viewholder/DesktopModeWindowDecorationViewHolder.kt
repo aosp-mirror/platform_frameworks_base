@@ -4,7 +4,7 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.graphics.Color
 import android.view.View
-
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 /**
  * Encapsulates the root [View] of a window decoration and its children to facilitate looking up
  * children (via findViewById) and updating to the latest data from [RunningTaskInfo].
@@ -23,6 +23,10 @@ internal abstract class DesktopModeWindowDecorationViewHolder(rootView: View) {
      * with the caption background color.
      */
     protected fun shouldUseLightCaptionColors(taskInfo: RunningTaskInfo): Boolean {
-        return Color.valueOf(taskInfo.taskDescription.statusBarColor).luminance() < 0.5
+        return if (Color.alpha(taskInfo.taskDescription.statusBarColor) != 0) {
+            Color.valueOf(taskInfo.taskDescription.statusBarColor).luminance() < 0.5
+        } else {
+            taskInfo.taskDescription.statusBarAppearance and APPEARANCE_LIGHT_STATUS_BARS == 0
+        }
     }
 }
