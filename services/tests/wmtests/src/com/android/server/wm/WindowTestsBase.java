@@ -71,6 +71,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -944,6 +945,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mWm.stopFreezingDisplayLocked();
         // The rotation animation won't actually play, it needs to be cleared manually.
         dc.setRotationAnimation(null);
+    }
+
+    static void resizeDisplay(DisplayContent displayContent, int width, int height) {
+        displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity,
+                displayContent.mBaseDisplayPhysicalXDpi, displayContent.mBaseDisplayPhysicalYDpi);
+        final Configuration c = new Configuration();
+        displayContent.computeScreenConfiguration(c);
+        displayContent.onRequestedOverrideConfigurationChanged(c);
     }
 
     // The window definition for UseTestDisplay#addWindows. The test can declare to add only
