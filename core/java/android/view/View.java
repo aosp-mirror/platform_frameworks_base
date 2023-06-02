@@ -9137,8 +9137,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final AccessibilityNodeInfo info = createAccessibilityNodeInfo();
             structure.setChildCount(1);
             final ViewStructure root = structure.newChild(0);
-            populateVirtualStructure(root, provider, info, forAutofill);
-            info.recycle();
+            if (info != null) {
+                populateVirtualStructure(root, provider, info, forAutofill);
+                info.recycle();
+            } else {
+                Log.w(AUTOFILL_LOG_TAG, "AccessibilityNodeInfo is null.");
+            }
         }
     }
 
