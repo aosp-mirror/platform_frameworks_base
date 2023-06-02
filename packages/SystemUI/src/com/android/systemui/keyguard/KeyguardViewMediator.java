@@ -45,6 +45,7 @@ import android.app.AlarmManager;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.WallpaperManager;
 import android.app.WindowConfiguration;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
@@ -280,6 +281,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
+    private WallpaperManager mWallpaperManager;
     private final IStatusBarService mStatusBarService;
     private final IBinder mStatusBarDisableToken = new Binder();
     private final UserTracker mUserTracker;
@@ -1350,11 +1352,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             setShowingLocked(false /* showing */, true /* forceCallbacks */);
         }
 
+        boolean isLockscreenLwpEnabled = getWallpaperManager().isLockscreenLiveWallpaperEnabled();
         mKeyguardTransitions.register(
-                KeyguardService.wrap(getExitAnimationRunner()),
-                KeyguardService.wrap(getOccludeAnimationRunner()),
-                KeyguardService.wrap(getOccludeByDreamAnimationRunner()),
-                KeyguardService.wrap(getUnoccludeAnimationRunner()));
+                KeyguardService.wrap(getExitAnimationRunner(), isLockscreenLwpEnabled),
+                KeyguardService.wrap(getOccludeAnimationRunner(), isLockscreenLwpEnabled),
+                KeyguardService.wrap(getOccludeByDreamAnimationRunner(), isLockscreenLwpEnabled),
+                KeyguardService.wrap(getUnoccludeAnimationRunner(), isLockscreenLwpEnabled));
 
         final ContentResolver cr = mContext.getContentResolver();
 
@@ -1398,6 +1401,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 com.android.internal.R.anim.lock_screen_behind_enter);
 
         mWorkLockController = new WorkLockActivityController(mContext, mUserTracker);
+    }
+
+    // TODO(b/273443374) remove, temporary util to get a feature flag
+    private WallpaperManager getWallpaperManager() {
+        if (mWallpaperManager == null) {
+            mWallpaperManager = mContext.getSystemService(WallpaperManager.class);
+        }
+        return mWallpaperManager;
     }
 
     @Override
