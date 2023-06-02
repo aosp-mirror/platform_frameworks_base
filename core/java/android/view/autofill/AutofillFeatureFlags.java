@@ -292,6 +292,9 @@ public class AutofillFeatureFlags {
     private static final String DEFAULT_AFAA_NON_AUTOFILLABLE_IME_ACTIONS = "3,4";
     private static final boolean DEFAULT_AFAA_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES = true;
     private static final boolean DEFAULT_AFAA_SHOULD_ENABLE_MULTILINE_FILTER = true;
+    private static final boolean
+            DEFAULT_AFAA_SHOULD_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE = true;
+    // END AUTOFILL FOR ALL APPS DEFAULTS
 
     private AutofillFeatureFlags() {};
 
@@ -447,7 +450,8 @@ public class AutofillFeatureFlags {
     public static boolean shouldIncludeAllViewsAutofillTypeNotNoneInAssistStructrue() {
         return DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_AUTOFILL,
-            DEVICE_CONFIG_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE, false);
+            DEVICE_CONFIG_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE,
+            DEFAULT_AFAA_SHOULD_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE);
     }
 
     /**
