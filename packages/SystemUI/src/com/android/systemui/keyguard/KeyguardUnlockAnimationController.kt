@@ -51,6 +51,7 @@ import com.android.systemui.shared.system.smartspace.SmartspaceState
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
+import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -173,7 +174,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         @JvmDefault
         fun onUnlockAnimationStarted(
             playingCannedAnimation: Boolean,
-            fromWakeAndUnlock: Boolean,
+            isWakeAndUnlockNotFromDream: Boolean,
             unlockAnimationStartDelay: Long,
             unlockAnimationDuration: Long
         ) {}
@@ -590,10 +591,13 @@ class KeyguardUnlockAnimationController @Inject constructor(
             playCannedUnlockAnimation()
         }
 
+        // Notify if waking from AOD only
+        val isWakeAndUnlockNotFromDream = biometricUnlockControllerLazy.get().isWakeAndUnlock &&
+            biometricUnlockControllerLazy.get().mode != MODE_WAKE_AND_UNLOCK_FROM_DREAM
         listeners.forEach {
             it.onUnlockAnimationStarted(
                 playingCannedUnlockAnimation /* playingCannedAnimation */,
-                biometricUnlockControllerLazy.get().isWakeAndUnlock /* isWakeAndUnlock */,
+                isWakeAndUnlockNotFromDream /* isWakeAndUnlockNotFromDream */,
                 CANNED_UNLOCK_START_DELAY /* unlockStartDelay */,
                 LAUNCHER_ICONS_ANIMATION_DURATION_MS /* unlockAnimationDuration */) }
 
