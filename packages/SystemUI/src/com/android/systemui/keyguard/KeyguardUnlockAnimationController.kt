@@ -206,6 +206,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
     var playingCannedUnlockAnimation = false
 
     /**
+     * Whether we reached the swipe gesture threshold to dismiss keyguard, or restore it, once
+     * and should ignore any future changes to the dismiss amount before the animation finishes.
+     */
+    var dismissAmountThresholdsReached = false
+
+    /**
      * Remote callback provided by Launcher that allows us to control the Launcher's unlock
      * animation and smartspace.
      *
@@ -649,6 +655,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
     @VisibleForTesting
     fun unlockToLauncherWithInWindowAnimations() {
+        surfaceBehindAlpha = 1f
         setSurfaceBehindAppearAmount(1f, wallpapers = false)
 
         try {
@@ -762,6 +769,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return
         }
 
+        if (dismissAmountThresholdsReached) {
+            return
+        }
+
         if (!keyguardStateController.isShowing) {
             return
         }
@@ -793,6 +804,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return
         }
 
+        // no-op if we alreaddy reached a threshold.
+        if (dismissAmountThresholdsReached) {
+            return
+        }
+
         // no-op if animation is not requested yet.
         if (!keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard() ||
                 !keyguardViewMediator.get().isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe) {
@@ -807,6 +823,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                         !keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture &&
                         dismissAmount >= DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD)) {
             setSurfaceBehindAppearAmount(1f)
+            dismissAmountThresholdsReached = true
             keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                     false /* cancelled */)
         }
@@ -941,6 +958,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         wallpaperTargets = null
 
         playingCannedUnlockAnimation = false
+        dismissAmountThresholdsReached = false
         willUnlockWithInWindowLauncherAnimations = false
         willUnlockWithSmartspaceTransition = false
 
