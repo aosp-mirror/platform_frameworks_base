@@ -163,16 +163,22 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         // Re-populate the top callback to WM if the removed callback was previously the top one.
         if (previousTopCallback == callback) {
             // We should call onBackCancelled() when an active callback is removed from dispatcher.
-            if (mProgressAnimator.isBackAnimationInProgress()
-                    && callback instanceof OnBackAnimationCallback) {
-                // The ProgressAnimator will handle the new topCallback, so we don't want to call
-                // onBackCancelled() on it. We call immediately the callback instead.
-                OnBackAnimationCallback animatedCallback = (OnBackAnimationCallback) callback;
-                animatedCallback.onBackCancelled();
-                Log.d(TAG, "The callback was removed while a back animation was in progress, "
-                        + "an onBackCancelled() was dispatched.");
-            }
+            sendCancelledIfInProgress(callback);
             setTopOnBackInvokedCallback(getTopCallback());
+        }
+    }
+
+    private void sendCancelledIfInProgress(@NonNull OnBackInvokedCallback callback) {
+        boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
+        if (isInProgress && callback instanceof OnBackAnimationCallback) {
+            OnBackAnimationCallback animatedCallback = (OnBackAnimationCallback) callback;
+            animatedCallback.onBackCancelled();
+            if (DEBUG) {
+                Log.d(TAG, "sendCancelIfRunning: callback canceled");
+            }
+        } else {
+            Log.w(TAG, "sendCancelIfRunning: isInProgress=" + isInProgress
+                    + "callback=" + callback);
         }
     }
 
@@ -188,9 +194,20 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             mImeDispatcher = null;
         }
         if (!mAllCallbacks.isEmpty()) {
+            OnBackInvokedCallback topCallback = getTopCallback();
+            if (topCallback != null) {
+                sendCancelledIfInProgress(topCallback);
+            } else {
+                // Should not be possible
+                Log.e(TAG, "There is no topCallback, even if mAllCallbacks is not empty");
+            }
             // Clear binder references in WM.
             setTopOnBackInvokedCallback(null);
         }
+
+        // We should also stop running animations since all callbacks have been removed.
+        // note: mSpring.skipToEnd(), in ProgressAnimator.reset(), requires the main handler.
+        Handler.getMain().post(mProgressAnimator::reset);
         mAllCallbacks.clear();
         mOnBackInvokedCallbacks.clear();
     }
@@ -342,10 +359,15 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackInvoked() throws RemoteException {
             Handler.getMain().post(() -> {
+                boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
                 mProgressAnimator.reset();
                 final OnBackInvokedCallback callback = mCallbackRef.get();
                 if (callback == null) {
                     Log.d(TAG, "Trying to call onBackInvoked() on a null callback reference.");
+                    return;
+                }
+                if (callback instanceof OnBackAnimationCallback && !isInProgress) {
+                    Log.w(TAG, "ProgressAnimator was not in progress, skip onBackInvoked().");
                     return;
                 }
                 callback.onBackInvoked();
