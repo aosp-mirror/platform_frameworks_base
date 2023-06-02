@@ -63,6 +63,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.classifier.Classifier;
@@ -958,6 +959,7 @@ public class QuickSettingsController implements Dumpable {
         // TODO (b/265193930): remove dependency on NPVC
         mPanelViewControllerLazy.get().cancelHeightAnimator();
         // end
+        DejankUtils.notifyRendererOfExpensiveFrame(mPanelView, "onExpansionStarted");
 
         // Reset scroll position and apply that position to the expanded height.
         float height = mExpansionHeight;
