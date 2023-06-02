@@ -19,6 +19,7 @@ package com.android.systemui.keyguard;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
@@ -182,8 +183,8 @@ public class KeyguardService extends Service {
 
     // Wrap Keyguard going away animation.
     // Note: Also used for wrapping occlude by Dream animation. It works (with some redundancy).
-    public static IRemoteTransition wrap(IRemoteAnimationRunner runner,
-            boolean lockscreenLiveWallpaperEnabled) {
+    public static IRemoteTransition wrap(final KeyguardViewMediator keyguardViewMediator,
+        final IRemoteAnimationRunner runner, final boolean lockscreenLiveWallpaperEnabled) {
         return new IRemoteTransition.Stub() {
 
             private final ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = new ArrayMap<>();
@@ -239,6 +240,12 @@ public class KeyguardService extends Service {
                     SurfaceControl.Transaction candidateT, IBinder currentTransition,
                     IRemoteTransitionFinishedCallback candidateFinishCallback)
                     throws RemoteException {
+                if ((candidateInfo.getFlags() & TRANSIT_FLAG_KEYGUARD_APPEARING) != 0) {
+                    keyguardViewMediator.setPendingLock(true);
+                    keyguardViewMediator.cancelKeyguardExitAnimation();
+                    return;
+                }
+
                 try {
                     synchronized (mLeashMap) {
                         runner.onAnimationCancelled();
