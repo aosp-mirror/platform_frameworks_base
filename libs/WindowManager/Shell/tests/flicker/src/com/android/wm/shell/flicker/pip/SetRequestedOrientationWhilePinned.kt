@@ -50,41 +50,41 @@ open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransit
     private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
     private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
 
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup {
-                // Launch the PiP activity fixed as landscape.
-                pipApp.launchViaIntent(
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions {
+            // Launch the activity back into fullscreen and ensure that it is now in landscape
+            pipApp.launchViaIntent(wmHelper)
+            // System bar may fade out during fixed rotation.
+            wmHelper
+                .StateSyncBuilder()
+                .withFullScreenApp(pipApp)
+                .withRotation(Rotation.ROTATION_90)
+                .withNavOrTaskBarVisible()
+                .withStatusBarVisible()
+                .waitForAndVerify()
+        }
+    }
+
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            // Launch the PiP activity fixed as landscape.
+            pipApp.launchViaIntent(
                     wmHelper,
                     stringExtras =
-                        mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString())
-                )
-                // Enter PiP.
-                broadcastActionTrigger.doAction(ActivityOptions.Pip.ACTION_ENTER_PIP)
-                // System bar may fade out during fixed rotation.
-                wmHelper
+                    mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString())
+            )
+            // Enter PiP.
+            broadcastActionTrigger.doAction(ActivityOptions.Pip.ACTION_ENTER_PIP)
+            // System bar may fade out during fixed rotation.
+            wmHelper
                     .StateSyncBuilder()
                     .withPipShown()
                     .withRotation(Rotation.ROTATION_0)
                     .withNavOrTaskBarVisible()
                     .withStatusBarVisible()
                     .waitForAndVerify()
-            }
-            teardown { pipApp.exit(wmHelper) }
-            transitions {
-                // Launch the activity back into fullscreen and ensure that it is now in landscape
-                pipApp.launchViaIntent(wmHelper)
-                // System bar may fade out during fixed rotation.
-                wmHelper
-                    .StateSyncBuilder()
-                    .withFullScreenApp(pipApp)
-                    .withRotation(Rotation.ROTATION_90)
-                    .withNavOrTaskBarVisible()
-                    .withStatusBarVisible()
-                    .waitForAndVerify()
-            }
         }
+    }
 
     /**
      * This test is not compatible with Tablets. When using [Activity.setRequestedOrientation] to
