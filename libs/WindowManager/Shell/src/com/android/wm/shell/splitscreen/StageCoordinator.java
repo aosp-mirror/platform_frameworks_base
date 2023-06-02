@@ -24,7 +24,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -2407,7 +2406,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (change.getMode() == TRANSIT_CHANGE
                         && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
                     mSplitLayout.update(startTransaction);
-                    record.mContainDisplayChange = true;
                 }
 
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
@@ -2439,8 +2437,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 final StageTaskListener stage = getStageOfTask(taskInfo);
                 if (stage == null) {
                     if (change.getParent() == null && !isClosingType(change.getMode())
-                            && taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
-                        record.mContainShowPipChange = true;
+                            && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+                        record.mContainShowFullscreenChange = true;
                     }
                     continue;
                 }
@@ -2459,15 +2457,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             }
             final ArraySet<StageTaskListener> dismissStages = record.getShouldDismissedStage();
-            if (!record.mContainDisplayChange && record.mContainShowPipChange) {
-                // This occurred when split enter pip by open another fullscreen app so let
-                // pip tranistion handler to handle this but also start our dismiss transition.
-                // TODO(b/282894249): Should improve this case animation on pip.
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
-                mSplitTransitions.startDismissTransition(wct, this, STAGE_TYPE_UNDEFINED,
-                        EXIT_REASON_CHILD_TASK_ENTER_PIP);
-            } else if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0
+            if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0
                     || dismissStages.size() == 1) {
                 // If the size of dismissStages == 1, one of the task is closed without prepare
                 // pending transition, which could happen if all activities were finished after
@@ -2480,9 +2470,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 final int dismissTop = (dismissStages.size() == 1
                         && getStageType(dismissStages.valueAt(0)) == STAGE_TYPE_MAIN)
                         || mMainStage.getChildCount() == 0 ? STAGE_TYPE_SIDE : STAGE_TYPE_MAIN;
-                prepareExitSplitScreen(dismissTop, wct);
+                // If there is a fullscreen opening change, we should not bring stage to top.
+                prepareExitSplitScreen(record.mContainShowFullscreenChange
+                        ? STAGE_TYPE_UNDEFINED : dismissTop, wct);
                 mSplitTransitions.startDismissTransition(wct, this, dismissTop,
-                        EXIT_REASON_UNKNOWN);
+                        EXIT_REASON_APP_FINISHED);
                 // This can happen in some pathological cases. For example:
                 // 1. main has 2 tasks [Task A (Single-task), Task B], side has one task [Task C]
                 // 2. Task B closes itself and starts Task A in LAUNCH_ADJACENT at the same time
@@ -2506,8 +2498,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     static class StageChangeRecord {
-        boolean mContainDisplayChange = false;
-        boolean mContainShowPipChange = false;
+        boolean mContainShowFullscreenChange = false;
         static class StageChange {
             final StageTaskListener mStageTaskListener;
             final IntArray mAddedTaskId = new IntArray();
