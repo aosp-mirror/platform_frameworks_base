@@ -16,6 +16,7 @@
 
 package com.android.dynsystem;
 
+import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_KEYGUARD_DISMISSED;
 import static android.os.image.DynamicSystemClient.KEY_KEYGUARD_USE_DEFAULT_STRINGS;
 
 import android.app.Activity;
@@ -83,9 +84,17 @@ public class VerificationActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             startInstallationService();
+        } else {
+            notifyKeyguardDismissed();
         }
 
         finish();
+    }
+
+    private void notifyKeyguardDismissed() {
+        Intent intent = new Intent(this, DynamicSystemInstallationService.class);
+        intent.setAction(ACTION_NOTIFY_KEYGUARD_DISMISSED);
+        startServiceAsUser(intent, UserHandle.SYSTEM);
     }
 
     private void startInstallationService() {
