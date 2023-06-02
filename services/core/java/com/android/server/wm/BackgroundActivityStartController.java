@@ -509,6 +509,7 @@ public class BackgroundActivityStartController {
                 + "; intent: " + intent
                 + "; callerApp: " + callerApp
                 + "; inVisibleTask: " + (callerApp != null && callerApp.hasActivityInVisibleTask())
+                + "; resultIfPiSenderAllowsBal: " + balCodeToString(resultIfPiSenderAllowsBal)
                 + "]";
         if (resultIfPiSenderAllowsBal != BAL_BLOCK) {
             // We should have returned before if !logVerdictChangeByPiDefaultChange
