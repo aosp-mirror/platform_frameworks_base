@@ -55,13 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center">
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/biometric_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:contentDescription="@null"
-            android:scaleType="fitXY" />
+        <include layout="@layout/auth_biometric_icon"/>
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/biometric_icon_overlay"

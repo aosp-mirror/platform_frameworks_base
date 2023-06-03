@@ -224,7 +224,7 @@ object UserSwitcherViewBinder {
                     }
             sectionView.removeAllViewsInLayout()
 
-            for (viewModel in section) {
+            section.onEachIndexed { index, viewModel ->
                 val view =
                     layoutInflater.inflate(
                         R.layout.user_switcher_fullscreen_popup_item,
@@ -237,6 +237,13 @@ object UserSwitcherViewBinder {
                     view.resources.getString(viewModel.textResourceId)
                 view.setOnClickListener { viewModel.onClicked() }
                 sectionView.addView(view)
+                // Ensure that the first item in the first section gets accessibility focus.
+                // Request for focus with a delay when view is inflated an added to the listview.
+                if (index == 0 && position == 0) {
+                    view.postDelayed({
+                        view.requestAccessibilityFocus()
+                    }, 200)
+                }
             }
             return sectionView
         }

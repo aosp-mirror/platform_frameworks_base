@@ -63,9 +63,7 @@ class AppListPageTest {
     fun canShowSystem() {
         val inputState by setContent()
 
-        composeTestRule.onNodeWithContentDescription(
-            context.getString(R.string.abc_action_menu_overflow_description)
-        ).performClick()
+        onMoreOptions().performClick()
         composeTestRule.onNodeWithText(context.getString(R.string.menu_show_system)).performClick()
 
         val state = inputState!!.state
@@ -75,20 +73,32 @@ class AppListPageTest {
     @Test
     fun afterShowSystem_displayHideSystem() {
         setContent()
-        composeTestRule.onNodeWithContentDescription(
-            context.getString(R.string.abc_action_menu_overflow_description)
-        ).performClick()
+        onMoreOptions().performClick()
         composeTestRule.onNodeWithText(context.getString(R.string.menu_show_system)).performClick()
 
-        composeTestRule.onNodeWithContentDescription(
-            context.getString(R.string.abc_action_menu_overflow_description)
-        ).performClick()
+        onMoreOptions().performClick()
 
         composeTestRule.onNodeWithText(context.getString(R.string.menu_hide_system))
             .assertIsDisplayed()
     }
 
+    @Test
+    fun noMoreOptions_notDisplayMoreOptions() {
+        setContent(noMoreOptions = true)
+
+        onMoreOptions().assertDoesNotExist()
+    }
+
+    @Test
+    fun noMoreOptions_showSystemIsFalse() {
+        val inputState by setContent(noMoreOptions = true)
+
+        val state = inputState!!.state
+        assertThat(state.showSystem.value).isFalse()
+    }
+
     private fun setContent(
+        noMoreOptions: Boolean = false,
         header: @Composable () -> Unit = {},
     ): State<AppListInput<TestAppRecord>?> {
         val appListState = mutableStateOf<AppListInput<TestAppRecord>?>(null)
@@ -96,12 +106,18 @@ class AppListPageTest {
             AppListPage(
                 title = TITLE,
                 listModel = TestAppListModel(),
+                noMoreOptions = noMoreOptions,
                 header = header,
                 appList = { appListState.value = this },
             )
         }
         return appListState
     }
+
+    private fun onMoreOptions() =
+        composeTestRule.onNodeWithContentDescription(
+            context.getString(R.string.abc_action_menu_overflow_description)
+        )
 
     private companion object {
         const val TITLE = "Title"

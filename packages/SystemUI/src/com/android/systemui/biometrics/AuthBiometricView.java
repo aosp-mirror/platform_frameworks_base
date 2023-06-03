@@ -961,6 +961,10 @@ public abstract class AuthBiometricView extends LinearLayout implements AuthBiom
         return Utils.isDeviceCredentialAllowed(mPromptInfo);
     }
 
+    public LottieAnimationView getIconView() {
+        return mIconView;
+    }
+
     @AuthDialog.DialogSize int getSize() {
         return mSize;
     }
