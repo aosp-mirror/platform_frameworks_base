@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"အခြားလက်ဗွေဖြင့် စမ်းကြည့်ပါ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"အလွန် လင်းသည်"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ပြင်ဆင်ကြည့်ပါ"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"အကြိမ်တိုင်း လက်ချောင်းအနေအထားကို အနည်းငယ်ပြောင်းပါ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"လက်ချောင်းအနေအထား နည်းနည်းစီ ပြောင်းပါ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"လက်ဗွေကို မသိရှိပါ"</string>
@@ -639,8 +639,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"အလွန်မှောင်သည်။ ပိုလင်းအောင် လုပ်ကြည့်ပါ။"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"ဖုန်းကို အဝေးသို့ခွာပါ။"</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"ဖုန်းကို အနားသို့ ပိုတိုးပါ။"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ဖုန်းကို ပိုမြှင့်လိုက်ပါ။"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ဖုန်းကို အောက်သို့နှိမ့်ပါ။"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"ဖုန်းကို မြှင့်လိုက်ပါ။"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"ဖုန်းကို နှိမ့်လိုက်ပါ။"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"ဖုန်းကို ဘယ်ဘက်သို့ရွှေ့ပါ။"</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"ဖုန်းကို ညာဘက်သို့ ရွှေ့ပါ။"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"သင့်စက်ပစ္စည်းကို တည့်တည့်ကြည့်ပါ။"</string>
@@ -1697,7 +1697,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ဖြတ်လမ်းလင့်ခ်ကို ပိတ်ရန်"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ဖြတ်လမ်းလင့်ခ်ကို သုံးရန်"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"အရောင်ပြောင်းပြန်ပြုလုပ်ခြင်း"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"အရောင်ပြင်ဆင်ခြင်း"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"အရောင်ပြင်ခြင်း"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"လက်တစ်ဖက်သုံးမုဒ်"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ပိုမှိန်ခြင်း"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်လိုက်သည်။"</string>

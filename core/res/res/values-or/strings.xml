@@ -1014,7 +1014,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"ଏହି ପୃଷ୍ଠାରୁ ବାହାରିଯାଆନ୍ତୁ"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ଏହି ପୃଷ୍ଠାରେ ରୁହନ୍ତୁ"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nଆପଣ କ’ଣ ପ୍ରକୃତରେ ଏହି ପୃଷ୍ଠାରୁ ଦୂରକୁ ନେଭିଗେଟ୍‍ କରିବାକୁ ଚାହୁଁଛନ୍ତି?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"ନିଶ୍ଚିତ କରନ୍ତୁ"</string>
+    <string name="save_password_label" msgid="9161712335355510035">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"ଧ୍ୟାନଦିଅନ୍ତୁ: ଜୁମ୍‌ ଇନ୍‍ ଓ ଆଉଟ୍‍ କରିବା ପାଇଁ ଡବଲ୍‍-ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ସ୍ୱତଃପୂରଣ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ଅଟୋଫିଲ୍ ସେଟ୍ କରନ୍ତୁ"</string>
@@ -1068,7 +1068,7 @@
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"ସ୍ପେସ୍‍"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"ଏଣ୍ଟର୍"</string>
-    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
+    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="search_go" msgid="2141477624421347086">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="search_hint" msgid="455364685740251925">"ସର୍ଚ୍ଚ କରନ୍ତୁ…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
@@ -1134,7 +1134,7 @@
     <string name="paste" msgid="461843306215520225">"ପେଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"ସାଦା ଟେକ୍ସଟ୍‍ ଭାବରେ ପେଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="replace" msgid="7842675434546657444">"ବଦଳାନ୍ତୁ…"</string>
-    <string name="delete" msgid="1514113991712129054">"ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
+    <string name="delete" msgid="1514113991712129054">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URL କପି କରନ୍ତୁ"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"ଟେକ୍ସଟ୍‍ ଚୟନ କରନ୍ତୁ"</string>
     <string name="undo" msgid="3175318090002654673">"ପୂର୍ବ ପରି କରନ୍ତୁ"</string>
@@ -1142,7 +1142,7 @@
     <string name="autofill" msgid="511224882647795296">"ଅଟୋଫିଲ୍‌"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"ଟେକ୍ସଟ୍‍ ଚୟନ"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"ଶବ୍ଦକୋଷରେ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="deleteText" msgid="4200807474529938112">"ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
+    <string name="deleteText" msgid="4200807474529938112">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ଟେକ୍ସଟ୍‌ କାର୍ଯ୍ୟ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ପଛକୁ ଫେରନ୍ତୁ"</string>
@@ -1357,7 +1357,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ଯୋଡ଼ାଯାଇଥିବା ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଛି। ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ଆନାଲଗ୍‍ ଅଡିଓ ଆକ୍ସେସରୀ ଚିହ୍ନଟ ହେଲା"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ଏହି ଫୋନ୍‌ରେ କନେକ୍ଟ ଥିବା ଡିଭାଇସ୍‍ କମ୍ପାଟିବଲ୍‍ ନୁହେଁ। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ।"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ଡିବଗିଂ କନେକ୍ଟ କରାଯାଇଛି"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ଡିବଗିଂ କନେକ୍ଟ ହୋଇଛି"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ଡିବଗିଂକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ଡିବଗିଙ୍ଗକୁ ଅକ୍ଷମ କରିବା ପାଇଁ ଚୟନ କରନ୍ତୁ।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ୱାୟାରଲେସ୍ ଡିବଗିଂ ସଂଯୋଗ କରାଯାଇଛି"</string>
@@ -1500,7 +1500,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ଡ୍ରାଇଭିଙ୍ଗ ଆପ୍‌ରୁ ବାହାରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="back_button_label" msgid="4078224038025043387">"ଫେରନ୍ତୁ"</string>
     <string name="next_button_label" msgid="6040209156399907780">"ପରବର୍ତ୍ତୀ"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"ଛାଡ଼ିଦିଅନ୍ତୁ"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"ବାଦ ଦିଅନ୍ତୁ"</string>
     <string name="no_matches" msgid="6472699895759164599">"କୌଣସି ମେଳକ ନାହିଁ"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ପୃଷ୍ଠାରେ ଖୋଜନ୍ତୁ"</string>
     <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{#ଟି ମେଳ}other{{total}ଟିରୁ #ଟି ମେଳ}}"</string>
@@ -1544,7 +1544,7 @@
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"ପରବର୍ତ୍ତୀ ମାସ"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"ALT"</string>
     <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"ବାତିଲ କରନ୍ତୁ"</string>
-    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
+    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"ହୋଇଗଲା"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"ମୋଡ୍‍ ପରିବର୍ତ୍ତନ"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"ଶିଫ୍ଟ"</string>
@@ -1650,7 +1650,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"ଅନଲକ୍‌ କରିବା ପାଇଁ, ଆପଣଙ୍କ Google ଆକାଉଣ୍ଟ ସହ ସାଇନ୍-ଇନ୍ କରନ୍ତୁ।"</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"ୟୁଜରନେମ୍‍ (ଇମେଲ୍)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"ପାସୱାର୍ଡ"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"ସାଇନ୍-ଇନ୍"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"ସାଇନ ଇନ କରନ୍ତୁ"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"ଅମାନ୍ୟ ୟୁଜରନେମ୍‍ କିମ୍ୱା ପାସ୍‌ୱର୍ଡ।"</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"ଆପଣଙ୍କର ୟୁଜରନେମ୍‍ କିମ୍ୱା ପାସ୍‌ୱର୍ଡ ଭୁଲି ଯାଇଛନ୍ତି କି?\n"<b>"google.com/accounts/recovery"</b>" ଭିଜିଟ୍‍ କରନ୍ତୁ।"</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"ଆକାଉଣ୍ଟ ଯାଞ୍ଚ କରାଯାଉଛି…"</string>
