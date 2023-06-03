@@ -137,6 +137,19 @@ constructor(
 
             updateTextColorFromWallpaper()
             statusBarStateListener.onDozeAmountChanged(0f, statusBarStateController.dozeAmount)
+
+            if (regionSamplingEnabled && (!regionSamplers.containsKey(v))) {
+                var regionSampler = RegionSampler(
+                        v as View,
+                        uiExecutor,
+                        bgExecutor,
+                        regionSamplingEnabled,
+                        isLockscreen = true,
+                ) { updateTextColorFromRegionSampler() }
+                initializeTextColors(regionSampler)
+                regionSamplers[v] = regionSampler
+                regionSampler.startRegionSampler()
+            }
         }
 
         override fun onViewDetachedFromWindow(v: View) {
@@ -171,23 +184,6 @@ constructor(
 
         val filteredTargets = targets.filter(::filterSmartspaceTarget)
         plugin?.onTargetsAvailable(filteredTargets)
-        if (!isRegionSamplersCreated) {
-            for (v in smartspaceViews) {
-                if (regionSamplingEnabled) {
-                    var regionSampler = RegionSampler(
-                        v as View,
-                        uiExecutor,
-                        bgExecutor,
-                        regionSamplingEnabled,
-                        isLockscreen = true,
-                    ) { updateTextColorFromRegionSampler() }
-                    initializeTextColors(regionSampler)
-                    regionSamplers[v] = regionSampler
-                    regionSampler.startRegionSampler()
-                }
-            }
-            isRegionSamplersCreated = true
-        }
     }
 
     private val userTrackerCallback = object : UserTracker.Callback {
