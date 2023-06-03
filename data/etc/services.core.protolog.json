@@ -3379,6 +3379,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "975028389": {
+      "message": "unable to call receiver for empty keyboard shortcuts",
+      "level": "ERROR",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "975275467": {
       "message": "Set animatingExit: reason=remove\/isAnimating win=%s",
       "level": "VERBOSE",

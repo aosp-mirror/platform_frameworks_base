@@ -1384,13 +1384,26 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED";
 
     /**
-     * Request for keyboard shortcuts to be retrieved asynchronously.
+     * Request for app's keyboard shortcuts to be retrieved asynchronously.
      *
      * @param receiver The callback to be triggered when the result is ready.
+     * @param deviceId The deviceId of KeyEvent by which this request is triggered, or -1 if it's
+     *                 not triggered by a KeyEvent.
      *
      * @hide
      */
     public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver, int deviceId);
+
+    /**
+     * Request for ime's keyboard shortcuts to be retrieved asynchronously.
+     *
+     * @param receiver The callback to be triggered when the result is ready.
+     * @param deviceId The deviceId of KeyEvent by which this request is triggered, or -1 if it's
+     *                 not triggered by a KeyEvent.
+     *
+     * @hide
+     */
+    default void requestImeKeyboardShortcuts(KeyboardShortcutsReceiver receiver, int deviceId) {};
 
     /**
      * Return the touch region for the current IME window, or an empty region if there is none.
