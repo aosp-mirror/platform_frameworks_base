@@ -204,6 +204,17 @@ public class RecordingServiceTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnSystemRequestedStop_recorderEndThrowsRuntimeException_showsErrorNotification()
+            throws IOException {
+        doReturn(true).when(mController).isRecording();
+        doThrow(new RuntimeException()).when(mScreenMediaRecorder).end();
+
+        mRecordingService.onStopped();
+
+        verify(mRecordingService).createErrorNotification();
+    }
+
+    @Test
     public void testOnSystemRequestedStop_recorderEndThrowsOOMError_releasesRecording()
             throws IOException {
         doReturn(true).when(mController).isRecording();

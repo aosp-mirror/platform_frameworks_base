@@ -1417,21 +1417,19 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * will be called.
      */
     @Override
-    void animateValuesInRange(long currentPlayTime, long lastPlayTime, boolean notify) {
+    void animateValuesInRange(long currentPlayTime, long lastPlayTime) {
         if (currentPlayTime < 0 || lastPlayTime < -1) {
             throw new UnsupportedOperationException("Error: Play time should never be negative.");
         }
 
         initAnimation();
         long duration = getTotalDuration();
-        if (notify) {
-            if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
-                notifyStartListeners(false);
-            } else if (lastPlayTime > duration
-                    || (lastPlayTime == duration && currentPlayTime < duration)
-            ) {
-                notifyStartListeners(true);
-            }
+        if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
+            notifyStartListeners(false);
+        } else if (lastPlayTime > duration
+                || (lastPlayTime == duration && currentPlayTime < duration)
+        ) {
+            notifyStartListeners(true);
         }
         if (duration >= 0) {
             lastPlayTime = Math.min(duration, lastPlayTime);
@@ -1448,7 +1446,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             iteration = Math.min(iteration, mRepeatCount);
             lastIteration = Math.min(lastIteration, mRepeatCount);
 
-            if (notify && iteration != lastIteration) {
+            if (iteration != lastIteration) {
                 notifyListeners(AnimatorCaller.ON_REPEAT, false);
             }
         }
@@ -1464,7 +1462,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     }
 
     @Override
-    void animateSkipToEnds(long currentPlayTime, long lastPlayTime, boolean notify) {
+    void animateSkipToEnds(long currentPlayTime, long lastPlayTime) {
         boolean inReverse = currentPlayTime < lastPlayTime;
         boolean doSkip;
         if (currentPlayTime <= 0 && lastPlayTime > 0) {
@@ -1474,13 +1472,9 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             doSkip = duration >= 0 && currentPlayTime >= duration && lastPlayTime < duration;
         }
         if (doSkip) {
-            if (notify) {
-                notifyStartListeners(inReverse);
-            }
+            notifyStartListeners(inReverse);
             skipToEndValue(inReverse);
-            if (notify) {
-                notifyEndListeners(inReverse);
-            }
+            notifyEndListeners(inReverse);
         }
     }
 

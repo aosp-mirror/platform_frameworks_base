@@ -1097,6 +1097,13 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void onShadeFlingEnd_mExpandImmediateShouldBeReset() {
+        mNotificationPanelViewController.onFlingEnd(false);
+
+        verify(mQsController).setExpandImmediate(false);
+    }
+
+    @Test
     public void inUnlockedSplitShade_transitioningMaxTransitionDistance_makesShadeFullyExpanded() {
         mStatusBarStateController.setState(SHADE);
         enableSplitShade(true);

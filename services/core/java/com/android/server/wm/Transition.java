@@ -52,7 +52,6 @@ import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
-import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TASK_LAUNCHING_BEHIND;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
@@ -2819,9 +2818,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         flags |= TransitionInfo.FLAG_IS_SYSTEM_WINDOW;
                     }
                 }
-            }
-            if (occludesKeyguard(wc)) {
-                flags |= FLAG_OCCLUDES_KEYGUARD;
             }
             if ((mFlags & FLAG_CHANGE_NO_ANIMATION) != 0
                     && (mFlags & FLAG_CHANGE_YES_ANIMATION) == 0) {
