@@ -64,7 +64,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"SIM କାର୍ଡ ଅନଲକ୍‍ କରାଯାଉଛି…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4 ରୁ 8 ନମ୍ବର ବିଶିଷ୍ଟ ଏକ PIN ଟାଇପ୍ କରନ୍ତୁ।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK କୋଡ୍‍‍ରେ 8ଟି କିମ୍ବା ଅଧିକ ନମ୍ବର ରହିଥାଏ।"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"ଆପଣଙ୍କ PIN ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଟାଇପ୍‍ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଆପଣଙ୍କ PIN ଟାଇପ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"ଆପଣଙ୍କ ପାସ୍‌ୱର୍ଡକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଟାଇପ୍ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"ଆପଣଙ୍କ ଲକ୍‍ ଖୋଲିବା ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ଭୁଲ SIM PIN କୋଡ, ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ କରିବା ପାଇଁ ଏବେ ହିଁ ନିଜ କ୍ଯାରିଅରଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
