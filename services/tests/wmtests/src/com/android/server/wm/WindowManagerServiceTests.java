@@ -53,6 +53,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -100,6 +101,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.AdoptShellPermissionsRule;
+import com.android.internal.os.IResultReceiver;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -911,6 +913,56 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         verify(mTransaction).setInputWindowInfo(
                 eq(surfaceControl),
                 argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
+    }
+
+    @Test
+    public void testRequestKeyboardShortcuts_noWindow() {
+        doNothing().when(mWm.mContext).enforceCallingOrSelfPermission(anyString(), anyString());
+        doReturn(null).when(mWm).getFocusedWindowLocked();
+        doReturn(null).when(mWm.mRoot).getCurrentInputMethodWindow();
+
+        TestResultReceiver receiver = new TestResultReceiver();
+        mWm.requestAppKeyboardShortcuts(receiver, 0);
+        assertNotNull(receiver.resultData);
+        assertTrue(receiver.resultData.isEmpty());
+
+        receiver = new TestResultReceiver();
+        mWm.requestImeKeyboardShortcuts(receiver, 0);
+        assertNotNull(receiver.resultData);
+        assertTrue(receiver.resultData.isEmpty());
+    }
+
+    @Test
+    public void testRequestKeyboardShortcuts() throws RemoteException {
+        final IWindow window = mock(IWindow.class);
+        final IBinder binder = mock(IBinder.class);
+        doReturn(binder).when(window).asBinder();
+        final WindowState windowState =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "appWin", window);
+        doNothing().when(mWm.mContext).enforceCallingOrSelfPermission(anyString(), anyString());
+        doReturn(windowState).when(mWm).getFocusedWindowLocked();
+        doReturn(windowState).when(mWm.mRoot).getCurrentInputMethodWindow();
+
+        TestResultReceiver receiver = new TestResultReceiver();
+        mWm.requestAppKeyboardShortcuts(receiver, 0);
+        mWm.requestImeKeyboardShortcuts(receiver, 0);
+        verify(window, times(2)).requestAppKeyboardShortcuts(receiver, 0);
+    }
+
+    class TestResultReceiver implements IResultReceiver {
+        public android.os.Bundle resultData;
+        private final IBinder mBinder = mock(IBinder.class);
+
+        @Override
+        public void send(int resultCode, android.os.Bundle resultData)
+                throws android.os.RemoteException {
+            this.resultData = resultData;
+        }
+
+        @Override
+        public android.os.IBinder asBinder() {
+            return mBinder;
+        }
     }
 
     private void setupActivityWithLaunchCookie(IBinder launchCookie, WindowContainerToken wct) {

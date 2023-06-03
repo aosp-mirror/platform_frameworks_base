@@ -56,7 +56,6 @@ import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -337,6 +336,12 @@ public final class KeyboardShortcutListSearch {
         mSpecialCharacterNames.put(KeyEvent.KEYCODE_MUHENKAN, "無変換");
         mSpecialCharacterNames.put(KeyEvent.KEYCODE_HENKAN, "変換");
         mSpecialCharacterNames.put(KeyEvent.KEYCODE_KATAKANA_HIRAGANA, "かな");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_ALT_LEFT, "Alt");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_ALT_RIGHT, "Alt");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_CTRL_LEFT, "Ctrl");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_CTRL_RIGHT, "Ctrl");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_SHIFT_LEFT, "Shift");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_SHIFT_RIGHT, "Shift");
 
         mModifierNames.put(KeyEvent.META_META_ON, "Meta");
         mModifierNames.put(KeyEvent.META_CTRL_ON, "Ctrl");
@@ -411,27 +416,45 @@ public final class KeyboardShortcutListSearch {
         mKeyCharacterMap = mBackupKeyCharacterMap;
     }
 
+    private boolean mAppShortcutsReceived;
+    private boolean mImeShortcutsReceived;
+
     @VisibleForTesting
     void showKeyboardShortcuts(int deviceId) {
         retrieveKeyCharacterMap(deviceId);
-        mWindowManager.requestAppKeyboardShortcuts(new KeyboardShortcutsReceiver() {
-            @Override
-            public void onKeyboardShortcutsReceived(
-                    final List<KeyboardShortcutGroup> result) {
-                // Add specific app shortcuts
-                if (result.isEmpty()) {
-                    mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
-                } else {
-                    mSpecificAppGroup = reMapToKeyboardShortcutMultiMappingGroup(result);
-                    mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
-                }
-                mFullShortsGroup.add(SHORTCUT_SYSTEM_INDEX, mSystemGroup);
-                mFullShortsGroup.add(SHORTCUT_INPUT_INDEX, mInputGroup);
-                mFullShortsGroup.add(SHORTCUT_OPENAPPS_INDEX, mOpenAppsGroup);
-                mFullShortsGroup.add(SHORTCUT_SPECIFICAPP_INDEX, mSpecificAppGroup);
-                showKeyboardShortcutSearchList(mFullShortsGroup);
+        mAppShortcutsReceived = false;
+        mImeShortcutsReceived = false;
+        mWindowManager.requestAppKeyboardShortcuts(result -> {
+            // Add specific app shortcuts
+            if (result.isEmpty()) {
+                mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
+            } else {
+                mSpecificAppGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
+                mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
+            }
+            mAppShortcutsReceived = true;
+            if (mImeShortcutsReceived) {
+                mergeAndShowKeyboardShortcutsGroups();
             }
         }, deviceId);
+        mWindowManager.requestImeKeyboardShortcuts(result -> {
+            // Add specific Ime shortcuts
+            if (!result.isEmpty()) {
+                mInputGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
+            }
+            mImeShortcutsReceived = true;
+            if (mAppShortcutsReceived) {
+                mergeAndShowKeyboardShortcutsGroups();
+            }
+        }, deviceId);
+    }
+
+    private void mergeAndShowKeyboardShortcutsGroups() {
+        mFullShortsGroup.add(SHORTCUT_SYSTEM_INDEX, mSystemGroup);
+        mFullShortsGroup.add(SHORTCUT_INPUT_INDEX, mInputGroup);
+        mFullShortsGroup.add(SHORTCUT_OPENAPPS_INDEX, mOpenAppsGroup);
+        mFullShortsGroup.add(SHORTCUT_SPECIFICAPP_INDEX, mSpecificAppGroup);
+        showKeyboardShortcutSearchList(mFullShortsGroup);
     }
 
     // The original data structure is only for 1-to-1 shortcut mapping, so remap the old

@@ -7161,15 +7161,45 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
-        mContext.enforceCallingOrSelfPermission(REGISTER_WINDOW_MANAGER_LISTENERS,
-                "requestAppKeyboardShortcuts");
+        enforceRegisterWindowManagerListenersPermission("requestAppKeyboardShortcuts");
 
+        WindowState focusedWindow = getFocusedWindow();
+        if (focusedWindow == null || focusedWindow.mClient == null) {
+            notifyReceiverWithEmptyBundle(receiver);
+            return;
+        }
         try {
-            WindowState focusedWindow = getFocusedWindow();
-            if (focusedWindow != null && focusedWindow.mClient != null) {
-                getFocusedWindow().mClient.requestAppKeyboardShortcuts(receiver, deviceId);
-            }
+            focusedWindow.mClient.requestAppKeyboardShortcuts(receiver, deviceId);
         } catch (RemoteException e) {
+            notifyReceiverWithEmptyBundle(receiver);
+        }
+    }
+
+    @Override
+    public void requestImeKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
+        enforceRegisterWindowManagerListenersPermission("requestImeKeyboardShortcuts");
+
+        WindowState imeWindow = mRoot.getCurrentInputMethodWindow();
+        if (imeWindow == null || imeWindow.mClient == null) {
+            notifyReceiverWithEmptyBundle(receiver);
+            return;
+        }
+        try {
+            imeWindow.mClient.requestAppKeyboardShortcuts(receiver, deviceId);
+        } catch (RemoteException e) {
+            notifyReceiverWithEmptyBundle(receiver);
+        }
+    }
+
+    private void enforceRegisterWindowManagerListenersPermission(String message) {
+        mContext.enforceCallingOrSelfPermission(REGISTER_WINDOW_MANAGER_LISTENERS, message);
+    }
+
+    private static void notifyReceiverWithEmptyBundle(IResultReceiver receiver) {
+        try {
+            receiver.send(0, Bundle.EMPTY);
+        } catch (RemoteException e) {
+            ProtoLog.e(WM_ERROR, "unable to call receiver for empty keyboard shortcuts");
         }
     }
 
