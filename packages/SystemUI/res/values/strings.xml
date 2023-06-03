@@ -2724,8 +2724,8 @@
     <string name="media_output_broadcast_last_update_error">Can\u2019t save.</string>
     <!-- The hint message when Broadcast code is less than 4 characters [CHAR LIMIT=60] -->
     <string name="media_output_broadcast_code_hint_no_less_than_min">Use at least 4 characters</string>
-    <!-- The hint message when Broadcast code is more than 16 characters [CHAR LIMIT=60] -->
-    <string name="media_output_broadcast_code_hint_no_more_than_max">Use fewer than 16 characters</string>
+    <!-- The hint message when Broadcast edit is more than 16/254 characters [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_edit_hint_no_more_than_max">Use fewer than <xliff:g id="length" example="16">%1$d</xliff:g> characters</string>
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>
