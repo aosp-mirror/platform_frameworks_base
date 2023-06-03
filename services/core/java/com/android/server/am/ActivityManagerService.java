@@ -19525,7 +19525,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (Display display : allDisplays) {
                 int displayId = display.getDisplayId();
                 // TODO(b/247592632): check other properties like isSecure or proper display type
-                if (display.isValid()
+                if (display.isValid() && ((display.getFlags() & Display.FLAG_PRIVATE) == 0)
                         && (allowOnDefaultDisplay || displayId != Display.DEFAULT_DISPLAY)) {
                     displayIds[numberValidDisplays++] = displayId;
                 }
