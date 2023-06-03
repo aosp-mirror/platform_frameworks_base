@@ -46,6 +46,7 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.ExecutorUtils
 import com.android.wm.shell.common.ExternalInterfaceBinder
+import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.RemoteCallable
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
@@ -54,11 +55,14 @@ import com.android.wm.shell.common.annotations.ExternalThread
 import com.android.wm.shell.common.annotations.ShellMainThread
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.ShellSharedConstants
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.KtProtoLog
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
@@ -66,6 +70,7 @@ import java.util.function.Consumer
 class DesktopTasksController(
         private val context: Context,
         shellInit: ShellInit,
+        private val shellCommandHandler: ShellCommandHandler,
         private val shellController: ShellController,
         private val displayController: DisplayController,
         private val shellTaskOrganizer: ShellTaskOrganizer,
@@ -75,6 +80,7 @@ class DesktopTasksController(
         private val enterDesktopTaskTransitionHandler: EnterDesktopTaskTransitionHandler,
         private val exitDesktopTaskTransitionHandler: ExitDesktopTaskTransitionHandler,
         private val desktopModeTaskRepository: DesktopModeTaskRepository,
+        private val launchAdjacentController: LaunchAdjacentController,
         @ShellMainThread private val mainExecutor: ShellExecutor
 ) : RemoteCallable<DesktopTasksController>, Transitions.TransitionHandler {
 
@@ -84,6 +90,11 @@ class DesktopTasksController(
         t: SurfaceControl.Transaction ->
         visualIndicator?.releaseVisualIndicator(t)
         visualIndicator = null
+    }
+    private val taskVisibilityListener = object : VisibleTasksListener {
+        override fun onVisibilityChanged(displayId: Int, hasVisibleFreeformTasks: Boolean) {
+            launchAdjacentController.launchAdjacentEnabled = !hasVisibleFreeformTasks
+        }
     }
 
     init {
@@ -95,12 +106,14 @@ class DesktopTasksController(
 
     private fun onInit() {
         KtProtoLog.d(WM_SHELL_DESKTOP_MODE, "Initialize DesktopTasksController")
+        shellCommandHandler.addDumpCallback(this::dump, this)
         shellController.addExternalInterface(
             ShellSharedConstants.KEY_EXTRA_SHELL_DESKTOP_MODE,
             { createExternalInterface() },
             this
         )
         transitions.addHandler(this)
+        desktopModeTaskRepository.addVisibleTasksListener(taskVisibilityListener, mainExecutor)
     }
 
     /** Show all tasks, that are part of the desktop, on top of launcher */
@@ -602,14 +615,17 @@ class DesktopTasksController(
      * @param taskInfo the task being dragged.
      * @param position position of surface when drag ends.
      * @param y the Y position of the motion event.
+     * @param windowDecor the window decoration for the task being dragged
      */
     fun onDragPositioningEnd(
             taskInfo: RunningTaskInfo,
             position: Point,
-            y: Float
+            y: Float,
+            windowDecor: DesktopModeWindowDecoration
     ) {
         val statusBarHeight = getStatusBarHeight(taskInfo)
         if (y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+            windowDecor.incrementRelayoutBlock()
             moveToFullscreenWithAnimation(taskInfo, position)
         }
     }
@@ -708,6 +724,12 @@ class DesktopTasksController(
             callbackExecutor: Executor
     ) {
         desktopModeTaskRepository.setTaskCornerListener(listener, callbackExecutor)
+    }
+
+    private fun dump(pw: PrintWriter, prefix: String) {
+        val innerPrefix = "$prefix  "
+        pw.println("${prefix}DesktopTasksController")
+        desktopModeTaskRepository.dump(pw, innerPrefix)
     }
 
     /** The interface for calls from outside the shell, within the host process. */

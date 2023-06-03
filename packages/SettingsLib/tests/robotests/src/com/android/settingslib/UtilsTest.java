@@ -455,9 +455,21 @@ public class UtilsTest {
     }
 
     @Test
-    public void containsIncompatibleChargers_returnTrue() {
-        setupIncompatibleCharging();
+    public void containsIncompatibleChargers_complianeWarningOther_returnTrue() {
+        setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
         assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isTrue();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_complianeWarningDebug_returnTrue() {
+        setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY);
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isTrue();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_unexpectedWarningType_returnFalse() {
+        setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_BC_1_2);
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
     }
 
     @Test
@@ -494,12 +506,17 @@ public class UtilsTest {
     }
 
     private void setupIncompatibleCharging() {
+        setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
+    }
+
+    private void setupIncompatibleCharging(int complianceWarningType) {
         final List<UsbPort> usbPorts = new ArrayList<>();
         usbPorts.add(mUsbPort);
         when(mUsbManager.getPorts()).thenReturn(usbPorts);
         when(mUsbPort.getStatus()).thenReturn(mUsbPortStatus);
         when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
         when(mUsbPortStatus.isConnected()).thenReturn(true);
-        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[]{1});
+        when(mUsbPortStatus.getComplianceWarnings())
+                .thenReturn(new int[]{complianceWarningType});
     }
 }

@@ -202,8 +202,6 @@ constructor(
 
     fun calculateScreenLocation(sampledView: View): RectF? {
 
-        if (!sampledView.isLaidOut) return null
-
         val screenLocation = tmpScreenLocation
         /**
          * The method getLocationOnScreen is used to obtain the view coordinates relative to its
@@ -218,6 +216,10 @@ constructor(
         samplingBounds.top = top
         samplingBounds.right = left + sampledView.width
         samplingBounds.bottom = top + sampledView.height
+
+        // ensure never go out of bounds
+        if (samplingBounds.right > displaySize.x) samplingBounds.right = displaySize.x
+        if (samplingBounds.bottom > displaySize.y) samplingBounds.bottom = displaySize.y
 
         return RectF(samplingBounds)
     }

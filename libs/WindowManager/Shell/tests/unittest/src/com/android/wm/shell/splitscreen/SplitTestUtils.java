@@ -31,6 +31,7 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
@@ -75,11 +76,12 @@ public class SplitTestUtils {
                 DisplayController displayController, DisplayImeController imeController,
                 DisplayInsetsController insetsController, SplitLayout splitLayout,
                 Transitions transitions, TransactionPool transactionPool,
-                ShellExecutor mainExecutor,
-                Optional<RecentTasksController> recentTasks) {
+                ShellExecutor mainExecutor, Optional<RecentTasksController> recentTasks,
+                LaunchAdjacentController launchAdjacentController) {
             super(context, displayId, syncQueue, taskOrganizer, mainStage,
                     sideStage, displayController, imeController, insetsController, splitLayout,
-                    transitions, transactionPool, mainExecutor, recentTasks);
+                    transitions, transactionPool, mainExecutor, recentTasks,
+                    launchAdjacentController);
 
             // Prepare root task for testing.
             mRootTask = new TestRunningTaskInfoBuilder().build();

@@ -54,12 +54,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class ClosePipWithDismissButtonTest(flicker: FlickerTest) : ClosePipTransition(flicker) {
-
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            super.transition(this)
-            transitions { pipApp.closePipWindow(wmHelper) }
-        }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { pipApp.closePipWindow(wmHelper) }
+    }
 
     /**
      * Checks that the focus changes between the pip menu window and the launcher when clicking the

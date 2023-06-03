@@ -39,14 +39,21 @@ public final class InputFeatureFlagProvider {
             InputProperties.enable_keyboard_backlight_animation().orElse(false);
 
     // To disable Custom keyboard backlight levels support via IDC files run:
-    // adb shell setprop persist.input.keyboard_backlight_custom_levels.enabled false (requires
+    // adb shell setprop persist.input.keyboard.backlight_custom_levels.enabled false (requires
     // restart)
     private static final boolean KEYBOARD_BACKLIGHT_CUSTOM_LEVELS_ENABLED =
             InputProperties.enable_keyboard_backlight_custom_levels().orElse(true);
 
+    // To disable als based ambient keyboard backlight control run:
+    // adb shell setprop persist.input.keyboard.ambient_backlight_control.enabled false (requires
+    // restart)
+    private static final boolean AMBIENT_KEYBOARD_BACKLIGHT_CONTROL_ENABLED =
+            InputProperties.enable_ambient_keyboard_backlight_control().orElse(true);
+
     private static Optional<Boolean> sKeyboardBacklightControlOverride = Optional.empty();
     private static Optional<Boolean> sKeyboardBacklightAnimationOverride = Optional.empty();
     private static Optional<Boolean> sKeyboardBacklightCustomLevelsOverride = Optional.empty();
+    private static Optional<Boolean> sAmbientKeyboardBacklightControlOverride = Optional.empty();
 
     public static boolean isKeyboardBacklightControlEnabled() {
         return sKeyboardBacklightControlOverride.orElse(KEYBOARD_BACKLIGHT_CONTROL_ENABLED);
@@ -61,6 +68,11 @@ public final class InputFeatureFlagProvider {
                 KEYBOARD_BACKLIGHT_CUSTOM_LEVELS_ENABLED);
     }
 
+    public static boolean isAmbientKeyboardBacklightControlEnabled() {
+        return sAmbientKeyboardBacklightControlOverride.orElse(
+                AMBIENT_KEYBOARD_BACKLIGHT_CONTROL_ENABLED);
+    }
+
     public static void setKeyboardBacklightControlEnabled(boolean enabled) {
         sKeyboardBacklightControlOverride = Optional.of(enabled);
     }
@@ -73,6 +85,10 @@ public final class InputFeatureFlagProvider {
         sKeyboardBacklightCustomLevelsOverride = Optional.of(enabled);
     }
 
+    public static void setAmbientKeyboardBacklightControlEnabled(boolean enabled) {
+        sAmbientKeyboardBacklightControlOverride = Optional.of(enabled);
+    }
+
     /**
      * Clears all input feature flag overrides.
      */
@@ -80,5 +96,6 @@ public final class InputFeatureFlagProvider {
         sKeyboardBacklightControlOverride = Optional.empty();
         sKeyboardBacklightAnimationOverride = Optional.empty();
         sKeyboardBacklightCustomLevelsOverride = Optional.empty();
+        sAmbientKeyboardBacklightControlOverride = Optional.empty();
     }
 }

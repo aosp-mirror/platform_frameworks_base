@@ -3532,7 +3532,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private void onShadeVisibilityChanged(boolean visible) {
         if (mVisible != visible) {
             mVisible = visible;
-            if (!visible) {
+            if (visible) {
+                DejankUtils.notifyRendererOfExpensiveFrame(
+                        mNotificationShadeWindowView, "onShadeVisibilityChanged");
+            } else {
                 mGutsManager.closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
                         true /* removeControls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
             }

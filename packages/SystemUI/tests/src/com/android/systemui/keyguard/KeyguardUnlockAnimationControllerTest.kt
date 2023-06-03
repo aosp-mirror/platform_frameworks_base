@@ -1,6 +1,7 @@
 package com.android.systemui.keyguard
 
 import android.app.ActivityManager
+import android.app.WallpaperManager
 import android.app.WindowConfiguration
 import android.graphics.Point
 import android.graphics.Rect
@@ -21,6 +22,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argThat
 import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertEquals
@@ -32,6 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -64,6 +67,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock
     private lateinit var powerManager: PowerManager
+    @Mock
+    private lateinit var wallpaperManager: WallpaperManager
 
     @Mock
     private lateinit var launcherUnlockAnimationController: ILauncherUnlockAnimationController.Stub
@@ -94,13 +99,14 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         keyguardUnlockAnimationController = KeyguardUnlockAnimationController(
             context, keyguardStateController, { keyguardViewMediator }, keyguardViewController,
             featureFlags, { biometricUnlockController }, statusBarStateController,
-            notificationShadeWindowController, powerManager
+            notificationShadeWindowController, powerManager, wallpaperManager
         )
         keyguardUnlockAnimationController.setLauncherUnlockController(
             launcherUnlockAnimationController)
 
         whenever(keyguardViewController.viewRootImpl).thenReturn(mock(ViewRootImpl::class.java))
         whenever(powerManager.isInteractive).thenReturn(true)
+        whenever(wallpaperManager.isLockscreenLiveWallpaperEnabled).thenReturn(false)
 
         // All of these fields are final, so we can't mock them, but are needed so that the surface
         // appear amount setter doesn't short circuit.
@@ -171,6 +177,46 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         // Since the animation is running, we should not have finished the remote animation.
         verify(keyguardViewMediator, times(0)).exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
             false /* cancelled */)
+    }
+
+    @Test
+    fun onWakeAndUnlock_notifiesListenerWithTrue() {
+        whenever(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
+        whenever(biometricUnlockController.mode).thenReturn(
+            BiometricUnlockController.MODE_WAKE_AND_UNLOCK)
+
+        val listener = mock(
+            KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener::class.java)
+        keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(listener)
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+            remoteAnimationTargets,
+            wallpaperTargets,
+            0 /* startTime */,
+            false /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        verify(listener).onUnlockAnimationStarted(any(), eq(true), any(), any())
+    }
+
+    @Test
+    fun onWakeAndUnlockFromDream_notifiesListenerWithFalse() {
+        whenever(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
+        whenever(biometricUnlockController.mode).thenReturn(
+            BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM)
+
+        val listener = mock(
+            KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener::class.java)
+        keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(listener)
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+            remoteAnimationTargets,
+            wallpaperTargets,
+            0 /* startTime */,
+            false /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        verify(listener).onUnlockAnimationStarted(any(), eq(false), any(), any())
     }
 
     /**

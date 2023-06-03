@@ -25,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
+import android.app.BroadcastOptions;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.SystemClock;
@@ -257,7 +258,10 @@ class BroadcastProcessQueue {
             deferredStatesApplyConsumer.accept(record, recordIndex);
         }
 
-        if (record.isReplacePending()) {
+        // Ignore FLAG_RECEIVER_REPLACE_PENDING if the sender specified the policy using the
+        // BroadcastOptions delivery group APIs.
+        if (record.isReplacePending()
+                && record.getDeliveryGroupPolicy() == BroadcastOptions.DELIVERY_GROUP_POLICY_ALL) {
             final BroadcastRecord replacedBroadcastRecord = replaceBroadcast(record, recordIndex);
             if (replacedBroadcastRecord != null) {
                 return replacedBroadcastRecord;
