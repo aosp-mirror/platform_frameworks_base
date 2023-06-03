@@ -614,7 +614,11 @@ public class AuthContainerView extends LinearLayout
             return ((AuthBiometricFingerprintView) view).isUdfps();
         }
         if (view instanceof BiometricPromptLayout) {
-            return ((BiometricPromptLayout) view).isUdfps();
+            // this will force the prompt to align itself on the edge of the screen
+            // instead of centering (temporary workaround to prevent small implicit view
+            // from breaking due to the way gravity / margins are set in the legacy
+            // AuthPanelController
+            return true;
         }
 
         return false;
