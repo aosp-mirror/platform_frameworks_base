@@ -435,11 +435,15 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_KEYGUARD_GOING_AWAY = 7;
     /**
      * A window is appearing above a locked keyguard.
+     * @deprecated use {@link #TRANSIT_TO_FRONT} + {@link #TRANSIT_FLAG_KEYGUARD_OCCLUDING} for
+     *             keyguard occluding with Shell transition.
      * @hide
      */
     int TRANSIT_KEYGUARD_OCCLUDE = 8;
     /**
      * A window is made invisible revealing a locked keyguard.
+     * @deprecated use {@link #TRANSIT_TO_BACK} + {@link #TRANSIT_FLAG_KEYGUARD_UNOCCLUDING} for
+     *             keyguard occluding with Shell transition.
      * @hide
      */
     int TRANSIT_KEYGUARD_UNOCCLUDE = 9;
@@ -562,6 +566,25 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_INVISIBLE = (1 << 10); // 0x400
 
     /**
+     * Transition flag: Indicates that keyguard will be showing (locked) with this transition,
+     * which is the opposite of {@link #TRANSIT_FLAG_KEYGUARD_GOING_AWAY}.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_APPEARING = (1 << 11); // 0x800
+
+    /**
+     * Transition flag: Indicates that keyguard is becoming hidden by an app
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_OCCLUDING = (1 << 12); // 0x1000
+
+    /**
+     * Transition flag: Indicates that keyguard is being revealed after an app was occluding it.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_UNOCCLUDING = (1 << 13); // 0x2000
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -576,9 +599,26 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT,
             TRANSIT_FLAG_INVISIBLE,
+            TRANSIT_FLAG_KEYGUARD_APPEARING,
+            TRANSIT_FLAG_KEYGUARD_OCCLUDING,
+            TRANSIT_FLAG_KEYGUARD_UNOCCLUDING
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
+
+    /**
+     * Transit flags used to signal keyguard visibility is changing for animations.
+     *
+     * <p>These roughly correspond to CLOSE, OPEN, TO_BACK, and TO_FRONT on a hypothetical Keyguard
+     * container. Since Keyguard isn't a container we can't include it in changes and need to send
+     * this information in its own channel.
+     * @hide
+     */
+    int KEYGUARD_VISIBILITY_TRANSIT_FLAGS =
+            (TRANSIT_FLAG_KEYGUARD_GOING_AWAY
+            | TRANSIT_FLAG_KEYGUARD_APPEARING
+            | TRANSIT_FLAG_KEYGUARD_OCCLUDING
+            | TRANSIT_FLAG_KEYGUARD_UNOCCLUDING);
 
     /**
      * Remove content mode: Indicates remove content mode is currently not defined.
@@ -3763,6 +3803,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @TestApi
         public float preferredMinDisplayRefreshRate;
 
         /**
@@ -3771,6 +3812,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @TestApi
         public float preferredMaxDisplayRefreshRate;
 
         /** Indicates whether this window wants the HDR conversion is disabled. */

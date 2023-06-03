@@ -31,6 +31,8 @@ import com.android.settingslib.spaprivileged.template.common.UserProfilePager
 /**
  * The full screen template for an App List page.
  *
+ * @param noMoreOptions default false. If true, then do not display more options action button,
+ * including the "Show System" / "Hide System" action.
  * @param header the description header appears before all the applications.
  */
 @Composable
@@ -38,6 +40,7 @@ fun <T : AppRecord> AppListPage(
     title: String,
     listModel: AppListModel<T>,
     showInstantApps: Boolean = false,
+    noMoreOptions: Boolean = false,
     matchAnyUserForAdmin: Boolean = false,
     primaryUserOnly: Boolean = false,
     noItemMessage: String? = null,
@@ -49,9 +52,11 @@ fun <T : AppRecord> AppListPage(
     SearchScaffold(
         title = title,
         actions = {
-            MoreOptionsAction {
-                ShowSystemAction(showSystem.value) { showSystem.value = it }
-                moreOptions()
+            if (!noMoreOptions) {
+                MoreOptionsAction {
+                    ShowSystemAction(showSystem.value) { showSystem.value = it }
+                    moreOptions()
+                }
             }
         },
     ) { bottomPadding, searchQuery ->

@@ -26,6 +26,7 @@ import android.graphics.fonts.Font
 import android.graphics.fonts.FontVariationAxis
 import android.text.Layout
 import android.util.LruCache
+import kotlin.math.roundToInt
 
 private const val DEFAULT_ANIMATION_DURATION: Long = 300
 private const val TYPEFACE_CACHE_MAX_ENTRIES = 5
@@ -63,9 +64,9 @@ class TypefaceVariantCacheImpl(
             return it
         }
 
-        return TypefaceVariantCache
-            .createVariantTypeface(baseTypeface, fvar)
-            .also { cache.put(fvar, it) }
+        return TypefaceVariantCache.createVariantTypeface(baseTypeface, fvar).also {
+            cache.put(fvar, it)
+        }
     }
 }
 
@@ -74,7 +75,6 @@ class TypefaceVariantCacheImpl(
  *
  * Currently this class can provide text style animation for text weight and text size. For example
  * the simple view that draws text with animating text size is like as follows:
- *
  * <pre> <code>
  * ```
  *     class SimpleTextAnimation : View {
@@ -97,6 +97,7 @@ class TypefaceVariantCacheImpl(
  */
 class TextAnimator(
     layout: Layout,
+    numberOfAnimationSteps: Int? = null, // Only do this number of discrete animation steps.
     private val invalidateCallback: () -> Unit,
 ) {
     var typefaceCache: TypefaceVariantCache = TypefaceVariantCacheImpl(layout.paint.typeface)
@@ -112,7 +113,8 @@ class TextAnimator(
         ValueAnimator.ofFloat(1f).apply {
             duration = DEFAULT_ANIMATION_DURATION
             addUpdateListener {
-                textInterpolator.progress = it.animatedValue as Float
+                textInterpolator.progress =
+                    calculateProgress(it.animatedValue as Float, numberOfAnimationSteps)
                 invalidateCallback()
             }
             addListener(
@@ -122,6 +124,17 @@ class TextAnimator(
                 }
             )
         }
+
+    private fun calculateProgress(animProgress: Float, numberOfAnimationSteps: Int?): Float {
+        if (numberOfAnimationSteps != null) {
+            // This clamps the progress to the nearest value of "numberOfAnimationSteps"
+            // discrete values between 0 and 1f.
+            return (animProgress * numberOfAnimationSteps).roundToInt() /
+                numberOfAnimationSteps.toFloat()
+        }
+
+        return animProgress
+    }
 
     sealed class PositionedGlyph {
 

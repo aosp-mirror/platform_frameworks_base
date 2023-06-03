@@ -548,6 +548,10 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
             if (!cancelled) {
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
                 resetSwipeOfView(animView);
+                // Clear the snapped view after success, assuming it's not being swiped now
+                if (animView == mTouchedView && !mIsSwiping) {
+                    mTouchedView = null;
+                }
             }
             onChildSnappedBack(animView, targetLeft);
         });
@@ -813,13 +817,39 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
         }
     }
 
-    public void resetSwipeState() {
-        View swipedView = getSwipedView();
+    private void resetSwipeState() {
+        resetSwipeStates(/* resetAll= */ false);
+    }
+
+    public void resetTouchState() {
+        resetSwipeStates(/* resetAll= */ true);
+    }
+
+    /** This method resets the swipe state, and if `resetAll` is true, also resets the snap state */
+    private void resetSwipeStates(boolean resetAll) {
+        final View touchedView = mTouchedView;
+        final boolean wasSnapping = mSnappingChild;
+        final boolean wasSwiping = mIsSwiping;
         mTouchedView = null;
         mIsSwiping = false;
-        if (swipedView != null) {
-            snapChildIfNeeded(swipedView, false, 0);
-            onChildSnappedBack(swipedView, 0);
+        // If we were swiping, then we resetting swipe requires resetting everything.
+        resetAll |= wasSwiping;
+        if (resetAll) {
+            mSnappingChild = false;
+        }
+        if (touchedView == null) return;  // No view to reset visually
+        // When snap needs to be reset, first thing is to cancel any translation animation
+        final boolean snapNeedsReset = resetAll && wasSnapping;
+        if (snapNeedsReset) {
+            cancelTranslateAnimation(touchedView);
+        }
+        // actually reset the view to default state
+        if (resetAll) {
+            snapChildIfNeeded(touchedView, false, 0);
+        }
+        // report if a swipe or snap was reset.
+        if (wasSwiping || snapNeedsReset) {
+            onChildSnappedBack(touchedView, 0);
         }
     }
 
