@@ -617,7 +617,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     r.curApp.info.packageName,
                     r.callerPackage,
                     r.calculateTypeForLogging(),
-                    r.getDeliveryGroupPolicy());
+                    r.getDeliveryGroupPolicy(),
+                    r.intent.getFlags());
         }
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG_BROADCAST, "finishReceiver [" + mQueueName + "] called but state is IDLE");
@@ -798,7 +799,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     dispatchDelay, receiveDelay, 0 /* finish_delay */,
                     SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
                     app != null ? app.info.packageName : null, callingPackage,
-                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy());
+                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy(), r.intent.getFlags());
         }
     }
 
