@@ -339,7 +339,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     private BroadcastRecord replaceBroadcastLocked(ArrayList<BroadcastRecord> queue,
             BroadcastRecord r, String typeForLogging) {
         final Intent intent = r.intent;
-        for (int i = queue.size() - 1; i > 0; i--) {
+        for (int i = queue.size() - 1; i >= 0; i--) {
             final BroadcastRecord old = queue.get(i);
             if (old.userId == r.userId && intent.filterEquals(old.intent)) {
                 if (DEBUG_BROADCAST) {
