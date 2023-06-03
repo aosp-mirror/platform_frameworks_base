@@ -14,21 +14,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<FrameLayout
+<com.android.systemui.animation.view.LaunchableImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:paddingVertical="@dimen/dream_overlay_complication_home_controls_padding">
-
-    <ImageView
-        android:id="@+id/home_controls_chip"
-        android:layout_height="@dimen/keyguard_affordance_fixed_height"
-        android:layout_width="@dimen/keyguard_affordance_fixed_width"
-        android:layout_gravity="bottom|start"
-        android:scaleType="center"
-        android:tint="?android:attr/textColorPrimary"
-        android:src="@drawable/controls_icon"
-        android:background="@drawable/keyguard_bottom_affordance_bg"
-        android:contentDescription="@string/quick_controls_title" />
-
-</FrameLayout>
+    android:id="@+id/home_controls_chip"
+    android:layout_height="@dimen/dream_overlay_bottom_affordance_height"
+    android:layout_width="@dimen/dream_overlay_bottom_affordance_width"
+    android:layout_gravity="bottom|start"
+    android:padding="@dimen/dream_overlay_bottom_affordance_padding"
+    android:background="@drawable/dream_overlay_bottom_affordance_bg"
+    android:scaleType="fitCenter"
+    android:tint="?android:attr/textColorPrimary"
+    android:src="@drawable/controls_icon"
+    android:contentDescription="@string/quick_controls_title" />

@@ -48,7 +48,6 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -82,7 +81,7 @@ public class DragAndDropControllerTest extends ShellTestCase {
     @Mock
     private ShellExecutor mMainExecutor;
     @Mock
-    private SplitScreenController mSplitScreenController;
+    private WindowManager mWindowManager;
 
     private DragAndDropController mController;
 
@@ -97,11 +96,6 @@ public class DragAndDropControllerTest extends ShellTestCase {
     @Test
     public void instantiateController_addInitCallback() {
         verify(mShellInit, times(1)).addInitCallback(any(), any());
-    }
-
-    @Test
-    public void instantiateController_registerConfigChangeListener() {
-        verify(mShellController, times(1)).addConfigurationChangeListener(any());
     }
 
     @Test

@@ -21,7 +21,6 @@ import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -30,12 +29,14 @@ import javax.inject.Inject
  * logging purposes.
  */
 @SysUISingleton
-class WifiConstants @Inject constructor(
-        context: Context,
-        dumpManager: DumpManager,
+class WifiConstants
+@Inject
+constructor(
+    context: Context,
+    dumpManager: DumpManager,
 ) : Dumpable {
     init {
-        dumpManager.registerDumpable("${SB_LOGGING_TAG}WifiConstants", this)
+        dumpManager.registerNormalDumpable("WifiConstants", this)
     }
 
     /** True if we should always show the wifi icon when wifi is enabled and false otherwise. */
@@ -43,8 +44,6 @@ class WifiConstants @Inject constructor(
         context.resources.getBoolean(R.bool.config_showWifiIndicatorWhenEnabled)
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.apply {
-            println("alwaysShowIconIfEnabled=$alwaysShowIconIfEnabled")
-        }
+        pw.apply { println("alwaysShowIconIfEnabled=$alwaysShowIconIfEnabled") }
     }
 }

@@ -76,6 +76,10 @@ class DeviceStateToLayoutMap {
         return layout;
     }
 
+    int size() {
+        return mLayoutMap.size();
+    }
+
     private Layout createLayout(int state) {
         if (mLayoutMap.contains(state)) {
             Slog.e(TAG, "Attempted to create a second layout for state " + state);

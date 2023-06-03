@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"50 % oben"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"30 % oben"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Vollbild unten"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Links teilen"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Rechts teilen"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Oben teilen"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Unten teilen"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Einhandmodus wird verwendet"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Wenn du die App schließen möchtest, wische vom unteren Rand des Displays nach oben oder tippe auf eine beliebige Stelle oberhalb der App"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Einhandmodus starten"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Außerhalb einer App doppeltippen, um die Position zu ändern"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Ok"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Für weitere Informationen maximieren."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Für bessere Darstellung neu starten?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Du kannst die App neu starten, damit sie an die Bildschirmabmessungen deines Geräts angepasst dargestellt wird – jedoch können dadurch dein Fortschritt oder nicht gespeicherte Änderungen verloren gehen."</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Abbrechen"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Neu starten"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Nicht mehr anzeigen"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Zum Verschieben\ndoppeltippen"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximieren"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimieren"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Schließen"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Zurück"</string>
     <string name="handle_text" msgid="1766582106752184456">"Ziehpunkt"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"App-Symbol"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Vollbild"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Desktopmodus"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Geteilter Bildschirm"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Mehr"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Frei schwebend"</string>
+    <string name="select_text" msgid="5139083974039906583">"Auswählen"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
+    <string name="close_text" msgid="4986518933445178928">"Schließen"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Menü schließen"</string>
 </resources>

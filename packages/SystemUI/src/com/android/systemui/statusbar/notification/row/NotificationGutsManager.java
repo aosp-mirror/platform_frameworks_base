@@ -44,12 +44,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.notification.ConversationIconFactory;
-import com.android.systemui.Dependency;
-import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -65,14 +63,14 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewListener;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
-import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.wmshell.BubblesManager;
 
-import java.io.PrintWriter;
 import java.util.Optional;
+
+import javax.inject.Inject;
 
 import dagger.Lazy;
 
@@ -80,13 +78,14 @@ import dagger.Lazy;
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
  * closing guts, and keeping track of the currently exposed notification guts.
  */
+@SysUISingleton
 public class NotificationGutsManager implements NotifGutsViewManager {
     private static final String TAG = "NotificationGutsManager";
 
     // Must match constant in Settings. Used to highlight preferences when linking to Settings.
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
 
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private final MetricsLogger mMetricsLogger;
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
     private final HighPriorityProvider mHighPriorityProvider;
@@ -94,12 +93,9 @@ public class NotificationGutsManager implements NotifGutsViewManager {
     private final OnUserInteractionCallback mOnUserInteractionCallback;
 
     // Dependencies:
-    private final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
-    private final StatusBarStateController mStatusBarStateController =
-            Dependency.get(StatusBarStateController.class);
-    private final DeviceProvisionedController mDeviceProvisionedController =
-            Dependency.get(DeviceProvisionedController.class);
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+    private final StatusBarStateController mStatusBarStateController;
+    private final DeviceProvisionedController mDeviceProvisionedController;
     private final AssistantFeedbackController mAssistantFeedbackController;
 
     // which notification is currently being longpress-examined by the user
@@ -124,9 +120,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
     private final ShadeController mShadeController;
     private NotifGutsViewListener mGutsListener;
 
-    /**
-     * Injected constructor. See {@link NotificationsModule}.
-     */
+    @Inject
     public NotificationGutsManager(Context context,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             @Main Handler mainHandler,
@@ -143,7 +137,11 @@ public class NotificationGutsManager implements NotifGutsViewManager {
             Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback,
-            ShadeController shadeController) {
+            ShadeController shadeController,
+            NotificationLockscreenUserManager notificationLockscreenUserManager,
+            StatusBarStateController statusBarStateController,
+            DeviceProvisionedController deviceProvisionedController,
+            MetricsLogger metricsLogger) {
         mContext = context;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mMainHandler = mainHandler;
@@ -161,6 +159,10 @@ public class NotificationGutsManager implements NotifGutsViewManager {
         mUiEventLogger = uiEventLogger;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mShadeController = shadeController;
+        mLockscreenUserManager = notificationLockscreenUserManager;
+        mStatusBarStateController = statusBarStateController;
+        mDeviceProvisionedController = deviceProvisionedController;
+        mMetricsLogger = metricsLogger;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -372,7 +374,8 @@ public class NotificationGutsManager implements NotifGutsViewManager {
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 row.getIsNonblockable(),
                 mHighPriorityProvider.isHighPriority(row.getEntry()),
-                mAssistantFeedbackController);
+                mAssistantFeedbackController,
+                mMetricsLogger);
     }
 
     /**
@@ -583,7 +586,9 @@ public class NotificationGutsManager implements NotifGutsViewManager {
         }
 
         final ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        if (row.isNotificationRowLongClickable()) {
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        }
         if (row.areGutsExposed()) {
             closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
                     true /* removeControls */, -1 /* x */, -1 /* y */,
@@ -624,7 +629,6 @@ public class NotificationGutsManager implements NotifGutsViewManager {
                                 !mAccessibilityManager.isTouchExplorationEnabled());
 
                 guts.openControls(
-                        !row.isBlockingHelperShowing(),
                         x,
                         y,
                         needsFalsingProtection,

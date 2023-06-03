@@ -29,6 +29,8 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
+import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
+import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
@@ -194,6 +196,7 @@ import android.window.SplashScreen;
 import android.window.SplashScreenView;
 import android.window.WindowProviderService;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
@@ -5890,9 +5893,21 @@ public final class ActivityThread extends ClientTransactionHandler
         final boolean shouldUpdateResources = hasPublicResConfigChange
                 || shouldUpdateResources(activityToken, currentResConfig, newConfig,
                 amOverrideConfig, movedToDifferentDisplay, hasPublicResConfigChange);
+
+        // TODO(b/266924897): temporary workaround, remove for U.
+        boolean skipActivityRelaunchWhenDocking = activity.getResources().getBoolean(
+                R.bool.config_skipActivityRelaunchWhenDocking);
+        int handledConfigChanges = activity.mActivityInfo.getRealConfigChanged();
+        if (skipActivityRelaunchWhenDocking && onlyDeskInUiModeChanged(activity.mCurrentConfig,
+                newConfig)) {
+            // If we're not relaunching this activity when docking, we should send the configuration
+            // changed event. Pretend as if the activity is handling uiMode config changes in its
+            // manifest so that we'll report any dock changes.
+            handledConfigChanges |= ActivityInfo.CONFIG_UI_MODE;
+        }
+
         final boolean shouldReportChange = shouldReportChange(activity.mCurrentConfig, newConfig,
-                r != null ? r.mSizeConfigurations : null,
-                activity.mActivityInfo.getRealConfigChanged());
+                r != null ? r.mSizeConfigurations : null, handledConfigChanges);
         // Nothing significant, don't proceed with updating and reporting.
         if (!shouldUpdateResources && !shouldReportChange) {
             return null;
@@ -5936,6 +5951,25 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         return configToReport;
+    }
+
+    /**
+     * Returns true if the uiMode configuration changed, and desk mode
+     * ({@link android.content.res.Configuration#UI_MODE_TYPE_DESK}) was the only change to uiMode.
+     */
+    private boolean onlyDeskInUiModeChanged(Configuration oldConfig, Configuration newConfig) {
+        boolean deskModeChanged = isInDeskUiMode(oldConfig) != isInDeskUiMode(newConfig);
+
+        // UI mode contains fields other than the UI mode type, so determine if any other fields
+        // changed.
+        boolean uiModeOtherFieldsChanged =
+                (oldConfig.uiMode & ~UI_MODE_TYPE_MASK) != (newConfig.uiMode & ~UI_MODE_TYPE_MASK);
+
+        return deskModeChanged && !uiModeOtherFieldsChanged;
+    }
+
+    private static boolean isInDeskUiMode(Configuration config) {
+        return (config.uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_DESK;
     }
 
     /**

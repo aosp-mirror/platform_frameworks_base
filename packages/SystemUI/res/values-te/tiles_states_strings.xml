@@ -176,4 +176,9 @@
     <item msgid="8014986104355098744">"ఆఫ్"</item>
     <item msgid="5966994759929723339">"ఆన్"</item>
   </string-array>
+  <string-array name="tile_states_font_scaling">
+    <item msgid="3173069902082305985">"అందుబాటులో లేదు"</item>
+    <item msgid="2478289035899842865">"ఆఫ్‌లో ఉంది"</item>
+    <item msgid="5137565285664080143">"ఆన్‌లో ఉంది"</item>
+  </string-array>
 </resources>

@@ -26,8 +26,10 @@ import android.animation.TypeEvaluator;
 import android.annotation.NonNull;
 import android.app.TaskInfo;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.os.Trace;
 import android.util.SparseArray;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -36,6 +38,8 @@ import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
 
@@ -51,7 +55,7 @@ import com.android.wm.shell.unfold.UnfoldBackgroundController;
  * instances of FullscreenUnfoldTaskAnimator.
  */
 public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
-        DisplayInsetsController.OnInsetsChangedListener {
+        DisplayInsetsController.OnInsetsChangedListener, ConfigurationChangeListener {
 
     private static final float[] FLOAT_9 = new float[9];
     private static final TypeEvaluator<Rect> RECT_EVALUATOR = new RectEvaluator(new Rect());
@@ -63,17 +67,21 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
 
     private final SparseArray<AnimationContext> mAnimationContextByTaskId = new SparseArray<>();
     private final int mExpandedTaskBarHeight;
-    private final float mWindowCornerRadiusPx;
     private final DisplayInsetsController mDisplayInsetsController;
     private final UnfoldBackgroundController mBackgroundController;
+    private final Context mContext;
+    private final ShellController mShellController;
 
     private InsetsSource mTaskbarInsetsSource;
+    private float mWindowCornerRadiusPx;
 
     public FullscreenUnfoldTaskAnimator(Context context,
             @NonNull UnfoldBackgroundController backgroundController,
-            DisplayInsetsController displayInsetsController) {
+            ShellController shellController, DisplayInsetsController displayInsetsController) {
+        mContext = context;
         mDisplayInsetsController = displayInsetsController;
         mBackgroundController = backgroundController;
+        mShellController = shellController;
         mExpandedTaskBarHeight = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.taskbar_frame_height);
         mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(context);
@@ -81,6 +89,14 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
 
     public void init() {
         mDisplayInsetsController.addInsetsChangedListener(DEFAULT_DISPLAY, this);
+        mShellController.addConfigurationChangeListener(this);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfiguration) {
+        Trace.beginSection("FullscreenUnfoldTaskAnimator#onConfigurationChanged");
+        mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
+        Trace.endSection();
     }
 
     @Override

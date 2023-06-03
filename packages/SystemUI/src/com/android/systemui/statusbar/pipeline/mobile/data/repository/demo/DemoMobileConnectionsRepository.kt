@@ -18,38 +18,36 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.content.Context
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
-import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import android.util.Log
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.Mobile
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.MobileDisabled
-import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.MOBILE_CONNECTION_BUFFER_SIZE
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -60,15 +58,19 @@ import kotlinx.coroutines.launch
 class DemoMobileConnectionsRepository
 @Inject
 constructor(
-    private val dataSource: DemoModeMobileConnectionDataSource,
+    private val mobileDataSource: DemoModeMobileConnectionDataSource,
+    private val wifiDataSource: DemoModeWifiDataSource,
     @Application private val scope: CoroutineScope,
     context: Context,
     private val logFactory: TableLogBufferFactory,
 ) : MobileConnectionsRepository {
 
-    private var demoCommandJob: Job? = null
+    private var mobileDemoCommandJob: Job? = null
+    private var wifiDemoCommandJob: Job? = null
 
-    private var connectionRepoCache = mutableMapOf<Int, DemoMobileConnectionRepository>()
+    private var carrierMergedSubId: Int? = null
+
+    private var connectionRepoCache = mutableMapOf<Int, CacheContainer>()
     private val subscriptionInfoCache = mutableMapOf<Int, SubscriptionModel>()
     val demoModeFinishedEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
@@ -112,6 +114,18 @@ constructor(
                 subscriptions.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
             )
 
+    override val activeMobileDataRepository: StateFlow<MobileConnectionRepository?> =
+        activeMobileDataSubscriptionId
+            .map { getRepoForSubId(it) }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                getRepoForSubId(activeMobileDataSubscriptionId.value)
+            )
+
+    // TODO(b/261029387): consider adding a demo command for this
+    override val activeSubChangedInGroupEvent: Flow<Unit> = flowOf()
+
     /** Demo mode doesn't currently support modifications to the mobile mappings */
     override val defaultDataSubRatConfig =
         MutableStateFlow(MobileMappings.Config.readConfig(context))
@@ -140,72 +154,123 @@ constructor(
 
     private fun <K, V> Map<K, V>.reverse() = entries.associateBy({ it.value }) { it.key }
 
+    // TODO(b/261029387): add a command for this value
+    override val defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
+
     // TODO(b/261029387): not yet supported
-    override val defaultMobileNetworkConnectivity = MutableStateFlow(MobileConnectivityModel())
+    override val defaultMobileNetworkConnectivity =
+        MutableStateFlow(MobileConnectivityModel(isConnected = true, isValidated = true))
 
     override fun getRepoForSubId(subId: Int): DemoMobileConnectionRepository {
-        return connectionRepoCache[subId]
-            ?: createDemoMobileConnectionRepo(subId).also { connectionRepoCache[subId] = it }
+        val current = connectionRepoCache[subId]?.repo
+        if (current != null) {
+            return current
+        }
+
+        val new = createDemoMobileConnectionRepo(subId)
+        connectionRepoCache[subId] = new
+        return new.repo
     }
 
-    private fun createDemoMobileConnectionRepo(subId: Int): DemoMobileConnectionRepository {
-        val tableLogBuffer = logFactory.create("DemoMobileConnectionLog [$subId]", 100)
+    private fun createDemoMobileConnectionRepo(subId: Int): CacheContainer {
+        val tableLogBuffer =
+            logFactory.getOrCreate(
+                "DemoMobileConnectionLog[$subId]",
+                MOBILE_CONNECTION_BUFFER_SIZE,
+            )
 
-        return DemoMobileConnectionRepository(
-            subId,
-            tableLogBuffer,
-        )
+        val repo =
+            DemoMobileConnectionRepository(
+                subId,
+                tableLogBuffer,
+                scope,
+            )
+        return CacheContainer(repo, lastMobileState = null)
     }
-
-    override val globalMobileDataSettingChangedEvent = MutableStateFlow(Unit)
 
     fun startProcessingCommands() {
-        demoCommandJob =
+        mobileDemoCommandJob =
             scope.launch {
-                dataSource.mobileEvents.filterNotNull().collect { event -> processEvent(event) }
+                mobileDataSource.mobileEvents.filterNotNull().collect { event ->
+                    processMobileEvent(event)
+                }
+            }
+        wifiDemoCommandJob =
+            scope.launch {
+                wifiDataSource.wifiEvents.filterNotNull().collect { event ->
+                    processWifiEvent(event)
+                }
             }
     }
 
     fun stopProcessingCommands() {
-        demoCommandJob?.cancel()
+        mobileDemoCommandJob?.cancel()
+        wifiDemoCommandJob?.cancel()
         _subscriptions.value = listOf()
         connectionRepoCache.clear()
         subscriptionInfoCache.clear()
     }
 
-    private fun processEvent(event: FakeNetworkEventModel) {
+    private fun processMobileEvent(event: FakeNetworkEventModel) {
         when (event) {
             is Mobile -> {
                 processEnabledMobileState(event)
             }
             is MobileDisabled -> {
-                processDisabledMobileState(event)
+                maybeRemoveSubscription(event.subId)
             }
         }
     }
 
-    private fun processEnabledMobileState(state: Mobile) {
+    private fun processWifiEvent(event: FakeWifiEventModel) {
+        when (event) {
+            is FakeWifiEventModel.WifiDisabled -> disableCarrierMerged()
+            is FakeWifiEventModel.Wifi -> disableCarrierMerged()
+            is FakeWifiEventModel.CarrierMerged -> processCarrierMergedWifiState(event)
+        }
+    }
+
+    private fun processEnabledMobileState(event: Mobile) {
         // get or create the connection repo, and set its values
-        val subId = state.subId ?: DEFAULT_SUB_ID
+        val subId = event.subId ?: DEFAULT_SUB_ID
         maybeCreateSubscription(subId)
 
         val connection = getRepoForSubId(subId)
-        // This is always true here, because we split out disabled states at the data-source level
-        connection.dataEnabled.value = true
-        connection.networkName.value = NetworkNameModel.Derived(state.name)
+        connectionRepoCache[subId]?.lastMobileState = event
 
-        connection.cdmaRoaming.value = state.roaming
-        connection.connectionInfo.value = state.toMobileConnectionModel()
+        // TODO(b/261029387): until we have a command, use the most recent subId
+        defaultDataSubId.value = subId
+
+        connection.processDemoMobileEvent(event, event.dataType.toResolvedNetworkType())
     }
 
-    private fun processDisabledMobileState(state: MobileDisabled) {
+    private fun processCarrierMergedWifiState(event: FakeWifiEventModel.CarrierMerged) {
+        // The new carrier merged connection is for a different sub ID, so disable carrier merged
+        // for the current (now old) sub
+        if (carrierMergedSubId != event.subscriptionId) {
+            disableCarrierMerged()
+        }
+
+        // get or create the connection repo, and set its values
+        val subId = event.subscriptionId
+        maybeCreateSubscription(subId)
+        carrierMergedSubId = subId
+
+        // TODO(b/261029387): until we have a command, use the most recent subId
+        defaultDataSubId.value = subId
+
+        val connection = getRepoForSubId(subId)
+        connection.processCarrierMergedEvent(event)
+    }
+
+    private fun maybeRemoveSubscription(subId: Int?) {
         if (_subscriptions.value.isEmpty()) {
             // Nothing to do here
             return
         }
 
-        val subId =
-            state.subId
+        val finalSubId =
+            subId
                 ?: run {
                     // For sake of usability, we can allow for no subId arg if there is only one
                     // subscription
@@ -223,7 +288,21 @@ constructor(
                     _subscriptions.value[0].subscriptionId
                 }
 
-        removeSubscription(subId)
+        removeSubscription(finalSubId)
+    }
+
+    private fun disableCarrierMerged() {
+        val currentCarrierMergedSubId = carrierMergedSubId ?: return
+
+        // If this sub ID was previously not carrier merged, we should reset it to its previous
+        // connection.
+        val lastMobileState = connectionRepoCache[carrierMergedSubId]?.lastMobileState
+        if (lastMobileState != null) {
+            processEnabledMobileState(lastMobileState)
+        } else {
+            // Otherwise, just remove the subscription entirely
+            removeSubscription(currentCarrierMergedSubId)
+        }
     }
 
     private fun removeSubscription(subId: Int) {
@@ -234,22 +313,6 @@ constructor(
 
     private fun subIdsString(): String =
         _subscriptions.value.joinToString(",") { it.subscriptionId.toString() }
-
-    private fun Mobile.toMobileConnectionModel(): MobileConnectionModel {
-        return MobileConnectionModel(
-            isEmergencyOnly = false, // TODO(b/261029387): not yet supported
-            isRoaming = roaming,
-            isInService = (level ?: 0) > 0,
-            isGsm = false, // TODO(b/261029387): not yet supported
-            cdmaLevel = level ?: 0,
-            primaryLevel = level ?: 0,
-            dataConnectionState =
-                DataConnectionState.Connected, // TODO(b/261029387): not yet supported
-            dataActivityDirection = (activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel(),
-            carrierNetworkChangeActive = carrierNetworkChange,
-            resolvedNetworkType = dataType.toResolvedNetworkType()
-        )
-    }
 
     private fun SignalIcon.MobileIconGroup?.toResolvedNetworkType(): ResolvedNetworkType {
         val key = mobileMappingsReverseLookup.value[this] ?: "dis"
@@ -263,17 +326,8 @@ constructor(
     }
 }
 
-class DemoMobileConnectionRepository(
-    override val subId: Int,
-    override val tableLogBuffer: TableLogBuffer,
-) : MobileConnectionRepository {
-    override val connectionInfo = MutableStateFlow(MobileConnectionModel())
-
-    override val numberOfLevels = MutableStateFlow(DEFAULT_NUM_LEVELS)
-
-    override val dataEnabled = MutableStateFlow(true)
-
-    override val cdmaRoaming = MutableStateFlow(false)
-
-    override val networkName = MutableStateFlow(NetworkNameModel.Derived("demo network"))
-}
+class CacheContainer(
+    var repo: DemoMobileConnectionRepository,
+    /** The last received [Mobile] event. Used when switching from carrier merged back to mobile. */
+    var lastMobileState: Mobile?,
+)

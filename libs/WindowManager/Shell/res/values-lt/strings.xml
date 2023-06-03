@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Viršutinis ekranas 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Viršutinis ekranas 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Apatinis ekranas viso ekrano režimu"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Išskaidyti kairėn"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Išskaidyti dešinėn"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Išskaidyti viršuje"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Išskaidyti apačioje"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Vienos rankos režimo naudojimas"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Jei norite išeiti, perbraukite aukštyn nuo ekrano apačios arba palieskite bet kur virš programos"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Pradėti vienos rankos režimą"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dukart palieskite už programos ribų, kad pakeistumėte jos poziciją"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Supratau"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Išskleiskite, jei reikia daugiau informacijos."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Paleisti iš naujo, kad būtų geresnis vaizdas?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Galite iš naujo paleisti programą, kad ji geriau atrodytų ekrane, bet galite prarasti eigą ir neišsaugotus pakeitimus"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Atšaukti"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Paleisti iš naujo"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Daugiau neberodyti"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Dukart palieskite, kad\nperkeltumėte šią programą"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Padidinti"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Sumažinti"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Uždaryti"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Atgal"</string>
     <string name="handle_text" msgid="1766582106752184456">"Rankenėlė"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Programos piktograma"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Visas ekranas"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Stalinio kompiuterio režimas"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Išskaidyto ekrano režimas"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Daugiau"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Slankusis langas"</string>
+    <string name="select_text" msgid="5139083974039906583">"Pasirinkti"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Ekrano kopija"</string>
+    <string name="close_text" msgid="4986518933445178928">"Uždaryti"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Uždaryti meniu"</string>
 </resources>

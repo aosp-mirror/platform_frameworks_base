@@ -21,6 +21,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import com.android.systemui.R
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarView
 import com.android.systemui.statusbar.pipeline.wifi.ui.binder.WifiViewBinder
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
@@ -33,6 +34,15 @@ class ModernStatusBarWifiView(
     context: Context,
     attrs: AttributeSet?,
 ) : ModernStatusBarView(context, attrs) {
+
+    override fun toString(): String {
+        return "ModernStatusBarWifiView(" +
+            "slot='$slot', " +
+            "isCollecting=${binding.isCollecting()}, " +
+            "visibleState=${StatusBarIconView.getVisibleStateString(visibleState)}); " +
+            "viewString=${super.toString()}"
+    }
+
     companion object {
         /**
          * Inflates a new instance of [ModernStatusBarWifiView], binds it to a view model, and
@@ -45,12 +55,9 @@ class ModernStatusBarWifiView(
             slot: String,
             wifiViewModel: LocationBasedWifiViewModel,
         ): ModernStatusBarWifiView {
-            return (
-                LayoutInflater.from(context).inflate(R.layout.new_status_bar_wifi_group, null)
-                    as ModernStatusBarWifiView
-                ).also {
-                    it.initView(slot) { WifiViewBinder.bind(it, wifiViewModel) }
-                }
+            return (LayoutInflater.from(context).inflate(R.layout.new_status_bar_wifi_group, null)
+                    as ModernStatusBarWifiView)
+                .also { it.initView(slot) { WifiViewBinder.bind(it, wifiViewModel) } }
         }
     }
 }

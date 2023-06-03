@@ -36,7 +36,6 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -68,7 +67,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var applicationInfo: ApplicationInfo
     @Mock
-    private lateinit var logger: MediaTttLogger<ChipReceiverInfo>
+    private lateinit var logger: MediaTttReceiverLogger
     @Mock
     private lateinit var accessibilityManager: AccessibilityManager
     @Mock
@@ -85,6 +84,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var commandQueue: CommandQueue
+    @Mock
+    private lateinit var rippleController: MediaTttReceiverRippleController
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
@@ -134,6 +135,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             viewUtil,
             fakeWakeLockBuilder,
             fakeClock,
+            rippleController,
         )
         controllerReceiver.start()
 
@@ -163,6 +165,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             viewUtil,
             fakeWakeLockBuilder,
             fakeClock,
+            rippleController,
         )
         controllerReceiver.start()
 
@@ -351,7 +354,11 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 
         val view = getChipView()
         assertThat(view.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
-        assertThat(view.getAppIconView().contentDescription).isEqualTo(APP_NAME)
+        assertThat(view.getAppIconView().contentDescription)
+            .isEqualTo(context.getString(
+                R.string.media_transfer_receiver_content_description_with_app_name,
+                APP_NAME,
+            ))
     }
 
     @Test

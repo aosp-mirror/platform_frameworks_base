@@ -48,6 +48,8 @@ import javax.inject.Inject;
 public class DataSaverTile extends QSTileImpl<BooleanState> implements
         DataSaverController.Listener{
 
+    public static final String TILE_SPEC = "saver";
+
     private static final String INTERACTION_JANK_TAG = "start_data_saver";
 
     private final DataSaverController mDataSaverController;

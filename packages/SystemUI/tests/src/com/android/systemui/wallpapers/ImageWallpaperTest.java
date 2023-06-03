@@ -32,13 +32,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.intThat;
 
+import android.app.ActivityManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
-import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Surface;
@@ -49,6 +49,7 @@ import android.view.WindowMetrics;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -81,11 +82,13 @@ public class ImageWallpaperTest extends SysuiTestCase {
     private Surface mSurface;
     @Mock
     private Context mMockContext;
+    @Mock
+    private UserTracker mUserTracker;
 
     @Mock
     private Bitmap mWallpaperBitmap;
     FakeSystemClock mFakeSystemClock = new FakeSystemClock();
-    FakeExecutor mFakeBackgroundExecutor = new FakeExecutor(mFakeSystemClock);
+    FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
 
     @Before
     public void setUp() throws Exception {
@@ -108,18 +111,21 @@ public class ImageWallpaperTest extends SysuiTestCase {
         when(mWallpaperBitmap.getConfig()).thenReturn(Bitmap.Config.ARGB_8888);
 
         // set up wallpaper manager
-        when(mWallpaperManager.getBitmapAsUser(eq(UserHandle.USER_CURRENT), anyBoolean()))
+        when(mWallpaperManager.getBitmapAsUser(eq(ActivityManager.getCurrentUser()), anyBoolean()))
                 .thenReturn(mWallpaperBitmap);
         when(mMockContext.getSystemService(WallpaperManager.class)).thenReturn(mWallpaperManager);
 
         // set up surface
         when(mSurfaceHolder.getSurface()).thenReturn(mSurface);
         doNothing().when(mSurface).hwuiDestroy();
+
+        // set up UserTracker
+        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
     }
 
     @Test
     public void testBitmapWallpaper_normal() {
-        // Will use a image wallpaper with dimensions DISPLAY_WIDTH x DISPLAY_WIDTH.
+        // Will use an image wallpaper with dimensions DISPLAY_WIDTH x DISPLAY_WIDTH.
         // Then we expect the surface size will be also DISPLAY_WIDTH x DISPLAY_WIDTH.
         int bitmapSide = DISPLAY_WIDTH;
         testSurfaceHelper(
@@ -131,7 +137,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
 
     @Test
     public void testBitmapWallpaper_low_resolution() {
-        // Will use a image wallpaper with dimensions BMP_WIDTH x BMP_HEIGHT.
+        // Will use an image wallpaper with dimensions BMP_WIDTH x BMP_HEIGHT.
         // Then we expect the surface size will be also BMP_WIDTH x BMP_HEIGHT.
         testSurfaceHelper(LOW_BMP_WIDTH /* bitmapWidth */,
                 LOW_BMP_HEIGHT /* bitmapHeight */,
@@ -155,13 +161,13 @@ public class ImageWallpaperTest extends SysuiTestCase {
         ImageWallpaper.CanvasEngine spyEngine = getSpyEngine();
         spyEngine.onCreate(mSurfaceHolder);
         spyEngine.onSurfaceRedrawNeeded(mSurfaceHolder);
-        assertThat(mFakeBackgroundExecutor.numPending()).isAtLeast(1);
+        assertThat(mFakeExecutor.numPending()).isAtLeast(1);
 
         int n = 0;
-        while (mFakeBackgroundExecutor.numPending() >= 1) {
+        while (mFakeExecutor.numPending() >= 1) {
             n++;
             assertThat(n).isAtMost(10);
-            mFakeBackgroundExecutor.runNextReady();
+            mFakeExecutor.runNextReady();
             mFakeSystemClock.advanceTime(1000);
         }
 
@@ -170,7 +176,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
     }
 
     private ImageWallpaper createImageWallpaper() {
-        return new ImageWallpaper(mFakeBackgroundExecutor) {
+        return new ImageWallpaper(mFakeExecutor, mUserTracker) {
             @Override
             public Engine onCreateEngine() {
                 return new CanvasEngine() {

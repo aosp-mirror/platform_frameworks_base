@@ -211,6 +211,12 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         IOnBackInvokedCallback getIOnBackInvokedCallback() {
             return mIOnBackInvokedCallback;
         }
+
+        @Override
+        public String toString() {
+            return "ImeCallback=ImeOnBackInvokedCallback@" + mId
+                    + " Callback=" + mIOnBackInvokedCallback;
+        }
     }
 
     /**

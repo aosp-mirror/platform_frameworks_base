@@ -48,7 +48,10 @@ constructor(
                 setOf(
                     ViewIdToTranslate(R.id.quick_settings_panel, START, filterShade),
                     ViewIdToTranslate(R.id.notification_stack_scroller, END, filterShade),
-                    ViewIdToTranslate(R.id.rightLayout, END, filterShade),
+                    ViewIdToTranslate(R.id.statusIcons, END, filterShade),
+                    ViewIdToTranslate(R.id.privacy_container, END, filterShade),
+                    ViewIdToTranslate(R.id.batteryRemainingIcon, END, filterShade),
+                    ViewIdToTranslate(R.id.carrier_group, END, filterShade),
                     ViewIdToTranslate(R.id.clock, START, filterShade),
                     ViewIdToTranslate(R.id.date, START, filterShade)),
             progressProvider = progressProvider)

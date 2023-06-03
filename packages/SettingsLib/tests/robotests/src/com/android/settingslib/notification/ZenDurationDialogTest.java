@@ -16,6 +16,8 @@
 
 package com.android.settingslib.notification;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -204,5 +206,28 @@ public class ZenDurationDialogTest {
         mController.onClickTimeButton(view, tag, true,
                 ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
         assertEquals(120, tag.countdownZenDuration);
+    }
+
+    @Test
+    public void testAccessibility() {
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
+                Settings.Secure.ZEN_DURATION_FOREVER);
+        mController.setupDialog(mBuilder);
+        ZenDurationDialog.ConditionTag forever = mController.getConditionTagAt(
+                ZenDurationDialog.FOREVER_CONDITION_INDEX);
+        ZenDurationDialog.ConditionTag countdown = mController.getConditionTagAt(
+                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+        ZenDurationDialog.ConditionTag alwaysAsk = mController.getConditionTagAt(
+                ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX);
+
+        forever.rb.setChecked(true);
+        assertThat(forever.line1.getStateDescription().toString()).isEqualTo("selected");
+        assertThat(countdown.line1.getStateDescription()).isNull();
+        assertThat(alwaysAsk.line1.getStateDescription()).isNull();
+
+        alwaysAsk.rb.setChecked(true);
+        assertThat(forever.line1.getStateDescription()).isNull();
+        assertThat(countdown.line1.getStateDescription()).isNull();
+        assertThat(alwaysAsk.line1.getStateDescription().toString()).isEqualTo("selected");
     }
 }

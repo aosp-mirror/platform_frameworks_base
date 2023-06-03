@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ضبط حجم النافذة العلوية ليكون ٥٠%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ضبط حجم النافذة العلوية ليكون ٣٠%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"عرض النافذة السفلية بملء الشاشة"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"تقسيم لليسار"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"تقسيم لليمين"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"تقسيم للأعلى"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"تقسيم للأسفل"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"استخدام وضع \"التصفح بيد واحدة\""</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"للخروج، مرِّر سريعًا من أسفل الشاشة إلى أعلاها أو انقر في أي مكان فوق التطبيق."</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"بدء وضع \"التصفح بيد واحدة\""</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"انقر مرّتين خارج تطبيق لتغيير موضعه."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"حسنًا"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"التوسيع للحصول على مزيد من المعلومات"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"هل تريد إعادة تشغيل التطبيق لعرضه بشكل أفضل؟"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"يمكنك إعادة تشغيل التطبيق حتى يظهر بشكل أفضل على شاشتك، ولكن قد تفقد تقدمك أو أي تغييرات غير محفوظة."</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"إلغاء"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"إعادة التشغيل"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"عدم عرض مربّع حوار التأكيد مجددًا"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"انقر مرّتَين لنقل\nهذا التطبيق."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"تكبير"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"تصغير"</string>
     <string name="close_button_text" msgid="2913281996024033299">"إغلاق"</string>
     <string name="back_button_text" msgid="1469718707134137085">"رجوع"</string>
     <string name="handle_text" msgid="1766582106752184456">"مقبض"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"رمز التطبيق"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"ملء الشاشة"</string>
     <string name="desktop_text" msgid="1077633567027630454">"وضع سطح المكتب"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"تقسيم الشاشة"</string>
     <string name="more_button_text" msgid="3655388105592893530">"المزيد"</string>
     <string name="float_button_text" msgid="9221657008391364581">"نافذة عائمة"</string>
+    <string name="select_text" msgid="5139083974039906583">"اختيار"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"لقطة شاشة"</string>
+    <string name="close_text" msgid="4986518933445178928">"إغلاق"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"إغلاق القائمة"</string>
 </resources>

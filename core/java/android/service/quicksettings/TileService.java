@@ -506,7 +506,7 @@ public class TileService extends Service {
      *     the calling package or if the calling user cannot act on behalf of the user from the
      *     {@code context}.</li>
      *     <li> {@link IllegalArgumentException} if the user of the {@code context} is not the
-     *     current user.</li>
+     *     current user. Only thrown for apps targeting {@link Build.VERSION_CODES#TIRAMISU}</li>
      * </ul>
      */
     public static final void requestListeningState(Context context, ComponentName component) {

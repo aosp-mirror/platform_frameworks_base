@@ -42,14 +42,30 @@ constructor(@MediaCarouselControllerLog private val buffer: LogBuffer) {
             }
         )
 
-    fun logMediaLoaded(key: String) =
-        buffer.log(TAG, LogLevel.DEBUG, { str1 = key }, { "add player $str1" })
+    fun logMediaLoaded(key: String, active: Boolean) =
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = key
+                bool1 = active
+            },
+            { "add player $str1, active: $bool1" }
+        )
 
     fun logMediaRemoved(key: String) =
         buffer.log(TAG, LogLevel.DEBUG, { str1 = key }, { "removing player $str1" })
 
-    fun logRecommendationLoaded(key: String) =
-        buffer.log(TAG, LogLevel.DEBUG, { str1 = key }, { "add recommendation $str1" })
+    fun logRecommendationLoaded(key: String, isActive: Boolean) =
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = key
+                bool1 = isActive
+            },
+            { "add recommendation $str1, active $bool1" }
+        )
 
     fun logRecommendationRemoved(key: String, immediately: Boolean) =
         buffer.log(
@@ -61,6 +77,10 @@ constructor(@MediaCarouselControllerLog private val buffer: LogBuffer) {
             },
             { "removing recommendation $str1, immediate=$bool1" }
         )
+
+    fun logCarouselHidden() = buffer.log(TAG, LogLevel.DEBUG, {}, { "hiding carousel" })
+
+    fun logCarouselVisible() = buffer.log(TAG, LogLevel.DEBUG, {}, { "showing carousel" })
 }
 
 private const val TAG = "MediaCarouselCtlrLog"

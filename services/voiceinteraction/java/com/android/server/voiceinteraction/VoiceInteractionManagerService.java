@@ -95,7 +95,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.LatencyTracker;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -404,6 +403,10 @@ public class VoiceInteractionManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             final long caller = Binder.clearCallingIdentity();
             try {
+                // HotwordDetector trigger uses VoiceInteractionService#showSession
+                // We need to cancel here because UI is not being shown due to a SoundTrigger
+                // HAL event.
+                HotwordMetricsLogger.cancelHotwordTriggerToUiLatencySession(mContext);
                 mImpl.showSessionLocked(options,
                         VoiceInteractionSession.SHOW_SOURCE_ACTIVITY,
                         new IVoiceInteractionSessionShowCallback.Stub() {
@@ -953,6 +956,13 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (mImpl == null) {
                     Slog.w(TAG, "showSessionFromSession without running voice interaction service");
                     return false;
+                }
+                // If the token is null, then the request to show the session is not coming from
+                // the active VoiceInteractionService session.
+                // We need to cancel here because UI is not being shown due to a SoundTrigger
+                // HAL event.
+                if (token == null) {
+                    HotwordMetricsLogger.cancelHotwordTriggerToUiLatencySession(mContext);
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
@@ -1718,6 +1728,11 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
+                    // HotwordDetector trigger uses VoiceInteractionService#showSession
+                    // We need to cancel here because UI is not being shown due to a SoundTrigger
+                    // HAL event.
+                    HotwordMetricsLogger.cancelHotwordTriggerToUiLatencySession(mContext);
+
                     return mImpl.showSessionLocked(args,
                             sourceFlags
                                     | VoiceInteractionSession.SHOW_WITH_ASSIST
@@ -2361,8 +2376,11 @@ public class VoiceInteractionManagerService extends SystemService {
                 public void onVoiceSessionWindowVisibilityChanged(boolean visible)
                         throws RemoteException {
                     if (visible) {
-                        LatencyTracker.getInstance(mContext)
-                                .onActionEnd(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION);
+                        // The AlwaysOnHotwordDetector trigger latency is always completed here even
+                        // if the reason the window was shown was not due to a SoundTrigger HAL
+                        // event. It is expected that the latency will be canceled if shown for
+                        // other invocation reasons, and this call becomes a noop.
+                        HotwordMetricsLogger.stopHotwordTriggerToUiLatencySession(mContext);
                     }
                 }
 

@@ -51,7 +51,7 @@ object CustomizationProviderContract {
          *
          * Supported operations:
          * - Query - to know which slots are available, query the [SlotTable.URI] [Uri]. The result
-         * set will contain rows with the [SlotTable.Columns] columns.
+         *   set will contain rows with the [SlotTable.Columns] columns.
          */
         object SlotTable {
             const val TABLE_NAME = "slots"
@@ -74,8 +74,8 @@ object CustomizationProviderContract {
          *
          * Supported operations:
          * - Query - to know about all the affordances that are available on the device, regardless
-         * of which ones are currently selected, query the [AffordanceTable.URI] [Uri]. The result
-         * set will contain rows, each with the columns specified in [AffordanceTable.Columns].
+         *   of which ones are currently selected, query the [AffordanceTable.URI] [Uri]. The result
+         *   set will contain rows, each with the columns specified in [AffordanceTable.Columns].
          */
         object AffordanceTable {
             const val TABLE_NAME = "affordances"
@@ -113,6 +113,11 @@ object CustomizationProviderContract {
                  * opens a destination where the user can re-enable the disabled affordance.
                  */
                 const val ENABLEMENT_COMPONENT_NAME = "enablement_action_intent"
+                /**
+                 * Byte array. Optional parcelled `Intent` to use to start an activity that can be
+                 * used to configure the affordance.
+                 */
+                const val CONFIGURE_INTENT = "configure_intent"
             }
         }
 
@@ -123,14 +128,14 @@ object CustomizationProviderContract {
          *
          * Supported operations:
          * - Insert - to insert an affordance and place it in a slot, insert values for the columns
-         * into the [SelectionTable.URI] [Uri]. The maximum capacity rule is enforced by the system.
-         * Selecting a new affordance for a slot that is already full will automatically remove the
-         * oldest affordance from the slot.
+         *   into the [SelectionTable.URI] [Uri]. The maximum capacity rule is enforced by the
+         *   system. Selecting a new affordance for a slot that is already full will automatically
+         *   remove the oldest affordance from the slot.
          * - Query - to know which affordances are set on which slots, query the
-         * [SelectionTable.URI] [Uri]. The result set will contain rows, each of which with the
-         * columns from [SelectionTable.Columns].
+         *   [SelectionTable.URI] [Uri]. The result set will contain rows, each of which with the
+         *   columns from [SelectionTable.Columns].
          * - Delete - to unselect an affordance, removing it from a slot, delete from the
-         * [SelectionTable.URI] [Uri], passing in values for each column.
+         *   [SelectionTable.URI] [Uri], passing in values for each column.
          */
         object SelectionTable {
             const val TABLE_NAME = "selections"
@@ -155,7 +160,7 @@ object CustomizationProviderContract {
      *
      * Supported operations:
      * - Query - to know the values of flags, query the [FlagsTable.URI] [Uri]. The result set will
-     * contain rows, each of which with the columns from [FlagsTable.Columns].
+     *   contain rows, each of which with the columns from [FlagsTable.Columns].
      */
     object FlagsTable {
         const val TABLE_NAME = "flags"
@@ -172,6 +177,15 @@ object CustomizationProviderContract {
 
         /** Flag denoting whether the customizable clocks feature is enabled. */
         const val FLAG_NAME_CUSTOM_CLOCKS_ENABLED = "is_custom_clocks_feature_enabled"
+
+        /** Flag denoting whether the Wallpaper preview should use the full screen UI. */
+        const val FLAG_NAME_WALLPAPER_FULLSCREEN_PREVIEW = "wallpaper_fullscreen_preview"
+
+        /** Flag denoting whether the Monochromatic Theme is enabled. */
+        const val FLAG_NAME_MONOCHROMATIC_THEME = "is_monochromatic_theme_enabled"
+
+        /** Flag denoting AI Wallpapers are enabled in wallpaper picker. */
+        const val FLAG_NAME_WALLPAPER_PICKER_UI_FOR_AIWP = "wallpaper_picker_ui_for_aiwp"
 
         object Columns {
             /** String. Unique ID for the flag. */

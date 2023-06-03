@@ -38,11 +38,18 @@ namespace renderthread {
 RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
                          IContextFactory* contextFactory)
         : mRenderThread(RenderThread::getInstance()), mContext(nullptr) {
-    mContext = mRenderThread.queue().runSync([&]() -> CanvasContext* {
-        return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory);
+    pid_t uiThreadId = pthread_gettid_np(pthread_self());
+    pid_t renderThreadId = getRenderThreadTid();
+    mContext = mRenderThread.queue().runSync([=, this]() -> CanvasContext* {
+        CanvasContext* context =
+                CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory);
+        if (context != nullptr) {
+            mRenderThread.queue().post(
+                    [=] { mDrawFrameTask.createHintSession(uiThreadId, renderThreadId); });
+        }
+        return context;
     });
-    mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode,
-                              pthread_gettid_np(pthread_self()), getRenderThreadTid());
+    mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode, uiThreadId, renderThreadId);
 }
 
 RenderProxy::~RenderProxy() {

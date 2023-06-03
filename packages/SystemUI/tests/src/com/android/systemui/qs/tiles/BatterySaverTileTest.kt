@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -100,6 +101,12 @@ class BatterySaverTileTest : SysuiTestCase() {
                 secureSettings)
 
         tile.initialize()
+        testableLooper.processAllMessages()
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
         testableLooper.processAllMessages()
     }
 

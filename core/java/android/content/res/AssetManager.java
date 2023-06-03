@@ -1453,6 +1453,16 @@ public final class AssetManager implements AutoCloseable {
     }
 
     /**
+     * @hide
+     */
+    Configuration[] getSizeAndUiModeConfigurations() {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeGetSizeAndUiModeConfigurations(mObject);
+        }
+    }
+
+    /**
      * Change the configuration used when retrieving resources.  Not for use by
      * applications.
      * @hide
@@ -1603,6 +1613,7 @@ public final class AssetManager implements AutoCloseable {
     private static native @Nullable String nativeGetResourceEntryName(long ptr, @AnyRes int resid);
     private static native @Nullable String[] nativeGetLocales(long ptr, boolean excludeSystem);
     private static native @Nullable Configuration[] nativeGetSizeConfigurations(long ptr);
+    private static native @Nullable Configuration[] nativeGetSizeAndUiModeConfigurations(long ptr);
     private static native void nativeSetResourceResolutionLoggingEnabled(long ptr, boolean enabled);
     private static native @Nullable String nativeGetLastResourceResolution(long ptr);
 

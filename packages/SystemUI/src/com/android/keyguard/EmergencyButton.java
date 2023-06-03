@@ -24,7 +24,6 @@ import android.view.ViewConfiguration;
 import android.widget.Button;
 
 import com.android.internal.util.EmergencyAffordanceManager;
-import com.android.internal.widget.LockPatternUtils;
 
 /**
  * This class implements a smart emergency button that updates itself based
@@ -39,8 +38,6 @@ public class EmergencyButton extends Button {
     private int mDownX;
     private int mDownY;
     private boolean mLongPressWasDragged;
-
-    private LockPatternUtils mLockPatternUtils;
 
     private final boolean mEnableEmergencyCallWhileSimLocked;
 
@@ -58,7 +55,6 @@ public class EmergencyButton extends Button {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mLockPatternUtils = new LockPatternUtils(mContext);
         if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
             setOnLongClickListener(v -> {
                 if (!mLongPressWasDragged
@@ -95,7 +91,8 @@ public class EmergencyButton extends Button {
         return super.performLongClick();
     }
 
-    void updateEmergencyCallButton(boolean isInCall, boolean hasTelephonyRadio, boolean simLocked) {
+    void updateEmergencyCallButton(boolean isInCall, boolean hasTelephonyRadio, boolean simLocked,
+            boolean isSecure) {
         boolean visible = false;
         if (hasTelephonyRadio) {
             // Emergency calling requires a telephony radio.
@@ -107,7 +104,7 @@ public class EmergencyButton extends Button {
                     visible = mEnableEmergencyCallWhileSimLocked;
                 } else {
                     // Only show if there is a secure screen (pin/pattern/SIM pin/SIM puk);
-                    visible = mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser());
+                    visible = isSecure;
                 }
             }
         }

@@ -217,9 +217,11 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private void animate(float progress) {
         Interpolator standardDecelerate = Interpolators.STANDARD_DECELERATE;
         Interpolator legacyDecelerate = Interpolators.LEGACY_DECELERATE;
+        float standardProgress = standardDecelerate.getInterpolation(progress);
 
         mBouncerMessageView.setTranslationY(
-                mYTrans - mYTrans * standardDecelerate.getInterpolation(progress));
+                mYTrans - mYTrans * standardProgress);
+        mBouncerMessageView.setAlpha(standardProgress);
 
         for (int i = 0; i < mViews.length; i++) {
             View[] row = mViews[i];
@@ -236,7 +238,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 view.setAlpha(scaledProgress);
                 int yDistance = mYTrans + mYTransOffset * i;
                 view.setTranslationY(
-                        yDistance - (yDistance * standardDecelerate.getInterpolation(progress)));
+                        yDistance - (yDistance * standardProgress));
                 if (view instanceof NumPadAnimationListener) {
                     ((NumPadAnimationListener) view).setProgress(scaledProgress);
                 }

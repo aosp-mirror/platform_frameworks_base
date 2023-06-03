@@ -17,6 +17,7 @@
 package com.android.systemui.controls.management
 
 import android.app.ActivityOptions
+import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -31,12 +32,15 @@ import android.widget.TextView
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
+import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.controls.ui.ControlsActivity
-import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.UserTracker
@@ -52,7 +56,8 @@ open class ControlsProviderSelectorActivity @Inject constructor(
     private val listingController: ControlsListingController,
     private val controlsController: ControlsController,
     private val userTracker: UserTracker,
-    private val uiController: ControlsUiController
+    private val authorizedPanelsRepository: AuthorizedPanelsRepository,
+    private val panelConfirmationDialogFactory: PanelConfirmationDialogFactory
 ) : ComponentActivity() {
 
     companion object {
@@ -72,6 +77,7 @@ open class ControlsProviderSelectorActivity @Inject constructor(
             }
         }
     }
+    private var dialog: Dialog? = null
 
     private val mOnBackInvokedCallback = OnBackInvokedCallback {
         if (DEBUG) {
@@ -138,9 +144,11 @@ open class ControlsProviderSelectorActivity @Inject constructor(
                 lifecycle,
                 listingController,
                 LayoutInflater.from(this),
-                ::launchFavoritingActivity,
+                ::onAppSelected,
                 FavoritesRenderer(resources, controlsController::countFavoritesForComponent),
-                resources).apply {
+                resources,
+                authorizedPanelsRepository.getAuthorizedPanels()
+        ).apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 var hasAnimated = false
                 override fun onChanged() {
@@ -167,13 +175,35 @@ open class ControlsProviderSelectorActivity @Inject constructor(
             Log.d(TAG, "Unregistered onBackInvokedCallback")
         }
         onBackInvokedDispatcher.unregisterOnBackInvokedCallback(mOnBackInvokedCallback)
+        dialog?.cancel()
+    }
+
+    fun onAppSelected(serviceInfo: ControlsServiceInfo) {
+        dialog?.cancel()
+        if (serviceInfo.panelActivity == null) {
+            launchFavoritingActivity(serviceInfo.componentName)
+        } else {
+            val appName = serviceInfo.loadLabel() ?: ""
+            dialog = panelConfirmationDialogFactory.createConfirmationDialog(this, appName) { ok ->
+                if (ok) {
+                    authorizedPanelsRepository.addAuthorizedPanels(
+                            setOf(serviceInfo.componentName.packageName)
+                    )
+                    val selected = SelectedItem.PanelItem(appName, componentName)
+                    controlsController.setPreferredSelection(selected)
+                    animateExitAndFinish()
+                    openControlsOrigin()
+                }
+                dialog = null
+            }.also { it.show() }
+        }
     }
 
     /**
      * Launch the [ControlsFavoritingActivity] for the specified component.
      * @param component a component name for a [ControlsProviderService]
      */
-    fun launchFavoritingActivity(component: ComponentName?) {
+    private fun launchFavoritingActivity(component: ComponentName?) {
         executor.execute {
             component?.let {
                 val intent = Intent(applicationContext, ControlsFavoritingActivity::class.java)
@@ -194,7 +224,15 @@ open class ControlsProviderSelectorActivity @Inject constructor(
         super.onDestroy()
     }
 
-    private fun animateExitAndFinish() {
+    private fun openControlsOrigin() {
+        startActivity(
+                Intent(applicationContext, ControlsActivity::class.java),
+                ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+        )
+    }
+
+    @VisibleForTesting
+    internal open fun animateExitAndFinish() {
         val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         ControlsAnimations.exitAnimation(
                 rootView,

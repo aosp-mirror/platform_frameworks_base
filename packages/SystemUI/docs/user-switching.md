@@ -6,7 +6,7 @@ Multiple users and the ability to switch between them is controlled by Settings 
 
 ### Quick Settings
 
-In the QS footer, an icon becomes available for users to tap on. The view and its onClick actions are handled by [MultiUserSwitchController][2]. Multiple visual implementations are currently in use; one for phones/foldables ([UserSwitchDialogController][6]) and one for tablets ([UserSwitcherActivity][5]).
+In the QS footer, an icon becomes available for users to tap on. The view and its onClick actions are handled by [MultiUserSwitchController][2]. Multiple visual implementations are currently in use; one for phones/foldables ([UserSwitchDialogController][6]) and one for tablets ([UserSwitcherFullscreenDialog][5]).
 
 ### Bouncer
 
@@ -29,7 +29,7 @@ All visual implementations should derive their logic and use the adapter specifi
 
 ## Visual Components
 
-### [UserSwitcherActivity][5]
+### [UserSwitcherFullscreenDialog][5]
 
 A fullscreen user switching activity, supporting add guest/user actions if configured.
 
@@ -41,5 +41,5 @@ Renders user switching as a dialog over the current surface, and supports add gu
 [2]: /frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/MultiUserController.java
 [3]: /frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/UserSwitcherController.java
 [4]: /frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/KeyguardQsUserSwitchController.java
-[5]: /frameworks/base/packages/SystemUI/src/com/android/systemui/user/UserSwitcherActivity.kt
+[5]: /frameworks/base/packages/SystemUI/src/com/android/systemui/user/UserSwitcherFullscreenDialog.kt
 [6]: /frameworks/base/packages/SystemUI/src/com/android/systemui/qs/user/UserSwitchDialogController.kt

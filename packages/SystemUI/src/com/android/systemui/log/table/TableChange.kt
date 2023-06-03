@@ -27,7 +27,7 @@ data class TableChange(
     var columnName: String = "",
     var type: DataType = DataType.EMPTY,
     var bool: Boolean = false,
-    var int: Int = 0,
+    var int: Int? = null,
     var str: String? = null,
 ) {
     /** Resets to default values so that the object can be recycled. */
@@ -54,9 +54,20 @@ data class TableChange(
     }
 
     /** Sets this to store an int change. */
-    fun set(value: Int) {
+    fun set(value: Int?) {
         type = DataType.INT
         int = value
+    }
+
+    /** Updates this to store the same value as [change]. */
+    fun updateTo(change: TableChange) {
+        reset(change.timestamp, change.columnPrefix, change.columnName)
+        when (change.type) {
+            DataType.STRING -> set(change.str)
+            DataType.INT -> set(change.int)
+            DataType.BOOLEAN -> set(change.bool)
+            DataType.EMPTY -> {}
+        }
     }
 
     /** Returns true if this object has a change. */

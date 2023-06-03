@@ -4831,6 +4831,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.w(TAG, "Ignoring setInputMethod of uid " + Binder.getCallingUid()
                     + " token: " + token);
             return;
+        } else {
+            // Called with current IME's token.
+            if (mMethodMap.get(id) != null
+                    && mSettings.getEnabledInputMethodListWithFilterLocked(
+                            (info) -> info.getId().equals(id)).isEmpty()) {
+                throw new IllegalStateException("Requested IME is not enabled: " + id);
+            }
         }
 
         final long ident = Binder.clearCallingIdentity();

@@ -243,7 +243,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV opcijas"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Tālruņa opcijas"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Ekrāna bloķētājs"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"Izslēgt strāvas padevi"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"Izslēgt"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Barošana"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Restartēt"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Ārkārtas situācija"</string>
@@ -343,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Var uztvert žestus ierīces pirksta nospieduma sensorā."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ekrānuzņēmuma izveide"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Var izveidot displeja ekrānuzņēmumu."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> (priekšskatījums)"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"atspējot vai pārveidot statusa joslu"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ļauj lietotnei atspējot statusa joslu vai pievienot un noņemt sistēmas ikonas."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Būt par statusa joslu"</string>
@@ -1841,6 +1842,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Skatīšanās pilnekrāna režīmā"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Lai izietu, no augšdaļas velciet lejup."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Labi"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Lai uzlabotu skatu, pagrieziet ekrānu."</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Lai uzlabotu skatu, izejiet no ekrāna sadalīšanas režīma."</string>
     <string name="done_label" msgid="7283767013231718521">"Gatavs"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Stundu apļveida slīdnis"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Minūšu apļveida slīdnis"</string>

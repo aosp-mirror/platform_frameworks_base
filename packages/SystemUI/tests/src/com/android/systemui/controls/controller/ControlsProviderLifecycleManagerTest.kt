@@ -105,6 +105,22 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testBindForPanel() {
+        manager.bindServiceForPanel()
+        executor.runAllReady()
+        assertTrue(context.isBound(componentName))
+    }
+
+    @Test
+    fun testUnbindPanelIsUnbound() {
+        manager.bindServiceForPanel()
+        executor.runAllReady()
+        manager.unbindService()
+        executor.runAllReady()
+        assertFalse(context.isBound(componentName))
+    }
+
+    @Test
     fun testNullBinding() {
         val mockContext = mock(Context::class.java)
         lateinit var serviceConnection: ServiceConnection

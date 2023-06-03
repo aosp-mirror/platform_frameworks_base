@@ -24,18 +24,16 @@ import com.android.systemui.R
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.CONTROLS_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.DETAILS_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.DURATION
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.MEDIACONTAINERS_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.MEDIATITLES_DELAY
 import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.calculateAlpha
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionLayoutController
 import com.android.systemui.util.animation.TransitionViewState
 import com.android.systemui.util.traceSection
+import java.lang.Float.max
+import java.lang.Float.min
 import javax.inject.Inject
 
 /**
@@ -48,7 +46,8 @@ constructor(
     private val context: Context,
     private val configurationController: ConfigurationController,
     private val mediaHostStatesManager: MediaHostStatesManager,
-    private val logger: MediaViewLogger
+    private val logger: MediaViewLogger,
+    private val mediaFlags: MediaFlags,
 ) {
 
     /**
@@ -80,6 +79,7 @@ constructor(
             setOf(
                 R.id.header_title,
                 R.id.header_artist,
+                R.id.media_explicit_indicator,
                 R.id.actionPlayPause,
             )
 
@@ -89,6 +89,9 @@ constructor(
                 R.id.turbulence_noise_view,
                 R.id.touch_ripple_view,
             )
+
+        // Sizing view id for recommendation card view.
+        val recSizingViewId = R.id.sizing_view
     }
 
     /** A listener when the current dimensions of the player change */
@@ -154,9 +157,11 @@ constructor(
             return transitionLayout?.translationY ?: 0.0f
         }
 
-    /** A callback for RTL config changes */
+    /** A callback for config changes */
     private val configurationListener =
         object : ConfigurationController.ConfigurationListener {
+            var lastOrientation = -1
+
             override fun onConfigChanged(newConfig: Configuration?) {
                 // Because the TransitionLayout is not always attached (and calculates/caches layout
                 // results regardless of attach state), we have to force the layoutDirection of the
@@ -168,6 +173,27 @@ constructor(
                     if (transitionLayout?.rawLayoutDirection != layoutDirection) {
                         transitionLayout?.layoutDirection = layoutDirection
                         refreshState()
+                    }
+                    val newOrientation = newConfig.orientation
+                    if (lastOrientation != newOrientation) {
+                        // Layout dimensions are possibly changing, so we need to update them. (at
+                        // least on large screen devices)
+                        lastOrientation = newOrientation
+                        // Update the height of media controls for the expanded layout. it is needed
+                        // for large screen devices.
+                        if (type == TYPE.PLAYER) {
+                            backgroundIds.forEach { id ->
+                                expandedLayout.getConstraint(id).layout.mHeight =
+                                    context.resources.getDimensionPixelSize(
+                                        R.dimen.qs_media_session_height_expanded
+                                    )
+                            }
+                        } else {
+                            expandedLayout.getConstraint(recSizingViewId).layout.mHeight =
+                                context.resources.getDimensionPixelSize(
+                                    R.dimen.qs_media_session_height_expanded
+                                )
+                        }
                     }
                 }
             }
@@ -195,13 +221,14 @@ constructor(
      * The expanded constraint set used to render a expanded player. If it is modified, make sure to
      * call [refreshState]
      */
-    val collapsedLayout = ConstraintSet()
-
+    var collapsedLayout = ConstraintSet()
+        @VisibleForTesting set
     /**
      * The expanded constraint set used to render a collapsed player. If it is modified, make sure
      * to call [refreshState]
      */
-    val expandedLayout = ConstraintSet()
+    var expandedLayout = ConstraintSet()
+        @VisibleForTesting set
 
     /** Whether the guts are visible for the associated player. */
     var isGutsVisible = false
@@ -304,39 +331,109 @@ constructor(
         val squishedViewState = viewState.copy()
         val squishedHeight = (squishedViewState.measureHeight * squishFraction).toInt()
         squishedViewState.height = squishedHeight
-        controlIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.alpha = calculateAlpha(squishFraction, CONTROLS_DELAY, DURATION)
-            }
-        }
-
-        detailIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.alpha = calculateAlpha(squishFraction, DETAILS_DELAY, DURATION)
-            }
-        }
-
         // We are not overriding the squishedViewStates height but only the children to avoid
         // them remeasuring the whole view. Instead it just remains as the original size
         backgroundIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.height = squishedHeight
-            }
+            squishedViewState.widgetStates.get(id)?.let { state -> state.height = squishedHeight }
         }
 
-        RecommendationViewHolder.mediaContainersIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.alpha = calculateAlpha(squishFraction, MEDIACONTAINERS_DELAY, DURATION)
-            }
-        }
-
-        RecommendationViewHolder.mediaTitlesAndSubtitlesIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.alpha = calculateAlpha(squishFraction, MEDIATITLES_DELAY, DURATION)
-            }
-        }
-
+        // media player
+        calculateWidgetGroupAlphaForSquishiness(
+            controlIds,
+            squishedViewState.measureHeight.toFloat(),
+            squishedViewState,
+            squishFraction
+        )
+        calculateWidgetGroupAlphaForSquishiness(
+            detailIds,
+            squishedViewState.measureHeight.toFloat(),
+            squishedViewState,
+            squishFraction
+        )
+        // recommendation card
+        val titlesTop =
+            calculateWidgetGroupAlphaForSquishiness(
+                RecommendationViewHolder.mediaTitlesAndSubtitlesIds,
+                squishedViewState.measureHeight.toFloat(),
+                squishedViewState,
+                squishFraction
+            )
+        calculateWidgetGroupAlphaForSquishiness(
+            RecommendationViewHolder.mediaContainersIds,
+            titlesTop,
+            squishedViewState,
+            squishFraction
+        )
         return squishedViewState
+    }
+
+    /**
+     * This function is to make each widget in UMO disappear before being clipped by squished UMO
+     *
+     * The general rule is that widgets in UMO has been divided into several groups, and widgets in
+     * one group have the same alpha during squishing It will change from alpha 0.0 when the visible
+     * bottom of UMO reach the bottom of this group It will change to alpha 1.0 when the visible
+     * bottom of UMO reach the top of the group below e.g.Album title, artist title and play-pause
+     * button will change alpha together.
+     *
+     * ```
+     *     And their alpha becomes 1.0 when the visible bottom of UMO reach the top of controls,
+     *     including progress bar, next button, previous button
+     * ```
+     *
+     * widgetGroupIds: a group of widgets have same state during UMO is squished,
+     * ```
+     *     e.g. Album title, artist title and play-pause button
+     * ```
+     *
+     * groupEndPosition: the height of UMO, when the height reaches this value,
+     * ```
+     *     widgets in this group should have 1.0 as alpha
+     *     e.g., the group of album title, artist title and play-pause button will become fully
+     *         visible when the height of UMO reaches the top of controls group
+     *         (progress bar, previous button and next button)
+     * ```
+     *
+     * squishedViewState: hold the widgetState of each widget, which will be modified
+     * squishFraction: the squishFraction of UMO
+     */
+    private fun calculateWidgetGroupAlphaForSquishiness(
+        widgetGroupIds: Set<Int>,
+        groupEndPosition: Float,
+        squishedViewState: TransitionViewState,
+        squishFraction: Float
+    ): Float {
+        val nonsquishedHeight = squishedViewState.measureHeight
+        var groupTop = squishedViewState.measureHeight.toFloat()
+        var groupBottom = 0F
+        widgetGroupIds.forEach { id ->
+            squishedViewState.widgetStates.get(id)?.let { state ->
+                groupTop = min(groupTop, state.y)
+                groupBottom = max(groupBottom, state.y + state.height)
+            }
+        }
+        // startPosition means to the height of squished UMO where the widget alpha should start
+        // changing from 0.0
+        // generally, it equals to the bottom of widgets, so that we can meet the requirement that
+        // widget should not go beyond the bounds of background
+        // endPosition means to the height of squished UMO where the widget alpha should finish
+        // changing alpha to 1.0
+        var startPosition = groupBottom
+        val endPosition = groupEndPosition
+        if (startPosition == endPosition) {
+            startPosition = (endPosition - 0.2 * (groupBottom - groupTop)).toFloat()
+        }
+        widgetGroupIds.forEach { id ->
+            squishedViewState.widgetStates.get(id)?.let { state ->
+                state.alpha =
+                    calculateAlpha(
+                        squishFraction,
+                        startPosition / nonsquishedHeight,
+                        endPosition / nonsquishedHeight
+                    )
+            }
+        }
+        return groupTop // used for the widget group above this group
     }
 
     /**
@@ -413,7 +510,7 @@ constructor(
      */
     fun attach(transitionLayout: TransitionLayout, type: TYPE) =
         traceSection("MediaViewController#attach") {
-            updateMediaViewControllerType(type)
+            loadLayoutForType(type)
             logger.logMediaLocation("attach $type", currentStartLocation, currentEndLocation)
             this.transitionLayout = transitionLayout
             layoutController.attach(transitionLayout)
@@ -522,7 +619,11 @@ constructor(
                         tmpState
                     )
             }
-            logger.logMediaSize("setCurrentState", result.width, result.height)
+            logger.logMediaSize(
+                "setCurrentState (progress $transitionProgress)",
+                result.width,
+                result.height
+            )
             layoutController.setState(
                 result,
                 applyImmediately,
@@ -544,11 +645,13 @@ constructor(
         overrideSize?.let {
             // To be safe we're using a maximum here. The override size should always be set
             // properly though.
-            if (result.measureHeight != it.measuredHeight
-                    || result.measureWidth != it.measuredWidth) {
+            if (
+                result.measureHeight != it.measuredHeight || result.measureWidth != it.measuredWidth
+            ) {
                 result.measureHeight = Math.max(it.measuredHeight, result.measureHeight)
                 result.measureWidth = Math.max(it.measuredWidth, result.measureWidth)
-                // The measureHeight and the shown height should both be set to the overridden height
+                // The measureHeight and the shown height should both be set to the overridden
+                // height
                 result.height = result.measureHeight
                 result.width = result.measureWidth
                 // Make sure all background views are also resized such that their size is correct
@@ -569,7 +672,7 @@ constructor(
         return result
     }
 
-    private fun updateMediaViewControllerType(type: TYPE) {
+    private fun loadLayoutForType(type: TYPE) {
         this.type = type
 
         // These XML resources contain ConstraintSets that will apply to this player type's layout
@@ -579,8 +682,13 @@ constructor(
                 expandedLayout.load(context, R.xml.media_session_expanded)
             }
             TYPE.RECOMMENDATION -> {
-                collapsedLayout.load(context, R.xml.media_recommendation_collapsed)
-                expandedLayout.load(context, R.xml.media_recommendation_expanded)
+                if (mediaFlags.isRecommendationCardUpdateEnabled()) {
+                    collapsedLayout.load(context, R.xml.media_recommendations_view_collapsed)
+                    expandedLayout.load(context, R.xml.media_recommendations_view_expanded)
+                } else {
+                    collapsedLayout.load(context, R.xml.media_recommendation_collapsed)
+                    expandedLayout.load(context, R.xml.media_recommendation_expanded)
+                }
             }
         }
         refreshState()
@@ -592,7 +700,7 @@ constructor(
      *
      * @param location Target
      * @param locationWhenHidden Location that will be used when the target is not
-     * [MediaHost.visible]
+     *   [MediaHost.visible]
      * @return State require for executing a transition, and also the respective [MediaHost].
      */
     private fun obtainViewStateForLocation(@MediaLocation location: Int): TransitionViewState? {

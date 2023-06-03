@@ -36,4 +36,15 @@
     <integer name="qs_security_footer_maxLines">1</integer>
 
     <bool name="config_use_large_screen_shade_header">true</bool>
+
+    <!-- A collection of defaults for the quick affordances on the lock screen. Each item must be a
+    string with two parts: the ID of the slot and the comma-delimited list of affordance IDs,
+    separated by a colon ':' character. For example: <item>bottom_end:home,wallet</item>. The
+    default is displayed by System UI as long as the user hasn't made a different choice for that
+    slot. If the user did make a choice, even if the choice is the "None" option, the default is
+    ignored. -->
+    <string-array name="config_keyguardQuickAffordanceDefaults" translatable="false">
+        <item>bottom_start:home</item>
+        <item>bottom_end:create_note</item>
+    </string-array>
 </resources>

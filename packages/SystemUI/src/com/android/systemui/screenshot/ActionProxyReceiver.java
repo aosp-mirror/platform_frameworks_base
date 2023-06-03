@@ -16,8 +16,6 @@
 
 package com.android.systemui.screenshot;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.systemui.screenshot.ScreenshotController.ACTION_TYPE_EDIT;
 import static com.android.systemui.screenshot.ScreenshotController.ACTION_TYPE_SHARE;
 import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_INTENT;
@@ -35,6 +33,7 @@ import android.util.Log;
 import android.view.RemoteAnimationAdapter;
 import android.view.WindowManagerGlobal;
 
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
@@ -52,14 +51,17 @@ public class ActionProxyReceiver extends BroadcastReceiver {
     private final CentralSurfaces mCentralSurfaces;
     private final ActivityManagerWrapper mActivityManagerWrapper;
     private final ScreenshotSmartActions mScreenshotSmartActions;
+    private final DisplayTracker mDisplayTracker;
 
     @Inject
     public ActionProxyReceiver(Optional<CentralSurfaces> centralSurfacesOptional,
             ActivityManagerWrapper activityManagerWrapper,
-            ScreenshotSmartActions screenshotSmartActions) {
+            ScreenshotSmartActions screenshotSmartActions,
+            DisplayTracker displayTracker) {
         mCentralSurfaces = centralSurfacesOptional.orElse(null);
         mActivityManagerWrapper = activityManagerWrapper;
         mScreenshotSmartActions = screenshotSmartActions;
+        mDisplayTracker = displayTracker;
     }
 
     @Override
@@ -78,7 +80,8 @@ public class ActionProxyReceiver extends BroadcastReceiver {
                             ScreenshotController.SCREENSHOT_REMOTE_RUNNER, 0, 0);
                     try {
                         WindowManagerGlobal.getWindowManagerService()
-                                .overridePendingAppTransitionRemote(runner, DEFAULT_DISPLAY);
+                                .overridePendingAppTransitionRemote(runner,
+                                        mDisplayTracker.getDefaultDisplayId());
                     } catch (Exception e) {
                         Log.e(TAG, "Error overriding screenshot app transition", e);
                     }

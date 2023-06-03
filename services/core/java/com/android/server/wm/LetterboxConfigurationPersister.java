@@ -216,6 +216,10 @@ class LetterboxConfigurationPersister {
     }
 
     private void readCurrentConfiguration() {
+        if (!mConfigurationFile.exists()) {
+            useDefaultValue();
+            return;
+        }
         FileInputStream fis = null;
         try {
             fis = mConfigurationFile.openRead();

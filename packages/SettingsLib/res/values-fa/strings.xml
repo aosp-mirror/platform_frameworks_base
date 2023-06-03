@@ -193,7 +193,7 @@
     <string name="tts_lang_use_system" msgid="6312945299804012406">"استفاده از زبان سیستم"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"زبان انتخاب نشده است"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"صدای خاص یک زبان را برای متن گفتاری تنظیم می‌کند"</string>
-    <string name="tts_play_example_title" msgid="1599468547216481684">"به نمونه‌ای گوش کنید"</string>
+    <string name="tts_play_example_title" msgid="1599468547216481684">"شنیدن نمونه"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"قسمت کوتاهی از ترکیب گفتار پخش شود"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"نصب داده‌های صوتی"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"نصب داده‌های صوتی مورد نیاز برای ترکیب گفتار"</string>
@@ -278,7 +278,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"برنامه موقعیت مکانی ساختگی: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"شبکه"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"گواهینامه نمایش بی‌سیم"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری مفصل Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"‏تصادفی‌سازی MAC غیرپایای Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"داده تلفن همراه همیشه فعال باشد"</string>
@@ -388,7 +388,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏پرداز زدن HWUI نمایه"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏فعال کردن لایه‌های اشکال‌زدایی GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏مجاز کردن بارگیری لایه‌های اشکال‌زدایی GPU برای برنامه‌های اشکا‌ل‌زدایی"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش طولانی فروشنده"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش‌گیری مفصل فروشنده"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"شامل گزارشات اشکال تکمیلی ورود به سیستم فروشنده ویژه دستگاه می‌شود که ممکن است دربرگیرنده اطلاعات خصوصی، استفاده بیشتر از باتری، و/یا استفاده بیشتر از فضای ذخیره‌سازی باشد."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"مقیاس پویانمایی پنجره"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"مقیاس پویانمایی انتقالی"</string>
@@ -517,7 +517,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"استفاده از زبان‌های سیستم"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"تنظیمات <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> بازنشد"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"این روش ورودی ممکن است بتواند تمام متنی را که تایپ می‌کنید جمع‌آوری کند، از جمله اطلاعات شخصی مانند گذرواژه‌ها و شماره‌های کارت اعتباری. این روش توسط برنامه <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ارائه می‌شود. از این روش ورودی استفاده می‌کنید؟"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"توجه: بعد از راه‌اندازی تا زمانی‌که قفل تلفنتان را باز نکنید، این برنامه نمی‌تواند شروع شود"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"توجه: بعداز بازراه‌اندازی تا زمانی‌که قفل تلفنتان را باز نکنید، این برنامه نمی‌تواند شروع شود"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"‏وضعیت ثبت IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ثبت‌شده"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ثبت نشده است"</string>
@@ -626,7 +626,7 @@
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"پیش‌فرض دستگاه"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیرفعال"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاهتان باید راه‌اندازی مجدد شود. اکنون راه‌اندازی مجدد کنید یا لغو کنید."</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاه باید بازراه‌اندازی شود. یا اکنون بازراه‌اندازی کنید یا لغو کنید."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"هدفون سیمی"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"روشن"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"خاموش"</string>

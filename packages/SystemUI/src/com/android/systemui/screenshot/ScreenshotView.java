@@ -37,6 +37,7 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -80,7 +81,6 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -120,7 +120,7 @@ public class ScreenshotView extends FrameLayout implements
     private static final long SCREENSHOT_TO_CORNER_X_DURATION_MS = 234;
     private static final long SCREENSHOT_TO_CORNER_Y_DURATION_MS = 500;
     private static final long SCREENSHOT_TO_CORNER_SCALE_DURATION_MS = 234;
-    private static final long SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS = 400;
+    public static final long SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS = 400;
     private static final long SCREENSHOT_ACTIONS_ALPHA_DURATION_MS = 100;
     private static final float SCREENSHOT_ACTIONS_START_SCALE_X = .7f;
     private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
@@ -132,14 +132,13 @@ public class ScreenshotView extends FrameLayout implements
     private final AccessibilityManager mAccessibilityManager;
     private final GestureDetector mSwipeDetector;
 
+    private int mDefaultDisplay = Display.DEFAULT_DISPLAY;
     private int mNavMode;
     private boolean mOrientationPortrait;
     private boolean mDirectionLTR;
 
     private ImageView mScrollingScrim;
     private DraggableConstraintLayout mScreenshotStatic;
-    private ViewGroup mMessageContainer;
-    private TextView mMessageContent;
     private ImageView mScreenshotPreview;
     private ImageView mScreenshotBadge;
     private View mScreenshotPreviewBorder;
@@ -164,6 +163,8 @@ public class ScreenshotView extends FrameLayout implements
 
     private final ArrayList<OverlayActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
+    // Should only be set/used if the SCREENSHOT_METADATA flag is set.
+    private ScreenshotData mScreenshotData;
 
     private final InteractionJankMonitor mInteractionJankMonitor;
     private long mDefaultTimeoutOfTimeoutHandler;
@@ -289,8 +290,11 @@ public class ScreenshotView extends FrameLayout implements
         mDismissButton.getBoundsOnScreen(tmpRect);
         swipeRegion.op(tmpRect, Region.Op.UNION);
 
-        mMessageContainer.findViewById(R.id.message_dismiss_button).getBoundsOnScreen(tmpRect);
-        swipeRegion.op(tmpRect, Region.Op.UNION);
+        View messageDismiss = findViewById(R.id.message_dismiss_button);
+        if (messageDismiss != null) {
+            messageDismiss.getBoundsOnScreen(tmpRect);
+            swipeRegion.op(tmpRect, Region.Op.UNION);
+        }
 
         return swipeRegion;
     }
@@ -321,7 +325,7 @@ public class ScreenshotView extends FrameLayout implements
 
     private void startInputListening() {
         stopInputListening();
-        mInputMonitor = new InputMonitorCompat("Screenshot", Display.DEFAULT_DISPLAY);
+        mInputMonitor = new InputMonitorCompat("Screenshot", mDefaultDisplay);
         mInputEventReceiver = mInputMonitor.getInputReceiver(
                 Looper.getMainLooper(), Choreographer.getInstance(), ev -> {
                     if (ev instanceof MotionEvent) {
@@ -346,29 +350,11 @@ public class ScreenshotView extends FrameLayout implements
         }
     }
 
-    /**
-     * Show a notification under the screenshot view indicating that a work profile screenshot has
-     * been taken and which app can be used to view it.
-     *
-     * @param appName The name of the app to use to view screenshots
-     */
-    void showWorkProfileMessage(String appName) {
-        mMessageContent.setText(
-                mContext.getString(R.string.screenshot_work_profile_notification, appName));
-        mMessageContainer.setVisibility(VISIBLE);
-        mMessageContainer.findViewById(R.id.message_dismiss_button).setOnClickListener((v) -> {
-            mMessageContainer.setVisibility(View.GONE);
-        });
-    }
-
     @Override // View
     protected void onFinishInflate() {
+        super.onFinishInflate();
         mScrollingScrim = requireNonNull(findViewById(R.id.screenshot_scrolling_scrim));
         mScreenshotStatic = requireNonNull(findViewById(R.id.screenshot_static));
-        mMessageContainer =
-                requireNonNull(mScreenshotStatic.findViewById(R.id.screenshot_message_container));
-        mMessageContent =
-                requireNonNull(mMessageContainer.findViewById(R.id.screenshot_message_content));
         mScreenshotPreview = requireNonNull(findViewById(R.id.screenshot_preview));
 
         mScreenshotPreviewBorder = requireNonNull(
@@ -458,8 +444,19 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, bitmap, screenInsets));
     }
 
+    void setScreenshot(ScreenshotData screenshot) {
+        mScreenshotData = screenshot;
+        setScreenshot(screenshot.getBitmap(), screenshot.getInsets());
+        mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, screenshot.getBitmap(),
+                screenshot.getInsets()));
+    }
+
     void setPackageName(String packageName) {
         mPackageName = packageName;
+    }
+
+    void setDefaultDisplay(int displayId) {
+        mDefaultDisplay = displayId;
     }
 
     void updateInsets(WindowInsets insets) {
@@ -796,9 +793,17 @@ public class ScreenshotView extends FrameLayout implements
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED, 0, mPackageName);
             if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
                 prepareSharedTransition();
-                mActionExecutor.launchIntentAsync(
-                        ActionIntentCreator.INSTANCE.createShareIntent(
-                                imageData.uri, imageData.subject),
+
+                Intent shareIntent;
+                if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && mScreenshotData != null
+                        && mScreenshotData.getContextUrl() != null) {
+                    shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithExtraText(
+                            imageData.uri, mScreenshotData.getContextUrl().toString());
+                } else {
+                    shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithSubject(
+                            imageData.uri, imageData.subject);
+                }
+                mActionExecutor.launchIntentAsync(shareIntent,
                         imageData.shareTransition.get().bundle,
                         imageData.owner.getIdentifier(), false);
             } else {
@@ -1078,7 +1083,7 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotBadge.setVisibility(View.GONE);
         mScreenshotBadge.setImageDrawable(null);
         mPendingSharedTransition = false;
-        mActionsContainerBackground.setVisibility(View.GONE);
+        mActionsContainerBackground.setVisibility(View.INVISIBLE);
         mActionsContainer.setVisibility(View.GONE);
         mDismissButton.setVisibility(View.GONE);
         mScrollingScrim.setVisibility(View.GONE);
@@ -1100,6 +1105,7 @@ public class ScreenshotView extends FrameLayout implements
         mQuickShareChip = null;
         setAlpha(1);
         mScreenshotStatic.setAlpha(1);
+        mScreenshotData = null;
     }
 
     private void startSharedTransition(ActionTransition transition) {

@@ -25,21 +25,25 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.UserManager
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
+import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
 import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.mockito.mock
@@ -70,17 +74,19 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var activityManager: ActivityManager
     @Mock private lateinit var manager: UserManager
+    @Mock private lateinit var headlessSystemUserMode: HeadlessSystemUserMode
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var uiEventLogger: UiEventLogger
     @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
+    @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     private lateinit var underTest: StatusBarUserChipViewModel
 
     private val userRepository = FakeUserRepository()
     private val keyguardRepository = FakeKeyguardRepository()
-    private val featureFlags = FakeFeatureFlags()
     private lateinit var guestUserInteractor: GuestUserInteractor
     private lateinit var refreshUsersScheduler: RefreshUsersScheduler
 
@@ -231,6 +237,11 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
         }
 
     private fun viewModel(): StatusBarUserChipViewModel {
+        val featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+                set(Flags.FACE_AUTH_REFACTOR, true)
+            }
         return StatusBarUserChipViewModel(
             context = context,
             interactor =
@@ -241,16 +252,20 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                     keyguardInteractor =
                         KeyguardInteractor(
                             repository = keyguardRepository,
+                            commandQueue = commandQueue,
+                            featureFlags = featureFlags,
+                            bouncerRepository = FakeKeyguardBouncerRepository(),
                         ),
-                    featureFlags =
-                        FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) },
+                    featureFlags = featureFlags,
                     manager = manager,
+                    headlessSystemUserMode = headlessSystemUserMode,
                     applicationScope = testScope.backgroundScope,
                     telephonyInteractor =
                         TelephonyInteractor(
                             repository = FakeTelephonyRepository(),
                         ),
                     broadcastDispatcher = fakeBroadcastDispatcher,
+                    keyguardUpdateMonitor = keyguardUpdateMonitor,
                     backgroundDispatcher = testDispatcher,
                     activityManager = activityManager,
                     refreshUsersScheduler = refreshUsersScheduler,

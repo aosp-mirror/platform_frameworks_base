@@ -30,9 +30,14 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.condition.SelfExecutingMonitor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
+import com.android.systemui.shared.condition.Condition;
+import com.android.systemui.shared.condition.Monitor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +48,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -60,9 +67,19 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
     @Mock
     private View mBcSmartspaceView;
 
+    @Mock
+    private FeatureFlags mFeatureFlags;
+
+    private Monitor mMonitor;
+
+    private final Set<Condition> mPreconditions = new HashSet<>();
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mMonitor = SelfExecutingMonitor.createInstance();
+
+        when(mFeatureFlags.isEnabled(Flags.HIDE_SMARTSPACE_ON_DREAM_OVERLAY)).thenReturn(false);
     }
 
     /**
@@ -75,11 +92,22 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
         verify(mDreamOverlayStateController, never()).addComplication(eq(mComplication));
     }
 
-    private SmartSpaceComplication.Registrant getRegistrant() {
-        return new SmartSpaceComplication.Registrant(
-                mDreamOverlayStateController,
-                mComplication,
-                mSmartspaceController);
+    @Test
+    public void testRegistrantStart_featureEnabled_addOverlayStateCallback() {
+        final SmartSpaceComplication.Registrant registrant = getRegistrant();
+        registrant.start();
+
+        verify(mDreamOverlayStateController).addCallback(any());
+    }
+
+    @Test
+    public void testRegistrantStart_featureDisabled_doesNotAddOverlayStateCallback() {
+        when(mFeatureFlags.isEnabled(Flags.HIDE_SMARTSPACE_ON_DREAM_OVERLAY)).thenReturn(true);
+
+        final SmartSpaceComplication.Registrant registrant = getRegistrant();
+        registrant.start();
+
+        verify(mDreamOverlayStateController, never()).addCallback(any());
     }
 
     @Test
@@ -176,5 +204,14 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
                         mSmartspaceController, mock(ComplicationLayoutParams.class));
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mBcSmartspaceView);
         assertEquals(viewHolder.getView(), viewHolder.getView());
+    }
+
+    private SmartSpaceComplication.Registrant getRegistrant() {
+        return new SmartSpaceComplication.Registrant(
+                mDreamOverlayStateController,
+                mComplication,
+                mSmartspaceController,
+                mMonitor,
+                mFeatureFlags);
     }
 }

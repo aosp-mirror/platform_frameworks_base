@@ -59,6 +59,7 @@ import java.util.concurrent.Executor;
 @SmallTest
 public class AutoAddTrackerTest extends SysuiTestCase {
 
+    private static final int END_POSITION = -1;
     private static final int USER = 0;
 
     @Mock
@@ -139,6 +140,29 @@ public class AutoAddTrackerTest extends SysuiTestCase {
         mAutoTracker = createAutoAddTracker(USER + 1);
         mAutoTracker.changeUser(UserHandle.of(USER));
         assertTrue(mAutoTracker.isAdded(SAVER));
+    }
+
+    @Test
+    public void testRestoredTilePositionPreserved() {
+        verify(mBroadcastDispatcher).registerReceiver(
+                mBroadcastReceiverArgumentCaptor.capture(), any(), any(), any(), anyInt(), any());
+        String restoredTiles = "saver,internet,work,cast";
+        Intent restoreTilesIntent = makeRestoreIntent(Secure.QS_TILES, null, restoredTiles);
+
+        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, restoreTilesIntent);
+
+        assertEquals(2, mAutoTracker.getRestoredTilePosition("work"));
+    }
+
+    @Test
+    public void testNoRestoredTileReturnsEndPosition() {
+        verify(mBroadcastDispatcher).registerReceiver(
+                mBroadcastReceiverArgumentCaptor.capture(), any(), any(), any(), anyInt(), any());
+        Intent restoreTilesIntent = makeRestoreIntent(Secure.QS_TILES, null, null);
+
+        mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, restoreTilesIntent);
+
+        assertEquals(END_POSITION, mAutoTracker.getRestoredTilePosition("work"));
     }
 
     @Test

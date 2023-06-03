@@ -49,10 +49,11 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
+import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.MediaHost;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -60,6 +61,8 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
+import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -68,6 +71,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.LifecycleFragment;
+import com.android.systemui.util.Utils;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -86,13 +90,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private final Rect mQsBounds = new Rect();
     private final SysuiStatusBarStateController mStatusBarStateController;
-    private final FalsingManager mFalsingManager;
     private final KeyguardBypassController mBypassController;
     private boolean mQsExpanded;
     private boolean mHeaderAnimating;
     private boolean mStackScrollerOverscrolling;
-
-    private long mDelay;
 
     private QSAnimator mQSAnimator;
     private HeightListener mPanelView;
@@ -114,8 +115,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final MediaHost mQqsMediaHost;
     private final QSFragmentComponent.Factory mQsComponentFactory;
     private final QSFragmentDisableFlagsLogger mQsFragmentDisableFlagsLogger;
-    private final QSTileHost mHost;
+    private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
     private final FeatureFlags mFeatureFlags;
+    private final QSLogger mLogger;
     private final FooterActionsController mFooterActionsController;
     private final FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
     private final ListeningAndVisibilityLifecycleOwner mListeningAndVisibilityLifecycleOwner;
@@ -148,11 +150,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      */
     private boolean mTransitioningToFullShade;
 
-    /**
-     * Whether the next Quick settings
-     */
-    private boolean mAnimateNextQsUpdate;
-
     private final DumpManager mDumpManager;
 
     /**
@@ -167,37 +164,33 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     // visible;
     private boolean mQsVisible;
 
-    /**
-     * Whether the notification panel uses the full width of the screen.
-     *
-     * Usually {@code true} on small screens, and {@code false} on large screens.
-     */
-    private boolean mIsNotificationPanelFullWidth;
+    private boolean mIsSmallScreen;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
-            QSTileHost qsTileHost,
             SysuiStatusBarStateController statusBarStateController, CommandQueue commandQueue,
             @Named(QS_PANEL) MediaHost qsMediaHost,
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
             KeyguardBypassController keyguardBypassController,
             QSFragmentComponent.Factory qsComponentFactory,
             QSFragmentDisableFlagsLogger qsFragmentDisableFlagsLogger,
-            FalsingManager falsingManager, DumpManager dumpManager, FeatureFlags featureFlags,
+            DumpManager dumpManager, QSLogger qsLogger,
             FooterActionsController footerActionsController,
-            FooterActionsViewModel.Factory footerActionsViewModelFactory) {
+            FooterActionsViewModel.Factory footerActionsViewModelFactory,
+            LargeScreenShadeInterpolator largeScreenShadeInterpolator,
+            FeatureFlags featureFlags) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
         mQsComponentFactory = qsComponentFactory;
         mQsFragmentDisableFlagsLogger = qsFragmentDisableFlagsLogger;
+        mLogger = qsLogger;
+        mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
+        mFeatureFlags = featureFlags;
         commandQueue.observe(getLifecycle(), this);
-        mHost = qsTileHost;
-        mFalsingManager = falsingManager;
         mBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
         mDumpManager = dumpManager;
-        mFeatureFlags = featureFlags;
         mFooterActionsController = footerActionsController;
         mFooterActionsViewModelFactory = footerActionsViewModelFactory;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
@@ -227,9 +220,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
         mQSFooterActionsViewModel = mFooterActionsViewModelFactory.create(/* lifecycleOwner */
                 this);
-        LinearLayout footerActionsView = view.findViewById(R.id.qs_footer_actions);
-        FooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
-                mListeningAndVisibilityLifecycleOwner);
+        bindFooterActionsView(view);
         mFooterActionsController.init();
 
         mQSPanelScrollView = view.findViewById(R.id.expanded_qs_scroll_view);
@@ -241,7 +232,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
                     // Lazily update animators whenever the scrolling changes
                     mQSAnimator.requestAnimatorUpdate();
-                    mHeader.setExpandedScrollAmount(scrollY);
                     if (mScrollListener != null) {
                         mScrollListener.onQsPanelScrollChanged(scrollY);
                     }
@@ -288,6 +278,33 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     mQSPanelController.getMediaHost().getHostView().setAlpha(1.0f);
                     mQSAnimator.requestAnimatorUpdate();
                 });
+    }
+
+    private void bindFooterActionsView(View root) {
+        LinearLayout footerActionsView = root.findViewById(R.id.qs_footer_actions);
+
+        if (!ComposeFacade.INSTANCE.isComposeAvailable()) {
+            Log.d(TAG, "Binding the View implementation of the QS footer actions");
+            FooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
+                    mListeningAndVisibilityLifecycleOwner);
+            return;
+        }
+
+        // Compose is available, so let's use the Compose implementation of the footer actions.
+        Log.d(TAG, "Binding the Compose implementation of the QS footer actions");
+        View composeView = ComposeFacade.INSTANCE.createFooterActionsView(root.getContext(),
+                mQSFooterActionsViewModel, mListeningAndVisibilityLifecycleOwner);
+
+        // The id R.id.qs_footer_actions is used by QSContainerImpl to set the horizontal margin
+        // to all views except for qs_footer_actions, so we set it to the Compose view.
+        composeView.setId(R.id.qs_footer_actions);
+
+        // Replace the View by the Compose provided one.
+        ViewGroup parent = (ViewGroup) footerActionsView.getParent();
+        ViewGroup.LayoutParams layoutParams = footerActionsView.getLayoutParams();
+        int index = parent.indexOfChild(footerActionsView);
+        parent.removeViewAt(index);
+        parent.addView(composeView, index, layoutParams);
     }
 
     @Override
@@ -594,7 +611,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Override
     public void setIsNotificationPanelFullWidth(boolean isFullWidth) {
-        mIsNotificationPanelFullWidth = isFullWidth;
+        mIsSmallScreen = isFullWidth;
     }
 
     @Override
@@ -619,7 +636,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 && mLastKeyguardAndExpanded == onKeyguardAndExpanded
                 && mLastViewHeight == currentHeight
                 && mLastHeaderTranslation == headerTranslation
-                && mSquishinessFraction == squishinessFraction) {
+                && mSquishinessFraction == squishinessFraction
+                && mLastPanelFraction == panelExpansionFraction) {
             return;
         }
         mLastHeaderTranslation = headerTranslation;
@@ -634,8 +652,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         int heightDiff = getHeightDiff();
         float panelTranslationY = translationScaleY * heightDiff;
 
-        // Let the views animate their contents correctly by giving them the necessary context.
-        mHeader.setExpansion(onKeyguardAndExpanded, expansion, panelTranslationY);
         if (expansion < 1 && expansion > 0.99) {
             if (mQuickQSPanelController.switchTileLayout(false)) {
                 mHeader.updateResources();
@@ -683,21 +699,23 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         } else {
             mQsMediaHost.setSquishFraction(mSquishinessFraction);
         }
-
+        updateMediaPositions();
     }
 
     private void setAlphaAnimationProgress(float progress) {
         final View view = getView();
         if (progress == 0 && view.getVisibility() != View.INVISIBLE) {
+            mLogger.logVisibility("QS fragment", View.INVISIBLE);
             view.setVisibility(View.INVISIBLE);
         } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
+            mLogger.logVisibility("QS fragment", View.VISIBLE);
             view.setVisibility((View.VISIBLE));
         }
         view.setAlpha(interpolateAlphaAnimationProgress(progress));
     }
 
     private float calculateAlphaProgress(float panelExpansionFraction) {
-        if (mIsNotificationPanelFullWidth) {
+        if (mIsSmallScreen) {
             // Small screens. QS alpha is not animated.
             return 1;
         }
@@ -732,7 +750,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             // Alpha progress should be linear on lockscreen shade expansion.
             return progress;
         }
-        return ShadeInterpolation.getContentAlpha(progress);
+        if (mIsSmallScreen || !mFeatureFlags.isEnabled(
+                Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+            return ShadeInterpolation.getContentAlpha(progress);
+        } else {
+            return mLargeScreenShadeInterpolator.getQsAlpha(progress);
+        }
     }
 
     @VisibleForTesting
@@ -756,6 +779,22 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 left + getView().getMeasuredWidth(),
                 top + mQSPanelScrollView.getMeasuredHeight()
                         - mQSPanelController.getPaddingBottom());
+    }
+
+    private void updateMediaPositions() {
+        if (Utils.useQsMediaPlayer(getContext())) {
+            View hostView = mQsMediaHost.getHostView();
+            // Make sure the media appears a bit from the top to make it look nicer
+            if (mLastQSExpansion > 0 && !isKeyguardState() && !mQqsMediaHost.getVisible()
+                    && !mQSPanelController.shouldUseHorizontalLayout() && !mInSplitShade) {
+                float interpolation = 1.0f - mLastQSExpansion;
+                interpolation = Interpolators.ACCELERATE.getInterpolation(interpolation);
+                float translationY = -hostView.getHeight() * 1.3f * interpolation;
+                hostView.setTranslationY(translationY);
+            } else {
+                hostView.setTranslationY(0);
+            }
+        }
     }
 
     private boolean headerWillBeAnimating() {
@@ -871,7 +910,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             getView().getViewTreeObserver().removeOnPreDrawListener(this);
             getView().animate()
                     .translationY(0f)
-                    .setStartDelay(mDelay)
                     .setDuration(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .setListener(mAnimateHeaderSlidingInListener)

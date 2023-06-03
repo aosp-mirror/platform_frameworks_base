@@ -53,7 +53,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Opération infructueuse. Activez le verrouillage SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM soit verrouillée.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM soit verrouillée.</item>
       <item quantity="other">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM soit verrouillée.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"Code IIEM"</string>
@@ -343,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Peut capturer des gestes effectués sur le capteur d\'empreintes digitales de l\'appareil."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Prendre une capture d\'écran"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Peut prendre une capture de l\'écran."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Aperçu, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"désactiver ou modifier la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"servir de barre d\'état"</string>
@@ -1275,18 +1276,18 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Une empreinte de mémoire du processus lié à l\'application <xliff:g id="PROC">%1$s</xliff:g> peut être partagée. Attention : Cette empreinte peut contenir des renseignements personnels auxquels le processus a accès, y compris du texte que vous avez entré."</string>
     <string name="sendText" msgid="493003724401350724">"Sélectionner une action pour le texte"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volume de la sonnerie"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Volume"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Volume du contenu multimédia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Lecture via Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Sonnerie silencieuse sélectionnée"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volume des appels entrants"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volume d\'appels entrants sur Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Volume de l\'alarme"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Volume des alarmes"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volume des notifications"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volume Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volume de la sonnerie"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume d\'appel"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume des appels"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume du contenu multimédia"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1717,7 +1718,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Pour basculer entre les fonctionnalités, maintenez le doigt sur le bouton d\'accessibilité."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec deux doigts et maintenez-les-y."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec trois doigts et maintenez-les-y."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zoom"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g> en cours..."</string>
@@ -1841,6 +1842,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Affichage plein écran"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Pour quitter, balayez vers le bas à partir du haut."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Faire pivoter pour obtenir un meilleur affichage"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Quitter l\'écran partagé pour obtenir un meilleur affichage"</string>
     <string name="done_label" msgid="7283767013231718521">"Terminé"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Curseur circulaire des heures"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Curseur circulaire des minutes"</string>

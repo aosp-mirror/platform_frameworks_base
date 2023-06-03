@@ -328,13 +328,13 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"আপনার অত্যাবশ্যক লক্ষণগুলির সম্পর্কে সেন্সর ডেটা অ্যাক্সেস করে"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"বিজ্ঞপ্তি"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"বিজ্ঞপ্তি দেখুন"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"উইন্ডোর কন্টেন্ট পুনরুদ্ধার করে"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ব্যবহার করছেন এমন একটি উইন্ডোর কন্টেন্ট নিরীক্ষণ করে৷"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"উইন্ডোর কন্টেন্ট ফিরিয়ে আনুন"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ব্যবহার করছেন এমন একটি উইন্ডোর কন্টেন্ট পরীক্ষা করে৷"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"স্পর্শের মাধ্যমে অন্বেষণ করা চালু করুন"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"যে আইটেমগুলিতে আলতো চেপেছেন সেগুলি সশব্দে বলবে এবং ইঙ্গিতগুলি ব্যবহার করে স্ক্রিন অন্বেষণ করা যাবে৷"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"যে আইটেমগুলিতে ট্যাপ করেছেন সেগুলি জোরে বলবে এবং ইঙ্গিতগুলি ব্যবহার করে স্ক্রিন অন্বেষণ করা যাবে৷"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"আপনার লেখা পাঠ্যকে নিরীক্ষণ করে"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"ক্রেডিট কার্ডের নম্বর ও পাসওয়ার্ডগুলির মতো ব্যক্তিগত তথ্য অন্তর্ভুক্ত করে৷"</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"প্রদর্শনের বৃহত্তরীকরণ ব্যবস্থা নিয়ন্ত্রণ করুন"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"ডিসপ্লে বড়কার ব্যবস্থা নিয়ন্ত্রণ করুন"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"প্রদর্শনের জুমের স্তর এবং লোকেশন নির্ধারন নিয়ন্ত্রণ করুন৷"</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"অঙ্গভঙ্গির কাজগুলি সম্পাদন"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"আলতো চাপ দেওয়া, সোয়াইপ, পিঞ্চ করা এবং অন্যান্য ইঙ্গিতের কাজগুলি সম্পাদন করতে পারবেন৷"</string>
@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ডিভাইসের আঙ্গুলের ছাপের সেন্সরের উপরে ইঙ্গিত করলে বুঝতে পারে।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"স্ক্রিনশট নিন"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ডিসপ্লের একটি স্ক্রিনশট নিতে পারেন।"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"প্রিভিউ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"স্ট্যাটাস বার নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"অ্যাপ্লিকেশনকে স্ট্যাটাস বার অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"স্থিতি দন্ডে থাকুন"</string>
@@ -1689,7 +1690,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"বন্ধ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> অ্যাপটিকে আপনার ডিভাইসে সম্পূর্ণ নিয়ন্ত্রণের অনুমতি দিতে চান?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"যে অ্যাপগুলি আপনাকে অ্যাক্সেসিবিলিটির প্রয়োজন মেটাতে সাহায্য করে সেই অ্যাপগুলির জন্য সম্পূর্ণ নিয়ন্ত্রণের বিষয়টি উপযুক্ত, কিন্তু তা বলে সমস্ত অ্যাপের জন্য নয়।"</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"স্ক্রিন দেখে নিয়ন্ত্রণ করা"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"স্ক্রিন দেখা ও নিয়ন্ত্রণ করা"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"এটি স্ক্রিনের সমস্ত কন্টেন্ট পড়তে এবং অন্য অ্যাপেও কন্টেন্ট ডিসপ্লে করতে পারে।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"দেখুন এবং কাজটি করুন"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"এটি কোনও একটি অ্যাপের সাথে অথবা হার্ডওয়্যার সেন্সরের সাথে আপনার ইন্টার‍্যাকশন ট্র্যাক করতে এবং আপনার হয়ে বিভিন্ন অ্যাপের সাথে ইন্টার‍্যাক্ট করতে পারে।"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"পূর্ণ স্ক্রিনে দেখা হচ্ছে"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"প্রস্থান করতে উপর থেকে নিচের দিকে সোয়াইপ করুন"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুঝেছি"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"আরও ভাল ক্যামেরা ভিউ পাওয়ার জন্য ঘোরান"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"আরও ভাল ক্যামেরা ভিউ পাওয়ার জন্য স্প্লিট স্ক্রিন থেকে বেরিয়ে আসুন"</string>
     <string name="done_label" msgid="7283767013231718521">"সম্পন্ন হয়েছে"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"বৃত্তাকার ঘণ্টা নির্বাচকের স্লাইডার"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"বৃত্তাকার মিনিট নির্বাচকের স্লাইডার"</string>

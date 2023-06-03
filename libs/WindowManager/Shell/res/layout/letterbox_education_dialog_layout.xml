@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2022 The Android Open Source Project
+  ~ Copyright (C) 2023 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,12 +13,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.wm.shell.compatui.letterboxedu.LetterboxEduDialogLayout
+<com.android.wm.shell.compatui.LetterboxEduDialogLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@android:color/system_neutral1_900">
+    style="@style/LetterboxDialog">
 
     <!-- The background of the top-level layout acts as the background dim. -->
 
@@ -69,6 +67,8 @@
                     android:text="@string/letterbox_education_dialog_title"
                     android:textAlignment="center"
                     android:textColor="@color/compat_controls_text"
+                    android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"
                     android:textSize="24sp"/>
 
                 <LinearLayout
@@ -78,13 +78,13 @@
                     android:orientation="horizontal"
                     android:paddingTop="48dp">
 
-                    <com.android.wm.shell.compatui.letterboxedu.LetterboxEduDialogActionLayout
+                    <com.android.wm.shell.compatui.LetterboxEduDialogActionLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/letterbox_education_ic_reposition"
                         app:text="@string/letterbox_education_reposition_text"/>
 
-                    <com.android.wm.shell.compatui.letterboxedu.LetterboxEduDialogActionLayout
+                    <com.android.wm.shell.compatui.LetterboxEduDialogActionLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart=
@@ -95,10 +95,16 @@
                 </LinearLayout>
 
                 <Button
+                    android:fontFamily="@*android:string/config_bodyFontFamily"
+                    android:fontWeight="500"
+                    android:lineHeight="20dp"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Small"
                     android:id="@+id/letterbox_education_dialog_dismiss_button"
+                    android:textStyle="bold"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="40dp"
+                    android:textSize="14sp"
                     android:background=
                         "@drawable/letterbox_education_dismiss_button_background_ripple"
                     android:text="@string/letterbox_education_got_it"
@@ -112,4 +118,4 @@
 
     </FrameLayout>
 
-</com.android.wm.shell.compatui.letterboxedu.LetterboxEduDialogLayout>
+</com.android.wm.shell.compatui.LetterboxEduDialogLayout>

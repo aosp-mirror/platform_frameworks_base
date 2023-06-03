@@ -30,7 +30,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -47,7 +46,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 /**
  * A View similar to a textView which contains password text and can animate when the text is
@@ -92,7 +90,6 @@ public class PasswordTextView extends View {
     private final int mGravity;
     private ArrayList<CharState> mTextChars = new ArrayList<>();
     private String mText = "";
-    private Stack<CharState> mCharPool = new Stack<>();
     private int mDotSize;
     private PowerManager mPM;
     private int mCharPadding;
@@ -100,7 +97,7 @@ public class PasswordTextView extends View {
     private Interpolator mAppearInterpolator;
     private Interpolator mDisappearInterpolator;
     private Interpolator mFastOutSlowInInterpolator;
-    private boolean mShowPassword;
+    private boolean mShowPassword = true;
     private UserActivityListener mUserActivityListener;
 
     public interface UserActivityListener {
@@ -154,8 +151,6 @@ public class PasswordTextView extends View {
         mDrawPaint.setTypeface(Typeface.create(
                 context.getString(com.android.internal.R.string.config_headlineFontFamily),
                 0));
-        mShowPassword = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.TEXT_SHOW_PASSWORD, 1) == 1;
         mAppearInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.linear_out_slow_in);
         mDisappearInterpolator = AnimationUtils.loadInterpolator(mContext,
@@ -310,13 +305,7 @@ public class PasswordTextView extends View {
     }
 
     private CharState obtainCharState(char c) {
-        CharState charState;
-        if(mCharPool.isEmpty()) {
-            charState = new CharState();
-        } else {
-            charState = mCharPool.pop();
-            charState.reset();
-        }
+        CharState charState = new CharState();
         charState.whichChar = c;
         return charState;
     }
@@ -343,8 +332,6 @@ public class PasswordTextView extends View {
                 maxDelay = Math.min(maxDelay, RESET_MAX_DELAY) + DISAPPEAR_DURATION;
                 charState.startRemoveAnimation(startDelay, maxDelay);
                 charState.removeDotSwapCallbacks();
-            } else {
-                mCharPool.push(charState);
             }
         }
         if (!animated) {
@@ -395,6 +382,13 @@ public class PasswordTextView extends View {
         info.setInputType(InputType.TYPE_NUMBER_VARIATION_PASSWORD);
     }
 
+    /**
+     * Controls whether the last entered digit is briefly shown after being entered
+     */
+    public void setShowPassword(boolean enabled) {
+        mShowPassword = enabled;
+    }
+
     private class CharState {
         char whichChar;
         ValueAnimator textAnimator;
@@ -421,8 +415,6 @@ public class PasswordTextView extends View {
             public void onAnimationEnd(Animator animation) {
                 if (!mCancelled) {
                     mTextChars.remove(CharState.this);
-                    mCharPool.push(CharState.this);
-                    reset();
                     cancelAnimator(textTranslateAnimator);
                     textTranslateAnimator = null;
                 }
@@ -517,21 +509,6 @@ public class PasswordTextView extends View {
                 isDotSwapPending = false;
             }
         };
-
-        void reset() {
-            whichChar = 0;
-            currentTextSizeFactor = 0.0f;
-            currentDotSizeFactor = 0.0f;
-            currentWidthFactor = 0.0f;
-            cancelAnimator(textAnimator);
-            textAnimator = null;
-            cancelAnimator(dotAnimator);
-            dotAnimator = null;
-            cancelAnimator(widthAnimator);
-            widthAnimator = null;
-            currentTextTranslationY = 1.0f;
-            removeDotSwapCallbacks();
-        }
 
         void startRemoveAnimation(long startDelay, long widthDelay) {
             boolean dotNeedsAnimation = (currentDotSizeFactor > 0.0f && dotAnimator == null)

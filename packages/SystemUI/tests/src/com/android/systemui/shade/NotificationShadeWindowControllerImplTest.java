@@ -46,11 +46,14 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -67,6 +70,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -91,13 +96,21 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
+    @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
 
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
-
+    private float mPreferredRefreshRate = -1;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        // Preferred refresh rate is equal to the first displayMode's refresh rate
+        mPreferredRefreshRate = mContext.getDisplay().getSupportedModes()[0].getRefreshRate();
+        overrideResource(
+                R.integer.config_keyguardRefreshRate,
+                (int) mPreferredRefreshRate
+        );
+
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
@@ -117,6 +130,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
         mNotificationShadeWindowController.attach();
         verify(mWindowManager).addView(eq(mNotificationShadeWindowView), any());
+        verify(mStatusBarStateController).addCallback(mStateListener.capture(), anyInt());
     }
 
     @Test
@@ -333,5 +347,60 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         verify(mWindowManager, atLeastOnce()).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat(mLayoutParameters.getValue().screenOrientation)
                 .isEqualTo(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+    }
+
+    @Test
+    public void udfpsEnrolled_minAndMaxRefreshRateSetToPreferredRefreshRate() {
+        // GIVEN udfps is enrolled
+        when(mAuthController.isUdfpsEnrolled(anyInt())).thenReturn(true);
+
+        // WHEN keyguard is showing
+        setKeyguardShowing();
+
+        // THEN min and max refresh rate is set to the preferredRefreshRate
+        verify(mWindowManager, atLeastOnce()).updateViewLayout(any(), mLayoutParameters.capture());
+        final List<WindowManager.LayoutParams> lpList = mLayoutParameters.getAllValues();
+        final WindowManager.LayoutParams lp = lpList.get(lpList.size() - 1);
+        assertThat(lp.preferredMaxDisplayRefreshRate).isEqualTo(mPreferredRefreshRate);
+        assertThat(lp.preferredMinDisplayRefreshRate).isEqualTo(mPreferredRefreshRate);
+    }
+
+    @Test
+    public void udfpsNotEnrolled_refreshRateUnset() {
+        // GIVEN udfps is NOT enrolled
+        when(mAuthController.isUdfpsEnrolled(anyInt())).thenReturn(false);
+
+        // WHEN keyguard is showing
+        setKeyguardShowing();
+
+        // THEN min and max refresh rate aren't set (set to 0)
+        verify(mWindowManager, atLeastOnce()).updateViewLayout(any(), mLayoutParameters.capture());
+        final List<WindowManager.LayoutParams> lpList = mLayoutParameters.getAllValues();
+        final WindowManager.LayoutParams lp = lpList.get(lpList.size() - 1);
+        assertThat(lp.preferredMaxDisplayRefreshRate).isEqualTo(0);
+        assertThat(lp.preferredMinDisplayRefreshRate).isEqualTo(0);
+    }
+
+    @Test
+    public void keyguardNotShowing_refreshRateUnset() {
+        // GIVEN UDFPS is enrolled
+        when(mAuthController.isUdfpsEnrolled(anyInt())).thenReturn(true);
+
+        // WHEN keyguard is NOT showing
+        mNotificationShadeWindowController.setKeyguardShowing(false);
+
+        // THEN min and max refresh rate aren't set (set to 0)
+        verify(mWindowManager, atLeastOnce()).updateViewLayout(any(), mLayoutParameters.capture());
+        final List<WindowManager.LayoutParams> lpList = mLayoutParameters.getAllValues();
+        final WindowManager.LayoutParams lp = lpList.get(lpList.size() - 1);
+        assertThat(lp.preferredMaxDisplayRefreshRate).isEqualTo(0);
+        assertThat(lp.preferredMinDisplayRefreshRate).isEqualTo(0);
+    }
+
+    private void setKeyguardShowing() {
+        mNotificationShadeWindowController.setKeyguardShowing(true);
+        mNotificationShadeWindowController.setKeyguardGoingAway(false);
+        mNotificationShadeWindowController.setKeyguardFadingAway(false);
+        mStateListener.getValue().onStateChanged(StatusBarState.KEYGUARD);
     }
 }

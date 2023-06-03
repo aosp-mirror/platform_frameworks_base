@@ -19,6 +19,7 @@ package com.android.wm.shell.back;
 import android.os.SystemProperties;
 import android.view.RemoteAnimationTarget;
 import android.window.BackEvent;
+import android.window.BackMotionEvent;
 
 /**
  * Helper class to record the touch location for gesture and generate back events.
@@ -82,11 +83,11 @@ class TouchTracker {
         mSwipeEdge = BackEvent.EDGE_LEFT;
     }
 
-    BackEvent createStartEvent(RemoteAnimationTarget target) {
-        return new BackEvent(mInitTouchX, mInitTouchY, 0, mSwipeEdge, target);
+    BackMotionEvent createStartEvent(RemoteAnimationTarget target) {
+        return new BackMotionEvent(mInitTouchX, mInitTouchY, 0, mSwipeEdge, target);
     }
 
-    BackEvent createProgressEvent() {
+    BackMotionEvent createProgressEvent() {
         float progressThreshold = PROGRESS_THRESHOLD >= 0
                 ? PROGRESS_THRESHOLD : mProgressThreshold;
         progressThreshold = progressThreshold == 0 ? 1 : progressThreshold;
@@ -109,8 +110,8 @@ class TouchTracker {
         return createProgressEvent(progress);
     }
 
-    BackEvent createProgressEvent(float progress) {
-        return new BackEvent(mLatestTouchX, mLatestTouchY, progress, mSwipeEdge, null);
+    BackMotionEvent createProgressEvent(float progress) {
+        return new BackMotionEvent(mLatestTouchX, mLatestTouchY, progress, mSwipeEdge, null);
     }
 
     public void setProgressThreshold(float progressThreshold) {

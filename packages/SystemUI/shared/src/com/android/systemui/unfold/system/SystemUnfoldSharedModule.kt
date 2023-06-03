@@ -19,7 +19,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.unfold.config.ResourceUnfoldTransitionConfig
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
-import com.android.systemui.unfold.dagger.UnfoldBackground
+import com.android.systemui.unfold.dagger.UnfoldSingleThreadBg
 import com.android.systemui.unfold.dagger.UnfoldMain
 import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.util.CurrentActivityTypeProvider
@@ -56,6 +56,6 @@ abstract class SystemUnfoldSharedModule {
     abstract fun mainHandler(@Main handler: Handler): Handler
 
     @Binds
-    @UnfoldBackground
+    @UnfoldSingleThreadBg
     abstract fun backgroundExecutor(@UiBackground executor: Executor): Executor
 }

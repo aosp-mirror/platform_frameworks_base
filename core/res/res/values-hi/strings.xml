@@ -27,7 +27,7 @@
     <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="untitled" msgid="3381766946944136678">"&lt;शीर्षक-रहित&gt;"</string>
+    <string name="untitled" msgid="3381766946944136678">"&lt;टाइटल-रहित&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(कोई फ़ोन नंबर नहीं)"</string>
     <string name="unknownName" msgid="7078697621109055330">"अज्ञात"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"वॉइसमेल"</string>
@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"डिवाइस के फ़िंगरप्रिंट सेंसर पर किए गए हाथ के जेस्चर कैप्चर किए जा सकते हैं."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"स्क्रीनशॉट लें"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"डिसप्ले का स्क्रीनशॉट लिया जा सकता है."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> की झलक"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"स्टेटस बार को अक्षम करें या बदलें"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ऐप को, स्टेटस बार को बंद करने या सिस्‍टम आइकॉन को जोड़ने और निकालने की अनुमति देता है."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"स्टेटस बार को रहने दें"</string>
@@ -1690,7 +1691,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> को अपना डिवाइस पूरी तरह कंट्रोल करने की मंज़ूरी दें?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"पूरी तरह कंट्रोल करने की अनुमति उन ऐप्लिकेशन के लिए ठीक है जो सुलभता से जुड़ी ज़रूरतों के लिए बने हैं, लेकिन ज़्यादातर ऐप्लिकेशन के लिए यह ठीक नहीं है."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन को देखें और कंट्रोल करें"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाली हर तरह के कॉन्टेंट को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन पर दिखा सकता है."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाले कॉन्टेंट को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन के ऊपर दिखा सकता है."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"देखें और कार्रवाई करें"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यह आपके और किसी ऐप्लिकेशन या हार्डवेयर सेंसर के बीच होने वाले इंटरैक्शन को ट्रैक कर सकता है और आपकी तरफ़ से ऐप्लिकेशन के साथ इंटरैक्ट कर सकता है."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दें"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"आप पूरे स्क्रीन पर देख रहे हैं"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहर निकलने के लिए, ऊपर से नीचे स्वा‍इप करें."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ठीक है"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"बेहतर व्यू पाने के लिए, डिवाइस की स्क्रीन को घुमाएं"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"बेहतर व्यू पाने के लिए, स्प्लिट स्क्रीन मोड बंद करें"</string>
     <string name="done_label" msgid="7283767013231718521">"हो गया"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"घंटो का चक्राकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनटों का चक्राकार स्लाइडर"</string>

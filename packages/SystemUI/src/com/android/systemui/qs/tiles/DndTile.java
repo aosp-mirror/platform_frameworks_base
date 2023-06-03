@@ -67,6 +67,8 @@ import javax.inject.Inject;
 /** Quick settings tile: Do not disturb **/
 public class DndTile extends QSTileImpl<BooleanState> {
 
+    public static final String TILE_SPEC = "dnd";
+
     private static final Intent ZEN_SETTINGS =
             new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
 

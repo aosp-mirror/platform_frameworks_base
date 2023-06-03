@@ -196,6 +196,9 @@ public class ZenDurationDialog {
                 if (isChecked) {
                     tag.rb.setChecked(true);
                 }
+                tag.line1.setStateDescription(
+                        isChecked ? buttonView.getContext().getString(
+                                com.android.internal.R.string.selected) : null);
             }
         });
 

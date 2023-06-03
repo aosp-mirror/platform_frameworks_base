@@ -31,6 +31,7 @@ import android.app.StatsManager;
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.ambientcontext.AmbientContextManager;
 import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
@@ -79,6 +80,7 @@ import android.permission.PermissionManager;
 import android.safetycenter.SafetyCenterManager;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.service.vr.IVrManager;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
@@ -95,6 +97,7 @@ import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassificationManager;
 
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.android.internal.app.IBatteryStats;
@@ -144,6 +147,13 @@ public class FrameworkServicesModule {
     @Singleton
     static Optional<SystemUpdateManager> provideSystemUpdateManager(Context context) {
         return Optional.ofNullable(context.getSystemService(SystemUpdateManager.class));
+    }
+
+    @Provides
+    @Nullable
+    @Singleton
+    static AmbientContextManager provideAmbientContextManager(Context context) {
+        return context.getSystemService(AmbientContextManager.class);
     }
 
     /** */
@@ -261,6 +271,13 @@ public class FrameworkServicesModule {
     @Provides
     @Singleton
     @Nullable
+    static IVrManager provideIVrManager() {
+        return IVrManager.Stub.asInterface(ServiceManager.getService(Context.VR_SERVICE));
+    }
+
+    @Provides
+    @Singleton
+    @Nullable
     static FaceManager provideFaceManager(Context context) {
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
             return context.getSystemService(FaceManager.class);
@@ -370,6 +387,13 @@ public class FrameworkServicesModule {
     @Singleton
     public LayoutInflater providerLayoutInflater(Context context) {
         return LayoutInflater.from(context);
+    }
+
+    /** */
+    @Provides
+    @Singleton
+    public AsyncLayoutInflater provideAsyncLayoutInflater(Context context) {
+        return new AsyncLayoutInflater(context);
     }
 
     @Provides

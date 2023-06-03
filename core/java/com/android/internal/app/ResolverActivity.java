@@ -209,7 +209,7 @@ public class ResolverActivity extends Activity implements
      * <p>Can only be used if there is a work profile.
      * <p>Possible values can be either {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK}.
      */
-    static final String EXTRA_SELECTED_PROFILE =
+    protected static final String EXTRA_SELECTED_PROFILE =
             "com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE";
 
     /**
@@ -224,8 +224,8 @@ public class ResolverActivity extends Activity implements
     static final String EXTRA_CALLING_USER =
             "com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER";
 
-    static final int PROFILE_PERSONAL = AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
-    static final int PROFILE_WORK = AbstractMultiProfilePagerAdapter.PROFILE_WORK;
+    protected static final int PROFILE_PERSONAL = AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
+    protected static final int PROFILE_WORK = AbstractMultiProfilePagerAdapter.PROFILE_WORK;
 
     private BroadcastReceiver mWorkProfileStateReceiver;
     private UserHandle mHeaderCreatorUser;

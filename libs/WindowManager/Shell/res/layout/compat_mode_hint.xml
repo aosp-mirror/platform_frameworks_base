@@ -29,11 +29,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:lineSpacingExtra="4sp"
+        android:letterSpacing="0.02"
         android:background="@drawable/compat_hint_bubble"
         android:padding="16dp"
         android:textAlignment="viewStart"
         android:textColor="@color/compat_controls_text"
-        android:textSize="14sp"/>
+        android:textSize="14sp"
+        android:fontFamily="@*android:string/config_bodyFontFamily"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Subhead"
+    />
 
     <ImageView
         android:layout_width="wrap_content"

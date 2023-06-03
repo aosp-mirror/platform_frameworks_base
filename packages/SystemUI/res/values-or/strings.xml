@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ନିମ୍ନ ସୀମାରେଖା <xliff:g id="PERCENT">%1$d</xliff:g> ଶତକଡ଼ା"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ବାମ ସୀମାରେଖା <xliff:g id="PERCENT">%1$d</xliff:g> ଶତକଡ଼ା"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ଡାହାଣ ସୀମାରେଖା <xliff:g id="PERCENT">%1$d</xliff:g> ଶତକଡ଼ା"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"ୱାର୍କ ପ୍ରୋଫାଇଲରେ ଥିବା <xliff:g id="APP">%1$s</xliff:g>ରେ ସେଭ କରାଯାଇଛି"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ଫାଇଲଗୁଡ଼ିକ"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ଏହି ସ୍କ୍ରିନସଟକୁ ଚିହ୍ନଟ କରିଛି।"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ଏବଂ ଅନ୍ୟ ଓପନ ଆପ୍ସ ଏହି ସ୍କ୍ରିନସଟକୁ ଚିହ୍ନଟ କରିଛି।"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ସ୍କ୍ରିନ୍ ରେକର୍ଡର୍"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ସ୍କ୍ରିନ ରେକର୍ଡିଂର ପ୍ରକ୍ରିୟାକରଣ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ଏକ ସ୍କ୍ରି‍ନ୍‍ ରେକର୍ଡ୍‍ ସେସନ୍‍ ପାଇଁ ଚାଲୁଥିବା ବିଜ୍ଞପ୍ତି"</string>
@@ -164,7 +168,6 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ PIN ଲେଖିଲେ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଏବଂ ଏହାର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"ଆପଣ ପରବର୍ତ୍ତୀ ପ୍ରଚେଷ୍ଟାରେ ଏକ ଭୁଲ ପାସୱାର୍ଡ ଲେଖିଲେ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଓ ଏହାର ଡାଟାକୁ ଡିଲିଟ୍ କରିଦିଆଯିବ।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ଟିପଚିହ୍ନ ସେନସର୍‌କୁ ଛୁଅଁନ୍ତୁ"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ଫେସ୍ ଚିହ୍ନଟ କରିହେବ ନାହିଁ। ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -193,6 +196,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ବିଜ୍ଞପ୍ତି ଶେଡ୍‍।"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"କ୍ୱିକ୍ ସେଟିଂସ୍।"</string>
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"କୁଇକ ସେଟିଂସ ଏବଂ ବିଜ୍ଞପ୍ତି ସେଡ।"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ଲକ୍‌ ସ୍କ୍ରୀନ୍‌।"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ୱର୍କ ଲକ୍‍ ସ୍କ୍ରୀନ୍‍"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ବନ୍ଦ କରନ୍ତୁ"</string>
@@ -253,6 +257,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ଉଜ୍ଜ୍ୱଳତା"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ରଙ୍ଗ ଇନଭାର୍ସନ"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"ରଙ୍ଗ ସଂଶୋଧନ"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"ଫଣ୍ଟର ଆକାର"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"ୟୁଜରମାନଙ୍କୁ ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ହୋଇଗଲା"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"ବନ୍ଦ କରନ୍ତୁ"</string>
@@ -394,8 +399,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ବିକଳ୍ପ ଦ୍ୱାରା ବିଜ୍ଞପ୍ତି ପଜ୍‍ ହୋଇଛି"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ବର୍ତ୍ତମାନ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"କୌଣସି ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
-    <string name="no_unseen_notif_text" msgid="395512586119868682">"କୌଣସି ନୂଆ ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ପୁରୁଣା ବିଜ୍ଞପ୍ତି ଦେଖିବାକୁ ଅନଲକ କରନ୍ତୁ"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"କୌଣସି ନୂଆ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ନାହିଁ"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ପୁରୁଣା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଦେଖିବାକୁ ଅନଲକ କରନ୍ତୁ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ଏହି ଡିଭାଇସ୍ ଆପଣଙ୍କ ବାପାମାଙ୍କ ଦ୍ୱାରା ପରିଚାଳିତ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ଏହି ଡିଭାଇସର ମାଲିକାନା ଆପଣଙ୍କ ସଂସ୍ଥା ପାଖରେ ଅଛି ଏବଂ ଏହା ନେଟୱାର୍କ ଟ୍ରାଫିକର ନିରୀକ୍ଷଣ କରିପାରେ"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା ନେଟୱାର୍କ ଟ୍ରାଫିକକୁ ନିରୀକ୍ଷଣ କରିପାରେ"</string>
@@ -530,8 +535,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ସ୍ୱଚାଳିତ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ ଏବଂ ବାର୍ତ୍ତାଳାପ ବିଭାଗର ନିମ୍ନରେ ଦେଖାଯାଏ"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ ସେଟିଂସ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ ହୋଇପାରେ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ। <xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଡିଫଲ୍ଟ ଭାବରେ ବବଲ୍ ହୁଏ।"</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"ଡିଭାଇସ ସେଟିଂସ ଆଧାରରେ ରିଂ କିମ୍ବା ଭାଇବ୍ରେଟ ହୋଇପାରେ"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"ଡିଭାଇସ ସେଟିଂସ ଆଧାରରେ ରିଂ କିମ୍ବା ଭାଇବ୍ରେଟ ହୋଇପାରେ। ଡିଫଲ୍ଟ ଭାବରେ <xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ବବଲ ଭାବେ ଦେଖାଯାଏ।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ଏହି ବିଜ୍ଞପ୍ତି ପ୍ରାପ୍ତ ହେବା ସମୟରେ ସାଉଣ୍ଡ ହେବା ଉଚିତ ନା ଭାଇବ୍ରେସନ୍ ତାହା ସିଷ୍ଟମକୁ ସ୍ଥିର କରିବାକୁ ଦିଅନ୍ତୁ"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ଡିଫଲ୍ଟକୁ ପ୍ରମୋଟ୍ କରାଯାଇଛି"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ନୀରବକୁ ଡିମୋଟ୍ କରାଯାଇଛି"</string>
@@ -773,6 +778,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"ସ୍କ୍ରିନ ରେକର୍ଡିଂ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"କୌଣସି ଶୀର୍ଷକ ନାହିଁ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ଷ୍ଟାଣ୍ଡବାଏ"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"ଫଣ୍ଟର ଆକାର"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"ଛୋଟ କରନ୍ତୁ"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"ବହୁତ ବଡ଼ କରନ୍ତୁ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"ଜୁମ୍ ଇନ୍ କରନ୍ତୁ"</string>
@@ -798,6 +806,9 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଯୋଗ କରିବାକୁ ଆପ୍ ବାଛନ୍ତୁ"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{#ଟି ନିୟନ୍ତ୍ରଣ ଯୋଗ କରାଯାଇଛି।}other{#ଟି ନିୟନ୍ତ୍ରଣ ଯୋଗ କରାଯାଇଛି।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"କାଢ଼ି ଦିଆଯାଇଛି"</string>
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g>କୁ ଯୋଗ କରିବେ?"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"ଏଠାରେ କେଉଁ ନିୟନ୍ତ୍ରଣ ଏବଂ ବିଷୟବସ୍ତୁ ଦେଖାଯିବ ତାହା <xliff:g id="APPNAME">%s</xliff:g> ବାଛିପାରିବ।"</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> ପାଇଁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ କାଢ଼ି ଦେବେ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ପସନ୍ଦ କରାଯାଇଛି"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ପସନ୍ଦ କରାଯାଇଛି, ସ୍ଥିତି <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ନାପସନ୍ଦ କରାଯାଇଛି"</string>
@@ -815,12 +826,13 @@
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ଅନ୍ୟ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକରେ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="controls_dialog_remove" msgid="3775288002711561936">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ଦ୍ଵାରା ପ୍ରସ୍ତାବିତ"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"ଡିଭାଇସ୍ ଲକ୍ ହୋଇଯାଇଛି"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"ଲକ ସ୍କ୍ରିନରୁ ଡିଭାଇସଗୁଡ଼ିକୁ ଦେଖାଇବେ ଏବଂ ନିୟନ୍ତ୍ରଣ କରିବେ?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"ଆପଣ ଲକ ସ୍କ୍ରିନରେ ଆପଣଙ୍କ ଏକ୍ସଟର୍ନଲ ଡିଭାଇସଗୁଡ଼ିକ ପାଇଁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରିପାରିବେ।\n\nଆପଣଙ୍କ ଫୋନ କିମ୍ବା ଟାବଲେଟକୁ ଅନଲକ ନକରି କିଛି ଡିଭାଇସକୁ ନିୟନ୍ତ୍ରଣ କରିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସର ଆପ ଆପଣଙ୍କୁ ଅନୁମତି ଦେଇପାରେ।\n\nଆପଣ ଯେ କୌଣସି ସମୟରେ ସେଟିଂସରେ ପରିବର୍ତ୍ତନ କରିପାରିବେ।"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ଲକ ସ୍କ୍ରିନରୁ ଡିଭାଇସଗୁଡ଼ିକୁ ନିୟନ୍ତ୍ରଣ କରିବେ?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"ଆପଣ ଆପଣଙ୍କ ଫୋନ କିମ୍ବା ଟାବଲେଟକୁ ଅନଲକ ନକରି କିଛି ଡିଭାଇସକୁ ନିୟନ୍ତ୍ରଣ କରିପାରିବେ।\n\nଏହି ଉପାୟରେ କେଉଁ ଡିଭାଇସଗୁଡ଼ିକୁ ନିୟନ୍ତ୍ରଣ କରାଯାଇପାରିବ ତାହା ଆପଣଙ୍କ ଡିଭାଇସର ଆପ ସ୍ଥିର କରେ।"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"ଆପଣ ଆପଣଙ୍କ ଫୋନ କିମ୍ବା ଟାବଲେଟକୁ ଅନଲକ ନକରି କିଛି ଡିଭାଇସକୁ ନିୟନ୍ତ୍ରଣ କରିପାରିବେ। ଏହି ଉପାୟରେ କେଉଁ ଡିଭାଇସଗୁଡ଼ିକୁ ନିୟନ୍ତ୍ରଣ କରାଯାଇପାରିବ ତାହା ଆପଣଙ୍କ ଡିଭାଇସ ଆପ ସ୍ଥିର କରେ।"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ନା, ଧନ୍ୟବାଦ"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ହଁ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PINରେ ଅକ୍ଷର କିମ୍ୱା ପ୍ରତୀକଗୁଡ଼ିକ ଥାଏ"</string>
@@ -848,13 +860,16 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ରୁ <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ଙ୍କ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚଲାନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g>ରୁ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚଲାନ୍ତୁ"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"ଆପଣଙ୍କ ପାଇଁ"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"ପୂର୍ବବତ୍ କରନ୍ତୁ"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ଚଲାଇବା ପାଇଁ ପାଖକୁ ମୁଭ କରନ୍ତୁ"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ଏଠାରେ ଚଲାଇବା ପାଇଁ <xliff:g id="DEVICENAME">%1$s</xliff:g>ର ପାଖକୁ ମୁଭ କରନ୍ତୁ"</string>
-    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ଚାଲୁଛି"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ପ୍ଲେ କରିବା ପାଇଁ ପାଖକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"ଏଠାରେ ପ୍ଲେ କରିବା ପାଇଁ <xliff:g id="DEVICENAME">%1$s</xliff:g> ପାଖକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ପ୍ଲେ ହେଉଛି"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"କିଛି ତ୍ରୁଟି ହୋଇଛି। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"ଲୋଡ ହେଉଛି"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ଟାବଲେଟ"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"ଆପଣଙ୍କ ମିଡିଆକୁ କାଷ୍ଟ କରାଯାଉଛି"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"<xliff:g id="APP_LABEL">%1$s</xliff:g>କୁ କାଷ୍ଟ କରାଯାଉଛି"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ନିୟନ୍ତ୍ରଣ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -864,6 +879,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"ତ୍ରୁଟି ହୋଇଛି, ପୁଣି ଚେଷ୍ଟା କର"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଏଡିଟ କରନ୍ତୁ"</string>
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"ଆପ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"ଆପକୁ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"ଆଉଟପୁଟ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"ଗୋଷ୍ଠୀ"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1ଟି ଡିଭାଇସ୍ ଚୟନ କରାଯାଇଛି"</string>
@@ -878,6 +895,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ଭଲ୍ୟୁମ"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ସ୍ପିକର ଏବଂ ଡିସପ୍ଲେଗୁଡ଼ିକ"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ପ୍ରସ୍ତାବିତ ଡିଭାଇସଗୁଡ଼ିକ"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"ପ୍ରିମିୟମ ଆକାଉଣ୍ଟ ଆବଶ୍ୟକ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ବ୍ରଡକାଷ୍ଟିଂ କିପରି କାମ କରେ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ବ୍ରଡକାଷ୍ଟ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ଆପଣଙ୍କ ଆଖପାଖର କମ୍ପାଟିବଲ ବ୍ଲୁଟୁଥ ଡିଭାଇସ ଥିବା ଲୋକମାନେ ଆପଣ ବ୍ରଡକାଷ୍ଟ କରୁଥିବା ମିଡିଆ ଶୁଣିପାରିବେ"</string>
@@ -889,6 +908,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ବ୍ରଡକାଷ୍ଟ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ସେଭ କରାଯାଇପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ସେଭ କରାଯାଇପାରିଲା ନାହିଁ।"</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"ଅତିକମରେ 4ଟି କେରେକ୍ଟର ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"16ଟିରୁ କମ କେରେକ୍ଟର ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ବିଲ୍ଡ ନମ୍ୱର"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"କ୍ଲିପବୋର୍ଡକୁ କପି କରାଯାଇଥିବା ବିଲ୍ଡ ନମ୍ୱର।"</string>
     <string name="basic_status" msgid="2315371112182658176">"ବାର୍ତ୍ତାଳାପ ଖୋଲନ୍ତୁ"</string>
@@ -1008,12 +1029,25 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ଅତିକମରେ ଗୋଟିଏ ଡିଭାଇସ ଉପଲବ୍ଧ ଅଛି"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ସର୍ଟକଟକୁ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ବାତିଲ କରନ୍ତୁ"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ବର୍ତ୍ତମାନ ଫ୍ଲିପ କରନ୍ତୁ"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"ଏକ ଉନ୍ନତ ସେଲ୍ଫି ପାଇଁ ଫୋନକୁ ଅନଫୋଲ୍ଡ କରନ୍ତୁ"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ଏକ ଉନ୍ନତ ସେଲ୍ଫି ପାଇଁ ସାମ୍ନା ଡିସପ୍ଲେକୁ ଫ୍ଲିପ କରିବେ?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ଉଚ୍ଚ ରିଜୋଲ୍ୟୁସନ ସହ ଅଧିକ ଚଉଡ଼ାର ଏକ ଫଟୋ ନେବା ପାଇଁ ପଛ-ପଟର କେମେରା ବ୍ୟବହାର କରନ୍ତୁ।"</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ଏହି ସ୍କ୍ରିନ ବନ୍ଦ ହୋଇଯିବ"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"ବର୍ତ୍ତମାନ ସ୍କ୍ରିନ ସ୍ୱିଚ କରନ୍ତୁ"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"ଫୋନକୁ ଅନଫୋଲ୍ଡ କରନ୍ତୁ"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"ସ୍କ୍ରିନ ସ୍ୱିଚ କରିବେ?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"ଉଚ୍ଚ ରିଜୋଲ୍ୟୁସନ ପାଇଁ ପଛ କେମେରା ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ଉଚ୍ଚ ରିଜୋଲ୍ୟୁସନ ପାଇଁ ଫୋନକୁ ଫ୍ଲିପ କରନ୍ତୁ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ଫୋଲ୍ଡ କରାଯାଇପାରୁଥିବା ଡିଭାଇସକୁ ଅନଫୋଲ୍ଡ କରାଯାଉଛି"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ଫୋଲ୍ଡ କରାଯାଇପାରୁଥିବା ଡିଭାଇସକୁ ଫ୍ଲିପ କରାଯାଉଛି"</string>
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ବେଟେରୀ ଚାର୍ଜ ବାକି ଅଛି"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ଏକ ଚାର୍ଜର ସହ ଆପଣଙ୍କ ଷ୍ଟାଇଲସକୁ କନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ଷ୍ଟାଇଲସ ବେଟେରୀର ଚାର୍ଜ କମ ଅଛି"</string>
+    <string name="video_camera" msgid="7654002575156149298">"ଭିଡିଓ କେମେରା"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"ଏହି ପ୍ରୋଫାଇଲରୁ କଲ କରାଯାଇପାରିବ ନାହିଁ"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"ଆପଣଙ୍କ ୱାର୍କ ନୀତି ଆପଣଙ୍କୁ କେବଳ ୱାର୍କ ପ୍ରୋଫାଇଲରୁ ଫୋନ କଲ କରିବାକୁ ଅନୁମତି ଦିଏ"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"ୱାର୍କ ପ୍ରୋଫାଇଲକୁ ସ୍ୱିଚ କରନ୍ତୁ"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="lock_screen_settings" msgid="9197175446592718435">"ଲକ ସ୍କ୍ରିନ ସେଟିଂସ"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ୱାଇ-ଫାଇ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"କେମେରାକୁ ବ୍ଲକ କରାଯାଇଛି"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"କେମେରା ଏବଂ ମାଇକ୍ରୋଫୋନକୁ ବ୍ଲକ କରାଯାଇଛି"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ମାଇକ୍ରୋଫୋନକୁ ବ୍ଲକ କରାଯାଇଛି"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ପ୍ରାୟୋରିଟି ମୋଡ ଚାଲୁ ଅଛି"</string>
 </resources>

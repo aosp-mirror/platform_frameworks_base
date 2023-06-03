@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.content.Context
 import android.content.res.Resources
 import android.provider.Settings
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -40,7 +41,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
@@ -48,7 +48,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
 
     @Mock private lateinit var sharedPrefs: FakeSharedPreferences

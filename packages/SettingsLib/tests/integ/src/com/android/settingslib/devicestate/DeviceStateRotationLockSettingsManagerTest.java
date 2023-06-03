@@ -33,7 +33,10 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager.SettableDeviceState;
 
+import com.google.common.truth.Expect;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -44,6 +47,8 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DeviceStateRotationLockSettingsManagerTest {
+
+    @Rule public Expect mExpect = Expect.create();
 
     @Mock private Context mMockContext;
     @Mock private Resources mMockResources;
@@ -65,12 +70,20 @@ public class DeviceStateRotationLockSettingsManagerTest {
         when(mMockContext.getApplicationContext()).thenReturn(mMockContext);
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockContext.getContentResolver()).thenReturn(context.getContentResolver());
+        when(mMockResources.getStringArray(R.array.config_perDeviceStateRotationLockDefaults))
+                .thenReturn(new String[]{"0:1", "1:0:2", "2:2"});
+        when(mMockResources.getIntArray(R.array.config_foldedDeviceStates))
+                .thenReturn(new int[]{0});
+        when(mMockResources.getIntArray(R.array.config_halfFoldedDeviceStates))
+                .thenReturn(new int[]{1});
+        when(mMockResources.getIntArray(R.array.config_openDeviceStates))
+                .thenReturn(new int[]{2});
         mFakeSecureSettings.registerContentObserver(
                 Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
                 /* notifyForDescendents= */ false, //NOTYPO
                 mContentObserver,
                 UserHandle.USER_CURRENT);
-        mManager = new DeviceStateRotationLockSettingsManager(context, mFakeSecureSettings);
+        mManager = new DeviceStateRotationLockSettingsManager(mMockContext, mFakeSecureSettings);
     }
 
     @Test
@@ -104,7 +117,7 @@ public class DeviceStateRotationLockSettingsManagerTest {
     public void getSettableDeviceStates_returnsExpectedValuesInOriginalOrder() {
         when(mMockResources.getStringArray(
                 R.array.config_perDeviceStateRotationLockDefaults)).thenReturn(
-                new String[]{"2:2", "4:0", "1:1", "0:0"});
+                new String[]{"2:1", "1:0:1", "0:2"});
 
         List<SettableDeviceState> settableDeviceStates =
                 DeviceStateRotationLockSettingsManager.getInstance(
@@ -112,9 +125,44 @@ public class DeviceStateRotationLockSettingsManagerTest {
 
         assertThat(settableDeviceStates).containsExactly(
                 new SettableDeviceState(/* deviceState= */ 2, /* isSettable= */ true),
-                new SettableDeviceState(/* deviceState= */ 4, /* isSettable= */ false),
-                new SettableDeviceState(/* deviceState= */ 1, /* isSettable= */ true),
-                new SettableDeviceState(/* deviceState= */ 0, /* isSettable= */ false)
+                new SettableDeviceState(/* deviceState= */ 1, /* isSettable= */ false),
+                new SettableDeviceState(/* deviceState= */ 0, /* isSettable= */ true)
         ).inOrder();
+    }
+
+    @Test
+    public void persistedInvalidIgnoredState_returnsDefaults() {
+        when(mMockResources.getStringArray(
+                R.array.config_perDeviceStateRotationLockDefaults)).thenReturn(
+                new String[]{"0:1", "1:0:2", "2:2"});
+        // Here 2 has IGNORED, and in the defaults 1 has IGNORED.
+        persistSettings("0:2:2:0:1:2");
+        DeviceStateRotationLockSettingsManager manager =
+                new DeviceStateRotationLockSettingsManager(mMockContext, mFakeSecureSettings);
+
+        mExpect.that(manager.getRotationLockSetting(0)).isEqualTo(1);
+        mExpect.that(manager.getRotationLockSetting(1)).isEqualTo(2);
+        mExpect.that(manager.getRotationLockSetting(2)).isEqualTo(2);
+    }
+
+    @Test
+    public void persistedValidValues_returnsPersistedValues() {
+        when(mMockResources.getStringArray(
+                R.array.config_perDeviceStateRotationLockDefaults)).thenReturn(
+                new String[]{"0:1", "1:0:2", "2:2"});
+        persistSettings("0:2:1:0:2:1");
+        DeviceStateRotationLockSettingsManager manager =
+                new DeviceStateRotationLockSettingsManager(mMockContext, mFakeSecureSettings);
+
+        mExpect.that(manager.getRotationLockSetting(0)).isEqualTo(2);
+        mExpect.that(manager.getRotationLockSetting(1)).isEqualTo(1);
+        mExpect.that(manager.getRotationLockSetting(2)).isEqualTo(1);
+    }
+
+    private void persistSettings(String value) {
+        mFakeSecureSettings.putStringForUser(
+                Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
+                value,
+                UserHandle.USER_CURRENT);
     }
 }

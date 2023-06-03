@@ -32,7 +32,9 @@ abstract class StartKeyguardTransitionModule {
 
     @Binds
     @IntoSet
-    abstract fun fromBouncer(impl: FromBouncerTransitionInteractor): TransitionInteractor
+    abstract fun fromPrimaryBouncer(
+        impl: FromPrimaryBouncerTransitionInteractor
+    ): TransitionInteractor
 
     @Binds
     @IntoSet
@@ -53,4 +55,10 @@ abstract class StartKeyguardTransitionModule {
     @Binds
     @IntoSet
     abstract fun fromDozing(impl: FromDozingTransitionInteractor): TransitionInteractor
+
+    @Binds
+    @IntoSet
+    abstract fun fromAlternateBouncer(
+        impl: FromAlternateBouncerTransitionInteractor
+    ): TransitionInteractor
 }

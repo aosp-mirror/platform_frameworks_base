@@ -16,13 +16,12 @@
 
 package com.android.systemui.model;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import android.annotation.NonNull;
 import android.util.Log;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.PrintWriter;
@@ -39,10 +38,15 @@ public class SysUiState implements Dumpable {
     private static final String TAG = SysUiState.class.getSimpleName();
     public static final boolean DEBUG = false;
 
+    private final DisplayTracker mDisplayTracker;
     private @QuickStepContract.SystemUiStateFlags int mFlags;
     private final List<SysUiStateCallback> mCallbacks = new ArrayList<>();
     private int mFlagsToSet = 0;
     private int mFlagsToClear = 0;
+
+    public SysUiState(DisplayTracker displayTracker) {
+        mDisplayTracker = displayTracker;
+    }
 
     /**
      * Add listener to be notified of changes made to SysUI state.
@@ -81,7 +85,7 @@ public class SysUiState implements Dumpable {
     }
 
     private void updateFlags(int displayId) {
-        if (displayId != DEFAULT_DISPLAY) {
+        if (displayId != mDisplayTracker.getDefaultDisplayId()) {
             // Ignore non-default displays for now
             Log.w(TAG, "Ignoring flag update for display: " + displayId, new Throwable());
             return;

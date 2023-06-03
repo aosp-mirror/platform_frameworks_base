@@ -105,6 +105,10 @@
         1.777778
     </item>
 
+    <!-- The aspect ratio that by which optimizations to large screen sizes are made.
+         Needs to be less that or equal to 1. -->
+    <item name="config_pipLargeScreenOptimizedAspectRatio" format="float" type="dimen">0.5625</item>
+
     <!-- The default gravity for the picture-in-picture window.
          Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
     <integer name="config_defaultPictureInPictureGravity">0x55</integer>

@@ -217,7 +217,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"Lydløs"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Slå trådløs til"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Slå trådløs fra"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"Skærmlås"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"Skærm­lås"</string>
     <string name="power_off" msgid="4111692782492232778">"Sluk"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Ringeren er deaktiveret"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Ringervibrering"</string>
@@ -241,7 +241,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Valgmuligheder for tabletcomputeren"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Valgmuligheder for Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Indstillinger for telefon"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"Skærmlås"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"Skærm­lås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Sluk"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Afbryderknap"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Genstart"</string>
@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrere bevægelser, der foretages på enhedens fingeraftrykssensor."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Tag screenshot"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan tage et screenshot af skærmen."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Preview, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktivere eller redigere statuslinje"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillader, at appen kan deaktivere statusbjælken eller tilføje og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vær statusbjælken"</string>
@@ -1147,7 +1148,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Markér tekst"</string>
     <string name="undo" msgid="3175318090002654673">"Fortryd"</string>
     <string name="redo" msgid="7231448494008532233">"Annuller fortryd"</string>
-    <string name="autofill" msgid="511224882647795296">"AutoFyld"</string>
+    <string name="autofill" msgid="511224882647795296">"Autofyld"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Tekstmarkering"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Føj til ordbog"</string>
     <string name="deleteText" msgid="4200807474529938112">"Slet"</string>
@@ -1254,7 +1255,7 @@
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen, mens du konfigurerer dit fingeraftryk."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Sluk skærmen for at afslutte konfigurationen"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktiver"</string>
-    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du bekræfte dit fingeraftryk?"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du verificere dit fingeraftryk?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at bekræfte dit fingeraftryk."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sluk skærm"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsæt"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visning i fuld skærm"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Stryg ned fra toppen for at afslutte."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK, det er forstået"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Roter, og få en bedre visning"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Afslut opdelt skærm, og få en bedre visning"</string>
     <string name="done_label" msgid="7283767013231718521">"Udfør"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkulær timevælger"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkulær minutvælger"</string>
@@ -1898,7 +1901,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishingadvarsel"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Arbejdsprofil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Underrettet"</string>
-    <string name="notification_verified_content_description" msgid="6401483602782359391">"Bekræftet"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Verificeret"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Udvid"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Skjul"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Slå udvidelse til eller fra"</string>

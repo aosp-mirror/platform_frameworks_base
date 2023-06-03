@@ -18,11 +18,13 @@ package com.android.systemui.notetask
 
 import android.app.Activity
 import android.app.KeyguardManager
+import android.app.role.RoleManager
 import android.content.Context
 import android.os.UserManager
 import androidx.core.content.getSystemService
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.notetask.quickaffordance.NoteTaskQuickAffordanceModule
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
 import dagger.Binds
@@ -33,20 +35,25 @@ import dagger.multibindings.IntoMap
 import java.util.Optional
 
 /** Compose all dependencies required by Note Task feature. */
-@Module
+@Module(includes = [NoteTaskQuickAffordanceModule::class])
 internal interface NoteTaskModule {
 
     @[Binds IntoMap ClassKey(LaunchNoteTaskActivity::class)]
-    fun bindNoteTaskLauncherActivity(activity: LaunchNoteTaskActivity): Activity?
+    fun LaunchNoteTaskActivity.bindNoteTaskLauncherActivity(): Activity
 
     @[Binds IntoMap ClassKey(CreateNoteTaskShortcutActivity::class)]
-    fun bindNoteTaskShortcutActivity(activity: CreateNoteTaskShortcutActivity): Activity?
+    fun CreateNoteTaskShortcutActivity.bindNoteTaskShortcutActivity(): Activity
 
     companion object {
 
         @[Provides NoteTaskEnabledKey]
-        fun provideIsNoteTaskEnabled(featureFlags: FeatureFlags): Boolean {
-            return featureFlags.isEnabled(Flags.NOTE_TASKS)
+        fun provideIsNoteTaskEnabled(
+            featureFlags: FeatureFlags,
+            roleManager: RoleManager,
+        ): Boolean {
+            val isRoleAvailable = roleManager.isRoleAvailable(NoteTaskInfoResolver.ROLE_NOTES)
+            val isFeatureEnabled = featureFlags.isEnabled(Flags.NOTE_TASKS)
+            return isRoleAvailable && isFeatureEnabled
         }
 
         @Provides

@@ -16,16 +16,24 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
+import android.view.accessibility.AccessibilityManager;
+
+import androidx.annotation.NonNull;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.AutoHideUiElement;
+
+import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
@@ -33,8 +41,10 @@ import javax.inject.Inject;
 @SysUISingleton
 public class AutoHideController {
     private static final String TAG = "AutoHideController";
-    private static final long AUTO_HIDE_TIMEOUT_MS = 2250;
+    private static final int AUTO_HIDE_TIMEOUT_MS = 2250;
+    private static final int USER_AUTO_HIDE_TIMEOUT_MS = 350;
 
+    private final AccessibilityManager mAccessibilityManager;
     private final IWindowManager mWindowManagerService;
     private final Handler mHandler;
 
@@ -52,11 +62,12 @@ public class AutoHideController {
     };
 
     @Inject
-    public AutoHideController(Context context, @Main Handler handler,
+    public AutoHideController(Context context,
+            @Main Handler handler,
             IWindowManager iWindowManager) {
+        mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mHandler = handler;
         mWindowManagerService = iWindowManager;
-
         mDisplayId = context.getDisplayId();
     }
 
@@ -138,7 +149,12 @@ public class AutoHideController {
 
     private void scheduleAutoHide() {
         cancelAutoHide();
-        mHandler.postDelayed(mAutoHide, AUTO_HIDE_TIMEOUT_MS);
+        mHandler.postDelayed(mAutoHide, getAutoHideTimeout());
+    }
+
+    private int getAutoHideTimeout() {
+        return mAccessibilityManager.getRecommendedTimeoutMillis(AUTO_HIDE_TIMEOUT_MS,
+                FLAG_CONTENT_CONTROLS);
     }
 
     public void checkUserAutoHide(MotionEvent event) {
@@ -160,7 +176,13 @@ public class AutoHideController {
 
     private void userAutoHide() {
         cancelAutoHide();
-        mHandler.postDelayed(mAutoHide, 350); // longer than app gesture -> flag clear
+        // longer than app gesture -> flag clear
+        mHandler.postDelayed(mAutoHide, getUserAutoHideTimeout());
+    }
+
+    private int getUserAutoHideTimeout() {
+        return mAccessibilityManager.getRecommendedTimeoutMillis(USER_AUTO_HIDE_TIMEOUT_MS,
+                FLAG_CONTENT_CONTROLS);
     }
 
     private boolean isAnyTransientBarShown() {
@@ -173,6 +195,15 @@ public class AutoHideController {
         }
 
         return false;
+    }
+
+    public void dump(@NonNull PrintWriter pw) {
+        pw.println("AutoHideController:");
+        pw.println("\tmAutoHideSuspended=" + mAutoHideSuspended);
+        pw.println("\tisAnyTransientBarShown=" + isAnyTransientBarShown());
+        pw.println("\thasPendingAutoHide=" + mHandler.hasCallbacks(mAutoHide));
+        pw.println("\tgetAutoHideTimeout=" + getAutoHideTimeout());
+        pw.println("\tgetUserAutoHideTimeout=" + getUserAutoHideTimeout());
     }
 
     /**

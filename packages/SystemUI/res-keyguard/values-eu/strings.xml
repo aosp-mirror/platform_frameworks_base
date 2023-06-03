@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kargatzen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bizkor kargatzen"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mantso kargatzen"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kargatzea optimizatu da bateria ez kaltetzeko"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bateria ez kaltetzeko, kargatzeko modua optimizatu da"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Desblokeatzeko, sakatu Menua."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sarea blokeatuta dago"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Ez dago SIM txartelik"</string>
@@ -84,7 +84,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratzaileak blokeatu egin du gailua"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Eskuz blokeatu da gailua"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ez da ezagutu"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aurpegi bidezko desblokeoak kamera atzitzeko baimena behar du"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aurpegi bidezko desblokeoak kamera erabiltzeko baimena behar du"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Idatzi SIMaren PINa. # saiakera geratzen zaizu gailua desblokeatzeko operadorearekin harremanetan jarri behar izan aurretik.}other{Idatzi SIMaren PINa. # saiakera gelditzen zaizkizu.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Orain, SIMa desgaituta dago. Aurrera egiteko, idatzi PUK kodea. # saiakera geratzen zaizu SIMa betiko ez-erabilgarri geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.}other{Orain, SIMa desgaituta dago. Aurrera egiteko, idatzi PUK kodea. # saiakera geratzen zaizkizu SIMa betiko ez-erabilgarri geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Lehenetsia"</string>

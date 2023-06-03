@@ -67,7 +67,7 @@
             android:importantForAccessibility="no"/>
         <TextView
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:minHeight="48dp"
             android:layout_weight="1"
             android:gravity="center_vertical"

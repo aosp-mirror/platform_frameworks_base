@@ -170,6 +170,10 @@ open class ControlsBindingControllerImpl @Inject constructor(
         retrieveLifecycleManager(component).bindService()
     }
 
+    override fun bindServiceForPanel(component: ComponentName) {
+        retrieveLifecycleManager(component).bindServiceForPanel()
+    }
+
     override fun changeUser(newUser: UserHandle) {
         if (newUser == currentUser) return
 

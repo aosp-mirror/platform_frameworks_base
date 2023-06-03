@@ -44,7 +44,7 @@ import java.util.Map;
 public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKeyInputView>
         extends KeyguardInputViewController<T> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final LockPatternUtils mLockPatternUtils;
+    protected final LockPatternUtils mLockPatternUtils;
     private final LatencyTracker mLatencyTracker;
     private final FalsingCollector mFalsingCollector;
     private final EmergencyButtonController mEmergencyButtonController;
@@ -103,6 +103,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
 
     @Override
     public void reset() {
+        super.reset();
         // start fresh
         mDismissing = false;
         mView.resetPasswordText(false /* animate */, false /* announce */);

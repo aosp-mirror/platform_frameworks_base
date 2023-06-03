@@ -74,7 +74,7 @@ constructor(
 
     /**
      * @return a context with the MCC/MNC [Configuration] values corresponding to this
-     * subscriptionId
+     *   subscriptionId
      */
     fun getMobileContextForSub(subId: Int, context: Context): Context {
         if (demoModeController.isInDemoMode) {

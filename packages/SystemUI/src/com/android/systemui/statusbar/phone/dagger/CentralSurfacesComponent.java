@@ -22,10 +22,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.biometrics.AuthRippleController;
-import com.android.systemui.shade.LargeScreenShadeHeaderController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.QuickSettingsController;
+import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
@@ -113,6 +114,9 @@ public interface CentralSurfacesComponent {
      */
     NotificationPanelViewController getNotificationPanelViewController();
 
+    /** Creates a QuickSettingsController. */
+    QuickSettingsController getQuickSettingsController();
+
     /**
      * Creates a LockIconViewController. Must be init after creation.
      */
@@ -134,9 +138,9 @@ public interface CentralSurfacesComponent {
     CentralSurfacesCommandQueueCallbacks getCentralSurfacesCommandQueueCallbacks();
 
     /**
-     * Creates a {@link LargeScreenShadeHeaderController}.
+     * Creates a {@link ShadeHeaderController}.
      */
-    LargeScreenShadeHeaderController getLargeScreenShadeHeaderController();
+    ShadeHeaderController getLargeScreenShadeHeaderController();
 
     /**
      * Creates a new {@link CollapsedStatusBarFragment} each time it's called. See

@@ -20,10 +20,21 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Button;
 
+import com.android.systemui.animation.LaunchableView;
+import com.android.systemui.animation.LaunchableViewDelegate;
+
+import kotlin.Unit;
+
 /**
  * A Button which doesn't have overlapping drawing commands
  */
-public class AlphaOptimizedButton extends Button {
+public class AlphaOptimizedButton extends Button implements LaunchableView {
+    private LaunchableViewDelegate mDelegate = new LaunchableViewDelegate(this,
+            (visibility) -> {
+                super.setVisibility(visibility);
+                return Unit.INSTANCE;
+            });
+
     public AlphaOptimizedButton(Context context) {
         super(context);
     }
@@ -44,5 +55,15 @@ public class AlphaOptimizedButton extends Button {
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    @Override
+    public void setShouldBlockVisibilityChanges(boolean block) {
+        mDelegate.setShouldBlockVisibilityChanges(block);
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        mDelegate.setVisibility(visibility);
     }
 }

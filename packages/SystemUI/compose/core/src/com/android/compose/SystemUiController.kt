@@ -78,11 +78,10 @@ interface SystemUiController {
      * Set the status bar color.
      *
      * @param color The **desired** [Color] to set. This may require modification if running on an
-     * API level that only supports white status bar icons.
+     *   API level that only supports white status bar icons.
      * @param darkIcons Whether dark status bar icons would be preferable.
      * @param transformColorForLightContent A lambda which will be invoked to transform [color] if
-     * dark icons were requested but are not available. Defaults to applying a black scrim.
-     *
+     *   dark icons were requested but are not available. Defaults to applying a black scrim.
      * @see statusBarDarkContentEnabled
      */
     fun setStatusBarColor(
@@ -95,16 +94,15 @@ interface SystemUiController {
      * Set the navigation bar color.
      *
      * @param color The **desired** [Color] to set. This may require modification if running on an
-     * API level that only supports white navigation bar icons. Additionally this will be ignored
-     * and [Color.Transparent] will be used on API 29+ where gesture navigation is preferred or the
-     * system UI automatically applies background protection in other navigation modes.
+     *   API level that only supports white navigation bar icons. Additionally this will be ignored
+     *   and [Color.Transparent] will be used on API 29+ where gesture navigation is preferred or
+     *   the system UI automatically applies background protection in other navigation modes.
      * @param darkIcons Whether dark navigation bar icons would be preferable.
      * @param navigationBarContrastEnforced Whether the system should ensure that the navigation bar
-     * has enough contrast when a fully transparent background is requested. Only supported on API
-     * 29+.
+     *   has enough contrast when a fully transparent background is requested. Only supported on API
+     *   29+.
      * @param transformColorForLightContent A lambda which will be invoked to transform [color] if
-     * dark icons were requested but are not available. Defaults to applying a black scrim.
-     *
+     *   dark icons were requested but are not available. Defaults to applying a black scrim.
      * @see navigationBarDarkContentEnabled
      * @see navigationBarContrastEnforced
      */

@@ -48,15 +48,31 @@ sealed interface NetworkNameModel : Diffable<NetworkNameModel> {
      * This name has been derived from telephony intents. see
      * [android.telephony.TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED]
      */
-    data class Derived(override val name: String) : NetworkNameModel {
+    data class IntentDerived(override val name: String) : NetworkNameModel {
         override fun logDiffs(prevVal: NetworkNameModel, row: TableRowLogger) {
-            if (prevVal !is Derived || prevVal.name != name) {
-                row.logChange(COL_NETWORK_NAME, "Derived($name)")
+            if (prevVal !is IntentDerived || prevVal.name != name) {
+                row.logChange(COL_NETWORK_NAME, "IntentDerived($name)")
             }
         }
 
         override fun logFull(row: TableRowLogger) {
-            row.logChange(COL_NETWORK_NAME, "Derived($name)")
+            row.logChange(COL_NETWORK_NAME, "IntentDerived($name)")
+        }
+    }
+
+    /**
+     * This name has been derived from the sim via
+     * [android.telephony.TelephonyManager.getSimOperatorName].
+     */
+    data class SimDerived(override val name: String) : NetworkNameModel {
+        override fun logDiffs(prevVal: NetworkNameModel, row: TableRowLogger) {
+            if (prevVal !is SimDerived || prevVal.name != name) {
+                row.logChange(COL_NETWORK_NAME, "SimDerived($name)")
+            }
+        }
+
+        override fun logFull(row: TableRowLogger) {
+            row.logChange(COL_NETWORK_NAME, "SimDerived($name)")
         }
     }
 
@@ -84,5 +100,5 @@ fun Intent.toNetworkNameModel(separator: String): NetworkNameModel? {
         str.append(spn)
     }
 
-    return if (str.isNotEmpty()) NetworkNameModel.Derived(str.toString()) else null
+    return if (str.isNotEmpty()) NetworkNameModel.IntentDerived(str.toString()) else null
 }

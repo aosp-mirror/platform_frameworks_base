@@ -412,11 +412,11 @@ public final class RequiresPermissionChecker extends BugChecker
 
     private static ParsedRequiresPermission parseRequiresPermissionRecursively(
             MethodInvocationTree tree, VisitorState state) {
-        if (ENFORCE_VIA_CONTEXT.matches(tree, state)) {
+        if (ENFORCE_VIA_CONTEXT.matches(tree, state) && tree.getArguments().size() > 0) {
             final ParsedRequiresPermission res = new ParsedRequiresPermission();
             res.allOf.add(String.valueOf(ASTHelpers.constValue(tree.getArguments().get(0))));
             return res;
-        } else if (ENFORCE_VIA_CHECKER.matches(tree, state)) {
+        } else if (ENFORCE_VIA_CHECKER.matches(tree, state) && tree.getArguments().size() > 1) {
             final ParsedRequiresPermission res = new ParsedRequiresPermission();
             res.allOf.add(String.valueOf(ASTHelpers.constValue(tree.getArguments().get(1))));
             return res;

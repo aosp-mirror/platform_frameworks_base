@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.shared.model
 
+import android.content.Intent
 import androidx.annotation.DrawableRes
 
 /**
@@ -45,4 +46,7 @@ data class KeyguardQuickAffordancePickerRepresentation(
      * user to a destination where they can re-enable it.
      */
     val actionComponentName: String? = null,
+
+    /** Optional [Intent] to use to start an activity to configure this affordance. */
+    val configureIntent: Intent? = null,
 )

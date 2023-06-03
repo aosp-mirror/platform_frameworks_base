@@ -22,13 +22,18 @@ import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_LOCKED
 import android.annotation.Nullable;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Trace;
-import android.util.Log;
+import android.util.IndentingPrintWriter;
+
+import androidx.annotation.NonNull;
 
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
+import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.wrapper.RotationPolicyWrapper;
 
+import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -39,19 +44,19 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public final class DeviceStateRotationLockSettingController
-        implements Listenable, RotationLockController.RotationLockControllerCallback {
-
-    private static final String TAG = "DSRotateLockSettingCon";
+        implements Listenable, RotationLockController.RotationLockControllerCallback, Dumpable {
 
     private final RotationPolicyWrapper mRotationPolicyWrapper;
     private final DeviceStateManager mDeviceStateManager;
     private final Executor mMainExecutor;
     private final DeviceStateRotationLockSettingsManager mDeviceStateRotationLockSettingsManager;
+    private final DeviceStateRotationLockSettingControllerLogger mLogger;
 
     // On registration for DeviceStateCallback, we will receive a callback with the current state
     // and this will be initialized.
     private int mDeviceState = -1;
-    @Nullable private DeviceStateManager.DeviceStateCallback mDeviceStateCallback;
+    @Nullable
+    private DeviceStateManager.DeviceStateCallback mDeviceStateCallback;
     private DeviceStateRotationLockSettingsManager.DeviceStateRotationLockSettingsListener
             mDeviceStateRotationLockSettingsListener;
 
@@ -60,21 +65,27 @@ public final class DeviceStateRotationLockSettingController
             RotationPolicyWrapper rotationPolicyWrapper,
             DeviceStateManager deviceStateManager,
             @Main Executor executor,
-            DeviceStateRotationLockSettingsManager deviceStateRotationLockSettingsManager) {
+            DeviceStateRotationLockSettingsManager deviceStateRotationLockSettingsManager,
+            DeviceStateRotationLockSettingControllerLogger logger,
+            DumpManager dumpManager) {
         mRotationPolicyWrapper = rotationPolicyWrapper;
         mDeviceStateManager = deviceStateManager;
         mMainExecutor = executor;
         mDeviceStateRotationLockSettingsManager = deviceStateRotationLockSettingsManager;
+        mLogger = logger;
+        dumpManager.registerDumpable(this);
     }
 
     @Override
     public void setListening(boolean listening) {
+        mLogger.logListeningChange(listening);
         if (listening) {
             // Note that this is called once with the initial state of the device, even if there
             // is no user action.
             mDeviceStateCallback = this::updateDeviceState;
             mDeviceStateManager.registerCallback(mMainExecutor, mDeviceStateCallback);
-            mDeviceStateRotationLockSettingsListener = () -> readPersistedSetting(mDeviceState);
+            mDeviceStateRotationLockSettingsListener = () ->
+                    readPersistedSetting("deviceStateRotationLockChange", mDeviceState);
             mDeviceStateRotationLockSettingsManager.registerListener(
                     mDeviceStateRotationLockSettingsListener);
         } else {
@@ -89,35 +100,28 @@ public final class DeviceStateRotationLockSettingController
     }
 
     @Override
-    public void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible) {
-        if (mDeviceState == -1) {
-            Log.wtf(TAG, "Device state was not initialized.");
+    public void onRotationLockStateChanged(boolean newRotationLocked, boolean affordanceVisible) {
+        int deviceState = mDeviceState;
+        boolean currentRotationLocked = mDeviceStateRotationLockSettingsManager
+                .isRotationLocked(deviceState);
+        mLogger.logRotationLockStateChanged(deviceState, newRotationLocked, currentRotationLocked);
+        if (deviceState == -1) {
             return;
         }
-
-        if (rotationLocked
-                == mDeviceStateRotationLockSettingsManager.isRotationLocked(mDeviceState)) {
-            Log.v(TAG, "Rotation lock same as the current setting, no need to update.");
+        if (newRotationLocked == currentRotationLocked) {
             return;
         }
-
-        saveNewRotationLockSetting(rotationLocked);
+        saveNewRotationLockSetting(newRotationLocked);
     }
 
     private void saveNewRotationLockSetting(boolean isRotationLocked) {
-        Log.v(
-                TAG,
-                "saveNewRotationLockSetting [state="
-                        + mDeviceState
-                        + "] [isRotationLocked="
-                        + isRotationLocked
-                        + "]");
-
-        mDeviceStateRotationLockSettingsManager.updateSetting(mDeviceState, isRotationLocked);
+        int deviceState = mDeviceState;
+        mLogger.logSaveNewRotationLockSetting(isRotationLocked, deviceState);
+        mDeviceStateRotationLockSettingsManager.updateSetting(deviceState, isRotationLocked);
     }
 
     private void updateDeviceState(int state) {
-        Log.v(TAG, "updateDeviceState [state=" + state + "]");
+        mLogger.logUpdateDeviceState(mDeviceState, state);
         if (Trace.isEnabled()) {
             Trace.traceBegin(
                     Trace.TRACE_TAG_APP, "updateDeviceState [state=" + state + "]");
@@ -127,22 +131,26 @@ public final class DeviceStateRotationLockSettingController
                 return;
             }
 
-            readPersistedSetting(state);
+            readPersistedSetting("updateDeviceState", state);
         } finally {
             Trace.endSection();
         }
     }
 
-    private void readPersistedSetting(int state) {
+    private void readPersistedSetting(String caller, int state) {
         int rotationLockSetting =
                 mDeviceStateRotationLockSettingsManager.getRotationLockSetting(state);
+        boolean shouldBeLocked = rotationLockSetting == DEVICE_STATE_ROTATION_LOCK_LOCKED;
+        boolean isLocked = mRotationPolicyWrapper.isRotationLocked();
+
+        mLogger.readPersistedSetting(caller, state, rotationLockSetting, shouldBeLocked, isLocked);
+
         if (rotationLockSetting == DEVICE_STATE_ROTATION_LOCK_IGNORED) {
             // This should not happen. Device states that have an ignored setting, should also
             // specify a fallback device state which is not ignored.
             // We won't handle this device state. The same rotation lock setting as before should
             // apply and any changes to the rotation lock setting will be written for the previous
             // valid device state.
-            Log.w(TAG, "Missing fallback. Ignoring new device state: " + state);
             return;
         }
 
@@ -150,9 +158,18 @@ public final class DeviceStateRotationLockSettingController
         mDeviceState = state;
 
         // Update the rotation policy, if needed, for this new device state
-        boolean newRotationLockSetting = rotationLockSetting == DEVICE_STATE_ROTATION_LOCK_LOCKED;
-        if (newRotationLockSetting != mRotationPolicyWrapper.isRotationLocked()) {
-            mRotationPolicyWrapper.setRotationLock(newRotationLockSetting);
+        if (shouldBeLocked != isLocked) {
+            mRotationPolicyWrapper.setRotationLock(shouldBeLocked);
         }
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter printWriter, @NonNull String[] args) {
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter);
+        mDeviceStateRotationLockSettingsManager.dump(pw);
+        pw.println("DeviceStateRotationLockSettingController");
+        pw.increaseIndent();
+        pw.println("mDeviceState: " + mDeviceState);
+        pw.decreaseIndent();
     }
 }

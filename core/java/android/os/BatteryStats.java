@@ -649,8 +649,11 @@ public abstract class BatteryStats implements Parcelable {
             return Uid.PROCESS_STATE_NONEXISTENT;
         } else if (procState == ActivityManager.PROCESS_STATE_TOP) {
             return Uid.PROCESS_STATE_TOP;
-        } else if (ActivityManager.isForegroundService(procState)) {
-            // State when app has put itself in the foreground.
+        } else if (procState == ActivityManager.PROCESS_STATE_BOUND_TOP) {
+            return Uid.PROCESS_STATE_BACKGROUND;
+        } else if (procState == ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+            return Uid.PROCESS_STATE_FOREGROUND_SERVICE;
+        } else if (procState == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
             return Uid.PROCESS_STATE_FOREGROUND_SERVICE;
         } else if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
             // Persistent and other foreground states go here.
@@ -2803,6 +2806,15 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract long getMobileRadioMeasuredBatteryConsumptionUC();
+
+    /**
+     * Returns the battery consumption (in microcoulombs) of the phone calls, derived from on device
+     * power measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+     *
+     * {@hide}
+     */
+    public abstract long getPhoneEnergyConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) of the screen while on, derived from on

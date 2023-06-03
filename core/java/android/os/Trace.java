@@ -109,7 +109,8 @@ public final class Trace {
     public static final long TRACE_TAG_THERMAL = 1L << 27;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
-    private static final int MAX_SECTION_NAME_LEN = 127;
+    /** @hide **/
+    public static final int MAX_SECTION_NAME_LEN = 127;
 
     // Must be volatile to avoid word tearing.
     // This is only kept in case any apps get this by reflection but do not

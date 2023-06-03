@@ -33,14 +33,15 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalMinimumTouchTargetEnforcement
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCompositionContext
@@ -64,11 +65,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.findRootCoordinates
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewTreeLifecycleOwner
@@ -77,7 +76,6 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * Create an expandable shape that can launch into an Activity or a Dialog.
@@ -170,25 +168,25 @@ fun Expandable(
     val contentColor = controller.contentColor
     val shape = controller.shape
 
-    // TODO(b/230830644): Use movableContentOf to preserve the content state instead once the
-    // Compose libraries have been updated and include aosp/2163631.
     val wrappedContent =
-        @Composable { controller: ExpandableController ->
-            CompositionLocalProvider(
-                LocalContentColor provides contentColor,
-            ) {
-                // We make sure that the content itself (wrapped by the background) is at least
-                // 40.dp, which is the same as the M3 buttons. This applies even if onClick is
-                // null, to make it easier to write expandables that are sometimes clickable and
-                // sometimes not. There shouldn't be any Expandable smaller than 40dp because if
-                // the expandable is not clickable directly, then something in its content should
-                // be (and with a size >= 40dp).
-                val minSize = 40.dp
-                Box(
-                    Modifier.defaultMinSize(minWidth = minSize, minHeight = minSize),
-                    contentAlignment = Alignment.Center,
+        remember(content) {
+            movableContentOf { expandable: Expandable ->
+                CompositionLocalProvider(
+                    LocalContentColor provides contentColor,
                 ) {
-                    content(controller.expandable)
+                    // We make sure that the content itself (wrapped by the background) is at least
+                    // 40.dp, which is the same as the M3 buttons. This applies even if onClick is
+                    // null, to make it easier to write expandables that are sometimes clickable and
+                    // sometimes not. There shouldn't be any Expandable smaller than 40dp because if
+                    // the expandable is not clickable directly, then something in its content
+                    // should be (and with a size >= 40dp).
+                    val minSize = 40.dp
+                    Box(
+                        Modifier.defaultMinSize(minWidth = minSize, minHeight = minSize),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        content(expandable)
+                    }
                 }
             }
         }
@@ -218,21 +216,8 @@ fun Expandable(
     // If this expandable is expanded when it's being directly clicked on, let's ensure that it has
     // the minimum interactive size followed by all M3 components (48.dp).
     val minInteractiveSizeModifier =
-        if (onClick != null && LocalMinimumTouchTargetEnforcement.current) {
-            // TODO(b/242040009): Replace this by Modifier.minimumInteractiveComponentSize() once
-            // http://aosp/2305511 is available.
-            val minTouchSize = LocalViewConfiguration.current.minimumTouchTargetSize
-            Modifier.layout { measurable, constraints ->
-                // Copied from androidx.compose.material3.InteractiveComponentSize.kt
-                val placeable = measurable.measure(constraints)
-                val width = maxOf(placeable.width, minTouchSize.width.roundToPx())
-                val height = maxOf(placeable.height, minTouchSize.height.roundToPx())
-                layout(width, height) {
-                    val centerX = ((width - placeable.width) / 2f).roundToInt()
-                    val centerY = ((height - placeable.height) / 2f).roundToInt()
-                    placeable.place(centerX, centerY)
-                }
-            }
+        if (onClick != null) {
+            Modifier.minimumInteractiveComponentSize()
         } else {
             Modifier
         }
@@ -270,7 +255,9 @@ fun Expandable(
                     .onGloballyPositioned {
                         controller.boundsInComposeViewRoot.value = it.boundsInRoot()
                     }
-            ) { wrappedContent(controller) }
+            ) {
+                wrappedContent(controller.expandable)
+            }
         }
         else -> {
             val clickModifier =
@@ -301,7 +288,7 @@ fun Expandable(
                         controller.boundsInComposeViewRoot.value = it.boundsInRoot()
                     },
             ) {
-                wrappedContent(controller)
+                wrappedContent(controller.expandable)
             }
         }
     }
@@ -315,7 +302,7 @@ private fun AnimatedContentInOverlay(
     animatorState: State<LaunchAnimator.State?>,
     overlay: ViewGroupOverlay,
     controller: ExpandableControllerImpl,
-    content: @Composable (ExpandableController) -> Unit,
+    content: @Composable (Expandable) -> Unit,
     composeViewRoot: View,
     onOverlayComposeViewChanged: (View?) -> Unit,
     density: Density,
@@ -370,7 +357,7 @@ private fun AnimatedContentInOverlay(
                             // We center the content in the expanding container.
                             contentAlignment = Alignment.Center,
                         ) {
-                            Box(contentModifier) { content(controller) }
+                            Box(contentModifier) { content(controller.expandable) }
                         }
                     }
                 }

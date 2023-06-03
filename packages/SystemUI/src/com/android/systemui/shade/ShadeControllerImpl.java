@@ -270,8 +270,6 @@ public final class ShadeControllerImpl implements ShadeController {
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
         mNotificationPanelViewController.collapsePanel(false, false, 1.0f);
 
-        mNotificationPanelViewController.closeQs();
-
         mExpandedVisible = false;
         notifyVisibilityChanged(false);
 

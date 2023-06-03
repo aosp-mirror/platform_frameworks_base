@@ -53,7 +53,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Échec de l\'opération. Veuillez activer le verrouillage de la carte SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne soit verrouillée.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée.</item>
       <item quantity="other">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"Code IMEI"</string>
@@ -343,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Peut enregistrer des gestes effectués sur le lecteur d\'empreinte digitale de l\'appareil."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Prendre une capture d\'écran"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Peut prendre des captures d\'écran."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Aperçu, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"remplacer la barre d\'état"</string>
@@ -1841,6 +1842,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Affichage en plein écran"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Pour quitter, balayez l\'écran du haut vers le bas."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Faites pivoter pour mieux voir"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Quittez l\'écran partagé pour mieux voir"</string>
     <string name="done_label" msgid="7283767013231718521">"OK"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Curseur circulaire des heures"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Curseur circulaire des minutes"</string>

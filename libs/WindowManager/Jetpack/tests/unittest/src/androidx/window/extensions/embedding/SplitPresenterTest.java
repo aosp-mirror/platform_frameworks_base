@@ -28,6 +28,7 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUND
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityInfoWithMinDimensions;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPairRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createWindowLayoutInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.getSplitBounds;
@@ -76,6 +77,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
+import androidx.window.extensions.core.util.function.Function;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
@@ -511,7 +513,7 @@ public class SplitPresenterTest {
         final Activity secondaryActivity = createMockActivity();
         final TaskFragmentContainer bottomTf = mController.newContainer(secondaryActivity, TASK_ID);
         final TaskFragmentContainer primaryTf = mController.newContainer(mActivity, TASK_ID);
-        final SplitPairRule rule = new SplitPairRule.Builder(pair ->
+        final SplitPairRule rule = createSplitPairRuleBuilder(pair ->
                 pair.first == mActivity && pair.second == secondaryActivity, pair -> false,
                 metrics -> true)
                 .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
@@ -529,7 +531,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testComputeSplitAttributes() {
-        final SplitPairRule splitPairRule = new SplitPairRule.Builder(
+        final SplitPairRule splitPairRule = createSplitPairRuleBuilder(
                 activityPair -> true,
                 activityIntentPair -> true,
                 windowMetrics -> windowMetrics.getBounds().equals(TASK_BOUNDS))
@@ -561,12 +563,33 @@ public class SplitPresenterTest {
                                 SplitAttributes.SplitType.RatioSplitType.splitEqually()
                         )
                 ).build();
+        final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
+                params -> splitAttributes;
 
-        mController.setSplitAttributesCalculator(params -> {
-            return splitAttributes;
-        });
+        mController.setSplitAttributesCalculator(calculator);
 
         assertEquals(splitAttributes, mPresenter.computeSplitAttributes(taskProperties,
+                splitPairRule, null /* minDimensionsPair */));
+    }
+
+    @Test
+    public void testComputeSplitAttributesOnHingeSplitTypeOnDeviceWithoutFoldingFeature() {
+        final SplitAttributes hingeSplitAttrs = new SplitAttributes.Builder()
+                .setSplitType(new SplitAttributes.SplitType.HingeSplitType(
+                        SplitAttributes.SplitType.RatioSplitType.splitEqually()))
+                .build();
+        final SplitPairRule splitPairRule = createSplitPairRuleBuilder(
+                activityPair -> true,
+                activityIntentPair -> true,
+                windowMetrics -> windowMetrics.getBounds().equals(TASK_BOUNDS))
+                .setFinishSecondaryWithPrimary(DEFAULT_FINISH_SECONDARY_WITH_PRIMARY)
+                .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
+                .setDefaultSplitAttributes(hingeSplitAttrs)
+                .build();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperty();
+        doReturn(null).when(mPresenter).getFoldingFeature(any());
+
+        assertEquals(hingeSplitAttrs, mPresenter.computeSplitAttributes(taskProperties,
                 splitPairRule, null /* minDimensionsPair */));
     }
 

@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以捕捉在设备指纹传感器上执行的手势。"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"截取屏幕截图"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"可截取显示画面的屏幕截图。"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"预览，<xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"允许应用停用状态栏或者增删系统图标。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"用作状态栏"</string>
@@ -596,7 +597,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"光线太亮"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"检测到按下“电源”按钮的操作"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"请尝试调整指纹"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"请在每次放手指时略微更改手指的位置"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"每次放手指时，请略微变换手指的位置"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"未能识别指纹"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"目前处于全屏模式"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"要退出，请从顶部向下滑动。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋转可改善预览效果"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"退出分屏可改善预览效果"</string>
     <string name="done_label" msgid="7283767013231718521">"完成"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"小时转盘"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"分钟转盘"</string>

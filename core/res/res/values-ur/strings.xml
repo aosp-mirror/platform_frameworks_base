@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"آلہ کے فنگر پرنٹ سینسر پر کیے گئے اشاروں کو کیپچر کر سکتا ہے۔"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"اسکرین شاٹ لیں"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ڈسپلے کا اسکرین شاٹ لیا جا سکتا ہے۔"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"پیش منظر، <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"بطور اسٹیٹس بار کام لیں"</string>
@@ -915,12 +916,12 @@
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"غیر مقفل کرنے کیلئے پاس ورڈ ٹائپ کریں"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"‏غیر مقفل کرنے کیلئے PIN ٹائپ کریں"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"‏غلط PIN کوڈ۔"</string>
-    <string name="keyguard_label_text" msgid="3841953694564168384">"غیر مقفل کرنے کیلئے، مینو پھر 0 دبائیں۔"</string>
+    <string name="keyguard_label_text" msgid="3841953694564168384">"غیر مقفل کرنے کیلئے، مینیو پھر 0 دبائیں۔"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"ہنگامی نمبر"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"کوئی سروس نہیں ہے"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"اسکرین مقفل ہے۔"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"غیر مقفل کرنے کیلئے مینو دبائیں یا ہنگامی کال کریں۔"</string>
-    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"غیر مقفل کرنے کیلئے مینو دبائیں۔"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"غیر مقفل کرنے کیلئے مینیو دبائیں یا ہنگامی کال کریں۔"</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"غیر مقفل کرنے کیلئے مینیو دبائیں۔"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"غیر مقفل کرنے کیلئے پیٹرن کو ڈرا کریں"</string>
     <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ہنگامی"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"کال پر واپس جائیں"</string>
@@ -1067,7 +1068,7 @@
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نے آپ کی کاپی کردہ ایک تصویر پیسٹ کر دی"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نے آپ کا کاپی کردہ مواد پیسٹ کر دیا"</string>
     <string name="more_item_label" msgid="7419249600215749115">"مزید"</string>
-    <string name="prepend_shortcut_label" msgid="1743716737502867951">"مینو+"</string>
+    <string name="prepend_shortcut_label" msgid="1743716737502867951">"مینیو+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+‎"</string>
     <string name="menu_ctrl_shortcut_label" msgid="131911133027196485">"Ctrl+‎"</string>
     <string name="menu_alt_shortcut_label" msgid="343761069945250991">"Alt+‎"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"پوری اسکرین میں دیکھ رہے ہیں"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"خارج ہونے کیلئے اوپر سے نیچے سوائپ کریں۔"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"سمجھ آ گئی"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"بہتر منظر کے لیے گھمائیں"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"بہتر منظر کے لیے اسپلٹ اسکرین سے باہر نکلیں"</string>
     <string name="done_label" msgid="7283767013231718521">"ہو گیا"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"گھنٹوں کا سرکلر سلائیڈر"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"منٹس سرکلر سلائیڈر"</string>
@@ -2048,11 +2051,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"اَن انسٹال کریں"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"بہر صورت کھولیں"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ضرر رساں ایپ کا پتہ چلا"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> کو آلے کے تمام لاگز تک رسائی کی اجازت دیں؟"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"‫<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> کو آلے کے تمام لاگز تک رسائی کی اجازت دیں؟"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"یک وقتی رسائی کی اجازت دیں"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"اجازت نہ دیں"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنے بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔"</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"‏آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنی بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔\n\ng.co/android/devicelogs پر مزید جانیں۔"</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"‏آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنی بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔\n\nمزید جاننے کیلئے g.co/android/devicelogs ملاحظہ کریں۔"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"دوبارہ نہ دکھائیں"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> کے سلائسز دکھانا چاہتی ہے"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ترمیم کریں"</string>

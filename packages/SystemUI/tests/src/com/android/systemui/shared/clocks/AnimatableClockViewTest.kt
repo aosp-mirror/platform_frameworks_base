@@ -57,7 +57,18 @@ class AnimatableClockViewTest : SysuiTestCase() {
         clockView.measure(50, 50)
 
         verify(mockTextAnimator).glyphFilter = any()
-        verify(mockTextAnimator).setTextStyle(300, -1.0f, 200, false, 350L, null, 0L, null)
+        verify(mockTextAnimator)
+            .setTextStyle(
+                weight = 300,
+                textSize = -1.0f,
+                color = 200,
+                strokeWidth = -1F,
+                animate = false,
+                duration = 350L,
+                interpolator = null,
+                delay = 0L,
+                onAnimationEnd = null
+            )
         verifyNoMoreInteractions(mockTextAnimator)
     }
 
@@ -68,8 +79,30 @@ class AnimatableClockViewTest : SysuiTestCase() {
         clockView.animateAppearOnLockscreen()
 
         verify(mockTextAnimator, times(2)).glyphFilter = any()
-        verify(mockTextAnimator).setTextStyle(100, -1.0f, 200, false, 0L, null, 0L, null)
-        verify(mockTextAnimator).setTextStyle(300, -1.0f, 200, true, 350L, null, 0L, null)
+        verify(mockTextAnimator)
+            .setTextStyle(
+                weight = 100,
+                textSize = -1.0f,
+                color = 200,
+                strokeWidth = -1F,
+                animate = false,
+                duration = 0L,
+                interpolator = null,
+                delay = 0L,
+                onAnimationEnd = null
+            )
+        verify(mockTextAnimator)
+            .setTextStyle(
+                weight = 300,
+                textSize = -1.0f,
+                color = 200,
+                strokeWidth = -1F,
+                animate = true,
+                duration = 350L,
+                interpolator = null,
+                delay = 0L,
+                onAnimationEnd = null
+            )
         verifyNoMoreInteractions(mockTextAnimator)
     }
 }

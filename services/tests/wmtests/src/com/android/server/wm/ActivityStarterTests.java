@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.Activity.RESULT_CANCELED;
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CANCELED;
@@ -42,6 +44,7 @@ import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBE
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations;
@@ -49,6 +52,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -73,6 +77,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -103,6 +108,8 @@ import android.window.TaskFragmentOrganizerToken;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.wm.utils.MockTracker;
@@ -110,6 +117,8 @@ import com.android.server.wm.utils.MockTracker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -150,6 +159,9 @@ public class ActivityStarterTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         mController = mock(ActivityStartController.class);
+        BackgroundActivityStartController balController =
+                new BackgroundActivityStartController(mAtm, mSupervisor);
+        doReturn(balController).when(mController).getBackgroundActivityLaunchController();
         mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
         clearInvocations(mActivityMetricsLogger);
     }
@@ -211,10 +223,13 @@ public class ActivityStarterTests extends WindowTestsBase {
             int expectedResult) {
         final ActivityTaskManagerService service = mAtm;
         final IPackageManager packageManager = mock(IPackageManager.class);
-        final ActivityStartController controller = mock(ActivityStartController.class);
 
-        final ActivityStarter starter = new ActivityStarter(controller, service,
-                service.mTaskSupervisor, mock(ActivityStartInterceptor.class));
+        final ActivityStarter starter =
+                new ActivityStarter(
+                        mController,
+                        service,
+                        service.mTaskSupervisor,
+                        mock(ActivityStartInterceptor.class));
         prepareStarter(launchFlags);
         final IApplicationThread caller = mock(IApplicationThread.class);
         final WindowProcessListener listener = mock(WindowProcessListener.class);
@@ -721,6 +736,63 @@ public class ActivityStarterTests extends WindowTestsBase {
                 hasForegroundActivities, callerIsRecents, callerIsTempAllowed,
                 callerIsInstrumentingWithBackgroundActivityStartPrivileges,
                 isCallingUidDeviceOwner, false /* isPinnedSingleInstance */);
+    }
+
+    /**
+     * This test ensures proper logging for BAL_ALLOW_PERMISSION.
+     */
+    @Test
+    public void testBackgroundActivityStartsAllowed_logging() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        MockitoSession mockingSession = mockitoSession()
+                .mockStatic(ActivityTaskManagerService.class)
+                .mockStatic(FrameworkStatsLog.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
+        doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
+                eq(START_ACTIVITIES_FROM_BACKGROUND),
+                anyInt(), anyInt()));
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "allowed_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, true, false, false, false);
+        verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                "",  // activity name
+                BackgroundActivityStartController.BAL_ALLOW_BAL_PERMISSION,
+                UNIMPORTANT_UID,
+                UNIMPORTANT_UID2));
+        mockingSession.finishMocking();
+    }
+
+    /**
+     * This test ensures proper logging for BAL_ALLOW_PENDING_INTENT.
+     */
+    @Test
+    public void testBackgroundActivityStartsAllowed_loggingPendingIntentAllowed() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        MockitoSession mockingSession = mockitoSession()
+                .mockStatic(ActivityTaskManagerService.class)
+                .mockStatic(FrameworkStatsLog.class)
+                .mockStatic(PendingIntentRecord.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
+        doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
+                eq(START_ACTIVITIES_FROM_BACKGROUND),
+                anyInt(), anyInt()));
+        doReturn(true).when(
+                () -> PendingIntentRecord.isPendingIntentBalAllowedByCaller(anyObject()));
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "allowed_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                Process.SYSTEM_UID, true, PROCESS_STATE_BOUND_TOP,
+                false, true, false, false, false);
+        verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                DEFAULT_COMPONENT_PACKAGE_NAME + "/" + DEFAULT_COMPONENT_PACKAGE_NAME,
+                BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT,
+                UNIMPORTANT_UID,
+                Process.SYSTEM_UID));
+        mockingSession.finishMocking();
     }
 
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
@@ -1491,7 +1563,7 @@ public class ActivityStarterTests extends WindowTestsBase {
             TaskFragment inTaskFragment) {
         starter.startActivityInner(target, source, null /* voiceSession */,
                 null /* voiceInteractor */, 0 /* startFlags */, true /* doResume */,
-                options, inTask, inTaskFragment, false /* restrictedBgActivity */,
-                null /* intentGrants */);
+                options, inTask, inTaskFragment,
+                BackgroundActivityStartController.BAL_ALLOW_DEFAULT, null /* intentGrants */);
     }
 }

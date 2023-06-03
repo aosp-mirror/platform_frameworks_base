@@ -1074,10 +1074,14 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Use launch-adjacent-flag-root if launching with launch-adjacent flag.
         if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
                 && mLaunchAdjacentFlagRootTask != null) {
-            // If the adjacent launch is coming from the same root, launch to adjacent root instead.
-            if (sourceTask != null && mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment() != null
+            if (sourceTask != null && sourceTask == candidateTask) {
+                // Do nothing when task that is getting opened is same as the source.
+            } else if (sourceTask != null
+                    && mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment() != null
                     && (sourceTask == mLaunchAdjacentFlagRootTask
                     || sourceTask.isDescendantOf(mLaunchAdjacentFlagRootTask))) {
+                // If the adjacent launch is coming from the same root, launch to
+                // adjacent root instead.
                 return mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment().asTask();
             } else {
                 return mLaunchAdjacentFlagRootTask;
@@ -1218,7 +1222,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
         // Clear last paused activity if focused root task changed while sleeping, so that the
         // top activity of current focused task can be resumed.
-        if (mDisplayContent.isSleeping()) {
+        if (mDisplayContent.isSleeping() && currentFocusedTask != null) {
             currentFocusedTask.clearLastPausedActivity();
         }
 
@@ -1873,7 +1877,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Only allow to specify orientation if this TDA is the last focused one on this logical
         // display that can request orientation request.
         return mDisplayContent.getOrientationRequestingTaskDisplayArea() == this
-                && !getIgnoreOrientationRequest(orientation);
+                && !shouldIgnoreOrientationRequest(orientation);
     }
 
     void clearPreferredTopFocusableRootTask() {

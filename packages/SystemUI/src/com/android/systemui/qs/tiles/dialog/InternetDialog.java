@@ -805,6 +805,11 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     @Override
+    public void onCarrierNetworkChange(boolean active) {
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
+    }
+
+    @Override
     @WorkerThread
     public void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
             @Nullable WifiEntry connectedEntry, boolean hasMoreWifiEntries) {

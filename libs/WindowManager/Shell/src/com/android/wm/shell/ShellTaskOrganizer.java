@@ -256,12 +256,30 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
+    /**
+     * Creates a persistent root task in WM for a particular windowing-mode.
+     * @param displayId The display to create the root task on.
+     * @param windowingMode Windowing mode to put the root task in.
+     * @param listener The listener to get the created task callback.
+     */
     public void createRootTask(int displayId, int windowingMode, TaskListener listener) {
-        ProtoLog.v(WM_SHELL_TASK_ORG, "createRootTask() displayId=%d winMode=%d listener=%s",
+        createRootTask(displayId, windowingMode, listener, false /* removeWithTaskOrganizer */);
+    }
+
+    /**
+     * Creates a persistent root task in WM for a particular windowing-mode.
+     * @param displayId The display to create the root task on.
+     * @param windowingMode Windowing mode to put the root task in.
+     * @param listener The listener to get the created task callback.
+     * @param removeWithTaskOrganizer True if this task should be removed when organizer destroyed.
+     */
+    public void createRootTask(int displayId, int windowingMode, TaskListener listener,
+            boolean removeWithTaskOrganizer) {
+        ProtoLog.v(WM_SHELL_TASK_ORG, "createRootTask() displayId=%d winMode=%d listener=%s" ,
                 displayId, windowingMode, listener.toString());
         final IBinder cookie = new Binder();
         setPendingLaunchCookieListener(cookie, listener);
-        super.createRootTask(displayId, windowingMode, cookie);
+        super.createRootTask(displayId, windowingMode, cookie, removeWithTaskOrganizer);
     }
 
     /**

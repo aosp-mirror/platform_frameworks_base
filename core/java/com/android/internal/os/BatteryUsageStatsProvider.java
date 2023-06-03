@@ -298,18 +298,16 @@ public class BatteryUsageStatsProvider {
                 BatteryStats.Uid.PROCESS_STATE_FOREGROUND, realtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
 
-        totalForegroundDurationUs += uid.getProcessStateTime(
-                BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE, realtimeUs,
-                BatteryStats.STATS_SINCE_CHARGED);
-
         return totalForegroundDurationUs / 1000;
     }
 
     private long getProcessBackgroundTimeMs(BatteryStats.Uid uid, long realtimeUs) {
-        return uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND, realtimeUs,
-                BatteryStats.STATS_SINCE_CHARGED) / 1000;
+        return (uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND,
+                realtimeUs, BatteryStats.STATS_SINCE_CHARGED)
+                + uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE,
+                realtimeUs, BatteryStats.STATS_SINCE_CHARGED))
+                / 1000;
     }
-
     private BatteryUsageStats getAggregatedBatteryUsageStats(BatteryUsageStatsQuery query) {
         final boolean includePowerModels = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;

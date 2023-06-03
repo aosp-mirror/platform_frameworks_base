@@ -1,0 +1,13 @@
+[
+    "vendor/google/nexus_overlay/PixelDocumentsUIGoogleOverlay/res/values-v31/themes.xml",
+    "vendor/google/nexus_overlay/PixelDocumentsUIGoogleOverlay/res/values-night-v31/themes.xml",
+    "vendor/unbundled_google/packages/NexusLauncher/res/values/colors.xml",
+    "vendor/unbundled_google/packages/NexusLauncher/res/values/styles.xml",
+    "packages/apps/Settings/res/values-night/colors.xml",
+    "packages/apps/Settings/res/values/colors.xml",
+    "packages/apps/Settings/res/values/styles.xml",
+    "frameworks/base/packages/SystemUI/res-keyguard/values/styles.xml",
+    "frameworks/base/packages/SystemUI/res/values/styles.xml",
+    "vendor/unbundled_google/packages/SettingsGoogle/res/values/styles.xml",
+    "vendor/unbundled_google/packages/SettingsGoogle/res/values/styles.xml"
+]

@@ -269,6 +269,14 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testBindServiceForPanel() {
+        controller.bindServiceForPanel(TEST_COMPONENT_NAME_1)
+        executor.runAllReady()
+
+        verify(providers[0]).bindServiceForPanel()
+    }
+
+    @Test
     fun testSubscribe() {
         val controlInfo1 = ControlInfo("id_1", "", "", DeviceTypes.TYPE_UNKNOWN)
         val controlInfo2 = ControlInfo("id_2", "", "", DeviceTypes.TYPE_UNKNOWN)

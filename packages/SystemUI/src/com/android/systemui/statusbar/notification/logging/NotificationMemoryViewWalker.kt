@@ -184,19 +184,21 @@ internal object NotificationMemoryViewWalker {
     private fun computeDrawableUse(drawable: Drawable, seenObjects: HashSet<Int>): Int =
         when (drawable) {
             is BitmapDrawable -> {
-                val ref = System.identityHashCode(drawable.bitmap)
-                if (seenObjects.contains(ref)) {
-                    0
-                } else {
-                    seenObjects.add(ref)
-                    drawable.bitmap.allocationByteCount
-                }
+                drawable.bitmap?.let {
+                    val ref = System.identityHashCode(it)
+                    if (seenObjects.contains(ref)) {
+                        0
+                    } else {
+                        seenObjects.add(ref)
+                        it.allocationByteCount
+                    }
+                } ?: 0
             }
             else -> 0
         }
 
     private fun isDrawableSoftwareBitmap(drawable: Drawable) =
-        drawable is BitmapDrawable && drawable.bitmap.config != Bitmap.Config.HARDWARE
+        drawable is BitmapDrawable && drawable.bitmap?.config != Bitmap.Config.HARDWARE
 
     private fun identifierForView(view: View) =
         if (view.id == View.NO_ID) {

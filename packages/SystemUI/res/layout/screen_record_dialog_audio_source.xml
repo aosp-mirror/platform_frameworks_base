@@ -23,7 +23,7 @@
     <TextView
         android:id="@+id/screen_recording_dialog_source_text"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="14sp"

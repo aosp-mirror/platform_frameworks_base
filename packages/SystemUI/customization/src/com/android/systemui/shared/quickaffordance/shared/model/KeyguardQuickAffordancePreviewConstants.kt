@@ -21,4 +21,5 @@ object KeyguardQuickAffordancePreviewConstants {
     const val MESSAGE_ID_SLOT_SELECTED = 1337
     const val KEY_SLOT_ID = "slot_id"
     const val KEY_INITIALLY_SELECTED_SLOT_ID = "initially_selected_slot_id"
+    const val KEY_HIGHLIGHT_QUICK_AFFORDANCES = "highlight_quick_affordances"
 }

@@ -182,7 +182,7 @@
     <string name="unknown" msgid="3544487229740637809">"Desconocido"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Se han establecido algunos valores predeterminados"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"No se han establecido valores predeterminados"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"No hay valores predeterminados"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Ajustes de conversión de texto a voz"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Salida de conversión de texto a voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidad de la voz"</string>
@@ -476,7 +476,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Es posible que el dispositivo se apague pronto (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> hasta la carga completa"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> hasta la carga completa"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hasta la carga completa"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Carga optimizada"</string>
     <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Carga optimizada"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconocido"</string>
@@ -587,7 +587,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restringido, debes configurar una pantalla de bloqueo que proteja tus aplicaciones y datos personales."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Establecer bloqueo"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Cambiar a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando usuario…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando usuario nuevo…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Creando nuevo invitado…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"No se ha podido crear el usuario"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"No se ha podido crear un nuevo invitado"</string>

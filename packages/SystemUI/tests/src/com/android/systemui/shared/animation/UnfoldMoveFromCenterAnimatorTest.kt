@@ -65,8 +65,8 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
         // Positive translationX -> translated to the right
         // 10x10 view center is 25px from the center,
         // When progress is 0.5 it should be translated at:
-        // 25 * 0.3 * (1 - 0.5) = 3.75px
-        assertThat(view.translationX).isWithin(0.01f).of(3.75f)
+        // 25 * 0.08 * (1 - 0.5) = 1px
+        assertThat(view.translationX).isWithin(0.01f).of(1.0f)
     }
 
     @Test
@@ -81,8 +81,8 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
         // Positive translationX -> translated to the right
         // 10x10 view center is 25px from the center,
         // When progress is 0 it should be translated at:
-        // 25 * 0.3 * (1 - 0) = 7.5px
-        assertThat(view.translationX).isWithin(0.01f).of(7.5f)
+        // 25 * 0.08 * (1 - 0) = 7.5px
+        assertThat(view.translationX).isWithin(0.01f).of(2f)
     }
 
     @Test
@@ -97,7 +97,7 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
         // Positive translationX -> translated to the right
         // 10x10 view center is 25px from the center,
         // When progress is 1 it should be translated at:
-        // 25 * 0.3 * 0 = 0px
+        // 25 * 0.08 * 0 = 0px
         assertThat(view.translationX).isEqualTo(0f)
     }
 
@@ -113,8 +113,8 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
         // Positive translationX -> translated to the right, original translation is ignored
         // 10x10 view center is 25px from the center,
         // When progress is 0.5 it should be translated at:
-        // 25 * 0.3 * (1 - 0.5) = 3.75px
-        assertThat(view.translationX).isWithin(0.01f).of(3.75f)
+        // 25 * 0.08 * (1 - 0.5) = 1px
+        assertThat(view.translationX).isWithin(0.01f).of(1.0f)
     }
 
     @Test
@@ -154,7 +154,7 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
         animator.onTransitionProgress(0.5f)
 
         // Positive translationY -> translated to the bottom
-        assertThat(view.translationY).isWithin(0.01f).of(3.75f)
+        assertThat(view.translationY).isWithin(0.01f).of(1f)
     }
 
     @Test
@@ -169,7 +169,7 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
         animator.updateViewPositions()
 
         // Negative translationX -> translated to the left
-        assertThat(view.translationX).isWithin(0.1f).of(-5.25f)
+        assertThat(view.translationX).isWithin(0.1f).of(-1.4f)
     }
 
     private fun createView(

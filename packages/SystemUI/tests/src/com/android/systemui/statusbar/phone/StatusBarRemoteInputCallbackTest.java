@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
@@ -78,7 +79,8 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
         mRemoteInputCallback = spy(new StatusBarRemoteInputCallback(mContext,
                 mock(GroupExpansionManager.class), mNotificationLockscreenUserManager,
                 mKeyguardStateController, mStatusBarStateController, mStatusBarKeyguardViewManager,
-                mActivityStarter, mShadeController, new CommandQueue(mContext),
+                mActivityStarter, mShadeController,
+                new CommandQueue(mContext, new FakeDisplayTracker(mContext)),
                 mock(ActionClickLogger.class), mFakeExecutor));
         mRemoteInputCallback.mChallengeReceiver = mRemoteInputCallback.new ChallengeReceiver();
     }

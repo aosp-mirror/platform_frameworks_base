@@ -204,15 +204,6 @@ public class UserDetailView extends PseudoGridView {
             Trace.endSection();
         }
 
-        @Override
-        public void onUserListItemClicked(@NonNull UserRecord record,
-                @Nullable UserSwitchDialogController.DialogShower dialogShower) {
-            if (dialogShower != null) {
-                mDialogShower.dismiss();
-            }
-            super.onUserListItemClicked(record, dialogShower);
-        }
-
         public void linkToViewGroup(ViewGroup viewGroup) {
             PseudoGridView.ViewGroupAdapterBridge.link(viewGroup, this);
         }

@@ -146,7 +146,7 @@ constructor(
      *
      * @param guestUserId id of the guest user to remove
      * @param targetUserId id of the user to switch to after guest is removed. If
-     * `UserHandle.USER_NULL`, then switch immediately to the newly created guest user.
+     *   `UserHandle.USER_NULL`, then switch immediately to the newly created guest user.
      */
     fun removeGuestUser(guestUserId: Int, targetUserId: Int) {
         userInteractor.removeGuestUser(
@@ -160,9 +160,9 @@ constructor(
      *
      * @param guestUserId user id of the guest user to exit
      * @param targetUserId user id of the guest user to exit, set to UserHandle#USER_NULL when
-     * target user id is not known
+     *   target user id is not known
      * @param forceRemoveGuestOnExit true: remove guest before switching user, false: remove guest
-     * only if its ephemeral, else keep guest
+     *   only if its ephemeral, else keep guest
      */
     fun exitGuestUser(guestUserId: Int, targetUserId: Int, forceRemoveGuestOnExit: Boolean) {
         userInteractor.exitGuestUser(guestUserId, targetUserId, forceRemoveGuestOnExit)

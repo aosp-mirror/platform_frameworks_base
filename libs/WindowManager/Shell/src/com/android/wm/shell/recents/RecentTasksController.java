@@ -308,7 +308,6 @@ public class RecentTasksController implements TaskStackListenerCallback,
             rawMapping.put(taskInfo.taskId, taskInfo);
         }
 
-        boolean desktopModeActive = DesktopModeStatus.isActive(mContext);
         ArrayList<ActivityManager.RecentTaskInfo> freeformTasks = new ArrayList<>();
 
         // Pull out the pairs as we iterate back in the list
@@ -320,7 +319,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
-            if (desktopModeActive && mDesktopModeTaskRepository.isPresent()
+            if (DesktopModeStatus.isProto2Enabled() && mDesktopModeTaskRepository.isPresent()
                     && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
                 // Freeform tasks will be added as a separate entry
                 freeformTasks.add(taskInfo);
@@ -328,7 +327,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             }
 
             final int pairedTaskId = mSplitTasks.get(taskInfo.taskId);
-            if (!desktopModeActive && pairedTaskId != INVALID_TASK_ID && rawMapping.contains(
+            if (pairedTaskId != INVALID_TASK_ID && rawMapping.contains(
                     pairedTaskId)) {
                 final ActivityManager.RecentTaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
                 rawMapping.remove(pairedTaskId);

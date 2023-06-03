@@ -1005,6 +1005,7 @@ public class PreferencesHelper implements RankingConfig {
                     channel.setAllowBubbles(existing != null
                             ? existing.getAllowBubbles()
                             : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
+                    channel.setImportantConversation(false);
                 }
                 clearLockedFieldsLocked(channel);
 

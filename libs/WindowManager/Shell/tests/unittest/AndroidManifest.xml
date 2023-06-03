@@ -20,6 +20,7 @@
     package="com.android.wm.shell.tests">
 
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application android:debuggable="true" android:largeHeap="true">
         <uses-library android:name="android.test.mock" />

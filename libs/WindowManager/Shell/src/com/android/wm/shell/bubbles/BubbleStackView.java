@@ -680,8 +680,6 @@ public class BubbleStackView extends FrameLayout
 
                     // Re-show the expanded view if we hid it.
                     showExpandedViewIfNeeded();
-                } else if (mPositioner.showingInTaskbar()) {
-                    mStackAnimationController.snapStackBack();
                 } else {
                     // Fling the stack to the edge, and save whether or not it's going to end up on
                     // the left side of the screen.
@@ -1360,16 +1358,6 @@ public class BubbleStackView extends FrameLayout
         mBubbleContainer.reorderView(mBubbleOverflow.getIconView(),
                 mBubbleContainer.getChildCount() - 1 /* index */);
         updateOverflowVisibility();
-    }
-
-    void updateOverflowButtonDot() {
-        for (Bubble b : mBubbleData.getOverflowBubbles()) {
-            if (b.showDot()) {
-                mBubbleOverflow.setShowDot(true);
-                return;
-            }
-        }
-        mBubbleOverflow.setShowDot(false);
     }
 
     /**
