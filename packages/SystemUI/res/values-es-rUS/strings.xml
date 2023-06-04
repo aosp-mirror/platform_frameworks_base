@@ -368,7 +368,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Se borrarán todas las aplicaciones y los datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Quitar"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en tu dispositivo durante una grabación o transmisión. Se incluyen las contraseñas, los detalles del pago, las fotos, los mensajes y el audio que reproduzcas."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que brinda esta función tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en tu dispositivo durante una grabación o transmisión. Se incluyen las contraseñas, los detalles del pago, las fotos, los mensajes y el audio que reproduzcas."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que brinda esta función tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en tu dispositivo durante una grabación o transmisión. Se incluyen contraseñas, detalles de pago, fotos, mensajes y audios que reproduzcas."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"¿Deseas comenzar a grabar o transmitir contenido?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Deseas iniciar una grabación o transmisión con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"¿Quieres permitir que <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comparta o grabe contenido?"</string>
@@ -395,7 +395,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Comenzar ahora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No hay notificaciones"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"No hay notificaciones nuevas"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloquea para ver notif. anteriores"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloquea para ver notificaciones anteriores"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Tu padre o madre administra este dispositivo"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Tu organización es propietaria de este dispositivo y podría controlar el tráfico de red"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> es la organización propietaria de este dispositivo y podría controlar el tráfico de red"</string>
@@ -440,7 +440,7 @@
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent lo mantiene desbloqueado"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Configuración de sonido"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Subtitular automáticamente"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Muestra subtítulos automáticos"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Sugerencia de subtítulos"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Superposición de subtítulos"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"habilitar"</string>
@@ -649,7 +649,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ícono izquierdo"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícono derecho"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionado y arrastra para agregar tarjetas"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionado y arrastra para reorganizar los mosaicos"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionado y arrastra para reorganizar las tarjetas"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastra aquí para quitar"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tarjetas"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>

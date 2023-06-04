@@ -119,7 +119,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"Назад"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Головна"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Меню"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Спеціальні можливості"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Доступність"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Обернути екран"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Огляд"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Камера"</string>
@@ -229,7 +229,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Джерело сигналу"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Слухові апарати"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Увімкнення…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Автоматичне обертання"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Автообертання"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматично обертати екран"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Геодані"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Заставка"</string>
@@ -466,14 +466,14 @@
     <string name="stream_system" msgid="7663148785370565134">"Система"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Дзвінок"</string>
     <string name="stream_music" msgid="2188224742361847580">"Медіа"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Сигнал"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Будильник"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Сповіщення"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Двотональний багаточастотний аналоговий сигнал"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"Спеціальні можливості"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"Доступність"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Дзвінок"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вібросигнал"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"без звуку"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Без звуку"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Торкніться, щоб увімкнути звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Торкніться, щоб налаштувати вібросигнал. Спеціальні можливості може бути вимкнено."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Торкніться, щоб вимкнути звук. Спеціальні можливості може бути вимкнено."</string>
@@ -491,7 +491,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Увімкнути демонстраційний режим"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Показати демонстраційний режим"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Сигнал"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Будильник"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Гаманець"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Швидше й безпечніше сплачуйте за покупки за допомогою телефона"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показати все"</string>
@@ -744,7 +744,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Перейти на <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Пристрій не перемикатиметься на мобільний Інтернет автоматично"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Ні, дякую"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Так, перемикатися"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Так"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Не вдається підтвердити вашу відповідь у налаштуваннях, оскільки інший додаток заступає запит на дозвіл."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Дозволити додатку <xliff:g id="APP_0">%1$s</xliff:g> показувати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Має доступ до інформації з додатка <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -785,7 +785,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Збільшення всього екрана"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Збільшити частину екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Перемкнути"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Кнопка спеціальних можливостей. Змініть або замініть її в Налаштуваннях.\n\n"<annotation id="link">"Переглянути налаштування"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Торкніться, щоб відкрити функції доступності. Змінити або замінити цю кнопку можна в Налаштуваннях.\n\n"<annotation id="link">"Налаштування"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Щоб тимчасово сховати кнопку, перемістіть її на край екрана"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перемістити ліворуч угору"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Перемістити праворуч угору"</string>
@@ -917,7 +917,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Слухаю аудіо"</string>
     <string name="game_status" msgid="1340694320630973259">"Граю в гру"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Друзі"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Поспілкуймося!"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Поспілкуймося"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Незабаром тут з\'явиться контент"</string>
     <string name="missed_call" msgid="4228016077700161689">"Пропущений виклик"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

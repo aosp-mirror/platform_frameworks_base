@@ -263,7 +263,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Açılıyor…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Veri Tasarrufu açık"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# cihaz}other{# cihaz}}"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Fener"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"El feneri"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera kullanımda"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobil veri"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Veri kullanımı"</string>
@@ -742,7 +742,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> üzerinden veri veya internet erişiminiz olmayacak. İnternet yalnızca kablosuz bağlantı üzerinden kullanılabilecek."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"operatörünüz"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> operatörüne geri dönülsün mü?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Uygunluk durumuna göre otomatik olarak mobil veriye geçilmez"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Kullanılabilir olduğunda otomatik olarak mobil veriye geçilmez"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Hayır, teşekkürler"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Evet, geçilsin"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Bir uygulama bir izin isteğinin anlaşılmasını engellediğinden, Ayarlar, yanıtınızı doğrulayamıyor."</string>
@@ -818,7 +818,7 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> tarafından önerildi"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Cihaz kilitlendi"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Cihazlar kilit ekranında gösterilip buradan kontrol edilsin mi?"</string>
-    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Kilit ekranına harici cihazlarınız için kontroller ekleyebilirsiniz.\n\nCihaz uygulamanız, bazı cihazları telefonunuzun veya tabletinizin kilidini açmadan kontrol etmenize izin verebilir.\n\nAyarlar\'da istediğiniz zaman değişiklik yapabilirsiniz."</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Kilit ekranına harici cihazlarınız için denetimler ekleyebilirsiniz.\n\nCihaz uygulamanız, bazı cihazları telefonunuzun veya tabletinizin kilidini açmadan denetlemenize izin verebilir.\n\nAyarlar\'da istediğiniz zaman değişiklik yapabilirsiniz."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Cihazlar kilit ekranından kontrol edilsin mi?"</string>
     <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Bazı cihazları telefonunuzun veya tabletinizin kilidini açmadan kontrol edebilirsiniz.\n\nHangi cihazların bu şekilde kontrol edilebileceğini cihaz uygulamanız belirler."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Hayır, teşekkürler"</string>

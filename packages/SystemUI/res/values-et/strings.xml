@@ -101,7 +101,7 @@
     <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Salvestamise ajal on Androidil juurdepääs kõigele, mis on teie ekraanikuval nähtaval või mida teie seadmes esitatakse. Seega olge paroolide, makseteabe, sõnumite ja muu tundliku teabega ettevaatlik."</string>
     <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Rakenduse salvestamise ajal on Androidil juurdepääs kõigele, mis on selles rakenduses nähtaval või mida selles esitatakse. Seega olge paroolide, makseteabe, sõnumite ja muu tundliku teabega ettevaatlik."</string>
     <string name="screenrecord_start_recording" msgid="348286842544768740">"Alusta salvestamist"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Heli salvestamine"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Salvesta heli"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Seadme heli"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Seadmest pärinev heli, nt muusika, kõned ja helinad"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
@@ -197,7 +197,7 @@
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Töö lukustuskuva"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Sulgemine"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"täielik vaikus"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ainult alarmid"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ainult äratused"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Mitte segada."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth on sees."</string>
@@ -395,7 +395,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Alusta kohe"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Märguandeid pole"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Uusi märguandeid ei ole"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Uute märguannete nägemiseks avage"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Vanemate märguannete nägemiseks avage"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Seda seadet haldab sinu vanem"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Teie organisatsioon on selle seadme omanik ja võib jälgida võrguliiklust"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> on selle seadme omanik ja võib jälgida võrguliiklust"</string>
@@ -794,7 +794,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Teisalda serva ja kuva"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Teisalda servast eemale ja kuva"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"lülita"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Seadmete juhikud"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Seadmete juhtimisvidinad"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Valige juhtelementide lisamiseks rakendus"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Lisati # juhtnupp.}other{Lisati # juhtnuppu.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eemaldatud"</string>
@@ -818,9 +818,9 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"Soovitas <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Seade on lukustatud"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Kas soovite seadmete juhtelemente lukustuskuval kuvada ja kasutada?"</string>
-    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Võite lukustuskuvale oma väliste seadmete juhtelemendid lisada.\n\nTeie seadmerakendus võib võimaldada teil teatud seadmeid ilma telefoni või tahvelarvutit avamata hallata.\n\nSaate igal ajal seadetes muudatusi teha."</string>
-    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kas soovite seadmeid lukustuskuva kaudu hallata?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Võite teatud seadmeid ilma telefoni või tahvelarvutit avamata hallata.\n\nTeie seadmerakendus määrab, milliseid seadmeid saab sel viisil hallata."</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Võite lukustuskuvale oma väliste seadmete juhtelemendid lisada.\n\nTeie seadmerakendus võib võimaldada teil teatud seadmeid ilma telefoni või tahvelarvutit avamata juhtida.\n\nSaate igal ajal seadetes muudatusi teha."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kas soovite seadmeid lukustuskuva kaudu juhtida?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Võite teatud seadmeid ilma telefoni või tahvelarvutit avamata juhtida.\n\nTeie seadmerakendus määrab, milliseid seadmeid saab sel viisil juhtida."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Tänan, ei"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Jah"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-kood sisaldab tähti või sümboleid"</string>
@@ -832,7 +832,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pühkige sõrmega, et näha rohkem"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Soovituste laadimine"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Meedia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Kas peita rakenduses <xliff:g id="APP_NAME">%1$s</xliff:g> see meediajuhik?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Kas peita see rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> meediajuhik?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Praegust meediaseanssi ei saa peita."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Peida"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Jätka"</string>

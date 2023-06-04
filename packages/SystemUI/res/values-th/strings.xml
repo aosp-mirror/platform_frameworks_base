@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"อินเทอร์เฟซผู้ใช้ของระบบ"</string>
+    <string name="app_label" msgid="4811759950673118541">"UI ของระบบ"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"เปิดโหมดประหยัดแบตเตอรี่ใช่ไหม"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"คุณมีแบตเตอรี่เหลืออยู่ <xliff:g id="PERCENTAGE">%s</xliff:g> โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
@@ -232,10 +232,10 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"หมุนอัตโนมัติ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ตำแหน่ง"</string>
-    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"โปรแกรมรักษาหน้าจอ"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"ภาพพักหน้าจอ"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"สิทธิ์เข้าถึงกล้อง"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"สิทธิ์เข้าถึงไมโครโฟน"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"พร้อมให้ใช้งาน"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"สิทธิ์เข้าถึงไมค์"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"พร้อมใช้งาน"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ถูกบล็อก"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"อุปกรณ์สื่อ"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ผู้ใช้"</string>
@@ -317,7 +317,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"แตะอีกครั้งเพื่อเปิด"</string>
     <string name="tap_again" msgid="1315420114387908655">"แตะอีกครั้ง"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"เลื่อนขึ้นเพื่อเปิด"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"ปัดขึ้นเพื่อเปิด"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"กดไอคอนปลดล็อกเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"ปลดล็อกด้วยใบหน้าแล้ว ปัดขึ้นเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ปลดล็อกด้วยใบหน้าแล้ว กดไอคอนปลดล็อกเพื่อเปิด"</string>
@@ -441,8 +441,8 @@
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g> <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"การตั้งค่าเสียง"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"แสดงคำบรรยายสื่อโดยอัตโนมัติ"</string>
-    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"เคล็ดลับเกี่ยวกับคำอธิบายภาพ"</string>
-    <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"การวางซ้อนคำบรรยายภาพ"</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"เคล็ดลับเกี่ยวกับคำบรรยายแทนเสียง"</string>
+    <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"การวางซ้อนคำบรรยายแทนเสียง"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"เปิดใช้"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ปิดใช้"</string>
     <string name="sound_settings" msgid="8874581353127418308">"เสียงและการสั่น"</string>
@@ -806,8 +806,8 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"ย้ายไปที่ตำแหน่ง <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"การควบคุม"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"เลือกตัวควบคุมที่ต้องการให้เข้าถึงได้จากการตั้งค่าด่วน"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"แตะตัวควบคุมค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"นำตัวควบคุมทั้งหมดออกแล้ว"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"แตะระบบควบคุมค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"นำระบบควบคุมทั้งหมดออกแล้ว"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ยังไม่ได้บันทึกการเปลี่ยนแปลง"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"ดูแอปอื่นๆ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"โหลดตัวควบคุมไม่ได้ ตรวจสอบแอป <xliff:g id="APP">%s</xliff:g> ให้แน่ใจว่าการตั้งค่าของแอปไม่เปลี่ยนแปลง"</string>
@@ -822,7 +822,7 @@
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ควบคุมอุปกรณ์จากหน้าจอล็อกไหม"</string>
     <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"คุณควบคุมอุปกรณ์บางอย่างได้โดยไม่ต้องปลดล็อกโทรศัพท์หรือแท็บเล็ต\n\nแอปของอุปกรณ์จะระบุอุปกรณ์ที่สามารถควบคุมด้วยวิธีนี้ได้"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ไม่เป็นไร"</string>
-    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"มี"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ใช่"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN ประกอบด้วยตัวอักษรหรือสัญลักษณ์"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"ยืนยัน <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN ไม่ถูกต้อง"</string>
@@ -862,7 +862,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"โหลดสถานะไม่ได้"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"พบข้อผิดพลาด โปรดลองอีกครั้ง"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"เพิ่มตัวควบคุม"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"แก้ไขตัวควบคุม"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"แก้ไขระบบควบคุม"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"เพิ่มเอาต์พุต"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"กลุ่ม"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"เลือกอุปกรณ์ไว้ 1 รายการ"</string>

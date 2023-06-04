@@ -193,7 +193,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Prozor sa obaveštenjima."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Brza podešavanja."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Zaključan ekran."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Zaključan ekran"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključan ekran za posao"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zatvori"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"potpuna tišina"</string>
@@ -395,7 +395,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Započni"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nema obaveštenja"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nema novih obaveštenja"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Otključajte da vidite starija obaveštenja"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Otključajte za starija obaveštenja"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Ovim uređajem upravlja roditelj"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizacija je vlasnik uređaja i može da nadgleda mrežni saobraćaj"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> je vlasnik ovog uređaja i može da nadgleda mrežni saobraćaj"</string>
@@ -713,7 +713,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Strelica udesno"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Meni"</string>
     <string name="tuner_app" msgid="6949280415826686972">"Aplikacija <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="notification_channel_alerts" msgid="3385787053375150046">"Obaveštenja"</string>
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Upozorenja"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Baterija"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Snimci ekrana"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Instant aplikacije"</string>
@@ -832,7 +832,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Prevucite da biste videli još"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Učitavaju se preporuke"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Mediji"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Želite li da sakrijete ovu kontrolu za medije za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Želite da sakrijete ovu kontrolu za medije za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Aktuelna sesija medija ne može da bude sakrivena."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Sakrij"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
@@ -955,7 +955,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Pogledajte sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da biste promenili mrežu, prekinite eternet vezu"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi boljeg doživljaja uređaja, aplikacije i usluge i dalje mogu da traže WiFi mreže u bilo kom trenutku, čak i kada je WiFi isključen. To možete da promenite u podešavanjima WiFi skeniranja. "<annotation id="link">"Promenite"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključite režim rada u avionu"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključi režim rada u avionu"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi da doda sledeću pločicu u Brza podešavanja"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj pločicu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne dodaj pločicu"</string>

@@ -649,7 +649,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Зүүн дүрс тэмдэг"</string>
     <string name="right_icon" msgid="1103955040645237425">"Баруун дүрс тэмдэг"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Хавтан нэмэхийн тулд дараад чирэх"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Хавтангуудыг дахин засварлахын тулд дараад чирнэ үү"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Хавтангуудыг дахин цэгцлэхийн тулд дараад чирнэ үү"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Устгахын тулд энд зөөнө үү"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Танд хамгийн багадаа <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> хавтан шаардлагатай"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Засах"</string>
@@ -687,7 +687,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Тохиргооны дарааллыг өөрчилнө үү."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Асаах/унтраах цэс"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>-н <xliff:g id="ID_1">%1$d</xliff:g>-р хуудас"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"Түгжигдсэн дэлгэц"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"Түгжээтэй дэлгэц"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Халснаас үүдэн утас унтарсан"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Таны утас одоо хэвийн ажиллаж байна.\nДэлгэрэнгүй мэдээлэл авах бол товшино уу"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Таны утас хэт халсан тул хөргөхөөр унтраасан болно. Таны утас одоо хэвийн ажиллаж байна.\n\nХэрэв та дараахыг хийвэл таны утас хэт халж болзошгүй:\n	• Их хэмжээний нөөц хэрэглээний апп (тоглоом, видео эсвэл шилжилтийн апп зэрэг)\n	• Багтаамж ихтэй файл татах, байршуулах\n	• Утсаа өндөр температурт ашиглах"</string>
