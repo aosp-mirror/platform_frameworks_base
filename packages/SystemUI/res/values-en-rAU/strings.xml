@@ -894,7 +894,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Available devices for audio output."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers &amp; displays"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers and displays"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Suggested devices"</string>
     <string name="media_output_status_require_premium" msgid="5691200962588753380">"Requires premium account"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"How broadcasting works"</string>
