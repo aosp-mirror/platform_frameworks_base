@@ -24,7 +24,7 @@
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Unesite šablon"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Unesite lozinku"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nevažeća kartica."</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"Napunjena je"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Napunjeno"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bežično punjenje"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Puni se"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Puni se"</string>
