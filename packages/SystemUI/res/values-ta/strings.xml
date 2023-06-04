@@ -833,7 +833,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"நிலையைக் காட்ட முடியவில்லை"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"பிழை, மீண்டும் முயலவும்"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"கட்டுப்பாடுகளைச் சேர்த்தல்"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"கட்டுப்பாடுகளை மாற்றுதல்"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"கட்டுப்பாடுகளை மாற்றுக"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"அவுட்புட்களைச் சேர்த்தல்"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"குழு"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 சாதனம் தேர்ந்தெடுக்கப்பட்டுள்ளது"</string>

@@ -256,7 +256,7 @@
       <item quantity="other">%d cihaz</item>
       <item quantity="one">%d cihaz</item>
     </plurals>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Fener"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"El feneri"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera kullanımda"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobil veri"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Veri kullanımı"</string>
@@ -790,7 +790,7 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> tarafından önerildi"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Cihaz kilitlendi"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Cihazlar kilit ekranında gösterilip buradan kontrol edilsin mi?"</string>
-    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Kilit ekranına harici cihazlarınız için kontroller ekleyebilirsiniz.\n\nCihaz uygulamanız, bazı cihazları telefonunuzun veya tabletinizin kilidini açmadan kontrol etmenize izin verebilir.\n\nAyarlar\'da istediğiniz zaman değişiklik yapabilirsiniz."</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Kilit ekranına harici cihazlarınız için denetimler ekleyebilirsiniz.\n\nCihaz uygulamanız, bazı cihazları telefonunuzun veya tabletinizin kilidini açmadan denetlemenize izin verebilir.\n\nAyarlar\'da istediğiniz zaman değişiklik yapabilirsiniz."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Cihazlar kilit ekranından kontrol edilsin mi?"</string>
     <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Bazı cihazları telefonunuzun veya tabletinizin kilidini açmadan kontrol edebilirsiniz.\n\nHangi cihazların bu şekilde kontrol edilebileceğini cihaz uygulamanız belirler."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Hayır, teşekkürler"</string>

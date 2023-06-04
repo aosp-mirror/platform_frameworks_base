@@ -109,9 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"I: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Activado"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo; solo izquierda"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo; solo derecha"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activo; izquierda y derecha"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo; solo oído izquierdo"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo; solo oído derecho"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activo; oídos izquierdo y derecho"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimedia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Llamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferencia de archivos"</string>
