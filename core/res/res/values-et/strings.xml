@@ -1975,8 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Sellele ei pääse teie seadmes <xliff:g id="DEVICE">%1$s</xliff:g> juurde. Proovige juurde pääseda oma telefonis."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"See rakendus on loodud Androidi vanema versiooni jaoks. See ei pruugi õigesti töötada ega hõlma uusimaid turva- ja privaatsusfunktsioone. Otsige värskendust või võtke ühendust rakenduse arendajaga."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Otsi värskendust"</string>
-    <!-- no translation found for deprecated_abi_message (6820548011196218091) -->
-    <skip />
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"See rakendus ei ühildu Androidi uusima versiooniga. Otsige värskendust või võtke ühendust rakenduse arendajaga."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Teile on uusi sõnumeid"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Avage vaatamiseks SMS-rakendus"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Mõned funkts. võivad olla piiratud"</string>
@@ -2173,7 +2172,7 @@
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Teie organisatsioon lubab sõnumeid saata ainult töörakendustest."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kasuta isiklikku brauserit"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Kasuta tööbrauserit"</string>
-    <string name="miniresolver_call" msgid="6386870060423480765">"Helistage"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Helista"</string>
     <string name="miniresolver_switch" msgid="8011924662117617451">"Lülitu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kaardi võrgu avamise PIN-kood"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM-kaardi võrgu alamhulga avamise PIN-kood"</string>
