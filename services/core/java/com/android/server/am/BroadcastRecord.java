@@ -44,7 +44,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
-import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessState;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -271,6 +270,8 @@ final class BroadcastRecord extends Binder {
     BroadcastFilter curFilter;  // the registered receiver currently running.
     Bundle curFilteredExtras;   // the bundle that has been filtered by the package visibility rules
 
+    int curAppLastProcessState; // The last process state of the current receiver before receiving
+
     boolean mIsReceiverAppRunning; // Was the receiver's app already running.
 
     boolean mWasReceiverAppStopped; // Was the receiver app stopped prior to starting
@@ -432,13 +433,14 @@ final class BroadcastRecord extends Binder {
             boolean initialSticky, int userId,
             @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
             boolean timeoutExempt,
-            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            int callerAppProcessState) {
         this(queue, intent, callerApp, callerPackage, callerFeatureId, callingPid,
                 callingUid, callerInstantApp, resolvedType, requiredPermissions,
                 excludedPermissions, excludedPackages, appOp, options, receivers, resultToApp,
                 resultTo, resultCode, resultData, resultExtras, serialized, sticky,
                 initialSticky, userId, -1, backgroundStartPrivileges, timeoutExempt,
-                filterExtrasForReceiver);
+                filterExtrasForReceiver, callerAppProcessState);
     }
 
     BroadcastRecord(BroadcastQueue _queue,
@@ -453,7 +455,8 @@ final class BroadcastRecord extends Binder {
             boolean _initialSticky, int _userId, int originalStickyCallingUid,
             @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
             boolean timeoutExempt,
-            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            int callerAppProcessState) {
         if (_intent == null) {
             throw new NullPointerException("Can't construct with a null intent");
         }
@@ -465,8 +468,7 @@ final class BroadcastRecord extends Binder {
         callerFeatureId = _callerFeatureId;
         callingPid = _callingPid;
         callingUid = _callingUid;
-        callerProcState = callerApp == null ? ActivityManager.PROCESS_STATE_UNKNOWN
-                : callerApp.getCurProcState();
+        callerProcState = callerAppProcessState;
         callerInstantApp = _callerInstantApp;
         callerInstrumented = isCallerInstrumented(_callerApp, _callingUid);
         resolvedType = _resolvedType;
@@ -606,7 +608,8 @@ final class BroadcastRecord extends Binder {
                 requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
                 splitReceivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
                 ordered, sticky, initialSticky, userId,
-                mBackgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver);
+                mBackgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
+                callerProcState);
         split.enqueueTime = this.enqueueTime;
         split.enqueueRealTime = this.enqueueRealTime;
         split.enqueueClockTime = this.enqueueClockTime;
@@ -686,7 +689,7 @@ final class BroadcastRecord extends Binder {
                     uid2receiverList.valueAt(i), null /* _resultToApp */, null /* _resultTo */,
                     resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
                     mBackgroundStartPrivileges, timeoutExempt,
-                    filterExtrasForReceiver);
+                    filterExtrasForReceiver, callerProcState);
             br.enqueueTime = this.enqueueTime;
             br.enqueueRealTime = this.enqueueRealTime;
             br.enqueueClockTime = this.enqueueClockTime;

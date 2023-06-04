@@ -106,6 +106,12 @@ class BroadcastProcessQueue {
     long lastCpuDelayTime;
 
     /**
+     * Snapshotted value of {@link ProcessStateRecord#getCurProcState()} before
+     * dispatching the current broadcast to the receiver in this process.
+     */
+    int lastProcessState;
+
+    /**
      * Ordered collection of broadcasts that are waiting to be dispatched to
      * this process, as a pair of {@link BroadcastRecord} and the index into
      * {@link BroadcastRecord#receivers} that represents the receiver.

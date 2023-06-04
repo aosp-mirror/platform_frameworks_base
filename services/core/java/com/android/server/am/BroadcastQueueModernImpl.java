@@ -1002,6 +1002,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     mService.mPackageManagerInt.grantImplicitAccess(r.userId, r.intent,
                             UserHandle.getAppId(app.uid), r.callingUid, true);
                 }
+                queue.lastProcessState = app.mState.getCurProcState();
                 if (receiver instanceof BroadcastFilter) {
                     notifyScheduleRegisteredReceiver(app, r, (BroadcastFilter) receiver);
                     thread.scheduleRegisteredReceiver(
@@ -1914,12 +1915,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 ? BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME
                 : BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
         final int type;
+        final int receiverProcessState;
         if (queue == null) {
             type = BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_UNKNOWN;
+            receiverProcessState = ActivityManager.PROCESS_STATE_UNKNOWN;
         } else if (queue.getActiveViaColdStart()) {
             type = BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
+            receiverProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
         } else {
             type = BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
+            receiverProcessState = queue.lastProcessState;
         }
         // With the new per-process queues, there's no delay between being
         // "dispatched" and "scheduled", so we report no "receive delay"
@@ -1934,7 +1939,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     receiverType, type, dispatchDelay, receiveDelay, finishDelay, packageState,
                     app != null ? app.info.packageName : null, r.callerPackage,
                     r.calculateTypeForLogging(), r.getDeliveryGroupPolicy(), r.intent.getFlags(),
-                    BroadcastRecord.getReceiverPriority(receiver), r.callerProcState);
+                    BroadcastRecord.getReceiverPriority(receiver), r.callerProcState,
+                    receiverProcessState);
         }
     }
 

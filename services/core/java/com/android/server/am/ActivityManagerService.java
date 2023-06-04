@@ -1176,20 +1176,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         public Intent intent;
         public boolean deferUntilActive;
         public int originalCallingUid;
+        /** The snapshot process state of the app who sent this broadcast */
+        public int originalCallingAppProcessState;
 
         public static StickyBroadcast create(Intent intent, boolean deferUntilActive,
-                int originalCallingUid) {
+                int originalCallingUid, int originalCallingAppProcessState) {
             final StickyBroadcast b = new StickyBroadcast();
             b.intent = intent;
             b.deferUntilActive = deferUntilActive;
             b.originalCallingUid = originalCallingUid;
+            b.originalCallingAppProcessState = originalCallingAppProcessState;
             return b;
         }
 
         @Override
         public String toString() {
             return "{intent=" + intent + ", defer=" + deferUntilActive + ", originalCallingUid="
-                    + originalCallingUid + "}";
+                    + originalCallingUid + ", originalCallingAppProcessState="
+                    + originalCallingAppProcessState + "}";
         }
     }
 
@@ -14033,7 +14037,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             receivers, null, null, 0, null, null, false, true, true, -1,
                             originalStickyCallingUid, BackgroundStartPrivileges.NONE,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */,
-                            null /* filterExtrasForReceiver */);
+                            null /* filterExtrasForReceiver */,
+                            broadcast.originalCallingAppProcessState);
                     queue.enqueueBroadcastLocked(r);
                 }
             }
@@ -14848,6 +14853,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        final int callerAppProcessState = getRealProcessStateLocked(callerApp, realCallingPid);
         // Add to the sticky list if requested.
         if (sticky) {
             if (checkPermission(android.Manifest.permission.BROADCAST_STICKY,
@@ -14910,12 +14916,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (intent.filterEquals(list.get(i).intent)) {
                     // This sticky already exists, replace it.
                     list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive,
-                            callingUid));
+                            callingUid, callerAppProcessState));
                     break;
                 }
             }
             if (i >= stickiesCount) {
-                list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive, callingUid));
+                list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive, callingUid,
+                        callerAppProcessState));
             }
         }
 
@@ -14998,7 +15005,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
                     registeredReceivers, resultToApp, resultTo, resultCode, resultData,
                     resultExtras, ordered, sticky, false, userId,
-                    backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver);
+                    backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
+                    callerAppProcessState);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
             queue.enqueueBroadcastLocked(r);
             registeredReceivers = null;
@@ -15092,7 +15100,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
                     receivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
                     ordered, sticky, false, userId,
-                    backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver);
+                    backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
+                    callerAppProcessState);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
             queue.enqueueBroadcastLocked(r);
@@ -15107,6 +15116,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return ActivityManager.BROADCAST_SUCCESS;
+    }
+
+    @GuardedBy("this")
+    private int getRealProcessStateLocked(ProcessRecord app, int pid) {
+        if (app == null) {
+            synchronized (mPidsSelfLocked) {
+                app = mPidsSelfLocked.get(pid);
+            }
+        }
+        if (app != null && app.getThread() != null && !app.isKilled()) {
+            return app.mState.getCurProcState();
+        }
+        return PROCESS_STATE_NONEXISTENT;
     }
 
     @VisibleForTesting
