@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"మీ పిన్‌ని నమోదు చేయండి"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"మీ PINను ఎంటర్ చేయండి"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"మీ ఆకృతిని ఎంటర్ చేయండి"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"మీ పాస్‌వర్డ్‌ను ఎంటర్ చేయండి"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"చెల్లని కార్డ్."</string>
@@ -52,7 +52,7 @@
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"ఆకృతి తప్పు"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"పాస్‌వర్డ్ తప్పు"</string>
-    <string name="kg_wrong_pin" msgid="4160978845968732624">"పిన్ తప్పు"</string>
+    <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN తప్పు"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# సెకనులో మళ్లీ ట్రై చేయండి.}other{# సెకన్లలో మళ్లీ ట్రై చేయండి.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM పిన్‌ని నమోదు చేయండి."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" కోసం SIM పిన్‌ని నమోదు చేయండి."</string>
@@ -64,7 +64,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"SIM కార్డ్‌ని అన్‌లాక్ చేస్తోంది…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4 నుండి 8 సంఖ్యలు ఉండే పిన్‌ను టైప్ చేయండి."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK కోడ్ అనేది 8 లేదా అంతకంటే ఎక్కువ సంఖ్యలు ఉండాలి."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"మీ PINను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్ల తర్వాత మళ్లీ ట్రై చేయండి."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM పిన్ కోడ్ తప్పు, ఇప్పుడు మీ డివైజ్‌ను అన్‌లాక్ చేయాలంటే, మీరు తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించాలి."</string>

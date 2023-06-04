@@ -544,7 +544,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"毎回確認"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"OFF にするまで"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"たった今"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"このスマートフォン"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"このデバイス"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"このタブレット"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"このスマートフォン"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"接続エラーです。デバイスを OFF にしてから ON に戻してください"</string>
