@@ -2172,7 +2172,7 @@
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"თქვენი ორგანიზაცია ნებას გრთავთ, მხოლოდ სამსახურის აპებიდან გაგზავნოთ შეტყობინებები"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"პირადი ბრაუზერის გამოყენება"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"სამსახურის ბრაუზერის გამოყენება"</string>
-    <string name="miniresolver_call" msgid="6386870060423480765">"ზარი"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"დარეკვა"</string>
     <string name="miniresolver_switch" msgid="8011924662117617451">"გადართვა"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ქსელის განბლოკვის PIN-კოდი"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM ქსელის ქვედანაყოფის განბლოკვის PIN-კოდი"</string>

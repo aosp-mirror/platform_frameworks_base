@@ -155,7 +155,7 @@
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nuk u transferua"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kodi i funksionit është i plotë."</string>
     <string name="fcError" msgid="5325116502080221346">"Problem me lidhjen ose kod është i pavlefshëm."</string>
-    <string name="httpErrorOk" msgid="6206751415788256357">"Në rregull!"</string>
+    <string name="httpErrorOk" msgid="6206751415788256357">"Në rregull"</string>
     <string name="httpError" msgid="3406003584150566720">"Pati një gabim në rrjet."</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"Nuk mundi ta gjente URL-në."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Skema e vërtetimit nuk mbështetet."</string>
