@@ -318,8 +318,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void setBouncerShowingOverDream(boolean bouncerShowingOverDream);
 
-    void collapseShade();
-
     int getWakefulnessState();
 
     boolean isScreenFullyOff();
