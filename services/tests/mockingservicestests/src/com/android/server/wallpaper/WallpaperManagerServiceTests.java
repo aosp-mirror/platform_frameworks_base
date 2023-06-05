@@ -90,7 +90,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -278,10 +277,8 @@ public class WallpaperManagerServiceTests {
 
     /**
      * Tests setWallpaperComponent and clearWallpaper should work as expected.
-     * TODO ignored since the assumption never passes. to be investigated.
      */
     @Test
-    @Ignore("b/264533465")
     public void testSetThenClearComponent() {
         // Skip if there is no pre-defined default wallpaper component.
         assumeThat(sDefaultWallpaperComponent,
