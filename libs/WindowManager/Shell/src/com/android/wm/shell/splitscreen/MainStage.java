@@ -24,6 +24,9 @@ import android.window.WindowContainerTransaction;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
+
+import java.util.Optional;
 
 /**
  * Main stage for split-screen mode. When split-screen is active all standard activity types launch
@@ -35,9 +38,10 @@ class MainStage extends StageTaskListener {
 
     MainStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider) {
+            SurfaceSession surfaceSession, IconProvider iconProvider,
+            Optional<WindowDecorViewModel> windowDecorViewModel) {
         super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession,
-                iconProvider);
+                iconProvider, windowDecorViewModel);
     }
 
     boolean isActive() {
