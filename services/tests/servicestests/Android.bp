@@ -215,6 +215,16 @@ java_library {
 }
 
 java_library {
+    name: "mockito-test-utils",
+    srcs: [
+        "utils-mockito/**/*.kt",
+    ],
+    static_libs: [
+        "mockito-target-minus-junit4",
+    ],
+}
+
+java_library {
     name: "servicestests-utils-mockito-extended",
     srcs: [
         "utils/**/*.java",
