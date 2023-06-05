@@ -28,7 +28,7 @@ import com.android.keyguard.KeyguardSecurityViewFlipper;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 
 import java.util.Optional;
 

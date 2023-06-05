@@ -18,7 +18,7 @@ package com.android.keyguard;
 
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_DEFAULT;
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_ONE_HANDED;
-import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
+import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -67,7 +67,7 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageInteractor;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
