@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Chip autentificat"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmat"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Atinge Confirm pentru a finaliza"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"S-a deblocat folosind fața."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"S-a deblocat cu ajutorul feței. Apasă pentru a continua."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Chipul a fost recunoscut. Apasă pentru a continua."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Chip recunoscut. Apasă pictograma Deblocare ca să continui."</string>
@@ -243,7 +244,8 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Căști"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Intrare"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Aparate auditive"</string>
+    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (5553051568867097111) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Se activează..."</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotire automată"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotirea automată a ecranului"</string>
@@ -988,7 +990,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispozitive disponibile pentru ieșire audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volum"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Difuzoare și afișaje"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Difuzoare și ecrane"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Dispozitive sugerate"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Oprește sesiunea comună ca să muți elementul media pe alt dispozitiv"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Oprește"</string>
@@ -1004,7 +1006,8 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Nu se poate salva. Încearcă din nou."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Nu se poate salva."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Folosește minimum 4 caractere."</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Folosește maximum 16 caractere"</string>
+    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numărul versiunii"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numărul versiunii s-a copiat în clipboard."</string>
     <string name="basic_status" msgid="2315371112182658176">"Deschide conversația"</string>
@@ -1108,10 +1111,8 @@
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Asistentul ascultă"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificare}few{# notificări}other{# de notificări}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (230135078402003532) -->
-    <skip />
-    <!-- no translation found for note_task_shortcut_long_label (7729325091147319409) -->
-    <skip />
+    <string name="note_task_button_label" msgid="230135078402003532">"Luare de notițe"</string>
+    <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"Luare de notițe, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Se difuzează"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Oprești transmisia <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Dacă transmiți <xliff:g id="SWITCHAPP">%1$s</xliff:g> sau schimbi ieșirea, transmisia actuală se va opri"</string>
