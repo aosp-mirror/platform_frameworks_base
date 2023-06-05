@@ -2009,7 +2009,9 @@ class PermissionService(
     }
 
     override fun onUserCreated(userId: Int) {
-        service.onUserAdded(userId)
+        withCorkedPackageInfoCache {
+            service.onUserAdded(userId)
+        }
     }
 
     override fun onUserRemoved(userId: Int) {
@@ -2024,7 +2026,9 @@ class PermissionService(
             packageNames = storageVolumePackageNames.remove(volumeUuid) ?: emptyList()
             mountedStorageVolumes += volumeUuid
         }
-        service.onStorageVolumeMounted(volumeUuid, packageNames, fingerprintChanged)
+        withCorkedPackageInfoCache {
+            service.onStorageVolumeMounted(volumeUuid, packageNames, fingerprintChanged)
+        }
     }
 
     override fun onPackageAdded(
@@ -2117,6 +2121,15 @@ class PermissionService(
         val packageState = packageManagerInternal.packageStates[packageName]
         if (packageState == null) {
             service.onPackageRemoved(packageName, appId)
+        }
+    }
+
+    private inline fun <T> withCorkedPackageInfoCache(block: () -> T): T {
+        PackageManager.corkPackageInfoCache()
+        try {
+            return block()
+        } finally {
+            PackageManager.uncorkPackageInfoCache()
         }
     }
 
