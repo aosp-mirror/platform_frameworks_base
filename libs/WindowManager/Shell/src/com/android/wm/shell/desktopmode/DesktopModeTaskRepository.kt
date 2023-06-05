@@ -87,8 +87,10 @@ class DesktopModeTaskRepository {
         visibleTasksListeners[visibleTasksListener] = executor
         displayData.keyIterator().forEach { displayId ->
             val visibleTasks = getVisibleTaskCount(displayId)
+            val stashed = isStashed(displayId)
             executor.execute {
                 visibleTasksListener.onVisibilityChanged(displayId, visibleTasks > 0)
+                visibleTasksListener.onStashedChanged(displayId, stashed)
             }
         }
     }
