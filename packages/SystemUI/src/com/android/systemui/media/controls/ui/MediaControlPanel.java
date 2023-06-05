@@ -248,9 +248,9 @@ public class MediaControlPanel {
     private final FeatureFlags mFeatureFlags;
     private final GlobalSettings mGlobalSettings;
 
-    // TODO(b/281032715): Consider making this as a final variable. For now having a null check
-    //  due to unit test failure. (Perhaps missing some setup)
     private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig;
+    private boolean mWasPlaying = false;
+    private boolean mButtonClicked = false;
 
     private ContentObserver mAnimationScaleObserver = new ContentObserver(null) {
         @Override
@@ -582,6 +582,25 @@ public class MediaControlPanel {
         if (!mMetadataAnimationHandler.isRunning()) {
             mMediaViewController.refreshState();
         }
+
+        // Turbulence noise
+        if (shouldPlayTurbulenceNoise()) {
+            if (mTurbulenceNoiseAnimationConfig == null) {
+                mTurbulenceNoiseAnimationConfig =
+                        createTurbulenceNoiseAnimation();
+            }
+            // Color will be correctly updated in ColorSchemeTransition.
+            mTurbulenceNoiseController.play(
+                    mTurbulenceNoiseAnimationConfig
+            );
+            mMainExecutor.executeDelayed(
+                    mTurbulenceNoiseController::finish,
+                    TURBULENCE_NOISE_PLAY_DURATION
+            );
+        }
+        mButtonClicked = false;
+        mWasPlaying = isPlaying();
+
         Trace.endSection();
     }
 
@@ -1155,21 +1174,14 @@ public class MediaControlPanel {
                     if (!mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
                         mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
                         logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
+                        // Used to determine whether to play turbulence noise.
+                        mWasPlaying = isPlaying();
+                        mButtonClicked = true;
+
                         action.run();
+
                         if (mFeatureFlags.isEnabled(Flags.UMO_SURFACE_RIPPLE)) {
                             mMultiRippleController.play(createTouchRippleAnimation(button));
-                            if (mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE)) {
-                                if (mTurbulenceNoiseAnimationConfig == null) {
-                                    mTurbulenceNoiseAnimationConfig =
-                                            createTurbulenceNoiseAnimation();
-                                }
-                                // Color will be correctly updated in ColorSchemeTransition.
-                                mTurbulenceNoiseController.play(mTurbulenceNoiseAnimationConfig);
-                                mMainExecutor.executeDelayed(
-                                        mTurbulenceNoiseController::finish,
-                                        TURBULENCE_NOISE_PLAY_DURATION
-                                );
-                            }
                         }
 
                         if (icon instanceof Animatable) {
@@ -1208,6 +1220,11 @@ public class MediaControlPanel {
         );
     }
 
+    private boolean shouldPlayTurbulenceNoise() {
+        return mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE) && mButtonClicked && !mWasPlaying
+                && isPlaying();
+    }
+
     private TurbulenceNoiseAnimationConfig createTurbulenceNoiseAnimation() {
         return new TurbulenceNoiseAnimationConfig(
                 /* gridCount= */ 2.14f,
@@ -1218,12 +1235,12 @@ public class MediaControlPanel {
                 /* color= */ mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
                 /* backgroundColor= */ Color.BLACK,
                 /* opacity= */ 51,
-                /* width= */ mMediaViewHolder.getMultiRippleView().getWidth(),
-                /* height= */ mMediaViewHolder.getMultiRippleView().getHeight(),
+                /* width= */ mMediaViewHolder.getTurbulenceNoiseView().getWidth(),
+                /* height= */ mMediaViewHolder.getTurbulenceNoiseView().getHeight(),
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,
                 /* easeInDuration= */ 1350f,
                 /* easeOutDuration= */ 1350f,
-                this.getContext().getResources().getDisplayMetrics().density,
+                getContext().getResources().getDisplayMetrics().density,
                 BlendMode.SCREEN,
                 /* onAnimationEnd= */ null,
                 /* lumaMatteBlendFactor= */ 0.26f,
