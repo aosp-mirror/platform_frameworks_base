@@ -60,7 +60,7 @@ interface ShadeViewController {
      * Returns whether the shade height is greater than zero or the shade is expecting a synthesized
      * down event.
      */
-    @get:Deprecated("use {@link #isExpanded()} instead") val isPanelExpanded: Boolean
+    val isPanelExpanded: Boolean
 
     /** Returns whether the shade is fully expanded in either QS or QQS. */
     val isShadeFullyExpanded: Boolean

@@ -2440,6 +2440,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         boolean isExpanded = !isFullyCollapsed() || mExpectingSynthesizedDown;
         if (mPanelExpanded != isExpanded) {
             mPanelExpanded = isExpanded;
+            updateSystemUiStateFlags();
             mShadeExpansionStateManager.onShadeExpansionFullyChanged(isExpanded);
             if (!isExpanded) {
                 mQsController.closeQsCustomizer();
@@ -2447,6 +2448,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
+    @Override
     public boolean isPanelExpanded() {
         return mPanelExpanded;
     }
@@ -3440,9 +3442,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             Log.d(TAG, "Updating panel sysui state flags: fullyExpanded="
                     + isFullyExpanded() + " inQs=" + mQsController.getExpanded());
         }
-        boolean isPanelVisible = mCentralSurfaces != null && mCentralSurfaces.isPanelExpanded();
         mSysUiState
-                .setFlag(SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE, isPanelVisible)
+                .setFlag(SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE, mPanelExpanded)
                 .setFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                         isFullyExpanded() && !mQsController.getExpanded())
                 .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED,
