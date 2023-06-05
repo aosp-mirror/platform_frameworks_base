@@ -2012,7 +2012,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRootWindowContainer.getDisplayContent(displayId);
                 if (dc == null) return;
-                final Task task = dc.getTask((t) -> t.isLeafTask() && t.isFocusable(),
+                final Task task = dc.getTask((t) -> t.isLeafTask() && t.isTopActivityFocusable(),
                         true /*  traverseTopToBottom */);
                 if (task == null) return;
                 setFocusedTask(task.mTaskId, null /* touchedActivity */);
