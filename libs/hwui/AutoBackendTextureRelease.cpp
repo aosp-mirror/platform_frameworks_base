@@ -18,6 +18,9 @@
 
 #include <SkImage.h>
 #include <include/gpu/ganesh/SkImageGanesh.h>
+#include <include/gpu/GrBackendSurfaceMutableState.h>
+#include <include/gpu/GrDirectContext.h>
+#include <include/gpu/GrBackendSurface.h>
 #include "renderthread/RenderThread.h"
 #include "utils/Color.h"
 #include "utils/PaintUtils.h"
