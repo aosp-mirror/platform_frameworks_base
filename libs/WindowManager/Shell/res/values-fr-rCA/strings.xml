@@ -77,7 +77,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bulle"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gérer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulle ignorée."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Touchez pour redémarrer cette application afin d\'obtenir un meilleur affichage."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Pour obtenir un meilleur affichage, touchez pour redémarrer cette application."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problèmes d\'appareil photo?\nTouchez pour réajuster"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Problème non résolu?\nTouchez pour rétablir"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Aucun problème d\'appareil photo? Touchez pour ignorer."</string>
