@@ -553,6 +553,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Приложение сможет получать сведения о предпочтительном платежном сервисе NFC (например, зарегистрированные идентификаторы AID и конечный пункт маршрута)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Управление NFC-модулем"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Приложение сможет обмениваться данными с NFC-метками, картами и устройствами считывания, используя NFC."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Транзакции, обрабатываемые в защитном элементе"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Позволяет приложению получать информацию о транзакциях, обрабатываемых в защитном элементе."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"Отключение функции блокировки экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Запрос данных об уровне сложности блокировки экрана"</string>
@@ -1360,7 +1362,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Режим USB-модема включен"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Режим MIDI включен"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-устройство подключено"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Нажмите, чтобы показать дополнительные параметры."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Нажмите, чтобы посмотреть дополнительные параметры"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Подключенное устройство заряжается. Нажмите, чтобы увидеть другие настройки."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Обнаружено аналоговое аудиоустройство"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Подсоединенное устройство несовместимо с этим телефоном. Нажмите, чтобы узнать подробности."</string>

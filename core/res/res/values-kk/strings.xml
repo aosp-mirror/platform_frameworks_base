@@ -551,6 +551,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Қолданба тіркелген көмектер және баратын жер маршруты сияқты таңдаулы NFC төлеу қызметі туралы ақпаратты ала алатын болады."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC функциясын басқару"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Қауіпсіз элемент арқылы жасалатын транзакция оқиғасы"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Қолданбаға қауіпсіз элемент арқылы жасалатын транзакциялар жөнінде ақпарат алуға мүмкіндік береді."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"экран бекітпесін істен шығару"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"экранды құлыптау күрделілігін сұрау"</string>
@@ -584,7 +586,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Аутентификациялауда қате шықты."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Экран құлпын пайдалану"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Жалғастыру үшін экран құлпын енгізіңіз."</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сканерді қатты басыңыз."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сканерді қатты басыңыз"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Саусақ ізін тану мүмкін емес. Қайталап көріңіз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Саусақ ізін оқу сканерін тазалап, әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сканерді тазалап, әрекетті қайталаңыз."</string>
@@ -594,7 +596,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Тым жарық."</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Қуат түймесін басу әрекеті анықталды."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Дұрыстап қойып көріңіз."</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Саусағыңыздың қалпын аздап өзгертіп тұрыңыз."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Саусағыңыздың орнын аздап өзгертіп тұрыңыз"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Саусақ ізі танылмады."</string>
@@ -642,17 +644,17 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонды жақынырақ ұстаңыз."</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонды жоғарырақ ұстаңыз."</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Телефонды төменірек ұстаңыз."</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай ұстаңыз."</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай ұстаңыз."</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай жылжытыңыз."</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай жылжытыңыз."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Құрылғының камерасына тура қараңыз."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Бетіңіз көрінбей тұр. Телефонды көз деңгейінде ұстаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Қозғалыс тым көп. Телефонды қозғалтпаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Қайта тіркеліңіз."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Бет танылмады. Қайталап көріңіз."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Басыңыздың қалпын сәл өзгертіңіз."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға барынша тура қараңыз."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға барынша тура қараңыз."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға барынша тура қараңыз."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға тура қараңыз."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға тура қараңыз."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға тура қараңыз."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Бетіңізді жауып тұрған нәрсені алып тастаңыз."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экранның жоғарғы жағын, сонымен қатар қара жолақты өшіріңіз."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -661,7 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Бет үлгісі жасалмады. Қайталап көріңіз."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Қою түсті көзілдірік анықталды. Бетіңіз толық көрініп тұруы керек."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Бетперде анықталды. Бетіңіз толық көрініп тұруы керек."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Бетперде тағып алғансыз. Бетіңіз толық көрініп тұруы керек."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
@@ -1388,7 +1390,7 @@
     <string name="show_ime" msgid="6406112007347443383">"Физикалық пернетақта қосулы кезде оны экранға шығару"</string>
     <string name="hardware" msgid="1800597768237606953">"Виртуалдық пернетақтаны көрсету"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Физикалық пернетақтаны конфигурациялау"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз."</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Басқа қолданбалардың үстінен көрсету"</string>
@@ -1611,7 +1613,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Планшет"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"ТД"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Үндеткіштерді қондыру"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Қондыру станциясының динамиктері"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Сыртқы құрылғы"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Құлақаспаптар"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -2274,10 +2276,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Енді экранның бір бөлігін ұлғайтуға болады."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Параметрлер бөлімінен қосу"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Қабылдамау"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонының бөгеуін алыңыз"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасының бөгеуін алыңыз"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонын блоктан шығарыңыз"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасын блоктан шығарыңыз"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; және барлық қолданбалар мен қызметтерге арналған."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Бөгеуді алу"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Блоктан шығару"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Датчикке қатысты құпиялық"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Қолданба белгішесі"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Қолданба брендін ілгері жылжыту кескіні"</string>

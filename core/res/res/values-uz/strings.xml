@@ -551,6 +551,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Bu ilovaga asosiy NFC toʻlov xizmati haqidagi axborotni olish imkonini beradi (masalan, qayd qilingan AID identifikatorlari va marshrutning yakuniy manzili)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC modulini boshqarish"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ilova qisqa masofali aloqa (NFC) texnologiyasi yordamida NFC yorliqlari, kartalar va o‘qish moslamalari bilan ma’lumot almashishi mumkin."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element tranzaksiya hodisasi"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Ilovaga Secure Element orqali amalga oshuvchi tranzaksiyalar axborotini olishga ruxsat beradi."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ekran qulfini o‘chirib qo‘yish"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ilovaga ekran qulfini va har qanday parol  yordamidagi xavfsizlik himoyalarini o‘chirishga ruxsat beradi. Masalan, kirish qo‘ng‘irog‘ida telefon ekran qulfini o‘chiradi va qo‘ng‘iroq tugashi bilan qulfni yoqadi."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekran qulfi qiyinligi darajasini talab qilish"</string>
@@ -661,7 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Yuzingiz modeli yaratilmadi. Qayta urining."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Qora koʻzoynak aniqlandi. Yuzingiz toʻliq koʻrinishi kerak."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yuzning bir qismi yopilib qolgan. Yuzingiz toʻliq koʻrinishi kerak."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yuz qismi yopilib qolgan. Yuzingiz toʻliq koʻrinishi kerak."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>
@@ -1611,7 +1613,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Planshet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Taglik karnaylar"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dok karnaylar"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Tashqi qurilma"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Quloq karnaychalari"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>

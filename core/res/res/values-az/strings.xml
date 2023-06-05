@@ -551,6 +551,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tətbiqə qeydiyyatdan keçmiş yardım və marşrut təyinatı kimi tərcih edilən nfc ödəniş xidməti məlumatını əldə etmək icazəsi verir."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication\'ı kontrol et"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Tətbiqə Yaxın Məsafə Kommunikasiyası (NFC) teqləri, kartları və oxuyucuları ilə əlaqə qurmağa icazə verir."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Təhlükəsiz Element əməliyyatı"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Tətbiqə Təhlükəsiz Elementdəki əməliyyatlar haqqında məlumat almaq imkanı verir."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"Ekran kilidini deaktiv edir"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Tətbiqə kilid açarını və təhlükəsizlik parolunu deaktiv etməyə imkan verir. Qanuni misal budur ki, telefon zəng qəbul edən zaman kilidi açır və zəng qurtarandan sonra kilidi bağlayır."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekran kilidi mürəkkəbliyi tələb edin"</string>
