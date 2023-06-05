@@ -329,8 +329,8 @@ public abstract class AlertingNotificationManager {
         }
 
         public void reset() {
-            mEntry = null;
             removeAutoRemovalCallbacks("reset()");
+            mEntry = null;
             mRemoveAlertRunnable = null;
         }
 
