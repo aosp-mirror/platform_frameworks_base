@@ -407,7 +407,6 @@ public class SizeCompatTests extends WindowTestsBase {
         clearInvocations(translucentActivity.mLetterboxUiController);
 
         // We destroy the first opaque activity
-        mActivity.setState(DESTROYED, "testing");
         mActivity.removeImmediately();
 
         // Check that updateInheritedLetterbox() is invoked again
