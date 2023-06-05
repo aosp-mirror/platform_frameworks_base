@@ -80,10 +80,12 @@ import com.android.systemui.decor.OverlayWindow;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegateImpl;
+import com.android.systemui.decor.ScreenDecorCommand;
 import com.android.systemui.log.ScreenDecorationsLogger;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
@@ -131,6 +133,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     protected boolean mIsRegistered;
     private final Context mContext;
     private final Executor mMainExecutor;
+    private final CommandRegistry mCommandRegistry;
     private final SecureSettings mSecureSettings;
     @VisibleForTesting
     DisplayTracker.Callback mDisplayListener;
@@ -315,6 +318,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     public ScreenDecorations(Context context,
             @Main Executor mainExecutor,
             SecureSettings secureSettings,
+            CommandRegistry commandRegistry,
             UserTracker userTracker,
             DisplayTracker displayTracker,
             PrivacyDotViewController dotViewController,
@@ -326,6 +330,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mContext = context;
         mMainExecutor = mainExecutor;
         mSecureSettings = secureSettings;
+        mCommandRegistry = commandRegistry;
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mDotViewController = dotViewController;
@@ -350,6 +355,10 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         }
     };
 
+    private final ScreenDecorCommand.Callback mScreenDecorCommandCallback = (cmd, pw) -> {
+        android.util.Log.d(TAG, cmd.toString());
+    };
+
     @Override
     public void start() {
         if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
@@ -361,6 +370,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mExecutor.execute(this::startOnScreenDecorationsThread);
         mDotViewController.setUiExecutor(mExecutor);
         mAuthController.addCallback(mAuthControllerCallback);
+        mCommandRegistry.registerCommand(ScreenDecorCommand.SCREEN_DECOR_CMD_NAME,
+                () -> new ScreenDecorCommand(mScreenDecorCommandCallback));
     }
 
     /**

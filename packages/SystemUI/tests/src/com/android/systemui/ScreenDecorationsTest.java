@@ -96,6 +96,7 @@ import com.android.systemui.log.ScreenDecorationsLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
@@ -138,6 +139,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private AuthController mAuthController;
     @Mock
     private Display mDisplay;
+    @Mock
+    private CommandRegistry mCommandRegistry;
     @Mock
     private UserTracker mUserTracker;
     @Mock
@@ -232,7 +235,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer"))));
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mExecutor, mSecureSettings,
-                mUserTracker, mDisplayTracker, mDotViewController, mThreadFactory,
+                mCommandRegistry, mUserTracker, mDisplayTracker, mDotViewController,
+                mThreadFactory,
                 mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
                 mAuthController) {
@@ -1227,7 +1231,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mFaceScanningProviderFactory.getProviders()).thenReturn(mFaceScanningProviders);
         when(mFaceScanningProviderFactory.getHasProviders()).thenReturn(true);
         ScreenDecorations screenDecorations = new ScreenDecorations(mContext, mExecutor,
-                mSecureSettings, mUserTracker, mDisplayTracker, mDotViewController,
+                mSecureSettings, mCommandRegistry, mUserTracker, mDisplayTracker,
+                mDotViewController,
                 mThreadFactory, mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")), mAuthController);
         screenDecorations.start();
