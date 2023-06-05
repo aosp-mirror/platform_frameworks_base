@@ -119,6 +119,7 @@ import static android.service.notification.NotificationListenerService.TRIM_LIGH
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING;
+import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.WAKE_LOCK_FOR_POSTING_NOTIFICATION;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -223,6 +224,8 @@ import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -234,6 +237,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.VibrationEffect;
+import android.os.WorkSource;
 import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -559,6 +563,7 @@ public class NotificationManagerService extends SystemService {
     private PermissionHelper mPermissionHelper;
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
     private TelecomManager mTelecomManager;
+    private PowerManager mPowerManager;
     private PostNotificationTrackerFactory mPostNotificationTrackerFactory;
 
     final IBinder mForegroundToken = new Binder();
@@ -923,7 +928,7 @@ public class NotificationManagerService extends SystemService {
         if (oldFlags != flags) {
             summary.getSbn().getNotification().flags = flags;
             mHandler.post(new EnqueueNotificationRunnable(userId, summary, isAppForeground,
-                    mPostNotificationTrackerFactory.newTracker()));
+                    mPostNotificationTrackerFactory.newTracker(null)));
         }
     }
 
@@ -1457,7 +1462,7 @@ public class NotificationManagerService extends SystemService {
                         // want to adjust the flag behaviour.
                         mHandler.post(new EnqueueNotificationRunnable(r.getUser().getIdentifier(),
                                 r, true /* isAppForeground*/,
-                                mPostNotificationTrackerFactory.newTracker()));
+                                mPostNotificationTrackerFactory.newTracker(null)));
                     }
                 }
             }
@@ -1488,7 +1493,7 @@ public class NotificationManagerService extends SystemService {
                         mHandler.post(
                                 new EnqueueNotificationRunnable(r.getUser().getIdentifier(), r,
                                         /* foreground= */ true,
-                                        mPostNotificationTrackerFactory.newTracker()));
+                                        mPostNotificationTrackerFactory.newTracker(null)));
                     }
                 }
             }
@@ -2233,7 +2238,7 @@ public class NotificationManagerService extends SystemService {
             UsageStatsManagerInternal usageStatsManagerInternal,
             TelecomManager telecomManager, NotificationChannelLogger channelLogger,
             SystemUiSystemPropertiesFlags.FlagResolver flagResolver,
-            PermissionManager permissionManager,
+            PermissionManager permissionManager, PowerManager powerManager,
             PostNotificationTrackerFactory postNotificationTrackerFactory) {
         mHandler = handler;
         Resources resources = getContext().getResources();
@@ -2265,6 +2270,7 @@ public class NotificationManagerService extends SystemService {
         mDpm = dpm;
         mUm = userManager;
         mTelecomManager = telecomManager;
+        mPowerManager = powerManager;
         mPostNotificationTrackerFactory = postNotificationTrackerFactory;
         mPlatformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
@@ -2568,6 +2574,7 @@ public class NotificationManagerService extends SystemService {
                 getContext().getSystemService(TelecomManager.class),
                 new NotificationChannelLoggerImpl(), SystemUiSystemPropertiesFlags.getResolver(),
                 getContext().getSystemService(PermissionManager.class),
+                getContext().getSystemService(PowerManager.class),
                 new PostNotificationTrackerFactory() {});
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
@@ -2684,7 +2691,7 @@ public class NotificationManagerService extends SystemService {
                     final boolean isAppForeground =
                             mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
                     mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground,
-                            mPostNotificationTrackerFactory.newTracker()));
+                            mPostNotificationTrackerFactory.newTracker(null)));
                 }
             }
 
@@ -6577,7 +6584,7 @@ public class NotificationManagerService extends SystemService {
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
             int incomingUserId, boolean postSilently) {
-        PostNotificationTracker tracker = mPostNotificationTrackerFactory.newTracker();
+        PostNotificationTracker tracker = acquireWakeLockForPost(pkg, callingUid);
         boolean enqueued = false;
         try {
             enqueued = enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id,
@@ -6586,6 +6593,22 @@ public class NotificationManagerService extends SystemService {
             if (!enqueued) {
                 tracker.cancel();
             }
+        }
+    }
+
+    private PostNotificationTracker acquireWakeLockForPost(String pkg, int uid) {
+        if (mFlagResolver.isEnabled(WAKE_LOCK_FOR_POSTING_NOTIFICATION)) {
+            // The package probably doesn't have WAKE_LOCK permission and should not require it.
+            return Binder.withCleanCallingIdentity(() -> {
+                WakeLock wakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                        "NotificationManagerService:post:" + pkg);
+                wakeLock.setWorkSource(new WorkSource(uid, pkg));
+                // TODO(b/275044361): Adjust to a more reasonable number when we have the data.
+                wakeLock.acquire(30_000);
+                return mPostNotificationTrackerFactory.newTracker(wakeLock);
+            });
+        } else {
+            return mPostNotificationTrackerFactory.newTracker(null);
         }
     }
 
@@ -7106,7 +7129,7 @@ public class NotificationManagerService extends SystemService {
                             mHandler.post(
                                     new NotificationManagerService.EnqueueNotificationRunnable(
                                             r.getUser().getIdentifier(), r, isAppForeground,
-                                            mPostNotificationTrackerFactory.newTracker()));
+                                            mPostNotificationTrackerFactory.newTracker(null)));
                         }
                     }
                 }
@@ -12168,20 +12191,20 @@ public class NotificationManagerService extends SystemService {
     }
 
     interface PostNotificationTrackerFactory {
-        default PostNotificationTracker newTracker() {
-            return new PostNotificationTracker();
+        default PostNotificationTracker newTracker(@Nullable WakeLock optionalWakelock) {
+            return new PostNotificationTracker(optionalWakelock);
         }
     }
 
     static class PostNotificationTracker {
         @ElapsedRealtimeLong private final long mStartTime;
-        @Nullable private NotificationRecordLogger.NotificationReported mReport;
+        @Nullable private final WakeLock mWakeLock;
         private boolean mOngoing;
 
         @VisibleForTesting
-        PostNotificationTracker() {
-            // TODO(b/275044361): (Conditionally) receive a wakelock.
+        PostNotificationTracker(@Nullable WakeLock wakeLock) {
             mStartTime = SystemClock.elapsedRealtime();
+            mWakeLock = wakeLock;
             mOngoing = true;
             if (DBG) {
                 Slog.d(TAG, "PostNotification: Started");
@@ -12199,9 +12222,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
-         * Cancels the tracker (TODO(b/275044361): releasing the acquired WakeLock). Either
-         * {@link #finish} or {@link #cancel} (exclusively) should be called on this object before
-         * it's discarded.
+         * Cancels the tracker (releasing the acquired WakeLock). Either {@link #finish} or
+         * {@link #cancel} (exclusively) should be called on this object before it's discarded.
          */
         void cancel() {
             if (!isOngoing()) {
@@ -12209,9 +12231,9 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             mOngoing = false;
-
-            // TODO(b/275044361): Release wakelock.
-
+            if (mWakeLock != null) {
+                Binder.withCleanCallingIdentity(() -> mWakeLock.release());
+            }
             if (DBG) {
                 long elapsedTime = SystemClock.elapsedRealtime() - mStartTime;
                 Slog.d(TAG, TextUtils.formatSimple("PostNotification: Abandoned after %d ms",
@@ -12220,9 +12242,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
-         * Finishes the tracker (TODO(b/275044361): releasing the acquired WakeLock) and returns the
-         * time elapsed since the operation started, in milliseconds. Either {@link #finish} or
-         * {@link #cancel} (exclusively) should be called on this object before it's discarded.
+         * Finishes the tracker (releasing the acquired WakeLock) and returns the time elapsed since
+         * the operation started, in milliseconds. Either {@link #finish} or {@link #cancel}
+         * (exclusively) should be called on this object before it's discarded.
          */
         @DurationMillisLong
         long finish() {
@@ -12232,9 +12254,9 @@ public class NotificationManagerService extends SystemService {
                 return elapsedTime;
             }
             mOngoing = false;
-
-            // TODO(b/275044361): Release wakelock.
-
+            if (mWakeLock != null) {
+                Binder.withCleanCallingIdentity(() -> mWakeLock.release());
+            }
             if (DBG) {
                 Slog.d(TAG,
                         TextUtils.formatSimple("PostNotification: Finished in %d ms", elapsedTime));
