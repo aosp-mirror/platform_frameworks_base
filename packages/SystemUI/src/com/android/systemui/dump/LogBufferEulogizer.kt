@@ -72,7 +72,7 @@ class LogBufferEulogizer(
      * The file will be prefaced by the [reason], which will then be returned (presumably so it can
      * be thrown).
      */
-    fun <T : Exception> record(reason: T): T {
+    fun <T : Throwable> record(reason: T): T {
         val start = systemClock.uptimeMillis()
         var duration = 0L
 
