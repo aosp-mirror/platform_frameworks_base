@@ -44,7 +44,7 @@
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Želite shraniti podatke za prijavo za aplikacijo <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"ključ za dostop"</string>
     <string name="password" msgid="6738570945182936667">"geslo"</string>
-    <string name="passkeys" msgid="5733880786866559847">"ključev za dostop"</string>
+    <string name="passkeys" msgid="5733880786866559847">"ključi za dostop"</string>
     <string name="passwords" msgid="5419394230391253816">"gesel"</string>
     <string name="sign_ins" msgid="4710739369149469208">"prijave"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"podatkov za prijavo"</string>

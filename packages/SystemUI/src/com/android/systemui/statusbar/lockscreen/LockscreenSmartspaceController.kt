@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.lockscreen
 
+import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
@@ -358,7 +359,11 @@ constructor(
                     showOnLockscreen: Boolean
             ) {
                 if (showOnLockscreen) {
-                    pi.send()
+                    val options = ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle()
+                    pi.send(options)
                 } else {
                     activityStarter.postStartActivityDismissingKeyguard(pi)
                 }

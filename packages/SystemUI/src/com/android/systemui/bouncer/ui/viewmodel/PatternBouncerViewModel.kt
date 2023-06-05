@@ -37,7 +37,11 @@ class PatternBouncerViewModel(
     private val applicationContext: Context,
     applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
-) : AuthMethodBouncerViewModel {
+    isInputEnabled: StateFlow<Boolean>,
+) :
+    AuthMethodBouncerViewModel(
+        isInputEnabled = isInputEnabled,
+    ) {
 
     /** The number of columns in the dot grid. */
     val columnCount = 3
@@ -62,6 +66,16 @@ class PatternBouncerViewModel(
     private val _dots = MutableStateFlow(defaultDots())
     /** All dots on the grid. */
     val dots: StateFlow<List<PatternDotViewModel>> = _dots.asStateFlow()
+
+    /** Whether the pattern itself should be rendered visibly. */
+    val isPatternVisible: StateFlow<Boolean> =
+        interactor.authenticationMethod
+            .map { authMethod -> isPatternVisible(authMethod) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = isPatternVisible(interactor.authenticationMethod.value),
+            )
 
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
@@ -139,11 +153,19 @@ class PatternBouncerViewModel(
 
     /** Notifies that the user has ended the drag gesture across the dot grid. */
     fun onDragEnd() {
-        interactor.authenticate(_selectedDots.value.map { it.toCoordinate() })
+        val isSuccessfullyAuthenticated =
+            interactor.authenticate(_selectedDots.value.map { it.toCoordinate() })
+        if (!isSuccessfullyAuthenticated) {
+            showFailureAnimation()
+        }
 
         _dots.value = defaultDots()
         _currentDot.value = null
         _selectedDots.value = linkedSetOf()
+    }
+
+    private fun isPatternVisible(authMethodModel: AuthenticationMethodModel): Boolean {
+        return (authMethodModel as? AuthenticationMethodModel.Pattern)?.isPatternVisible ?: false
     }
 
     private fun defaultDots(): List<PatternDotViewModel> {

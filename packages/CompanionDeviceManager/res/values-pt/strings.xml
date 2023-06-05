@@ -35,7 +35,7 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play Services"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> está pedindo permissão em nome do seu dispositivo <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> para acessar fotos, mídia e notificações do smartphone"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Permitir que o dispositivo &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; realize essa ação?"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Permitir que o dispositivo &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; realize esta ação?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> está pedindo permissão em nome do seu dispositivo <xliff:g id="DEVICE_NAME">%2$s</xliff:g> para fazer streaming de apps e de outros recursos do sistema para dispositivos por perto"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"dispositivo"</string>
     <string name="summary_generic_single_device" msgid="4181180669689590417">"O app poderá sincronizar informações, como o nome de quem está ligando, entre seu smartphone e o dispositivo <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
@@ -69,7 +69,7 @@
     <string name="permission_notification_summary" msgid="884075314530071011">"Pode ler todas as notificações, incluindo informações como contatos, mensagens e fotos"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Fazer transmissão dos apps no seu smartphone"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Faça streaming de apps e outros recursos do sistema pelo smartphone"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Fazer streaming de apps e outros recursos do sistema pelo smartphone"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"smartphone"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

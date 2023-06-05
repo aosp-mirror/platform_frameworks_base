@@ -392,23 +392,32 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
 
     @Test
     public void testSnapchild_targetIsZero() {
-        doNothing().when(mSwipeHelper).superSnapChild(mView, 0, 0);
-        mSwipeHelper.snapChild(mView, 0, 0);
+        doNothing().when(mSwipeHelper).superSnapChild(mNotificationRow, 0, 0);
+        mSwipeHelper.snapChild(mNotificationRow, 0, 0);
 
-        verify(mCallback, times(1)).onDragCancelled(mView);
-        verify(mSwipeHelper, times(1)).superSnapChild(mView, 0, 0);
+        verify(mCallback, times(1)).onDragCancelled(mNotificationRow);
+        verify(mSwipeHelper, times(1)).superSnapChild(mNotificationRow, 0, 0);
         verify(mSwipeHelper, times(1)).handleMenuCoveredOrDismissed();
     }
 
 
     @Test
     public void testSnapchild_targetNotZero() {
+        doNothing().when(mSwipeHelper).superSnapChild(mNotificationRow, 10, 0);
+        mSwipeHelper.snapChild(mNotificationRow, 10, 0);
+
+        verify(mCallback, times(1)).onDragCancelled(mNotificationRow);
+        verify(mSwipeHelper, times(1)).superSnapChild(mNotificationRow, 10, 0);
+        verify(mSwipeHelper, times(0)).handleMenuCoveredOrDismissed();
+    }
+
+    @Test
+    public void testSnapchild_targetNotSwipeable() {
         doNothing().when(mSwipeHelper).superSnapChild(mView, 10, 0);
         mSwipeHelper.snapChild(mView, 10, 0);
 
-        verify(mCallback, times(1)).onDragCancelled(mView);
-        verify(mSwipeHelper, times(1)).superSnapChild(mView, 10, 0);
-        verify(mSwipeHelper, times(0)).handleMenuCoveredOrDismissed();
+        verify(mCallback).onDragCancelled(mView);
+        verify(mSwipeHelper, never()).superSnapChild(mView, 10, 0);
     }
 
     @Test

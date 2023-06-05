@@ -258,6 +258,10 @@ public final class AccessibilityStatsLogUtils {
     }
 
     private static int convertToLoggingMagnificationScale(float scale) {
-        return (int) (scale * 100);
+        // per b/269366674, we make every 10% a bucket for both privacy and readability concern.
+        // For example
+        // 1. both 2.30f(230%) and 2.36f(236%) would return 230 as bucket id.
+        // 2. bucket id 370 means scale range in [370%, 379%]
+        return ((int) (scale * 10)) * 10;
     }
 }

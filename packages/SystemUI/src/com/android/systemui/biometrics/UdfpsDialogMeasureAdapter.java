@@ -63,7 +63,7 @@ public class UdfpsDialogMeasureAdapter {
     }
 
     @NonNull
-    AuthDialog.LayoutParams onMeasureInternal(
+    public AuthDialog.LayoutParams onMeasureInternal(
             int width, int height, @NonNull AuthDialog.LayoutParams layoutParams,
             float scaleFactor) {
 
@@ -86,7 +86,7 @@ public class UdfpsDialogMeasureAdapter {
      * too cleanly support this case. So, let's have the onLayout code translate the sensor location
      * instead.
      */
-    int getBottomSpacerHeight() {
+    public int getBottomSpacerHeight() {
         return mBottomSpacerHeight;
     }
 

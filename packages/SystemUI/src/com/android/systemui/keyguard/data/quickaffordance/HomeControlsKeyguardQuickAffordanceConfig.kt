@@ -54,7 +54,7 @@ constructor(
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
 
-    override val pickerName: String by lazy { context.getString(component.getTileTitleId()) }
+    override fun pickerName(): String = context.getString(component.getTileTitleId())
 
     override val pickerIconResourceId: Int by lazy { component.getTileImageId() }
 

@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
+import com.android.systemui.temporarydisplay.TemporaryViewUiEventLogger
 import com.android.systemui.temporarydisplay.chipbar.ChipbarAnimator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarLogger
@@ -108,6 +109,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     private lateinit var fakeExecutor: FakeExecutor
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
     private lateinit var uiEventLogger: MediaTttSenderUiEventLogger
+    private lateinit var tempViewUiEventLogger: TemporaryViewUiEventLogger
     private val defaultTimeout = context.resources.getInteger(R.integer.heads_up_notification_decay)
 
     @Before
@@ -137,6 +139,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
         uiEventLoggerFake = UiEventLoggerFake()
         uiEventLogger = MediaTttSenderUiEventLogger(uiEventLoggerFake)
+        tempViewUiEventLogger = TemporaryViewUiEventLogger(uiEventLoggerFake)
 
         chipbarCoordinator =
             ChipbarCoordinator(
@@ -156,6 +159,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 vibratorHelper,
                 fakeWakeLockBuilder,
                 fakeClock,
+                tempViewUiEventLogger,
             )
         chipbarCoordinator.start()
 
@@ -352,8 +356,8 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
             .isEqualTo(ChipStateSender.TRANSFER_TO_RECEIVER_SUCCEEDED.getExpectedStateText())
         assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.GONE)
-        // Event index 1 since initially displaying the triggered chip would also log an event.
-        assertThat(uiEventLoggerFake.eventId(1))
+        // Event index 2 since initially displaying the triggered chip would also log two events.
+        assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_SUCCEEDED.id)
         verify(vibratorHelper, never())
             .vibrate(
@@ -363,6 +367,24 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 any(),
                 any<VibrationAttributes>(),
             )
+    }
+
+    @Test
+    fun commandQueueCallback_transferToReceiverSucceeded_sameViewInstanceId() {
+        displayReceiverTriggered()
+        reset(vibratorHelper)
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null
+        )
+
+        // Event index 2 since initially displaying the triggered chip would also log two events.
+        assertThat(uiEventLoggerFake.eventId(2))
+            .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_SUCCEEDED.id)
+        verify(vibratorHelper, never()).vibrate(any<VibrationEffect>())
+        assertThat(uiEventLoggerFake.logs[0].instanceId)
+            .isEqualTo(uiEventLoggerFake.logs[2].instanceId)
     }
 
     @Test
@@ -410,9 +432,9 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
         getChipbarView().getUndoButton().performClick()
 
-        // Event index 2 since initially displaying the triggered and succeeded chip would also log
+        // Event index 3 since initially displaying the triggered and succeeded chip would also log
         // events.
-        assertThat(uiEventLoggerFake.eventId(2))
+        assertThat(uiEventLoggerFake.eventId(3))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_RECEIVER_CLICKED.id)
         assertThat(undoCallbackCalled).isTrue()
         assertThat(getChipbarView().getChipText())
@@ -436,8 +458,8 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
             .isEqualTo(ChipStateSender.TRANSFER_TO_THIS_DEVICE_SUCCEEDED.getExpectedStateText())
         assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.GONE)
-        // Event index 1 since initially displaying the triggered chip would also log an event.
-        assertThat(uiEventLoggerFake.eventId(1))
+        // Event index 2 since initially displaying the triggered chip would also log two events.
+        assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_SUCCEEDED.id)
         verify(vibratorHelper, never())
             .vibrate(
@@ -494,9 +516,9 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
         getChipbarView().getUndoButton().performClick()
 
-        // Event index 2 since initially displaying the triggered and succeeded chip would also log
+        // Event index 3 since initially displaying the triggered and succeeded chip would also log
         // events.
-        assertThat(uiEventLoggerFake.eventId(2))
+        assertThat(uiEventLoggerFake.eventId(3))
             .isEqualTo(
                 MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_THIS_DEVICE_CLICKED.id
             )
@@ -523,8 +545,8 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getErrorIcon().visibility).isEqualTo(View.VISIBLE)
-        // Event index 1 since initially displaying the triggered chip would also log an event.
-        assertThat(uiEventLoggerFake.eventId(1))
+        // Event index 2 since initially displaying the triggered chip would also log two events.
+        assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_FAILED.id)
         verify(vibratorHelper)
             .vibrate(
@@ -559,7 +581,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.GONE)
         assertThat(chipbarView.getErrorIcon().visibility).isEqualTo(View.VISIBLE)
         // Event index 1 since initially displaying the triggered chip would also log an event.
-        assertThat(uiEventLoggerFake.eventId(1))
+        assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_FAILED.id)
         verify(vibratorHelper)
             .vibrate(
@@ -1082,6 +1104,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Test
     fun newState_viewListenerRegistered() {
         val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        whenever(mockChipbarCoordinator.tempViewUiEventLogger).thenReturn(tempViewUiEventLogger)
         underTest =
             MediaTttSenderCoordinator(
                 mockChipbarCoordinator,
@@ -1109,6 +1132,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Test
     fun onInfoPermanentlyRemoved_viewListenerUnregistered() {
         val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        whenever(mockChipbarCoordinator.tempViewUiEventLogger).thenReturn(tempViewUiEventLogger)
         underTest =
             MediaTttSenderCoordinator(
                 mockChipbarCoordinator,
@@ -1142,6 +1166,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Test
     fun onInfoPermanentlyRemoved_wrongId_viewListenerNotUnregistered() {
         val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        whenever(mockChipbarCoordinator.tempViewUiEventLogger).thenReturn(tempViewUiEventLogger)
         underTest =
             MediaTttSenderCoordinator(
                 mockChipbarCoordinator,
@@ -1174,6 +1199,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Test
     fun farFromReceiverState_viewListenerUnregistered() {
         val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        whenever(mockChipbarCoordinator.tempViewUiEventLogger).thenReturn(tempViewUiEventLogger)
         underTest =
             MediaTttSenderCoordinator(
                 mockChipbarCoordinator,
@@ -1210,6 +1236,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Test
     fun statesWithDifferentIds_onInfoPermanentlyRemovedForOneId_viewListenerNotUnregistered() {
         val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        whenever(mockChipbarCoordinator.tempViewUiEventLogger).thenReturn(tempViewUiEventLogger)
         underTest =
             MediaTttSenderCoordinator(
                 mockChipbarCoordinator,

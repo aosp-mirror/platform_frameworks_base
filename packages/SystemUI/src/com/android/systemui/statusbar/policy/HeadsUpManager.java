@@ -140,7 +140,13 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     }
 
     protected boolean shouldHeadsUpBecomePinned(@NonNull NotificationEntry entry) {
-        return hasFullScreenIntent(entry);
+        final HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
+        if (headsUpEntry == null) {
+            // This should not happen since shouldHeadsUpBecomePinned is always called after adding
+            // the NotificationEntry into AlertingNotificationManager's mAlertEntries map.
+            return hasFullScreenIntent(entry);
+        }
+        return hasFullScreenIntent(entry) && !headsUpEntry.wasUnpinned;
     }
 
     protected boolean hasFullScreenIntent(@NonNull NotificationEntry entry) {
@@ -151,6 +157,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
             @NonNull HeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned) {
         mLogger.logSetEntryPinned(headsUpEntry.mEntry, isPinned);
         NotificationEntry entry = headsUpEntry.mEntry;
+        if (!isPinned) {
+            headsUpEntry.wasUnpinned = true;
+        }
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
             updatePinnedMode();
@@ -177,7 +186,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     protected void onAlertEntryAdded(AlertEntry alertEntry) {
         NotificationEntry entry = alertEntry.mEntry;
         entry.setHeadsUp(true);
-        setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(entry));
+
+        final boolean shouldPin = shouldHeadsUpBecomePinned(entry);
+        setEntryPinned((HeadsUpEntry) alertEntry, shouldPin);
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 1 /* visible */);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, true);
@@ -411,6 +422,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     protected class HeadsUpEntry extends AlertEntry {
         public boolean remoteInputActive;
         protected boolean expanded;
+        protected boolean wasUnpinned;
 
         @Override
         public boolean isSticky() {

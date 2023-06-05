@@ -120,6 +120,10 @@ public class AnrLatencyTracker implements AutoCloseable {
 
     private long mPreDumpIfLockTooSlowStartUptime;
     private long mPreDumpIfLockTooSlowDuration = 0;
+    private long mNotifyAppUnresponsiveStartUptime;
+    private long mNotifyAppUnresponsiveDuration = 0;
+    private long mNotifyWindowUnresponsiveStartUptime;
+    private long mNotifyWindowUnresponsiveDuration = 0;
 
     private final int mAnrRecordPlacedOnQueueCookie =
             sNextAnrRecordPlacedOnQueueCookieGenerator.incrementAndGet();
@@ -425,11 +429,36 @@ public class AnrLatencyTracker implements AutoCloseable {
         anrSkipped("dumpStackTraces");
     }
 
+    /** Records the start of AnrController#notifyAppUnresponsive. */
+    public void notifyAppUnresponsiveStarted() {
+        mNotifyAppUnresponsiveStartUptime = getUptimeMillis();
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "notifyAppUnresponsive()");
+    }
+
+    /** Records the end of AnrController#notifyAppUnresponsive. */
+    public void notifyAppUnresponsiveEnded() {
+        mNotifyAppUnresponsiveDuration = getUptimeMillis() - mNotifyAppUnresponsiveStartUptime;
+        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /** Records the start of AnrController#notifyWindowUnresponsive. */
+    public void notifyWindowUnresponsiveStarted() {
+        mNotifyWindowUnresponsiveStartUptime = getUptimeMillis();
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "notifyWindowUnresponsive()");
+    }
+
+    /** Records the end of AnrController#notifyWindowUnresponsive. */
+    public void notifyWindowUnresponsiveEnded() {
+        mNotifyWindowUnresponsiveDuration = getUptimeMillis()
+                - mNotifyWindowUnresponsiveStartUptime;
+        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
     /**
      * Returns latency data as a comma separated value string for inclusion in ANR report.
      */
     public String dumpAsCommaSeparatedArrayWithHeader() {
-        return "DurationsV4: " + mAnrTriggerUptime
+        return "DurationsV5: " + mAnrTriggerUptime
                 /* triggering_to_app_not_responding_duration = */
                 + "," + (mAppNotRespondingStartUptime -  mAnrTriggerUptime)
                 /* app_not_responding_duration = */
@@ -480,6 +509,10 @@ public class AnrLatencyTracker implements AutoCloseable {
                 + "," + (mCopyingFirstPidSucceeded ? 1 : 0)
                 /* preDumpIfLockTooSlow_duration = */
                 + "," + mPreDumpIfLockTooSlowDuration
+                /* notifyAppUnresponsive_duration = */
+                + "," + mNotifyAppUnresponsiveDuration
+                /* notifyWindowUnresponsive_duration = */
+                + "," + mNotifyWindowUnresponsiveDuration
                 + "\n\n";
 
     }

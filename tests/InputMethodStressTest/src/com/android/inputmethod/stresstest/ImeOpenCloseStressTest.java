@@ -102,12 +102,10 @@ public final class ImeOpenCloseStressTest {
         for (int i = 0; i < iterNum; i++) {
             String msgPrefix = "Iteration #" + i + " ";
             Log.i(TAG, msgPrefix + "start");
-            boolean showResult = callOnMainSync(activity::showImeWithInputMethodManager);
-            assertThat(showResult).isEqualTo(!(hasUnfocusableWindowFlags(activity)));
+            callOnMainSync(activity::showImeWithInputMethodManager);
             verifyShowBehavior(activity);
 
-            boolean hideResult = callOnMainSync(activity::hideImeWithInputMethodManager);
-            assertThat(hideResult).isEqualTo(!(hasUnfocusableWindowFlags(activity)));
+            callOnMainSync(activity::hideImeWithInputMethodManager);
 
             verifyHideBehavior(activity);
         }
@@ -128,14 +126,12 @@ public final class ImeOpenCloseStressTest {
         for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
             String msgPrefix = "Iteration #" + i + " ";
             Log.i(TAG, msgPrefix + "start");
-            boolean showResult = callOnMainSync(activity::showImeWithInputMethodManager);
-            assertThat(showResult).isTrue();
+            callOnMainSync(activity::showImeWithInputMethodManager);
             waitOnMainUntil(
                     msgPrefix + "IME should be visible",
                     () -> !activity.isAnimating() && isImeShown(editText));
 
-            boolean hideResult = callOnMainSync(activity::hideImeWithInputMethodManager);
-            assertThat(hideResult).isTrue();
+            callOnMainSync(activity::hideImeWithInputMethodManager);
             waitOnMainUntil(
                     msgPrefix + "IME should be hidden",
                     () -> !activity.isAnimating() && !isImeShown(editText));
@@ -156,17 +152,13 @@ public final class ImeOpenCloseStressTest {
         List<Integer> intervals = new ArrayList<>();
         for (int i = 10; i < 100; i += 10) intervals.add(i);
         for (int i = 100; i < 1000; i += 50) intervals.add(i);
-        boolean firstHide = false;
         for (int intervalMillis : intervals) {
             String msgPrefix = "Interval = " + intervalMillis + " ";
             Log.i(TAG, msgPrefix + " start");
-            boolean hideResult = callOnMainSync(activity::hideImeWithInputMethodManager);
-            assertThat(hideResult).isEqualTo(firstHide);
-            firstHide = true;
+            callOnMainSync(activity::hideImeWithInputMethodManager);
             SystemClock.sleep(intervalMillis);
 
-            boolean showResult = callOnMainSync(activity::showImeWithInputMethodManager);
-            assertThat(showResult).isTrue();
+            callOnMainSync(activity::showImeWithInputMethodManager);
             verifyShowBehavior(activity);
         }
     }
@@ -247,8 +239,7 @@ public final class ImeOpenCloseStressTest {
         TestActivity activity = TestActivity.start(intent);
 
         // Show InputMethodManager without requesting focus
-        boolean showResult = callOnMainSync(activity::showImeWithInputMethodManager);
-        assertThat(showResult).isFalse();
+        callOnMainSync(activity::showImeWithInputMethodManager);
 
         int windowFlags = activity.getWindow().getAttributes().flags;
         EditText editText = activity.getEditText();
@@ -474,8 +465,7 @@ public final class ImeOpenCloseStressTest {
                         Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
         TestActivity activity = TestActivity.start(intent1);
         // Show Ime with InputMethodManager to ensure the keyboard is shown on the second activity
-        boolean showResult = callOnMainSync(activity::showImeWithInputMethodManager);
-        assertThat(showResult).isEqualTo(!(hasUnfocusableWindowFlags(activity)));
+        callOnMainSync(activity::showImeWithInputMethodManager);
 
         Thread.sleep(1000);
         verifyShowBehavior(activity);
@@ -493,6 +483,7 @@ public final class ImeOpenCloseStressTest {
         verifyShowBehavior(activity);
     }
 
+    // TODO: Add tests for activities that don't handle the rotation.
     @Test
     public void testRotateScreenWithKeyboardOn() throws Exception {
         Intent intent =
@@ -502,8 +493,7 @@ public final class ImeOpenCloseStressTest {
                         Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
         TestActivity activity = TestActivity.start(intent);
         // Show Ime with InputMethodManager to ensure the keyboard is shown on the second activity
-        boolean showResult = callOnMainSync(activity::showImeWithInputMethodManager);
-        assertThat(showResult).isEqualTo(!(hasUnfocusableWindowFlags(activity)));
+        callOnMainSync(activity::showImeWithInputMethodManager);
         Thread.sleep(2000);
         verifyShowBehavior(activity);
 
@@ -514,14 +504,14 @@ public final class ImeOpenCloseStressTest {
         Thread.sleep(1000);
         Log.i(TAG, "Rotate screen right");
         assertThat(uiDevice.isNaturalOrientation()).isFalse();
-        verifyShowBehavior(activity);
+        verifyRotateBehavior(activity);
 
         uiDevice.setOrientationLeft();
         uiDevice.waitForIdle();
         Thread.sleep(1000);
         Log.i(TAG, "Rotate screen left");
         assertThat(uiDevice.isNaturalOrientation()).isFalse();
-        verifyShowBehavior(activity);
+        verifyRotateBehavior(activity);
 
         uiDevice.setOrientationNatural();
         uiDevice.waitForIdle();
@@ -567,6 +557,38 @@ public final class ImeOpenCloseStressTest {
                     editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ false);
             // Ime is shown but with a fallback InputConnection
             waitOnMainUntilImeIsShown(editText);
+        }
+    }
+
+    private static void verifyRotateBehavior(TestActivity activity) {
+        // Get the new TestActivity after recreation.
+        TestActivity newActivity = TestActivity.getLastCreatedInstance();
+        assertThat(newActivity).isNotNull();
+        assertThat(newActivity).isNotEqualTo(activity);
+
+        EditText newEditText = newActivity.getEditText();
+        int softInputMode = newActivity.getWindow().getAttributes().softInputMode;
+        int softInputVisibility = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+
+        if (hasUnfocusableWindowFlags(newActivity)) {
+            verifyImeAlwaysHiddenWithWindowFlagSet(newActivity);
+            return;
+        }
+
+        if (softInputVisibility == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
+            // After rotation, the keyboard would be hidden only when the flag is
+            // SOFT_INPUT_STATE_ALWAYS_HIDDEN. However, SOFT_INPUT_STATE_HIDDEN is different because
+            // it requires appending SOFT_INPUT_IS_FORWARD_NAVIGATION flag, which won't be added
+            // when rotating the devices (rotating doesn't navigate forward to the next app window.)
+            verifyWindowAndViewFocus(newEditText, /*expectWindowFocus*/ true, /*expectViewFocus*/
+                    true);
+            waitOnMainUntilImeIsHidden(newEditText);
+
+        } else {
+            // Other cases, keyboard would be shown.
+            verifyWindowAndViewFocus(newEditText, /*expectWindowFocus*/ true, /*expectViewFocus*/
+                    true);
+            waitOnMainUntilImeIsShown(newEditText);
         }
     }
 }

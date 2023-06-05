@@ -27,6 +27,8 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -68,6 +70,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         PinBouncerViewModel(
             applicationScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
+            isInputEnabled = MutableStateFlow(true).asStateFlow(),
         )
 
     @Before
@@ -91,7 +94,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onShown()
 
-            assertThat(message).isEqualTo(ENTER_YOUR_PIN)
+            assertThat(message?.text).isEqualTo(ENTER_YOUR_PIN)
             assertThat(pinLengths).isEqualTo(0 to 0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -113,7 +116,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onPinButtonClicked(1)
 
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
             assertThat(pinLengths).isEqualTo(0 to 1)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -137,7 +140,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onBackspaceButtonClicked()
 
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
             assertThat(pinLengths).isEqualTo(1 to 0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -167,7 +170,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
                 advanceTimeBy(PinBouncerViewModel.BACKSPACE_LONG_PRESS_DELAY_MS)
             }
 
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
             assertThat(pinLengths).isEqualTo(1 to 0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -217,7 +220,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onAuthenticateButtonClicked()
 
             assertThat(pinLengths).isEqualTo(0 to 0)
-            assertThat(message).isEqualTo(WRONG_PIN)
+            assertThat(message?.text).isEqualTo(WRONG_PIN)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
@@ -241,7 +244,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onPinButtonClicked(4)
             underTest.onPinButtonClicked(5) // PIN is now wrong!
             underTest.onAuthenticateButtonClicked()
-            assertThat(message).isEqualTo(WRONG_PIN)
+            assertThat(message?.text).isEqualTo(WRONG_PIN)
             assertThat(pinLengths).isEqualTo(0 to 0)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -251,7 +254,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             underTest.onPinButtonClicked(2)
             underTest.onPinButtonClicked(3)
             underTest.onPinButtonClicked(4)
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
 
             underTest.onAuthenticateButtonClicked()
 

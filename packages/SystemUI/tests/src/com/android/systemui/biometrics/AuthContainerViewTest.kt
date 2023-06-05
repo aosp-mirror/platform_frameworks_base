@@ -41,11 +41,15 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
 import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
-import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
-import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
+import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
+import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
 import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
+import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -53,28 +57,33 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import org.junit.After
+import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class AuthContainerViewTest : SysuiTestCase() {
+open class AuthContainerViewTest : SysuiTestCase() {
 
     @JvmField @Rule
     var mockitoRule = MockitoJUnit.rule()
+
+    private val featureFlags = FakeFeatureFlags()
 
     @Mock
     lateinit var callback: AuthDialogCallback
@@ -91,16 +100,25 @@ class AuthContainerViewTest : SysuiTestCase() {
     @Mock
     lateinit var interactionJankMonitor: InteractionJankMonitor
 
+    // TODO(b/278622168): remove with flag
+    open val useNewBiometricPrompt = false
+
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val biometricPromptRepository = FakePromptRepository()
     private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
     private val credentialInteractor = FakeCredentialInteractor()
-    private val bpCredentialInteractor = BiometricPromptCredentialInteractor(
+    private val bpCredentialInteractor = PromptCredentialInteractor(
         Dispatchers.Main.immediate,
         biometricPromptRepository,
-        credentialInteractor
+        credentialInteractor,
     )
+    private val promptSelectorInteractor by lazy {
+        PromptSelectorInteractorImpl(
+            biometricPromptRepository,
+            lockPatternUtils,
+        )
+    }
     private val displayStateInteractor = DisplayStateInteractorImpl(
         testScope.backgroundScope,
         mContext,
@@ -115,6 +133,11 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     private var authContainer: TestAuthContainerView? = null
 
+    @Before
+    fun setup() {
+        featureFlags.set(Flags.BIOMETRIC_BP_STRONG, useNewBiometricPrompt)
+    }
+
     @After
     fun tearDown() {
         if (authContainer?.isAttachedToWindow == true) {
@@ -125,7 +148,7 @@ class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testNotifiesAnimatedIn() {
         initializeFingerprintContainer()
-        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L)
+        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
     }
 
     @Test
@@ -164,13 +187,13 @@ class AuthContainerViewTest : SysuiTestCase() {
         container.dismissFromSystemServer()
         waitForIdleSync()
 
-        verify(callback, never()).onDialogAnimatedIn(anyLong())
+        verify(callback, never()).onDialogAnimatedIn(anyLong(), anyBoolean())
 
         container.addToView()
         waitForIdleSync()
 
         // attaching the view resets the state and allows this to happen again
-        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L)
+        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
     }
 
     @Test
@@ -185,7 +208,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
         // the first time is triggered by initializeFingerprintContainer()
         // the second time was triggered by dismissWithoutCallback()
-        verify(callback, times(2)).onDialogAnimatedIn(authContainer?.requestId ?: 0L)
+        verify(callback, times(2)).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
     }
 
     @Test
@@ -479,6 +502,8 @@ class AuthContainerViewTest : SysuiTestCase() {
                 this.authenticators = authenticators
             }
         },
+        featureFlags,
+        testScope.backgroundScope,
         fingerprintProps,
         faceProps,
         wakefulnessLifecycle,
@@ -486,8 +511,10 @@ class AuthContainerViewTest : SysuiTestCase() {
         userManager,
         lockPatternUtils,
         interactionJankMonitor,
-        { bpCredentialInteractor },
         { authBiometricFingerprintViewModel },
+        { promptSelectorInteractor },
+        { bpCredentialInteractor },
+        PromptViewModel(promptSelectorInteractor),
         { credentialViewModel },
         Handler(TestableLooper.get(this).looper),
         fakeExecutor
@@ -497,7 +524,10 @@ class AuthContainerViewTest : SysuiTestCase() {
         }
     }
 
-    override fun waitForIdleSync() = TestableLooper.get(this).processAllMessages()
+    override fun waitForIdleSync() {
+        testScope.runCurrent()
+        TestableLooper.get(this).processAllMessages()
+    }
 
     private fun AuthContainerView.addToView() {
         ViewUtils.attachView(this)

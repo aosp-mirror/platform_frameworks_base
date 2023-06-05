@@ -26,7 +26,6 @@ import android.os.RemoteCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.service.autofill.AutofillFieldClassificationService.Scores;
-import android.text.TextUtils;
 import android.view.autofill.AutofillManager;
 
 import com.android.internal.os.IResultReceiver;
@@ -348,8 +347,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
 
     private int isFieldDetectionServiceEnabled(PrintWriter pw) {
         final int userId = getNextIntArgRequired();
-        String name = mService.getFieldDetectionServiceName(userId);
-        boolean enabled = !TextUtils.isEmpty(name);
+        boolean enabled = mService.isFieldDetectionServiceEnabledForUser(userId);
         pw.println(enabled);
         return 0;
     }

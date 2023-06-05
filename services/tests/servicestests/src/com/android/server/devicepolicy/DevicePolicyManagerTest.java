@@ -7842,7 +7842,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             throws Exception {
         int validLockTaskFeatures = LOCK_TASK_FEATURE_SYSTEM_INFO | LOCK_TASK_FEATURE_KEYGUARD
                 | LOCK_TASK_FEATURE_HOME | LOCK_TASK_FEATURE_GLOBAL_ACTIONS
-                | LOCK_TASK_FEATURE_NOTIFICATIONS;
+                | LOCK_TASK_FEATURE_NOTIFICATIONS | LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK;
         setDeviceOwner();
         dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
 
@@ -7857,7 +7857,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetLockTaskFeatures_financeDo_invalidLockTaskFeatures_throwsException()
             throws Exception {
         int invalidLockTaskFeatures = LOCK_TASK_FEATURE_NONE | LOCK_TASK_FEATURE_OVERVIEW
-                | LOCK_TASK_FEATURE_HOME | LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK;
+                | LOCK_TASK_FEATURE_HOME;
         setDeviceOwner();
         dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
         // Called during setup.

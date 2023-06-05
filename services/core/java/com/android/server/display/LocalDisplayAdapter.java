@@ -888,7 +888,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     BrightnessSynchronizer.brightnessFloatToInt(
                                             sdrBrightnessState));
 
-                            handleHdrSdrNitsChanged(nits, sdrNits);
+                            if (getDisplayDeviceConfig().hasSdrToHdrRatioSpline()) {
+                                handleHdrSdrNitsChanged(nits, sdrNits);
+                            }
 
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);

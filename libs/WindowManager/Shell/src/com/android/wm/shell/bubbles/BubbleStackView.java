@@ -1346,7 +1346,7 @@ public class BubbleStackView extends FrameLayout
 
     // Recreates & shows the education views. Call when a theme/config change happens.
     private void updateUserEdu() {
-        if (isStackEduVisible()) {
+        if (isStackEduVisible() && !mStackEduView.isHiding()) {
             removeView(mStackEduView);
             mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
             addView(mStackEduView);
@@ -2518,6 +2518,7 @@ public class BubbleStackView extends FrameLayout
             mExpandedAnimationController.expandFromStack(() -> {
                 updatePointerPosition(false /* forIme */);
                 afterExpandedViewAnimation();
+                mExpandedViewContainer.setVisibility(VISIBLE);
                 mExpandedViewAnimationController.animateForImeVisibilityChange(visible);
             } /* after */);
             return;

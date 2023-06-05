@@ -31,6 +31,8 @@ import com.android.systemui.biometrics.domain.interactor.LogContextInteractor
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
+import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
@@ -54,6 +56,11 @@ interface BiometricsModule {
     @Binds
     @SysUISingleton
     fun rearDisplayStateRepository(impl: RearDisplayStateRepositoryImpl): RearDisplayStateRepository
+
+    @Binds
+    @SysUISingleton
+    fun providesPromptSelectorInteractor(impl: PromptSelectorInteractorImpl):
+            PromptSelectorInteractor
 
     @Binds
     @SysUISingleton

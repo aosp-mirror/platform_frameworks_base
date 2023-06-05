@@ -45,6 +45,7 @@ import android.app.AlarmManager;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.WallpaperManager;
 import android.app.WindowConfiguration;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
@@ -280,6 +281,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
+    private WallpaperManager mWallpaperManager;
     private final IStatusBarService mStatusBarService;
     private final IBinder mStatusBarDisableToken = new Binder();
     private final UserTracker mUserTracker;
@@ -1350,11 +1352,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             setShowingLocked(false /* showing */, true /* forceCallbacks */);
         }
 
+        boolean isLockscreenLwpEnabled = getWallpaperManager().isLockscreenLiveWallpaperEnabled();
         mKeyguardTransitions.register(
-                KeyguardService.wrap(getExitAnimationRunner()),
-                KeyguardService.wrap(getOccludeAnimationRunner()),
-                KeyguardService.wrap(getOccludeByDreamAnimationRunner()),
-                KeyguardService.wrap(getUnoccludeAnimationRunner()));
+                KeyguardService.wrap(getExitAnimationRunner(), isLockscreenLwpEnabled),
+                KeyguardService.wrap(getOccludeAnimationRunner(), isLockscreenLwpEnabled),
+                KeyguardService.wrap(getOccludeByDreamAnimationRunner(), isLockscreenLwpEnabled),
+                KeyguardService.wrap(getUnoccludeAnimationRunner(), isLockscreenLwpEnabled));
 
         final ContentResolver cr = mContext.getContentResolver();
 
@@ -1398,6 +1401,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 com.android.internal.R.anim.lock_screen_behind_enter);
 
         mWorkLockController = new WorkLockActivityController(mContext, mUserTracker);
+    }
+
+    // TODO(b/273443374) remove, temporary util to get a feature flag
+    private WallpaperManager getWallpaperManager() {
+        if (mWallpaperManager == null) {
+            mWallpaperManager = mContext.getSystemService(WallpaperManager.class);
+        }
+        return mWallpaperManager;
     }
 
     @Override
@@ -1602,9 +1613,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         final ContentResolver cr = mContext.getContentResolver();
 
         // From SecuritySettings
-        final long lockAfterTimeout = Settings.Secure.getInt(cr,
+        final long lockAfterTimeout = Settings.Secure.getIntForUser(cr,
                 Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
-                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT);
+                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT, userId);
 
         // From DevicePolicyAdmin
         final long policyTimeout = mLockPatternUtils.getDevicePolicyManager()
@@ -1616,8 +1627,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             timeout = lockAfterTimeout;
         } else {
             // From DisplaySettings
-            long displayTimeout = Settings.System.getInt(cr, SCREEN_OFF_TIMEOUT,
-                    KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT);
+            long displayTimeout = Settings.System.getIntForUser(cr, SCREEN_OFF_TIMEOUT,
+                    KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT, userId);
 
             // policy in effect. Make sure we don't go beyond policy limit.
             displayTimeout = Math.max(displayTimeout, 0); // ignore negative values
@@ -1943,7 +1954,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 startKeyguardExitAnimation(0, 0);
             }
 
-            mPowerGestureIntercepted = mUpdateMonitor.isSecureCameraLaunchedOverKeyguard();
+            mPowerGestureIntercepted =
+                    isOccluded && mUpdateMonitor.isSecureCameraLaunchedOverKeyguard();
 
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
@@ -2469,7 +2481,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private void playSound(int soundId) {
         if (soundId == 0) return;
         final ContentResolver cr = mContext.getContentResolver();
-        if (Settings.System.getInt(cr, Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1) == 1) {
+        int lockscreenSoundsEnabled = Settings.System.getIntForUser(cr,
+                Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1,
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (lockscreenSoundsEnabled == 1) {
 
             mLockSounds.stop(mLockSoundStreamId);
             // Init mAudioManager

@@ -1086,6 +1086,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final DreamManagerInternal dreamManagerInternal = getDreamManagerInternal();
         if (dreamManagerInternal == null || !dreamManagerInternal.canStartDreaming(isScreenOn)) {
+            Slog.d(TAG, "Can't start dreaming when attempting to dream from short power"
+                    + " press (isScreenOn=" + isScreenOn + ")");
             noDreamAction.run();
             return;
         }

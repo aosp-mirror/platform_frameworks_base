@@ -53,12 +53,21 @@ internal fun PasswordBouncer(
 ) {
     val focusRequester = remember { FocusRequester() }
     val password: String by viewModel.password.collectAsState()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
 
     LaunchedEffect(Unit) {
         // When the UI comes up, request focus on the TextField to bring up the software keyboard.
         focusRequester.requestFocus()
         // Also, report that the UI is shown to let the view-model runs some logic.
         viewModel.onShown()
+    }
+
+    LaunchedEffect(animateFailure) {
+        if (animateFailure) {
+            // We don't currently have a failure animation for password, just consume it:
+            viewModel.onFailureAnimationShown()
+        }
     }
 
     Column(
@@ -71,6 +80,7 @@ internal fun PasswordBouncer(
         TextField(
             value = password,
             onValueChange = viewModel::onPasswordInputChanged,
+            enabled = isInputEnabled,
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
             textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),

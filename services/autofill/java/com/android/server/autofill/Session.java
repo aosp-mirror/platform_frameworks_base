@@ -184,6 +184,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -224,6 +225,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private static final String EXTRA_REQUEST_ID = "android.service.autofill.extra.REQUEST_ID";
 
     private static final String PCC_HINTS_DELIMITER = ",";
+    public static final String EXTRA_KEY_DETECTIONS = "detections";
 
     final Object mLock;
 
@@ -321,7 +323,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Id of the View currently being displayed.
      */
     @GuardedBy("mLock")
-    @Nullable private AutofillId mCurrentViewId;
+    private @Nullable AutofillId mCurrentViewId;
 
     @GuardedBy("mLock")
     private IAutoFillManagerClient mClient;
@@ -369,7 +371,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private Bundle mClientState;
 
     @GuardedBy("mLock")
-    private boolean mDestroyed;
+    boolean mDestroyed;
 
     /**
      * Helper used to handle state of Save UI when it must be hiding to show a custom description
@@ -448,7 +450,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private ArrayList<AutofillId> mAugmentedAutofillableIds;
 
     @NonNull
-    private final AutofillInlineSessionController mInlineSessionController;
+    final AutofillInlineSessionController mInlineSessionController;
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -612,7 +614,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * TODO(b/151867668): improve how asynchronous data dependencies are handled, without using
      * CountDownLatch.
      */
-    private final class AssistDataReceiverImpl extends IAssistDataReceiver.Stub {
+    final class AssistDataReceiverImpl extends IAssistDataReceiver.Stub {
         @GuardedBy("mLock")
         private boolean mWaitForInlineRequest;
         @GuardedBy("mLock")
@@ -627,17 +629,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mPendingFillRequest = null;
             mWaitForInlineRequest = isInlineRequest;
             mPendingInlineSuggestionsRequest = null;
-            return isInlineRequest ? (inlineSuggestionsRequest) -> {
-                synchronized (mLock) {
-                    if (!mWaitForInlineRequest || mPendingInlineSuggestionsRequest != null) {
-                        return;
-                    }
-                    mWaitForInlineRequest = inlineSuggestionsRequest != null;
-                    mPendingInlineSuggestionsRequest = inlineSuggestionsRequest;
-                    maybeRequestFillLocked();
-                    viewState.resetState(ViewState.STATE_PENDING_CREATE_INLINE_REQUEST);
+            if (isInlineRequest) {
+                WeakReference<AssistDataReceiverImpl> assistDataReceiverWeakReference =
+                        new WeakReference<AssistDataReceiverImpl>(this);
+                WeakReference<ViewState> viewStateWeakReference =
+                        new WeakReference<ViewState>(viewState);
+                return new InlineSuggestionRequestConsumer(assistDataReceiverWeakReference,
+                    viewStateWeakReference);
+            }
+            return null;
+        }
+
+        void handleInlineSuggestionRequest(InlineSuggestionsRequest inlineSuggestionsRequest,
+                ViewState viewState) {
+            synchronized (mLock) {
+                if (!mWaitForInlineRequest || mPendingInlineSuggestionsRequest != null) {
+                    return;
                 }
-            } : null;
+                mWaitForInlineRequest = inlineSuggestionsRequest != null;
+                mPendingInlineSuggestionsRequest = inlineSuggestionsRequest;
+                maybeRequestFillLocked();
+                viewState.resetState(ViewState.STATE_PENDING_CREATE_INLINE_REQUEST);
+            }
         }
 
         @GuardedBy("mLock")
@@ -1224,24 +1237,30 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final RemoteInlineSuggestionRenderService remoteRenderService =
                 mService.getRemoteInlineSuggestionRenderServiceLocked();
         if (mSessionFlags.mInlineSupportedByService
-            && remoteRenderService != null
-            && (isViewFocusedLocked(flags) || isRequestSupportFillDialog(flags))) {
+                && remoteRenderService != null
+                && (isViewFocusedLocked(flags) || isRequestSupportFillDialog(flags))) {
+
             Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestConsumer =
                 mAssistReceiver.newAutofillRequestLocked(viewState,
                     /* isInlineRequest= */ true);
+
             if (inlineSuggestionsRequestConsumer != null) {
-                final AutofillId focusedId = mCurrentViewId;
                 final int requestIdCopy = requestId;
+                final AutofillId focusedId = mCurrentViewId;
+
+                WeakReference sessionWeakReference = new WeakReference<Session>(this);
+                InlineSuggestionRendorInfoCallbackOnResultListener
+                        inlineSuggestionRendorInfoCallbackOnResultListener =
+                                new InlineSuggestionRendorInfoCallbackOnResultListener(
+                                        sessionWeakReference,
+                                        requestIdCopy,
+                                        inlineSuggestionsRequestConsumer,
+                                        focusedId);
+                RemoteCallback inlineSuggestionRendorInfoCallback = new RemoteCallback(
+                        inlineSuggestionRendorInfoCallbackOnResultListener, mHandler);
+
                 remoteRenderService.getInlineSuggestionsRendererInfo(
-                        new RemoteCallback((extras) -> {
-                            synchronized (mLock) {
-                                mInlineSessionController.onCreateInlineSuggestionsRequestLocked(
-                                        focusedId, inlineSuggestionsRequestCacheDecorator(
-                                                inlineSuggestionsRequestConsumer, requestIdCopy),
-                                        extras);
-                            }
-                        }, mHandler)
-                );
+                        inlineSuggestionRendorInfoCallback);
                 viewState.setState(ViewState.STATE_PENDING_CREATE_INLINE_REQUEST);
             }
         } else {
@@ -3646,6 +3665,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final ArrayList<FillContext> contexts = mergePreviousSessionLocked( /* forSave= */ true);
 
+        FieldClassificationResponse fieldClassificationResponse =
+                mClassificationState.mLastFieldClassificationResponse;
+        if (mService.isPccClassificationEnabled()
+                && fieldClassificationResponse != null
+                && !fieldClassificationResponse.getClassifications().isEmpty()) {
+            if (mClientState == null) {
+                mClientState = new Bundle();
+            }
+            mClientState.putParcelableArrayList(EXTRA_KEY_DETECTIONS, new ArrayList<>(
+                    fieldClassificationResponse.getClassifications()));
+        }
         final SaveRequest saveRequest =
                 new SaveRequest(contexts, mClientState, mSelectedDatasetIds);
         mRemoteFillService.onSaveRequest(saveRequest);
@@ -4827,16 +4857,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return null;
         }
 
-        final boolean isWhitelisted = mService
+        final boolean isAllowlisted = mService
                 .isWhitelistedForAugmentedAutofillLocked(mComponentName);
 
-        if (!isWhitelisted) {
+        if (!isAllowlisted) {
             if (sVerbose) {
                 Slog.v(TAG, "triggerAugmentedAutofillLocked(): "
                         + ComponentName.flattenToShortString(mComponentName) + " not whitelisted ");
             }
             logAugmentedAutofillRequestLocked(mode, remoteService.getComponentName(),
-                    mCurrentViewId, isWhitelisted, /* isInline= */ null);
+                    mCurrentViewId, isAllowlisted, /* isInline= */ null);
             return null;
         }
 
@@ -4869,32 +4899,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final AutofillId focusedId = mCurrentViewId;
 
-        final Function<InlineFillUi, Boolean> inlineSuggestionsResponseCallback =
-                response -> {
-                    synchronized (mLock) {
-                        return mInlineSessionController.setInlineFillUiLocked(response);
-                    }
-                };
         final Consumer<InlineSuggestionsRequest> requestAugmentedAutofill =
-                (inlineSuggestionsRequest) -> {
-                    synchronized (mLock) {
-                        logAugmentedAutofillRequestLocked(mode, remoteService.getComponentName(),
-                                focusedId, isWhitelisted, inlineSuggestionsRequest != null);
-                        remoteService.onRequestAutofillLocked(id, mClient,
-                                taskId, mComponentName, mActivityToken,
-                                AutofillId.withoutSession(focusedId), currentValue,
-                                inlineSuggestionsRequest, inlineSuggestionsResponseCallback,
-                                /*onErrorCallback=*/ () -> {
-                                    synchronized (mLock) {
-                                        cancelAugmentedAutofillLocked();
-
-                                        // Also cancel augmented in IME
-                                        mInlineSessionController.setInlineFillUiLocked(
-                                                InlineFillUi.emptyUi(mCurrentViewId));
-                                    }
-                                }, mService.getRemoteInlineSuggestionRenderServiceLocked(), userId);
-                    }
-                };
+                new AugmentedAutofillInlineSuggestionRequestConsumer(
+                        this, focusedId, isAllowlisted, mode, currentValue);
 
         // When the inline suggestion render service is available and the view is focused, there
         // are 3 cases when augmented autofill should ask IME for inline suggestion request,
@@ -4912,14 +4919,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         || mSessionFlags.mExpiredResponse)
                 && (isViewFocusedLocked(flags) || isRequestSupportFillDialog(flags))) {
             if (sDebug) Slog.d(TAG, "Create inline request for augmented autofill");
-            remoteRenderService.getInlineSuggestionsRendererInfo(new RemoteCallback(
-                    (extras) -> {
-                        synchronized (mLock) {
-                            mInlineSessionController.onCreateInlineSuggestionsRequestLocked(
-                                    focusedId, /*requestConsumer=*/ requestAugmentedAutofill,
-                                    extras);
-                        }
-                    }, mHandler));
+            remoteRenderService.getInlineSuggestionsRendererInfo(
+                    new RemoteCallback(
+                            new AugmentedAutofillInlineSuggestionRendererOnResultListener(
+                                    this, focusedId, requestAugmentedAutofill),
+                            mHandler));
         } else {
             requestAugmentedAutofill.accept(
                     mInlineSessionController.getInlineSuggestionsRequestLocked().orElse(null));
@@ -4928,6 +4932,169 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mAugmentedAutofillDestroyer = remoteService::onDestroyAutofillWindowsRequest;
         }
         return mAugmentedAutofillDestroyer;
+    }
+
+    private static class AugmentedAutofillInlineSuggestionRendererOnResultListener
+            implements RemoteCallback.OnResultListener {
+
+        WeakReference<Session> mSessionWeakRef;
+        final AutofillId mFocusedId;
+        Consumer<InlineSuggestionsRequest> mRequestAugmentedAutofill;
+
+        AugmentedAutofillInlineSuggestionRendererOnResultListener(
+                Session session,
+                AutofillId focussedId,
+                Consumer<InlineSuggestionsRequest> requestAugmentedAutofill) {
+            mSessionWeakRef = new WeakReference<>(session);
+            mFocusedId = focussedId;
+            mRequestAugmentedAutofill = requestAugmentedAutofill;
+        }
+
+        @Override
+        public void onResult(@Nullable Bundle result) {
+            Session session = mSessionWeakRef.get();
+
+            if (logIfSessionNull(
+                    session, "AugmentedAutofillInlineSuggestionRendererOnResultListener:")) {
+                return;
+            }
+            synchronized (session.mLock) {
+                session.mInlineSessionController.onCreateInlineSuggestionsRequestLocked(
+                        mFocusedId, /*requestConsumer=*/ mRequestAugmentedAutofill,
+                        result);
+            }
+        }
+    }
+
+    private static class AugmentedAutofillInlineSuggestionRequestConsumer
+            implements Consumer<InlineSuggestionsRequest> {
+
+        WeakReference<Session> mSessionWeakRef;
+        final AutofillId mFocusedId;
+        final boolean mIsAllowlisted;
+        final int mMode;
+        final AutofillValue mCurrentValue;
+
+        AugmentedAutofillInlineSuggestionRequestConsumer(
+                Session session,
+                AutofillId focussedId,
+                boolean isAllowlisted,
+                int mode,
+                AutofillValue currentValue) {
+            mSessionWeakRef = new WeakReference<>(session);
+            mFocusedId = focussedId;
+            mIsAllowlisted = isAllowlisted;
+            mMode = mode;
+            mCurrentValue = currentValue;
+
+        }
+        @Override
+        public void accept(InlineSuggestionsRequest inlineSuggestionsRequest) {
+            Session session = mSessionWeakRef.get();
+
+            if (logIfSessionNull(
+                    session, "AugmentedAutofillInlineSuggestionRequestConsumer:")) {
+                return;
+            }
+            session.onAugmentedAutofillInlineSuggestionAccept(
+                    inlineSuggestionsRequest, mFocusedId, mIsAllowlisted, mMode, mCurrentValue);
+
+        }
+    }
+
+    private static class AugmentedAutofillInlineSuggestionsResponseCallback
+            implements Function<InlineFillUi, Boolean> {
+
+        WeakReference<Session> mSessionWeakRef;
+
+        AugmentedAutofillInlineSuggestionsResponseCallback(Session session) {
+            this.mSessionWeakRef = new WeakReference<>(session);
+        }
+
+        @Override
+        public Boolean apply(InlineFillUi inlineFillUi) {
+            Session session = mSessionWeakRef.get();
+
+            if (logIfSessionNull(
+                    session, "AugmentedAutofillInlineSuggestionsResponseCallback:")) {
+                return false;
+            }
+
+            synchronized (session.mLock) {
+                return session.mInlineSessionController.setInlineFillUiLocked(inlineFillUi);
+            }
+        }
+    }
+
+    private static class AugmentedAutofillErrorCallback implements Runnable {
+
+        WeakReference<Session> mSessionWeakRef;
+
+        AugmentedAutofillErrorCallback(Session session) {
+            this.mSessionWeakRef = new WeakReference<>(session);
+        }
+
+        @Override
+        public void run() {
+            Session session = mSessionWeakRef.get();
+
+            if (logIfSessionNull(session, "AugmentedAutofillErrorCallback:")) {
+                return;
+            }
+            session.onAugmentedAutofillErrorCallback();
+        }
+    }
+
+    /**
+     * If the session is null or has been destroyed, log the error msg, and return true.
+     * This is a helper function intended to be called when de-referencing from a weak reference.
+     * @param session
+     * @param logPrefix
+     * @return true if the session is null, false otherwise.
+     */
+    private static boolean logIfSessionNull(Session session, String logPrefix) {
+        if (session == null) {
+            Slog.wtf(TAG, logPrefix + " Session null");
+            return true;
+        }
+        if (session.mDestroyed) {
+            // TODO: Update this to return in this block. We aren't doing this to preserve the
+            //  behavior, but can be modified once we have more time to soak the changes.
+            Slog.w(TAG, logPrefix + " Session destroyed, but following through");
+            // Follow-through
+        }
+        return false;
+    }
+
+    private void onAugmentedAutofillInlineSuggestionAccept(
+            InlineSuggestionsRequest inlineSuggestionsRequest,
+            AutofillId focussedId,
+            boolean isAllowlisted,
+            int mode,
+            AutofillValue currentValue) {
+        synchronized (mLock) {
+            final RemoteAugmentedAutofillService remoteService =
+                    mService.getRemoteAugmentedAutofillServiceLocked();
+            logAugmentedAutofillRequestLocked(mode, remoteService.getComponentName(),
+                    focussedId, isAllowlisted, inlineSuggestionsRequest != null);
+            remoteService.onRequestAutofillLocked(id, mClient,
+                    taskId, mComponentName, mActivityToken,
+                    AutofillId.withoutSession(focussedId), currentValue,
+                    inlineSuggestionsRequest,
+                    new AugmentedAutofillInlineSuggestionsResponseCallback(this),
+                    new AugmentedAutofillErrorCallback(this),
+                    mService.getRemoteInlineSuggestionRenderServiceLocked(), userId);
+        }
+    }
+
+    private void onAugmentedAutofillErrorCallback() {
+        synchronized (mLock) {
+            cancelAugmentedAutofillLocked();
+
+            // Also cancel augmented in IME
+            mInlineSessionController.setInlineFillUiLocked(
+                    InlineFillUi.emptyUi(mCurrentViewId));
+        }
     }
 
     @GuardedBy("mLock")
@@ -5151,7 +5318,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     @NonNull
-    private Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestCacheDecorator(
+    Consumer<InlineSuggestionsRequest> inlineSuggestionsRequestCacheDecorator(
             @NonNull Consumer<InlineSuggestionsRequest> consumer, int requestId) {
         return inlineSuggestionsRequest -> {
             consumer.accept(inlineSuggestionsRequest);

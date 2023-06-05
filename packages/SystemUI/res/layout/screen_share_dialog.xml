@@ -36,7 +36,7 @@
             android:layout_width="@dimen/screenrecord_logo_size"
             android:layout_height="@dimen/screenrecord_logo_size"
             android:src="@drawable/ic_media_projection_permission"
-            android:tint="?androidprv:attr/colorAccentPrimary"
+            android:tint="?androidprv:attr/colorAccentPrimaryVariant"
             android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/screen_share_dialog_title"

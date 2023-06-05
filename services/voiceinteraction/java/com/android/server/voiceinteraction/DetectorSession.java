@@ -84,6 +84,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.infra.AndroidFuture;
 import com.android.server.LocalServices;
+import com.android.server.policy.AppOpsPolicy;
 import com.android.server.voiceinteraction.VoiceInteractionManagerServiceImpl.DetectorRemoteExceptionListener;
 
 import java.io.Closeable;
@@ -742,18 +743,24 @@ abstract class DetectorSession {
     void enforcePermissionsForDataDelivery() {
         Binder.withCleanCallingIdentity(() -> {
             synchronized (mLock) {
-                int result = PermissionChecker.checkPermissionForPreflight(
-                        mContext, RECORD_AUDIO, /* pid */ -1, mVoiceInteractorIdentity.uid,
-                        mVoiceInteractorIdentity.packageName);
-                if (result != PermissionChecker.PERMISSION_GRANTED) {
-                    throw new SecurityException(
-                        "Failed to obtain permission RECORD_AUDIO for identity "
-                        + mVoiceInteractorIdentity);
+                if (AppOpsPolicy.isHotwordDetectionServiceRequired(mContext.getPackageManager())) {
+                    int result = PermissionChecker.checkPermissionForPreflight(
+                            mContext, RECORD_AUDIO, /* pid */ -1, mVoiceInteractorIdentity.uid,
+                            mVoiceInteractorIdentity.packageName);
+                    if (result != PermissionChecker.PERMISSION_GRANTED) {
+                        throw new SecurityException(
+                                "Failed to obtain permission RECORD_AUDIO for identity "
+                                        + mVoiceInteractorIdentity);
+                    }
+                    int hotwordOp = AppOpsManager.strOpToOp(
+                            AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
+                    mAppOpsManager.noteOpNoThrow(hotwordOp,
+                            mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
+                            mVoiceInteractorIdentity.attributionTag, HOTWORD_DETECTION_OP_MESSAGE);
+                } else {
+                    enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
+                            RECORD_AUDIO, HOTWORD_DETECTION_OP_MESSAGE);
                 }
-                int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
-                mAppOpsManager.noteOpNoThrow(hotwordOp,
-                        mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                        mVoiceInteractorIdentity.attributionTag, HOTWORD_DETECTION_OP_MESSAGE);
                 enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
                         CAPTURE_AUDIO_HOTWORD, HOTWORD_DETECTION_OP_MESSAGE);
             }

@@ -1013,7 +1013,8 @@ public class RippleDrawable extends LayerDrawable {
         }
         p.setShader(shader);
         p.setColorFilter(null);
-        p.setColor(color);
+        // Alpha is handled by the shader (and color is a no-op because there's a shader)
+        p.setColor(0xFF000000);
         return properties;
     }
 

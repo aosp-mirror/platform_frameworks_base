@@ -18,7 +18,7 @@ package com.android.server.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
-import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
+import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTHENTICATED_PENDING_SYSUI;
@@ -311,8 +311,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -397,8 +396,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -516,7 +514,7 @@ public class BiometricServiceTest {
         assertEquals(STATE_AUTH_STARTED, mBiometricService.mAuthSession.getState());
 
         // startPreparedClient invoked
-        mBiometricService.mAuthSession.onDialogAnimatedIn();
+        mBiometricService.mAuthSession.onDialogAnimatedIn(true /* startFingerprintNow */);
         verify(mBiometricService.mSensors.get(0).impl)
                 .startPreparedClient(cookieCaptor.getValue());
 
@@ -530,8 +528,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
 
         // Hardware authenticated
         final byte[] HAT = generateRandomHAT();
@@ -587,8 +584,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -752,8 +748,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 anyString(),
-                anyLong() /* requestId */,
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                anyLong() /* requestId */);
     }
 
     @Test
@@ -854,8 +849,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -935,8 +929,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(TEST_REQUEST_ID),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(TEST_REQUEST_ID));
     }
 
     @Test
@@ -1432,8 +1425,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(requestId),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(requestId));
 
         // Requesting strong and credential, when credential is setup
         resetReceivers();
@@ -1456,8 +1448,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(requestId),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(requestId));
 
         // Un-downgrading the authenticator allows successful strong auth
         for (BiometricSensor sensor : mBiometricService.mSensors) {
@@ -1482,8 +1473,7 @@ public class BiometricServiceTest {
                 anyInt() /* userId */,
                 anyLong() /* operationId */,
                 eq(TEST_PACKAGE_NAME),
-                eq(requestId),
-                eq(BIOMETRIC_MULTI_SENSOR_DEFAULT));
+                eq(requestId));
     }
 
     @Test(expected = IllegalStateException.class)

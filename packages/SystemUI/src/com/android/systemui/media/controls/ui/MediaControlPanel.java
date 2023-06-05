@@ -34,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Color;
@@ -54,6 +55,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Process;
 import android.os.Trace;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -121,6 +123,7 @@ import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseContro
 import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
@@ -244,10 +247,18 @@ public class MediaControlPanel {
     private MultiRippleController mMultiRippleController;
     private TurbulenceNoiseController mTurbulenceNoiseController;
     private final FeatureFlags mFeatureFlags;
+    private final GlobalSettings mGlobalSettings;
 
     // TODO(b/281032715): Consider making this as a final variable. For now having a null check
     //  due to unit test failure. (Perhaps missing some setup)
     private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig;
+
+    private ContentObserver mAnimationScaleObserver = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean selfChange) {
+            updateAnimatorDurationScale();
+        }
+    };
 
     /**
      * Initialize a new control panel
@@ -276,7 +287,8 @@ public class MediaControlPanel {
             ActivityIntentHelper activityIntentHelper,
             NotificationLockscreenUserManager lockscreenUserManager,
             BroadcastDialogController broadcastDialogController,
-            FeatureFlags featureFlags
+            FeatureFlags featureFlags,
+            GlobalSettings globalSettings
     ) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
@@ -305,6 +317,13 @@ public class MediaControlPanel {
         });
 
         mFeatureFlags = featureFlags;
+
+        mGlobalSettings = globalSettings;
+        mGlobalSettings.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+                mAnimationScaleObserver
+        );
+        updateAnimatorDurationScale();
     }
 
     /**
@@ -385,6 +404,13 @@ public class MediaControlPanel {
         }
         this.mIsSeekBarEnabled = isSeekBarEnabled;
         updateSeekBarVisibility();
+    }
+
+    private void updateAnimatorDurationScale() {
+        if (mSeekBarObserver != null) {
+            mSeekBarObserver.setAnimationEnabled(
+                    mGlobalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f);
+        }
     }
 
     /**

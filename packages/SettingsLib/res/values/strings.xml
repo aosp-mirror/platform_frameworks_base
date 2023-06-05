@@ -1327,6 +1327,12 @@
     <string name="media_transfer_this_device_name" product="default">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
+    <!-- Name of the dock device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
+    <!-- Default name of the external device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_external_device_name">External Device</string>
+    <!-- Default name of the connected device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_default_device_name">Connected device</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
     <!-- Sub status indicates device is not available due to an unknown error. [CHAR LIMIT=NONE] -->

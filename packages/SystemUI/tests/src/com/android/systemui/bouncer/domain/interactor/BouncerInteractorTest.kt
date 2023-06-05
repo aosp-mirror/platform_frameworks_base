@@ -27,6 +27,7 @@ import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -75,13 +76,13 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
 
             underTest.clearMessage()
-            assertThat(message).isNull()
+            assertThat(message).isEmpty()
 
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
 
             // Wrong input.
-            underTest.authenticate(listOf(9, 8, 7))
+            assertThat(underTest.authenticate(listOf(9, 8, 7))).isFalse()
             assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -89,7 +90,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
 
             // Correct input.
-            underTest.authenticate(listOf(1, 2, 3, 4))
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
@@ -107,13 +108,13 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
 
             underTest.clearMessage()
-            assertThat(message).isNull()
+            assertThat(message).isEmpty()
 
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
 
             // Wrong input.
-            underTest.authenticate("alohamora".toList())
+            assertThat(underTest.authenticate("alohamora".toList())).isFalse()
             assertThat(message).isEqualTo(MESSAGE_WRONG_PASSWORD)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -121,7 +122,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
 
             // Correct input.
-            underTest.authenticate("password".toList())
+            assertThat(underTest.authenticate("password".toList())).isTrue()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
@@ -139,15 +140,18 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
             underTest.clearMessage()
-            assertThat(message).isNull()
+            assertThat(message).isEmpty()
 
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
             // Wrong input.
-            underTest.authenticate(
-                listOf(AuthenticationMethodModel.Pattern.PatternCoordinate(3, 4))
-            )
+            assertThat(
+                    underTest.authenticate(
+                        listOf(AuthenticationMethodModel.Pattern.PatternCoordinate(3, 4))
+                    )
+                )
+                .isFalse()
             assertThat(message).isEqualTo(MESSAGE_WRONG_PATTERN)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
@@ -155,7 +159,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
             // Correct input.
-            underTest.authenticate(emptyList())
+            assertThat(underTest.authenticate(emptyList())).isTrue()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
@@ -200,6 +204,56 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             assertThat(message).isEqualTo(customMessage)
         }
+
+    @Test
+    fun throttling() =
+        testScope.runTest {
+            val throttling by collectLastValue(underTest.throttling)
+            val message by collectLastValue(underTest.message)
+            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
+            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
+            assertThat(throttling).isNull()
+            assertThat(message).isEqualTo("")
+            assertThat(isUnlocked).isFalse()
+            repeat(BouncerInteractor.THROTTLE_EVERY) { times ->
+                // Wrong PIN.
+                assertThat(underTest.authenticate(listOf(6, 7, 8, 9))).isFalse()
+                if (times < BouncerInteractor.THROTTLE_EVERY - 1) {
+                    assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
+                }
+            }
+            assertThat(throttling).isNotNull()
+            assertTryAgainMessage(message, BouncerInteractor.THROTTLE_DURATION_SEC)
+
+            // Correct PIN, but throttled, so doesn't unlock:
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isFalse()
+            assertThat(isUnlocked).isFalse()
+            assertTryAgainMessage(message, BouncerInteractor.THROTTLE_DURATION_SEC)
+
+            throttling?.totalDurationSec?.let { seconds ->
+                repeat(seconds) { time ->
+                    advanceTimeBy(1000)
+                    val remainingTime = seconds - time - 1
+                    if (remainingTime > 0) {
+                        assertTryAgainMessage(message, remainingTime)
+                    }
+                }
+            }
+            assertThat(message).isEqualTo("")
+            assertThat(throttling).isNull()
+            assertThat(isUnlocked).isFalse()
+
+            // Correct PIN and no longer throttled so unlocks:
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
+            assertThat(isUnlocked).isTrue()
+        }
+
+    private fun assertTryAgainMessage(
+        message: String?,
+        time: Int,
+    ) {
+        assertThat(message).isEqualTo("Try again in $time seconds.")
+    }
 
     companion object {
         private const val MESSAGE_ENTER_YOUR_PIN = "Enter your PIN"

@@ -222,6 +222,8 @@ import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -232,7 +234,6 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import kotlin.Unit;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 @CentralSurfacesComponent.CentralSurfacesScope
@@ -1570,6 +1571,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             // When media is visible, it overlaps with the large clock. Use small clock instead.
             return SMALL;
         }
+        // To prevent the weather clock from overlapping with the notification shelf on AOD, we use
+        // the small clock here
+        if (mKeyguardStatusViewController.isLargeClockBlockingNotificationShelf()
+                && hasVisibleNotifications() && isOnAod()) {
+            return SMALL;
+        }
         return LARGE;
     }
 
@@ -2200,6 +2207,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // TODO: non-linearly transform progress fraction into squish amount (ease-in, linear out)
         mCurrentBackProgress = progressFraction;
         applyBackScaling(progressFraction);
+        mQsController.setClippingBounds();
     }
 
     /** Resets back progress. */
@@ -3443,6 +3451,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @VisibleForTesting
     void notifyExpandingStarted() {
         if (!mExpanding) {
+            DejankUtils.notifyRendererOfExpensiveFrame(mView, "notifyExpandingStarted");
             mExpanding = true;
             mIsExpandingOrCollapsing = true;
             mQsController.onExpandingStarted(mQsController.getFullyExpanded());

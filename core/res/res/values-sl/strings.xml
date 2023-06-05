@@ -1702,7 +1702,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ogledovanje in upravljanje zaslona"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Bere lahko vso vsebino na zaslonu ter prikaže vsebino prek drugih aplikacij."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ogledovanje in izvajanje dejanj"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Spremlja lahko vaše interakcije z aplikacijo ali senzorjem strojne opreme ter komunicira z aplikacijami v vašem imenu."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Spremlja lahko vaše interakcije z aplikacijo ali tipalom strojne opreme ter komunicira z aplikacijami v vašem imenu."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Dovoli"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Zavrni"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Če želite začeti uporabljati funkcijo, se je dotaknite:"</string>
@@ -1717,7 +1717,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Popravljanje barv"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enoročni način"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Zelo zatemnjen zaslon"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Slušni aparati"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Slušni pripomočki"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vklopljena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je izklopljena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Spustite gumba za glasnost. Če želite vklopiti storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, znova pritisnite in 3 sekunde pridržite oba gumba za glasnost."</string>
@@ -1977,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"V napravi <xliff:g id="DEVICE">%1$s</xliff:g> ni mogoče dostopati do te vsebine. Poskusite s telefonom."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Ta aplikacija je bila razvita za starejšo različico Androida. Morda ne bo delovala pravilno ter ne vključuje najnovejših varnostnih funkcij in funkcij za varovanje zasebnosti. Preverite, ali je na voljo posodobitev, ali pa se obrnite na razvijalca aplikacije."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Preveri, ali je na voljo posodobitev"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Ta aplikacija ni združljiva z najnovejšo različico Androida. Preverite, ali je na voljo posodobitev, ali pa se obrnite na razvijalca aplikacije."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Imate nova sporočila."</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Za ogled odprite aplikacijo za SMS-je"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Nekatere funkcije bodo morda omejene"</string>
@@ -2152,7 +2153,7 @@
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Skupinski pogovor"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Osebno"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"Služba"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Delo"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Pogled osebnega profila"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Pogled delovnega profila"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Blokiral skrbnik za IT"</string>
@@ -2167,20 +2168,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Želite odpreti delovno aplikacijo <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Želite odpreti v osebni aplikaciji <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Želite odpreti v delovni aplikaciji <xliff:g id="APP">%s</xliff:g>?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Želite poklicati iz delovne aplikacije?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Želite preklopiti na delovno aplikacijo?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Organizacija vam omogoča klicanje samo iz delovnih aplikacij."</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organizacija vam omogoča pošiljanje sporočil samo iz delovnih aplikacij."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Uporabi osebni brskalnik"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Uporabi delovni brskalnik"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Pokliči"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Preklopi"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Koda PIN za odklepanje omrežja kartice SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Koda PIN za odklepanje podnabora omrežja kartice SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Koda PIN za odklepanje kartice SIM za podjetje"</string>

@@ -27,28 +27,34 @@ import com.android.systemui.biometrics.AuthBiometricView.STATE_HELP
 import com.android.systemui.biometrics.AuthBiometricView.STATE_PENDING_CONFIRMATION
 
 /** Face/Fingerprint combined icon animator for BiometricPrompt. */
-class AuthBiometricFingerprintAndFaceIconController(
-        context: Context,
-        iconView: LottieAnimationView,
-        iconViewOverlay: LottieAnimationView
+open class AuthBiometricFingerprintAndFaceIconController(
+    context: Context,
+    iconView: LottieAnimationView,
+    iconViewOverlay: LottieAnimationView,
 ) : AuthBiometricFingerprintIconController(context, iconView, iconViewOverlay) {
 
     override val actsAsConfirmButton: Boolean = true
 
     override fun shouldAnimateIconViewForTransition(
-            @BiometricState oldState: Int,
-            @BiometricState newState: Int
+        @BiometricState oldState: Int,
+        @BiometricState newState: Int
     ): Boolean = when (newState) {
         STATE_PENDING_CONFIRMATION -> true
-        STATE_AUTHENTICATED -> false
         else -> super.shouldAnimateIconViewForTransition(oldState, newState)
     }
 
     @RawRes
     override fun getAnimationForTransition(
-            @BiometricState oldState: Int,
-            @BiometricState newState: Int
+        @BiometricState oldState: Int,
+        @BiometricState newState: Int
     ): Int? = when (newState) {
+        STATE_AUTHENTICATED -> {
+           if (oldState == STATE_PENDING_CONFIRMATION) {
+               R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie
+           } else {
+               super.getAnimationForTransition(oldState, newState)
+           }
+        }
         STATE_PENDING_CONFIRMATION -> {
             if (oldState == STATE_ERROR || oldState == STATE_HELP) {
                 R.raw.fingerprint_dialogue_error_to_unlock_lottie
@@ -56,7 +62,6 @@ class AuthBiometricFingerprintAndFaceIconController(
                 R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie
             }
         }
-        STATE_AUTHENTICATED -> null
         else -> super.getAnimationForTransition(oldState, newState)
     }
 }

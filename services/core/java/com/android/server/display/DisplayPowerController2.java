@@ -157,6 +157,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_OFF = 3;
 
     private static final int RINGBUFFER_MAX = 100;
+    private static final int RINGBUFFER_RBC_MAX = 20;
 
     private static final float[] BRIGHTNESS_RANGE_BOUNDARIES = {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80,
@@ -389,6 +390,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     // Keeps a record of brightness changes for dumpsys.
     private RingBuffer<BrightnessEvent> mBrightnessEventRingBuffer;
+
+    // Keeps a record of rbc changes for dumpsys.
+    private final RingBuffer<BrightnessEvent> mRbcEventRingBuffer =
+            new RingBuffer<>(BrightnessEvent.class, RINGBUFFER_RBC_MAX);
 
     // Controls and tracks all the wakelocks that are acquired/released by the system. Also acts as
     // a medium of communication between this class and the PowerManagerService.
@@ -1593,6 +1598,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mTempBrightnessEvent.getReason().getReason() == BrightnessReason.REASON_TEMPORARY
                         && mLastBrightnessEvent.getReason().getReason()
                         == BrightnessReason.REASON_TEMPORARY;
+        // Purely for dumpsys;
+        final boolean isRbcEvent =
+                mLastBrightnessEvent.isRbcEnabled() != mTempBrightnessEvent.isRbcEnabled();
+
         if ((!mTempBrightnessEvent.equalsMainData(mLastBrightnessEvent) && !tempToTempTransition)
                 || brightnessAdjustmentFlags != 0) {
             mTempBrightnessEvent.setInitialBrightness(mLastBrightnessEvent.getBrightness());
@@ -1612,6 +1621,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             if (mBrightnessEventRingBuffer != null) {
                 mBrightnessEventRingBuffer.append(newEvent);
             }
+            if (isRbcEvent) {
+                mRbcEventRingBuffer.append(newEvent);
+            }
+
         }
 
         // Update display white-balance.
@@ -2359,6 +2372,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             dumpBrightnessEvents(pw);
         }
 
+        dumpRbcEvents(pw);
+
         if (mHbmController != null) {
             mHbmController.dump(pw);
         }
@@ -2428,6 +2443,20 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         BrightnessEvent[] eventArray = mBrightnessEventRingBuffer.toArray();
         for (int i = 0; i < mBrightnessEventRingBuffer.size(); i++) {
             pw.println("  " + eventArray[i].toString());
+        }
+    }
+
+    private void dumpRbcEvents(PrintWriter pw) {
+        int size = mRbcEventRingBuffer.size();
+        if (size < 1) {
+            pw.println("No Reduce Bright Colors Adjustments");
+            return;
+        }
+
+        pw.println("Reduce Bright Colors Adjustments Last " + size + " Events: ");
+        BrightnessEvent[] eventArray = mRbcEventRingBuffer.toArray();
+        for (int i = 0; i < mRbcEventRingBuffer.size(); i++) {
+            pw.println("  " + eventArray[i]);
         }
     }
 

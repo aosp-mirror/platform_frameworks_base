@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Maintains a connection to a particular {@link MediaRoute2ProviderService}.
@@ -61,6 +62,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     private final Context mContext;
     private final int mUserId;
     private final Handler mHandler;
+    private final boolean mIsSelfScanOnlyProvider;
 
     // Connection state
     private boolean mRunning;
@@ -70,14 +72,19 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
     private boolean mIsManagerScanning;
     private RouteDiscoveryPreference mLastDiscoveryPreference = null;
+    private boolean mLastDiscoveryPreferenceIncludesThisPackage = false;
 
     @GuardedBy("mLock")
     final List<RoutingSessionInfo> mReleasingSessions = new ArrayList<>();
 
-    MediaRoute2ProviderServiceProxy(@NonNull Context context, @NonNull ComponentName componentName,
+    MediaRoute2ProviderServiceProxy(
+            @NonNull Context context,
+            @NonNull ComponentName componentName,
+            boolean isSelfScanOnlyProvider,
             int userId) {
         super(componentName);
         mContext = Objects.requireNonNull(context, "Context must not be null.");
+        mIsSelfScanOnlyProvider = isSelfScanOnlyProvider;
         mUserId = userId;
         mHandler = new Handler(Looper.myLooper());
     }
@@ -107,8 +114,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     @Override
-    public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+    public void updateDiscoveryPreference(
+            Set<String> activelyScanningPackages, RouteDiscoveryPreference discoveryPreference) {
         mLastDiscoveryPreference = discoveryPreference;
+        mLastDiscoveryPreferenceIncludesThisPackage =
+                activelyScanningPackages.contains(mComponentName.getPackageName());
         if (mConnectionReady) {
             mActiveConnection.updateDiscoveryPreference(discoveryPreference);
         }
@@ -209,11 +219,15 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
     private boolean shouldBind() {
         if (mRunning) {
-            // Bind when there is a discovery preference or an active route session.
-            return (mLastDiscoveryPreference != null
-                    && !mLastDiscoveryPreference.getPreferredFeatures().isEmpty())
-                    || !getSessionInfos().isEmpty()
-                    || mIsManagerScanning;
+            boolean shouldBind =
+                    mLastDiscoveryPreference != null
+                            && !mLastDiscoveryPreference.getPreferredFeatures().isEmpty();
+            if (mIsSelfScanOnlyProvider) {
+                shouldBind &= mLastDiscoveryPreferenceIncludesThisPackage;
+            }
+            shouldBind |= mIsManagerScanning;
+            shouldBind |= !getSessionInfos().isEmpty();
+            return shouldBind;
         }
         return false;
     }
@@ -301,7 +315,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         if (mActiveConnection == connection) {
             mConnectionReady = true;
             if (mLastDiscoveryPreference != null) {
-                updateDiscoveryPreference(mLastDiscoveryPreference);
+                updateDiscoveryPreference(
+                        mLastDiscoveryPreferenceIncludesThisPackage
+                                ? Set.of(mComponentName.getPackageName())
+                                : Set.of(),
+                        mLastDiscoveryPreference);
             }
         }
     }

@@ -18,10 +18,11 @@ package com.android.systemui.theme
 
 import android.util.Pair
 import com.android.systemui.monet.dynamiccolor.DynamicColor
-import com.android.systemui.monet.dynamiccolor.MaterialDynamicColors as MDC
+import com.android.systemui.monet.dynamiccolor.MaterialDynamicColors
 
 class DynamicColors {
     companion object {
+        private val MDC = MaterialDynamicColors()
         @JvmField
         val ALL_DYNAMIC_COLORS_MAPPED: List<Pair<String, DynamicColor>> =
             arrayListOf(

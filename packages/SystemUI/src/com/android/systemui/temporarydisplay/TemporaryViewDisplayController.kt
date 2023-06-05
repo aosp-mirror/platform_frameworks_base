@@ -79,6 +79,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     @LayoutRes private val viewLayoutRes: Int,
     private val wakeLockBuilder: WakeLock.Builder,
     private val systemClock: SystemClock,
+    internal val tempViewUiEventLogger: TemporaryViewUiEventLogger,
 ) : CoreStartable, Dumpable {
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
@@ -207,6 +208,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
 
     private fun showNewView(newDisplayInfo: DisplayInfo, timeout: Int) {
         logger.logViewAddition(newDisplayInfo.info)
+        tempViewUiEventLogger.logViewAdded(newDisplayInfo.info.instanceId)
         createAndAcquireWakeLock(newDisplayInfo)
         updateTimeout(newDisplayInfo, timeout)
         inflateAndUpdateView(newDisplayInfo)

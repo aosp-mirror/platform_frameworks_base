@@ -36,8 +36,10 @@ sealed class AuthenticationMethodModel(
 
     data class Password(val password: String) : AuthenticationMethodModel(isSecure = true)
 
-    data class Pattern(val coordinates: List<PatternCoordinate>) :
-        AuthenticationMethodModel(isSecure = true) {
+    data class Pattern(
+        val coordinates: List<PatternCoordinate>,
+        val isPatternVisible: Boolean = true,
+    ) : AuthenticationMethodModel(isSecure = true) {
 
         data class PatternCoordinate(
             val x: Int,

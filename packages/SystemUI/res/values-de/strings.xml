@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Teilen"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Bildschirmaufzeichnung gespeichert"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Zum Ansehen tippen"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Fehler beim Löschen der Bildschirmaufzeichnung"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Fehler beim Speichern der Bildschirmaufzeichnung"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Fehler beim Start der Bildschirmaufzeichnung"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Zurück"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Startbildschirm"</string>
@@ -142,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Gesicht authentifiziert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bestätigt"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Zum Abschließen auf \"Bestätigen\" tippen"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Per Gesichtserkennung entsperrt. Tippe auf das Symbol „Entsperren“, um fortzufahren."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Gerät per Gesichtserkennung entsperrt."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Gerät mit dem Gesicht entsperrt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gesicht erkannt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gesicht erkannt. Tippe zum Fortfahren auf das Symbol „Entsperren“."</string>
@@ -243,7 +243,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Eingabe"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hörhilfen"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hörgeräte"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Wird aktiviert…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Autom. drehen"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Bildschirm automatisch drehen"</string>
@@ -896,8 +896,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# Steuerelement hinzugefügt.}other{# Steuerelemente hinzugefügt.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Entfernt"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> hinzufügen?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> darf auswählen, welche Einstellungen und Inhalte hier angezeigt werden."</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Einstellungen für <xliff:g id="APPNAME">%s</xliff:g> entfernen?"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> darf auswählen, welche Steuerelemente und Inhalte hier angezeigt werden."</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Steuerelemente für <xliff:g id="APPNAME">%s</xliff:g> entfernen?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Aus Favoriten entfernt"</string>
@@ -943,8 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> wird gerade über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergegeben"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> von <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for controls_media_empty_title (8296102892421573325) -->
-    <skip />
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> wird ausgeführt"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Wiedergeben"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausieren"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Vorheriger Titel"</string>

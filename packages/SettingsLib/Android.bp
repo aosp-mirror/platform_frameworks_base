@@ -69,9 +69,6 @@ android_library {
         "src/**/*.java",
         "src/**/*.kt",
     ],
-
-    min_sdk_version: "30",
-
 }
 
 // NOTE: Keep this module in sync with ./common.mk

@@ -63,7 +63,11 @@ public abstract class ClockRegistryModule {
                 bgDispatcher,
                 featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
                 /* handleAllUsers= */ true,
-                new DefaultClockProvider(context, layoutInflater, resources),
+                new DefaultClockProvider(
+                        context,
+                        layoutInflater,
+                        resources,
+                        featureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION)),
                 context.getString(R.string.lockscreen_clock_id_fallback),
                 logBuffer,
                 /* keepAllLoaded = */ false,

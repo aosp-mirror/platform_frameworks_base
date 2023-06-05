@@ -15,11 +15,13 @@
  */
 package com.android.keyguard;
 
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.pm.PackageManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -76,12 +78,20 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
 
     @Test
     public void refresh_replacesSliceContentAndNotifiesListener() {
+        // Skips the test if running on a watch because watches don't have a SliceManager system
+        // service.
+        assumeFalse(isWatch());
+
         mController.refresh();
         verify(mView).hideSlice();
     }
 
     @Test
     public void onAttachedToWindow_registersListeners() {
+        // Skips the test if running on a watch because watches don't have a SliceManager system
+        // service.
+        assumeFalse(isWatch());
+
         mController.init();
         verify(mTunerService).addTunable(any(TunerService.Tunable.class), anyString());
         verify(mConfigurationController).addCallback(
@@ -90,6 +100,10 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
 
     @Test
     public void onDetachedFromWindow_unregistersListeners() {
+        // Skips the test if running on a watch because watches don't have a SliceManager system
+        // service.
+        assumeFalse(isWatch());
+
         ArgumentCaptor<View.OnAttachStateChangeListener> attachListenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
 
@@ -101,5 +115,10 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
         verify(mTunerService).removeTunable(any(TunerService.Tunable.class));
         verify(mConfigurationController).removeCallback(
                 any(ConfigurationController.ConfigurationListener.class));
+    }
+
+    private boolean isWatch() {
+        final PackageManager pm = mContext.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_WATCH);
     }
 }

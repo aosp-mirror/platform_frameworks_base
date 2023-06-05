@@ -248,6 +248,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private static final int MSG_DELIVERY_TIMEOUT_HARD = 3;
     private static final int MSG_BG_ACTIVITY_START_TIMEOUT = 4;
     private static final int MSG_CHECK_HEALTH = 5;
+    private static final int MSG_CHECK_PENDING_COLD_START_VALIDITY = 6;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
@@ -282,6 +283,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
             case MSG_CHECK_HEALTH: {
                 checkHealth();
+                return true;
+            }
+            case MSG_CHECK_PENDING_COLD_START_VALIDITY: {
+                checkPendingColdStartValidity();
                 return true;
             }
         }
@@ -450,20 +455,29 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 // skip to look for another warm process
                 if (mRunningColdStart == null) {
                     mRunningColdStart = queue;
-                } else {
+                } else if (isPendingColdStartValid()) {
                     // Move to considering next runnable queue
                     queue = nextQueue;
                     continue;
+                } else {
+                    // Pending cold start is not valid, so clear it and move on.
+                    clearInvalidPendingColdStart();
+                    mRunningColdStart = queue;
                 }
             }
 
             if (DEBUG_BROADCAST) logv("Promoting " + queue
                     + " from runnable to running; process is " + queue.app);
             promoteToRunningLocked(queue);
-            final boolean completed;
+            boolean completed;
             if (processWarm) {
                 updateOomAdj |= queue.runningOomAdjusted;
-                completed = scheduleReceiverWarmLocked(queue);
+                try {
+                    completed = scheduleReceiverWarmLocked(queue);
+                } catch (BroadcastDeliveryFailedException e) {
+                    reEnqueueActiveBroadcast(queue);
+                    completed = true;
+                }
             } else {
                 completed = scheduleReceiverColdLocked(queue);
             }
@@ -486,13 +500,61 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_RECEIVER);
         }
 
+        checkPendingColdStartValidity();
         checkAndRemoveWaitingFor();
 
         traceEnd(cookie);
     }
 
+    private boolean isPendingColdStartValid() {
+        if (mRunningColdStart.app.getPid() > 0) {
+            // If the process has already started, check if it wasn't killed.
+            return !mRunningColdStart.app.isKilled();
+        } else {
+            // Otherwise, check if the process start is still pending.
+            return mRunningColdStart.app.isPendingStart();
+        }
+    }
+
+    private void clearInvalidPendingColdStart() {
+        logw("Clearing invalid pending cold start: " + mRunningColdStart);
+        mRunningColdStart.reEnqueueActiveBroadcast();
+        demoteFromRunningLocked(mRunningColdStart);
+        clearRunningColdStart();
+    }
+
+    private void checkPendingColdStartValidity() {
+        // There are a few cases where a starting process gets killed but AMS doesn't report
+        // this event. So, once we start waiting for a pending cold start, periodically check
+        // if the pending start is still valid and if not, clear it so that the queue doesn't
+        // keep waiting for the process start forever.
+        synchronized (mService) {
+            // If there is no pending cold start, then nothing to do.
+            if (mRunningColdStart == null) {
+                return;
+            }
+            if (isPendingColdStartValid()) {
+                mLocalHandler.sendEmptyMessageDelayed(MSG_CHECK_PENDING_COLD_START_VALIDITY,
+                        mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS);
+            } else {
+                clearInvalidPendingColdStart();
+            }
+        }
+    }
+
+    private void reEnqueueActiveBroadcast(@NonNull BroadcastProcessQueue queue) {
+        checkState(queue.isActive(), "isActive");
+
+        final BroadcastRecord record = queue.getActive();
+        final int index = queue.getActiveIndex();
+        setDeliveryState(queue, queue.app, record, index, record.receivers.get(index),
+                BroadcastRecord.DELIVERY_PENDING, "reEnqueueActiveBroadcast");
+        queue.reEnqueueActiveBroadcast();
+    }
+
     @Override
-    public boolean onApplicationAttachedLocked(@NonNull ProcessRecord app) {
+    public boolean onApplicationAttachedLocked(@NonNull ProcessRecord app)
+            throws BroadcastDeliveryFailedException {
         // Process records can be recycled, so always start by looking up the
         // relevant per-process queue
         final BroadcastProcessQueue queue = getProcessQueue(app);
@@ -513,8 +575,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             queue.traceProcessEnd();
             queue.traceProcessRunningBegin();
-            if (scheduleReceiverWarmLocked(queue)) {
+            try {
+                if (scheduleReceiverWarmLocked(queue)) {
+                    demoteFromRunningLocked(queue);
+                }
+            } catch (BroadcastDeliveryFailedException e) {
+                reEnqueueActiveBroadcast(queue);
                 demoteFromRunningLocked(queue);
+                throw e;
             }
 
             // We might be willing to kick off another cold start
@@ -544,14 +612,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         if ((mRunningColdStart != null) && (mRunningColdStart == queue)) {
-            // We've been waiting for this app to cold start, and it had
-            // trouble; clear the slot and fail delivery below
-            mRunningColdStart = null;
-
-            queue.traceProcessEnd();
-
-            // We might be willing to kick off another cold start
-            enqueueUpdateRunningList();
+            clearRunningColdStart();
         }
 
         if (queue != null) {
@@ -572,6 +633,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 enqueueUpdateRunningList();
             }
         }
+    }
+
+    private void clearRunningColdStart() {
+        mRunningColdStart.traceProcessEnd();
+
+        // We've been waiting for this app to cold start, and it had
+        // trouble; clear the slot and fail delivery below
+        mRunningColdStart = null;
+
+        // We might be willing to kick off another cold start
+        enqueueUpdateRunningList();
     }
 
     @Override
@@ -659,8 +731,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (mService.shouldIgnoreDeliveryGroupPolicy(r.intent.getAction())) {
             return;
         }
-        final int policy = (r.options != null)
-                ? r.options.getDeliveryGroupPolicy() : BroadcastOptions.DELIVERY_GROUP_POLICY_ALL;
+        final int policy = r.getDeliveryGroupPolicy();
         final BroadcastConsumer broadcastConsumer;
         switch (policy) {
             case BroadcastOptions.DELIVERY_GROUP_POLICY_ALL:
@@ -676,6 +747,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     // supplied, then ignore the delivery group policy.
                     return;
                 }
+                // TODO: Don't merge with the same BroadcastRecord more than once.
                 broadcastConsumer = (record, recordIndex) -> {
                     r.intent.mergeExtras(record.intent, extrasMerger);
                     mBroadcastConsumerSkipAndCanceled.accept(record, recordIndex);
@@ -686,10 +758,31 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return;
         }
         forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
+            // If the receiver is already in a terminal state, then ignore it.
+            if (isDeliveryStateTerminal(testRecord.getDeliveryState(testIndex))) {
+                return false;
+            }
             // We only allow caller to remove broadcasts they enqueued
-            return (r.callingUid == testRecord.callingUid)
-                    && (r.userId == testRecord.userId)
-                    && r.matchesDeliveryGroup(testRecord);
+            if ((r.callingUid != testRecord.callingUid)
+                    || (r.userId != testRecord.userId)
+                    || !r.matchesDeliveryGroup(testRecord)) {
+                return false;
+            }
+            // TODO: If a process is in a deferred state, we can always apply the policy as long
+            // as it is one of the receivers for the new broadcast.
+
+            // For ordered broadcast, check if the receivers for the new broadcast is a superset
+            // of those for the previous one as skipping and removing only one of them could result
+            // in an inconsistent state.
+            if (testRecord.ordered || testRecord.resultTo != null) {
+                // TODO: Cache this result in some way so that we don't have to perform the
+                // same check for all the broadcast receivers.
+                return r.containsAllReceivers(testRecord.receivers);
+            } else if (testRecord.prioritized) {
+                return r.containsAllReceivers(testRecord.receivers);
+            } else {
+                return r.containsReceiver(testRecord.receivers.get(testIndex));
+            }
         }, broadcastConsumer, true);
     }
 
@@ -770,7 +863,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     @CheckResult
     @GuardedBy("mService")
-    private boolean scheduleReceiverWarmLocked(@NonNull BroadcastProcessQueue queue) {
+    private boolean scheduleReceiverWarmLocked(@NonNull BroadcastProcessQueue queue)
+            throws BroadcastDeliveryFailedException {
         checkState(queue.isActive(), "isActive");
 
         final int cookie = traceBegin("scheduleReceiverWarmLocked");
@@ -852,7 +946,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     @CheckResult
     private boolean dispatchReceivers(@NonNull BroadcastProcessQueue queue,
-            @NonNull BroadcastRecord r, int index) {
+            @NonNull BroadcastRecord r, int index) throws BroadcastDeliveryFailedException {
         final ProcessRecord app = queue.app;
         final Object receiver = r.receivers.get(index);
 
@@ -939,6 +1033,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 logw(msg);
                 app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER,
                         ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
+                // If we were trying to deliver a manifest broadcast, throw the error as we need
+                // to try redelivering the broadcast to this receiver.
+                if (receiver instanceof ResolveInfo) {
+                    throw new BroadcastDeliveryFailedException(e);
+                }
                 finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE,
                         "remote app");
                 return false;
@@ -1026,7 +1125,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             boolean waitForServices) {
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if ((queue == null) || !queue.isActive()) {
-            logw("Ignoring finish; no active broadcast for " + queue);
+            logw("Ignoring finishReceiverLocked; no active broadcast for " + queue);
             return false;
         }
 
@@ -1063,7 +1162,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         // We're on a roll; move onto the next broadcast for this process
         queue.makeActiveNextPending();
-        if (scheduleReceiverWarmLocked(queue)) {
+        try {
+            if (scheduleReceiverWarmLocked(queue)) {
+                demoteFromRunningLocked(queue);
+                return true;
+            }
+        } catch (BroadcastDeliveryFailedException e) {
+            reEnqueueActiveBroadcast(queue);
             demoteFromRunningLocked(queue);
             return true;
         }
@@ -1100,7 +1205,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void finishReceiverActiveLocked(@NonNull BroadcastProcessQueue queue,
             @DeliveryState int deliveryState, @NonNull String reason) {
         if (!queue.isActive()) {
-            logw("Ignoring finish; no active broadcast for " + queue);
+            logw("Ignoring finishReceiverActiveLocked; no active broadcast for " + queue);
             return;
         }
 
@@ -1826,7 +1931,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, uid, senderUid, actionName,
                     receiverType, type, dispatchDelay, receiveDelay, finishDelay, packageState,
-                    app != null ? app.info.packageName : null, r.callerPackage);
+                    app != null ? app.info.packageName : null, r.callerPackage,
+                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy());
         }
     }
 

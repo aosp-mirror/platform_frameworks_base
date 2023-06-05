@@ -37,6 +37,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ExtconUEventObserver.ExtconInfo;
 
 import java.io.FileDescriptor;
@@ -195,6 +196,8 @@ final class DockObserver extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(TAG, new BinderService());
+        // Logs dock state after setDockStateFromProviderLocked sets mReportedDockState
+        FrameworkStatsLog.write(FrameworkStatsLog.DOCK_STATE_CHANGED, mReportedDockState);
     }
 
     @Override
@@ -256,7 +259,6 @@ final class DockObserver extends SystemService {
                     + mReportedDockState);
             final int previousDockState = mPreviousDockState;
             mPreviousDockState = mReportedDockState;
-
             // Skip the dock intent if not yet provisioned.
             final ContentResolver cr = getContext().getContentResolver();
             if (!mDeviceProvisionedObserver.isDeviceProvisioned()) {

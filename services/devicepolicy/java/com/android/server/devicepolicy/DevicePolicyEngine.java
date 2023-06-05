@@ -454,8 +454,8 @@ final class DevicePolicyEngine {
                 onGlobalPolicyChanged(policyDefinition, enforcingAdmin);
             }
 
-            applyGlobalPolicyOnUsersWithLocalPoliciesLocked(
-                    policyDefinition, enforcingAdmin, /* value= */ null, /* enforcePolicy= */ true);
+            applyGlobalPolicyOnUsersWithLocalPoliciesLocked(policyDefinition, enforcingAdmin,
+                    /* value= */ null, /* skipEnforcePolicy= */ false);
 
             sendPolicyResultToAdmin(
                     enforcingAdmin,

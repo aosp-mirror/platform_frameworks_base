@@ -36,7 +36,7 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Услуги на Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> бара дозвола во име на вашиот <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> за да пристапува до фотографиите, аудиовизуелните содржини и известувањата на телефонот"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Ќе дозволите &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; да го преземе ова дејство?"</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> бара дозвола во име на вашиот <xliff:g id="DEVICE_NAME">%2$s</xliff:g> за да стримува апликации и други системски карактеристики на уредите во близина"</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> бара дозвола во име на вашиот <xliff:g id="DEVICE_NAME">%2$s</xliff:g> за да стримува апликации и други системски функции на уредите во близина"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"уред"</string>
     <string name="summary_generic_single_device" msgid="4181180669689590417">"Оваа апликација ќе може да ги синхронизира податоците како што се имињата на јавувачите помеѓу вашиот телефон и <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Оваа апликација ќе може да ги синхронизира податоците како што се имињата на јавувачите помеѓу вашиот телефон и избраниот уред"</string>
@@ -69,7 +69,7 @@
     <string name="permission_notification_summary" msgid="884075314530071011">"може да ги чита сите известувања, вклучително и податоци како контакти, пораки и фотографии"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Стримувајте ги апликациите на телефонот"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Апликации за стриминг и други системски карактеристики од вашиот телефон"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Апликации за стриминг и други системски функции од вашиот телефон"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"Телефон"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"Таблет"</string>
 </resources>

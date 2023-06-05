@@ -184,7 +184,7 @@ public final class UserProperties implements Parcelable {
      * device policies from its parent profile.
      *
      *<p> All the user restrictions and device policies would be not propagated to the profile
-     * with this property value. The {(TODO:b/256978256) @link DevicePolicyEngine}
+     * with this property value. The {@link com.android.server.devicepolicy.DevicePolicyEngine}
      * uses this property to determine and propagate only select ones to the given profile.
      *
      * @hide

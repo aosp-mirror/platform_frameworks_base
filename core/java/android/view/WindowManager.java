@@ -555,6 +555,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT = (1 << 9); // 0x200
 
     /**
+     * Transition flag: The transition is prepared when nothing is visible on screen, e.g. screen
+     * is off. The animation handlers can decide whether to skip animations.
+     * @hide
+     */
+    int TRANSIT_FLAG_INVISIBLE = (1 << 10); // 0x400
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -567,7 +574,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_LOCKED,
             TRANSIT_FLAG_IS_RECENTS,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY,
-            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT,
+            TRANSIT_FLAG_INVISIBLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}

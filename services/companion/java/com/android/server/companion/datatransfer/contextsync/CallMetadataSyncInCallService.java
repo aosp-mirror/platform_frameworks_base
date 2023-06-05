@@ -79,15 +79,20 @@ public class CallMetadataSyncInCallService extends InCallService {
                         int callControlAction) {
                     final CrossDeviceCall crossDeviceCall = getCallForId(crossDeviceCallId,
                             mCurrentCalls.values());
-                    if (crossDeviceCall == null) {
-                        return;
-                    }
                     switch (callControlAction) {
                         case android.companion.Telecom.ACCEPT:
-                            crossDeviceCall.doAccept();
+                            if (crossDeviceCall != null) {
+                                crossDeviceCall.doAccept();
+                            } else {
+                                Slog.w(TAG, "Failed to process accept action; no matching call");
+                            }
                             break;
                         case android.companion.Telecom.REJECT:
-                            crossDeviceCall.doReject();
+                            if (crossDeviceCall != null) {
+                                crossDeviceCall.doReject();
+                            } else {
+                                Slog.w(TAG, "Failed to process reject action; no matching call");
+                            }
                             break;
                         case android.companion.Telecom.SILENCE:
                             doSilence();
@@ -99,13 +104,25 @@ public class CallMetadataSyncInCallService extends InCallService {
                             doUnmute();
                             break;
                         case android.companion.Telecom.END:
-                            crossDeviceCall.doEnd();
+                            if (crossDeviceCall != null) {
+                                crossDeviceCall.doEnd();
+                            } else {
+                                Slog.w(TAG, "Failed to process end action; no matching call");
+                            }
                             break;
                         case android.companion.Telecom.PUT_ON_HOLD:
-                            crossDeviceCall.doPutOnHold();
+                            if (crossDeviceCall != null) {
+                                crossDeviceCall.doPutOnHold();
+                            } else {
+                                Slog.w(TAG, "Failed to process hold action; no matching call");
+                            }
                             break;
                         case android.companion.Telecom.TAKE_OFF_HOLD:
-                            crossDeviceCall.doTakeOffHold();
+                            if (crossDeviceCall != null) {
+                                crossDeviceCall.doTakeOffHold();
+                            } else {
+                                Slog.w(TAG, "Failed to process unhold action; no matching call");
+                            }
                             break;
                         default:
                     }
@@ -188,6 +205,8 @@ public class CallMetadataSyncInCallService extends InCallService {
                 && mNumberOfActiveSyncAssociations > 0) {
             mCurrentCalls.remove(call);
             call.unregisterCallback(mTelecomCallback);
+            mCdmsi.removeSelfOwnedCallId(call.getDetails().getExtras().getString(
+                    CrossDeviceSyncController.EXTRA_CALL_ID));
             sync(getUserId());
         }
     }
@@ -196,8 +215,9 @@ public class CallMetadataSyncInCallService extends InCallService {
     public void onMuteStateChanged(boolean isMuted) {
         if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)
                 && mNumberOfActiveSyncAssociations > 0) {
-            mCurrentCalls.values().forEach(call -> call.updateMuted(isMuted));
-            sync(getUserId());
+            mCdmsi.sendCrossDeviceSyncMessageToAllDevices(getUserId(),
+                    CrossDeviceSyncController.createCallControlMessage(null, isMuted
+                            ? android.companion.Telecom.MUTE : android.companion.Telecom.UNMUTE));
         }
     }
 
@@ -205,8 +225,9 @@ public class CallMetadataSyncInCallService extends InCallService {
     public void onSilenceRinger() {
         if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)
                 && mNumberOfActiveSyncAssociations > 0) {
-            mCurrentCalls.values().forEach(call -> call.updateSilencedIfRinging());
-            sync(getUserId());
+            mCdmsi.sendCrossDeviceSyncMessageToAllDevices(getUserId(),
+                    CrossDeviceSyncController.createCallControlMessage(null,
+                            android.companion.Telecom.SILENCE));
         }
     }
 

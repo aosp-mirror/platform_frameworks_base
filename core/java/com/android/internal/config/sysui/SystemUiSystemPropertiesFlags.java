@@ -80,7 +80,7 @@ public class SystemUiSystemPropertiesFlags {
 
         /** Gating the logging of DND state change events. */
         public static final Flag LOG_DND_STATE_EVENTS =
-                devFlag("persist.sysui.notification.log_dnd_state_events");
+                releasedFlag("persist.sysui.notification.log_dnd_state_events");
     }
 
     //// == End of flags.  Everything below this line is the implementation. == ////

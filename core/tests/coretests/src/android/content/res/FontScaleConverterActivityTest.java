@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.os.Bundle;
 import android.platform.test.annotations.IwTest;
+import android.platform.test.annotations.PlatinumTest;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.util.PollingCheck;
@@ -72,6 +73,7 @@ public class FontScaleConverterActivityTest {
         restoreSystemFontScaleToDefault();
     }
 
+    @PlatinumTest(focusArea = "accessibility")
     @IwTest(focusArea = "accessibility")
     @Test
     public void testFontsScaleNonLinearly() {
@@ -103,6 +105,7 @@ public class FontScaleConverterActivityTest {
         )));
     }
 
+    @PlatinumTest(focusArea = "accessibility")
     @IwTest(focusArea = "accessibility")
     @Test
     public void testOnConfigurationChanged_doesNotCrash() {
@@ -117,6 +120,7 @@ public class FontScaleConverterActivityTest {
         });
     }
 
+    @PlatinumTest(focusArea = "accessibility")
     @IwTest(focusArea = "accessibility")
     @Test
     public void testUpdateConfiguration_doesNotCrash() {

@@ -5,3 +5,5 @@ per-file *Launcher* = file:/core/java/android/content/pm/LAUNCHER_OWNERS
 per-file *Shortcut* = file:/core/java/android/content/pm/SHORTCUT_OWNERS
 per-file *ComponentCallbacks* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *ComponentCallbacks* = charlesccchen@google.com
+per-file ContentCaptureOptions* = file:/core/java/android/view/contentcapture/OWNERS
+

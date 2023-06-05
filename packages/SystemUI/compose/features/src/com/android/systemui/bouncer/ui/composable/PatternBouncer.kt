@@ -18,6 +18,7 @@ package com.android.systemui.bouncer.ui.composable
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -41,12 +42,15 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.Easings
 import com.android.internal.R
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
+import com.android.systemui.compose.modifiers.thenIf
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -66,9 +70,9 @@ internal fun PatternBouncer(
     val rowCount = viewModel.rowCount
 
     val dotColor = MaterialTheme.colorScheme.secondary
-    val dotRadius = with(LocalDensity.current) { 8.dp.toPx() }
+    val dotRadius = with(LocalDensity.current) { (DOT_DIAMETER_DP / 2).dp.toPx() }
     val lineColor = MaterialTheme.colorScheme.primary
-    val lineStrokeWidth = dotRadius * 2 + with(LocalDensity.current) { 4.dp.toPx() }
+    val lineStrokeWidth = with(LocalDensity.current) { LINE_STROKE_WIDTH_DP.dp.toPx() }
 
     var containerSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
     val horizontalSpacing = containerSize.width / colCount
@@ -82,6 +86,9 @@ internal fun PatternBouncer(
     val currentDot: PatternDotViewModel? by viewModel.currentDot.collectAsState()
     // The dots selected so far, if the user is currently dragging.
     val selectedDots: List<PatternDotViewModel> by viewModel.selectedDots.collectAsState()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
+    val isAnimationEnabled: Boolean by viewModel.isPatternVisible.collectAsState()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
 
     // Map of animatables for the scale of each dot, keyed by dot.
     val dotScalingAnimatables = remember(dots) { dots.associateWith { Animatable(1f) } }
@@ -96,19 +103,46 @@ internal fun PatternBouncer(
     val view = LocalView.current
 
     // When the current dot is changed, we need to update our animations.
-    LaunchedEffect(currentDot) {
-        view.performHapticFeedback(
-            HapticFeedbackConstants.VIRTUAL_KEY,
-            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
-        )
+    LaunchedEffect(currentDot, isAnimationEnabled) {
+        // Perform haptic feedback, but only if the current dot is not null, so we don't perform it
+        // when the UI first shows up or when the user lifts their pointer/finger.
+        if (currentDot != null) {
+            view.performHapticFeedback(
+                HapticFeedbackConstants.VIRTUAL_KEY,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
+            )
+        }
 
-        // Make sure that the current dot is scaled up while the other dots are scaled back down.
+        if (!isAnimationEnabled) {
+            return@LaunchedEffect
+        }
+
+        // Make sure that the current dot is scaled up while the other dots are scaled back
+        // down.
         dotScalingAnimatables.entries.forEach { (dot, animatable) ->
             val isSelected = dot == currentDot
-            launch {
-                animatable.animateTo(if (isSelected) 2f else 1f)
+            // Launch using the longer-lived scope because we want these animations to proceed to
+            // completion even if the LaunchedEffect is canceled because its key objects have
+            // changed.
+            scope.launch {
                 if (isSelected) {
-                    animatable.animateTo(1f)
+                    animatable.animateTo(
+                        targetValue = (SELECTED_DOT_DIAMETER_DP / DOT_DIAMETER_DP.toFloat()),
+                        animationSpec =
+                            tween(
+                                durationMillis = SELECTED_DOT_REACTION_ANIMATION_DURATION_MS,
+                                easing = Easings.StandardAccelerateEasing,
+                            ),
+                    )
+                } else {
+                    animatable.animateTo(
+                        targetValue = 1f,
+                        animationSpec =
+                            tween(
+                                durationMillis = SELECTED_DOT_RETRACT_ANIMATION_DURATION_MS,
+                                easing = Easings.StandardDecelerateEasing,
+                            ),
+                    )
                 }
             }
         }
@@ -116,14 +150,18 @@ internal fun PatternBouncer(
         selectedDots.forEach { dot ->
             lineFadeOutAnimatables[dot]?.let { line ->
                 if (!line.isRunning) {
+                    // Launch using the longer-lived scope because we want these animations to
+                    // proceed to completion even if the LaunchedEffect is canceled because its key
+                    // objects have changed.
                     scope.launch {
                         if (dot == currentDot) {
-                            // Reset the fade-out animation for the current dot. When the current
-                            // dot is switched, this entire code block runs again for the newly
-                            // selected dot.
+                            // Reset the fade-out animation for the current dot. When the
+                            // current dot is switched, this entire code block runs again for
+                            // the newly selected dot.
                             line.snapTo(1f)
                         } else {
-                            // For all non-current dots, make sure that the lines are fading out.
+                            // For all non-current dots, make sure that the lines are fading
+                            // out.
                             line.animateTo(
                                 targetValue = 0f,
                                 animationSpec =
@@ -139,6 +177,17 @@ internal fun PatternBouncer(
         }
     }
 
+    // Show the failure animation if the user entered the wrong input.
+    LaunchedEffect(animateFailure) {
+        if (animateFailure) {
+            showFailureAnimation(
+                dots = dots,
+                scalingAnimatables = dotScalingAnimatables,
+            )
+            viewModel.onFailureAnimationShown()
+        }
+    }
+
     // This is the position of the input pointer.
     var inputPosition: Offset? by remember { mutableStateOf(null) }
 
@@ -148,27 +197,34 @@ internal fun PatternBouncer(
             // when it leaves the bounds of the dot grid.
             .clipToBounds()
             .onSizeChanged { containerSize = it }
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { start ->
-                        inputPosition = start
-                        viewModel.onDragStart()
-                    },
-                    onDragEnd = {
-                        inputPosition = null
-                        lineFadeOutAnimatables.values.forEach { animatable ->
-                            scope.launch { animatable.animateTo(1f) }
-                        }
-                        viewModel.onDragEnd()
-                    },
-                ) { change, _ ->
-                    inputPosition = change.position
-                    viewModel.onDrag(
-                        xPx = change.position.x,
-                        yPx = change.position.y,
-                        containerSizePx = containerSize.width,
-                        verticalOffsetPx = verticalOffset,
-                    )
+            .thenIf(isInputEnabled) {
+                Modifier.pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { start ->
+                            inputPosition = start
+                            viewModel.onDragStart()
+                        },
+                        onDragEnd = {
+                            inputPosition = null
+                            if (isAnimationEnabled) {
+                                lineFadeOutAnimatables.values.forEach { animatable ->
+                                    // Launch using the longer-lived scope because we want these
+                                    // animations to proceed to completion even if the surrounding
+                                    // scope is canceled.
+                                    scope.launch { animatable.animateTo(1f) }
+                                }
+                            }
+                            viewModel.onDragEnd()
+                        },
+                    ) { change, _ ->
+                        inputPosition = change.position
+                        viewModel.onDrag(
+                            xPx = change.position.x,
+                            yPx = change.position.y,
+                            containerSizePx = containerSize.width,
+                            verticalOffsetPx = verticalOffset,
+                        )
+                    }
                 }
             }
     ) {
@@ -247,3 +303,62 @@ private fun lineAlpha(gridSpacing: Float, lineLength: Float = gridSpacing): Floa
     // farther the user input pointer goes from the line, the more opaque the line gets.
     return ((lineLength / gridSpacing - 0.3f) * 4f).coerceIn(0f, 1f)
 }
+
+private suspend fun showFailureAnimation(
+    dots: List<PatternDotViewModel>,
+    scalingAnimatables: Map<PatternDotViewModel, Animatable<Float, AnimationVector1D>>,
+) {
+    val dotsByRow =
+        buildList<MutableList<PatternDotViewModel>> {
+            dots.forEach { dot ->
+                val rowIndex = dot.y
+                while (size <= rowIndex) {
+                    add(mutableListOf())
+                }
+                get(rowIndex).add(dot)
+            }
+        }
+
+    coroutineScope {
+        dotsByRow.forEachIndexed { rowIndex, rowDots ->
+            rowDots.forEach { dot ->
+                scalingAnimatables[dot]?.let { dotScaleAnimatable ->
+                    launch {
+                        dotScaleAnimatable.animateTo(
+                            targetValue =
+                                FAILURE_ANIMATION_DOT_DIAMETER_DP / DOT_DIAMETER_DP.toFloat(),
+                            animationSpec =
+                                tween(
+                                    durationMillis =
+                                        FAILURE_ANIMATION_DOT_SHRINK_ANIMATION_DURATION_MS,
+                                    delayMillis =
+                                        rowIndex * FAILURE_ANIMATION_DOT_SHRINK_STAGGER_DELAY_MS,
+                                    easing = Easings.LinearEasing,
+                                ),
+                        )
+
+                        dotScaleAnimatable.animateTo(
+                            targetValue = 1f,
+                            animationSpec =
+                                tween(
+                                    durationMillis =
+                                        FAILURE_ANIMATION_DOT_REVERT_ANIMATION_DURATION,
+                                    easing = Easings.StandardEasing,
+                                ),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private const val DOT_DIAMETER_DP = 16
+private const val SELECTED_DOT_DIAMETER_DP = 24
+private const val SELECTED_DOT_REACTION_ANIMATION_DURATION_MS = 83
+private const val SELECTED_DOT_RETRACT_ANIMATION_DURATION_MS = 750
+private const val LINE_STROKE_WIDTH_DP = 16
+private const val FAILURE_ANIMATION_DOT_DIAMETER_DP = 13
+private const val FAILURE_ANIMATION_DOT_SHRINK_ANIMATION_DURATION_MS = 50
+private const val FAILURE_ANIMATION_DOT_SHRINK_STAGGER_DELAY_MS = 33
+private const val FAILURE_ANIMATION_DOT_REVERT_ANIMATION_DURATION = 617

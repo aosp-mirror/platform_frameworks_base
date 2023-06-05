@@ -57,7 +57,7 @@
     <string name="set_as_default" msgid="4415328591568654603">"Weka iwe chaguomsingi"</string>
     <string name="settings" msgid="6536394145760913145">"Mipangilio"</string>
     <string name="use_once" msgid="9027366575315399714">"Tumia mara moja"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Manenosiri <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • funguo <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> za siri"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Manenosiri <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Funguo <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> za siri"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Manenosiri <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Funguo <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> za siri"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"Kitambulisho cha <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>

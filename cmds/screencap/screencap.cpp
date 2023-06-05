@@ -30,6 +30,8 @@
 
 #include <binder/ProcessState.h>
 
+#include <ftl/concat.h>
+#include <ftl/optional.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SyncScreenCaptureListener.h>
@@ -45,14 +47,7 @@ using namespace android;
 #define COLORSPACE_SRGB       1
 #define COLORSPACE_DISPLAY_P3 2
 
-static void usage(const char* pname, std::optional<PhysicalDisplayId> displayId)
-{
-    std::string defaultDisplayStr = "";
-    if (!displayId) {
-        defaultDisplayStr = "";
-    } else {
-        defaultDisplayStr = " (default: " + to_string(*displayId) + ")";
-    }
+void usage(const char* pname, ftl::Optional<DisplayId> displayIdOpt) {
     fprintf(stderr,
             "usage: %s [-hp] [-d display-id] [FILENAME]\n"
             "   -h: this message\n"
@@ -61,7 +56,13 @@ static void usage(const char* pname, std::optional<PhysicalDisplayId> displayId)
             "       see \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n"
             "If FILENAME ends with .png it will be saved as a png.\n"
             "If FILENAME is not given, the results will be printed to stdout.\n",
-            pname, defaultDisplayStr.c_str());
+            pname,
+            displayIdOpt
+                    .transform([](DisplayId id) {
+                        return std::string(ftl::Concat(" (default: ", id.value, ')').str());
+                    })
+                    .value_or(std::string())
+                    .c_str());
 }
 
 static int32_t flinger2bitmapFormat(PixelFormat f)
@@ -132,7 +133,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Failed to get ID for any displays.\n");
         return 1;
     }
-    std::optional<PhysicalDisplayId> displayId;
+    std::optional<DisplayId> displayIdOpt;
     const char* pname = argv[0];
     bool png = false;
     int c;
@@ -142,8 +143,8 @@ int main(int argc, char** argv)
                 png = true;
                 break;
             case 'd':
-                displayId = DisplayId::fromValue<PhysicalDisplayId>(atoll(optarg));
-                if (!displayId) {
+                displayIdOpt = DisplayId::fromValue(atoll(optarg));
+                if (!displayIdOpt) {
                     fprintf(stderr, "Invalid display ID: %s\n", optarg);
                     return 1;
                 }
@@ -151,15 +152,15 @@ int main(int argc, char** argv)
             case '?':
             case 'h':
                 if (ids.size() == 1) {
-                    displayId = ids.front();
-                } 
-                usage(pname, displayId);
+                    displayIdOpt = ids.front();
+                }
+                usage(pname, displayIdOpt);
                 return 1;
         }
     }
 
-    if (!displayId) { // no diplsay id is specified
-        displayId = ids.front();
+    if (!displayIdOpt) {
+        displayIdOpt = ids.front();
         if (ids.size() > 1) {
             fprintf(stderr,
                     "[Warning] Multiple displays were found, but no display id was specified! "
@@ -191,7 +192,7 @@ int main(int argc, char** argv)
     }
 
     if (fd == -1) {
-        usage(pname, displayId);
+        usage(pname, displayIdOpt);
         return 1;
     }
 
@@ -208,7 +209,7 @@ int main(int argc, char** argv)
     ProcessState::self()->startThreadPool();
 
     sp<SyncScreenCaptureListener> captureListener = new SyncScreenCaptureListener();
-    status_t result = ScreenshotClient::captureDisplay(*displayId, captureListener);
+    status_t result = ScreenshotClient::captureDisplay(*displayIdOpt, captureListener);
     if (result != NO_ERROR) {
         close(fd);
         return 1;

@@ -150,6 +150,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 .thenReturn(100);
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin))
                 .thenReturn(-200);
+        when(mResources.getInteger(R.integer.keyguard_date_weather_view_invisibility))
+                .thenReturn(View.INVISIBLE);
 
         when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
         when(mView.findViewById(R.id.lockscreen_clock_view)).thenReturn(mSmallClockFrame);

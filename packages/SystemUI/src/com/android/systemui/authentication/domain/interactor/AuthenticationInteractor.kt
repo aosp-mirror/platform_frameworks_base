@@ -75,6 +75,12 @@ constructor(
      */
     val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
 
+    /**
+     * Number of consecutively failed authentication attempts. This resets to `0` when
+     * authentication succeeds.
+     */
+    val failedAuthenticationAttempts: StateFlow<Int> = repository.failedAuthenticationAttempts
+
     init {
         // UNLOCKS WHEN AUTH METHOD REMOVED.
         //
@@ -130,7 +136,12 @@ constructor(
             }
 
         if (isSuccessful) {
+            repository.setFailedAuthenticationAttempts(0)
             repository.setUnlocked(true)
+        } else {
+            repository.setFailedAuthenticationAttempts(
+                repository.failedAuthenticationAttempts.value + 1
+            )
         }
 
         return isSuccessful

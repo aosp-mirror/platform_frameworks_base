@@ -16,12 +16,15 @@
 
 package com.android.server.broadcastradio;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.hardware.radio.IAnnouncementListener;
 import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -129,6 +132,13 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mService.getContext().checkCallingOrSelfPermission(Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump HIDL BroadcastRadioService from "
+                    + "from pid=" + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " without permission " + Manifest.permission.DUMP);
+            return;
+        }
         IndentingPrintWriter radioPw = new IndentingPrintWriter(pw);
         radioPw.printf("BroadcastRadioService\n");
 

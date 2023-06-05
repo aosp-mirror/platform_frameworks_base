@@ -32,6 +32,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 import com.android.server.biometrics.BiometricSchedulerProto;
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
@@ -569,9 +570,10 @@ public class BiometricScheduler {
         if (mCurrentOperation == null) {
             return;
         }
-        final BiometricSchedulerOperation mOperation = mCurrentOperation;
+        final BiometricSchedulerOperation operation = mCurrentOperation;
         mHandler.postDelayed(() -> {
-            if (mOperation == mCurrentOperation) {
+            if (operation == mCurrentOperation) {
+                Counter.logIncrement("biometric.scheduler_watchdog_triggered_count");
                 clearScheduler();
             }
         }, 10000);

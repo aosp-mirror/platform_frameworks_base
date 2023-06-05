@@ -122,7 +122,7 @@ fun FooterActions(
     }
 
     val backgroundColor = colorAttr(R.attr.underSurfaceColor)
-    val contentColor = LocalAndroidColorScheme.current.textColorPrimary
+    val contentColor = LocalAndroidColorScheme.current.deprecated.textColorPrimary
     val backgroundTopRadius = dimensionResource(R.dimen.qs_corner_radius)
     val backgroundModifier =
         remember(
@@ -287,7 +287,7 @@ private fun NumberButton(
                     number.toString(),
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = LocalAndroidColorScheme.current.textColorPrimary,
+                    color = LocalAndroidColorScheme.current.deprecated.textColorPrimary,
                     // TODO(b/242040009): This should only use a standard text style instead and
                     // should not override the text size.
                     fontSize = 18.sp,
@@ -305,7 +305,7 @@ private fun NumberButton(
 @Composable
 private fun NewChangesDot(modifier: Modifier = Modifier) {
     val contentDescription = stringResource(R.string.fgs_dot_content_description)
-    val color = LocalAndroidColorScheme.current.colorAccentTertiary
+    val color = LocalAndroidColorScheme.current.deprecated.colorAccentTertiary
 
     Canvas(modifier.size(12.dp).semantics { this.contentDescription = contentDescription }) {
         drawCircle(color)
@@ -324,8 +324,9 @@ private fun TextButton(
     Expandable(
         shape = CircleShape,
         color = colorAttr(R.attr.underSurfaceColor),
-        contentColor = LocalAndroidColorScheme.current.textColorSecondary,
-        borderStroke = BorderStroke(1.dp, LocalAndroidColorScheme.current.colorBackground),
+        contentColor = LocalAndroidColorScheme.current.deprecated.textColorSecondary,
+        borderStroke =
+            BorderStroke(1.dp, LocalAndroidColorScheme.current.deprecated.colorBackground),
         modifier = modifier.padding(horizontal = 4.dp),
         onClick = onClick,
     ) {

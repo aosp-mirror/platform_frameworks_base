@@ -63,10 +63,12 @@ import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioAttributes;
+import android.media.AudioDescriptor;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioDeviceVolumeManager;
 import android.media.AudioManager;
+import android.media.AudioProfile;
 import android.media.VolumeInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -1576,6 +1578,10 @@ public class HdmiControlService extends SystemService {
         if (!isTvDevice()) {
             // If the device is not TV, we can't convert path to port-id, so stop here.
             return true;
+        }
+        // Invalidate the physical address if parameters length is too short.
+        if (params.length < offset + 2) {
+            return false;
         }
         int path = HdmiUtils.twoBytesToInt(params, offset);
         if (path != Constants.INVALID_PHYSICAL_ADDRESS && path == getPhysicalAddress()) {
@@ -4723,11 +4729,22 @@ public class HdmiControlService extends SystemService {
             Slog.w(TAG, "Tried to update eARC status on a port that doesn't support eARC.");
             return;
         }
-        // If eARC is disabled, the local device is null. In this case, the HAL shouldn't have
-        // reported connection state changes, but even if it did, it won't take effect.
         if (mEarcLocalDevice != null) {
             mEarcLocalDevice.handleEarcStateChange(status);
+        } else if (status == HDMI_EARC_STATUS_ARC_PENDING) {
+            // If eARC is disabled, the local device is null. This is why we notify
+            // AudioService here that the eARC connection is terminated.
+            notifyEarcStatusToAudioService(false, new ArrayList<>());
+            startArcAction(true, null);
         }
+    }
+
+    protected void notifyEarcStatusToAudioService(
+            boolean enabled, List<AudioDescriptor> audioDescriptors) {
+        AudioDeviceAttributes attributes = new AudioDeviceAttributes(
+                AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_HDMI_EARC, "", "",
+                new ArrayList<AudioProfile>(), audioDescriptors);
+        getAudioManager().setWiredDeviceConnectionState(attributes, enabled ? 1 : 0);
     }
 
     @ServiceThreadOnly

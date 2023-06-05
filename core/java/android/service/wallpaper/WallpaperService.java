@@ -1391,7 +1391,7 @@ public abstract class WallpaperService extends Service {
                             Trace.endSection();
                         }
 
-                        if (redrawNeeded) {
+                        if (redrawNeeded || sizeChanged) {
                             Trace.beginSection("WPMS.Engine.onSurfaceRedrawNeeded");
                             onSurfaceRedrawNeeded(mSurfaceHolder);
                             Trace.endSection();

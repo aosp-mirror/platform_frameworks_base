@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g>-с хандах боломжгүй. Оронд нь утсан дээрээ туршиж үзнэ үү."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Энэ аппыг Android-н хуучин хувилбарт зориулж бүтээсэн. Энэ нь зохих ёсоор ажиллахгүй байж магадгүй бөгөөд хамгийн сүүлийн үеийн аюулгүй байдал болон нууцлалын хамгаалалтыг агуулдаггүй. Шинэчлэлт байгаа эсэхийг шалгах эсвэл аппын хөгжүүлэгчтэй холбогдоно уу."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шинэчлэлтийг шалгах"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Энэ апп Android-н хамгийн сүүлийн үеийн хувилбартай тохиромжгүй. Шинэчлэлт байгаа эсэхийг шалгах эсвэл аппын хөгжүүлэгчтэй холбогдоно уу."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Танд шинэ мессежүүд байна"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Үзэхийн тулд SMS аппыг нээх"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Зарим функцийг хязгаарласан байж болзошгүй"</string>
@@ -2165,20 +2166,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Ажлын <xliff:g id="APP">%s</xliff:g>-г нээх үү?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Хувийн <xliff:g id="APP">%s</xliff:g>-д нээх үү?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Ажлын <xliff:g id="APP">%s</xliff:g>-д нээх үү?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Ажлын аппаас залгах уу?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Ажлын апп руу сэлгэх үү?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Танай байгууллага танд зөвхөн ажлын аппуудаас дуудлага хийхийг зөвшөөрдөг"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Танай байгууллага танд зөвхөн ажлын аппуудаас мессеж илгээхийг зөвшөөрдөг"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Хувийн хөтөч ашиглах"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Ажлын хөтөч ашиглах"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Залгах"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Сэлгэх"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Сүлжээний SIM-н түгжээг тайлах ПИН"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Сүлжээний дэд олонлогийн SIM-н түгжээг тайлах ПИН"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Байгууллагын SIM-н түгжээг тайлах ПИН"</string>

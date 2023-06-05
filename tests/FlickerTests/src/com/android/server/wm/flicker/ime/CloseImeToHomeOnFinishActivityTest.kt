@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -71,6 +72,7 @@ open class CloseImeToHomeOnFinishActivityTest(flicker: FlickerTest) : BaseTest(f
 
     @Presubmit
     @Test
+    @PlatinumTest(focusArea = "ime")
     @IwTest(focusArea = "ime")
     override fun cujCompleted() {
         runAndIgnoreAssumptionViolation { entireScreenCovered() }

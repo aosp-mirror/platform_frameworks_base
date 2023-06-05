@@ -837,7 +837,7 @@ public class OomAdjuster {
      */
     @GuardedBy("mService")
     void enqueueOomAdjTargetLocked(ProcessRecord app) {
-        if (app != null) {
+        if (app != null && app.mState.getMaxAdj() > FOREGROUND_APP_ADJ) {
             mPendingProcessSet.add(app);
         }
     }
@@ -3188,7 +3188,6 @@ public class OomAdjuster {
         }
 
         if (state.getCurCapability() != state.getSetCapability()) {
-            changes |= ActivityManagerService.ProcessChangeItem.CHANGE_CAPABILITY;
             state.setSetCapability(state.getCurCapability());
         }
 
@@ -3212,13 +3211,12 @@ public class OomAdjuster {
                     mProcessList.enqueueProcessChangeItemLocked(app.getPid(), app.info.uid);
             item.changes |= changes;
             item.foregroundActivities = state.hasRepForegroundActivities();
-            item.capability = state.getSetCapability();
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
                     "Item " + Integer.toHexString(System.identityHashCode(item))
                             + " " + app.toShortString() + ": changes=" + item.changes
                             + " foreground=" + item.foregroundActivities
                             + " type=" + state.getAdjType() + " source=" + state.getAdjSource()
-                            + " target=" + state.getAdjTarget() + " capability=" + item.capability);
+                            + " target=" + state.getAdjTarget());
         }
 
         if (state.isCached() && !state.shouldNotKillOnBgRestrictedAndIdle()) {
@@ -3253,7 +3251,11 @@ public class OomAdjuster {
                 // {@link SCHED_GROUP_TOP_APP}. We don't check render thread because it
                 // is not ready when attaching.
                 app.getWindowProcessController().onTopProcChanged();
-                setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                if (mService.mUseFifoUiScheduling) {
+                    mService.scheduleAsFifoPriority(app.getPid(), true);
+                } else {
+                    setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                }
                 initialSchedGroup = SCHED_GROUP_TOP_APP;
             } catch (Exception e) {
                 Slog.w(TAG, "Failed to pre-set top priority to " + app + " " + e);

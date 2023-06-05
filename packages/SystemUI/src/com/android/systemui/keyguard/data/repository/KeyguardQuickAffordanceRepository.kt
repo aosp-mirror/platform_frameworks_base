@@ -170,7 +170,7 @@ constructor(
                     pickerState as? KeyguardQuickAffordanceConfig.PickerScreenState.Disabled
                 KeyguardQuickAffordancePickerRepresentation(
                     id = config.key,
-                    name = config.pickerName,
+                    name = config.pickerName(),
                     iconResourceId = config.pickerIconResourceId,
                     isEnabled =
                         pickerState is KeyguardQuickAffordanceConfig.PickerScreenState.Default,
@@ -234,7 +234,9 @@ constructor(
                 pw.println("    $slotId$selectionText (capacity = $capacity)")
             }
             pw.println("Available affordances on device:")
-            configs.forEach { config -> pw.println("    ${config.key} (\"${config.pickerName}\")") }
+            configs.forEach { config ->
+                pw.println("    ${config.key} (\"${config.pickerName()}\")")
+            }
         }
     }
 

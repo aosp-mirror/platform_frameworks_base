@@ -87,6 +87,14 @@ class SplitScreenTransitions {
         mStageCoordinator = stageCoordinator;
     }
 
+    private void initTransition(@NonNull IBinder transition,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        mAnimatingTransition = transition;
+        mFinishTransaction = finishTransaction;
+        mFinishCallback = finishCallback;
+    }
+
     /** Play animation for enter transition or dismiss transition. */
     void playAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
@@ -94,9 +102,7 @@ class SplitScreenTransitions {
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot,
             @NonNull WindowContainerToken topRoot) {
-        mFinishCallback = finishCallback;
-        mAnimatingTransition = transition;
-        mFinishTransaction = finishTransaction;
+        initTransition(transition, finishTransaction, finishCallback);
 
         final TransitSession pendingTransition = getPendingTransition(transition);
         if (pendingTransition != null) {
@@ -220,6 +226,45 @@ class SplitScreenTransitions {
         onFinish(null /* wct */, null /* wctCB */);
     }
 
+    /** Play animation for drag divider dismiss transition. */
+    void playDragDismissAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback,
+            @NonNull WindowContainerToken toTopRoot, @NonNull SplitDecorManager toTopDecor,
+            @NonNull WindowContainerToken topRoot) {
+        initTransition(transition, finishTransaction, finishCallback);
+
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final SurfaceControl leash = change.getLeash();
+
+            if (toTopRoot.equals(change.getContainer())) {
+                startTransaction.setAlpha(leash, 1.f);
+                startTransaction.show(leash);
+
+                ValueAnimator va = new ValueAnimator();
+                mAnimations.add(va);
+
+                toTopDecor.onResized(startTransaction, animated -> {
+                    mAnimations.remove(va);
+                    if (animated) {
+                        mTransitions.getMainExecutor().execute(() -> {
+                            onFinish(null /* wct */, null /* wctCB */);
+                        });
+                    }
+                });
+            } else if (topRoot.equals(change.getContainer())) {
+                // Ensure it on top of all changes in transition.
+                startTransaction.setLayer(leash, Integer.MAX_VALUE);
+                startTransaction.setAlpha(leash, 1.f);
+                startTransaction.show(leash);
+            }
+        }
+        startTransaction.apply();
+        onFinish(null /* wct */, null /* wctCB */);
+    }
+
     /** Play animation for resize transition. */
     void playResizeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
@@ -227,9 +272,7 @@ class SplitScreenTransitions {
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot,
             @NonNull SplitDecorManager mainDecor, @NonNull SplitDecorManager sideDecor) {
-        mFinishCallback = finishCallback;
-        mAnimatingTransition = transition;
-        mFinishTransaction = finishTransaction;
+        initTransition(transition, finishTransaction, finishCallback);
 
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -305,8 +348,6 @@ class SplitScreenTransitions {
             WindowContainerTransaction wct,
             @Nullable RemoteTransition remoteTransition,
             Transitions.TransitionHandler handler,
-            @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback,
             int extraTransitType, boolean resizeAnim) {
         if (mPendingEnter != null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
@@ -314,20 +355,16 @@ class SplitScreenTransitions {
             return null;
         }
         final IBinder transition = mTransitions.startTransition(transitType, wct, handler);
-        setEnterTransition(transition, remoteTransition, consumedCallback, finishedCallback,
-                extraTransitType, resizeAnim);
+        setEnterTransition(transition, remoteTransition, extraTransitType, resizeAnim);
         return transition;
     }
 
     /** Sets a transition to enter split. */
     void setEnterTransition(@NonNull IBinder transition,
             @Nullable RemoteTransition remoteTransition,
-            @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback,
             int extraTransitType, boolean resizeAnim) {
         mPendingEnter = new EnterSession(
-                transition, consumedCallback, finishedCallback, remoteTransition, extraTransitType,
-                resizeAnim);
+                transition, remoteTransition, extraTransitType, resizeAnim);
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                 + " deduced Enter split screen");
@@ -565,12 +602,10 @@ class SplitScreenTransitions {
         final boolean mResizeAnim;
 
         EnterSession(IBinder transition,
-                @Nullable TransitionConsumedCallback consumedCallback,
-                @Nullable TransitionFinishedCallback finishedCallback,
                 @Nullable RemoteTransition remoteTransition,
                 int extraTransitType, boolean resizeAnim) {
-            super(transition, consumedCallback, finishedCallback, remoteTransition,
-                    extraTransitType);
+            super(transition, null /* consumedCallback */, null /* finishedCallback */,
+                    remoteTransition, extraTransitType);
             this.mResizeAnim = resizeAnim;
         }
     }

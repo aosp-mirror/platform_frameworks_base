@@ -513,6 +513,7 @@ public class DisplayRotation {
             }
 
             if (mDisplayContent.inTransition()
+                    && mDisplayContent.getDisplayPolicy().isScreenOnFully()
                     && !mDisplayContent.mTransitionController.useShellTransitionsRotation()) {
                 // Rotation updates cannot be performed while the previous rotation change animation
                 // is still in progress. Skip this update. We will try updating again after the
@@ -1729,7 +1730,9 @@ public class DisplayRotation {
     }
 
     /**
-     * Called by the DeviceStateManager callback when the device state changes.
+     * Called by the display manager just before it applied the device state, it is guaranteed
+     * that in case of physical display change the {@link DisplayRotation#physicalDisplayChanged}
+     * method will be invoked *after* this one.
      */
     void foldStateChanged(DeviceStateController.DeviceState deviceState) {
         if (mFoldController != null) {

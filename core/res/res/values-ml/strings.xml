@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ഈ ആപ്പ് Android-ന്റെ പഴയ പതിപ്പിനായാണ് സൃഷ്ടിച്ചിരിക്കുന്നത്. ഇത് ശരിയായി പ്രവർത്തിക്കണമെന്നില്ല, ഏറ്റവും പുതിയ സുരക്ഷാ, സ്വകാര്യതാ പരിരക്ഷകൾ ഇതിൽ ഉൾപ്പെടുന്നുമില്ല. അപ്ഡേറ്റിനായി തിരയുക അല്ലെങ്കിൽ ആപ്പിന്റെ ഡെവലപ്പറെ ബന്ധപ്പെടുക."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"ഈ ആപ്പ്, Android-ന്റെ എറ്റവും പുതിയ പതിപ്പിന് അനുയോജ്യമല്ല. അപ്ഡേറ്റിന് തിരയുക അല്ലെങ്കിൽ ആപ്പിന്റെ ഡെവലപ്പറെ ബന്ധപ്പെടുക."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"നിങ്ങൾക്ക് പുതിയ സന്ദേശങ്ങൾ ഉണ്ട്"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"കാണുന്നതിന് SMS ആപ്പ് തുറക്കുക"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ചില പ്രവർത്തനം പരിമിതപ്പെടാം"</string>
@@ -2165,20 +2166,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"ഔദ്യോഗിക <xliff:g id="APP">%s</xliff:g> തുറക്കണോ?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"സ്വകാര്യ <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"ഔദ്യോഗിക <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"ഔദ്യോഗിക ആപ്പിൽ നിന്ന് കോൾ ചെയ്യണോ?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ഔദ്യോഗിക ആപ്പിലേക്ക് മാറണോ?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"സ്ഥാപനം ഔദ്യോഗിക ആപ്പുകളിൽ നിന്ന് കോളുകൾ ചെയ്യാൻ മാത്രമേ നിങ്ങളെ അനുവദിക്കുന്നുള്ളൂ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"സ്ഥാപനം ഔദ്യോഗിക ആപ്പുകളിൽ നിന്ന് സന്ദേശമയയ്ക്കാൻ മാത്രമേ നിങ്ങളെ അനുവദിക്കുന്നുള്ളൂ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"വ്യക്തിപരമായ ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ഔദ്യോഗിക ബ്രൗസർ ഉപയോഗിക്കുക"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"കോൾ ചെയ്യുക"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"മാറുക"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"സിം നെറ്റ്‌വർക്ക് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"സിം നെറ്റ്‌വർക്ക് സബ്സെറ്റ് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"സിം കോർപ്പറേറ്റ് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>

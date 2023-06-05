@@ -16,9 +16,12 @@
 
 package com.android.wm.shell.transition;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -26,6 +29,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -190,6 +194,12 @@ public class Transitions implements RemoteCallable<Transitions>,
      * however it can't be too small since there is some potential IPC involved.
      */
     private static final int SYNC_ALLOWANCE_MS = 120;
+
+    /**
+     * Keyguard gets a more generous timeout to finish its animations, because we are always holding
+     * a sleep token during occlude/unocclude transitions and we want them to finish playing cleanly
+     */
+    private static final int SYNC_ALLOWANCE_KEYGUARD_MS = 2000;
 
     /** For testing only. Disables the force-finish timeout on sync. */
     private boolean mDisableForceSync = false;
@@ -492,6 +502,10 @@ public class Transitions implements RemoteCallable<Transitions>,
                 finishT.show(leash);
             } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                 finishT.hide(leash);
+            } else if (isOpening && mode == TRANSIT_CHANGE) {
+                // Just in case there is a race with another animation (eg. recents finish()).
+                // Changes are visible->visible so it's a problem if it isn't visible.
+                t.show(leash);
             }
         }
     }
@@ -541,7 +555,10 @@ public class Transitions implements RemoteCallable<Transitions>,
                     layer = -zSplitLine - i;
                 }
             } else if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
-                if (isOpening) {
+                if (isOpening
+                        // This is for when an activity launches while a different transition is
+                        // collecting.
+                        || change.hasFlags(FLAG_MOVED_TO_TOP)) {
                     // put on top
                     layer = zSplitLine + numChanges - i;
                 } else {
@@ -557,8 +574,8 @@ public class Transitions implements RemoteCallable<Transitions>,
                     layer = zSplitLine + numChanges - i;
                 }
             } else { // CHANGE or other
-                if (isClosing) {
-                    // Put below CLOSE mode.
+                if (isClosing || TransitionUtil.isOrderOnly(change)) {
+                    // Put below CLOSE mode (in the "static" section).
                     layer = zSplitLine - i;
                 } else {
                     // Put above CLOSE mode.
@@ -669,7 +686,7 @@ public class Transitions implements RemoteCallable<Transitions>,
                 // Sleep starts a process of forcing all prior transitions to finish immediately
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                         "Start finish-for-sync track %d", i);
-                finishForSync(i, null /* forceFinish */);
+                finishForSync(active, i, null /* forceFinish */);
             }
             if (hadPreceding) {
                 return false;
@@ -1017,6 +1034,9 @@ public class Transitions implements RemoteCallable<Transitions>,
         for (int i = 0; i < mPendingTransitions.size(); ++i) {
             if (mPendingTransitions.get(i).mToken == token) return true;
         }
+        for (int i = 0; i < mReadyDuringSync.size(); ++i) {
+            if (mReadyDuringSync.get(i).mToken == token) return true;
+        }
         for (int t = 0; t < mTracks.size(); ++t) {
             final Track tr = mTracks.get(t);
             for (int i = 0; i < tr.mReadyTransitions.size(); ++i) {
@@ -1068,6 +1088,16 @@ public class Transitions implements RemoteCallable<Transitions>,
                 }
             }
         }
+        if (request.getType() == TRANSIT_KEYGUARD_OCCLUDE && request.getTriggerTask() != null
+                && request.getTriggerTask().getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            // This freeform task is on top of keyguard, so its windowing mode should be changed to
+            // fullscreen.
+            if (wct == null) {
+                wct = new WindowContainerTransaction();
+            }
+            wct.setWindowingMode(request.getTriggerTask().token, WINDOWING_MODE_FULLSCREEN);
+            wct.setBounds(request.getTriggerTask().token, null);
+        }
         mOrganizer.startTransition(transitionToken, wct != null && wct.isEmpty() ? null : wct);
         active.mToken = transitionToken;
         // Currently, WMCore only does one transition at a time. If it makes a requestStart, it
@@ -1103,10 +1133,17 @@ public class Transitions implements RemoteCallable<Transitions>,
      *
      * This is then repeated until there are no more pending sleep transitions.
      *
+     * @param reason The SLEEP transition that triggered this round of finishes. We will continue
+     *               looping round finishing transitions as long as this is still waiting.
      * @param forceFinish When non-null, this is the transition that we last sent the SLEEP merge
      *                    signal to -- so it will be force-finished if it's still running.
      */
-    private void finishForSync(int trackIdx, @Nullable ActiveTransition forceFinish) {
+    private void finishForSync(ActiveTransition reason,
+            int trackIdx, @Nullable ActiveTransition forceFinish) {
+        if (!isTransitionKnown(reason.mToken)) {
+            Log.d(TAG, "finishForSleep: already played sync transition " + reason);
+            return;
+        }
         final Track track = mTracks.get(trackIdx);
         if (forceFinish != null) {
             final Track trk = mTracks.get(forceFinish.getTrack());
@@ -1150,8 +1187,11 @@ public class Transitions implements RemoteCallable<Transitions>,
             if (track.mActiveTransition == playing) {
                 if (!mDisableForceSync) {
                     // Give it a short amount of time to process it before forcing.
-                    mMainExecutor.executeDelayed(() -> finishForSync(trackIdx, playing),
-                            SYNC_ALLOWANCE_MS);
+                    final int tolerance = KeyguardTransitionHandler.handles(playing.mInfo)
+                            ? SYNC_ALLOWANCE_KEYGUARD_MS
+                            : SYNC_ALLOWANCE_MS;
+                    mMainExecutor.executeDelayed(
+                            () -> finishForSync(reason, trackIdx, playing), tolerance);
                 }
                 break;
             }

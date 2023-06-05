@@ -35,7 +35,7 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play சேவைகள்"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"உங்கள் மொபைலில் உள்ள படங்கள், மீடியா, அறிவிப்புகள் ஆகியவற்றை அணுக உங்கள் <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> சார்பாக <xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் அனுமதியைக் கோருகிறது"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"இந்தச் செயலைச் செய்ய &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&amp;gt சாதனத்தை அனுமதிக்கவா?"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"இந்தச் செயலைச் செய்ய &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ஐ அனுமதிக்கவா?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"அருகிலுள்ள சாதனங்களுக்கு ஆப்ஸையும் பிற சிஸ்டம் அம்சங்களையும் ஸ்ட்ரீம் செய்ய உங்கள் <xliff:g id="DEVICE_NAME">%2$s</xliff:g> சார்பாக <xliff:g id="APP_NAME">%1$s</xliff:g> அனுமதி கோருகிறது"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"சாதனம்"</string>
     <string name="summary_generic_single_device" msgid="4181180669689590417">"அழைப்பவரின் பெயர் போன்ற தகவலை உங்கள் மொபைல் மற்றும் <xliff:g id="DEVICE_NAME">%1$s</xliff:g> சாதனத்திற்கு இடையில் இந்த ஆப்ஸால் ஒத்திசைக்க முடியும்"</string>

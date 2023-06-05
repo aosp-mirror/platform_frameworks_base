@@ -72,6 +72,8 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         val resources: Resources = mock()
         whenever(resources.getStringArray(R.array.config_keyguardQuickAffordanceDefaults))
             .thenReturn(emptyArray())
+        whenever(resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled))
+            .thenReturn(true)
         whenever(context.resources).thenReturn(resources)
 
         testDispatcher = UnconfinedTestDispatcher()

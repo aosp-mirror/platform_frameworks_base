@@ -272,6 +272,7 @@ class AnimatableClockView @JvmOverloads constructor(
             color = lockScreenColor,
             animate = isAnimationEnabled,
             duration = APPEAR_ANIM_DURATION,
+            interpolator = Interpolators.EMPHASIZED_DECELERATE,
             delay = 0,
             onAnimationEnd = null
         )
@@ -562,7 +563,7 @@ class AnimatableClockView @JvmOverloads constructor(
         private const val DOUBLE_LINE_FORMAT_12_HOUR = "hh\nmm"
         private const val DOUBLE_LINE_FORMAT_24_HOUR = "HH\nmm"
         private const val DOZE_ANIM_DURATION: Long = 300
-        private const val APPEAR_ANIM_DURATION: Long = 350
+        private const val APPEAR_ANIM_DURATION: Long = 833
         private const val CHARGE_ANIM_DURATION_PHASE_0: Long = 500
         private const val CHARGE_ANIM_DURATION_PHASE_1: Long = 1000
         private const val COLOR_ANIM_DURATION: Long = 400

@@ -47,7 +47,7 @@ import kotlinx.coroutines.flow.onStart
 class KeyguardQuickAffordanceLocalUserSelectionManager
 @Inject
 constructor(
-    @Application context: Context,
+    @Application private val context: Context,
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
     broadcastDispatcher: BroadcastDispatcher,
@@ -126,6 +126,11 @@ constructor(
             }
 
     override fun getSelections(): Map<String, List<String>> {
+        // If the custom shortcuts feature is not enabled, ignore prior selections and use defaults
+        if (!context.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled)) {
+            return defaults
+        }
+
         val slotKeys = sharedPrefs.all.keys.filter { it.startsWith(KEY_PREFIX_SLOT) }
         val result =
             slotKeys

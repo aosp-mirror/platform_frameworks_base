@@ -33,6 +33,7 @@ import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockSettings
+import com.android.systemui.plugins.WeatherData
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -50,6 +51,7 @@ class DefaultClockController(
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
     private val settings: ClockSettings?,
+    private val hasStepClockAnimation: Boolean = false,
 ) : ClockController {
     override val smallClock: DefaultClockFaceController
     override val largeClock: LargeClockFaceController
@@ -170,7 +172,8 @@ class DefaultClockController(
         view: AnimatableClockView,
         seedColor: Int?,
     ) : DefaultClockFaceController(view, seedColor) {
-        override val config = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
+        override val config =
+            ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
 
         init {
             animations = LargeClockAnimations(view, 0f, 0f)
@@ -225,6 +228,8 @@ class DefaultClockController(
 
             clocks.forEach { it.refreshFormat() }
         }
+
+        override fun onWeatherDataChanged(data: WeatherData) {}
     }
 
     open inner class DefaultClockAnimations(
@@ -271,6 +276,8 @@ class DefaultClockController(
             // the top margin change in recomputePadding to make clock be centered
             view.translationY = 0.5f * view.bottom * (1 - swipingFraction)
         }
+
+        override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {}
     }
 
     inner class LargeClockAnimations(

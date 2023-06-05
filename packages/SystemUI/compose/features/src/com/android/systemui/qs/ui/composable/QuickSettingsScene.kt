@@ -27,28 +27,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** The Quick Settings (AKA "QS") scene shows the quick setting tiles. */
-@SysUISingleton
-class QuickSettingsScene
-@Inject
-constructor(
+class QuickSettingsScene(
     private val viewModel: QuickSettingsSceneViewModel,
 ) : ComposableScene {
     override val key = SceneKey.QuickSettings
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    override fun destinationScenes(
+        containerName: String,
+    ): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
                     UserAction.Swipe(Direction.UP) to SceneModel(SceneKey.Shade),
@@ -58,6 +55,7 @@ constructor(
 
     @Composable
     override fun Content(
+        containerName: String,
         modifier: Modifier,
     ) {
         QuickSettingsScene(

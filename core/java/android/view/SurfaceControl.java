@@ -786,7 +786,11 @@ public final class SurfaceControl implements Parcelable {
             mReleaseStack = null;
         }
         setUnreleasedWarningCallSite(callsite);
-        addToRegistry();
+        if (nativeObject != 0) {
+            // Only add valid surface controls to the registry. This is called at the end of this
+            // method since its information is dumped if the process threshold is reached.
+            addToRegistry();
+        }
     }
 
     /**
@@ -891,6 +895,10 @@ public final class SurfaceControl implements Parcelable {
             if ((mWidth > 0 || mHeight > 0) && (isEffectLayer() || isContainerLayer())) {
                 throw new IllegalStateException(
                         "Only buffer layers can set a valid buffer size.");
+            }
+
+            if (mName == null) {
+                Log.w(TAG, "Missing name for SurfaceControl", new Throwable());
             }
 
             if ((mFlags & FX_SURFACE_MASK) == FX_SURFACE_NORMAL) {
@@ -1254,6 +1262,9 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Note: Most callers should use {@link SurfaceControl.Builder} or one of the other constructors
+     *       to build an instance of a SurfaceControl. This constructor is mainly used for
+     *       unparceling and passing into an AIDL call as an out parameter.
      * @hide
      */
     public SurfaceControl() {
@@ -2495,6 +2506,7 @@ public final class SurfaceControl implements Parcelable {
     public static SurfaceControl mirrorSurface(SurfaceControl mirrorOf) {
         long nativeObj = nativeMirrorSurface(mirrorOf.mNativeObject);
         SurfaceControl sc = new SurfaceControl();
+        sc.mName = mirrorOf.mName + " (mirror)";
         sc.assignNativeObject(nativeObj, "mirrorSurface");
         return sc;
     }

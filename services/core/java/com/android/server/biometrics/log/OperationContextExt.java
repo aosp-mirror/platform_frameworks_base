@@ -241,9 +241,10 @@ public class OperationContextExt {
     }
 
     /** Update this object with the latest values from the given context. */
-    OperationContextExt update(@NonNull BiometricContext biometricContext) {
+    OperationContextExt update(@NonNull BiometricContext biometricContext, boolean isCrypto) {
         mAidlContext.isAod = biometricContext.isAod();
         mAidlContext.displayState = toAidlDisplayState(biometricContext.getDisplayState());
+        mAidlContext.isCrypto = isCrypto;
         setFirstSessionId(biometricContext);
 
         mIsDisplayOn = biometricContext.isDisplayOn();

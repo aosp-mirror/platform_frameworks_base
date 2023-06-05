@@ -15,6 +15,7 @@
  */
 package com.android.systemui.smartspace.dagger
 
+import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.content.Intent
 import android.view.View
@@ -81,7 +82,11 @@ interface SmartspaceViewComponent {
                         showOnLockscreen: Boolean
                 ) {
                     if (showOnLockscreen) {
-                        pi.send()
+                        val options = ActivityOptions.makeBasic()
+                                .setPendingIntentBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                .toBundle()
+                        pi.send(options)
                     } else {
                         activityStarter.startPendingIntentDismissingKeyguard(pi)
                     }

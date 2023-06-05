@@ -1202,6 +1202,14 @@ public class AppProfiler {
 
         mCachedAppsWatermarkData.updateCachedAppsHighWatermarkIfNecessaryLocked(
                 numCached + numEmpty, now);
+        boolean allChanged;
+        int trackerMemFactor;
+        synchronized (mService.mProcessStats.mLock) {
+            allChanged = mService.mProcessStats.setMemFactorLocked(memFactor,
+                    mService.mAtmInternal == null || !mService.mAtmInternal.isSleeping(),
+                    SystemClock.uptimeMillis() /* re-acquire the time within the lock */);
+            trackerMemFactor = mService.mProcessStats.getMemFactorLocked();
+        }
 
         if (mService.mConstants.USE_MODERN_TRIM) {
             // Modern trim is not sent based on lowmem state
@@ -1235,14 +1243,6 @@ public class AppProfiler {
 
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
-        boolean allChanged;
-        int trackerMemFactor;
-        synchronized (mService.mProcessStats.mLock) {
-            allChanged = mService.mProcessStats.setMemFactorLocked(memFactor,
-                    mService.mAtmInternal == null || !mService.mAtmInternal.isSleeping(),
-                    SystemClock.uptimeMillis() /* re-acquire the time within the lock */);
-            trackerMemFactor = mService.mProcessStats.getMemFactorLocked();
-        }
         if (memFactor != ADJ_MEM_FACTOR_NORMAL) {
             if (mLowRamStartTime == 0) {
                 mLowRamStartTime = now;

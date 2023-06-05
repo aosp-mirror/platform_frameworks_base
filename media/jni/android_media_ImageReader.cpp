@@ -768,6 +768,7 @@ static void ImageReader_unlockGraphicBuffer(JNIEnv* env, jobject /*thiz*/,
             android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env, buffer);
     if (graphicBuffer.get() == NULL) {
         jniThrowRuntimeException(env, "Invalid graphic buffer!");
+        return;
     }
 
     status_t res = graphicBuffer->unlock();

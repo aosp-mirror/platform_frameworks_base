@@ -3883,13 +3883,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * @return true if activity bounds are letterboxed or letterboxed for diplay cutout.
+     * @return {@code true} if activity bounds are letterboxed or letterboxed for display cutout.
+     * Note that it's always {@code false} if the activity is in pip mode.
      *
      * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
      * LetterboxUiController#shouldShowLetterboxUi} for more context.
      */
     boolean areAppWindowBoundsLetterboxed() {
         return mActivityRecord != null
+                && !mActivityRecord.inPinnedWindowingMode()
                 && (mActivityRecord.areBoundsLetterboxed() || isLetterboxedForDisplayCutout());
     }
 

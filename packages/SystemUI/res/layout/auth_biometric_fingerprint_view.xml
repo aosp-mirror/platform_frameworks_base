@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
+<!-- TODO(b/251476085): remove after BiometricFingerprintView is un-flagged -->
 <com.android.systemui.biometrics.AuthBiometricFingerprintView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/contents"

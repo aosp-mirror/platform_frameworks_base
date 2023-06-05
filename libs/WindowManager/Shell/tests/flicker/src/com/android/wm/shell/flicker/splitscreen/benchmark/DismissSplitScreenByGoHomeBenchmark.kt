@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
 import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -55,6 +56,7 @@ open class DismissSplitScreenByGoHomeBenchmark(override val flicker: FlickerTest
             thisTransition(this)
         }
 
+    @PlatinumTest(focusArea = "sysui")
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test

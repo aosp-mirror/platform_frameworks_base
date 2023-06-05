@@ -26,6 +26,8 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -57,6 +59,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     private val underTest =
         PasswordBouncerViewModel(
             interactor = bouncerInteractor,
+            isInputEnabled = MutableStateFlow(true).asStateFlow(),
         )
 
     @Before
@@ -82,7 +85,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onShown()
 
-            assertThat(message).isEqualTo(ENTER_YOUR_PASSWORD)
+            assertThat(message?.text).isEqualTo(ENTER_YOUR_PASSWORD)
             assertThat(password).isEqualTo("")
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -106,7 +109,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onPasswordInputChanged("password")
 
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
             assertThat(password).isEqualTo("password")
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -153,7 +156,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             underTest.onAuthenticateKeyPressed()
 
             assertThat(password).isEqualTo("")
-            assertThat(message).isEqualTo(WRONG_PASSWORD)
+            assertThat(message?.text).isEqualTo(WRONG_PASSWORD)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
@@ -176,13 +179,13 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             underTest.onPasswordInputChanged("wrong")
             underTest.onAuthenticateKeyPressed()
             assertThat(password).isEqualTo("")
-            assertThat(message).isEqualTo(WRONG_PASSWORD)
+            assertThat(message?.text).isEqualTo(WRONG_PASSWORD)
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             // Enter the correct password:
             underTest.onPasswordInputChanged("password")
-            assertThat(message).isEmpty()
+            assertThat(message?.text).isEmpty()
 
             underTest.onAuthenticateKeyPressed()
 

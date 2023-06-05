@@ -656,7 +656,7 @@
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"បានបិទ​ឧបករណ៍​ចាប់សញ្ញាជា​បណ្តោះអាសន្ន។"</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"មិនអាចប្រើ​ឧបករណ៍ចាប់ស្នាមម្រាមដៃ​បានទេ។ សូមទាក់ទង​ក្រុមហ៊ុនផ្ដល់​ការជួសជុល"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"បាន​ចុច​ប៊ូតុង​ថាមពល"</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"ម្រាមដៃ <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"ម្រាមដៃទី <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ប្រើស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ប្រើស្នាមម្រាមដៃ ឬ​ការចាក់សោអេក្រង់"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ប្រើ​ស្នាមម្រាមដៃ​របស់អ្នក ដើម្បីបន្ត"</string>
@@ -665,10 +665,10 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"មានអ្វីមួយខុសប្រក្រតី។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"រូបស្នាមម្រាមដៃ"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ដោះ​សោ​តាម​​ទម្រង់​មុខ"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ការដោះ​សោ​ដោយស្កេន​មុខ"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"មានបញ្ហា​ពាក់ព័ន្ធនឹង​មុខងារ​ដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ចុចដើម្បីលុប​គំរូមុខ​របស់អ្នក រួចបញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"រៀបចំ​ការដោះសោ​តាមទម្រង់មុខ"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"រៀបចំ​ការដោះសោ​ដោយស្កេនមុខ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ដោះសោទូរសព្ទ​របស់អ្នកដោយសម្លឹងមើលវា"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ដើម្បីប្រើមុខងារដោះសោតាមទម្រង់មុខ សូមបើក"<b>"ការចូលប្រើកាមេរ៉ា"</b>"នៅក្នុងការកំណត់ &gt; ឯកជនភាព"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"រៀបចំ​វិធីច្រើនទៀត​ដើម្បី​ដោះសោ"</string>
@@ -1715,7 +1715,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ការកែតម្រូវ​ពណ៌"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ពន្លឺតិចខ្លាំង"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ឧបករណ៍ស្តាប់"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ឧបករណ៍ជំនួយការស្ដាប់"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"លែង​គ្រាប់ចុចកម្រិតសំឡេង។ ដើម្បីបើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g> សូមចុច​គ្រាប់ចុចកម្រិតសំឡេងទាំងពីរឱ្យជាប់ម្ដងទៀត​រយៈពេល 3 វិនាទី។"</string>
@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"មិនអាច​ចូលប្រើប្រាស់​កម្មវិធី​នេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នកបាន​ទេ។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"កម្មវិធីនេះ​ត្រូវបានបង្កើតឡើង​សម្រាប់​កំណែ Android ចាស់​ជាងនេះ។ កម្មវិធីនេះអាចមិនដំណើរការបានត្រឹមត្រូវ និងមិនរួមបញ្ចូលការការពារឯកជនភាព និងសុវត្ថិភាពចុងក្រោយបំផុតទេ។ ពិនិត្យរកមើលកំណែថ្មី ឬទាក់ទងទៅអ្នកអភិវឌ្ឍន៍កម្មវិធី។"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"រក​មើល​កំណែ​ថ្មី"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"កម្មវិធីនេះ​មិនត្រូវគ្នាជាមួយ​កំណែ Android ចុងក្រោយបំផុត​ទេ។ សូមពិនិត្យរកមើល​កំណែថ្មី ឬទាក់ទងទៅ​អ្នកអភិវឌ្ឍន៍កម្មវិធី។"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"អ្នកមានសារថ្មី"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"បើកកម្មវិធីសារ SMS ដើម្បីមើល"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"មុខងារ​មួយចំនួន​អាច​ត្រូវ​បាន​កម្រិត"</string>

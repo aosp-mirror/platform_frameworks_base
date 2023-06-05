@@ -35,12 +35,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -72,6 +74,7 @@ import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.MessageQueue;
@@ -96,16 +99,17 @@ import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
+import com.android.server.display.DisplayManagerService.DeviceStateListener;
 import com.android.server.display.DisplayManagerService.SyncRoot;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.lights.LightsManager;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import com.google.common.collect.ImmutableMap;
-
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
+import com.google.common.collect.ImmutableMap;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -114,6 +118,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -544,6 +549,30 @@ public class DisplayManagerServiceTest {
                 new DisplayManagerService(mContext, mShortMockedInjector);
         registerDefaultDisplays(displayManager);
         displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+    }
+
+    /**
+     * Tests that we send the device state to window manager
+     */
+    @Test
+    public void testOnStateChanged_sendsStateChangedEventToWm() throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        registerDefaultDisplays(displayManager);
+        displayManager.windowManagerAndInputReady();
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        DeviceStateListener listener = displayManager.new DeviceStateListener();
+        Handler handler = displayManager.getDisplayHandler();
+        IDisplayManagerCallback displayChangesCallback = registerDisplayChangeCallback(
+                displayManager);
+
+        listener.onStateChanged(123);
+        waitForIdleHandler(handler);
+
+        InOrder inOrder = inOrder(mMockWindowManagerInternal, displayChangesCallback);
+        // Verify there are no display events before WM call
+        inOrder.verify(displayChangesCallback, never()).onDisplayEvent(anyInt(), anyInt());
+        inOrder.verify(mMockWindowManagerInternal).onDisplayManagerReceivedDeviceState(123);
     }
 
     /**
@@ -2052,6 +2081,15 @@ public class DisplayManagerServiceTest {
         displayDeviceInfo.copyFrom(displayDevice.getDisplayDeviceInfoLocked());
         displayDeviceInfo.modeId = modeId;
         updateDisplayDeviceInfo(displayManager, displayDevice, displayDeviceInfo);
+    }
+
+    private IDisplayManagerCallback registerDisplayChangeCallback(
+            DisplayManagerService displayManager) {
+        IDisplayManagerCallback displayChangesCallback = mock(IDisplayManagerCallback.class);
+        when(displayChangesCallback.asBinder()).thenReturn(new Binder());
+        DisplayManagerService.BinderService binderService = displayManager.new BinderService();
+        binderService.registerCallback(displayChangesCallback);
+        return displayChangesCallback;
     }
 
     private FakeDisplayManagerCallback registerDisplayListenerCallback(

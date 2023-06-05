@@ -19,6 +19,7 @@ package com.android.wm.shell.splitscreen;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
@@ -201,7 +202,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             // Inflates split decor view only when the root task is visible.
-            if (mRootTaskInfo.isVisible != taskInfo.isVisible) {
+            if (!ENABLE_SHELL_TRANSITIONS && mRootTaskInfo.isVisible != taskInfo.isVisible) {
                 if (taskInfo.isVisible) {
                     mSplitDecorManager.inflate(mContext, mRootLeash,
                             taskInfo.configuration.windowConfiguration.getBounds());
@@ -376,6 +377,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    void evictChildren(WindowContainerTransaction wct, int taskId) {
+        final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.get(taskId);
+        if (taskInfo != null) {
+            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+        }
+    }
+
     void reparentTopTask(WindowContainerTransaction wct) {
         wct.reparentTasks(null /* currentParent */, mRootTaskInfo.token,
                 CONTROLLED_WINDOWING_MODES, CONTROLLED_ACTIVITY_TYPES,
@@ -385,6 +393,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     void resetBounds(WindowContainerTransaction wct) {
         wct.setBounds(mRootTaskInfo.token, null);
         wct.setAppBounds(mRootTaskInfo.token, null);
+        wct.setSmallestScreenWidthDp(mRootTaskInfo.token, SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
     }
 
     void onSplitScreenListenerRegistered(SplitScreen.SplitScreenListener listener,

@@ -76,7 +76,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
     private fun AppVersion() {
         if (packageInfo.versionName == null) return
         Spacer(modifier = Modifier.height(4.dp))
-        SettingsBody(packageInfo.versionName)
+        SettingsBody(packageInfo.versionNameBidiWrapped)
     }
 
     @Composable
@@ -84,9 +84,14 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
         if (packageInfo.versionName == null) return
         Divider()
         Box(modifier = Modifier.padding(SettingsDimension.itemPadding)) {
-            val versionName = BidiFormatter.getInstance().unicodeWrap(packageInfo.versionName)
-            SettingsBody(stringResource(R.string.version_text, versionName))
+            SettingsBody(stringResource(R.string.version_text, packageInfo.versionNameBidiWrapped))
         }
+    }
+
+    private companion object {
+        /** Wrapped the version name, so its directionality still keep same when RTL. */
+        val PackageInfo.versionNameBidiWrapped: String
+            get() = BidiFormatter.getInstance().unicodeWrap(versionName)
     }
 }
 

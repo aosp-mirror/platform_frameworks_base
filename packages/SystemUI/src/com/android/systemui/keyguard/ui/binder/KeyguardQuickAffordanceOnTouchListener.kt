@@ -46,7 +46,7 @@ class KeyguardQuickAffordanceOnTouchListener(
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(v: View, event: MotionEvent): Boolean {
         return when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN ->
+            MotionEvent.ACTION_DOWN -> {
                 if (viewModel.configKey != null) {
                     downDisplayCoords.set(event.rawX, event.rawY)
                     if (isUsingAccurateTool(event)) {
@@ -62,21 +62,10 @@ class KeyguardQuickAffordanceOnTouchListener(
                                 .scaleX(PRESSED_SCALE)
                                 .scaleY(PRESSED_SCALE)
                                 .setDuration(longPressDurationMs)
-                                .withEndAction {
-                                    if (
-                                        falsingManager?.isFalseLongTap(
-                                            FalsingManager.MODERATE_PENALTY
-                                        ) == false
-                                    ) {
-                                        dispatchClick(viewModel.configKey)
-                                    }
-                                    cancel()
-                                }
                     }
-                    true
-                } else {
-                    false
                 }
+                false
+            }
             MotionEvent.ACTION_MOVE -> {
                 if (!isUsingAccurateTool(event)) {
                     // Moving too far while performing a long-press gesture cancels that
@@ -91,7 +80,7 @@ class KeyguardQuickAffordanceOnTouchListener(
                         cancel()
                     }
                 }
-                true
+                false
             }
             MotionEvent.ACTION_UP -> {
                 if (isUsingAccurateTool(event)) {
@@ -146,7 +135,7 @@ class KeyguardQuickAffordanceOnTouchListener(
                             }
                     )
                 }
-                true
+                false
             }
             MotionEvent.ACTION_CANCEL -> {
                 cancel()
@@ -179,7 +168,7 @@ class KeyguardQuickAffordanceOnTouchListener(
         view.setOnClickListener(null)
     }
 
-    private fun cancel(onAnimationEnd: Runnable? = null) {
+    fun cancel(onAnimationEnd: Runnable? = null) {
         longPressAnimator?.cancel()
         longPressAnimator = null
         view.animate().scaleX(1f).scaleY(1f).withEndAction(onAnimationEnd)

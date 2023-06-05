@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.android.systemui.bouncer.ui.composable
 
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,40 +33,43 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.android.systemui.R
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** The bouncer scene displays authentication challenges like PIN, password, or pattern. */
-@SysUISingleton
-class BouncerScene
-@Inject
-constructor(
+class BouncerScene(
     private val viewModel: BouncerViewModel,
+    private val dialogFactory: () -> AlertDialog,
 ) : ComposableScene {
     override val key = SceneKey.Bouncer
 
-    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
+    override fun destinationScenes(
+        containerName: String,
+    ): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
                     UserAction.Back to SceneModel(SceneKey.Lockscreen),
@@ -67,16 +77,23 @@ constructor(
             )
             .asStateFlow()
 
-    @Composable override fun Content(modifier: Modifier) = BouncerScene(viewModel, modifier)
+    @Composable
+    override fun Content(
+        containerName: String,
+        modifier: Modifier,
+    ) = BouncerScene(viewModel, dialogFactory, modifier)
 }
 
 @Composable
 private fun BouncerScene(
     viewModel: BouncerViewModel,
+    dialogFactory: () -> AlertDialog,
     modifier: Modifier = Modifier,
 ) {
-    val message: String by viewModel.message.collectAsState()
+    val message: BouncerViewModel.MessageViewModel by viewModel.message.collectAsState()
     val authMethodViewModel: AuthMethodBouncerViewModel? by viewModel.authMethod.collectAsState()
+    val dialogMessage: String? by viewModel.throttlingDialogMessage.collectAsState()
+    var dialog: Dialog? by remember { mutableStateOf(null) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -87,9 +104,10 @@ private fun BouncerScene(
         Crossfade(
             targetState = message,
             label = "Bouncer message",
-        ) {
+            animationSpec = if (message.isUpdateAnimated) tween() else snap(),
+        ) { message ->
             Text(
-                text = it,
+                text = message.text,
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyLarge,
             )
@@ -130,6 +148,27 @@ private fun BouncerScene(
                 text = stringResource(com.android.internal.R.string.lockscreen_emergency_call),
                 style = MaterialTheme.typography.bodyMedium,
             )
+        }
+
+        if (dialogMessage != null) {
+            if (dialog == null) {
+                dialog =
+                    dialogFactory().apply {
+                        setMessage(dialogMessage)
+                        setButton(
+                            DialogInterface.BUTTON_NEUTRAL,
+                            context.getString(R.string.ok),
+                        ) { _, _ ->
+                            viewModel.onThrottlingDialogDismissed()
+                        }
+                        setCancelable(false)
+                        setCanceledOnTouchOutside(false)
+                        show()
+                    }
+            }
+        } else {
+            dialog?.dismiss()
+            dialog = null
         }
     }
 }

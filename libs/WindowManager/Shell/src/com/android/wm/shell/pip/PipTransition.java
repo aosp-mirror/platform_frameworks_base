@@ -53,6 +53,7 @@ import android.os.SystemProperties;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.TaskSnapshot;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
@@ -247,11 +248,6 @@ public class PipTransition extends PipTransitionController {
             }
             updatePipForUnhandledTransition(currentPipTaskChange, startTransaction,
                     finishTransaction);
-        }
-
-        // Fade in the fadeout PIP when the fixed rotation is finished.
-        if (mPipTransitionState.isInPip() && !mInFixedRotation && mHasFadeOut) {
-            fadeExistingPip(true /* show */);
         }
 
         return false;
@@ -880,6 +876,14 @@ public class PipTransition extends PipTransitionController {
                 } else {
                     animator.setColorContentOverlay(mContext);
                 }
+            } else {
+                final TaskSnapshot snapshot = PipUtils.getTaskSnapshot(
+                        taskInfo.launchIntoPipHostTaskId, false /* isLowResolution */);
+                if (snapshot != null) {
+                    // use the task snapshot during the animation, this is for
+                    // launch-into-pip aka. content-pip use case.
+                    animator.setSnapshotContentOverlay(snapshot, sourceHintRect);
+                }
             }
         } else if (enterAnimationType == ANIM_TYPE_ALPHA) {
             animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,
@@ -1056,6 +1060,12 @@ public class PipTransition extends PipTransitionController {
                 .crop(finishTransaction, leash, destBounds)
                 .round(finishTransaction, leash, isInPip)
                 .shadow(finishTransaction, leash, isInPip);
+        // Make sure the PiP keeps invisible if it was faded out. If it needs to fade in, that will
+        // be handled by onFixedRotationFinished().
+        if (isInPip && mHasFadeOut) {
+            startTransaction.setAlpha(leash, 0f);
+            finishTransaction.setAlpha(leash, 0f);
+        }
     }
 
     /** Hides and shows the existing PIP during fixed rotation transition of other activities. */
@@ -1069,10 +1079,28 @@ public class PipTransition extends PipTransitionController {
         }
         final float alphaStart = show ? 0 : 1;
         final float alphaEnd = show ? 1 : 0;
+        final PipAnimationController.PipTransactionHandler transactionHandler =
+                new PipAnimationController.PipTransactionHandler() {
+            @Override
+            public boolean handlePipTransaction(SurfaceControl leash,
+                    SurfaceControl.Transaction tx, Rect destinationBounds, float alpha) {
+                if (alpha == 0) {
+                    if (show) {
+                        tx.setPosition(leash, destinationBounds.left, destinationBounds.top);
+                    } else {
+                        // Put PiP out of the display so it won't block touch when it is hidden.
+                        final Rect displayBounds = mPipDisplayLayoutState.getDisplayBounds();
+                        final int max = Math.max(displayBounds.width(), displayBounds.height());
+                        tx.setPosition(leash, max, max);
+                    }
+                }
+                return false;
+            }
+        };
         mPipAnimationController
                 .getAnimator(taskInfo, leash, mPipBoundsState.getBounds(), alphaStart, alphaEnd)
                 .setTransitionDirection(TRANSITION_DIRECTION_SAME)
-                .setPipAnimationCallback(mPipAnimationCallback)
+                .setPipTransactionHandler(transactionHandler)
                 .setDuration(mEnterExitAnimationDuration)
                 .start();
         mHasFadeOut = !show;

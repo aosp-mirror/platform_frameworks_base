@@ -462,11 +462,27 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // to the actual Task surface now.
             // PipTransition is responsible to fade it out and cleanup when finishing the enter PIP
             // transition.
-            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            final SurfaceControl.Transaction t = mSurfaceControlTransactionFactory.getTransaction();
             mTaskOrganizer.reparentChildSurfaceToTask(taskId, overlay, t);
             t.setLayer(overlay, Integer.MAX_VALUE);
             t.apply();
         }
+    }
+
+    /**
+     * Callback when launcher aborts swipe-pip-to-home operation.
+     */
+    public void abortSwipePipToHome(int taskId, ComponentName componentName) {
+        if (!mPipTransitionState.getInSwipePipToHomeTransition()) {
+            return;
+        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "Abort swipe-pip-to-home for %s", componentName);
+        sendOnPipTransitionCancelled(TRANSITION_DIRECTION_TO_PIP);
+        // Cleanup internal states
+        mPipTransitionState.setInSwipePipToHomeTransition(false);
+        mPictureInPictureParams = null;
+        mPipTransitionState.setTransitionState(PipTransitionState.UNDEFINED);
     }
 
     public ActivityManager.RunningTaskInfo getTaskInfo() {

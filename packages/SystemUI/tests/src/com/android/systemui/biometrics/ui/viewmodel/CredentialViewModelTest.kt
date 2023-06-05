@@ -2,12 +2,12 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.data.model.PromptKind
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.CredentialStatus
 import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
+import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
 import com.android.systemui.biometrics.promptInfo
+import com.android.systemui.biometrics.shared.model.PromptKind
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -40,17 +40,13 @@ class CredentialViewModelTest : SysuiTestCase() {
         viewModel =
             CredentialViewModel(
                 mContext,
-                BiometricPromptCredentialInteractor(
-                    dispatcher,
-                    promptRepository,
-                    credentialInteractor
-                )
+                PromptCredentialInteractor(dispatcher, promptRepository, credentialInteractor)
             )
     }
 
-    @Test fun setsPinInputFlags() = setsInputFlags(PromptKind.PIN, expectFlags = true)
-    @Test fun setsPasswordInputFlags() = setsInputFlags(PromptKind.PASSWORD, expectFlags = false)
-    @Test fun setsPatternInputFlags() = setsInputFlags(PromptKind.PATTERN, expectFlags = false)
+    @Test fun setsPinInputFlags() = setsInputFlags(PromptKind.Pin, expectFlags = true)
+    @Test fun setsPasswordInputFlags() = setsInputFlags(PromptKind.Password, expectFlags = false)
+    @Test fun setsPatternInputFlags() = setsInputFlags(PromptKind.Pattern, expectFlags = false)
 
     private fun setsInputFlags(type: PromptKind, expectFlags: Boolean) =
         runTestWithKind(type) {
@@ -65,10 +61,10 @@ class CredentialViewModelTest : SysuiTestCase() {
             job.cancel()
         }
 
-    @Test fun isStealthIgnoredByPin() = isStealthMode(PromptKind.PIN, expectStealth = false)
+    @Test fun isStealthIgnoredByPin() = isStealthMode(PromptKind.Pin, expectStealth = false)
     @Test
-    fun isStealthIgnoredByPassword() = isStealthMode(PromptKind.PASSWORD, expectStealth = false)
-    @Test fun isStealthUsedByPattern() = isStealthMode(PromptKind.PATTERN, expectStealth = true)
+    fun isStealthIgnoredByPassword() = isStealthMode(PromptKind.Password, expectStealth = false)
+    @Test fun isStealthUsedByPattern() = isStealthMode(PromptKind.Pattern, expectStealth = true)
 
     private fun isStealthMode(type: PromptKind, expectStealth: Boolean) =
         runTestWithKind(type, init = { credentialInteractor.stealthMode = true }) {
@@ -119,7 +115,7 @@ class CredentialViewModelTest : SysuiTestCase() {
 
         val attestations = mutableListOf<ByteArray?>()
         val remainingAttempts = mutableListOf<RemainingAttempts?>()
-        var header: HeaderViewModel? = null
+        var header: CredentialHeaderViewModel? = null
         val job = launch {
             launch { viewModel.validatedAttestation.toList(attestations) }
             launch { viewModel.remainingAttempts.toList(remainingAttempts) }
@@ -147,7 +143,7 @@ class CredentialViewModelTest : SysuiTestCase() {
 
         val attestations = mutableListOf<ByteArray?>()
         val remainingAttempts = mutableListOf<RemainingAttempts?>()
-        var header: HeaderViewModel? = null
+        var header: CredentialHeaderViewModel? = null
         val job = launch {
             launch { viewModel.validatedAttestation.toList(attestations) }
             launch { viewModel.remainingAttempts.toList(remainingAttempts) }
@@ -169,7 +165,7 @@ class CredentialViewModelTest : SysuiTestCase() {
     }
 
     private fun runTestWithKind(
-        kind: PromptKind = PromptKind.PIN,
+        kind: PromptKind = PromptKind.Pin,
         init: () -> Unit = {},
         block: suspend TestScope.() -> Unit,
     ) =

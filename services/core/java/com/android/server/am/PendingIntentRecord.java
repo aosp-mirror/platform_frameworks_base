@@ -42,6 +42,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerWhitelistManager;
 import android.os.PowerWhitelistManager.ReasonCode;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
@@ -348,21 +349,22 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
      * use caller's BAL permission.
      */
     public static BackgroundStartPrivileges getBackgroundStartPrivilegesAllowedByCaller(
-            @Nullable ActivityOptions activityOptions, int callingUid) {
+            @Nullable ActivityOptions activityOptions, int callingUid,
+            @Nullable String callingPackage) {
         if (activityOptions == null) {
             // since the ActivityOptions were not created by the app itself, determine the default
             // for the app
-            return getDefaultBackgroundStartPrivileges(callingUid);
+            return getDefaultBackgroundStartPrivileges(callingUid, callingPackage);
         }
         return getBackgroundStartPrivilegesAllowedByCaller(activityOptions.toBundle(),
-                callingUid);
+                callingUid, callingPackage);
     }
 
     private static BackgroundStartPrivileges getBackgroundStartPrivilegesAllowedByCaller(
-            @Nullable Bundle options, int callingUid) {
+            @Nullable Bundle options, int callingUid, @Nullable String callingPackage) {
         if (options == null || !options.containsKey(
                         ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED)) {
-            return getDefaultBackgroundStartPrivileges(callingUid);
+            return getDefaultBackgroundStartPrivileges(callingUid, callingPackage);
         }
         return options.getBoolean(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED)
                 ? BackgroundStartPrivileges.ALLOW_BAL
@@ -381,8 +383,18 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                     android.Manifest.permission.LOG_COMPAT_CHANGE
             })
     public static BackgroundStartPrivileges getDefaultBackgroundStartPrivileges(
-            int callingUid) {
-        boolean isChangeEnabledForApp = CompatChanges.isChangeEnabled(
+            int callingUid, @Nullable String callingPackage) {
+        if (UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
+            // We temporarily allow BAL for system processes, while we verify that all valid use
+            // cases are opted in explicitly to grant their BAL permission.
+            // Background: In many cases devices are running additional apps that share UID with
+            // the system. If one of these apps targets a lower SDK the change is not active, but
+            // as soon as that app is upgraded (or removed) BAL would be blocked. (b/283138430)
+            return BackgroundStartPrivileges.ALLOW_BAL;
+        }
+        boolean isChangeEnabledForApp = callingPackage != null ? CompatChanges.isChangeEnabled(
+                DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingPackage,
+                UserHandle.getUserHandleForUid(callingUid)) : CompatChanges.isChangeEnabled(
                 DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingUid);
         if (isChangeEnabledForApp) {
             return BackgroundStartPrivileges.ALLOW_FGS;
@@ -638,7 +650,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         // temporarily allow receivers and services to open activities from background if the
         // PendingIntent.send() caller was foreground at the time of sendInner() call
         if (uid != callingUid && controller.mAtmInternal.isUidForeground(callingUid)) {
-            return getBackgroundStartPrivilegesAllowedByCaller(options, callingUid);
+            return getBackgroundStartPrivilegesAllowedByCaller(options, callingUid, null);
         }
         return BackgroundStartPrivileges.NONE;
     }

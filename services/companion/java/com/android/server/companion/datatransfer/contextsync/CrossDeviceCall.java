@@ -25,8 +25,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
+import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telecom.VideoProfile;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -39,9 +41,11 @@ import java.util.UUID;
 public class CrossDeviceCall {
 
     private static final String TAG = "CrossDeviceCall";
+    private static final String SEPARATOR = "::";
 
     private final String mId;
     private final Call mCall;
+    private final int mUserId;
     @VisibleForTesting boolean mIsEnterprise;
     private final String mCallingAppPackageName;
     private String mCallingAppName;
@@ -52,6 +56,7 @@ public class CrossDeviceCall {
     private String mContactDisplayName;
     private Uri mHandle;
     private int mHandlePresentation;
+    private int mDirection;
     private boolean mIsMuted;
     private final Set<Integer> mControls = new HashSet<>();
     private final boolean mIsCallPlacedByContextSync;
@@ -73,22 +78,24 @@ public class CrossDeviceCall {
                 ? callDetails.getIntentExtras().getString(CrossDeviceSyncController.EXTRA_CALL_ID)
                 : null;
         final String generatedId = UUID.randomUUID().toString();
-        mId = predefinedId != null ? (generatedId + predefinedId) : generatedId;
+        mId = predefinedId != null ? (generatedId + SEPARATOR + predefinedId) : generatedId;
         if (call != null) {
             call.putExtra(CrossDeviceSyncController.EXTRA_CALL_ID, mId);
         }
-        mIsCallPlacedByContextSync =
-                new ComponentName(context, CallMetadataSyncConnectionService.class)
-                        .equals(callDetails.getAccountHandle().getComponentName());
-        mCallingAppPackageName =
-                callDetails.getAccountHandle().getComponentName().getPackageName();
+        final PhoneAccountHandle handle = callDetails.getAccountHandle();
+        mUserId = handle != null ? handle.getUserHandle().getIdentifier() : -1;
+        mIsCallPlacedByContextSync = handle != null
+                && new ComponentName(context, CallMetadataSyncConnectionService.class)
+                .equals(handle.getComponentName());
+        mCallingAppPackageName = handle != null
+                ? callDetails.getAccountHandle().getComponentName().getPackageName() : "";
         mIsEnterprise = (callDetails.getCallProperties() & Call.Details.PROPERTY_ENTERPRISE_CALL)
                 == Call.Details.PROPERTY_ENTERPRISE_CALL;
         final PackageManager packageManager = context.getPackageManager();
         try {
             final ApplicationInfo applicationInfo = packageManager
-                    .getApplicationInfo(mCallingAppPackageName,
-                            PackageManager.ApplicationInfoFlags.of(0));
+                    .getApplicationInfoAsUser(mCallingAppPackageName,
+                            PackageManager.ApplicationInfoFlags.of(0), mUserId);
             mCallingAppName = packageManager.getApplicationLabel(applicationInfo).toString();
             mCallingAppIcon = BitmapUtils.renderDrawableToByteArray(
                     packageManager.getApplicationIcon(applicationInfo));
@@ -128,8 +135,19 @@ public class CrossDeviceCall {
         mContactDisplayName = callDetails.getContactDisplayName();
         mHandle = callDetails.getHandle();
         mHandlePresentation = callDetails.getHandlePresentation();
+        final int direction = callDetails.getCallDirection();
+        if (direction == Call.Details.DIRECTION_INCOMING) {
+            mDirection = android.companion.Telecom.Call.INCOMING;
+        } else if (direction == Call.Details.DIRECTION_OUTGOING) {
+            mDirection = android.companion.Telecom.Call.OUTGOING;
+        } else {
+            mDirection = android.companion.Telecom.Call.UNKNOWN_DIRECTION;
+        }
         mStatus = convertStateToStatus(callDetails.getState());
         mControls.clear();
+        if (mStatus == android.companion.Telecom.Call.DIALING) {
+            mControls.add(android.companion.Telecom.END);
+        }
         if (mStatus == android.companion.Telecom.Call.RINGING
                 || mStatus == android.companion.Telecom.Call.RINGING_SILENCED) {
             mControls.add(android.companion.Telecom.ACCEPT);
@@ -170,6 +188,8 @@ public class CrossDeviceCall {
                 return android.companion.Telecom.Call.RINGING_SIMULATED;
             case Call.STATE_DISCONNECTED:
                 return android.companion.Telecom.Call.DISCONNECTED;
+            case Call.STATE_DIALING:
+                return android.companion.Telecom.Call.DIALING;
             default:
                 Slog.e(TAG, "Couldn't resolve state to status: " + callState);
                 return android.companion.Telecom.Call.UNKNOWN_STATUS;
@@ -195,6 +215,8 @@ public class CrossDeviceCall {
                 return Call.STATE_SIMULATED_RINGING;
             case android.companion.Telecom.Call.DISCONNECTED:
                 return Call.STATE_DISCONNECTED;
+            case android.companion.Telecom.Call.DIALING:
+                return Call.STATE_DIALING;
             case android.companion.Telecom.Call.UNKNOWN_STATUS:
             default:
                 return Call.STATE_NEW;
@@ -207,6 +229,10 @@ public class CrossDeviceCall {
 
     public Call getCall() {
         return mCall;
+    }
+
+    public int getUserId() {
+        return mUserId;
     }
 
     public String getCallingAppName() {
@@ -231,11 +257,11 @@ public class CrossDeviceCall {
             // Cannot use any contact information.
             return getNonContactString();
         }
-        return mContactDisplayName != null ? mContactDisplayName : getNonContactString();
+        return TextUtils.isEmpty(mContactDisplayName) ? getNonContactString() : mContactDisplayName;
     }
 
     private String getNonContactString() {
-        if (mCallerDisplayName != null
+        if (!TextUtils.isEmpty(mCallerDisplayName)
                 && mCallerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
             return mCallerDisplayName;
         }
@@ -248,6 +274,10 @@ public class CrossDeviceCall {
 
     public int getStatus() {
         return mStatus;
+    }
+
+    public int getDirection() {
+        return mDirection;
     }
 
     public Set<Integer> getControls() {

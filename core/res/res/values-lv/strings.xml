@@ -1698,7 +1698,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"IZSLĒGTA"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vai atļaut pakalpojumam <xliff:g id="SERVICE">%1$s</xliff:g> pilnībā kontrolēt jūsu ierīci?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pilnīga kontrole ir piemērota lietotnēm, kas nepieciešamas lietotājiem ar īpašām vajadzībām, taču ne lielākajai daļai lietotņu."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skatīt un pārvaldīt ekrānu"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekrāna skatīšana un pārvaldīšana"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Tā var nolasīt visu ekrānā esošo saturu un attēlot saturu citām lietotnēm."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Darbību skatīšana un veikšana"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Tā var izsekot jūsu mijiedarbību ar lietotni vai aparatūras sensoru un mijiedarboties ar lietotnēm jūsu vārdā."</string>
@@ -1976,6 +1976,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ierīcē <xliff:g id="DEVICE">%1$s</xliff:g> nevar piekļūt šai funkcijai. Mēģiniet tai piekļūt tālrunī."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Šī lietotne ir paredzēta vecākai Android versijai. Tā var nedarboties pareizi un neietver jaunākās drošības un konfidencialitātes aizsardzības funkcijas. Pārbaudiet atjauninājumu pieejamību vai sazinieties ar lietotnes izstrādātāju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Meklēt atjauninājumu"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Šī lietotne nav saderīga ar jaunāko Android versiju. Pārbaudiet atjauninājumu pieejamību vai sazinieties ar lietotnes izstrādātāju."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jums ir jaunas īsziņas."</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Lai skatītu, atveriet īsziņu lietotni."</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Funkcijas var būt ierobežotas"</string>
@@ -2166,20 +2167,14 @@
     <string name="miniresolver_open_work" msgid="6286176185835401931">"Vai atvērt lietotni <xliff:g id="APP">%s</xliff:g> darba profilā?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Vai atvērt lietotnes <xliff:g id="APP">%s</xliff:g> personīgajā profilā?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Vai atvērt lietotnes <xliff:g id="APP">%s</xliff:g> darba profilā?"</string>
-    <!-- no translation found for miniresolver_call_in_work (528779988307529039) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch_to_work (1042640606122638596) -->
-    <skip />
-    <!-- no translation found for miniresolver_call_information (6739417525304184083) -->
-    <skip />
-    <!-- no translation found for miniresolver_sms_information (4311292661329483088) -->
-    <skip />
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Vai zvanīt no darba lietotnes?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vai pārslēgties uz darba lietotni?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Jūsu organizācija ļauj jums veikt zvanus tikai no darba lietotnēm."</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Jūsu organizācija ļauj jums sūtīt ziņojumus tikai no darba lietotnēm."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Izmantot personīgo pārlūku"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Izmantot darba pārlūku"</string>
-    <!-- no translation found for miniresolver_call (6386870060423480765) -->
-    <skip />
-    <!-- no translation found for miniresolver_switch (8011924662117617451) -->
-    <skip />
+    <string name="miniresolver_call" msgid="6386870060423480765">"Zvanīt"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Pārslēgties"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM tīkla atbloķēšanas PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM tīkla apakškopas atbloķēšanas PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM Corporate atbloķēšanas PIN"</string>

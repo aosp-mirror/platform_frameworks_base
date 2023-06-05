@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -103,6 +104,7 @@ open class CloseImeToAppOnPressBackTest(flicker: FlickerTest) : BaseTest(flicker
 
     @Presubmit
     @Test
+    @PlatinumTest(focusArea = "ime")
     @IwTest(focusArea = "ime")
     override fun cujCompleted() {
         super.cujCompleted()

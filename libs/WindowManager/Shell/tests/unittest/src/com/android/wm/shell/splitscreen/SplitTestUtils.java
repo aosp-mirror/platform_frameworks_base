@@ -44,11 +44,15 @@ public class SplitTestUtils {
 
     static SplitLayout createMockSplitLayout() {
         final Rect dividerBounds = new Rect(48, 0, 52, 100);
+        final Rect bounds1 = new Rect(0, 0, 40, 100);
+        final Rect bounds2 = new Rect(60, 0, 100, 100);
         final SurfaceControl leash = createMockSurface();
         SplitLayout out = mock(SplitLayout.class);
         doReturn(dividerBounds).when(out).getDividerBounds();
         doReturn(dividerBounds).when(out).getRefDividerBounds();
         doReturn(leash).when(out).getDividerLeash();
+        doReturn(bounds1).when(out).getBounds1();
+        doReturn(bounds2).when(out).getBounds2();
         return out;
     }
 
