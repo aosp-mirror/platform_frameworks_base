@@ -512,9 +512,10 @@ private class Spaghetti(
         }
 
         applicationScope.launch {
-            viewModel.showTemporaryHelp(
+            // help messages from the HAL should be displayed as temporary (i.e. soft) errors
+            viewModel.showTemporaryError(
                 help,
-                messageAfterHelp = modalities.asDefaultHelpMessage(applicationContext),
+                messageAfterError = modalities.asDefaultHelpMessage(applicationContext),
             )
         }
     }
