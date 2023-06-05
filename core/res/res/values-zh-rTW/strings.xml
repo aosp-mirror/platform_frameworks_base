@@ -461,10 +461,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"允許應用程式修改平板電腦的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允許應用程式修改 Android TV 裝置的通話記錄，包括來電和撥出電話相關資料。惡意應用程式可能會藉此清除或修改你的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
-    <string name="permlab_bodySensors" msgid="662918578601619569">"在使用期間可存取人體感應器資料，例如心跳速率"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心跳速率"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"在使用期間可存取人體感應器資料，例如心率"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心率、體溫和血氧比例。"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心率"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心率、體溫和血氧比例。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳細資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"這個應用程式可讀取所有儲存在 Android TV 裝置上的日曆活動，以及共用或儲存日曆資料。"</string>
