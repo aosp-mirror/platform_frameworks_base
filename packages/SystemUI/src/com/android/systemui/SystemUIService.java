@@ -82,11 +82,8 @@ public class SystemUIService extends Service {
         mLogBufferFreezer.attach(mBroadcastDispatcher);
 
         // Attempt to dump all LogBuffers for any uncaught exception
-        mUncaughtExceptionPreHandlerManager.registerHandler((thread, throwable) -> {
-            if (throwable instanceof Exception) {
-                mLogBufferEulogizer.record(((Exception) throwable));
-            }
-        });
+        mUncaughtExceptionPreHandlerManager.registerHandler(
+                (thread, throwable) -> mLogBufferEulogizer.record(throwable));
 
         // If configured, set up a battery notification
         if (getResources().getBoolean(R.bool.config_showNotificationForUnknownBatteryState)) {
