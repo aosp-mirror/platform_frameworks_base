@@ -270,6 +270,17 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
+    public void cancelExpansionAndCollapseShade() {
+        if (mNotificationPanelViewController.isTracking()) {
+            mNotificationShadeWindowViewController.cancelCurrentTouch();
+        }
+        if (mNotificationPanelViewController.isPanelExpanded()
+                && mStatusBarStateController.getState() == StatusBarState.SHADE) {
+            animateCollapseShade();
+        }
+    }
+
+    @Override
     public void collapseOnMainThread() {
         if (Looper.getMainLooper().isCurrentThread()) {
             collapseShade();

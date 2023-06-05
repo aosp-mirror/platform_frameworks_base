@@ -2960,19 +2960,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mShadeSurface.setBouncerShowing(bouncerShowing);
     }
 
-    /**
-     * Collapses the notification shade if it is tracking or expanded.
-     */
-    @Override
-    public void collapseShade() {
-        if (mShadeSurface.isTracking()) {
-            mNotificationShadeWindowViewController.cancelCurrentTouch();
-        }
-        if (mShadeSurface.isPanelExpanded() && mState == StatusBarState.SHADE) {
-            mShadeController.animateCollapseShade();
-        }
-    }
-
     @VisibleForTesting
     final WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
         @Override
