@@ -125,6 +125,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -4014,8 +4016,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         ShortcutUser user = new ShortcutUser(mService, 0);
 
-        File corruptedShortcutPackage = new File("/data/local/tmp/cts/content/",
+        File corruptedShortcutPackage = new File(getTestContext().getFilesDir(),
                 "broken_shortcut.xml");
+        Files.copy(new File("/data/local/tmp/cts/content/", "broken_shortcut.xml").toPath(),
+                corruptedShortcutPackage.toPath(), StandardCopyOption.REPLACE_EXISTING);
         assertNull(ShortcutPackage.loadFromFile(mService, user, corruptedShortcutPackage, false));
     }
 
@@ -4114,6 +4118,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     + "<user locales=\"en\" last-app-scan-time2=\"14400000");
         }
         try (Writer os = new FileWriter(mService.getUserFile(USER_10).getBaseFile())) {
+            os.write("<?xml version='1.0' encoding='utf");
+        }
+        ShortcutPackage sp = mService.getUserShortcutsLocked(USER_0).getPackageShortcutsIfExists(
+                CALLING_PACKAGE_1);
+        try (Writer os = new FileWriter(sp.getShortcutPackageItemFile().getPath())) {
             os.write("<?xml version='1.0' encoding='utf");
         }
 
