@@ -308,27 +308,10 @@ class WallpaperController {
         }
     }
 
-    private boolean shouldWallpaperBeVisible(WindowState wallpaperTarget) {
-        if (DEBUG_WALLPAPER) {
-            Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + " prev="
-                    + mPrevWallpaperTarget);
-        }
-        return wallpaperTarget != null || mPrevWallpaperTarget != null;
-    }
-
     boolean isWallpaperTargetAnimating() {
         return mWallpaperTarget != null && mWallpaperTarget.isAnimating(TRANSITION | PARENTS)
                 && (mWallpaperTarget.mActivityRecord == null
                         || !mWallpaperTarget.mActivityRecord.isWaitingForTransitionStart());
-    }
-
-    void updateWallpaperVisibility() {
-        final boolean visible = shouldWallpaperBeVisible(mWallpaperTarget);
-
-        for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.setVisibility(visible);
-        }
     }
 
     /**
@@ -801,11 +784,20 @@ class WallpaperController {
         result.setWallpaperTarget(wallpaperTarget);
     }
 
+    public void updateWallpaperTokens(boolean keyguardLocked) {
+        if (DEBUG_WALLPAPER) {
+            Slog.v(TAG, "Wallpaper vis: target " + mWallpaperTarget + " prev="
+                    + mPrevWallpaperTarget);
+        }
+        updateWallpaperTokens(mWallpaperTarget != null || mPrevWallpaperTarget != null,
+                keyguardLocked);
+    }
+
     /**
      * Change the visibility of the top wallpaper to {@param visibility} and hide all the others.
      */
-    private void updateWallpaperTokens(boolean visibility, boolean locked) {
-        WindowState topWallpaper = mFindResults.getTopWallpaper(locked);
+    private void updateWallpaperTokens(boolean visibility, boolean keyguardLocked) {
+        WindowState topWallpaper = mFindResults.getTopWallpaper(keyguardLocked);
         WallpaperWindowToken topWallpaperToken =
                 topWallpaper == null ? null : topWallpaper.mToken.asWallpaperToken();
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {

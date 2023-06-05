@@ -1065,7 +1065,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (obscuredChanged && w.isVisible() && mWallpaperController.isWallpaperTarget(w)) {
             // This is the wallpaper target and its obscured state changed... make sure the
             // current wallpaper's visibility has been updated accordingly.
-            mWallpaperController.updateWallpaperVisibility();
+            mWallpaperController.updateWallpaperTokens(mDisplayContent.isKeyguardLocked());
         }
 
         w.handleWindowMovedIfNeeded();
