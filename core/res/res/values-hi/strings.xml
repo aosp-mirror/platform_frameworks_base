@@ -239,7 +239,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV डिवाइस में फ़ोन से जुड़े विकल्प"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"फ़ोन विकल्‍प"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"स्‍क्रीन लॉक"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"पावर बंद करें"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"बंद करें"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"पावर"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"रीस्टार्ट करें"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"आपातकालीन"</string>
@@ -303,7 +303,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करें"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"मैसेज (एसएमएस)"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"फ़ाइलें"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"फ़ाइल"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"अपने डिवाइस में मौजूद फ़ाइलों का ऐक्सेस दें"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"संगीत और ऑडियो"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"आपके डिवाइस पर संगीत और ऑडियो को ऐक्सेस करने की अनुमति"</string>
@@ -551,6 +551,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"अगर ऐप्लिकेशन को अनुमति दी जाती है, तो वह पैसे चुकाने की आपकी उस पसंदीदा सेवा के बारे में जानकारी पा सकता है जो NFC का इस्तेमाल करती है. इसमें रजिस्टर किए गए डिवाइस और उनके आउटपुट के रूट जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नियर फ़ील्‍ड कम्‍यूनिकेशन नियंत्रित करें"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ऐप्स  को नियर फ़ील्ड कम्यूनिकेशन (NFC) टैग, कार्ड, और रीडर के साथ संचार करने देता है."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"सुरक्षा चिप में होने वाला लेन-देन की जानकारी"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"इससे ऐप्लिकेशन को सुरक्षा चिप पर होने वाले लेन-देन की जानकारी मिलेगी."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"अपना स्‍क्रीन लॉक अक्षम करें"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ऐप्स को कीलॉक और कोई भी संबद्ध पासवर्ड सुरक्षा बंद करने देता है. उदाहरण के लिए, इनकमिंग फ़ोन कॉल पाते समय फ़ोन, कीलॉक को बंद कर देता है, फिर कॉल खत्म होने पर कीलॉक को फिर से चालू कर देता है."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"जानें कि स्क्रीन लॉक कितना मुश्किल बनाया गया है"</string>
@@ -588,13 +590,13 @@
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फ़िंगरप्रिंट की पहचान नहीं की जा सकी. फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फ़िंगरप्रिंट सेंसर को साफ़ करके फिर से कोशिश करें"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"फ़िंगरप्रिंट सेंसर को साफ़ करके फिर से कोशिश करें"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेंसर को उंगली से ज़ोर से दबाएं"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेंसर को उंगली से दबाकर रखें"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"किसी दूसरे फ़िंगरप्रिंट से कोशिश करें"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"बहुत रोशनी है"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"पावर बटन दबाया गया"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"सेंसर पर सही तरीके से उंगली लगाने की कोशिश करें"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"फ़िंगरप्रिंट सेट अप करते समय, अपनी उंगली को हर बार थोड़ी अलग स्थिति में रखें"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"फ़िंगरप्रिंट सेट अप करते समय, अपनी उंगली को हर बार एक अलग ऐंगल में रखें"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फ़िंगरप्रिंट की पहचान नहीं हो पाई"</string>
@@ -642,10 +644,10 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"फ़ोन को नज़दीक लाएं"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"फ़ोन को थोड़ा और ऊपर ले जाएं"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"फ़ोन को थोड़ा नीचे ले जाएं"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"फ़ोन को अपने बाईं ओर ले जाएं"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"फ़ोन को अपने दाईं ओर ले जाएं"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"फ़ोन को अपनी बाईं ओर ले जाएं"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"फ़ोन को अपनी दाईं ओर ले जाएं"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"कृपया अपने डिवाइस की तरफ़ सीधे देखें."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"आपका चेहरा नहीं दिख रहा है. फ़ोन को अपनी आंखों की सीध में पकड़कर रखें."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"आपका चेहरा नहीं दिख रहा है. फ़ोन को अपनी आंखों की सीध में रखें."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"डिवाइस बहुत ज़्यादा हिल रहा है. फ़ोन को बिना हिलाएं पकड़ें."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"कृपया फिर से अपने चेहरे की पहचान कराएं."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"चेहरे की पहचान नहीं हुई. फिर से कोशिश करें."</string>

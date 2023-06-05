@@ -553,6 +553,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Подія, пов’язана з транcакцією в Компоненті захисту"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Надає додатку доступ до інформації про транcакції, що відбуваються в Компоненті захисту."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"вимикати блокування екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запитувати рівень складності блокування екрана"</string>
@@ -663,7 +665,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Не вдається створити модель обличчя. Повторіть спробу."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Виявлено темні окуляри. Обличчя має бути видно повністю."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Виявлено аксесуар, який закриває обличчя. Обличчя має бути видно повністю."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Обличчя не видно повністю, бо його закриває аксесуар."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
@@ -2279,7 +2281,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Розблокуйте мікрофон пристрою"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Розблокуйте камеру пристрою"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Для &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; та всіх додатків і сервісів"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Розблокувати"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Надати"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Конфіденційність датчиків"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок додатка"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Зображення фірмової символіки додатка"</string>

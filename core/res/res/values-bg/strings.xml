@@ -551,6 +551,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дава възможност на приложението да получава информация за предпочитаната услуга за плащане чрез NFC, като например регистрирани помощни средства и местоназначение."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролиране на комуникацията в близкото поле"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Събитие за транзакции в защитен елемент"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Разрешава на приложението да получава информация за транзакциите, които се осъществяват в защитен елемент."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"деактивиране на заключването на екрана ви"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"заявяване на сложност на опцията за заключване на екрана"</string>
@@ -1611,7 +1613,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Таблет"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевизор"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Докинг станц.: Високогов."</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Високоговорители докинг станция"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Външно устройство"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Слушалки"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -2055,7 +2057,7 @@
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"В регистрационните файлове за устройството се записва какво се извършва на него. Приложенията могат да използват тези регистрационни файлове, за да откриват и отстраняват проблеми.\n\nНякои регистрационни файлове за устройството може да съдържат поверителна информация, затова разрешавайте достъп до всички тях само на приложения, на които имате доверие. \n\nАко не разрешите на това приложение достъп до всички регистрационни файлове за устройството, то пак може да осъществява достъп до собствените си регистрационни файлове. Производителят на устройството може да има достъп до някои регистрационни файлове или информация на устройството ви.\n\nНаучете повече на адрес g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Да не се показва пак"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> иска да показва части от <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Редактиране"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Редакти­ране"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"При обаждания и известия устройството ще вибрира"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Обажданията и известията ще бъдат заглушени"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Промени в системата"</string>
