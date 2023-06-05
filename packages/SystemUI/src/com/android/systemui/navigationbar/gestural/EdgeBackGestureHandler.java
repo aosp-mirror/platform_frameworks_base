@@ -885,6 +885,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     private boolean isTrackpadDevice(int deviceId) {
         InputDevice inputDevice = mInputManager.getInputDevice(deviceId);
+        if (inputDevice == null) {
+            return false;
+        }
         return inputDevice.getSources() == (InputDevice.SOURCE_MOUSE
                 | InputDevice.SOURCE_TOUCHPAD);
     }
