@@ -142,9 +142,7 @@ public class LocaleConfig implements Parcelable {
             XmlResourceParser parser = res.getXml(resId);
             parseLocaleConfig(parser, res);
         } catch (Resources.NotFoundException e) {
-            if (resId != 0) {
-                Slog.w(TAG, "The resource file pointed to by the given resource ID isn't found.");
-            }
+            Slog.w(TAG, "The resource file pointed to by the given resource ID isn't found.");
             mStatus = STATUS_NOT_SPECIFIED;
         } catch (XmlPullParserException | IOException e) {
             Slog.w(TAG, "Failed to parse XML configuration from "

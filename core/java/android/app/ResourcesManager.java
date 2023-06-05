@@ -36,7 +36,6 @@ import android.content.res.ResourcesKey;
 import android.content.res.loader.ResourcesLoader;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
-import android.os.LocaleList;
 import android.os.Process;
 import android.os.Trace;
 import android.util.ArrayMap;
@@ -118,11 +117,6 @@ public class ResourcesManager {
     @UnsupportedAppUsage
     private final ArrayList<WeakReference<Resources>> mResourceReferences = new ArrayList<>();
     private final ReferenceQueue<Resources> mResourcesReferencesQueue = new ReferenceQueue<>();
-
-    /**
-     * The list of locales the app declares it supports.
-     */
-    private LocaleList mLocaleList = LocaleList.getEmptyLocaleList();
 
     private static class ApkKey {
         public final String path;
@@ -1608,22 +1602,6 @@ public class ResourcesManager {
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Returns the LocaleList current set
-     */
-    public LocaleList getLocaleList() {
-        return mLocaleList;
-    }
-
-    /**
-     * Sets the LocaleList of app's supported locales
-     */
-    public void setLocaleList(LocaleList localeList) {
-        if ((localeList != null) && !localeList.isEmpty()) {
-            mLocaleList = localeList;
         }
     }
 
