@@ -545,7 +545,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void togglePanel() {
-        if (mCentralSurfaces.isPanelExpanded()) {
+        if (mShadeViewController.isPanelExpanded()) {
             mShadeController.animateCollapseShade();
         } else {
             mShadeController.animateExpandShade();
