@@ -73,6 +73,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     protected @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     protected @Mock AlternateBouncerInteractor mAlternateBouncerInteractor;
+    protected @Mock UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
 
     protected FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
@@ -167,7 +168,8 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
                 mActivityLaunchAnimator,
                 mFeatureFlags,
                 mPrimaryBouncerInteractor,
-                mAlternateBouncerInteractor);
+                mAlternateBouncerInteractor,
+                mUdfpsKeyguardAccessibilityDelegate);
         return controller;
     }
 }
