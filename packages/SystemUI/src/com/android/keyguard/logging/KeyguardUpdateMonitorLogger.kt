@@ -30,7 +30,7 @@ import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.KeyguardListenModel
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.TrustGrantFlags
-import com.android.systemui.log.dagger.KeyguardUpdateMonitorLog
+import com.android.settingslib.fuelgauge.BatteryStatus
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogLevel.DEBUG
@@ -38,6 +38,7 @@ import com.android.systemui.log.LogLevel.ERROR
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.VERBOSE
 import com.android.systemui.log.LogLevel.WARNING
+import com.android.systemui.log.dagger.KeyguardUpdateMonitorLog
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
@@ -683,8 +684,27 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
-    fun logHandleBatteryUpdate(isInteresting: Boolean) {
-        logBuffer.log(TAG, DEBUG, { bool1 = isInteresting }, { "handleBatteryUpdate: $bool1" })
+    fun logHandleBatteryUpdate(batteryStatus: BatteryStatus?) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                bool1 = batteryStatus != null
+                int1 = batteryStatus?.status ?: -1
+                int2 = batteryStatus?.chargingStatus ?: -1
+                long1 = (batteryStatus?.level ?: -1).toLong()
+                long2 = (batteryStatus?.maxChargingWattage ?: -1).toLong()
+                str1 = "${batteryStatus?.plugged ?: -1}"
+            },
+            {
+                "handleBatteryUpdate: isNotNull: $bool1 " +
+                    "BatteryStatus{status= $int1, " +
+                    "level=$long1, " +
+                    "plugged=$str1, " +
+                    "chargingStatus=$int2, " +
+                    "maxChargingWattage= $long2}"
+            }
+        )
     }
 
     fun scheduleWatchdog(@CompileTimeConstant watchdogType: String) {
