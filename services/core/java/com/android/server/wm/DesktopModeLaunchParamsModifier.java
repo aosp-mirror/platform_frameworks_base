@@ -80,8 +80,8 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             appendLog("not in bounds phase, skipping");
             return RESULT_SKIP;
         }
-        if (!task.isActivityTypeStandard()) {
-            appendLog("not standard activity type, skipping");
+        if (!task.isActivityTypeStandardOrUndefined()) {
+            appendLog("not standard or undefined activity type, skipping");
             return RESULT_SKIP;
         }
         if (!currentParams.mBounds.isEmpty()) {

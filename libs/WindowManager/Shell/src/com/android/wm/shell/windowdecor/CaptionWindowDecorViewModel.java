@@ -38,6 +38,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 /**
@@ -87,6 +88,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     public void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter) {
         mTaskOperations = new TaskOperations(transitionStarter, mContext, mSyncQueue);
     }
+
+    @Override
+    public void setSplitScreenController(SplitScreenController splitScreenController) {}
 
     @Override
     public boolean onTaskOpening(
