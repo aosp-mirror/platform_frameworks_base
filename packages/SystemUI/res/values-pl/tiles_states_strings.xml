@@ -108,8 +108,8 @@
   </string-array>
   <string-array name="tile_states_work">
     <item msgid="389523503690414094">"Niedostępny"</item>
-    <item msgid="8045580926543311193">"Wyłączony"</item>
-    <item msgid="4913460972266982499">"Włączony"</item>
+    <item msgid="8045580926543311193">"Wyłączono"</item>
+    <item msgid="4913460972266982499">"Włączono"</item>
   </string-array>
   <string-array name="tile_states_cast">
     <item msgid="6032026038702435350">"Niedostępny"</item>
@@ -134,7 +134,7 @@
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"Niedostępny"</item>
     <item msgid="4572245614982283078">"Wyłączone"</item>
-    <item msgid="6536448410252185664">"Włączony"</item>
+    <item msgid="6536448410252185664">"Włączone"</item>
   </string-array>
   <string-array name="tile_states_cameratoggle">
     <item msgid="6680671247180519913">"Niedostępny"</item>
