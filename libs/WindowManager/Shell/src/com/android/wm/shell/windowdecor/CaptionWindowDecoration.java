@@ -113,7 +113,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
         mRelayoutParams.mLayoutResId = R.layout.caption_window_decor;
-        mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
+        mRelayoutParams.mCaptionHeightId = getCaptionHeightId();
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
 
@@ -220,5 +220,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     public void close() {
         closeDragResizeListener();
         super.close();
+    }
+
+    @Override
+    int getCaptionHeightId() {
+        return R.dimen.freeform_decor_caption_height;
     }
 }
