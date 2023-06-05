@@ -81,6 +81,10 @@ public class SystemUiSystemPropertiesFlags {
         /** Gating the logging of DND state change events. */
         public static final Flag LOG_DND_STATE_EVENTS =
                 releasedFlag("persist.sysui.notification.log_dnd_state_events");
+
+        /** Gating the holding of WakeLocks until NLSes are told about a new notification. */
+        public static final Flag WAKE_LOCK_FOR_POSTING_NOTIFICATION =
+                devFlag("persist.sysui.notification.wake_lock_for_posting_notification");
     }
 
     //// == End of flags.  Everything below this line is the implementation. == ////

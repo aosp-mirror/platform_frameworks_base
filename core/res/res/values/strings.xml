@@ -1789,6 +1789,8 @@
     <string name="biometric_error_user_canceled">Authentication canceled</string>
     <!-- Message shown by the biometric dialog when biometric is not recognized -->
     <string name="biometric_not_recognized">Not recognized</string>
+    <!-- Message shown by the biometric dialog when face is not recognized [CHAR LIMIT=50] -->
+    <string name="biometric_face_not_recognized">Face not recognized</string>
     <!-- Message shown when biometric authentication has been canceled [CHAR LIMIT=50] -->
     <string name="biometric_error_canceled">Authentication canceled</string>
     <!-- Message returned to applications if BiometricPrompt setAllowDeviceCredentials is enabled but no pin, pattern, or password is set. [CHAR LIMIT=NONE] -->
@@ -5035,8 +5037,8 @@
     <string name="display_rotation_camera_compat_toast_after_rotation">Rotate for a better view</string>
 
     <!-- Text on a toast shown when a camera view is started within the app that may not be able
-         to display the camera preview correctly while in split screen. [CHAR LIMIT=NONE] -->
-    <string name="display_rotation_camera_compat_toast_in_split_screen">Exit split screen for a better view</string>
+         to display the camera preview correctly while in multi-window. [CHAR LIMIT=NONE] -->
+    <string name="display_rotation_camera_compat_toast_in_multi_window">Open <xliff:g id="name" example="MyApp">%s</xliff:g> in full screen for a better view</string>
 
     <!-- Label for button to confirm chosen date or time [CHAR LIMIT=30] -->
     <string name="done_label">Done</string>
