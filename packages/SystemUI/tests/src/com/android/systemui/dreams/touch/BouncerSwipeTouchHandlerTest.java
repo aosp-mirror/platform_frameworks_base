@@ -42,7 +42,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.touch.scrim.ScrimController;
 import com.android.systemui.dreams.touch.scrim.ScrimManager;
-import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;

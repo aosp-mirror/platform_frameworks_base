@@ -20,7 +20,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
 import com.android.systemui.authentication.data.repository.AuthenticationRepositoryImpl
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
-import com.android.systemui.bouncer.data.repo.BouncerRepository
+import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor

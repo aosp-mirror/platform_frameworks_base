@@ -28,11 +28,11 @@ import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerPr
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionListener
