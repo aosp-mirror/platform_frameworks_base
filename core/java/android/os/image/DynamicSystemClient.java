@@ -209,6 +209,13 @@ public class DynamicSystemClient {
     public static final String ACTION_HIDE_NOTIFICATION =
             "android.os.image.action.HIDE_NOTIFICATION";
 
+    /**
+     * Intent action: notify the service to post a status update when keyguard is dismissed.
+     * @hide
+     */
+    public static final String ACTION_NOTIFY_KEYGUARD_DISMISSED =
+            "android.os.image.action.NOTIFY_KEYGUARD_DISMISSED";
+
     /*
      * Intent Keys
      */
