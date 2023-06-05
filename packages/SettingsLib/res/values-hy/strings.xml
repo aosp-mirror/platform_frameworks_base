@@ -390,8 +390,8 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Թույլատրել GPU վրիպազերծման շերտերի բեռնումը վրիպազերծման հավելվածների համար"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Մատակարարի մանրամասն գրանցամատյան"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Վրիպակների հաշվետվություններում ներառել կոնկրետ սարքի վերաբերյալ մատակարարի լրացուցիչ մատյանները։ Դա կարող է պարունակել խիստ անձնական տեղեկություններ, ավելի արագ սպառել մարտկոցի լիցքը և/կամ ավելի շատ տարածք օգտագործել։"</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"Պատուհանի շարժապատկերի սանդղակ"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Անցումային շարժական սանդղակ"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"Պատուհանի շարժապատկեր"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Անցումների շարժապատկեր"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Շարժանկարի տևողության սանդղակ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Կրկնաստեղծել երկրորդական էկրան"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Հավելվածներ"</string>
@@ -657,7 +657,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet-ը անջատված է:"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet։"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Զանգել հնարավոր չէ։"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Պրոֆիլի նկար ընտրեք"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Ընտրեք պրոֆիլի նկար"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Օգտատիրոջ կանխադրված պատկերակ"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Ֆիզիկական ստեղնաշար"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Ընտրեք ստեղնաշարի դասավորությունը"</string>
