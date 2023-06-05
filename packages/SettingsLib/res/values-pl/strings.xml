@@ -84,7 +84,7 @@
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Rozłączono"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Rozłączanie..."</string>
-    <string name="bluetooth_connecting" msgid="5871702668260192755">"Łączenie..."</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"Łączę..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Połączono – <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Paruję…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Połączono (bez telefonu) – <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -99,8 +99,8 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> naładowania baterii"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P: bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Urządzenie aktywne"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktywny, tylko lewa strona"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktywny, tylko prawa strona"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktywne, tylko lewa strona"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktywne, tylko prawa strona"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktywny, lewa i prawa strona"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Dźwięk multimediów"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Połączenia telefoniczne"</string>
@@ -545,12 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Przed chwilą"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ten telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ten tablet"</string>
-    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
-    <skip />
-    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
-    <skip />
-    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
-    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Głośnik ze stacją dokującą"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Urządzenie zewnętrzne"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Połączone urządzenie"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ten telefon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nie można odtworzyć na tym urządzeniu"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Aby przełączyć, potrzebujesz konta premium"</string>
