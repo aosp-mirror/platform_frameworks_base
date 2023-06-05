@@ -137,13 +137,7 @@ public class CompanionTransportManager {
         synchronized (mTransports) {
             for (int i = 0; i < associationIds.length; i++) {
                 if (mTransports.contains(associationIds[i])) {
-                    try {
-                        mTransports.get(associationIds[i]).sendMessage(message, data);
-                    } catch (IOException e) {
-                        Slog.e(TAG, "Failed to send message 0x" + Integer.toHexString(message)
-                                + " data length " + data.length + " to association "
-                                + associationIds[i]);
-                    }
+                    mTransports.get(associationIds[i]).requestForResponse(message, data);
                 }
             }
         }
@@ -244,6 +238,7 @@ public class CompanionTransportManager {
         }
 
         addMessageListenersToTransport(transport);
+        transport.setOnTransportClosedListener(this::detachSystemDataTransport);
         transport.start();
         synchronized (mTransports) {
             mTransports.put(associationId, transport);
@@ -319,6 +314,16 @@ public class CompanionTransportManager {
     private void addMessageListenersToTransport(Transport transport) {
         for (int i = 0; i < mMessageListeners.size(); i++) {
             transport.addListener(mMessageListeners.keyAt(i), mMessageListeners.valueAt(i));
+        }
+    }
+
+    void detachSystemDataTransport(Transport transport) {
+        int associationId = transport.mAssociationId;
+        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        if (association != null) {
+            detachSystemDataTransport(association.getPackageName(),
+                    association.getUserId(),
+                    association.getId());
         }
     }
 }
