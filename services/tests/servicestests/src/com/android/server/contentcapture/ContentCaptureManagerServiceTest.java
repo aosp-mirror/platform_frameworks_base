@@ -143,25 +143,13 @@ public class ContentCaptureManagerServiceTest {
     }
 
     @Test
-    public void constructor_contentProtection_serviceInfoThrows_noBlocklistManager() {
-        mDevCfgEnableContentProtectionReceiver = true;
-        mContentProtectionServiceInfoConstructorShouldThrow = true;
-
-        mContentCaptureManagerService = new TestContentCaptureManagerService();
-
-        assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(0);
-        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(1);
-        verifyZeroInteractions(mMockContentProtectionBlocklistManager);
-    }
-
-    @Test
     public void constructor_contentProtection_enabled_createsBlocklistManager() {
         mDevCfgEnableContentProtectionReceiver = true;
 
         mContentCaptureManagerService = new TestContentCaptureManagerService();
 
         assertThat(mContentProtectionBlocklistManagersCreated).isEqualTo(1);
-        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(1);
+        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(0);
         verify(mMockContentProtectionBlocklistManager).updateBlocklist(anyInt());
     }
 
@@ -356,6 +344,21 @@ public class ContentCaptureManagerServiceTest {
         mDevCfgEnableContentProtectionReceiver = true;
         mContentCaptureManagerService = new TestContentCaptureManagerService();
         mContentCaptureManagerService.mDevCfgEnableContentProtectionReceiver = false;
+
+        mContentCaptureManagerService
+                .getContentCaptureManagerServiceStub()
+                .onLoginDetected(PARCELED_EVENTS);
+
+        assertThat(mContentProtectionServiceInfosCreated).isEqualTo(0);
+        assertThat(mRemoteContentProtectionServicesCreated).isEqualTo(0);
+        verifyZeroInteractions(mMockRemoteContentProtectionService);
+    }
+
+    @Test
+    public void onLoginDetected_invalidPermissions() {
+        mDevCfgEnableContentProtectionReceiver = true;
+        mContentProtectionServiceInfoConstructorShouldThrow = true;
+        mContentCaptureManagerService = new TestContentCaptureManagerService();
 
         mContentCaptureManagerService
                 .getContentCaptureManagerServiceStub()
