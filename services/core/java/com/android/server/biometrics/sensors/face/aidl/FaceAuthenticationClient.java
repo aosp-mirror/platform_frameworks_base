@@ -212,8 +212,6 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         // 1) Authenticated == true
         // 2) Error occurred
         // 3) Authenticated == false
-        // 4) onLockout
-        // 5) onLockoutTimed
         mCallback.onClientFinished(this, true /* success */);
     }
 
@@ -306,7 +304,11 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         PerformanceTracker.getInstanceForSensorId(getSensorId())
                 .incrementTimedLockoutForUser(getTargetUserId());
 
-        onError(error, 0 /* vendorCode */);
+        try {
+            getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
+        }
     }
 
     @Override
@@ -321,6 +323,10 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         PerformanceTracker.getInstanceForSensorId(getSensorId())
                 .incrementPermanentLockoutForUser(getTargetUserId());
 
-        onError(error, 0 /* vendorCode */);
+        try {
+            getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
+        }
     }
 }
