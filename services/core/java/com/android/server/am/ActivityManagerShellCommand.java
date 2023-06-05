@@ -290,6 +290,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runKillAll(pw);
                 case "make-uid-idle":
                     return runMakeIdle(pw);
+                case "set-deterministic-uid-idle":
+                    return runSetDeterministicUidIdle(pw);
                 case "monitor":
                     return runMonitor(pw);
                 case "watch-uids":
@@ -1517,6 +1519,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         mInterface.makePackageIdle(getNextArgRequired(), userId);
+        return 0;
+    }
+
+    int runSetDeterministicUidIdle(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        boolean deterministic = Boolean.parseBoolean(getNextArgRequired());
+        mInterface.setDeterministicUidIdle(deterministic);
         return 0;
     }
 
@@ -4271,6 +4290,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  make-uid-idle [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      If the given application's uid is in the background and waiting to");
             pw.println("      become idle (not allowing background services), do that now.");
+            pw.println(
+                    "  set-deterministic-uid-idle [--user <USER_ID> | all | current] <true|false>");
+            pw.println("      If true, sets the timing of making UIDs idle consistent and");
+            pw.println("      deterministic. If false, the timing will be variable depending on");
+            pw.println("      other activity on the device. The default is false.");
             pw.println("  monitor [--gdb <port>] [-p <TARGET>] [-s] [-c] [-k]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");

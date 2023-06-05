@@ -430,6 +430,13 @@ public final class JobStatus {
      * when it started running. This isn't copied over when a job is rescheduled.
      */
     public boolean startedAsUserInitiatedJob = false;
+    /**
+     * Whether this particular JobStatus instance started with the foreground flag
+     * (or more accurately, did <b>not</b> have the
+     * {@link android.content.Context#BIND_NOT_FOREGROUND} flag
+     * included in its binding flags when started).
+     */
+    public boolean startedWithForegroundFlag = false;
 
     public boolean startedWithImmediacyPrivilege = false;
 
@@ -1606,6 +1613,10 @@ public final class JobStatus {
      * for any reason.
      */
     public boolean shouldTreatAsUserInitiatedJob() {
+        // isUserBgRestricted is intentionally excluded from this method. It should be fine to
+        // treat the job as a UI job while the app is TOP, but just not in the background.
+        // Instead of adding a proc state check here, the parts of JS that can make the distinction
+        // and care about the distinction can do the check.
         return getJob().isUserInitiated()
                 && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_USER) == 0
                 && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ) == 0;
@@ -1651,6 +1662,11 @@ public final class JobStatus {
                 // EJs can't run in Battery Saver if we explicitly require that Battery Saver is off
                 || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                         && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
+    }
+
+    /** Returns whether or not the app is background restricted by the user (FAS). */
+    public boolean isUserBgRestricted() {
+        return mIsUserBgRestricted;
     }
 
     /** @return true if the constraint was changed, false otherwise. */
@@ -2801,6 +2817,12 @@ public final class JobStatus {
             pw.println(")");
         }
         pw.decreaseIndent();
+
+        pw.print("Started with foreground flag: ");
+        pw.println(startedWithForegroundFlag);
+        if (mIsUserBgRestricted) {
+            pw.println("User BG restricted");
+        }
 
         if (changedAuthorities != null) {
             pw.println("Changed authorities:");
