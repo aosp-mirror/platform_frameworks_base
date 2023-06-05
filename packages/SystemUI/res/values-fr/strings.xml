@@ -299,11 +299,11 @@
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Arrêter"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode une main"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Débloquer le micro de l\'appareil ?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer l\'appareil photo de l\'appareil ?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer la caméra de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Débloquer l\'appareil photo et le micro de l\'appareil ?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Cette action débloque l\'accès à tous les services et applis autorisés à utiliser votre micro."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Cette action débloque l\'accès à tous les services et applis autorisés à utiliser votre appareil photo."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Cette action débloque l\'accès pour tous les services et applis autorisés à utiliser votre appareil photo ou votre micro."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"L\'accès sera débloqué pour tous les services et applis autorisés à utiliser votre micro."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"L\'accès sera débloqué pour tous les services et applis autorisés à utiliser votre caméra."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"L\'accès sera débloqué pour tous les services et applis autorisés à utiliser votre caméra ou votre micro."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Le micro est bloqué"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"La caméra est bloquée"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Le micro et la caméra sont bloqués"</string>
@@ -322,7 +322,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Appuyer à nouveau pour ouvrir"</string>
     <string name="tap_again" msgid="1315420114387908655">"Appuyer à nouveau"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Balayer vers le haut pour ouvrir"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Balayez vers le haut pour ouvrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Appuyez sur l\'icône de déverrouillage pour ouvrir"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Déverrouillé par visage. Balayez vers le haut pour ouvrir."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Déverrouillé par visage. Appuyez sur icône déverrouillage pour ouvrir."</string>
@@ -492,7 +492,7 @@
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Les appels et les notifications sonneront (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barre d\'état"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Mode de démonstration de l\'interface du système"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Mode démo de l\'UI du système"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Activer le mode de démonstration"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Afficher le mode de démonstration"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
@@ -567,7 +567,7 @@
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Désactiver l\'affichage sous forme de bulles"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> : <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"paramètres des notifications"</string>
-    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"options de répétition des notifications"</string>
+    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"options de mise en attente des notifications"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"M\'envoyer un rappel"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Annuler"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Répétée après <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
@@ -749,7 +749,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Rebasculer sur <xliff:g id="CARRIER">%s</xliff:g> ?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Il n\'y aura pas de basculement automatique entre les données mobile selon la disponibilité"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Non, merci"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Oui, revenir"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Oui, rebasculer"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"L\'application Paramètres ne peut pas valider votre réponse, car une application masque la demande d\'autorisation."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Autoriser <xliff:g id="APP_0">%1$s</xliff:g> à afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g> ?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Accès aux informations de <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -937,11 +937,11 @@
     <string name="audio_status" msgid="4237055636967709208">"Écoute du contenu"</string>
     <string name="game_status" msgid="1340694320630973259">"Joue"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Amis"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Bavardons ce soir !"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Parlons-en ce soir !"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Le contenu s\'affichera bientôt"</string>
     <string name="missed_call" msgid="4228016077700161689">"Appel manqué"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+ de <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Voir les messages récents, les appels manqués et les notifications d\'état"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Voir les messages récents, les appels manqués et les changements d\'état"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversation"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Mise en pause par Ne pas déranger"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> a envoyé un message : <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
@@ -972,7 +972,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Recherche de réseaux…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Échec de la connexion au réseau"</string>
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Connexion automatique au Wi-Fi désactivée pour le moment"</string>
-    <string name="see_all_networks" msgid="3773666844913168122">"Tout afficher"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Tout voir"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pour changer de réseau, déconnectez l\'Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Pour améliorer l\'expérience sur l\'appareil, les applis et les services peuvent continuer de rechercher les réseaux Wi-Fi, même si le Wi-Fi est désactivé. Vous pouvez modifier cela dans les paramètres de recherche Wi-Fi. "<annotation id="link">"Modifier"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Désactiver le mode Avion"</string>
@@ -1012,7 +1012,7 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Appareil photo et micro désactivés"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notification}one{# notification}many{# notifications}other{# notifications}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <string name="note_task_button_label" msgid="8718616095800343136">"Prendre des notes"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"Prise de notes"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Diffusion…"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou que vous modifiez le résultat, votre annonce actuelle s\'arrêtera"</string>
@@ -1039,7 +1039,7 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> de batterie restante"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connectez votre stylet à un chargeur"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"La batterie du stylet est faible"</string>
-    <string name="video_camera" msgid="7654002575156149298">"Caméra vidéo"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Caméra"</string>
     <string name="call_from_work_profile_title" msgid="6991157106804289643">"Impossible d\'appeler depuis ce profil"</string>
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Votre règle professionnelle ne vous permet de passer des appels que depuis le profil professionnel"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Passer au profil professionnel"</string>

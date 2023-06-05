@@ -747,7 +747,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Je hebt dan geen toegang meer tot data of internet via <xliff:g id="CARRIER">%s</xliff:g>. Internet is alleen nog beschikbaar via wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"je provider"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Terugschakelen naar <xliff:g id="CARRIER">%s</xliff:g>?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobiele data worden niet automatisch overgezet op basis van beschikbaarheid"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobiele data wordt niet automatisch omgeschakeld op basis van beschikbaarheid"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Nee, bedankt"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ja, overschakelen"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Aangezien een app een rechtenverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>

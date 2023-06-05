@@ -918,8 +918,8 @@
     <string name="no_conversations_text" msgid="5354115541282395015">"Dine seneste samtaler vises her"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioriterede samtaler"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Seneste samtaler"</string>
-    <string name="days_timestamp" msgid="5821854736213214331">"For <xliff:g id="DURATION">%1$s</xliff:g> dage siden"</string>
-    <string name="one_week_timestamp" msgid="4925600765473875590">"For 1 uge siden"</string>
+    <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> dage siden"</string>
+    <string name="one_week_timestamp" msgid="4925600765473875590">"1 uge siden"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"For 2 uger siden"</string>
     <string name="over_one_week_timestamp" msgid="3770560704420807142">"For mere end 1 uge siden"</string>
     <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"For mere end 2 uger siden"</string>

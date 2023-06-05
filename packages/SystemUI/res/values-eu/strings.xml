@@ -255,7 +255,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Ez dago gailurik erabilgarri"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Ez zaude konektatuta wifi-sarera"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Distira"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Kolore-alderantzikatzea"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Koloreen alderantzikatzea"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Koloreen zuzenketa"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Letra-tamaina"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Kudeatu erabiltzaileak"</string>

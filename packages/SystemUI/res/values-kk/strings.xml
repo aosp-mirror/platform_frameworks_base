@@ -298,15 +298,15 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Бастау"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Тоқтату"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Бір қолмен басқару режимі"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Құрылғы микрофонының бөгеуі алынсын ба?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Құрылғы камерасының бөгеуі алынсын ба?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Құрылғы камерасы мен микрофонының бөгеуі алынсын ба?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Құрылғы микрофонын блоктан шығару керек пе?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Құрылғы камерасын блоктан шығару керек пе?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Құрылғы камерасы мен микрофонын блоктан шығару керек пе?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Камераңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Камераңызды немесе микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
-    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон бөгелген"</string>
-    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера бөгелген"</string>
-    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон мен камера бөгелген"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон блокталған"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера блокталған"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон мен камера блокталған"</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын микрофонға жылжытыңыз, оның қалпы микрофонды пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын камераға жылжытыңыз, оның қалпы камераны пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Оның бөгеуін алу үшін құрылғыдағы құпиялық ауыстырғышын ашық қалыпқа жылжытып, пайдалану мүмкіндігін қамтамасыз етіңіз. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
@@ -388,7 +388,7 @@
     <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Қолданбаны бөлісу, жазып алу не трансляциялау кезінде бұл қолданба онда көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізу кезінде сақ болыңыз."</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Әкімшіңіз бөгеген"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Құрылғы саясатына байланысты экранды түсіру өшірілді."</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"Барлығын тазалау"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"Барлығын тазарту"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Басқару"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Тарих"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Жаңа"</string>
@@ -692,7 +692,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Параметрлер тәртібін өзгерту."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Қуат мәзірі"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ішінен <xliff:g id="ID_1">%1$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"Құлыпталған экран"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"Құлыптаулы экран"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон қызып кеткендіктен өшірілді"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефоныңыз қалыпты жұмыс істеп тұр.\nТолығырақ ақпарат алу үшін түртіңіз."</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефоныңыз қатты қызып кеткендіктен өшірілді. Телефоныңыз қазір қалыпты жұмыс істеп тұр.\n\nТелефоныңыз мына жағдайларда ыстық болуы мүмкін:\n	• Ресурстар талап ететін қолданбаларды пайдалану (ойын, бейне немесе навигация қолданбалары)\n	• Үлкен көлемді файлдарды жүктеу немесе жүктеп салу\n	• Телефонды жоғары температурада пайдалану"</string>
@@ -718,7 +718,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Оң жақ"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Mәзір"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> қолданбасы"</string>
-    <string name="notification_channel_alerts" msgid="3385787053375150046">"Ескертулер"</string>
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Хабарландырулар"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Батарея"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Скриншоттар"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
@@ -818,7 +818,7 @@
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Басқару элементтері"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"\"Жылдам параметрлер\" мәзірінен пайдалануға болатын басқару элементтерін таңдаңыз."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Басқару элементтерінің ретін өзгерту үшін оларды басып тұрып сүйреңіз."</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементтері жойылды."</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементі жойылды."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгерістер сақталмады."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Басқа қолданбаларды көру"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Басқару элементтері жүктелмеді. Қолданба параметрлерінің өзгермегенін тексеру үшін <xliff:g id="APP">%s</xliff:g> қолданбасын қараңыз."</string>
@@ -1046,8 +1046,8 @@
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Жабу"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Экран құлпының параметрлері"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi қолжетімсіз."</string>
-    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера бөгелген."</string>
-    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера мен микрофон бөгелген."</string>
-    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон бөгелген."</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера блокталған."</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера мен микрофон блокталған."</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон блокталған."</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\"Маңызды\" режимі қосулы."</string>
 </resources>

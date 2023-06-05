@@ -263,7 +263,7 @@
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"बन्द गर्नुहोस्"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"जोडिएको"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"यन्त्र जडान भयो, ब्याट्रीको चार्ज स्तर <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="2381969772953268809">"जडान हुँदै..."</string>
+    <string name="quick_settings_connecting" msgid="2381969772953268809">"कनेक्ट गरिँदै छ..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"हटस्पट"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"सक्रिय गर्दै…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"डेटा सेभर सक्रिय छ"</string>
@@ -838,7 +838,7 @@
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN मा अक्षर वा चिन्हहरू समाविष्ट हुन्छन्"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> पुष्टि गर्नुहोस्"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN मिलेन"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN हाल्नुहोस्"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"अर्को PIN प्रयोग गरी हेर्नु…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> का हकमा गरिएको परिवर्तन पुष्टि गर्नुहोस्"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>
@@ -865,7 +865,7 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> मा प्ले गर्न आफ्नो डिभाइस नजिकै लैजानुहोस्"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"यो डिभाइसमा प्ले गर्न <xliff:g id="DEVICENAME">%1$s</xliff:g> को अझ नजिक जानुहोस्"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> मा प्ले गरिँदै छ"</string>
-    <string name="media_transfer_failed" msgid="7955354964610603723">"केही चिज गडबड भयो। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"कुनै समस्या आयो। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"लोड हुँदै छ"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ट्याब्लेट"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"तपाईंको मिडिया कास्ट गरिँदै छ"</string>

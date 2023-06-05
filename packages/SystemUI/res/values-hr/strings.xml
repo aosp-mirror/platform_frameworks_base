@@ -53,7 +53,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dopusti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje pogrešaka putem USB-a nije dopušteno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutačno prijavljen na ovaj uređaj ne može uključiti otklanjanje pogrešaka putem USB-a. Da biste upotrebljavali tu značajku, prijeđite na primarnog korisnika."</string>
-    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Želite li promijeniti jezik sustava u <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
+    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Želite li jezik sustava promijeniti na <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Drugi uređaj zatražio je promjenu jezika sustava"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Promijeni jezik"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Zadrži trenutačni jezik"</string>
@@ -198,7 +198,7 @@
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Brze postavke."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Brze postavke i zaslon obavijesti."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Zaključavanje zaslona."</string>
-    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključan zaslon radnog profila"</string>
+    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključani zaslon radnog profila"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zatvaranje"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"potpuna tišina"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"samo alarmi"</string>
@@ -322,7 +322,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"To blokira SVE zvukove i vibracije, uključujući alarme, glazbu, videozapise i igre."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite opet za otvaranje"</string>
     <string name="tap_again" msgid="1315420114387908655">"Dodirnite ponovo"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Prijeđite prstom prema gore da biste otvorili"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Prijeđite prstom prema gore za otvaranje"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pritisnite ikonu otključavanja da biste otvorili"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Otključano licem. Prijeđite prstom prema gore za otvaranje."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Otključano pomoću lica. Pritisnite ikonu otključavanja da biste otvorili."</string>
@@ -692,7 +692,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Uređivanje redoslijeda postavki."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Izbornik tipke za uključivanje/isključivanje"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključan zaslon"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključani zaslon"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog vrućine"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon sad radi normalno.\nDodirnite za više informacija"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon se pregrijao, stoga se isključio kako bi se ohladio Telefon sada radi normalno.\n\nTelefon se može pregrijati ako:\n	• upotrebljavate zahtjevne aplikacije (kao što su igre, aplikacije za videozapise ili navigaciju)\n	• preuzimate ili prenosite velike datoteke\n	• upotrebljavate telefon na visokim temperaturama."</string>
@@ -830,7 +830,7 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"Preporuka s kanala <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Uređaj je zaključan"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Prikazati uređaje i omogućiti upravljanje njima na zaključanom zaslonu?"</string>
-    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Na zaključan zaslon možete dodati kontrole za svoje vanjske uređaje.\n\nAplikacija vašeg uređaja može vam dopustiti upravljanje nekim uređajima bez otključavanja telefona ili tableta.\n\nPromjene uvijek možete unijeti u Postavkama."</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Na zaključani zaslon možete dodati kontrole za svoje vanjske uređaje.\n\nAplikacija vašeg uređaja može vam dopustiti upravljanje nekim uređajima bez otključavanja telefona ili tableta.\n\nPromjene uvijek možete unijeti u Postavkama."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Upravljati uređajima na zaključanom zaslonu?"</string>
     <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Nekim uređajima možete upravljati bez otključavanja telefona ili tableta. Aplikacija vašeg uređaja odlučuje kojim se uređajima može upravljati na taj način."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ne, hvala"</string>
@@ -887,7 +887,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Odabrano uređaja: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(nije povezano)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nije prebačeno. Dodirnite da biste pokušali ponovo."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Povezivanje uređaja"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Povežite uređaj"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Da biste emitirali ovu sesiju, otvorite aplikaciju."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nepoznata aplikacija"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zaustavi emitiranje"</string>
@@ -962,7 +962,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Privremeno povezano"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Slaba veza"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilna veza neće se automatski uspostaviti"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilni podaci neće se automatski prenositi"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Niste povezani"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nije dostupna nijedna druga mreža"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nema dostupnih mreža"</string>
@@ -979,7 +979,7 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi dodati sljedeću pločicu u Brze postavke"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj pločicu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nemoj dodati pločicu"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Odabir korisnika"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Odaberite korisnika"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplikacija je aktivna}one{# aplikacija je aktivna}few{# aplikacije su aktivne}other{# aplikacija je aktivno}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
