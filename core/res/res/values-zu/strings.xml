@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"I-ID Yomshayeli ishintshela kokungavinjelwe. Ucingo olulandelayo: Aluvinjelwe"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Isevisi ayilungiselelwe."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ngeke ukwazi ukuguqul izilungiselelo zemininingwane yoshayayo."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Ushintshele idatha ku-<xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Ungashintsha lokhu noma nini kumasethingi"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ayikho isevisi yedatha yeselula"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Ukushaya okuphuthumayo akutholakali"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ayikho isevisi yezwi"</string>
@@ -311,9 +313,9 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"rekhoda ividiyo"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Umsebenzi womzimba"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"finyelela kumsebenzi wakho womzimba"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Ikhamela"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Ikhamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"thatha izithombe uphinde urekhode ividiyo"</string>
-    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Amadivayisi aseduze"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"kumadivayisi aseduze"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"thola futhi uxhume kumadivayisi aseduze"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Amarekhodi wamakholi"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"funda futhi ubhale irekhodi lamakholi efoni"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ivuemela uhlelo lokusebenza ukuthola ulwazi lesevisi yenkokhelo ye-nfc njengezinsiza zokubhalisa nezindawo zomzila."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lawula Uxhumano Lwenkambu Eseduze"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ivuela uhlelo lokusebenza ukuthi ixhumane ne-Near Field Communication (NFC) amathegi, amakhadi kanye nezinhlelo zokufunda."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Umcimbi wokwenziwe Ku-elementi Evikelekile"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Ivumela i-app ukuthi ithole ulwazi mayelana nemisebenzi eyenzekayo Ku-elementi Evikelekile."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"khubaza ukukhiya kwakho iskrini"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ivumela uhlelo lokusebenza ukukhubaza ukuvala ukhiye nanoma yikuphi ukuphepha kwephasiwedi okuhlobene. Isibonelo, ifoni ikhubaza ukuvala ukhiye lapho ithola ikholi yefoni engenayo, bese inike amandla kabusha ukuvala ukhiye lapho ikholi isiqedile."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"cela ubunkimbinkimbi kokukhiya isikrini"</string>
@@ -581,11 +585,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Iphutha lokufakazela ubuqiniso"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Sebenzisa isikhiya sesikrini"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Faka ukukhiya isikrini kwakho ukuze uqhubeke"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Cindezela ngokuqinile kunzwa"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Cindezela inzwa uqinise"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Ayisazi isigxivizo somunwe. Zama futhi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hlanza inzwa yesigxivizo somunwe bese uzame futhi"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Hlanza inzwa bese uzame futhi"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Cindezela ngokuqinile kunzwa"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Cindezela inzwa uqinise"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Umnwe uhanjiswe kancane kakhulu. Sicela uzame futhi."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zama ezinye izigxivizo zeminwe"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Kukhanya kakhulu"</string>
@@ -637,8 +641,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Ukukhanya okunganele"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Yisa ifoni kude"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Sondeza ifoni eduze"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Yisa ifoni phezulu"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Yisa ifoni phansi"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Nyusa ifoni"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Yehlisa ifoni"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Yisa ifoni ngakwesokunxele sakho"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Yisa ifoni ngakwesokudla sakho"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Sicela ubheke ngokuqondile kakhulu kudivayisi yakho."</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ayikwazi ukufinyelela ikhamera yethebulethi kusuka ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Lokhu akukwazi ukufinyelelwa ngenkathi usakaza. Zama efonini yakho kunalokho."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Okuzenzakalelayo kwesistimu"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"IKHADI <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

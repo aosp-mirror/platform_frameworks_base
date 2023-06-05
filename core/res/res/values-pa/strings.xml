@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ਪ੍ਰਤਿਬੰਧਿਤ ਨਾ ਕਰਨ ਲਈ ਕਾਲਰ ਆਈ.ਡੀ. ਪੂਰਵ-ਨਿਰਧਾਰਤ। ਅਗਲੀ ਕਾਲ: ਪ੍ਰਤਿਬੰਧਿਤ ਨਹੀਂ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ਸੇਵਾ ਪ੍ਰਬੰਧਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ਤੁਸੀਂ ਕਾਲਰ ਆਈ.ਡੀ. ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੇ।"</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"ਡਾਟੇ ਨੂੰ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"ਤੁਸੀਂ ਕਿਸੇ ਵੇਲੇ ਵੀ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਇਸਨੂੰ ਬਦਲ ਸਕਦੇ ਹੋ"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ਕੋਈ ਮੋਬਾਈਲ ਡਾਟਾ ਸੇਵਾ ਨਹੀਂ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਉਪਲਬਧ ਨਹੀਂ"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ਕੋਈ ਆਵਾਜ਼ੀ ਸੇਵਾ ਨਹੀਂ"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ਐਪ ਨੂੰ ਤਰਜੀਹੀ NFC ਭੁਗਤਾਨਸ਼ੁਦਾ ਸੇਵਾ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਕਿ ਰਜਿਸਟਰ ਕੀਤੇ ਸਾਧਨ ਅਤੇ ਮੰਜ਼ਿਲ ਰਸਤਾ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ (NFC) ਟੈਗਾਂ, ਕਾਰਡਾਂ ਅਤੇ ਰੀਡਰਾਂ ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"ਸੁਰੱਖਿਅਤ ਅੰਸ਼ ਦੇ ਲੈਣ-ਦੇਣ ਸੰਬੰਧੀ ਇਵੈਂਟ"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"ਐਪ ਨੂੰ ਸੁਰੱਖਿਅਤ ਅੰਸ਼ \'ਤੇ ਹੋਣ ਵਾਲੇ ਲੈਣ-ਦੇਣ ਬਾਰੇ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ਆਪਣਾ ਸਕ੍ਰੀਨ  ਲਾਕ  ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ਐਪ ਨੂੰ ਕੀਲਾਕ ਅਤੇ ਕਿਸੇ ਵੀ ਸੰਬੰਧਿਤ ਪਾਸਵਰਡ ਸੁਰੱਖਿਆ ਨੂੰ ਬੰਦ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਫ਼ੋਨ ਇੱਕ ਇਨਕਮਿੰਗ ਫ਼ੋਨ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਨ ਵੇਲੇ ਬੰਦ ਕਰਦਾ ਹੈ, ਫਿਰ ਜਦੋਂ ਕਾਲ ਖਤਮ ਹੁੰਦੀ ਹੈ ਤਾਂ ਕੀਲਾਕ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਲਈ ਬੇਨਤੀ ਕਰੋ"</string>
@@ -1275,13 +1279,13 @@
     <string name="volume_call" msgid="7625321655265747433">"ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ਬਲੂਟੁੱਥ ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"ਅਲਾਰਮ ਦੀ ਅਵਾਜ਼"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"ਸੂਚਨਾ ਦੀ ਅਵਾਜ਼"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ਰਿੰਗਟੋਨ ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"ਮੀਡੀਆ ਦੀ ਅਵਾਜ਼"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"ਸੂਚਨਾ ਦੀ ਅਵਾਜ਼"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ਕੋਈ ਨਹੀਂ"</string>
@@ -1608,7 +1612,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ਟੈਬਲੈੱਟ"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ਫ਼ੋਨ ਕਰੋ"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ਡੌਕ ਸਪੀਕਰਸ"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ਡੌਕ ਸਪੀਕਰ"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"ਬਾਹਰੀ ਡੀਵਾਈਸ"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ਹੈੱਡਫ਼ੋਨ"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1622,7 +1626,7 @@
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
-    <string name="media_route_status_connecting" msgid="5845597961412010540">"ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
+    <string name="media_route_status_connecting" msgid="5845597961412010540">"ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"ਉਪਲਬਧ"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"ਵਰਤੋਂ ਵਿੱਚ"</string>
@@ -1713,7 +1717,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ਨੂੰ ਲਾਗ-ਆਉਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ …"</string>
     <string name="owner_name" msgid="8713560351570795743">"ਮਾਲਕ"</string>
     <string name="guest_name" msgid="8502103277839834324">"ਮਹਿਮਾਨ"</string>
@@ -2078,7 +2082,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ਠੀਕ ਹੈ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ਬੰਦ ਕਰੋ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ਹੋਰ ਜਾਣੋ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਨੇ Android ਅਡੈਪਟਿਵ ਸੂਚਨਾਵਾਂ ਦੀ ਜਗ੍ਹਾ ਲੈ ਲਈ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਕਾਰਵਾਈਆਂ ਅਤੇ ਜਵਾਬਾਂ ਵਾਲੇ ਸੁਝਾਅ ਦਿਖਾਉਂਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰਦੀ ਹੈ।\n\nਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਸੂਚਨਾ ਸਮੱਗਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ, ਜਿਸ ਵਿੱਚ ਸੰਪਰਕ ਦੇ ਨਾਮ ਅਤੇ ਸੁਨੇਹੇ ਵਰਗੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਸੂਚਨਾਵਾਂ ਨੂੰ ਖਾਰਜ ਵੀ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਸੂਚਨਾਵਾਂ ਦਾ ਜਵਾਬ ਵੀ ਦੇ ਸਕਦੀ ਹੈ, ਜਿਵੇਂ ਕਿ ਫ਼ੋਨ ਕਾਲਾਂ ਦਾ ਜਵਾਬ ਦੇਣਾ ਅਤੇ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਕੰਟਰੋਲ ਕਰਨਾ।"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਨੇ Android ਅਡੈਪਟਿਵ ਸੂਚਨਾਵਾਂ ਦੀ ਜਗ੍ਹਾ ਲੈ ਲਈ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਕਾਰਵਾਈਆਂ ਅਤੇ ਜਵਾਬਾਂ ਵਾਲੇ ਸੁਝਾਅ ਦਿਖਾਉਂਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰਦੀ ਹੈ।\n\nਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਸੂਚਨਾ ਸਮੱਗਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ, ਜਿਸ ਵਿੱਚ ਸੰਪਰਕ ਦੇ ਨਾਮ ਅਤੇ ਸੁਨੇਹਿਆਂ ਵਰਗੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਸੂਚਨਾਵਾਂ ਨੂੰ ਖਾਰਜ ਵੀ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਸੂਚਨਾਵਾਂ ਦਾ ਜਵਾਬ ਵੀ ਦੇ ਸਕਦੀ ਹੈ, ਜਿਵੇਂ ਕਿ ਫ਼ੋਨ ਕਾਲਾਂ ਦਾ ਜਵਾਬ ਦੇਣਾ ਅਤੇ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਕੰਟਰੋਲ ਕਰਨਾ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ਨਿਯਮਬੱਧ ਮੋਡ ਦੀ ਜਾਣਕਾਰੀ ਵਾਲੀ ਸੂਚਨਾ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ਬੈਟਰੀ ਚਾਰਜ ਕਰਨ ਦੇ ਮਿੱਥੇ ਸਮੇਂ ਤੋਂ ਪਹਿਲਾਂ ਸ਼ਾਇਦ ਬੈਟਰੀ ਖਤਮ ਹੋ ਜਾਵੇ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਟੈਬਲੈੱਟ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ਸਟ੍ਰੀਮਿੰਗ ਦੌਰਾਨ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ਸਿਸਟਮ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"ਕਾਰਡ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

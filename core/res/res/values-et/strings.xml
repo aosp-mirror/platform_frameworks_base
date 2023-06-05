@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Helistaja ID pole vaikimisi piiratud. Järgmine kõne: pole piiratud"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Teenus pole ette valmistatud."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Helistaja ID seadet ei saa muuta."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Mobiilne andmeside lülitati operaatorile <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Saate seda igal ajal seadetes muuta"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Mobiilne andmesideteenus puudub"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hädaabikõned pole saadaval"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Häälkõned pole saadaval"</string>
@@ -262,7 +264,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Seaded"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Abi"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Häälabi"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Lukustamine"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Lukusta"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Uus märguanne"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtuaalne klaviatuur"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Võimaldab rakendusel hankida eelistatud NFC-makseteenuse teavet (nt registreeritud abi ja marsruudi sihtkoht)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lähiväljaside juhtimine"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Võimaldab rakendusel suhelda lähiväljaside (NFC) märgendite, kaartide ja lugeritega."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Turvaelemendiga tehingu sündmus"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Võimaldab rakendusel võtta vastu teavet tehingute kohta, mis toimuvad turvaelemendi abil."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"keelake ekraanilukk"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Võimaldab rakendusel keelata klahviluku ja muu seotud parooli turvalisuse. Näiteks keelab telefon klahviluku sissetuleva kõne vastuvõtmisel ja lubab klahviluku uuesti, kui kõne on lõpetatud."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekraaniluku keerukuse taotlemine"</string>
@@ -581,11 +585,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Viga autentimisel"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekraaniluku kasutamine"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jätkamiseks sisestage oma ekraanilukk"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Vajutage tugevalt andurile"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Vajutage kindlalt andurile"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Sõrmejälge ei õnnestu tuvastada. Proovige uuesti."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhastage sõrmejäljeandur ja proovige uuesti"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhastage andur ja proovige uuesti"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Vajutage tugevalt andurile"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Vajutage kindlalt andurile"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Sõrm liikus liiga aeglaselt. Proovige uuesti."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Proovige teist sõrmejälge"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liiga ere"</string>
@@ -658,7 +662,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Teie näomudelit ei saa luua. Proovige uuesti."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Tuvastati tumedad prillid. Teie nägu peab olema täielikult nähtaval."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tuvastati nägu kattev ese. Teie nägu peab olema täielikult nähtaval."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tuvastati näokate. Nägu peab olema täielikult nähtaval."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nägu ei saa kinnitada. Riistvara pole saadaval."</string>
@@ -1683,7 +1687,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"SEES"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"VÄLJAS"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Kas anda teenusele <xliff:g id="SERVICE">%1$s</xliff:g> teie seadme üle täielik kontroll?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täielik haldusõigus sobib rakendustele, mis pakuvad juurdepääsufunktsioone. Enamiku rakenduste puhul seda ei soovitata."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täielik kontroll sobib rakendustele, mis pakuvad juurdepääsufunktsioone. Enamiku rakenduste puhul seda ei soovitata."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekraanikuva vaatamine ja haldamine"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"See saab lugeda kogu ekraanil kuvatud sisu ja kuvada sisu rakenduste peal."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Toimingute vaatamine ja tegemine"</string>
@@ -2095,7 +2099,7 @@
     <string name="mime_type_audio_ext" msgid="2615491023840514797">"<xliff:g id="EXTENSION">%1$s</xliff:g>-helifail"</string>
     <string name="mime_type_video" msgid="7071965726609428150">"Video"</string>
     <string name="mime_type_video_ext" msgid="185438149044230136">"<xliff:g id="EXTENSION">%1$s</xliff:g>-videofail"</string>
-    <string name="mime_type_image" msgid="2134307276151645257">"Kujutis"</string>
+    <string name="mime_type_image" msgid="2134307276151645257">"Pilt"</string>
     <string name="mime_type_image_ext" msgid="5743552697560999471">"<xliff:g id="EXTENSION">%1$s</xliff:g>-kujutisefail"</string>
     <string name="mime_type_compressed" msgid="8737300936080662063">"Arhiiv"</string>
     <string name="mime_type_compressed_ext" msgid="4775627287994475737">"<xliff:g id="EXTENSION">%1$s</xliff:g>-arhiivifail"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tahvelarvuti kaamerale juurde"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Sellele ei pääse voogesituse ajal juurde. Proovige juurde pääseda oma telefonis."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Süsteemi vaikeseade"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"KAART <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

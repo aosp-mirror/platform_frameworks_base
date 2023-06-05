@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ডিফল্টরূপে কলার আইডি সীমাবদ্ধ করা থাকে না৷ পরবর্তী কল: সীমাবদ্ধ নয়"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"পরিষেবা প্রস্তুত নয়৷"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"আপনি কলার আইডি এর সেটিংস পরিবর্তন করতে পারবেন না৷"</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g>-এর ডেটা ব্যবহার করা হয়েছে"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"আপনি যে কোনও সময় সেটিংস থেকে এটি পরিবর্তন করতে পারবেন"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"মোবাইল ডেটা পরিষেবা নেই"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"জরুরি কল করা যাবে না"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ভয়েস পরিষেবা নেই"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"অ্যাপের মাধ্যমে পছন্দসই এনএফসি পেমেন্ট পরিষেবার তথ্য, যেমন রেজিস্ট্রার করার সহায়তা এবং রুট ডেস্টিনেশন সম্পর্কিত তথ্য অ্যাক্সেস করার অনুমতি দেয়।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়ার ফিল্ড কমিউনিকেশন নিয়ন্ত্রণ করে"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"অ্যাপ্লিকেশানকে নিয়ার ফিল্ড কমিউনিকেশন (NFC) ট্যাগ, কার্ড এবং রিডারগুলির সাথে যোগাযোগ করতে দেয়৷"</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"নিরাপদ এলিমেন্ট ট্রানজ্যাকশন ইভেন্ট"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"নিরাপদ এলিমেন্ট ব্যবহার করা হচ্ছে এমন ট্রানজ্যাকশন সম্পর্কে তথ্য পেতে অ্যাপকে অনুমতি দেয়।"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"আপনার স্ক্রিন লক অক্ষম করুন"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"কী-লক এবং যেকোনো সংশ্লিষ্ট পাসওয়ার্ড সুরক্ষা অক্ষম করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ উদাহরণস্বরূপ, একটি ইনকামিং ফোন কল গ্রহণ করার সময়ে ফোনটি কী-লক অক্ষম করে, তারপরে কল শেষ হয়ে গেলে কী-লকটিকে আবার সক্ষম করে৷"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"স্ক্রিন লকের জটিলতা জানার অনুরোধ করুন"</string>
@@ -591,11 +595,11 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"অত্যন্ত উজ্জ্বল"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"পাওয়ার বোতাম প্রেস করার বিষয়টি শনাক্ত করা হয়েছে"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"অ্যাডজাস্ট করার চেষ্টা করুন"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"প্রতিবার আঙ্গুলের ছাপ সেটআপ করার সময় আপনার আঙ্গুলের অবস্থান সামান্য পরিবর্তন করুন"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"প্রতিবার আপনার আঙুলের অবস্থান সামান্য পরিবর্তন করুন"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"আঙ্গুলের ছাপ শনাক্ত করা যায়নি"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"আঙুলের ছাপ শনাক্ত করা যায়নি"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ফিঙ্গারপ্রিন্ট শনাক্ত করা যায়নি"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"আঙ্গুলের ছাপ যাচাই করা হয়েছে"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ফেস যাচাই করা হয়েছে"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ফেস যাচাই করা হয়েছে, \'কনফার্ম করুন\' বোতাম প্রেস করুন"</string>
@@ -624,7 +628,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফেস আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"\'ফেস আনলক\' ফিচার ব্যবহার করার ক্ষেত্রে হওয়া সমস্যা"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপনার ফেস মডেল মুছে দেওয়ার জন্য ট্যাপ করুন এবং তারপরে আবার ফেস যোগ করুন"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"\'ফেস আনলক\' সেট আপ করুন"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"\'ফেস আনলক\' সেট-আপ করুন"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপনার ফোনের দিকে তাকিয়ে এটিকে আনলক করুন"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"\'ফেস আনলক\' ফিচার ব্যবহার করতে \'সেটিংস ও গোপনীয়তা\' বিকল্পে গিয়ে "<b>"ক্যামেরায় অ্যাক্সেস দিন"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক করার জন্য বিভিন্ন উপায়ে সেট আপ করুন"</string>
@@ -647,9 +651,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"আপনার মুখের ছবি আবার নথিভুক্ত করুন।"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"মুখ শনাক্ত করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"আপনার মাথার পজিশন সামান্য পরিবর্তন করুন"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"আপনার ফোনের দিকে আরও সরাসরি তাকান"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"আপনার ফোনের দিকে আরও সরাসরি তাকান"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"আপনার ফোনের দিকে আরও সরাসরি তাকান"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"আপনার ফোনের দিকে একদম সোজাসুজি তাকান"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"আপনার ফোনের দিকে একদম সোজাসুজি তাকান"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"আপনার ফোনের দিকে একদম সোজাসুজি তাকান"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"আপনার মুখকে আড়াল করে এমন সব কিছু সরিয়ে দিন।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ব্ল্যাক বার সহ আপনার স্ক্রিনের উপরের অংশ মুছে ফেলুন"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -658,7 +662,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ফেস মডেল তৈরি করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"কালো চশমা শনাক্ত করা হয়েছে। আপনার মুখ পুরোপুরি দৃশ্যমান হতে হবে।"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"মুখে মাস্ক শনাক্ত করা হয়েছে। আপনার মুখ পুরোপুরি দৃশ্যমান হতে হবে।"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"আপনার মুখ ঢাকা আছে। পুরো মুখটাই দেখাতে হবে।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ফেস যাচাই করা যায়নি। হার্ডওয়্যার উপলভ্য নেই।"</string>
@@ -1360,7 +1364,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"অ্যানালগ অডিও অ্যাক্সেসরি শনাক্ত করা হয়েছে"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"সংযুক্ত ডিভাইসটি এই ফোনের সাথে ব্যবহার করা যাবে না। আরও জানতে ট্যাপ করুন।"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB ডিবাগিং কানেক্ট হয়েছে"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"ইউএসবি ডিবাগিং বন্ধ করতে ট্যাপ করুন"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ডিবাগিং বন্ধ করতে ট্যাপ করুন"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ডিবাগিং অক্ষম করতে বেছে নিন।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ওয়্যারলেস ডিবাগিং কানেক্ট করা হয়েছে"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ওয়্যারলেস ডিবাগিং বন্ধ করতে ট্যাপ করুন"</string>
@@ -1385,7 +1389,7 @@
     <string name="show_ime" msgid="6406112007347443383">"ফিজিক্যাল কীবোর্ড সক্রিয় থাকার সময় এটিকে স্ক্রীনে রাখুন"</string>
     <string name="hardware" msgid="1800597768237606953">"ভার্চুয়াল কীবোর্ড দেখুন"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ফিজিক্যাল কীবোর্ড কনফিগার করুন"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ভাষা এবং লেআউট বেছে নিন আলতো চাপ দিন"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ভাষা ও লেআউট বেছে নিতে ট্যাপ করুন"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"অন্যান্য অ্যাপের উপরে দেখুন"</string>
@@ -1684,7 +1688,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"বন্ধ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> অ্যাপটিকে আপনার ডিভাইসে সম্পূর্ণ নিয়ন্ত্রণের অনুমতি দিতে চান?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"যে অ্যাপগুলি আপনাকে অ্যাক্সেসিবিলিটির প্রয়োজন মেটাতে সাহায্য করে সেই অ্যাপগুলির জন্য সম্পূর্ণ নিয়ন্ত্রণের বিষয়টি উপযুক্ত, কিন্তু তা বলে সমস্ত অ্যাপের জন্য নয়।"</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"স্ক্রিন দেখে নিয়ন্ত্রণ করা"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"স্ক্রিন দেখা ও নিয়ন্ত্রণ করা"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"এটি স্ক্রিনের সমস্ত কন্টেন্ট পড়তে এবং অন্য অ্যাপেও কন্টেন্ট ডিসপ্লে করতে পারে।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"দেখুন এবং কাজটি করুন"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"এটি কোনও একটি অ্যাপের সাথে অথবা হার্ডওয়্যার সেন্সরের সাথে আপনার ইন্টার‍্যাকশন ট্র্যাক করতে এবং আপনার হয়ে বিভিন্ন অ্যাপের সাথে ইন্টার‍্যাক্ট করতে পারে।"</string>
@@ -1701,7 +1705,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"রঙ উল্টানো"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"রঙ সংশোধন"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এক হাতে ব্যবহার করার মোড"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিরিক্ত কম আলো"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিরিক্ত কম ব্রাইটনেস"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> চালু করা হয়েছে।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> বন্ধ করা হয়েছে।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ব্যবহার করতে ভলিউম কী বোতাম ৩ সেকেন্ডের জন্য চেপে ধরে রাখুন"</string>
@@ -1713,7 +1717,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"একটি ফিচার থেকে অন্যটিতে যেতে, তিনটি আঙ্গুল দিয়ে উপরের দিকে সোয়াইপ করে ধরে থাকুন।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"বড় করে দেখা"</string>
     <string name="user_switched" msgid="7249833311585228097">"বর্তমান ব্যবহারকারী <xliff:g id="NAME">%1$s</xliff:g>৷"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"ব্যবহারকারী পরিবর্তন করে <xliff:g id="NAME">%1$s</xliff:g> করা হচ্ছে…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> প্রোফাইলে পাল্টানো হচ্ছে…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>কে লগ-আউট করা হচ্ছে..."</string>
     <string name="owner_name" msgid="8713560351570795743">"মালিক"</string>
     <string name="guest_name" msgid="8502103277839834324">"অতিথি"</string>
@@ -1891,7 +1895,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS অনুরোধ USSD অনুরোধে পরিবর্তন করা হয়েছে"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"নতুন SS অনুরোধে পরিবর্তন করা হয়েছে"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ফিশিংয়ের সতর্কতা"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"কর্মস্থলের প্রোফাইল"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"অফিস প্রোফাইল"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"সতর্ক করা হয়েছে"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"যাচাই করা হয়েছে"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"বড় করুন"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g> থেকে ট্যাবলেটের ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"স্ট্রিমিংয়ের সময় এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ফোনে ব্যবহার করে দেখুন।"</string>
     <string name="system_locale_title" msgid="711882686834677268">"সিস্টেম ডিফল্ট"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"কার্ড <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

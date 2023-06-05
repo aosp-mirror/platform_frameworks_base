@@ -74,6 +74,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : non restreint"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Ce service n\'est pas pris en charge."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Impossible de modifier le paramètre relatif au numéro de l\'appelant."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Données changées à <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Vous pouvez modifier cette option en tout temps dans les paramètres"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Aucun service de données cellulaires"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Le service d\'appel d\'urgence n\'est pas accessible"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Aucun service vocal"</string>
@@ -312,7 +314,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder à vos activités physiques"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et filmer des vidéos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"découvrir les appareils à proximité et s\'y connecter"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir de l\'information sur le service préféré de paiement CCP comme les aides enregistrées et la route de destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"gérer la communication en champ proche"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permet à l\'application de communiquer avec des bornes, des cartes et des lecteurs compatibles avec la technologie CCP (communication en champ proche)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Événement de transaction relatif à un élément sécurisé"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Autorise l\'application à recevoir des informations relatives aux transactions effectuées sur un élément sécurisé."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"désactiver le verrouillage de l\'écran"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permet à l\'application de désactiver le verrouillage des touches et toute mesure de sécurité par mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"demander la complexité du verrouillage d\'écran"</string>
@@ -625,7 +629,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problème avec la fonctionnalité de déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Touchez pour supprimer votre modèle facial, puis ajoutez votre visage de nouveau"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage par reconnaissance faciale"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le Déverrouillage par reconnaissance faciale"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Déverrouillez votre téléphone en le regardant"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pour utiliser le déverrouillage par reconnaissance faciale, activez l\'"<b>"accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurer d\'autres méthodes de déverrouillage"</string>
@@ -643,7 +647,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Déplacez le téléphone vers la gauche"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Déplacez le téléphone vers la droite"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Veuillez regarder plus directement votre appareil."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Impossible de voir votre visage. Tenez votre téléphone à la hauteur des yeux."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Visage non détecté. Tenez votre téléphone à hauteur des yeux."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Trop de mouvement. Tenez le téléphone immobile."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Veuillez inscrire votre visage à nouveau."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Visage non reconnu. Réessayez."</string>
@@ -659,7 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossible de créer votre modèle facial. Réessayez."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Lunettes sombres détectées. Votre visage doit être entièrement visible."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Couvre-visage détecté. Votre visage doit être entièrement visible."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Couvre-visage détecté. Montrez votre visage entier."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. de vérif. visage. Matériel non accessible."</string>
@@ -1270,18 +1274,18 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Une empreinte de mémoire du processus lié à l\'application <xliff:g id="PROC">%1$s</xliff:g> peut être partagée. Attention : Cette empreinte peut contenir des renseignements personnels auxquels le processus a accès, y compris du texte que vous avez entré."</string>
     <string name="sendText" msgid="493003724401350724">"Sélectionner une action pour le texte"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volume de la sonnerie"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Volume"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Volume du contenu multimédia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Lecture via Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Sonnerie silencieuse sélectionnée"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volume des appels entrants"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volume d\'appels entrants sur Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Volume de l\'alarme"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Volume des alarmes"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volume des notifications"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volume Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volume de la sonnerie"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume d\'appel"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume des appels"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume du contenu multimédia"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1653,7 +1657,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"Pour déverrouiller l\'appareil, connectez-vous avec votre compte Google."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nom d\'utilisateur (courriel)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Mot de passe"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"Connexion"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"Se connecter"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Nom d\'utilisateur ou mot de passe non valide."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Vous avez oublié votre nom d\'utilisateur ou votre mot de passe?\nRendez-vous sur la page "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Vérification du compte en cours…"</string>
@@ -1712,9 +1716,9 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Pour basculer entre les fonctionnalités, maintenez le doigt sur le bouton d\'accessibilité."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec deux doigts et maintenez-les-y."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec trois doigts et maintenez-les-y."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zoom"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g> en cours…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g> en cours..."</string>
     <string name="owner_name" msgid="8713560351570795743">"Propriétaire"</string>
     <string name="guest_name" msgid="8502103277839834324">"Invité"</string>
@@ -2291,4 +2295,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossible d\'accéder à l\'appareil photo de la tablette à partir de votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Vous ne pouvez pas y accéder lorsque vous utilisez la diffusion en continu. Essayez sur votre téléphone à la place."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Paramètre système par défaut"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"CARTE <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

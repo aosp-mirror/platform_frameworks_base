@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"அழைப்பாளர் ஐடி ஆனது வரையறுக்கப்படவில்லை என்பதற்கு இயல்பாக அமைக்கப்பட்டது. அடுத்த அழைப்பு: வரையறுக்கப்படவில்லை"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"சேவை ஒதுக்கப்படவில்லை."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"அழைப்பாளர் ஐடி அமைப்பை மாற்ற முடியாது."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"டேட்டா <xliff:g id="CARRIERDISPLAY">%s</xliff:g>க்கு மாற்றப்பட்டது"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"அமைப்புகளில் இதை எப்போது வேண்டுமானாலும் மாற்றிக்கொள்ளலாம்"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"மொபைல் டேட்டா சேவையைப் பயன்படுத்த முடியாது"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"அவசர அழைப்பைச் செய்ய முடியாது"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"குரல் சேவை இல்லை"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"குறுகிய இடைவெளி தகவல்பரிமாற்றத்தைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"பாதுகாப்பு உறுப்பில் நிகழ்கின்ற பணப் பரிமாற்ற நிகழ்வு"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"பாதுகாப்பு உறுப்பில் நிகழ்கின்ற பணப் பரிமாற்றங்கள் குறித்த தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"உங்கள் திரைப் பூட்டை முடக்குதல்"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் ஆப்ஸை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"திரைப் பூட்டு தொடர்பான சிக்கலைத் தீர்க்க அனுமதி கோருதல்"</string>
@@ -1619,7 +1623,7 @@
     <string name="media_route_chooser_title" msgid="6646594924991269208">"சாதனத்துடன் இணைக்கவும்"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ஸ்கிரீனை சாதனத்தில் திரையிடு"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"சாதனங்களைத் தேடுகிறது..."</string>
-    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"அமைப்பு"</string>
+    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"அமைப்புகள்"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"துண்டி"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ஸ்கேன் செய்கிறது..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"இணைக்கிறது..."</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து டேப்லெட்டின் கேமராவை அணுக முடியாது"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ஸ்ட்ரீமின்போது இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் மொபைலில் பயன்படுத்திப் பார்க்கவும்."</string>
     <string name="system_locale_title" msgid="711882686834677268">"சிஸ்டத்தின் இயல்பு"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"கார்டு <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
