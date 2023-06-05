@@ -897,6 +897,11 @@ class ActivityStarter {
         }
         mLastStartReason = request.reason;
         mLastStartActivityTimeMs = System.currentTimeMillis();
+        // Reset the ActivityRecord#mCurrentLaunchCanTurnScreenOn state of last start activity in
+        // case the state is not yet consumed during rapid activity launch.
+        if (mLastStartActivityRecord != null) {
+            mLastStartActivityRecord.setCurrentLaunchCanTurnScreenOn(false);
+        }
         mLastStartActivityRecord = null;
 
         final IApplicationThread caller = request.caller;
