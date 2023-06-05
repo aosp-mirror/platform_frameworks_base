@@ -233,7 +233,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"输入"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"助听器"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"正在开启…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自动旋转屏幕"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自动屏幕旋转"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"自动旋转屏幕"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置信息"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"屏保"</string>
@@ -654,7 +654,7 @@
     <string name="left_icon" msgid="5036278531966897006">"向左图标"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右图标"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加功能块"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列功能块"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列图块"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"您至少需要 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 个卡片"</string>
     <string name="qs_edit" msgid="5583565172803472437">"编辑"</string>
@@ -816,8 +816,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"取消收藏"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移至位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控制"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"选择要从“快捷设置”菜单访问的控制项"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控制器"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"选择要显示在“快捷设置”菜单中的控件"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控件"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制器"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"未保存更改"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"查看其他应用"</string>

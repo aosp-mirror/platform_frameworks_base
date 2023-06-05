@@ -817,7 +817,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"העברה למיקום <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"פקדים"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"יש לבחור פקדים לגישה מההגדרות המהירות"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"יש ללחוץ לחיצה ארוכה ולגרור כדי לארגן מחדש את הפקדים"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"כדי לארגן מחדש את הפקדים, צריך ללחוץ לחיצה ארוכה ולגרור"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"כל הפקדים הוסרו"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"השינויים לא נשמרו"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"הצגת אפליקציות אחרות"</string>

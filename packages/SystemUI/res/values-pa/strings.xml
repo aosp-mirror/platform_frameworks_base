@@ -263,7 +263,7 @@
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"ਬੰਦ ਕਰੋ"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"ਕਨੈਕਟ ਕੀਤੀ ਗਈ, ਬੈਟਰੀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="2381969772953268809">"ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
+    <string name="quick_settings_connecting" msgid="2381969772953268809">"ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"ਹੌਟਸਪੌਟ"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ਚਾਲੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
@@ -914,7 +914,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"ਬਿਲਡ ਨੰਬਰ ਨੂੰ ਕਲਿੱਪਬੋਰਡ \'ਤੇ ਕਾਪੀ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="basic_status" msgid="2315371112182658176">"ਗੱਲਬਾਤ ਖੋਲ੍ਹੋ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ਗੱਲਬਾਤ ਵਿਜੇਟ"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"ਆਪਣੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਕੋਈ ਗੱਲਬਾਤ ਚੁਣੋ"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"ਆਪਣੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਕਿਸੇ ਗੱਲਬਾਤ \'ਤੇ ਟੈਪ ਕਰੋ"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"ਤੁਹਾਡੀਆਂ ਹਾਲੀਆ ਗੱਲਾਂਬਾਤਾਂ ਇੱਥੇ ਦਿਸਣਗੀਆਂ"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ਤਰਜੀਹੀ ਗੱਲਾਂਬਾਤਾਂ"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ਹਾਲੀਆ ਗੱਲਾਂਬਾਤਾਂ"</string>

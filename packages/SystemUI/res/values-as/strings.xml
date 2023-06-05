@@ -201,7 +201,7 @@
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"কৰ্মস্থানৰ প্ৰ\'ফাইলৰ লক স্ক্ৰীন"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"বন্ধ কৰক"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"সম্পূৰ্ণ নিৰৱতা"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"কেৱল এলাৰ্মবোৰৰ বাবে"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"কেৱল এলাৰ্ম"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"অসুবিধা নিদিব"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ব্লুটুথ।"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ব্লুটুথ অন হৈ আছে।"</string>
