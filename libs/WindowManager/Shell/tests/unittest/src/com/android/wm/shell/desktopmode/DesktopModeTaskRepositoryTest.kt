@@ -129,6 +129,18 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun addListener_notifiesStashed() {
+        repo.setStashed(DEFAULT_DISPLAY, true)
+        val listener = TestVisibilityListener()
+        val executor = TestShellExecutor()
+        repo.addVisibleTasksListener(listener, executor)
+        executor.flushAll()
+
+        assertThat(listener.stashedOnDefaultDisplay).isTrue()
+        assertThat(listener.stashedChangesOnDefaultDisplay).isEqualTo(1)
+    }
+
+    @Test
     fun addListener_tasksOnDifferentDisplay_doesNotNotify() {
         repo.updateVisibleFreeformTasks(SECOND_DISPLAY, taskId = 1, visible = true)
         val listener = TestVisibilityListener()
