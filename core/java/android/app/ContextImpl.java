@@ -3463,7 +3463,7 @@ class ContextImpl extends Context {
         AttributionSource attributionSource = new AttributionSource(Process.myUid(),
                 Process.myPid(), mOpPackageName, attributionTag,
                 (renouncedPermissions != null) ? renouncedPermissions.toArray(new String[0]) : null,
-                nextAttributionSource);
+                getDeviceId(), nextAttributionSource);
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
         if (nextAttributionSource != null) {

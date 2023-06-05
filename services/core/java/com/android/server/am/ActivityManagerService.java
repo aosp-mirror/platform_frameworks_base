@@ -19885,7 +19885,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return superImpl.apply(code, new AttributionSource(shellUid,
                             Process.INVALID_PID, "com.android.shell",
                             attributionSource.getAttributionTag(), attributionSource.getToken(),
-                            /*renouncedPermissions*/ null, attributionSource.getNext()),
+                            /*renouncedPermissions*/ null, attributionSource.getDeviceId(),
+                            attributionSource.getNext()),
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                             skiProxyOperation);
                 } finally {
@@ -19938,7 +19939,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return superImpl.apply(clientId, code, new AttributionSource(shellUid,
                             Process.INVALID_PID, "com.android.shell",
                             attributionSource.getAttributionTag(), attributionSource.getToken(),
-                            /*renouncedPermissions*/ null, attributionSource.getNext()),
+                            /*renouncedPermissions*/ null, attributionSource.getDeviceId(),
+                            attributionSource.getNext()),
                             startIfModeDefault, shouldCollectAsyncNotedOp, message,
                             shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
                             proxiedAttributionFlags, attributionChainId);
@@ -19964,7 +19966,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     superImpl.apply(clientId, code, new AttributionSource(shellUid,
                             Process.INVALID_PID, "com.android.shell",
                             attributionSource.getAttributionTag(), attributionSource.getToken(),
-                            /*renouncedPermissions*/ null, attributionSource.getNext()),
+                            /*renouncedPermissions*/ null, attributionSource.getDeviceId(),
+                            attributionSource.getNext()),
                             skipProxyOperation);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
