@@ -1054,6 +1054,10 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         return false;
     }
 
+    private String getNotRecognizedString(@Modality int modality) {
+        return mContext.getString(modality == TYPE_FACE
+                ? R.string.biometric_face_not_recognized : R.string.biometric_not_recognized);
+    }
 
     private String getErrorString(@Modality int modality, int error, int vendorCode) {
         switch (modality) {
@@ -1100,7 +1104,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
                 mCurrentDialog.animateToCredentialUI();
             } else if (isSoftError) {
                 final String errorMessage = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED)
-                        ? mContext.getString(R.string.biometric_not_recognized)
+                        ? getNotRecognizedString(modality)
                         : getErrorString(modality, error, vendorCode);
                 if (DEBUG) Log.d(TAG, "onBiometricError, soft error: " + errorMessage);
                 // The camera privacy error can return before the prompt initializes its state,
