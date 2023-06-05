@@ -1407,7 +1407,7 @@ public final class BroadcastQueueModernImplTest {
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST),
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD),
                 anyLong(), anyLong(), anyLong(), anyInt(), nullable(String.class),
-                anyString(), anyInt(), anyInt()),
+                anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()),
                 times(1));
     }
 
