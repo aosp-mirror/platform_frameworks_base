@@ -107,10 +107,8 @@ public abstract class InfoMediaManager extends MediaManager {
                 && !TextUtils.isEmpty(mPackageName)) {
             RouteListingPreference routeListingPreference =
                     getRouteListingPreference();
-            if (routeListingPreference != null) {
-                Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference,
-                        mPreferenceItemMap);
-            }
+            Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference,
+                    mPreferenceItemMap);
         }
     }
 
@@ -674,9 +672,9 @@ public abstract class InfoMediaManager extends MediaManager {
         public void onRouteListingPreferenceUpdated(
                 String packageName,
                 RouteListingPreference routeListingPreference) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference,
-                        mPreferenceItemMap);
+            if (TextUtils.equals(mPackageName, packageName)) {
+                Api34Impl.onRouteListingPreferenceUpdated(
+                        routeListingPreference, mPreferenceItemMap);
                 refreshDevices();
             }
         }
