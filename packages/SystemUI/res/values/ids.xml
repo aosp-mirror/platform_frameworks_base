@@ -211,4 +211,6 @@
     <item type="id" name="keyguard_indication_area" />
     <item type="id" name="keyguard_indication_text" />
     <item type="id" name="keyguard_indication_text_bottom" />
+    <item type="id" name="lock_icon" />
+    <item type="id" name="lock_icon_bg" />
 </resources>

@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -23,6 +25,7 @@ import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -68,13 +71,9 @@ public class LockIconView extends FrameLayout implements Dumpable {
     public LockIconView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mSensorRect = new RectF();
-    }
 
-    @Override
-    public void onFinishInflate() {
-        super.onFinishInflate();
-        mLockIcon = findViewById(R.id.lock_icon);
-        mBgView = findViewById(R.id.lock_icon_bg);
+        addBgImageView(context, attrs);
+        addLockIconImageView(context, attrs);
     }
 
     void setDozeAmount(float dozeAmount) {
@@ -182,6 +181,30 @@ public class LockIconView extends FrameLayout implements Dumpable {
         mAod = aod;
 
         mLockIcon.setImageState(getLockIconState(mIconType, mAod), true);
+    }
+
+    private void addLockIconImageView(Context context, AttributeSet attrs) {
+        mLockIcon = new ImageView(context, attrs);
+        mLockIcon.setId(R.id.lock_icon);
+        mLockIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        addView(mLockIcon);
+        LayoutParams lp = (LayoutParams) mLockIcon.getLayoutParams();
+        lp.height = MATCH_PARENT;
+        lp.width = MATCH_PARENT;
+        lp.gravity = Gravity.CENTER;
+        mLockIcon.setLayoutParams(lp);
+    }
+
+    private void addBgImageView(Context context, AttributeSet attrs) {
+        mBgView = new ImageView(context, attrs);
+        mBgView.setId(R.id.lock_icon_bg);
+        mBgView.setImageDrawable(context.getDrawable(R.drawable.fingerprint_bg));
+        mBgView.setVisibility(View.INVISIBLE);
+        addView(mBgView);
+        LayoutParams lp = (LayoutParams) mBgView.getLayoutParams();
+        lp.height = MATCH_PARENT;
+        lp.width = MATCH_PARENT;
+        mBgView.setLayoutParams(lp);
     }
 
     private static int[] getLockIconState(@IconType int icon, boolean aod) {
