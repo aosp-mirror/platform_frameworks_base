@@ -167,4 +167,10 @@
          true, routing from the android emergency number database will be ignored. -->
     <bool name="ignore_emergency_number_routing_from_db">false</bool>
     <java-symbol type="bool" name="ignore_emergency_number_routing_from_db" />
+
+    <!-- Boolean indicating whether allow sending null to modem to clear the previous initial attach
+         data profile -->
+    <bool name="allow_clear_initial_attach_data_profile">false</bool>
+    <java-symbol type="bool" name="allow_clear_initial_attach_data_profile" />
+
 </resources>
