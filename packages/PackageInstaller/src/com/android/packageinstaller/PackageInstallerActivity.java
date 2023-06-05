@@ -49,6 +49,8 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -144,9 +146,12 @@ public class PackageInstallerActivity extends AlertActivity {
             final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mCallingPackage);
             if (!TextUtils.isEmpty(existingUpdateOwnerLabel)
                     && mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP) {
-                viewToEnable.setText(
+                String updateOwnerString =
                         getString(R.string.install_confirm_question_update_owner_reminder,
-                                requestedUpdateOwnerLabel, existingUpdateOwnerLabel));
+                                requestedUpdateOwnerLabel, existingUpdateOwnerLabel);
+                Spanned styledUpdateOwnerString =
+                        Html.fromHtml(updateOwnerString, Html.FROM_HTML_MODE_LEGACY);
+                viewToEnable.setText(styledUpdateOwnerString);
                 mOk.setText(R.string.update_anyway);
             } else {
                 mOk.setText(R.string.update);
