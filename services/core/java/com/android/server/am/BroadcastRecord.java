@@ -44,6 +44,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
+import android.app.ActivityManager;
+import android.app.ActivityManager.ProcessState;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
@@ -93,6 +95,7 @@ final class BroadcastRecord extends Binder {
     final @Nullable String callerFeatureId; // which feature in the package sent this
     final int callingPid;   // the pid of who sent this
     final int callingUid;   // the uid of who sent this
+    final @ProcessState int callerProcState; // Procstate of the caller process at enqueue time.
 
     final int originalStickyCallingUid;
             // if this is a sticky broadcast, the Uid of the original sender
@@ -462,6 +465,8 @@ final class BroadcastRecord extends Binder {
         callerFeatureId = _callerFeatureId;
         callingPid = _callingPid;
         callingUid = _callingUid;
+        callerProcState = callerApp == null ? ActivityManager.PROCESS_STATE_UNKNOWN
+                : callerApp.getCurProcState();
         callerInstantApp = _callerInstantApp;
         callerInstrumented = isCallerInstrumented(_callerApp, _callingUid);
         resolvedType = _resolvedType;
@@ -515,6 +520,7 @@ final class BroadcastRecord extends Binder {
         callerFeatureId = from.callerFeatureId;
         callingPid = from.callingPid;
         callingUid = from.callingUid;
+        callerProcState = from.callerProcState;
         callerInstantApp = from.callerInstantApp;
         callerInstrumented = from.callerInstrumented;
         ordered = from.ordered;
