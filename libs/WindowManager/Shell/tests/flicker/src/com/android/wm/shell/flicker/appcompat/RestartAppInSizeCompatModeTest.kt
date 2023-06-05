@@ -20,6 +20,7 @@ import android.platform.test.annotations.Postsubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
 import org.junit.Test
@@ -87,5 +88,19 @@ class RestartAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flick
     fun appWindowRemainInsideVisibleBounds() {
         val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)
         flicker.assertLayersEnd { visibleRegion(letterboxApp).coversAtMost(displayBounds) }
+    }
+
+    companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestFactory.rotationTests] for configuring screen orientation and
+         * navigation modes.
+         */
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.rotationTests()
+        }
     }
 }
