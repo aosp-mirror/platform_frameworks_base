@@ -19,6 +19,8 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.CoreStartable
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
