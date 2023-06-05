@@ -764,16 +764,21 @@ class DesktopTasksController(
 
         private val listener: VisibleTasksListener = object : VisibleTasksListener {
             override fun onVisibilityChanged(displayId: Int, visible: Boolean) {
-                // TODO(b/261234402): move visibility from sysui state to listener
+                KtProtoLog.v(
+                        WM_SHELL_DESKTOP_MODE,
+                        "IDesktopModeImpl: onVisibilityChanged display=%d visible=%b",
+                        displayId,
+                        visible
+                )
                 remoteListener.call { l -> l.onVisibilityChanged(displayId, visible) }
             }
 
             override fun onStashedChanged(displayId: Int, stashed: Boolean) {
                 KtProtoLog.v(
                         WM_SHELL_DESKTOP_MODE,
-                        "IDesktopModeImpl: onStashedChanged stashed=%b display=%d",
-                        stashed,
-                        displayId
+                        "IDesktopModeImpl: onStashedChanged display=%d stashed=%b",
+                        displayId,
+                        stashed
                 )
                 remoteListener.call { l -> l.onStashedChanged(displayId, stashed) }
             }
