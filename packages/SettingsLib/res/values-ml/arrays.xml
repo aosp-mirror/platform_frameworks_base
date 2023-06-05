@@ -63,13 +63,17 @@
     <item msgid="6336372935919715515">"ഫിൽട്ടറിംഗ് പ്രവർത്തനക്ഷമമാക്കി"</item>
     <item msgid="2779123106632690576">"പ്രവർത്തനക്ഷമമാക്കി"</item>
   </string-array>
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:0 (195768089203590086) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:1 (2776218217644557831) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:2 (8163235976612675092) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:0 (3961868665260627524) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:1 (2505973306504851132) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:2 (5883011000629613855) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:3 (1051534112762023603) -->
+  <string-array name="bt_hci_snoop_log_filters_entries">
+    <item msgid="195768089203590086">"ACL ഹെഡ്ഡറുകൾ മാത്രം വിടുക"</item>
+    <item msgid="2776218217644557831">"A2DP മീഡിയാ പാക്കറ്റുകൾ ഫിൽട്ടർ ചെയ്യുക"</item>
+    <item msgid="8163235976612675092">"RFCOMM ചാനൽ ഫിൽട്ടർ ചെയ്യുക"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_profile_filter_entries">
+    <item msgid="3961868665260627524">"പ്രവർത്തനരഹിതമാക്കുക"</item>
+    <item msgid="2505973306504851132">"പ്രതീകങ്ങളുടെ സ്ട്രിംഗ് ഉപയോഗിച്ച് പൂരിപ്പിക്കുക"</item>
+    <item msgid="5883011000629613855">"ഹെഡ്ഡർ മാത്രം വിടുക"</item>
+    <item msgid="1051534112762023603">"പൂർണ്ണമായും നീക്കം ചെയ്യുക"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (ഡിഫോൾട്ട്)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
