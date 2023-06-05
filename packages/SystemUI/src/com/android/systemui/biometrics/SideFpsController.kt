@@ -35,6 +35,7 @@ import android.os.Handler
 import android.util.Log
 import android.util.RotationUtils
 import android.view.Display
+import android.view.DisplayInfo
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
@@ -58,6 +59,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.util.boundsOnScreen
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.traceSection
 import java.io.PrintWriter
@@ -128,6 +130,8 @@ constructor(
             }
         }
     @VisibleForTesting var overlayOffsets: SensorLocationInternal = SensorLocationInternal.DEFAULT
+
+    private val displayInfo = DisplayInfo()
 
     private val overlayViewParams =
         WindowManager.LayoutParams(
@@ -214,6 +218,23 @@ constructor(
         for (requestSource in requests) {
             pw.println("     $requestSource.name")
         }
+
+        pw.println("overlayView:")
+        pw.println("     width=${overlayView?.width}")
+        pw.println("     height=${overlayView?.height}")
+        pw.println("     boundsOnScreen=${overlayView?.boundsOnScreen}")
+
+        pw.println("displayStateInteractor:")
+        pw.println("     isInRearDisplayMode=${displayStateInteractor?.isInRearDisplayMode?.value}")
+
+        pw.println("sensorProps:")
+        pw.println("     displayId=${displayInfo.uniqueId}")
+        pw.println("     sensorType=${sensorProps?.sensorType}")
+        pw.println("     location=${sensorProps?.getLocation(displayInfo.uniqueId)}")
+
+        pw.println("overlayOffsets=$overlayOffsets")
+        pw.println("isReverseDefaultRotation=$isReverseDefaultRotation")
+        pw.println("currentRotation=${displayInfo.rotation}")
     }
 
     private fun onOrientationChanged(@BiometricOverlayConstants.ShowReason reason: Int) {
@@ -226,6 +247,8 @@ constructor(
         val view = layoutInflater.inflate(R.layout.sidefps_view, null, false)
         overlayView = view
         val display = context.display!!
+        // b/284098873 `context.display.rotation` may not up-to-date, we use displayInfo.rotation
+        display.getDisplayInfo(displayInfo)
         val offsets =
             sensorProps.getLocation(display.uniqueId).let { location ->
                 if (location == null) {
@@ -239,12 +262,12 @@ constructor(
         view.rotation =
             display.asSideFpsAnimationRotation(
                 offsets.isYAligned(),
-                getRotationFromDefault(display.rotation)
+                getRotationFromDefault(displayInfo.rotation)
             )
         lottie.setAnimation(
             display.asSideFpsAnimation(
                 offsets.isYAligned(),
-                getRotationFromDefault(display.rotation)
+                getRotationFromDefault(displayInfo.rotation)
             )
         )
         lottie.addLottieOnCompositionLoadedListener {
