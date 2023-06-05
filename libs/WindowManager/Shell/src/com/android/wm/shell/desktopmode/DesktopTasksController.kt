@@ -164,21 +164,28 @@ class DesktopTasksController(
     }
 
     /** Move a task with given `taskId` to desktop */
-    fun moveToDesktop(taskId: Int) {
-        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task -> moveToDesktop(task) }
+    fun moveToDesktop(taskId: Int, wct: WindowContainerTransaction = WindowContainerTransaction()) {
+        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let {
+            task -> moveToDesktop(task, wct)
+        }
     }
 
-    /** Move a task to desktop */
-    fun moveToDesktop(task: RunningTaskInfo) {
+    /**
+     * Move a task to desktop
+     */
+    fun moveToDesktop(
+            task: RunningTaskInfo,
+            wct: WindowContainerTransaction = WindowContainerTransaction()
+    ) {
         KtProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTasksController: moveToDesktop taskId=%d",
             task.taskId
         )
-        val wct = WindowContainerTransaction()
         // Bring other apps to front first
         bringDesktopAppsToFront(task.displayId, wct)
         addMoveToDesktopChanges(wct, task.token)
+
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
