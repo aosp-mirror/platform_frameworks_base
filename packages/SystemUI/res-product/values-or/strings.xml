@@ -42,7 +42,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"ଆପଣ ଆପଣଙ୍କ ଅନ୍‌ଲକ୍ ପାଟର୍ନକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଡ୍ର କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ ପ୍ରୟାସ ପରେ ଆପଣଙ୍କୁ ଏକ ଇମେଲ୍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ଆପଣଙ୍କ ଫୋନ୍‌କୁ ଅନ୍‌ଲକ୍‌ କରିବା ପାଇଁ କୁହାଯିବ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"ଟିପଚିହ୍ନ ସେନ୍ସର ପାୱାର ବଟନରେ ଅଛି। ଏହା ଟାବଲେଟର ଧାରରେ ବଢ଼ାଯାଇଥିବା ଭଲ୍ୟୁମ ବଟନ ପାଖରେ ଥିବା ଫ୍ଲାଟ ବଟନ ଅଟେ।"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"ଟିପଚିହ୍ନ ସେନ୍ସର ପାୱାର ବଟନରେ ଅଛି। ଏହା ଡିଭାଇସର ଧାରରେ ବଢ଼ାଯାଇଥିବା ଭଲ୍ୟୁମ ବଟନ ପାଖରେ ଥିବା ଫ୍ଲାଟ ବଟନ ଅଟେ।"</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"ଟିପଚିହ୍ନ ସେନ୍ସର ପାୱାର ବଟନରେ ଅଛି। ଏହା ଫୋନର ଧାରରେ ବଢ଼ାଯାଇଥିବା ଭଲ୍ୟୁମ ବଟନ ପାଖରେ ଥିବା ଫ୍ଲାଟ ବଟନ ଅଟେ।"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"ଟିପଚିହ୍ନ ସେନ୍ସର ପାୱାର ବଟନରେ ଅଛି। ଏହା ଫୋନର ଧାରରେ ଉଠି ରହିଥିବା ଭଲ୍ୟୁମ ବଟନ ପାଖରେ ଥିବା ଫ୍ଲାଟ ବଟନ ଅଟେ।"</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଫୋନ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଟାବଲେଟ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
