@@ -693,6 +693,7 @@ public final class Choreographer {
      * @throws IllegalStateException if no frame is in progress.
      * @hide
      */
+    @TestApi
     @UnsupportedAppUsage
     public long getFrameTimeNanos() {
         synchronized (mLock) {
@@ -714,6 +715,27 @@ public final class Choreographer {
         synchronized (mLock) {
             return USE_FRAME_TIME ? mLastFrameTimeNanos : System.nanoTime();
         }
+    }
+
+    /**
+     * Gets the time in {@link System#nanoTime()} timebase which the current frame
+     * is expected to be presented.
+     * <p>
+     * This time should be used to advance any animation clocks.
+     * Prefer using this method over {@link #getFrameTimeNanos()}.
+     * </p><p>
+     * This method should only be called from within a callback.
+     * </p>
+     *
+     * @return The frame start time, in the {@link System#nanoTime()} time base.
+     *
+     * @throws IllegalStateException if no frame is in progress.
+     * @hide
+     */
+    @TestApi
+    @UnsupportedAppUsage
+    public long getExpectedPresentationTimeNanos() {
+        return mFrameData.getPreferredFrameTimeline().getExpectedPresentationTimeNanos();
     }
 
     private void scheduleFrameLocked(long now) {
