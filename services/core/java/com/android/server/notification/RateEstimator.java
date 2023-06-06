@@ -23,7 +23,7 @@ package com.android.server.notification;
  * {@hide}
  */
 class RateEstimator {
-    private static final double RATE_ALPHA = 0.5;
+    private static final double RATE_ALPHA = 0.7;
     private static final double MINIMUM_DT = 0.0005;
 
     private Long mLastEventTime;
