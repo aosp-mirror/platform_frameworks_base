@@ -1583,7 +1583,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
-        mDefaultWallpaperComponent = WallpaperManager.getCmfDefaultWallpaperComponent(context);
+        mDefaultWallpaperComponent = WallpaperManager.getDefaultWallpaperComponent(context);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mIPackageManager = AppGlobals.getPackageManager();
