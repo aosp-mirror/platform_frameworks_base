@@ -94,6 +94,7 @@ final class KeyboardBacklightController implements
     private final PersistentDataStore mDataStore;
     private final Handler mHandler;
     private final AnimatorFactory mAnimatorFactory;
+    private final UEventManager mUEventManager;
     // Always access on handler thread or need to lock this for synchronization.
     private final SparseArray<KeyboardBacklightState> mKeyboardBacklights = new SparseArray<>(1);
     // Maintains state if all backlights should be on or turned off
@@ -123,19 +124,21 @@ final class KeyboardBacklightController implements
     }
 
     KeyboardBacklightController(Context context, NativeInputManagerService nativeService,
-            PersistentDataStore dataStore, Looper looper) {
-        this(context, nativeService, dataStore, looper, ValueAnimator::ofInt);
+            PersistentDataStore dataStore, Looper looper, UEventManager uEventManager) {
+        this(context, nativeService, dataStore, looper, ValueAnimator::ofInt, uEventManager);
     }
 
     @VisibleForTesting
     KeyboardBacklightController(Context context, NativeInputManagerService nativeService,
-            PersistentDataStore dataStore, Looper looper, AnimatorFactory animatorFactory) {
+            PersistentDataStore dataStore, Looper looper, AnimatorFactory animatorFactory,
+            UEventManager uEventManager) {
         mContext = context;
         mNative = nativeService;
         mDataStore = dataStore;
         mHandler = new Handler(looper, this::handleMessage);
         mAnimatorFactory = animatorFactory;
         mAmbientController = new AmbientKeyboardBacklightController(context, looper);
+        mUEventManager = uEventManager;
     }
 
     @Override
@@ -152,13 +155,12 @@ final class KeyboardBacklightController implements
         // We want to observe creation of such LED nodes since they might be created after device
         // FD created and InputDevice creation logic doesn't initialize LED nodes which leads to
         // backlight not working.
-        UEventObserver observer = new UEventObserver() {
+        mUEventManager.addListener(new UEventManager.UEventListener() {
             @Override
-            public void onUEvent(UEvent event) {
+            public void onUEvent(UEventObserver.UEvent event) {
                 onKeyboardBacklightUEvent(event);
             }
-        };
-        observer.startObserving(UEVENT_KEYBOARD_BACKLIGHT_TAG);
+        }, UEVENT_KEYBOARD_BACKLIGHT_TAG);
 
         if (InputFeatureFlagProvider.isAmbientKeyboardBacklightControlEnabled()) {
             // Start ambient backlight controller
