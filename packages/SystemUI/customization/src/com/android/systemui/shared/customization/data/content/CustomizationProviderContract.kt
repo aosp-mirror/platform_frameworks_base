@@ -82,7 +82,6 @@ object CustomizationProviderContract {
             val URI: Uri =
                 LOCK_SCREEN_QUICK_AFFORDANCE_BASE_URI.buildUpon().appendPath(TABLE_NAME).build()
             const val ENABLEMENT_INSTRUCTIONS_DELIMITER = "]["
-            const val COMPONENT_NAME_SEPARATOR = "/"
 
             object Columns {
                 /** String. Unique ID for this affordance. */
@@ -108,11 +107,11 @@ object CustomizationProviderContract {
                  */
                 const val ENABLEMENT_ACTION_TEXT = "enablement_action_text"
                 /**
-                 * String. Optional package name and activity action string, delimited by
-                 * [COMPONENT_NAME_SEPARATOR] to use with an `Intent` to start an activity that
-                 * opens a destination where the user can re-enable the disabled affordance.
+                 * String. Optional URI-formatted `Intent` (formatted using
+                 * `Intent#toUri(Intent.URI_INTENT_SCHEME)` used to start an activity that opens a
+                 * destination where the user can re-enable the disabled affordance.
                  */
-                const val ENABLEMENT_COMPONENT_NAME = "enablement_action_intent"
+                const val ENABLEMENT_ACTION_INTENT = "enablement_action_intent"
                 /**
                  * Byte array. Optional parcelled `Intent` to use to start an activity that can be
                  * used to configure the affordance.
