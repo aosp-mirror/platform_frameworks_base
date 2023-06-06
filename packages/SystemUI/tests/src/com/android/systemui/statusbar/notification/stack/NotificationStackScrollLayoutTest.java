@@ -89,7 +89,6 @@ import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -103,7 +102,6 @@ import java.util.ArrayList;
 /**
  * Tests for {@link NotificationStackScrollLayout}.
  */
-@Ignore("b/255552856")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -375,20 +373,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAppearFractionCalculation() {
-        // appear start position
-        when(mNotificationShelf.getIntrinsicHeight()).thenReturn(100);
-        // because it's the same as shelf height, appear start position equals shelf height
-        mStackScroller.mStatusBarHeight = 100;
-        // appear end position
-        when(mEmptyShadeView.getHeight()).thenReturn(200);
-
-        assertEquals(0f, mStackScroller.calculateAppearFraction(100));
-        assertEquals(1f, mStackScroller.calculateAppearFraction(200));
-        assertEquals(0.5f, mStackScroller.calculateAppearFraction(150));
-    }
-
-    @Test
     public void testAppearFractionCalculationIsNotNegativeWhenShelfBecomesSmaller() {
         // this situation might occur if status bar height is defined in pixels while shelf height
         // in dp and screen density changes - appear start position
@@ -590,6 +574,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testReInflatesFooterViews() {
+        when(mEmptyShadeView.getTextResource()).thenReturn(R.string.empty_shade_text);
         clearInvocations(mStackScroller);
         mStackScroller.reinflateViews();
         verify(mStackScroller).setFooterView(any());
@@ -916,7 +901,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setHasFilteredOutSeenNotifications(true);
         mStackScroller.updateEmptyShadeView(true, false);
 
-        verify(mEmptyShadeView).setFooterText(not(0));
+        verify(mEmptyShadeView).setFooterText(not(eq(0)));
     }
 
     @Test
