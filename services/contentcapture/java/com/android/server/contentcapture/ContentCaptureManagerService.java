@@ -805,20 +805,7 @@ public class ContentCaptureManagerService extends
     @Nullable
     private ComponentName getContentProtectionServiceComponentName() {
         String flatComponentName = getContentProtectionServiceFlatComponentName();
-        ComponentName componentName = ComponentName.unflattenFromString(flatComponentName);
-        if (componentName == null) {
-            return null;
-        }
-
-        // Check permissions by trying to construct {@link ContentCaptureServiceInfo}
-        try {
-            createContentProtectionServiceInfo(componentName);
-        } catch (Exception ex) {
-            // Swallow, exception was already logged
-            return null;
-        }
-
-        return componentName;
+        return ComponentName.unflattenFromString(flatComponentName);
     }
 
     /** @hide */
@@ -853,6 +840,15 @@ public class ContentCaptureManagerService extends
                 return null;
             }
         }
+
+        // Check permissions by trying to construct {@link ContentCaptureServiceInfo}
+        try {
+            createContentProtectionServiceInfo(mContentProtectionServiceComponentName);
+        } catch (Exception ex) {
+            // Swallow, exception was already logged
+            return null;
+        }
+
         return createRemoteContentProtectionService(mContentProtectionServiceComponentName);
     }
 
