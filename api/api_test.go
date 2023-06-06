@@ -19,6 +19,7 @@ import (
 
 	"android/soong/android"
 	"android/soong/bp2build"
+	"android/soong/java"
 )
 
 func runCombinedApisTestCaseWithRegistrationCtxFunc(t *testing.T, tc bp2build.Bp2buildTestCase, registrationCtxFunc func(ctx android.RegistrationContext)) {
@@ -30,7 +31,9 @@ func runCombinedApisTestCaseWithRegistrationCtxFunc(t *testing.T, tc bp2build.Bp
 
 func runCombinedApisTestCase(t *testing.T, tc bp2build.Bp2buildTestCase) {
 	t.Helper()
-	runCombinedApisTestCaseWithRegistrationCtxFunc(t, tc, func(ctx android.RegistrationContext) {})
+	runCombinedApisTestCaseWithRegistrationCtxFunc(t, tc, func(ctx android.RegistrationContext) {
+		ctx.RegisterModuleType("java_defaults", java.DefaultsFactory)
+	})
 }
 
 func TestCombinedApisGeneral(t *testing.T) {
@@ -42,6 +45,13 @@ func TestCombinedApisGeneral(t *testing.T) {
     system_server_classpath: ["ssc"],
 }
 `,
+		Filesystem: map[string]string{
+			"a/Android.bp": `
+			java_defaults {
+				name: "android.jar_defaults",
+			}
+			`,
+		},
 		ExpectedBazelTargets: []string{
 			bp2build.MakeBazelTargetNoRestrictions("merged_txts", "foo-current.txt", bp2build.AttrNameToString{
 				"scope": `"public"`,
