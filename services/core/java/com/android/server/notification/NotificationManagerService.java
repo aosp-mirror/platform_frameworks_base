@@ -2344,6 +2344,7 @@ public class NotificationManagerService extends SystemService {
                 mRankingHandler,
                 mZenModeHelper,
                 mPermissionHelper,
+                mPermissionManager,
                 mNotificationChannelLogger,
                 mAppOps,
                 new SysUiStatsEvent.BuilderFactory(),
