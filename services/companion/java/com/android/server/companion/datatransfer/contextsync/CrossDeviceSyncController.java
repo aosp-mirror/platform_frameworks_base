@@ -280,7 +280,7 @@ public class CrossDeviceSyncController {
                     mCallFacilitators.add(
                             new CallMetadataSyncData.CallFacilitator(
                                     defaultOutgoingTelAccount.getLabel().toString(),
-                                    FACILITATOR_ID_SYSTEM));
+                                    FACILITATOR_ID_SYSTEM, FACILITATOR_ID_SYSTEM));
                 }
             }
         }
@@ -574,6 +574,10 @@ public class CrossDeviceSyncController {
                 case (int) Telecom.CallFacilitator.IDENTIFIER:
                     facilitator.setIdentifier(pis.readString(Telecom.CallFacilitator.IDENTIFIER));
                     break;
+                case (int) Telecom.CallFacilitator.EXTENDED_IDENTIFIER:
+                    facilitator.setExtendedIdentifier(
+                            pis.readString(Telecom.CallFacilitator.EXTENDED_IDENTIFIER));
+                    break;
                 default:
                     Slog.e(TAG, "Unhandled field in Facilitator:"
                             + ProtoUtils.currentFieldToString(pis));
@@ -649,6 +653,8 @@ public class CrossDeviceSyncController {
             final long facilitatorToken = pos.start(Telecom.Call.Origin.FACILITATOR);
             pos.write(Telecom.CallFacilitator.NAME, call.getCallingAppName());
             pos.write(Telecom.CallFacilitator.IDENTIFIER, call.getCallingAppPackageName());
+            pos.write(Telecom.CallFacilitator.EXTENDED_IDENTIFIER,
+                    call.getSerializedPhoneAccountHandle());
             pos.end(facilitatorToken);
             pos.end(originToken);
             pos.write(Telecom.Call.STATUS, call.getStatus());
@@ -662,6 +668,8 @@ public class CrossDeviceSyncController {
             final long facilitatorsToken = pos.start(Telecom.FACILITATORS);
             pos.write(Telecom.CallFacilitator.NAME, facilitator.getName());
             pos.write(Telecom.CallFacilitator.IDENTIFIER, facilitator.getIdentifier());
+            pos.write(Telecom.CallFacilitator.EXTENDED_IDENTIFIER,
+                    facilitator.getExtendedIdentifier());
             pos.end(facilitatorsToken);
         }
         pos.end(telecomToken);
