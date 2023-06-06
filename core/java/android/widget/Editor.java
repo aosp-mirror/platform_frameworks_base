@@ -8112,16 +8112,10 @@ public class Editor {
             mHighlightPaint = new Paint();
             mHighlightPath = new Path();
 
-            // The highlight color is supposed to be 12% of the color primary40. We can't
-            // directly access Material 3 theme. But because Material 3 sets the colorPrimary to
-            // be primary40, here we hardcoded it to be 12% of colorPrimary.
-            final TypedValue typedValue = new TypedValue();
-            mTextView.getContext().getTheme()
-                    .resolveAttribute(R.attr.colorPrimary, typedValue, true);
-            final int colorPrimary = typedValue.data;
-            final int highlightColor = ColorUtils.setAlphaComponent(colorPrimary,
-                    (int) (0.12f * Color.alpha(colorPrimary)));
-            mHighlightPaint.setColor(highlightColor);
+            // Insert mode highlight color is 20% opacity of the default text color.
+            int color = mTextView.getTextColors().getDefaultColor();
+            color = ColorUtils.setAlphaComponent(color, (int) (0.2f * Color.alpha(color)));
+            mHighlightPaint.setColor(color);
         }
 
         /**
