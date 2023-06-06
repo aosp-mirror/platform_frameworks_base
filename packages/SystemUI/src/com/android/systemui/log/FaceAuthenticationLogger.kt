@@ -6,7 +6,7 @@ import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.FaceAuthLog
 import javax.inject.Inject
 
