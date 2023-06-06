@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.DrawableRes
@@ -34,6 +35,7 @@ import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.Companion.appStoreIntent
 import com.android.systemui.util.kotlin.getOrNull
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -76,18 +78,31 @@ constructor(
             component.getControlsListingController().getOrNull()?.getCurrentServices()
         val hasFavorites =
             component.getControlsController().getOrNull()?.getFavorites()?.isNotEmpty() == true
-        if (currentServices.isNullOrEmpty() || !hasFavorites) {
-            return KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
-                instructions =
-                    listOf(
-                        context.getString(
-                            R.string.keyguard_affordance_enablement_dialog_home_instruction_1
-                        ),
-                        context.getString(
-                            R.string.keyguard_affordance_enablement_dialog_home_instruction_2
-                        ),
-                    ),
-            )
+        val componentPackageName = component.getPackageName()
+        when {
+            currentServices.isNullOrEmpty() && !componentPackageName.isNullOrEmpty() -> {
+                // No home app installed but we know which app we want to install.
+                return disabledPickerState(
+                    actionText = context.getString(R.string.install_app),
+                    actionIntent = appStoreIntent(context, componentPackageName),
+                )
+            }
+            currentServices.isNullOrEmpty() && componentPackageName.isNullOrEmpty() -> {
+                // No home app installed and we don't know which app we want to install.
+                return disabledPickerState()
+            }
+            !hasFavorites -> {
+                // Home app installed but no favorites selected.
+                val activityClass = component.getControlsUiController().get().resolveActivity()
+                return disabledPickerState(
+                    actionText = context.getString(R.string.controls_open_app),
+                    actionIntent =
+                        Intent().apply {
+                            component = ComponentName(context, activityClass)
+                            putExtra(ControlsUiController.EXTRA_ANIMATE, true)
+                        },
+                )
+            }
         }
 
         return KeyguardQuickAffordanceConfig.PickerScreenState.Default()
@@ -170,6 +185,27 @@ constructor(
         } else {
             KeyguardQuickAffordanceConfig.LockScreenState.Hidden
         }
+    }
+
+    private fun disabledPickerState(
+        actionText: String? = null,
+        actionIntent: Intent? = null,
+    ): KeyguardQuickAffordanceConfig.PickerScreenState.Disabled {
+        check(actionIntent == null || actionText != null)
+
+        return KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
+            instructions =
+                listOf(
+                    context.getString(
+                        R.string.keyguard_affordance_enablement_dialog_home_instruction_1
+                    ),
+                    context.getString(
+                        R.string.keyguard_affordance_enablement_dialog_home_instruction_2
+                    ),
+                ),
+            actionText = actionText,
+            actionIntent = actionIntent,
+        )
     }
 
     companion object {
