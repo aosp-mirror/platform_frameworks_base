@@ -553,6 +553,21 @@ public final class UiAutomation {
     }
 
     /**
+     * Provides reference to the cache through a locked connection.
+     *
+     * @return the accessibility cache.
+     * @hide
+     */
+    public @Nullable AccessibilityCache getCache() {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        return AccessibilityInteractionClient.getCache(connectionId);
+    }
+
+    /**
      * Adopt the permission identity of the shell UID for all permissions. This allows
      * you to call APIs protected permissions which normal apps cannot hold but are
      * granted to the shell UID. If you already adopted all shell permissions by calling
@@ -827,6 +842,22 @@ public final class UiAutomation {
      *            established.
      */
     public AccessibilityNodeInfo getRootInActiveWindow() {
+        return getRootInActiveWindow(AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
+    }
+
+    /**
+     * Gets the root {@link AccessibilityNodeInfo} in the active window.
+     *
+     * @param prefetchingStrategy the prefetching strategy.
+     * @return The root info.
+     * @throws IllegalStateException If the connection to the accessibility subsystem is not
+     * established.
+     *
+     * @hide
+     */
+    @Nullable
+    public AccessibilityNodeInfo getRootInActiveWindow(
+            @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
         final int connectionId;
         synchronized (mLock) {
             throwIfNotConnectedLocked();
@@ -834,8 +865,7 @@ public final class UiAutomation {
         }
         // Calling out without a lock held.
         return AccessibilityInteractionClient.getInstance()
-                .getRootInActiveWindow(connectionId,
-                        AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
+                .getRootInActiveWindow(connectionId, prefetchingStrategy);
     }
 
     /**
