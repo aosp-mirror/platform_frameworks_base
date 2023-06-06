@@ -302,11 +302,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public static final int ANIMATION_TYPE_NONE = -1;
 
     /** Running animation will show insets */
-    @VisibleForTesting
     public static final int ANIMATION_TYPE_SHOW = 0;
 
     /** Running animation will hide insets */
-    @VisibleForTesting
     public static final int ANIMATION_TYPE_HIDE = 1;
 
     /** Running animation is controlled by user via {@link #controlWindowInsetsAnimation} */
@@ -447,21 +445,21 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     if (mInputMethodJankContext == null) return;
                     ImeTracker.forJank().onRequestAnimation(
                             mInputMethodJankContext,
-                            mShow ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE,
+                            getAnimationType(),
                             !mHasAnimationCallbacks);
                 }
 
                 @Override
                 public void onAnimationCancel(Animator animation) {
                     if (mInputMethodJankContext == null) return;
-                    ImeTracker.forJank().onCancelAnimation();
+                    ImeTracker.forJank().onCancelAnimation(getAnimationType());
                 }
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     onAnimationFinish();
                     if (mInputMethodJankContext == null) return;
-                    ImeTracker.forJank().onFinishAnimation();
+                    ImeTracker.forJank().onFinishAnimation(getAnimationType());
                 }
             });
             if (!mHasAnimationCallbacks) {
@@ -561,6 +559,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     return mShow ? ANIMATION_DURATION_FADE_IN_MS : ANIMATION_DURATION_FADE_OUT_MS;
                 }
             }
+        }
+
+        /**
+         * Returns the current animation type.
+         */
+        @AnimationType
+        private int getAnimationType() {
+            return mShow ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE;
         }
     }
 

@@ -16,8 +16,12 @@
 
 package android.view.inputmethod;
 
+import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
+import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
+
 import static com.android.internal.inputmethod.InputMethodDebug.softInputDisplayReasonToString;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_IME_INSETS_ANIMATION;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_IME_INSETS_HIDE_ANIMATION;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_IME_INSETS_SHOW_ANIMATION;
 import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_HIDDEN;
 import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_SHOWN;
 
@@ -696,20 +700,22 @@ public interface ImeTracker {
         /**
          * Called when the animation, which is going to be monitored, starts.
          *
-         * @param jankContext context which is needed by {@link InteractionJankMonitor}
-         * @param animType {@link AnimationType}
+         * @param jankContext context which is needed by {@link InteractionJankMonitor}.
+         * @param animType the animation type.
          * @param useSeparatedThread {@code true} if the animation is handled by the app,
          *                           {@code false} if the animation will be scheduled on the
-         *                           {@link android.view.InsetsAnimationThread}
+         *                           {@link android.view.InsetsAnimationThread}.
          */
         public void onRequestAnimation(@NonNull InputMethodJankContext jankContext,
                 @AnimationType int animType, boolean useSeparatedThread) {
+            final int cujType = getImeInsetsCujFromAnimation(animType);
             if (jankContext.getDisplayContext() == null
-                    || jankContext.getTargetSurfaceControl() == null) {
+                    || jankContext.getTargetSurfaceControl() == null
+                    || cujType == -1) {
                 return;
             }
             final Configuration.Builder builder = Configuration.Builder.withSurface(
-                            CUJ_IME_INSETS_ANIMATION,
+                            cujType,
                             jankContext.getDisplayContext(),
                             jankContext.getTargetSurfaceControl())
                     .setTag(String.format(Locale.US, "%d@%d@%s", animType,
@@ -719,16 +725,44 @@ public interface ImeTracker {
 
         /**
          * Called when the animation, which is going to be monitored, cancels.
+         *
+         * @param animType the animation type.
          */
-        public void onCancelAnimation() {
-            InteractionJankMonitor.getInstance().cancel(CUJ_IME_INSETS_ANIMATION);
+        public void onCancelAnimation(@AnimationType int animType) {
+            final int cujType = getImeInsetsCujFromAnimation(animType);
+            if (cujType == -1) {
+                InteractionJankMonitor.getInstance().cancel(cujType);
+            }
         }
 
         /**
          * Called when the animation, which is going to be monitored, ends.
+         *
+         * @param animType the animation type.
          */
-        public void onFinishAnimation() {
-            InteractionJankMonitor.getInstance().end(CUJ_IME_INSETS_ANIMATION);
+        public void onFinishAnimation(@AnimationType int animType) {
+            final int cujType = getImeInsetsCujFromAnimation(animType);
+            if (cujType != -1) {
+                InteractionJankMonitor.getInstance().end(cujType);
+            }
+        }
+
+        /**
+         * A helper method to translate animation type to CUJ type for IME animations.
+         *
+         * @param animType the animation type.
+         * @return the integer in {@link com.android.internal.jank.InteractionJankMonitor.CujType},
+         * or {@code -1} if the animation type is not supported for tracking yet.
+         */
+        private static int getImeInsetsCujFromAnimation(@AnimationType int animType) {
+            switch (animType) {
+                case ANIMATION_TYPE_SHOW:
+                    return CUJ_IME_INSETS_SHOW_ANIMATION;
+                case ANIMATION_TYPE_HIDE:
+                    return CUJ_IME_INSETS_HIDE_ANIMATION;
+                default:
+                    return -1;
+            }
         }
     }
 
