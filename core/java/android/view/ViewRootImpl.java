@@ -4134,6 +4134,9 @@ public final class ViewRootImpl implements ViewParent,
         // implement AccessibilityNodeProvider#findFocus
         AccessibilityNodeInfo current = provider.createAccessibilityNodeInfo(
                 AccessibilityNodeProvider.HOST_VIEW_ID);
+        if (current == null) {
+            return null;
+        }
         if (current.isFocused()) {
             return current;
         }
