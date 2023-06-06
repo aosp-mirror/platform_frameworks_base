@@ -38,6 +38,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.settings.SecureSettings
@@ -62,6 +63,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val systemClock: SystemClock,
     private val featureFlags: FeatureFlags,
+    private val userTracker: UserTracker,
     @Background private val backgroundDelayableExecutor: DelayableExecutor
 ) :
     QSTileImpl<QSTile.State?>(
@@ -93,6 +95,7 @@ constructor(
                     systemSettings,
                     secureSettings,
                     systemClock,
+                    userTracker,
                     mainHandler,
                     backgroundDelayableExecutor
                 )

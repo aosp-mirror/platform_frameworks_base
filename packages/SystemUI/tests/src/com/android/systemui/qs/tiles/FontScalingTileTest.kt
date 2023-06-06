@@ -33,6 +33,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -61,6 +62,7 @@ class FontScalingTileTest : SysuiTestCase() {
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     @Mock private lateinit var uiEventLogger: QsEventLogger
+    @Mock private lateinit var userTracker: UserTracker
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var systemClock: FakeSystemClock
@@ -93,6 +95,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 FakeSettings(),
                 FakeSystemClock(),
                 featureFlags,
+                userTracker,
                 backgroundDelayableExecutor,
             )
         fontScalingTile.initialize()
