@@ -229,12 +229,18 @@ public class KeyguardClockPositionAlgorithm {
         }
     }
 
-    public float getLockscreenMinStackScrollerPadding() {
+    /**
+     * @param nsslTop NotificationStackScrollLayout top, which is below top of the srceen.
+     * @return Distance from nsslTop to top of the first view in the lockscreen shade.
+     */
+    public float getLockscreenNotifPadding(float nsslTop) {
         if (mBypassEnabled) {
-            return mUnlockedStackScrollerPadding;
+            return mUnlockedStackScrollerPadding - nsslTop;
         } else if (mIsSplitShade) {
-            return mSplitShadeTargetTopMargin + mUserSwitchHeight;
+            return mSplitShadeTargetTopMargin + mUserSwitchHeight - nsslTop;
         } else {
+            // Non-bypass portrait shade already uses values from nsslTop
+            // so we don't need to subtract it here.
             return mMinTopMargin + mKeyguardStatusHeight;
         }
     }
