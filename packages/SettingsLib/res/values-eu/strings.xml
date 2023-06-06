@@ -99,8 +99,8 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Ezk. gailuaren bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>. Esk- gailuaren bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktibo"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktibo, ezkerreko audifonoa soilik"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktibo, eskuineko audifonoa soilik"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktibo, ezkerrekoa soilik"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktibo, eskuinekoa soilik"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktibo, ezkerreko eta eskuineko audifonoak"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Euskarriaren audioa"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefono-deiak"</string>
@@ -545,12 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Oraintxe"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Telefono hau"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tableta hau"</string>
-    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
-    <skip />
-    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
-    <skip />
-    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
-    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Oinarri bozgorailuduna"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Kanpoko gailua"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Konektatutako gailua"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Telefono hau"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Ezin da erreproduzitu gailu honetan"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Aldatzeko, bertsio-berritu kontua"</string>
