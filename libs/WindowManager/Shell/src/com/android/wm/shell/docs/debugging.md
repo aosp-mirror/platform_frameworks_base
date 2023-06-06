@@ -21,8 +21,8 @@ This code itself will not compile by itself, but the `protologtool` will preproc
 building to check the log state (is enabled) before printing the print format style log.
 
 **Notes**
-- ProtoLogs currently only work from soong builds (ie. via make/mp). We need to reimplement the
-  tool for use with SysUI-studio
+- ProtoLogs are only fully supported from soong builds (ie. via make/mp). In SysUI-studio it falls
+  back to log via Logcat
 - Non-text ProtoLogs are not currently supported with the Shell library (you can't view them with
   traces in Winscope)
 

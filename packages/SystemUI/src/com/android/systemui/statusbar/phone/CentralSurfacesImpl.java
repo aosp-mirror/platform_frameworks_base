@@ -157,7 +157,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -627,7 +627,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final UserSwitcherController mUserSwitcherController;
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
     protected final BatteryController mBatteryController;
-    protected boolean mPanelExpanded;
     private UiModeManager mUiModeManager;
     private LogMaker mStatusBarStateLog;
     protected final NotificationIconAreaController mNotificationIconAreaController;
@@ -1522,22 +1521,15 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     @VisibleForTesting
     void onShadeExpansionFullyChanged(Boolean isExpanded) {
-        if (mPanelExpanded != isExpanded) {
-            mPanelExpanded = isExpanded;
-            if (getShadeViewController() != null) {
-                // Needed to update SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
-                getShadeViewController().updateSystemUiStateFlags();
+        if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
+            if (DEBUG) {
+                Log.v(TAG, "clearing notification effects from Height");
             }
-            if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
-                if (DEBUG) {
-                    Log.v(TAG, "clearing notification effects from Height");
-                }
-                clearNotificationEffects();
-            }
+            clearNotificationEffects();
+        }
 
-            if (!isExpanded) {
-                mRemoteInputManager.onPanelCollapsed();
-            }
+        if (!isExpanded) {
+            mRemoteInputManager.onPanelCollapsed();
         }
     }
 
@@ -1856,11 +1848,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     PowerManager.WAKE_REASON_APPLICATION,
                     "com.android.systemui:full_screen_intent");
         }
-    }
-
-    @Override
-    public boolean isPanelExpanded() {
-        return mPanelExpanded;
     }
 
     /**
@@ -2973,19 +2960,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mShadeSurface.setBouncerShowing(bouncerShowing);
     }
 
-    /**
-     * Collapses the notification shade if it is tracking or expanded.
-     */
-    @Override
-    public void collapseShade() {
-        if (mShadeSurface.isTracking()) {
-            mNotificationShadeWindowViewController.cancelCurrentTouch();
-        }
-        if (mPanelExpanded && mState == StatusBarState.SHADE) {
-            mShadeController.animateCollapseShade();
-        }
-    }
-
     @VisibleForTesting
     final WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
         @Override
@@ -3334,7 +3308,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            if ((!isOccluded() || isPanelExpanded())
+            if ((!isOccluded() || mShadeSurface.isPanelExpanded())
                     && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
                     || mTransitionToFullShadeProgress > 0f)) {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);

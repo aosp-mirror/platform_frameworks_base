@@ -224,8 +224,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     NotificationPresenter getPresenter();
 
-    boolean isPanelExpanded();
-
     /**
      * Used to dispatch initial touch events before crossing the threshold to pull down the
      * notification shade. After that, since the launcher window is set to slippery, input
@@ -319,8 +317,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     void setBouncerShowing(boolean bouncerShowing);
 
     void setBouncerShowingOverDream(boolean bouncerShowingOverDream);
-
-    void collapseShade();
 
     int getWakefulnessState();
 

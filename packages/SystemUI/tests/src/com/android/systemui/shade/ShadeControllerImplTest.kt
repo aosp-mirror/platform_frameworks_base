@@ -57,6 +57,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
     @Mock private lateinit var assistManager: AssistManager
     @Mock private lateinit var gutsManager: NotificationGutsManager
     @Mock private lateinit var notificationPanelViewController: NotificationPanelViewController
+    @Mock private lateinit var nswvc: NotificationShadeWindowViewController
     @Mock private lateinit var display: Display
 
     private lateinit var shadeController: ShadeControllerImpl
@@ -80,6 +81,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 Lazy { assistManager },
                 Lazy { gutsManager },
             )
+        shadeController.setNotificationShadeWindowViewController(nswvc)
         shadeController.setNotificationPanelViewController(notificationPanelViewController)
     }
 
@@ -103,5 +105,29 @@ class ShadeControllerImplTest : SysuiTestCase() {
         verify(notificationPanelViewController).expandToNotifications()
         shadeController.animateExpandQs()
         verify(notificationPanelViewController).expandToQs()
+    }
+
+    @Test
+    fun cancelExpansionAndCollapseShade_callsCancelCurrentTouch() {
+        // GIVEN the shade is tracking a touch
+        whenever(notificationPanelViewController.isTracking).thenReturn(true)
+
+        // WHEN cancelExpansionAndCollapseShade is called
+        shadeController.cancelExpansionAndCollapseShade()
+
+        // VERIFY that cancelCurrentTouch is called
+        verify(nswvc).cancelCurrentTouch()
+    }
+
+    @Test
+    fun cancelExpansionAndCollapseShade_doesNotCallAnimateCollapseShade_whenCollapsed() {
+        // GIVEN the shade is tracking a touch
+        whenever(notificationPanelViewController.isTracking).thenReturn(false)
+
+        // WHEN cancelExpansionAndCollapseShade is called
+        shadeController.cancelExpansionAndCollapseShade()
+
+        // VERIFY that cancelCurrentTouch is NOT called
+        verify(nswvc, never()).cancelCurrentTouch()
     }
 }

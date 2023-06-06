@@ -744,7 +744,7 @@ constructor(
             } else if (dismissShade) {
                 // The animation will take care of dismissing the shade at the end of the animation.
                 // If we don't animate, collapse it directly.
-                centralSurfaces?.collapseShade()
+                shadeControllerLazy.get().cancelExpansionAndCollapseShade()
             }
 
             // We should exit the dream to prevent the activity from starting below the

@@ -906,10 +906,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
     }
 
     fun setWallpaperAppearAmount(amount: Float) {
-        val animationAlpha = when {
-            !powerManager.isInteractive -> 0f
-            else -> amount
-        }
+        val animationAlpha = amount
 
         wallpaperTargets?.forEach { wallpaper ->
             // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is

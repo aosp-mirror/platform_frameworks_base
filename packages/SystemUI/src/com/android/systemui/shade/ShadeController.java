@@ -71,6 +71,9 @@ public interface ShadeController {
     /** Posts a request to expand the shade to quick settings. */
     void postAnimateExpandQs();
 
+    /** Cancels any ongoing expansion touch handling and collapses the shade. */
+    void cancelExpansionAndCollapseShade();
+
     /**
      * If the shade is not fully expanded, collapse it animated.
      *

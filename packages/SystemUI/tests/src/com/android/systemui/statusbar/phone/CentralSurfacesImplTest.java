@@ -113,7 +113,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.notetask.NoteTaskController;
@@ -1059,7 +1059,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // GIVEN device occluded and panel is NOT expanded
         mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
         when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        mCentralSurfaces.mPanelExpanded = false;
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
 
         mCentralSurfaces.updateScrimController();
 
@@ -1073,7 +1073,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // GIVEN device occluded and qs IS expanded
         mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
         when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        mCentralSurfaces.mPanelExpanded = true;
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
 
         mCentralSurfaces.updateScrimController();
 
@@ -1139,32 +1139,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarKeyguardViewManager).updateResources();
-    }
-
-    @Test
-    public void collapseShade_callsanimateCollapseShade_whenExpanded() {
-        // GIVEN the shade is expanded
-        mCentralSurfaces.onShadeExpansionFullyChanged(true);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-
-        // WHEN collapseShade is called
-        mCentralSurfaces.collapseShade();
-
-        // VERIFY that animateCollapseShade is called
-        verify(mShadeController).animateCollapseShade();
-    }
-
-    @Test
-    public void collapseShade_doesNotCallanimateCollapseShade_whenCollapsed() {
-        // GIVEN the shade is collapsed
-        mCentralSurfaces.onShadeExpansionFullyChanged(false);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-
-        // WHEN collapseShade is called
-        mCentralSurfaces.collapseShade();
-
-        // VERIFY that animateCollapseShade is NOT called
-        verify(mShadeController, never()).animateCollapseShade();
     }
 
     @Test
