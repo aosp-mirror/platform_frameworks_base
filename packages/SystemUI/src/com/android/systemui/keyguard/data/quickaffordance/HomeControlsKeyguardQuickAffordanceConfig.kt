@@ -83,18 +83,31 @@ constructor(
             currentServices.isNullOrEmpty() && !componentPackageName.isNullOrEmpty() -> {
                 // No home app installed but we know which app we want to install.
                 return disabledPickerState(
+                    explanation =
+                        context.getString(
+                            R.string.home_quick_affordance_unavailable_install_the_app
+                        ),
                     actionText = context.getString(R.string.install_app),
                     actionIntent = appStoreIntent(context, componentPackageName),
                 )
             }
             currentServices.isNullOrEmpty() && componentPackageName.isNullOrEmpty() -> {
                 // No home app installed and we don't know which app we want to install.
-                return disabledPickerState()
+                return disabledPickerState(
+                    explanation =
+                        context.getString(
+                            R.string.home_quick_affordance_unavailable_install_the_app
+                        ),
+                )
             }
             !hasFavorites -> {
                 // Home app installed but no favorites selected.
                 val activityClass = component.getControlsUiController().get().resolveActivity()
                 return disabledPickerState(
+                    explanation =
+                        context.getString(
+                            R.string.home_quick_affordance_unavailable_configure_the_app
+                        ),
                     actionText = context.getString(R.string.controls_open_app),
                     actionIntent =
                         Intent().apply {
@@ -188,21 +201,14 @@ constructor(
     }
 
     private fun disabledPickerState(
+        explanation: String,
         actionText: String? = null,
         actionIntent: Intent? = null,
     ): KeyguardQuickAffordanceConfig.PickerScreenState.Disabled {
         check(actionIntent == null || actionText != null)
 
         return KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
-            instructions =
-                listOf(
-                    context.getString(
-                        R.string.keyguard_affordance_enablement_dialog_home_instruction_1
-                    ),
-                    context.getString(
-                        R.string.keyguard_affordance_enablement_dialog_home_instruction_2
-                    ),
-                ),
+            explanation = explanation,
             actionText = actionText,
             actionIntent = actionIntent,
         )
