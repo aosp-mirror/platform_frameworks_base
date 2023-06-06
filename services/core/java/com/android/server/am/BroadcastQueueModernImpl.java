@@ -1933,7 +1933,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, uid, senderUid, actionName,
                     receiverType, type, dispatchDelay, receiveDelay, finishDelay, packageState,
                     app != null ? app.info.packageName : null, r.callerPackage,
-                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy());
+                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy(), r.intent.getFlags(),
+                    BroadcastRecord.getReceiverPriority(receiver), r.callerProcState);
         }
     }
 
