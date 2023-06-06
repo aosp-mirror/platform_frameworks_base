@@ -545,12 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Upravo"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ovaj telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ovaj tablet"</string>
-    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
-    <skip />
-    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
-    <skip />
-    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
-    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Zvučnik bazne stanice"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Spoljni uređaj"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Povezani uređaj"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ovaj telefon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Ne možete da pustite na ovom uređaju"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Nadogradite nalog radi prebacivanja"</string>
