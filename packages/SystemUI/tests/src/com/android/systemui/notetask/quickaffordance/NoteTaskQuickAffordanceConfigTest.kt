@@ -296,8 +296,8 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
         assertThat(pickerScreenState is KeyguardQuickAffordanceConfig.PickerScreenState.Disabled)
             .isTrue()
         val disabled = pickerScreenState as KeyguardQuickAffordanceConfig.PickerScreenState.Disabled
-        assertThat(disabled.instructions)
-            .isEqualTo(listOf("Select a default notes app to use the notetaking shortcut"))
+        assertThat(disabled.explanation)
+            .isEqualTo("Select a default notes app to use the notetaking shortcut")
         assertThat(disabled.actionText).isEqualTo("Select app")
         assertThat(disabled.actionIntent?.action)
             .isEqualTo(ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE)

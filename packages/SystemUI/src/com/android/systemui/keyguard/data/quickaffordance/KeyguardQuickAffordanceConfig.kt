@@ -87,8 +87,8 @@ interface KeyguardQuickAffordanceConfig {
          * described in the instructions.
          */
         data class Disabled(
-            /** List of human-readable instructions for setting up the quick affordance. */
-            val instructions: List<String>,
+            /** Human-readable explanation as to why the quick affordance is current disabled. */
+            val explanation: String,
             /**
              * Optional text to display on a button that the user can click to start a flow to go
              * and set up the quick affordance and make it enabled.
@@ -101,7 +101,7 @@ interface KeyguardQuickAffordanceConfig {
             val actionIntent: Intent? = null,
         ) : PickerScreenState() {
             init {
-                check(instructions.isNotEmpty()) { "Instructions must not be empty!" }
+                check(explanation.isNotEmpty()) { "Explanation must not be empty!" }
                 check(
                     (actionText.isNullOrEmpty() && actionIntent == null) ||
                         (!actionText.isNullOrEmpty() && actionIntent != null)

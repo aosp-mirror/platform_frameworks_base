@@ -80,16 +80,14 @@ constructor(
         return when {
             !controller.isAvailableOnDevice ->
                 KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
-            !controller.isAbleToOpenCameraApp ->
+            !controller.isAbleToOpenCameraApp -> {
                 KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
-                    instructions =
-                        listOf(
-                            context.getString(
-                                R.string
-                                    .keyguard_affordance_enablement_dialog_qr_scanner_instruction
-                            ),
+                    explanation =
+                        context.getString(
+                            R.string.qr_scanner_quick_affordance_unavailable_explanation
                         ),
                 )
+            }
             else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default()
         }
     }
