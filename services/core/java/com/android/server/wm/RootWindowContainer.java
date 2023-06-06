@@ -102,6 +102,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserProperties;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -148,6 +149,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.UserState;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.Slogf;
@@ -1879,6 +1881,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             rootTask.switchUser(userId);
         });
 
+
+        if (topFocusedRootTask != null && isAlwaysVisibleUser(topFocusedRootTask.mUserId)) {
+            Slog.i(TAG, "Persisting top task because it belongs to an always-visible user");
+            // For a normal user-switch, we will restore the new user's task. But if the pre-switch
+            // top task is an always-visible (Communal) one, keep it even after the switch.
+            mUserRootTaskInFront.put(mCurrentUser, focusRootTaskId);
+        }
+
         final int restoreRootTaskId = mUserRootTaskInFront.get(userId);
         Task rootTask = getRootTask(restoreRootTaskId);
         if (rootTask == null) {
@@ -1892,6 +1902,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             resumeHomeActivity(null, "switchUserOnOtherDisplay", getDefaultTaskDisplayArea());
         }
         return homeInFront;
+    }
+
+    /** Returns whether the given user is to be always-visible (e.g. a communal profile). */
+    private boolean isAlwaysVisibleUser(@UserIdInt int userId) {
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final UserProperties properties = umi.getUserProperties(userId);
+        return properties != null && properties.getAlwaysVisible();
     }
 
     void removeUser(int userId) {
