@@ -104,7 +104,11 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
     @Override
     protected BubbleViewInfo doInBackground(Void... voids) {
-        if (mController.get().isShowingAsBubbleBar()) {
+        if (!verifyState()) {
+            // If we're in an inconsistent state, then switched modes and should just bail now.
+            return null;
+        }
+        if (mLayerView.get() != null) {
             return BubbleViewInfo.populateForBubbleBar(mContext.get(), mController.get(),
                     mLayerView.get(), mIconFactory, mBubble, mSkipInflation);
         } else {
@@ -118,12 +122,24 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         if (isCancelled() || viewInfo == null) {
             return;
         }
+
         mMainExecutor.execute(() -> {
+            if (!verifyState()) {
+                return;
+            }
             mBubble.setViewInfo(viewInfo);
             if (mCallback != null) {
                 mCallback.onBubbleViewsReady(mBubble);
             }
         });
+    }
+
+    private boolean verifyState() {
+        if (mController.get().isShowingAsBubbleBar()) {
+            return mLayerView.get() != null;
+        } else {
+            return mStackView.get() != null;
+        }
     }
 
     /**
