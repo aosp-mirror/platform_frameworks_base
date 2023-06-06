@@ -100,19 +100,20 @@ constructor(
         return when {
             !walletController.walletClient.isWalletServiceAvailable ->
                 KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
-            !isWalletAvailable() || queryCards().isEmpty() -> {
+            !isWalletAvailable() ->
                 KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
-                    instructions =
-                        listOf(
-                            context.getString(
-                                R.string.keyguard_affordance_enablement_dialog_wallet_instruction_1
-                            ),
-                            context.getString(
-                                R.string.keyguard_affordance_enablement_dialog_wallet_instruction_2
-                            ),
+                    explanation =
+                        context.getString(
+                            R.string.wallet_quick_affordance_unavailable_install_the_app
                         ),
                 )
-            }
+            queryCards().isEmpty() ->
+                KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
+                    explanation =
+                        context.getString(
+                            R.string.wallet_quick_affordance_unavailable_configure_the_app
+                        ),
+                )
             else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default()
         }
     }
@@ -147,9 +148,7 @@ constructor(
     }
 
     private fun isWalletAvailable() =
-        with(walletController.walletClient) {
-            isWalletServiceAvailable && isWalletFeatureAvailable
-        }
+        with(walletController.walletClient) { isWalletServiceAvailable && isWalletFeatureAvailable }
 
     private fun state(
         isFeatureEnabled: Boolean,
