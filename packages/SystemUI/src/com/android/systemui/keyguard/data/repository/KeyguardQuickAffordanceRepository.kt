@@ -175,7 +175,7 @@ constructor(
                     iconResourceId = config.pickerIconResourceId,
                     isEnabled =
                         pickerState is KeyguardQuickAffordanceConfig.PickerScreenState.Default,
-                    instructions = disabledPickerState?.instructions,
+                    explanation = disabledPickerState?.explanation,
                     actionText = disabledPickerState?.actionText,
                     actionIntent =
                         disabledPickerState?.actionIntent?.apply {
@@ -191,6 +191,7 @@ constructor(
                         },
                 )
             }
+            .sortedBy { it.name }
     }
 
     /**

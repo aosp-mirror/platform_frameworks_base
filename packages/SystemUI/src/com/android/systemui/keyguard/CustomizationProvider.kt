@@ -283,7 +283,7 @@ class CustomizationProvider :
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns.ICON,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns.IS_ENABLED,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
-                        .ENABLEMENT_INSTRUCTIONS,
+                        .ENABLEMENT_EXPLANATION,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
                         .ENABLEMENT_ACTION_TEXT,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
@@ -299,10 +299,7 @@ class CustomizationProvider :
                             representation.name,
                             representation.iconResourceId,
                             if (representation.isEnabled) 1 else 0,
-                            representation.instructions?.joinToString(
-                                Contract.LockScreenQuickAffordances.AffordanceTable
-                                    .ENABLEMENT_INSTRUCTIONS_DELIMITER
-                            ),
+                            representation.explanation,
                             representation.actionText,
                             representation.actionIntent?.toUri(Intent.URI_INTENT_SCHEME),
                             representation.configureIntent?.toUri(Intent.URI_INTENT_SCHEME),
