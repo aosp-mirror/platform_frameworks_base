@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"面孔已經驗證"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"已確認"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"輕按 [確定] 以完成"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"已使用面孔解鎖。"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"已使用面孔解鎖。按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"已識別面孔。按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"已識別面孔。按解鎖圖示即可繼續。"</string>
@@ -243,7 +244,8 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音訊"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳機"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"輸入"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"助聽器"</string>
+    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (5553051568867097111) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"正在開啟…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自動旋轉"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"自動旋轉螢幕"</string>
@@ -1004,7 +1006,8 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"無法儲存，請再試一次。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"無法儲存。"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"請至少使用 4 個字元"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"請使用少於 16 個字元"</string>
+    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"版本號碼已複製到剪貼簿。"</string>
     <string name="basic_status" msgid="2315371112182658176">"開啟對話"</string>
@@ -1108,10 +1111,8 @@
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"「Google 助理」正在聆聽"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 則通知}other{# 則通知}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>，<xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (230135078402003532) -->
-    <skip />
-    <!-- no translation found for note_task_shortcut_long_label (7729325091147319409) -->
-    <skip />
+    <string name="note_task_button_label" msgid="230135078402003532">"做筆記"</string>
+    <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"做筆記，<xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"廣播"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"要停止廣播「<xliff:g id="APP_NAME">%1$s</xliff:g>」的內容嗎？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"如要廣播「<xliff:g id="SWITCHAPP">%1$s</xliff:g>」的內容或變更輸出來源，系統就會停止廣播目前的內容"</string>
