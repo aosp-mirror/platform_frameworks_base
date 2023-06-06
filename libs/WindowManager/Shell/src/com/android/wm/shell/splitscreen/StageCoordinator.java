@@ -2907,7 +2907,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         setSplitsVisible(false);
-        prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, finishWct);
+        finishWct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                true /* reparentLeafTaskIfRelaunch */);
         logExit(EXIT_REASON_UNKNOWN);
     }
 
