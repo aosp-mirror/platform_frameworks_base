@@ -141,6 +141,7 @@ import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.util.SplitBounds;
 import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -198,6 +199,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final ArrayList<Integer> mPausingTasks = new ArrayList<>();
     private final Optional<RecentTasksController> mRecentTasks;
     private final LaunchAdjacentController mLaunchAdjacentController;
+    private final Optional<WindowDecorViewModel> mWindowDecorViewModel;
 
     private final Rect mTempRect1 = new Rect();
     private final Rect mTempRect2 = new Rect();
@@ -276,7 +278,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             TransactionPool transactionPool,
             IconProvider iconProvider, ShellExecutor mainExecutor,
             Optional<RecentTasksController> recentTasks,
-            LaunchAdjacentController launchAdjacentController) {
+            LaunchAdjacentController launchAdjacentController,
+            Optional<WindowDecorViewModel> windowDecorViewModel) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
@@ -285,6 +288,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
         mLaunchAdjacentController = launchAdjacentController;
+        mWindowDecorViewModel = windowDecorViewModel;
 
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_FULLSCREEN, this /* listener */);
 
@@ -295,7 +299,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mMainStageListener,
                 mSyncQueue,
                 mSurfaceSession,
-                iconProvider);
+                iconProvider,
+                mWindowDecorViewModel);
         mSideStage = new SideStage(
                 mContext,
                 mTaskOrganizer,
@@ -303,7 +308,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSideStageListener,
                 mSyncQueue,
                 mSurfaceSession,
-                iconProvider);
+                iconProvider,
+                mWindowDecorViewModel);
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
@@ -332,7 +338,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             Transitions transitions, TransactionPool transactionPool,
             ShellExecutor mainExecutor,
             Optional<RecentTasksController> recentTasks,
-            LaunchAdjacentController launchAdjacentController) {
+            LaunchAdjacentController launchAdjacentController,
+            Optional<WindowDecorViewModel> windowDecorViewModel) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
@@ -350,6 +357,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
         mLaunchAdjacentController = launchAdjacentController;
+        mWindowDecorViewModel = windowDecorViewModel;
         mDisplayController.addDisplayWindowListener(this);
         mDisplayLayout = new DisplayLayout();
         transitions.addHandler(this);
@@ -1709,7 +1717,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mRootTaskInfo == null || mRootTaskInfo.taskId != taskInfo.taskId) {
             throw new IllegalArgumentException(this + "\n Unknown task info changed: " + taskInfo);
         }
-
+        mWindowDecorViewModel.ifPresent(viewModel -> viewModel.onTaskInfoChanged(taskInfo));
         mRootTaskInfo = taskInfo;
         if (mSplitLayout != null
                 && mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)

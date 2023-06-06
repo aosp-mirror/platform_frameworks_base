@@ -205,8 +205,7 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
-            Optional<DesktopTasksController> desktopTasksController,
-            Optional<SplitScreenController> splitScreenController) {
+            Optional<DesktopTasksController> desktopTasksController) {
         if (DesktopModeStatus.isAnyEnabled()) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -217,8 +216,7 @@ public abstract class WMShellModule {
                     syncQueue,
                     transitions,
                     desktopModeController,
-                    desktopTasksController,
-                    splitScreenController);
+                    desktopTasksController);
         }
         return new CaptionWindowDecorViewModel(
                     context,
@@ -336,11 +334,13 @@ public abstract class WMShellModule {
             IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
+            Optional<WindowDecorViewModel> windowDecorViewModel,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new SplitScreenController(context, shellInit, shellCommandHandler, shellController,
                 shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, displayController,
                 displayImeController, displayInsetsController, dragAndDropController, transitions,
-                transactionPool, iconProvider, recentTasks, launchAdjacentController, mainExecutor);
+                transactionPool, iconProvider, recentTasks, launchAdjacentController,
+                windowDecorViewModel, mainExecutor);
     }
 
     //

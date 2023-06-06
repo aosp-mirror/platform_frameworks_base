@@ -133,7 +133,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
-                mMainExecutor, Optional.empty(), mLaunchAdjacentController));
+                mMainExecutor, Optional.empty(), mLaunchAdjacentController, Optional.empty()));
         mDividerLeash = new SurfaceControl.Builder(mSurfaceSession).setName("fakeDivider").build();
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
