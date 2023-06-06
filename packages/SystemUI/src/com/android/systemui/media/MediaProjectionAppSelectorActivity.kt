@@ -38,8 +38,6 @@ import com.android.internal.app.ResolverListController
 import com.android.internal.app.chooser.NotSelectableTargetInfo
 import com.android.internal.app.chooser.TargetInfo
 import com.android.systemui.R
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorComponent
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorController
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
@@ -53,7 +51,6 @@ import javax.inject.Inject
 class MediaProjectionAppSelectorActivity(
     private val componentFactory: MediaProjectionAppSelectorComponent.Factory,
     private val activityLauncher: AsyncActivityLauncher,
-    private val featureFlags: FeatureFlags,
     /** This is used to override the dependency in a screenshot test */
     @VisibleForTesting
     private val listControllerFactory: ((userHandle: UserHandle) -> ResolverListController)?
@@ -62,9 +59,8 @@ class MediaProjectionAppSelectorActivity(
     @Inject
     constructor(
         componentFactory: MediaProjectionAppSelectorComponent.Factory,
-        activityLauncher: AsyncActivityLauncher,
-        featureFlags: FeatureFlags
-    ) : this(componentFactory, activityLauncher, featureFlags, listControllerFactory = null)
+        activityLauncher: AsyncActivityLauncher
+    ) : this(componentFactory, activityLauncher, listControllerFactory = null)
 
     private lateinit var configurationController: ConfigurationController
     private lateinit var controller: MediaProjectionAppSelectorController
@@ -108,11 +104,7 @@ class MediaProjectionAppSelectorActivity(
     override fun appliedThemeResId(): Int = R.style.Theme_SystemUI_MediaProjectionAppSelector
 
     override fun createBlockerEmptyStateProvider(): EmptyStateProvider =
-        if (featureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
-            component.emptyStateProvider
-        } else {
-            object : EmptyStateProvider {}
-        }
+        component.emptyStateProvider
 
     override fun createListController(userHandle: UserHandle): ResolverListController =
         listControllerFactory?.invoke(userHandle) ?: super.createListController(userHandle)
