@@ -43,7 +43,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -96,7 +95,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
 import com.android.systemui.util.settings.FakeSettings;
@@ -138,8 +136,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private AuthController mAuthController;
     @Mock
     private Display mDisplay;
-    @Mock
-    private TunerService mTunerService;
     @Mock
     private UserTracker mUserTracker;
     @Mock
@@ -234,7 +230,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer"))));
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mExecutor, mSecureSettings,
-                mTunerService, mUserTracker, mDisplayTracker, mDotViewController, mThreadFactory,
+                mUserTracker, mDisplayTracker, mDotViewController, mThreadFactory,
                 mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
                 mAuthController) {
@@ -247,12 +243,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
             @Override
             public void onConfigurationChanged(Configuration newConfig) {
                 super.onConfigurationChanged(newConfig);
-                mExecutor.runAllReady();
-            }
-
-            @Override
-            public void onTuningChanged(String key, String newValue) {
-                super.onTuningChanged(key, newValue);
                 mExecutor.runAllReady();
             }
 
@@ -270,7 +260,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.mDisplayInfo = mDisplayInfo;
         doReturn(1f).when(mScreenDecorations).getPhysicalPixelDisplaySizeRatio();
         doNothing().when(mScreenDecorations).updateOverlayProviderViews(any());
-        reset(mTunerService);
 
         try {
             mPrivacyDotShowingListener = mScreenDecorations.mPrivacyDotShowingListener.getClass()
@@ -464,8 +453,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
         // No views added.
         verifyOverlaysExistAndAdded(false, false, false, false, null);
-        // No Tuners tuned.
-        verify(mTunerService, never()).addTunable(any(), any());
         // No dot controller init
         verify(mDotViewController, never()).initialize(any(), any(), any(), any());
     }
@@ -497,8 +484,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Face scanning doesn't exist
         verifyFaceScanningViewExists(false);
 
-        // One tunable.
-        verify(mTunerService, times(1)).addTunable(any(), any());
         // Dot controller init
         verify(mDotViewController, times(1)).initialize(
                 isA(View.class), isA(View.class), isA(View.class), isA(View.class));
@@ -528,8 +513,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Face scanning doesn't exist
         verifyFaceScanningViewExists(false);
 
-        // One tunable.
-        verify(mTunerService, times(1)).addTunable(any(), any());
         // No dot controller init
         verify(mDotViewController, never()).initialize(any(), any(), any(), any());
     }
@@ -560,8 +543,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Face scanning doesn't exist
         verifyFaceScanningViewExists(false);
 
-        // One tunable.
-        verify(mTunerService, times(1)).addTunable(any(), any());
         // Dot controller init
         verify(mDotViewController, times(1)).initialize(
                 isA(View.class), isA(View.class), isA(View.class), isA(View.class));
@@ -1076,15 +1057,10 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     public void testRegistration_From_NoOverlay_To_HasOverlays() {
         doReturn(false).when(mScreenDecorations).hasOverlays();
         mScreenDecorations.start();
-        verify(mTunerService, times(0)).addTunable(any(), any());
-        verify(mTunerService, times(1)).removeTunable(any());
         assertThat(mScreenDecorations.mIsRegistered, is(false));
-        reset(mTunerService);
 
         doReturn(true).when(mScreenDecorations).hasOverlays();
         mScreenDecorations.onConfigurationChanged(new Configuration());
-        verify(mTunerService, times(1)).addTunable(any(), any());
-        verify(mTunerService, times(0)).removeTunable(any());
         assertThat(mScreenDecorations.mIsRegistered, is(true));
     }
 
@@ -1093,14 +1069,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         doReturn(true).when(mScreenDecorations).hasOverlays();
 
         mScreenDecorations.start();
-        verify(mTunerService, times(1)).addTunable(any(), any());
-        verify(mTunerService, times(0)).removeTunable(any());
         assertThat(mScreenDecorations.mIsRegistered, is(true));
-        reset(mTunerService);
 
         mScreenDecorations.onConfigurationChanged(new Configuration());
-        verify(mTunerService, times(0)).addTunable(any(), any());
-        verify(mTunerService, times(0)).removeTunable(any());
         assertThat(mScreenDecorations.mIsRegistered, is(true));
     }
 
@@ -1109,15 +1080,10 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         doReturn(true).when(mScreenDecorations).hasOverlays();
 
         mScreenDecorations.start();
-        verify(mTunerService, times(1)).addTunable(any(), any());
-        verify(mTunerService, times(0)).removeTunable(any());
         assertThat(mScreenDecorations.mIsRegistered, is(true));
-        reset(mTunerService);
 
         doReturn(false).when(mScreenDecorations).hasOverlays();
         mScreenDecorations.onConfigurationChanged(new Configuration());
-        verify(mTunerService, times(0)).addTunable(any(), any());
-        verify(mTunerService, times(1)).removeTunable(any());
         assertThat(mScreenDecorations.mIsRegistered, is(false));
     }
 
@@ -1181,7 +1147,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mFaceScanningProviderFactory.getProviders()).thenReturn(mFaceScanningProviders);
         when(mFaceScanningProviderFactory.getHasProviders()).thenReturn(true);
         ScreenDecorations screenDecorations = new ScreenDecorations(mContext, mExecutor,
-                mSecureSettings, mTunerService, mUserTracker, mDisplayTracker, mDotViewController,
+                mSecureSettings, mUserTracker, mDisplayTracker, mDotViewController,
                 mThreadFactory, mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")), mAuthController);
         screenDecorations.start();

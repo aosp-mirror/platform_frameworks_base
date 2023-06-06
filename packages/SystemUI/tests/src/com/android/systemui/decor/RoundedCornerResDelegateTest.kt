@@ -109,27 +109,6 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
     }
 
     @Test
-    fun testUpdateTuningSizeFactor() {
-        setupResources(radius = 100,
-                roundedTopDrawable = getTestsDrawable(R.drawable.rounded3px),
-                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded4px))
-
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
-
-        val factor = 5
-        roundedCornerResDelegate.tuningSizeFactor = factor
-        val length = (factor * mContext.resources.displayMetrics.density).toInt()
-
-        assertEquals(Size(length, length), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(length, length), roundedCornerResDelegate.bottomRoundedSize)
-
-        roundedCornerResDelegate.tuningSizeFactor = null
-
-        assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
-    }
-
-    @Test
     fun testPhysicalPixelDisplaySizeChanged() {
         setupResources(
                 roundedTopDrawable = getTestsDrawable(R.drawable.rounded4px),

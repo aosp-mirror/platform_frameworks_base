@@ -84,8 +84,6 @@ import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
-import com.android.systemui.tuner.TunerService;
-import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.SecureSettings;
@@ -105,18 +103,15 @@ import javax.inject.Inject;
  * for antialiasing and emulation purposes.
  */
 @SysUISingleton
-public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
+public class ScreenDecorations implements CoreStartable, Dumpable {
     private static final boolean DEBUG = false;
     private static final String TAG = "ScreenDecorations";
 
-    public static final String SIZE = "sysui_rounded_size";
-    public static final String PADDING = "sysui_rounded_content_padding";
     // Provide a way for factory to disable ScreenDecorations to run the Display tests.
     private static final boolean DEBUG_DISABLE_SCREEN_DECORATIONS =
             SystemProperties.getBoolean("debug.disable_screen_decorations", false);
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
-    private static final boolean VERBOSE = false;
     static final boolean DEBUG_COLOR = DEBUG_SCREENSHOT_ROUNDED_CORNERS;
 
     private static final int[] DISPLAY_CUTOUT_IDS = {
@@ -134,7 +129,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     protected boolean mIsRegistered;
     private final Context mContext;
     private final Executor mMainExecutor;
-    private final TunerService mTunerService;
     private final SecureSettings mSecureSettings;
     @VisibleForTesting
     DisplayTracker.Callback mDisplayListener;
@@ -315,7 +309,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     public ScreenDecorations(Context context,
             @Main Executor mainExecutor,
             SecureSettings secureSettings,
-            TunerService tunerService,
             UserTracker userTracker,
             DisplayTracker displayTracker,
             PrivacyDotViewController dotViewController,
@@ -327,7 +320,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         mContext = context;
         mMainExecutor = mainExecutor;
         mSecureSettings = secureSettings;
-        mTunerService = tunerService;
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mDotViewController = dotViewController;
@@ -608,12 +600,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
                 return;
             }
 
-            mMainExecutor.execute(() -> {
-                Trace.beginSection("ScreenDecorations#addTunable");
-                mTunerService.addTunable(this, SIZE);
-                Trace.endSection();
-            });
-
             // Watch color inversion and invert the overlay as needed.
             if (mColorInversionSetting == null) {
                 mColorInversionSetting = new SettingObserver(mSecureSettings, mHandler,
@@ -632,12 +618,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             mUserTracker.addCallback(mUserChangedCallback, mExecutor);
             mIsRegistered = true;
         } else {
-            mMainExecutor.execute(() -> {
-                Trace.beginSection("ScreenDecorations#removeTunable");
-                mTunerService.removeTunable(this);
-                Trace.endSection();
-            });
-
             if (mColorInversionSetting != null) {
                 mColorInversionSetting.setListening(false);
             }
@@ -1168,34 +1148,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             }
         }
         Trace.endSection();
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
-            Log.i(TAG, "ScreenDecorations is disabled");
-            return;
-        }
-        mExecutor.execute(() -> {
-            if (mOverlays == null || !SIZE.equals(key)) {
-                return;
-            }
-            Trace.beginSection("ScreenDecorations#onTuningChanged");
-            try {
-                final int sizeFactor = Integer.parseInt(newValue);
-                mRoundedCornerResDelegate.setTuningSizeFactor(sizeFactor);
-            } catch (NumberFormatException e) {
-                mRoundedCornerResDelegate.setTuningSizeFactor(null);
-            }
-            updateOverlayProviderViews(new Integer[] {
-                    R.id.rounded_corner_top_left,
-                    R.id.rounded_corner_top_right,
-                    R.id.rounded_corner_bottom_left,
-                    R.id.rounded_corner_bottom_right
-            });
-            updateHwLayerRoundedCornerExistAndSize();
-            Trace.endSection();
-        });
     }
 
     private void updateHwLayerRoundedCornerDrawable() {

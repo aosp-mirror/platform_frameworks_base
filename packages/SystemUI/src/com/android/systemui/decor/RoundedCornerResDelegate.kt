@@ -55,15 +55,6 @@ class RoundedCornerResDelegate(
     var bottomRoundedSize = Size(0, 0)
         private set
 
-    var tuningSizeFactor: Int? = null
-        set(value) {
-            if (field == value) {
-                return
-            }
-            field = value
-            reloadMeasures()
-        }
-
     var physicalPixelDisplaySizeRatio: Float = 1f
         set(value) {
             if (field == value) {
@@ -120,19 +111,6 @@ class RoundedCornerResDelegate(
         }
         bottomRoundedDrawable?.let {
             bottomRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
-        }
-
-        tuningSizeFactor?.let {
-            if (it <= 0) {
-                return
-            }
-            val length: Int = (it * density).toInt()
-            if (topRoundedSize.width > 0) {
-                topRoundedSize = Size(length, length)
-            }
-            if (bottomRoundedSize.width > 0) {
-                bottomRoundedSize = Size(length, length)
-            }
         }
 
         if (physicalPixelDisplaySizeRatio != 1f) {
