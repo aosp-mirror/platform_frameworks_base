@@ -25,9 +25,11 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import android.annotation.EnforcePermission;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.test.FakePermissionEnforcer;
 
 import androidx.test.filters.SmallTest;
 
@@ -57,7 +59,8 @@ public final class DeviceStateManagerGlobalTest {
 
     @Before
     public void setUp() {
-        mService = new TestDeviceStateManagerService();
+        FakePermissionEnforcer permissionEnforcer = new FakePermissionEnforcer();
+        mService = new TestDeviceStateManagerService(permissionEnforcer);
         mDeviceStateManagerGlobal = new DeviceStateManagerGlobal(mService);
         assertFalse(mService.mCallbacks.isEmpty());
     }
@@ -261,6 +264,10 @@ public final class DeviceStateManagerGlobalTest {
 
         private Set<IDeviceStateManagerCallback> mCallbacks = new HashSet<>();
 
+        TestDeviceStateManagerService(FakePermissionEnforcer enforcer) {
+            super(enforcer);
+        }
+
         private DeviceStateInfo getInfo() {
             final int mergedBaseState = mBaseStateRequest == null
                     ? mBaseState : mBaseStateRequest.state;
@@ -380,7 +387,10 @@ public final class DeviceStateManagerGlobalTest {
         // No-op in the test since DeviceStateManagerGlobal just calls into the system server with
         // no business logic around it.
         @Override
-        public void onStateRequestOverlayDismissed(boolean shouldCancelMode) {}
+        @EnforcePermission(android.Manifest.permission.CONTROL_DEVICE_STATE)
+        public void onStateRequestOverlayDismissed(boolean shouldCancelMode) {
+            onStateRequestOverlayDismissed_enforcePermission();
+        }
 
         public void setSupportedStates(int[] states) {
             mSupportedStates = states;
