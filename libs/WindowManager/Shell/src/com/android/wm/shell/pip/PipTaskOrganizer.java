@@ -438,6 +438,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
             PictureInPictureParams pictureInPictureParams) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "startSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
         mPipTransitionState.setInSwipePipToHomeTransition(true);
         sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);
@@ -450,6 +452,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
             SurfaceControl overlay) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "stopSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
         // do nothing if there is no startSwipePipToHome being called before
         if (!mPipTransitionState.getInSwipePipToHomeTransition()) {
             return;
@@ -522,6 +526,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "exitPip: %s, state=%s", mTaskInfo.topActivity, mPipTransitionState);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (isLaunchIntoPipTask()) {
             exitLaunchIntoPipTask(wct);
@@ -559,6 +565,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // destinationBounds calculated above will be incorrect if this is with rotation.
             wct.setBounds(mToken, null);
         } else {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "exitPip: %s, dest=%s", mTaskInfo.topActivity, destinationBounds);
             final SurfaceControl.Transaction tx =
                     mSurfaceControlTransactionFactory.getTransaction();
             mSurfaceTransactionHelper.scale(tx, mLeash, destinationBounds,
@@ -656,9 +664,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         animator.setInterpolator(Interpolators.ALPHA_OUT);
         animator.start();
         mPipTransitionState.setTransitionState(PipTransitionState.EXITING_PIP);
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "removePip: %s, state=%s", mTaskInfo.topActivity, mPipTransitionState);
     }
 
     private void removePipImmediately() {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "removePipImmediately: %s, state=%s", mTaskInfo.topActivity, mPipTransitionState);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.setBounds(mToken, null);
@@ -723,6 +735,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         mPipUiEventLoggerLogger.log(uiEventEnum);
 
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "onTaskAppeared: %s, state=%s", mTaskInfo.topActivity, mPipTransitionState);
         if (mPipTransitionState.getInSwipePipToHomeTransition()) {
             if (!mWaitForFixedRotation) {
                 onEndOfSwipePipToHomeTransition();
@@ -774,6 +788,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void onTaskAppearedWithFixedRotation(int animationType) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "onTaskAppearedWithFixedRotation: %s, state=%s animationType=%d",
+                mTaskInfo.topActivity, mPipTransitionState, animationType);
         if (animationType == ANIM_TYPE_ALPHA) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Defer entering PiP alpha animation, fixed rotation is ongoing", TAG);
@@ -920,6 +937,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "onTaskVanished: %s, state=%s", mTaskInfo.topActivity, mPipTransitionState);
         if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
             return;
         }
@@ -961,6 +980,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipBoundsState.setOverrideMinSize(
                 mPipBoundsAlgorithm.getMinimalSize(info.topActivityInfo));
         final PictureInPictureParams newParams = info.pictureInPictureParams;
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "onTaskInfoChanged: %s, state=%s oldParams=%s newParams=%s",
+                mTaskInfo.topActivity, mPipTransitionState, mPictureInPictureParams, newParams);
 
         // mPictureInPictureParams is only null if there is no PiP
         if (newParams == null || mPictureInPictureParams == null) {
@@ -1001,6 +1023,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     @Override
     public void onFixedRotationStarted(int displayId, int newRotation) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "onFixedRotationStarted: %s, state=%s", mTaskInfo, mPipTransitionState);
         mNextRotation = newRotation;
         mWaitForFixedRotation = true;
 
@@ -1022,6 +1046,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     @Override
     public void onFixedRotationFinished(int displayId) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "onFixedRotationFinished: %s, state=%s", mTaskInfo, mPipTransitionState);
         if (!mWaitForFixedRotation) {
             return;
         }
@@ -1057,6 +1083,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     /** Called when exiting PIP transition is finished to do the state cleanup. */
     void onExitPipFinished(TaskInfo info) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "onExitPipFinished: %s, state=%s leash=%s",
+                info.topActivity, mPipTransitionState, mLeash);
         if (mLeash == null) {
             // TODO(239461594): Remove once the double call to onExitPipFinished() is fixed
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -1108,6 +1137,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     /** Explicitly set the visibility of PiP window. */
     public void setPipVisibility(boolean visible) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "setPipVisibility: %s, state=%s visible=%s",
+                mTaskInfo.topActivity, mPipTransitionState, visible);
         if (!isInPip()) {
             return;
         }
