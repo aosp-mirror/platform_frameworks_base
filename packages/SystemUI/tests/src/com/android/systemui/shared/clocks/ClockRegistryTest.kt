@@ -298,6 +298,54 @@ class ClockRegistryTest : SysuiTestCase() {
     }
 
     @Test
+    fun unknownPluginAttached_clockAndListUnchanged_loadRequested() {
+        val mockPluginLifecycle = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        whenever(mockPluginLifecycle.getPackage()).thenReturn("some.other.package")
+
+        var changeCallCount = 0
+        var listChangeCallCount = 0
+        registry.registerClockChangeListener(object : ClockRegistry.ClockChangeListener {
+            override fun onCurrentClockChanged() { changeCallCount++ }
+            override fun onAvailableClocksChanged() { listChangeCallCount++ }
+        })
+
+        assertEquals(true, pluginListener.onPluginAttached(mockPluginLifecycle))
+        scheduler.runCurrent()
+        assertEquals(0, changeCallCount)
+        assertEquals(0, listChangeCallCount)
+    }
+
+    @Test
+    fun knownPluginAttached_clockAndListChanged_notLoaded() {
+        val mockPluginLifecycle1 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        whenever(mockPluginLifecycle1.getPackage()).thenReturn("com.android.systemui.falcon.one")
+        val mockPluginLifecycle2 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        whenever(mockPluginLifecycle2.getPackage()).thenReturn("com.android.systemui.falcon.two")
+
+        var changeCallCount = 0
+        var listChangeCallCount = 0
+        registry.registerClockChangeListener(object : ClockRegistry.ClockChangeListener {
+            override fun onCurrentClockChanged() { changeCallCount++ }
+            override fun onAvailableClocksChanged() { listChangeCallCount++ }
+        })
+
+        registry.applySettings(ClockSettings("DIGITAL_CLOCK_CALLIGRAPHY", null))
+        scheduler.runCurrent()
+        assertEquals(1, changeCallCount)
+        assertEquals(0, listChangeCallCount)
+
+        assertEquals(false, pluginListener.onPluginAttached(mockPluginLifecycle1))
+        scheduler.runCurrent()
+        assertEquals(1, changeCallCount)
+        assertEquals(1, listChangeCallCount)
+
+        assertEquals(false, pluginListener.onPluginAttached(mockPluginLifecycle2))
+        scheduler.runCurrent()
+        assertEquals(1, changeCallCount)
+        assertEquals(2, listChangeCallCount)
+    }
+
+    @Test
     fun pluginAddRemove_concurrentModification() {
         val mockPluginLifecycle1 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
         val mockPluginLifecycle2 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
