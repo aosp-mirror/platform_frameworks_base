@@ -20,6 +20,8 @@ import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
+import static com.android.wm.shell.transition.DefaultTransitionHandler.isSupportedOverrideAnimation;
+
 import static java.util.Objects.requireNonNull;
 
 import android.content.Context;
@@ -113,8 +115,11 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
             return false;
         }
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
-        if (options != null && options.getType() == ANIM_SCENE_TRANSITION) {
-            // Scene-transition will be handled by app side.
+        if (options != null
+                // Scene-transition will be handled by app side.
+                && (options.getType() == ANIM_SCENE_TRANSITION
+                // Use default transition handler to animate override animation.
+                || isSupportedOverrideAnimation(options))) {
             return false;
         }
 
