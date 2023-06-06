@@ -122,7 +122,6 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
-import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -171,7 +170,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final StageListenerImpl mMainStageListener = new StageListenerImpl();
     private final SideStage mSideStage;
     private final StageListenerImpl mSideStageListener = new StageListenerImpl();
-    private final DisplayLayout mDisplayLayout;
     @SplitPosition
     private int mSideStagePosition = SPLIT_POSITION_BOTTOM_OR_RIGHT;
 
@@ -311,7 +309,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
                 this::onTransitionAnimationComplete, this);
         mDisplayController.addDisplayWindowListener(this);
-        mDisplayLayout = new DisplayLayout(displayController.getDisplayLayout(displayId));
         transitions.addHandler(this);
         mSplitUnsupportedToast = Toast.makeText(mContext,
                 R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT);
@@ -345,7 +342,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
         mDisplayController.addDisplayWindowListener(this);
-        mDisplayLayout = new DisplayLayout();
         transitions.addHandler(this);
         mSplitUnsupportedToast = Toast.makeText(mContext,
                 R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT);
@@ -1689,7 +1685,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSplitLayout == null) {
             mSplitLayout = new SplitLayout(TAG + "SplitDivider", mContext,
                     mRootTaskInfo.configuration, this, mParentContainerCallbacks,
-                    mDisplayImeController, mTaskOrganizer,
+                    mDisplayController, mDisplayImeController, mTaskOrganizer,
                     PARALLAX_ALIGN_CENTER /* parallaxType */);
             mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSplitLayout);
         }
@@ -2153,8 +2149,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (displayId != DEFAULT_DISPLAY) {
             return;
         }
-        mDisplayLayout.set(mDisplayController.getDisplayLayout(displayId));
-
         if (mSplitLayout != null && mSplitLayout.isDensityChanged(newConfig.densityDpi)
                 && mMainStage.isActive()
                 && mSplitLayout.updateConfiguration(newConfig)
@@ -2171,10 +2165,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void onDisplayChange(int displayId, int fromRotation, int toRotation,
             @Nullable DisplayAreaInfo newDisplayAreaInfo, WindowContainerTransaction wct) {
-        if (!mMainStage.isActive()) return;
+        if (displayId != DEFAULT_DISPLAY || !mMainStage.isActive()) return;
 
-        mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
-        mSplitLayout.rotateTo(toRotation, mDisplayLayout.stableInsets());
+        mSplitLayout.rotateTo(toRotation);
         if (newDisplayAreaInfo != null) {
             mSplitLayout.updateConfiguration(newDisplayAreaInfo.configuration);
         }
