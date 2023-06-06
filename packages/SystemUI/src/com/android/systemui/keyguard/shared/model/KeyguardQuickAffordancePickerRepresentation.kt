@@ -41,11 +41,8 @@ data class KeyguardQuickAffordancePickerRepresentation(
      */
     val actionText: String? = null,
 
-    /**
-     * If not enabled, an optional component name (package and action) for a button that takes the
-     * user to a destination where they can re-enable it.
-     */
-    val actionComponentName: String? = null,
+    /** Optional [Intent] to use to start an activity to re-enable this affordance. */
+    val actionIntent: Intent? = null,
 
     /** Optional [Intent] to use to start an activity to configure this affordance. */
     val configureIntent: Intent? = null,
