@@ -105,6 +105,8 @@ class KeyboardBacklightControllerTests {
     private lateinit var iInputManager: IInputManager
     @Mock
     private lateinit var native: NativeInputManagerService
+    @Mock
+    private lateinit var uEventManager: UEventManager
     private lateinit var keyboardBacklightController: KeyboardBacklightController
     private lateinit var context: Context
     private lateinit var dataStore: PersistentDataStore
@@ -130,7 +132,7 @@ class KeyboardBacklightControllerTests {
         })
         testLooper = TestLooper()
         keyboardBacklightController = KeyboardBacklightController(context, native, dataStore,
-                testLooper.looper, FakeAnimatorFactory())
+                testLooper.looper, FakeAnimatorFactory(), uEventManager)
         InputManagerGlobal.resetInstance(iInputManager)
         val inputManager = InputManager(context)
         `when`(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager)
