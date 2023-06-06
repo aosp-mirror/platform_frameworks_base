@@ -873,6 +873,18 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
     }
 
+    /**
+     * Returns {@code true} if the default transition handler can run the override animation.
+     * @see #loadAnimation(TransitionInfo, TransitionInfo.Change, int, boolean)
+     */
+    public static boolean isSupportedOverrideAnimation(
+            @NonNull TransitionInfo.AnimationOptions options) {
+        final int animType = options.getType();
+        return animType == ANIM_CUSTOM || animType == ANIM_SCALE_UP
+                || animType == ANIM_THUMBNAIL_SCALE_UP || animType == ANIM_THUMBNAIL_SCALE_DOWN
+                || animType == ANIM_CLIP_REVEAL || animType == ANIM_OPEN_CROSS_PROFILE_APPS;
+    }
+
     private static void applyTransformation(long time, SurfaceControl.Transaction t,
             SurfaceControl leash, Animation anim, Transformation transformation, float[] matrix,
             Point position, float cornerRadius, @Nullable Rect immutableClipRect) {
