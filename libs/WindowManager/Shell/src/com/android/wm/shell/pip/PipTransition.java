@@ -308,8 +308,9 @@ public class PipTransition extends PipTransitionController {
     @Override
     public void end() {
         Animator animator = mPipAnimationController.getCurrentAnimator();
-        if (animator == null) return;
-        animator.end();
+        if (animator != null && animator.isRunning()) {
+            animator.end();
+        }
     }
 
     @Override
