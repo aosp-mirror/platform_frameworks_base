@@ -17,37 +17,41 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.platform.test.annotations.Postsubmit
-import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.WindowUtils
+
 import androidx.test.filters.RequiresDevice
 import org.junit.Test
+
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 /**
- * Test launching app in size compat mode.
+ * Test launching a fixed portrait letterboxed app in landscape and repositioning to the right.
  *
- * To run this test: `atest WMShellFlickerTests:OpenAppInSizeCompatModeTest`
+ * To run this test: `atest WMShellFlickerTests:RepositionFixedPortraitAppTest`
+ *  Actions:
+ *  ```
+ *      Launch a fixed portrait app in landscape to letterbox app
+ *      Double tap to the right to reposition app and wait for app to move
+ *  ```
  *
- * Actions:
- * ```
- *     Rotate non resizable portrait only app to opposite orientation to trigger size compat mode
- * ```
- *
- * Notes:
- * ```
- *     Some default assertions (e.g., nav bar, status bar and screen covered)
- *     are inherited [BaseTest]
- * ```
+ *  Notes:
+ *  ```
+ *      Some default assertions (e.g., nav bar, status bar and screen covered)
+ *      are inherited [BaseTest]
+ *  ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class OpenAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flicker) {
+class RepositionFixedPortraitAppTest(flicker: FlickerTest) : BaseAppCompat(flicker) {
 
+    val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation).bounds
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -55,17 +59,15 @@ class OpenAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flicker)
                 setStartRotation()
                 letterboxApp.launchViaIntent(wmHelper)
             }
-            transitions { setEndRotation() }
-            teardown { letterboxApp.exit(wmHelper) }
+            transitions {
+                letterboxApp.repositionHorizontally(displayBounds, true)
+                letterboxApp.waitForAppToMoveHorizontallyTo(wmHelper, displayBounds, true)
+            }
+            teardown {
+                letterboxApp.repositionHorizontally(displayBounds, false)
+                letterboxApp.exit(wmHelper)
+            }
         }
-
-    /**
-     * Windows maybe recreated when rotated. Checks that the focus does not change or if it does,
-     * focus returns to [letterboxApp]
-     */
-    @Postsubmit
-    @Test
-    fun letterboxAppFocusedAtEnd() = flicker.assertEventLog { focusChanges(letterboxApp.`package`) }
 
     @Postsubmit
     @Test
@@ -73,36 +75,29 @@ class OpenAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flicker)
 
     @Postsubmit
     @Test
-    fun appIsLetterboxedAtEnd() = assertAppLetterboxedAtEnd()
+    fun letterboxAppLayerKeepVisible() = assertLetterboxAppLayerKeepVisible()
 
-    /**
-     * Checks that the [ComponentNameMatcher.ROTATION] layer appears during the transition, doesn't
-     * flicker, and disappears before the transition is complete
-     */
     @Postsubmit
     @Test
-    fun rotationLayerAppearsAndVanishes() {
-        flicker.assertLayers {
-            this.isVisible(letterboxApp)
-                .then()
-                .isVisible(ComponentNameMatcher.ROTATION)
-                .then()
-                .isVisible(letterboxApp)
-                .isInvisible(ComponentNameMatcher.ROTATION)
-        }
-    }
+    fun appStaysLetterboxed() = assertAppStaysLetterboxed()
+
+    @Postsubmit
+    @Test
+    fun appKeepVisible() = assertLetterboxAppKeepVisible()
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.rotationTests] for configuring screen orientation and
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
          * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.rotationTests()
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(Rotation.ROTATION_90)
+            )
         }
     }
 }
