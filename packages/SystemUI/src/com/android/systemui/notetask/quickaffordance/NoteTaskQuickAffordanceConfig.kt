@@ -122,17 +122,18 @@ constructor(
             isEnabled && isDefaultNotesAppSet -> PickerScreenState.Default()
             isEnabled -> {
                 PickerScreenState.Disabled(
-                    listOf(
+                    explanation =
                         context.getString(
-                            R.string.keyguard_affordance_enablement_dialog_notes_app_instruction
-                        )
-                    ),
-                    context.getString(
-                        R.string.keyguard_affordance_enablement_dialog_notes_app_action
-                    ),
-                    Intent(ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE).apply {
-                        setPackage(context.packageName)
-                    }
+                            R.string.notes_app_quick_affordance_unavailable_explanation
+                        ),
+                    actionText =
+                        context.getString(
+                            R.string.keyguard_affordance_enablement_dialog_notes_app_action
+                        ),
+                    actionIntent =
+                        Intent(ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE).apply {
+                            setPackage(context.packageName)
+                        },
                 )
             }
             else -> PickerScreenState.UnavailableOnDevice
