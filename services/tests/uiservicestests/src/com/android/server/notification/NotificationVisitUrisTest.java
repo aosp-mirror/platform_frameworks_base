@@ -115,11 +115,19 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
             PREFERRED_CONSTRUCTORS = ImmutableMap.of(
                     Notification.Builder.class,
                     Notification.Builder.class.getConstructor(Context.class, String.class));
+
+            EXCLUDED_SETTERS_OVERLOADS = ImmutableMultimap.<Class<?>, Method>builder()
+                    .put(RemoteViews.class,
+                            // b/245950570: Tries to connect to service and will crash.
+                            RemoteViews.class.getMethod("setRemoteAdapter",
+                                    int.class, Intent.class))
+                    .build();
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
 
+    // Setters that shouldn't be called, for various reasons (but NOT because they are KNOWN_BAD).
     private static final Multimap<Class<?>, String> EXCLUDED_SETTERS =
             ImmutableMultimap.<Class<?>, String>builder()
                     // Handled by testAllStyles().
@@ -134,6 +142,9 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
                     .put(RemoteViews.class, "mergeRemoteViews")
                     .build();
 
+    // Same as above, but specific overloads that should not be called.
+    private static final Multimap<Class<?>, Method> EXCLUDED_SETTERS_OVERLOADS;
+
     private Context mContext;
 
     @Rule
@@ -146,10 +157,12 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
 
     @Test // This is a meta-test, checks that the generators are not broken.
     public void verifyTest() {
-        Generated<Notification> notification = buildNotification(mContext, /* styleClass= */ null,
-                /* extenderClass= */ null, /* actionExtenderClass= */ null,
+        Generated<Notification> notification = buildNotification(mContext,
+                /* styleClass= */ Notification.MessagingStyle.class,
+                /* extenderClass= */ Notification.WearableExtender.class,
+                /* actionExtenderClass= */ Notification.Action.WearableExtender.class,
                 /* includeRemoteViews= */ true);
-        assertThat(notification.includedUris.size()).isAtLeast(20);
+        assertThat(notification.includedUris.size()).isAtLeast(730);
     }
 
     @Test
@@ -479,6 +492,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
                         || method.getReturnType().equals(clazz))
                         && method.getParameterCount() >= 1
                         && !EXCLUDED_SETTERS.containsEntry(clazz, method.getName())
+                        && !EXCLUDED_SETTERS_OVERLOADS.containsEntry(clazz, method)
                         && Arrays.stream(method.getParameterTypes())
                             .noneMatch(excludingParameterTypes::contains)) {
                     methods.put(method.getName(), method);
