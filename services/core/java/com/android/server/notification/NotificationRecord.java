@@ -27,6 +27,7 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.Person;
@@ -46,6 +47,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.provider.Settings;
@@ -101,7 +103,8 @@ public final class NotificationRecord {
     final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
-
+    private final KeyguardManager mKeyguardManager;
+    private final PowerManager mPowerManager;
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
     IBinder permissionOwner;
@@ -228,6 +231,8 @@ public final class NotificationRecord {
         mUpdateTimeMs = mCreationTimeMs;
         mInterruptionTimeMs = mCreationTimeMs;
         mContext = context;
+        mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
+        mPowerManager = mContext.getSystemService(PowerManager.class);
         stats = new NotificationUsageStats.SingleNotificationStats();
         mChannel = channel;
         mPreChannelsNotification = isPreChannelsNotification();
@@ -1617,6 +1622,11 @@ public final class NotificationRecord {
 
     public ArraySet<String> getPhoneNumbers() {
         return mPhoneNumbers;
+    }
+
+    boolean isLocked() {
+        return mKeyguardManager.isKeyguardLocked()
+                || !mPowerManager.isInteractive();  // Unlocked AOD
     }
 
     @VisibleForTesting
