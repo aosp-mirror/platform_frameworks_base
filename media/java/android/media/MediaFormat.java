@@ -1136,11 +1136,14 @@ public final class MediaFormat {
      * may fail if other parameters are not compatible with the desired
      * profile or if the desired profile is not supported, but it may also
      * fail silently (where the encoder ends up using a different, compatible profile.)
+     * <p>
+     * It is recommended that the profile is set for all encoders. For more information, see
+     * the <i>Encoder Profiles</i> section of the {@link MediaCodec} API reference.
      * <p class="note">
      * <strong>Note:</strong> Codecs are free to use all the available
      * coding tools at the specified profile, but may ultimately choose to not do so.
      * <p class="note">
-     * <strong>Note:</strong> When configuring video encoders, profile must be
+     * <strong>Note:</strong> When configuring video encoders, profile (if set) must be
      * set together with {@link #KEY_LEVEL level}.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels

@@ -20,6 +20,7 @@ package com.android.systemui.keyguard
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.content.UriMatcher
 import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
@@ -286,7 +287,7 @@ class CustomizationProvider :
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
                         .ENABLEMENT_ACTION_TEXT,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
-                        .ENABLEMENT_COMPONENT_NAME,
+                        .ENABLEMENT_ACTION_INTENT,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns.CONFIGURE_INTENT,
                 )
             )
@@ -303,8 +304,8 @@ class CustomizationProvider :
                                     .ENABLEMENT_INSTRUCTIONS_DELIMITER
                             ),
                             representation.actionText,
-                            representation.actionComponentName,
-                            representation.configureIntent?.toUri(0),
+                            representation.actionIntent?.toUri(Intent.URI_INTENT_SCHEME),
+                            representation.configureIntent?.toUri(Intent.URI_INTENT_SCHEME),
                         )
                     )
                 }
