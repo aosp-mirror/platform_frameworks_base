@@ -178,7 +178,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
         mRelayoutParams.mLayoutResId = windowDecorLayoutId;
-        mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
+        mRelayoutParams.mCaptionHeightId = getCaptionHeightId();
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
 
@@ -477,6 +477,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mTransitionsPausingRelayout.remove(transition)) {
             mRelayoutBlock--;
         }
+    }
+
+    @Override
+    int getCaptionHeightId() {
+        return R.dimen.freeform_decor_caption_height;
     }
 
     /**
