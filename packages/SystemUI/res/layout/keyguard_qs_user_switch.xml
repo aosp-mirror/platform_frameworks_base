@@ -24,7 +24,7 @@
     android:layout_gravity="end">
     <!-- We add a background behind the UserAvatarView with the same color and with a circular shape
          so that this view can be expanded into a Dialog or an Activity. -->
-    <com.android.systemui.animation.LaunchableFrameLayout
+    <com.android.systemui.animation.view.LaunchableFrameLayout
         android:id="@+id/kg_multi_user_avatar_with_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -42,5 +42,5 @@
             systemui:framePadding="0dp"
             systemui:frameWidth="0dp">
         </com.android.systemui.statusbar.phone.UserAvatarView>
-    </com.android.systemui.animation.LaunchableFrameLayout>
+    </com.android.systemui.animation.view.LaunchableFrameLayout>
 </FrameLayout>
