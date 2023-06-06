@@ -1882,6 +1882,7 @@ public class AlarmManagerService extends SystemService {
         mActivityOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mBroadcastOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mMetricsHelper = new MetricsHelper(getContext(), mLock);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mListenerDeathRecipient = new IBinder.DeathRecipient() {
             @Override
@@ -1983,7 +1984,6 @@ public class AlarmManagerService extends SystemService {
                 Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
             }
         }
-        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         publishLocalService(AlarmManagerInternal.class, new LocalService());
         publishBinderService(Context.ALARM_SERVICE, mService);
     }
