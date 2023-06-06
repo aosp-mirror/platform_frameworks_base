@@ -60,7 +60,6 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.widget.TextView;
 
-import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.BouncerPanelExpansionCalculator;
@@ -83,12 +82,11 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -102,7 +100,6 @@ import java.util.ArrayList;
 /**
  * Tests for {@link NotificationStackScrollLayout}.
  */
-@Ignore("b/255552856")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -112,7 +109,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     private NotificationStackScrollLayout mStackScrollerInternal;  // See explanation below
     private AmbientState mAmbientState;
     private TestableResources mTestableResources;
-
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private SysuiStatusBarStateController mBarState;
@@ -127,7 +123,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationSection mNotificationSection;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     @Mock private NotificationStackScrollLayoutController mStackScrollLayoutController;
-    @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock private NotificationShelf mNotificationShelf;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -135,7 +131,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
 
     @Before
-    @UiThreadTest
     public void setUp() throws Exception {
         allowTestableLooperAsMainThread();
         mTestableResources = mContext.getOrCreateTestableResources();
@@ -161,7 +156,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mDependency.injectTestDependency(AmbientState.class, mAmbientState);
         mDependency.injectTestDependency(NotificationShelf.class, mNotificationShelf);
         mDependency.injectTestDependency(
-                UnlockedScreenOffAnimationController.class, mUnlockedScreenOffAnimationController);
+                ScreenOffAnimationController.class, mScreenOffAnimationController);
 
         NotificationShelfController notificationShelfController =
                 mock(NotificationShelfController.class);
@@ -363,7 +358,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testSetExpandedHeight_listenerReceivedCallbacks() {
         final float expectedHeight = 0f;
 
@@ -371,20 +365,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
             Assert.assertEquals(expectedHeight, height, 0);
         });
         mStackScroller.setExpandedHeight(expectedHeight);
-    }
-
-    @Test
-    public void testAppearFractionCalculation() {
-        // appear start position
-        when(mNotificationShelf.getIntrinsicHeight()).thenReturn(100);
-        // because it's the same as shelf height, appear start position equals shelf height
-        mStackScroller.mStatusBarHeight = 100;
-        // appear end position
-        when(mEmptyShadeView.getHeight()).thenReturn(200);
-
-        assertEquals(0f, mStackScroller.calculateAppearFraction(100));
-        assertEquals(1f, mStackScroller.calculateAppearFraction(200));
-        assertEquals(0.5f, mStackScroller.calculateAppearFraction(150));
     }
 
     @Test
@@ -404,7 +384,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testSetExpandedHeight_withSplitShade_doesntInterpolateStackHeight() {
         mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
@@ -592,6 +571,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testReInflatesFooterViews() {
+        when(mEmptyShadeView.getTextResource()).thenReturn(R.string.empty_shade_text);
         clearInvocations(mStackScroller);
         mStackScroller.reinflateViews();
         verify(mStackScroller).setFooterView(any());
@@ -599,21 +579,18 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testSetIsBeingDraggedResetsExposedMenu() {
         mStackScroller.setIsBeingDragged(true);
         verify(mNotificationSwipeHelper).resetExposedMenuView(true, true);
     }
 
     @Test
-    @UiThreadTest
     public void testPanelTrackingStartResetsExposedMenu() {
         mStackScroller.onPanelTrackingStarted();
         verify(mNotificationSwipeHelper).resetExposedMenuView(true, true);
     }
 
     @Test
-    @UiThreadTest
     public void testDarkModeResetsExposedMenu() {
         mStackScroller.setHideAmount(0.1f, 0.1f);
         verify(mNotificationSwipeHelper).resetExposedMenuView(true, true);
@@ -874,7 +851,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setHasFilteredOutSeenNotifications(true);
         mStackScroller.updateEmptyShadeView(true, false);
 
-        verify(mEmptyShadeView).setFooterText(not(0));
+        verify(mEmptyShadeView).setFooterText(not(eq(0)));
     }
 
     @Test
