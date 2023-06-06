@@ -55,6 +55,7 @@ import android.content.pm.dex.IArtManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.content.IntentSender;
@@ -818,4 +819,8 @@ interface IPackageManager {
     boolean[] canPackageQuery(String sourcePackageName, in String[] targetPackageNames, int userId);
 
     boolean waitForHandler(long timeoutMillis, boolean forBackgroundHandler);
+
+    void registerPackageMonitorCallback(IRemoteCallback callback, int userId);
+
+    void unregisterPackageMonitorCallback(IRemoteCallback callback);
 }
