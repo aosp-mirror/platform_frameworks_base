@@ -48,6 +48,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private val KEY_TIMESTAMP = "appliedTimestamp"
+private val KNOWN_PLUGINS =
+    mapOf<String, List<ClockMetadata>>(
+        "com.android.systemui.falcon.one" to listOf(ClockMetadata("ANALOG_CLOCK_BIGNUM")),
+        "com.android.systemui.falcon.two" to listOf(ClockMetadata("DIGITAL_CLOCK_CALLIGRAPHY")),
+        "com.android.systemui.falcon.three" to listOf(ClockMetadata("DIGITAL_CLOCK_FLEX")),
+        "com.android.systemui.falcon.four" to listOf(ClockMetadata("DIGITAL_CLOCK_GROWTH")),
+        "com.android.systemui.falcon.five" to listOf(ClockMetadata("DIGITAL_CLOCK_HANDWRITTEN")),
+        "com.android.systemui.falcon.six" to listOf(ClockMetadata("DIGITAL_CLOCK_INFLATE")),
+        "com.android.systemui.falcon.seven" to listOf(ClockMetadata("DIGITAL_CLOCK_METRO")),
+        "com.android.systemui.falcon.eight" to listOf(ClockMetadata("DIGITAL_CLOCK_NUMBEROVERLAP")),
+        "com.android.systemui.falcon.nine" to listOf(ClockMetadata("DIGITAL_CLOCK_WEATHER")),
+    )
 
 private fun <TKey, TVal> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(
     key: TKey,
@@ -127,8 +139,61 @@ open class ClockRegistry(
 
     private val pluginListener =
         object : PluginListener<ClockProviderPlugin> {
-            override fun onPluginAttached(manager: PluginLifecycleManager<ClockProviderPlugin>) {
-                manager.loadPlugin()
+            override fun onPluginAttached(
+                manager: PluginLifecycleManager<ClockProviderPlugin>
+            ): Boolean {
+                if (keepAllLoaded) {
+                    // Always load new plugins if requested
+                    return true
+                }
+
+                val knownClocks = KNOWN_PLUGINS.get(manager.getPackage())
+                if (knownClocks == null) {
+                    logBuffer.tryLog(
+                        TAG,
+                        LogLevel.WARNING,
+                        { str1 = manager.getPackage() },
+                        { "Loading unrecognized clock package: $str1" }
+                    )
+                    return true
+                }
+
+                logBuffer.tryLog(
+                    TAG,
+                    LogLevel.INFO,
+                    { str1 = manager.getPackage() },
+                    { "Skipping initial load of known clock package package: $str1" }
+                )
+
+                var isClockListChanged = false
+                for (metadata in knownClocks) {
+                    val id = metadata.clockId
+                    val info =
+                        availableClocks.concurrentGetOrPut(id, ClockInfo(metadata, null, manager)) {
+                            isClockListChanged = true
+                            onConnected(id)
+                        }
+
+                    if (manager != info.manager) {
+                        logBuffer.tryLog(
+                            TAG,
+                            LogLevel.ERROR,
+                            { str1 = id },
+                            { "Clock Id conflict on known attach: $str1 is double registered" }
+                        )
+                        continue
+                    }
+
+                    info.provider = null
+                }
+
+                if (isClockListChanged) {
+                    triggerOnAvailableClocksChanged()
+                }
+                verifyLoadedProviders()
+
+                // Load executed via verifyLoadedProviders
+                return false
             }
 
             override fun onPluginLoaded(
