@@ -641,6 +641,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     @VisibleForTesting
     void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
+        info.setUnreleasedWarningCallSiteForAllSurfaces("Transitions.onTransitionReady");
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady %s: %s",
                 transitionToken, info);
         final int activeIdx = findByToken(mPendingTransitions, transitionToken);

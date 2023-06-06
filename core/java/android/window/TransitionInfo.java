@@ -550,6 +550,16 @@ public final class TransitionInfo implements Parcelable {
     }
 
     /**
+     * Updates the callsites of all the surfaces in this transition, which aids in the debugging of
+     * lingering surfaces.
+     */
+    public void setUnreleasedWarningCallSiteForAllSurfaces(String callsite) {
+        for (int i = mChanges.size() - 1; i >= 0; --i) {
+            mChanges.get(i).getLeash().setUnreleasedWarningCallSite(callsite);
+        }
+    }
+
+    /**
      * Makes a copy of this as if it were parcel'd and unparcel'd. This implies that surfacecontrol
      * refcounts are incremented which allows the "remote" receiver to release them without breaking
      * the caller's references. Use this only if you need to "send" this to a local function which
