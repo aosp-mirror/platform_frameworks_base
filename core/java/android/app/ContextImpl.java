@@ -3478,6 +3478,16 @@ class ContextImpl extends Context {
             ((CompatResources) r).setContext(this);
         }
         mResources = r;
+
+        // only do this if the user already has more than one preferred locale
+        if (r.getConfiguration().getLocales().size() > 1) {
+            LocaleConfig lc = LocaleConfig.fromContextIgnoringOverride(this);
+            mResourcesManager.setLocaleList(lc != null
+                    && lc.getSupportedLocales() != null
+                    && !lc.getSupportedLocales().isEmpty()
+                    ? lc.getSupportedLocales()
+                    : null);
+        }
     }
 
     void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
