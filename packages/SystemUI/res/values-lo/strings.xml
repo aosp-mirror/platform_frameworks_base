@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ຢືນຢັນແລ້ວ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ແຕະຢືນຢັນເພື່ອສຳເລັດ"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"ປົດລັອກດ້ວຍໃບໜ້າແລ້ວ."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ປົດລັອກດ້ວຍໜ້າແລ້ວ. ກົດເພື່ອສືບຕໍ່."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດເພື່ອສືບຕໍ່."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດໄອຄອນປົດລັອກເພື່ອສືບຕໍ່."</string>
@@ -1003,7 +1004,8 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ບໍ່ສາມາດບັນທຶກໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ບໍ່ສາມາດບັນທຶກໄດ້."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"ໃຊ້ຢ່າງໜ້ອຍ 4 ຕົວອັກສອນ"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"ໃຊ້ໜ້ອຍກວ່າ 16 ຕົວອັກສອນ"</string>
+    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ໝາຍເລກສ້າງ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ສຳເນົາໝາຍເລກສ້າງໄປໃສ່ຄລິບບອດແລ້ວ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
