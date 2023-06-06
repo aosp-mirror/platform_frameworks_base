@@ -47,6 +47,7 @@ object CredentialViewBinder {
         val descriptionView: TextView = view.requireViewById(R.id.description)
         val iconView: ImageView? = view.findViewById(R.id.icon)
         val errorView: TextView = view.requireViewById(R.id.error)
+        val cancelButton: Button? = view.findViewById(R.id.cancel_button)
         val emergencyButtonView: Button = view.requireViewById(R.id.emergencyCallButton)
 
         var errorTimer: Job? = null
@@ -60,7 +61,7 @@ object CredentialViewBinder {
                     updateForContentDimensions(
                         containerWidth,
                         containerHeight,
-                        0 /* animateDurationMs */
+                        0 // animateDurationMs
                     )
                 }
             }
@@ -103,7 +104,18 @@ object CredentialViewBinder {
                                 }
                             }
                         }
-                        .collect { errorView.textOrHide = it }
+                        .collect { it ->
+                            val hasError = !it.isNullOrBlank()
+                            errorView.visibility =
+                                if (hasError) {
+                                    View.VISIBLE
+                                } else if (cancelButton != null) {
+                                    View.INVISIBLE
+                                } else {
+                                    View.GONE
+                                }
+                            errorView.text = if (hasError) it else ""
+                        }
                 }
 
                 // show an extra dialog if the remaining attempts becomes low
@@ -116,6 +128,8 @@ object CredentialViewBinder {
                 }
             }
         }
+
+        cancelButton?.setOnClickListener { host.onCredentialAborted() }
 
         // bind the auth widget
         when (view) {

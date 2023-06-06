@@ -499,6 +499,8 @@ public class AuthContainerView extends LinearLayout
                         R.layout.auth_credential_pattern_view, null, false);
                 break;
             case Utils.CREDENTIAL_PIN:
+                mCredentialView = factory.inflate(R.layout.auth_credential_pin_view, null, false);
+                break;
             case Utils.CREDENTIAL_PASSWORD:
                 mCredentialView = factory.inflate(
                         R.layout.auth_credential_password_view, null, false);
