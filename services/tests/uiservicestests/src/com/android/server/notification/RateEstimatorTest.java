@@ -138,22 +138,22 @@ public class RateEstimatorTest extends UiServiceTestCase {
 
     @Test
     public void testEstimateCatchesUpQuickly() {
-        long nextEventTime = postEvents(mTestStartTime, 10, 20); // 20 events at 100Hz
+        long nextEventTime = postEvents(mTestStartTime, 100, 30); // 30 events at 10Hz
 
         final float firstBurstRate = mEstimator.getRate(nextEventTime);
-        assertThat(firstBurstRate).isWithin(10f).of(100);
+        assertThat(firstBurstRate).isWithin(2f).of(10);
 
         nextEventTime += HOURS.toMillis(3); // 3 hours later...
-        nextEventTime = postEvents(nextEventTime, 10, 20); // same burst of 20 events at 100Hz
+        nextEventTime = postEvents(nextEventTime, 100, 30); // same burst of 30 events at 10Hz
 
-        // Catching up. Rate is not yet 100, since we had a long period of inactivity...
+        // Catching up. Rate is not yet 10, since we had a long period of inactivity...
         float secondBurstRate = mEstimator.getRate(nextEventTime);
-        assertThat(secondBurstRate).isWithin(10f).of(60);
+        assertThat(secondBurstRate).isWithin(1f).of(6);
 
         // ... but after a few more events, we are there.
-        nextEventTime = postEvents(nextEventTime, 10, 10); // 10 more events at 100Hz
+        nextEventTime = postEvents(nextEventTime, 100, 10); // 10 more events at 10Hz
         secondBurstRate = mEstimator.getRate(nextEventTime);
-        assertThat(secondBurstRate).isWithin(10f).of(100);
+        assertThat(secondBurstRate).isWithin(1f).of(10);
     }
 
     /** @return the next event time. */
