@@ -1482,6 +1482,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         // If running background, we need to reparent current top visible task to main stage.
         if (!isSplitScreenVisible()) {
+            // Ensure to evict old splitting tasks because the new split pair might be composed by
+            // one of the splitting tasks, evicting the task when finishing entering transition
+            // won't guarantee to put the task to the indicated new position.
+            mMainStage.evictAllChildren(wct);
             mMainStage.reparentTopTask(wct);
             prepareSplitLayout(wct);
         }
@@ -2311,8 +2315,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mSplitTransitions.setDismissTransition(transition, dismissTop,
                             EXIT_REASON_APP_FINISHED);
                 } else if (!isSplitScreenVisible() && isOpening) {
-                    // If split running backgroud and trigger task is appearing into split,
-                    // prepare to enter split screen.
+                    // If split is running in the background and the trigger task is appearing into
+                    // split, prepare to enter split screen.
+                    setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, out);
                     prepareEnterSplitScreen(out);
                     mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                             TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
@@ -2338,6 +2343,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             if (isOpening && getStageOfTask(triggerTask) != null) {
                 // One task is appearing into split, prepare to enter split screen.
                 out = new WindowContainerTransaction();
+                setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, out);
                 prepareEnterSplitScreen(out);
                 mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                         TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
@@ -2901,7 +2907,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         setSplitsVisible(false);
-        prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, finishWct);
+        finishWct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                true /* reparentLeafTaskIfRelaunch */);
         logExit(EXIT_REASON_UNKNOWN);
     }
 

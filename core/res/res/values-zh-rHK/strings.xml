@@ -1975,7 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用手機。"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"此應用程式專為舊版 Android 而設。因此可能無法正常運作，且不提供最新的安全性和私隱保護。請檢查是否有更新版本，或聯絡應用程式開發人員。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"檢查更新"</string>
-    <string name="deprecated_abi_message" msgid="6820548011196218091">"這個應用程式與最新版的 Android 不相容。請檢查是否有可用的更新，或與應用程式發人員聯絡。"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"此應用程式不兼容最新 Android 版本。請檢查是否有更新版本，或聯絡應用程式開發人員。"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"你有新的訊息"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"開啟短訊應用程式查看內容"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"部分功能可能會受到限制"</string>
