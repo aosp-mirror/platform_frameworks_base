@@ -3157,4 +3157,11 @@
 
     <!--- Content of toast triggered when the notes app entry point is triggered without setting a default notes app. [CHAR LIMIT=NONE] -->
     <string name="set_default_notes_app_toast_content">Set default notes app in Settings</string>
+
+    <!--
+    Label for a button that, when clicked, sends the user to the app store to install an app.
+
+    [CHAR LIMIT=64].
+    -->
+    <string name="install_app">Install app</string>
 </resources>
