@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.animation
+package com.android.systemui.animation.view
 
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import com.android.systemui.animation.LaunchableView
+import com.android.systemui.animation.LaunchableViewDelegate
 
 /** A [FrameLayout] that also implements [LaunchableView]. */
 open class LaunchableFrameLayout : FrameLayout, LaunchableView {
