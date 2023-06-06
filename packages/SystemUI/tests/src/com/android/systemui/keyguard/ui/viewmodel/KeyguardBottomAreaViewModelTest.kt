@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -110,6 +111,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     private lateinit var quickAccessWalletAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var qrCodeScannerAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var dockManager: DockManagerFake
+    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
 
     @Before
     fun setUp() {
@@ -126,6 +128,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         qrCodeScannerAffordanceConfig =
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
         dockManager = DockManagerFake()
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
         registry =
             FakeKeyguardQuickAffordanceRegistry(
                 mapOf(
@@ -240,6 +243,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         logger = logger,
                         devicePolicyManager = devicePolicyManager,
                         dockManager = dockManager,
+                        biometricSettingsRepository = biometricSettingsRepository,
                         backgroundDispatcher = testDispatcher,
                         appContext = mContext,
                     ),
