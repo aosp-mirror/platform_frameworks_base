@@ -8767,24 +8767,22 @@ public class WindowManagerService extends IWindowManager.Stub
         final int sanitizedType = sanitizeWindowType(session, displayId, windowToken, type);
         final InputApplicationHandle applicationHandle;
         final String name;
-        final InputChannel clientChannel;
+        Objects.requireNonNull(outInputChannel);
         synchronized (mGlobalLock) {
             EmbeddedWindowController.EmbeddedWindow win =
                     new EmbeddedWindowController.EmbeddedWindow(session, this, window,
                             mInputToWindowMap.get(hostInputToken), callingUid, callingPid,
                             sanitizedType, displayId, focusGrantToken, inputHandleName,
                             (flags & FLAG_NOT_FOCUSABLE) == 0);
-            clientChannel = win.openInputChannel();
-            mEmbeddedWindowController.add(clientChannel.getToken(), win);
+            win.openInputChannel(outInputChannel);
+            mEmbeddedWindowController.add(outInputChannel.getToken(), win);
             applicationHandle = win.getApplicationHandle();
             name = win.toString();
         }
 
-        updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
+        updateInputChannel(outInputChannel.getToken(), callingUid, callingPid, displayId, surface,
                 name, applicationHandle, flags, privateFlags, inputFeatures, sanitizedType,
                 null /* region */, window);
-
-        clientChannel.copyTo(outInputChannel);
     }
 
     boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow) {
