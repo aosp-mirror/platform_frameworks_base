@@ -50,10 +50,8 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
-import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
@@ -169,9 +167,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    public void transitionToFullShade_largeScreen_flagEnabled_alphaLargeScreenShadeInterpolator() {
-        when(mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
-                .thenReturn(true);
+    public void transitionToFullShade_largeScreen_alphaLargeScreenShadeInterpolator() {
         QSFragment fragment = resumeAndGetFragment();
         setIsLargeScreen();
         setStatusBarCurrentAndUpcomingState(StatusBarState.SHADE);
@@ -185,25 +181,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         assertThat(mQsFragmentView.getAlpha())
                 .isEqualTo(123f);
-    }
-
-    @Test
-    public void transitionToFullShade_largeScreen_flagDisabled_alphaStandardInterpolator() {
-        when(mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
-                .thenReturn(false);
-        QSFragment fragment = resumeAndGetFragment();
-        setIsLargeScreen();
-        setStatusBarCurrentAndUpcomingState(StatusBarState.SHADE);
-        boolean isTransitioningToFullShade = true;
-        float transitionProgress = 0.5f;
-        float squishinessFraction = 0.5f;
-        when(mLargeScreenShadeInterpolator.getQsAlpha(transitionProgress)).thenReturn(123f);
-
-        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
-                squishinessFraction);
-
-        assertThat(mQsFragmentView.getAlpha())
-                .isEqualTo(ShadeInterpolation.getContentAlpha(transitionProgress));
     }
 
     @Test

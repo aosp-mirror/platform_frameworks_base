@@ -8,7 +8,6 @@ import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerPr
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
@@ -311,9 +310,8 @@ class NotificationShelfTest : SysuiTestCase() {
     }
 
     @Test
-    fun updateState_flagTrue_largeScreen_expansionChanging_shelfAlphaUpdated_largeScreenValue() {
+    fun updateState_largeScreen_expansionChanging_shelfAlphaUpdated_largeScreenValue() {
         val expansionFraction = 0.6f
-        whenever(flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)).thenReturn(true)
         whenever(ambientState.isSmallScreen).thenReturn(false)
         whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
             .thenReturn(0.123f)
@@ -321,20 +319,6 @@ class NotificationShelfTest : SysuiTestCase() {
         updateState_expansionChanging_shelfAlphaUpdated(
             expansionFraction = expansionFraction,
             expectedAlpha = 0.123f
-        )
-    }
-
-    @Test
-    fun updateState_flagFalse_largeScreen_expansionChanging_shelfAlphaUpdated_standardValue() {
-        val expansionFraction = 0.6f
-        whenever(flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)).thenReturn(false)
-        whenever(ambientState.isSmallScreen).thenReturn(false)
-        whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
-            .thenReturn(0.123f)
-
-        updateState_expansionChanging_shelfAlphaUpdated(
-            expansionFraction = expansionFraction,
-            expectedAlpha = ShadeInterpolation.getContentAlpha(expansionFraction)
         )
     }
 

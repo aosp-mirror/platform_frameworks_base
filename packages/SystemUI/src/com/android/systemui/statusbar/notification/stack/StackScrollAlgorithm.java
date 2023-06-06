@@ -29,8 +29,6 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -189,9 +187,7 @@ public class StackScrollAlgorithm {
 
     private float interpolateFooterAlpha(AmbientState ambientState) {
         float expansion = ambientState.getExpansionFraction();
-        FeatureFlags flags = ambientState.getFeatureFlags();
-        if (ambientState.isSmallScreen()
-                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+        if (ambientState.isSmallScreen()) {
             return ShadeInterpolation.getContentAlpha(expansion);
         }
         LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();
@@ -200,9 +196,7 @@ public class StackScrollAlgorithm {
 
     private float interpolateNotificationContentAlpha(AmbientState ambientState) {
         float expansion = ambientState.getExpansionFraction();
-        FeatureFlags flags = ambientState.getFeatureFlags();
-        if (ambientState.isSmallScreen()
-                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+        if (ambientState.isSmallScreen()) {
             return ShadeInterpolation.getContentAlpha(expansion);
         }
         LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();

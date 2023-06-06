@@ -61,7 +61,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
@@ -697,9 +696,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToUnlocked_nonClippedQs_flagTrue_followsLargeScreensInterpolator() {
-        when(mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
-                .thenReturn(true);
+    public void transitionToUnlocked_nonClippedQs_followsLargeScreensInterpolator() {
         mScrimController.setClipsQsScrim(false);
         mScrimController.setRawPanelExpansionFraction(0f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
@@ -734,48 +731,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mNotificationsScrim, OPAQUE,
-                mScrimBehind, OPAQUE));
-    }
-
-
-    @Test
-    public void transitionToUnlocked_nonClippedQs_flagFalse() {
-        when(mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
-                .thenReturn(false);
-        mScrimController.setClipsQsScrim(false);
-        mScrimController.setRawPanelExpansionFraction(0f);
-        mScrimController.transitionTo(ScrimState.UNLOCKED);
-        finishAnimationsImmediately();
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mNotificationsScrim, TRANSPARENT,
-                mScrimBehind, TRANSPARENT));
-
-        assertScrimTinted(Map.of(
-                mNotificationsScrim, false,
-                mScrimInFront, false,
-                mScrimBehind, true
-        ));
-
-        // Back scrim should be visible after start dragging
-        mScrimController.setRawPanelExpansionFraction(0.29f);
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mNotificationsScrim, TRANSPARENT,
-                mScrimBehind, SEMI_TRANSPARENT));
-
-        // Back scrim should be opaque at 30%
-        mScrimController.setRawPanelExpansionFraction(0.3f);
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mNotificationsScrim, TRANSPARENT,
-                mScrimBehind, OPAQUE));
-
-        // Then, notification scrim should fade in
-        mScrimController.setRawPanelExpansionFraction(0.31f);
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mNotificationsScrim, SEMI_TRANSPARENT,
                 mScrimBehind, OPAQUE));
     }
 
