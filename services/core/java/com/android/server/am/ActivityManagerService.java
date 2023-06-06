@@ -13785,7 +13785,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (action.startsWith("android.intent.action.USER_")
                                 || action.startsWith("android.intent.action.PACKAGE_")
                                 || action.startsWith("android.intent.action.UID_")
-                                || action.startsWith("android.intent.action.EXTERNAL_")) {
+                                || action.startsWith("android.intent.action.EXTERNAL_")
+                                || action.startsWith("android.bluetooth.")) {
                             if (DEBUG_BROADCAST) {
                                 Slog.wtf(TAG,
                                         "System internals registering for " + filter.toLongString()
