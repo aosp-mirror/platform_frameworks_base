@@ -75,6 +75,8 @@ public class ContentProtectionEventProcessor {
                                     ContentCaptureEvent.TYPE_VIEW_DISAPPEARED,
                                     ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED)));
 
+    private static final int RESET_LOGIN_TOTAL_EVENTS_TO_PROCESS = 150;
+
     @NonNull private final RingBuffer<ContentCaptureEvent> mEventBuffer;
 
     @NonNull private final Handler mHandler;
@@ -92,6 +94,8 @@ public class ContentProtectionEventProcessor {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @Nullable
     public Instant mLastFlushTime;
+
+    private int mResetLoginRemainingEventsToProcess;
 
     public ContentProtectionEventProcessor(
             @NonNull RingBuffer<ContentCaptureEvent> eventBuffer,
@@ -130,6 +134,8 @@ public class ContentProtectionEventProcessor {
         mSuspiciousTextDetected |= isSuspiciousText(event);
         if (mPasswordFieldDetected && mSuspiciousTextDetected) {
             loginDetected();
+        } else {
+            maybeResetLoginFlags();
         }
     }
 
@@ -139,8 +145,28 @@ public class ContentProtectionEventProcessor {
                 || Instant.now().isAfter(mLastFlushTime.plus(MIN_DURATION_BETWEEN_FLUSHING))) {
             flush();
         }
+        resetLoginFlags();
+    }
+
+    @UiThread
+    private void resetLoginFlags() {
         mPasswordFieldDetected = false;
         mSuspiciousTextDetected = false;
+        mResetLoginRemainingEventsToProcess = 0;
+    }
+
+    @UiThread
+    private void maybeResetLoginFlags() {
+        if (mPasswordFieldDetected || mSuspiciousTextDetected) {
+            if (mResetLoginRemainingEventsToProcess <= 0) {
+                mResetLoginRemainingEventsToProcess = RESET_LOGIN_TOTAL_EVENTS_TO_PROCESS;
+            } else {
+                mResetLoginRemainingEventsToProcess--;
+                if (mResetLoginRemainingEventsToProcess <= 0) {
+                    resetLoginFlags();
+                }
+            }
+        }
     }
 
     @UiThread

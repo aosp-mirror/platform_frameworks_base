@@ -91,6 +91,8 @@ public class ContentProtectionEventProcessorTest {
     private static final Set<Integer> EVENT_TYPES_TO_STORE =
             ImmutableSet.of(TYPE_VIEW_APPEARED, TYPE_VIEW_DISAPPEARED, TYPE_VIEW_TEXT_CHANGED);
 
+    private static final int RESET_LOGIN_TOTAL_EVENTS_TO_PROCESS = 150;
+
     @Rule public final MockitoRule mMockitoRule = MockitoJUnit.rule();
 
     @Mock private RingBuffer<ContentCaptureEvent> mMockEventBuffer;
@@ -229,6 +231,56 @@ public class ContentProtectionEventProcessorTest {
         verify(mMockEventBuffer, never()).clear();
         verify(mMockEventBuffer, never()).toArray();
         verifyZeroInteractions(mMockContentCaptureManager);
+    }
+
+    @Test
+    public void processEvent_loginDetected_belowResetLimit() throws Exception {
+        when(mMockEventBuffer.toArray()).thenReturn(BUFFERED_EVENTS);
+        mContentProtectionEventProcessor.mSuspiciousTextDetected = true;
+        ContentCaptureEvent event =
+                createAndroidPasswordFieldEvent(
+                        ANDROID_CLASS_NAME, InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        for (int i = 0; i < RESET_LOGIN_TOTAL_EVENTS_TO_PROCESS; i++) {
+            mContentProtectionEventProcessor.processEvent(PROCESS_EVENT);
+        }
+
+        assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
+        assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isTrue();
+        verify(mMockEventBuffer, never()).clear();
+        verify(mMockEventBuffer, never()).toArray();
+
+        mContentProtectionEventProcessor.processEvent(event);
+
+        assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
+        assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isFalse();
+        verify(mMockEventBuffer).clear();
+        verify(mMockEventBuffer).toArray();
+        assertOnLoginDetected();
+    }
+
+    @Test
+    public void processEvent_loginDetected_aboveResetLimit() throws Exception {
+        mContentProtectionEventProcessor.mSuspiciousTextDetected = true;
+        ContentCaptureEvent event =
+                createAndroidPasswordFieldEvent(
+                        ANDROID_CLASS_NAME, InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        for (int i = 0; i < RESET_LOGIN_TOTAL_EVENTS_TO_PROCESS + 1; i++) {
+            mContentProtectionEventProcessor.processEvent(PROCESS_EVENT);
+        }
+
+        assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isFalse();
+        assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isFalse();
+        verify(mMockEventBuffer, never()).clear();
+        verify(mMockEventBuffer, never()).toArray();
+
+        mContentProtectionEventProcessor.processEvent(event);
+
+        assertThat(mContentProtectionEventProcessor.mPasswordFieldDetected).isTrue();
+        assertThat(mContentProtectionEventProcessor.mSuspiciousTextDetected).isFalse();
+        verify(mMockEventBuffer, never()).clear();
+        verify(mMockEventBuffer, never()).toArray();
     }
 
     @Test
