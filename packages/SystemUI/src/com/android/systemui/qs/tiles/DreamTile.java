@@ -166,17 +166,6 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
     }
 
     @Override
-    protected void handleLongClick(@Nullable View view) {
-        try {
-            // Need to wake on long click so bouncer->settings works.
-            mDreamManager.awaken();
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Can't awaken", e);
-        }
-        super.handleLongClick(view);
-    }
-
-    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = getTileLabel();
         state.secondaryLabel = getActiveDreamName();
