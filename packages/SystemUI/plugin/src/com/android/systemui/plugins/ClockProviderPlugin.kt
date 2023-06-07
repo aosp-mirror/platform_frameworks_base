@@ -18,7 +18,7 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.internal.annotations.Keep
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.annotations.ProvidesInterface
 import java.io.PrintWriter
 import java.util.Locale
@@ -95,7 +95,7 @@ interface ClockFaceController {
     val animations: ClockAnimations
 
     /** Some clocks may log debug information */
-    var logBuffer: LogBuffer?
+    var messageBuffer: MessageBuffer?
 }
 
 /** Events that should call when various rendering parameters change */

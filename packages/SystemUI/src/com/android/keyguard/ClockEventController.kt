@@ -91,9 +91,9 @@ constructor(
             field = value
             if (value != null) {
                 smallLogBuffer?.log(TAG, DEBUG, {}, { "New Clock" })
-                value.smallClock.logBuffer = smallLogBuffer
+                value.smallClock.messageBuffer = smallLogBuffer
                 largeLogBuffer?.log(TAG, DEBUG, {}, { "New Clock" })
-                value.largeClock.logBuffer = largeLogBuffer
+                value.largeClock.messageBuffer = largeLogBuffer
 
                 value.initialize(resources, dozeAmount, 0f)
 

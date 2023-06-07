@@ -23,10 +23,11 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.OpenForTesting
-import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogMessageImpl
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.LogMessage
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.log.core.MessageInitializer
 import com.android.systemui.log.core.MessagePrinter
 import com.android.systemui.plugins.ClockController
@@ -75,7 +76,7 @@ private fun <TKey, TVal> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(
 
 private val TMP_MESSAGE: LogMessage by lazy { LogMessageImpl.Factory.create() }
 
-private inline fun LogBuffer?.tryLog(
+private inline fun Logger?.tryLog(
     tag: String,
     level: LogLevel,
     messageInitializer: MessageInitializer,
@@ -84,7 +85,7 @@ private inline fun LogBuffer?.tryLog(
 ) {
     if (this != null) {
         // Wrap messagePrinter to convert it from crossinline to noinline
-        this.log(tag, level, messageInitializer, messagePrinter, ex)
+        this.log(level, messagePrinter, ex, messageInitializer)
     } else {
         messageInitializer(TMP_MESSAGE)
         val msg = messagePrinter(TMP_MESSAGE)
@@ -110,7 +111,7 @@ open class ClockRegistry(
     val handleAllUsers: Boolean,
     defaultClockProvider: ClockProvider,
     val fallbackClockId: ClockId = DEFAULT_CLOCK_ID,
-    val logBuffer: LogBuffer? = null,
+    messageBuffer: MessageBuffer? = null,
     val keepAllLoaded: Boolean,
     subTag: String,
     var isTransitClockEnabled: Boolean = false,
@@ -124,6 +125,7 @@ open class ClockRegistry(
         fun onAvailableClocksChanged() {}
     }
 
+    private val logger: Logger? = if (messageBuffer != null) Logger(messageBuffer, TAG) else null
     private val availableClocks = ConcurrentHashMap<ClockId, ClockInfo>()
     private val clockChangeListeners = mutableListOf<ClockChangeListener>()
     private val settingObserver =
@@ -150,7 +152,7 @@ open class ClockRegistry(
 
                 val knownClocks = KNOWN_PLUGINS.get(manager.getPackage())
                 if (knownClocks == null) {
-                    logBuffer.tryLog(
+                    logger.tryLog(
                         TAG,
                         LogLevel.WARNING,
                         { str1 = manager.getPackage() },
@@ -159,7 +161,7 @@ open class ClockRegistry(
                     return true
                 }
 
-                logBuffer.tryLog(
+                logger.tryLog(
                     TAG,
                     LogLevel.INFO,
                     { str1 = manager.getPackage() },
@@ -176,7 +178,7 @@ open class ClockRegistry(
                         }
 
                     if (manager != info.manager) {
-                        logBuffer.tryLog(
+                        logger.tryLog(
                             TAG,
                             LogLevel.ERROR,
                             { str1 = id },
@@ -216,7 +218,7 @@ open class ClockRegistry(
                         }
 
                     if (manager != info.manager) {
-                        logBuffer.tryLog(
+                        logger.tryLog(
                             TAG,
                             LogLevel.ERROR,
                             { str1 = id },
@@ -244,7 +246,7 @@ open class ClockRegistry(
                     val id = clock.clockId
                     val info = availableClocks[id]
                     if (info?.manager != manager) {
-                        logBuffer.tryLog(
+                        logger.tryLog(
                             TAG,
                             LogLevel.ERROR,
                             { str1 = id },
@@ -319,7 +321,7 @@ open class ClockRegistry(
 
                 ClockSettings.deserialize(json)
             } catch (ex: Exception) {
-                logBuffer.tryLog(TAG, LogLevel.ERROR, {}, { "Failed to parse clock settings" }, ex)
+                logger.tryLog(TAG, LogLevel.ERROR, {}, { "Failed to parse clock settings" }, ex)
                 null
             }
         settings = result
@@ -348,7 +350,7 @@ open class ClockRegistry(
                 )
             }
         } catch (ex: Exception) {
-            logBuffer.tryLog(TAG, LogLevel.ERROR, {}, { "Failed to set clock settings" }, ex)
+            logger.tryLog(TAG, LogLevel.ERROR, {}, { "Failed to set clock settings" }, ex)
         }
         settings = value
     }
@@ -508,9 +510,9 @@ open class ClockRegistry(
     }
 
     private fun onConnected(clockId: ClockId) {
-        logBuffer.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Connected $str1" })
+        logger.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Connected $str1" })
         if (currentClockId == clockId) {
-            logBuffer.tryLog(
+            logger.tryLog(
                 TAG,
                 LogLevel.INFO,
                 { str1 = clockId },
@@ -520,10 +522,10 @@ open class ClockRegistry(
     }
 
     private fun onLoaded(clockId: ClockId) {
-        logBuffer.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Loaded $str1" })
+        logger.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Loaded $str1" })
 
         if (currentClockId == clockId) {
-            logBuffer.tryLog(
+            logger.tryLog(
                 TAG,
                 LogLevel.INFO,
                 { str1 = clockId },
@@ -534,10 +536,10 @@ open class ClockRegistry(
     }
 
     private fun onUnloaded(clockId: ClockId) {
-        logBuffer.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Unloaded $str1" })
+        logger.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Unloaded $str1" })
 
         if (currentClockId == clockId) {
-            logBuffer.tryLog(
+            logger.tryLog(
                 TAG,
                 LogLevel.WARNING,
                 { str1 = clockId },
@@ -548,10 +550,10 @@ open class ClockRegistry(
     }
 
     private fun onDisconnected(clockId: ClockId) {
-        logBuffer.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Disconnected $str1" })
+        logger.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Disconnected $str1" })
 
         if (currentClockId == clockId) {
-            logBuffer.tryLog(
+            logger.tryLog(
                 TAG,
                 LogLevel.WARNING,
                 { str1 = clockId },
@@ -597,22 +599,17 @@ open class ClockRegistry(
         if (isEnabled && clockId.isNotEmpty()) {
             val clock = createClock(clockId)
             if (clock != null) {
-                logBuffer.tryLog(
-                    TAG,
-                    LogLevel.INFO,
-                    { str1 = clockId },
-                    { "Rendering clock $str1" }
-                )
+                logger.tryLog(TAG, LogLevel.INFO, { str1 = clockId }, { "Rendering clock $str1" })
                 return clock
             } else if (availableClocks.containsKey(clockId)) {
-                logBuffer.tryLog(
+                logger.tryLog(
                     TAG,
                     LogLevel.WARNING,
                     { str1 = clockId },
                     { "Clock $str1 not loaded; using default" }
                 )
             } else {
-                logBuffer.tryLog(
+                logger.tryLog(
                     TAG,
                     LogLevel.ERROR,
                     { str1 = clockId },
