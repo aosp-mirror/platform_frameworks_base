@@ -17,8 +17,6 @@
 package com.android.server.permission.access.appop
 
 import android.app.AppOpsManager
-import com.android.server.permission.access.AccessUri
-import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.MutateStateScope
@@ -39,22 +37,6 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
 
     override val subjectScheme: String
         get() = PackageUri.SCHEME
-
-    override fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int {
-        subject as PackageUri
-        `object` as AppOpUri
-        return getAppOpMode(subject.packageName, subject.userId, `object`.appOpName)
-    }
-
-    override fun MutateStateScope.setDecision(
-        subject: AccessUri,
-        `object`: AccessUri,
-        decision: Int
-    ) {
-        subject as PackageUri
-        `object` as AppOpUri
-        setAppOpMode(subject.packageName, subject.userId, `object`.appOpName, decision)
-    }
 
     override fun GetStateScope.onStateMutated() {
         onAppOpModeChangedListeners.forEachIndexed { _, it -> it.onStateMutated() }

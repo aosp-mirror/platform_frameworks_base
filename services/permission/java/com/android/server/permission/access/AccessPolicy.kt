@@ -56,13 +56,6 @@ class AccessPolicy private constructor(
             "Scheme policy for $subjectScheme and $objectScheme does not exist"
         }
 
-    fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int =
-        with(getSchemePolicy(subject, `object`)) { getDecision(subject, `object`) }
-
-    fun MutateStateScope.setDecision(subject: AccessUri, `object`: AccessUri, decision: Int) {
-        with(getSchemePolicy(subject, `object`)) { setDecision(subject, `object`, decision) }
-    }
-
     fun initialize(
         state: MutableAccessState,
         userIds: IntSet,
@@ -493,14 +486,6 @@ abstract class SchemePolicy {
     abstract val subjectScheme: String
 
     abstract val objectScheme: String
-
-    abstract fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int
-
-    abstract fun MutateStateScope.setDecision(
-        subject: AccessUri,
-        `object`: AccessUri,
-        decision: Int
-    )
 
     open fun GetStateScope.onStateMutated() {}
 
