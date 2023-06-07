@@ -3085,6 +3085,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return key_consumed;
                 }
                 break;
+            case KeyEvent.KEYCODE_L:
+                if (down && event.isMetaPressed() && repeatCount == 0) {
+                    lockNow(null /* options */);
+                    return key_consumed;
+                }
+                break;
             case KeyEvent.KEYCODE_N:
                 if (down && event.isMetaPressed()) {
                     if (event.isCtrlPressed()) {
