@@ -78,7 +78,7 @@ import com.android.systemui.decor.FaceScanningProviderFactory;
 import com.android.systemui.decor.OverlayWindow;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerDecorProviderFactory;
-import com.android.systemui.decor.RoundedCornerResDelegate;
+import com.android.systemui.decor.RoundedCornerResDelegateImpl;
 import com.android.systemui.log.ScreenDecorationsLogger;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.settings.DisplayTracker;
@@ -142,7 +142,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     public final int mFaceScanningViewId;
 
     @VisibleForTesting
-    protected RoundedCornerResDelegate mRoundedCornerResDelegate;
+    protected RoundedCornerResDelegateImpl mRoundedCornerResDelegate;
     @VisibleForTesting
     protected DecorProviderFactory mRoundedCornerFactory;
     private CutoutDecorProviderFactory mCutoutFactory;
@@ -429,8 +429,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mDisplayMode = mDisplayInfo.getMode();
         mDisplayUniqueId = mDisplayInfo.uniqueId;
         mDisplayCutout = mDisplayInfo.displayCutout;
-        mRoundedCornerResDelegate = new RoundedCornerResDelegate(mContext.getResources(),
-                mDisplayUniqueId);
+        mRoundedCornerResDelegate =
+                new RoundedCornerResDelegateImpl(mContext.getResources(), mDisplayUniqueId);
         mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(
                 getPhysicalPixelDisplaySizeRatio());
         mRoundedCornerFactory = new RoundedCornerDecorProviderFactory(mRoundedCornerResDelegate);
