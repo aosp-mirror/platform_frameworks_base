@@ -21,6 +21,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
+import android.content.pm.ParceledListSlice;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -47,7 +48,7 @@ interface IAccessibilityManager {
 
     boolean removeClient(IAccessibilityManagerClient client, int userId);
 
-    List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
+    ParceledListSlice<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
 
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);

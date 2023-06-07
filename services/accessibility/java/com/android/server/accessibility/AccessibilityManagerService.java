@@ -74,6 +74,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
@@ -1250,7 +1251,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId) {
+    public ParceledListSlice<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(
+            int userId) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getInstalledAccessibilityServiceList",
                     FLAGS_ACCESSIBILITY_MANAGER, "userId=" + userId);
@@ -1262,8 +1264,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int deviceId = mProxyManager.getFirstDeviceIdForUidLocked(
                     Binder.getCallingUid());
             if (mProxyManager.isProxyedDeviceId(deviceId)) {
-                return mProxyManager.getInstalledAndEnabledServiceInfosLocked(
-                        AccessibilityServiceInfo.FEEDBACK_ALL_MASK, deviceId);
+                return new ParceledListSlice<>(
+                        mProxyManager.getInstalledAndEnabledServiceInfosLocked(
+                                AccessibilityServiceInfo.FEEDBACK_ALL_MASK, deviceId));
             }
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -1275,7 +1278,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         if (Binder.getCallingPid() == OWN_PROCESS_ID) {
-            return serviceInfos;
+            return new ParceledListSlice<>(serviceInfos);
         }
         final PackageManagerInternal pm = LocalServices.getService(
                 PackageManagerInternal.class);
@@ -1287,7 +1290,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 serviceInfos.remove(i);
             }
         }
-        return serviceInfos;
+        return new ParceledListSlice<>(serviceInfos);
     }
 
     @Override
