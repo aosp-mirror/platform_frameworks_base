@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.shelf.ui.viewbinder
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -32,7 +33,6 @@ import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
  * [NotificationShelfController] interface. Once the [LegacyNotificationShelfControllerImpl] is
  * removed, this class can go away and the ViewBinder can be used directly.
  */
-@CentralSurfacesScope
+@SysUISingleton
 class NotificationShelfViewBinderWrapperControllerImpl @Inject constructor() :
     NotificationShelfController {
 

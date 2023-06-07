@@ -744,6 +744,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<AssistManager> assistManagerLazy,
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
+            NotificationShelfController notificationShelfController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
@@ -840,6 +841,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mAssistManagerLazy = assistManagerLazy;
         mConfigurationController = configurationController;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mNotificationShelfController = notificationShelfController;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
@@ -1651,7 +1653,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotifListContainer = mCentralSurfacesComponent.getNotificationListContainer();
         mPresenter = mCentralSurfacesComponent.getNotificationPresenter();
         mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
-        mNotificationShelfController = mCentralSurfacesComponent.getNotificationShelfController();
 
         mHeadsUpManager.addListener(mCentralSurfacesComponent.getStatusBarHeadsUpChangeListener());
 
@@ -3408,7 +3409,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected Display mDisplay;
     private int mDisplayId;
 
-    protected NotificationShelfController mNotificationShelfController;
+    private final NotificationShelfController mNotificationShelfController;
 
     private final Lazy<AssistManager> mAssistManagerLazy;
 

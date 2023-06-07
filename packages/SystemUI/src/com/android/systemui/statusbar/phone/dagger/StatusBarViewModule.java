@@ -23,7 +23,6 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
@@ -32,15 +31,9 @@ import com.android.systemui.shade.NotificationsQuickSettingsContainer;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl;
-import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
-import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule;
-import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModelModule;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -68,7 +61,6 @@ import dagger.multibindings.IntoSet;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 
 @Module(subcomponents = StatusBarFragmentComponent.class,
         includes = {
@@ -78,43 +70,6 @@ import javax.inject.Provider;
 public abstract class StatusBarViewModule {
 
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationShelf providesNotificationShelf(LayoutInflater layoutInflater,
-            NotificationStackScrollLayout notificationStackScrollLayout) {
-        NotificationShelf view = (NotificationShelf) layoutInflater.inflate(
-                R.layout.status_bar_notification_shelf, notificationStackScrollLayout, false);
-
-        if (view == null) {
-            throw new IllegalStateException(
-                    "R.layout.status_bar_notification_shelf could not be properly inflated");
-        }
-        return view;
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationShelfController providesStatusBarWindowView(
-            FeatureFlags featureFlags,
-            Provider<NotificationShelfViewBinderWrapperControllerImpl> newImpl,
-            NotificationShelfComponent.Builder notificationShelfComponentBuilder,
-            NotificationShelf notificationShelf) {
-        if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
-            return newImpl.get();
-        } else {
-            NotificationShelfComponent component = notificationShelfComponentBuilder
-                    .notificationShelf(notificationShelf)
-                    .build();
-            LegacyNotificationShelfControllerImpl notificationShelfController =
-                    component.getNotificationShelfController();
-            notificationShelfController.init();
-
-            return notificationShelfController;
-        }
-    }
 
     /** */
     @Binds
