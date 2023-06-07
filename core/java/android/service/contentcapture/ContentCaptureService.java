@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -140,10 +141,9 @@ public abstract class ContentCaptureService extends Service {
     private long mCallerMismatchTimeout = 1000;
     private long mLastCallerMismatchLog;
 
-    /**
-     * Binder that receives calls from the system server.
-     */
-    private final IContentCaptureService mServerInterface = new IContentCaptureService.Stub() {
+    /** Binder that receives calls from the system server in the content capture flow. */
+    private final IContentCaptureService mContentCaptureServerInterface =
+            new IContentCaptureService.Stub() {
 
         @Override
         public void onConnected(IBinder callback, boolean verbose, boolean debug) {
@@ -199,10 +199,24 @@ public abstract class ContentCaptureService extends Service {
         }
     };
 
-    /**
-     * Binder that receives calls from the app.
-     */
-    private final IContentCaptureDirectManager mClientInterface =
+    /** Binder that receives calls from the system server in the content protection flow. */
+    private final IContentProtectionService mContentProtectionServerInterface =
+            new IContentProtectionService.Stub() {
+
+                @Override
+                public void onLoginDetected(
+                        @SuppressWarnings("rawtypes") ParceledListSlice events) {
+                    mHandler.sendMessage(
+                            obtainMessage(
+                                    ContentCaptureService::handleOnLoginDetected,
+                                    ContentCaptureService.this,
+                                    Binder.getCallingUid(),
+                                    events));
+                }
+            };
+
+    /** Binder that receives calls from the app in the content capture flow. */
+    private final IContentCaptureDirectManager mContentCaptureClientInterface =
             new IContentCaptureDirectManager.Stub() {
 
         @Override
@@ -232,9 +246,19 @@ public abstract class ContentCaptureService extends Service {
     @Override
     public final IBinder onBind(Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
-            return mServerInterface.asBinder();
+            return mContentCaptureServerInterface.asBinder();
         }
-        Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
+        if (PROTECTION_SERVICE_INTERFACE.equals(intent.getAction())) {
+            return mContentProtectionServerInterface.asBinder();
+        }
+        Log.w(
+                TAG,
+                "Tried to bind to wrong intent (should be "
+                        + SERVICE_INTERFACE
+                        + " or "
+                        + PROTECTION_SERVICE_INTERFACE
+                        + "): "
+                        + intent);
         return null;
     }
 
@@ -468,7 +492,7 @@ public abstract class ContentCaptureService extends Service {
         } else {
             stateFlags |= ContentCaptureSession.STATE_DISABLED;
         }
-        setClientState(clientReceiver, stateFlags, mClientInterface.asBinder());
+        setClientState(clientReceiver, stateFlags, mContentCaptureClientInterface.asBinder());
     }
 
     private void handleSendEvents(int uid,
@@ -534,6 +558,18 @@ public abstract class ContentCaptureService extends Service {
             }
         }
         writeFlushMetrics(lastSessionId, activityComponent, metrics, options, reason);
+    }
+
+    private void handleOnLoginDetected(
+            int uid, @NonNull ParceledListSlice<ContentCaptureEvent> parceledEvents) {
+        if (uid != Process.SYSTEM_UID) {
+            Log.e(TAG, "handleOnLoginDetected() not allowed for uid: " + uid);
+            return;
+        }
+        List<ContentCaptureEvent> events = parceledEvents.getList();
+        int sessionIdInt = events.isEmpty() ? NO_SESSION_ID : events.get(0).getSessionId();
+        ContentCaptureSessionId sessionId = new ContentCaptureSessionId(sessionIdInt);
+        events.forEach(event -> onContentCaptureEvent(sessionId, event));
     }
 
     private void handleOnActivitySnapshot(int sessionId, @NonNull SnapshotData snapshotData) {
