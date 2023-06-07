@@ -130,7 +130,7 @@ public interface ServiceProvider extends
 
     void onPointerUp(long requestId, int sensorId, PointerContext pc);
 
-    void onUiReady(long requestId, int sensorId);
+    void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event, long requestId, int sensorId);
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 

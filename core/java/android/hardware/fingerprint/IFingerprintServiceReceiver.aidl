@@ -32,4 +32,5 @@ oneway interface IFingerprintServiceReceiver {
     void onChallengeGenerated(int sensorId, int userId, long challenge);
     void onUdfpsPointerDown(int sensorId);
     void onUdfpsPointerUp(int sensorId);
+    void onUdfpsOverlayShown();
 }
