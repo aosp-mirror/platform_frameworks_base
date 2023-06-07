@@ -122,6 +122,7 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstanceFactory.create(
                 mContext, mAppInfo, wrongVersionTestPluginComponentName,
                 TestPlugin.class, mPluginListener);
+        mPluginInstance.onCreate();
     }
 
     @Test
@@ -135,11 +136,12 @@ public class PluginInstanceTest extends SysuiTestCase {
 
     @Test
     public void testOnDestroy() {
+        mPluginInstance.onCreate();
         mPluginInstance.onDestroy();
         assertEquals(1, mPluginListener.mDetachedCount);
         assertEquals(1, mPluginListener.mUnloadCount);
         assertNull(mPluginInstance.getPlugin());
-        assertInstances(0, -1); // Destroyed but never created
+        assertInstances(0, 0); // Destroyed but never created
     }
 
     @Test
@@ -158,6 +160,16 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstance.unloadPlugin();
         mPluginInstance.onDestroy();
         assertNull(mPluginInstance.getPlugin());
+        assertInstances(0, 0);
+    }
+
+    @Test
+    public void testOnAttach_SkipLoad() {
+        mPluginListener.mAttachReturn = false;
+        mPluginInstance.onCreate();
+        assertEquals(1, mPluginListener.mAttachedCount);
+        assertEquals(0, mPluginListener.mLoadCount);
+        assertEquals(null, mPluginInstance.getPlugin());
         assertInstances(0, 0);
     }
 
@@ -220,15 +232,17 @@ public class PluginInstanceTest extends SysuiTestCase {
     }
 
     public class FakeListener implements PluginListener<TestPlugin> {
+        public boolean mAttachReturn = true;
         public int mAttachedCount = 0;
         public int mDetachedCount = 0;
         public int mLoadCount = 0;
         public int mUnloadCount = 0;
 
         @Override
-        public void onPluginAttached(PluginLifecycleManager<TestPlugin> manager) {
+        public boolean onPluginAttached(PluginLifecycleManager<TestPlugin> manager) {
             mAttachedCount++;
             assertEquals(PluginInstanceTest.this.mPluginInstance, manager);
+            return mAttachReturn;
         }
 
         @Override
