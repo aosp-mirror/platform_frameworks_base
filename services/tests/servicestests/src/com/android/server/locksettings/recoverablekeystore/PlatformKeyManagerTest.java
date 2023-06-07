@@ -27,6 +27,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertThrows;
 
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -54,6 +55,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.UnrecoverableKeyException;
 import java.util.List;
 
@@ -390,6 +392,18 @@ public class PlatformKeyManagerTest {
         verify(mKeyStoreProxy).getKey(
                 eq(ENCRYPTION_KEY_ALIAS_2),
                 any());
+    }
+
+    @Test
+    public void getEncryptKey_noScreenlock() throws Exception {
+        when(mKeyguardManager.isDeviceSecure(USER_ID_FIXTURE)).thenReturn(false);
+        doThrow(new KeyStoreException()).when(mKeyStoreProxy).setEntry(
+                anyString(),
+                any(),
+                any());
+
+        assertThrows(InsecureUserException.class,
+                () -> mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE));
     }
 
     @Test
