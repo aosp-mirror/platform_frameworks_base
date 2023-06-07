@@ -3714,11 +3714,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             if (parser.getName().equals(TAG_PERMISSIONS)) {
                 final LegacyPermissionState legacyState;
                 if (ps.hasSharedUser()) {
-                    legacyState = getSettingLPr(ps.getSharedUserAppId()).getLegacyPermissionState();
+                    final SettingBase sharedUserSettings = getSettingLPr(
+                            ps.getSharedUserAppId());
+                    legacyState = sharedUserSettings != null
+                            ? sharedUserSettings.getLegacyPermissionState() : null;
                 } else {
                     legacyState = ps.getLegacyPermissionState();
                 }
-                readInstallPermissionsLPr(parser, legacyState, users);
+                if (legacyState != null) {
+                    readInstallPermissionsLPr(parser, legacyState, users);
+                }
             } else if (parser.getName().equals(TAG_USES_STATIC_LIB)) {
                 readUsesStaticLibLPw(parser, ps);
             } else if (parser.getName().equals(TAG_USES_SDK_LIB)) {
