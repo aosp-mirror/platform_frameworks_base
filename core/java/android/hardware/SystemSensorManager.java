@@ -453,7 +453,7 @@ public class SystemSensorManager extends SensorManager {
                 public void onReceive(Context context, Intent intent) {
                     if (intent.getAction() == Intent.ACTION_DYNAMIC_SENSOR_CHANGED) {
                         if (DEBUG_DYNAMIC_SENSOR) {
-                            Log.i(TAG, "DYNS received DYNAMIC_SENSOR_CHANED broadcast");
+                            Log.i(TAG, "DYNS received DYNAMIC_SENSOR_CHANGED broadcast");
                         }
                         // Dynamic sensors probably changed
                         mDynamicSensorListDirty = true;
@@ -498,7 +498,7 @@ public class SystemSensorManager extends SensorManager {
     protected void unregisterDynamicSensorCallbackImpl(
             DynamicSensorCallback callback) {
         if (DEBUG_DYNAMIC_SENSOR) {
-            Log.i(TAG, "Removing dynamic sensor listerner");
+            Log.i(TAG, "Removing dynamic sensor listener");
         }
         mDynamicSensorCallbacks.remove(callback);
     }
@@ -624,7 +624,7 @@ public class SystemSensorManager extends SensorManager {
             }
             if (hardwareBuffer.getWidth() < MIN_DIRECT_CHANNEL_BUFFER_SIZE) {
                 throw new IllegalArgumentException(
-                        "Width if HaradwareBuffer must be greater than "
+                        "Width if HardwareBuffer must be greater than "
                         + MIN_DIRECT_CHANNEL_BUFFER_SIZE);
             }
             if ((hardwareBuffer.getUsage() & HardwareBuffer.USAGE_SENSOR_DIRECT_DATA) == 0) {
@@ -655,7 +655,7 @@ public class SystemSensorManager extends SensorManager {
 
     /*
      * BaseEventQueue is the communication channel with the sensor service,
-     * SensorEventQueue, TriggerEventQueue are subclases and there is one-to-one mapping between
+     * SensorEventQueue, TriggerEventQueue are subclasses and there is one-to-one mapping between
      * the queues and the listeners. InjectEventQueue is also a sub-class which is a special case
      * where data is being injected into the sensor HAL through the sensor service. It is not
      * associated with any listener and there is one InjectEventQueue associated with a

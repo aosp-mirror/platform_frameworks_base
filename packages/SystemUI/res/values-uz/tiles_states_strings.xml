@@ -88,7 +88,7 @@
   </string-array>
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"Ishlamaydi"</item>
-    <item msgid="1909756493418256167">"Yoqilmagan"</item>
+    <item msgid="1909756493418256167">"Oʻchiq"</item>
     <item msgid="4531508423703413340">"Yoniq"</item>
   </string-array>
   <string-array name="tile_states_inversion">

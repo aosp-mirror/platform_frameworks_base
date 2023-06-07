@@ -74,6 +74,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Zvanītāja ID noklusējumi ir iestatīti uz Nav ierobežots. Nākamais zvans: nav ierobežots"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Pakalpojums netiek nodrošināts."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Zvanītāja ID iestatījumu nevar mainīt."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Tiek izmantots operatora <xliff:g id="CARRIERDISPLAY">%s</xliff:g> datu savienojums"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Šo opciju jebkurā brīdī var mainīt iestatījumos"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nav pieejams neviens datu pakalpojums mobilajām ierīcēm"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Nav pieejami ārkārtas izsaukumi"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Balss izsaukumu pakalpojums nedarbojas"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ļauj lietotnei iegūt informāciju par vēlamo NFC maksājumu pakalpojumu, piemēram, par reģistrētajiem lietojumprogrammu ID un maršruta galamērķi."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolē tuvlauka saziņu"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ļauj lietotnei sazināties ar tuva darbības lauka sakaru (Near Field Communication — NFC) atzīmēm, kartēm un lasītājiem."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Darījums, kas apstrādājams, izmantojot drošības elementu"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Ļauj lietotnei saņemt informāciju par darījumiem, kas apstrādājami, izmantojot drošības elementu."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"atspējot ekrāna bloķēšanu"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ļauj lietotnei atspējot taustiņslēgu un visu saistīto paroļu drošību. Piemēram, tālrunis atspējo taustiņslēgu, saņemot ienākošu zvanu, un pēc zvana pabeigšanas atkārtoti iespējo taustiņslēgu."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekrāna bloķēšanas sarežģītības pakāpes informācijas pieprasījums"</string>
@@ -592,7 +596,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Pārāk spilgts"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Konstatēta barošanas pogas nospiešana"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Mēģiniet mainīt pozīciju"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Katru reizi mazliet mainiet pirksta pozīciju."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Katru reizi mazliet mainiet pirksta pozīciju"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Pirksta nospiedums netika atpazīts"</string>
@@ -1685,7 +1689,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"IZSLĒGTA"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vai atļaut pakalpojumam <xliff:g id="SERVICE">%1$s</xliff:g> pilnībā kontrolēt jūsu ierīci?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pilnīga kontrole ir piemērota lietotnēm, kas nepieciešamas lietotājiem ar īpašām vajadzībām, taču ne lielākajai daļai lietotņu."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skatīt un pārvaldīt ekrānu"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekrāna skatīšana un pārvaldīšana"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Tā var nolasīt visu ekrānā esošo saturu un attēlot saturu citām lietotnēm."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Darbību skatīšana un veikšana"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Tā var izsekot jūsu mijiedarbību ar lietotni vai aparatūras sensoru un mijiedarboties ar lietotnēm jūsu vārdā."</string>
@@ -2291,4 +2295,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nevar piekļūt planšetdatora kamerai no jūsu ierīces (<xliff:g id="DEVICE">%1$s</xliff:g>)."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Straumēšanas laikā nevar piekļūt šim saturam. Mēģiniet tam piekļūt savā tālrunī."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sistēmas noklusējums"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"KARTE <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

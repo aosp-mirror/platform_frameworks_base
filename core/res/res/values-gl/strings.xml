@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: non restrinxido"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Servizo non ofrecido."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Non podes cambiar a configuración do identificador de chamada."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Cambiouse a conexión de datos a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Podes cambiar esta opción en calquera momento en Configuración"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Non hai servizo de datos para móbiles"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"As chamadas de emerxencia non están dispoñibles"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Non hai servizo de chamadas de voz"</string>
@@ -305,7 +307,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"acceder a ficheiros no teu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música e audio do dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"fotos e vídeos"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"acceder a fotos e vídeos do dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar audio"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a aplicación obteña información do servizo de pago de NFC preferido, como as axudas rexistradas e o destino da ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite á aplicación comunicarse con etiquetas, tarxetas e lectores Near Field Communication (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Evento de transacción no elemento seguro"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Permite que a aplicación reciba información sobre transaccións que ocorran nun elemento seguro."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desactivar o bloqueo da pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite á aplicación desactivar o bloqueo do teclado e calquera seguranza dos contrasinais asociada. Por exemplo, o teléfono desactiva o bloqueo do teclado ao recibir unha chamada telefónica entrante e, a continuación, volve activar o bloqueo do teclado unha vez finalizada a chamada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"solicitar o nivel de complexidade do bloqueo de pantalla"</string>
@@ -642,7 +646,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Move o teléfono cara á esquerda"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Move o teléfono cara á dereita"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Mira o dispositivo de forma máis directa."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Non se pode ver a túa cara. Coloca o teléfono á altura dos ollos."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Non se che ve a cara. Pon o teléfono diante dos ollos"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Demasiado movemento. Non movas o teléfono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Volve rexistrar a túa cara."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Non se recoñeceu a cara. Téntao de novo."</string>
@@ -650,15 +654,15 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mira o teléfono de forma máis directa"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mira o teléfono de forma máis directa"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mira o teléfono de forma máis directa"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Quita todo o que oculte a túa cara."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Quita todo o que oculte a túa cara"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpa a parte superior da pantalla, incluída a barra de cor negra"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
     <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Non se puido crear o modelo facial. Téntao de novo."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Detectáronse lentes escuras. A cara debe poder verse por completo."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Detectouse unha máscara. A cara debe poder verse por completo."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Levas lentes escuras, pero débeseche ver toda a cara"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tes a cara tapada, pero débeseche ver enteira"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Sen verificar a cara. Hardware non dispoñible."</string>
@@ -1247,8 +1251,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicacións."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Está finalizando o arranque"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Premiches o botón de acendido, o que adoita facer que se apague a pantalla.\n\nProba a dar un toque suave namentres configuras a impresión dixital."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Apaga a pantalla e acaba a configuración"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Desactivar"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Para rematar, apaga a pantalla"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Apagar"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Queres seguir verificando a impresión?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Premiches o botón de acendido, o que adoita facer que se apague a pantalla.\n\nProba a dar un toque suave para verificar a impresión dixital."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Desactivar pantalla"</string>
@@ -1319,8 +1323,8 @@
     <string name="sms_control_yes" msgid="4858845109269524622">"Permitir"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Rexeitar"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; quere enviar unha mensaxe a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="2723725738333388351">"Esta acción "<b>"pode supoñer custos"</b>" na túa conta de teléfono móbil."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Esta acción suporá custos na túa conta de teléfono móbil."</b></string>
+    <string name="sms_short_code_details" msgid="2723725738333388351">"Esta acción "<b>"pode supoñer custos"</b>" na conta do teu operador móbil."</string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Esta acción suporá custos na conta do teu operador móbil."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Enviar"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Cancelar"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Lembrar a miña opción"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Non se puido acceder á cámara da tableta desde o teu dispositivo (<xliff:g id="DEVICE">%1$s</xliff:g>)"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Non se puido acceder a este contido durante a reprodución en tempo real. Téntao desde o teléfono."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Opción predeterminada do sistema"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"TARXETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

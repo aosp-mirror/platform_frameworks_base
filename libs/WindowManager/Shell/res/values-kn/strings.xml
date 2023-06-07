@@ -23,7 +23,7 @@
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"ಸ್ಪ್ಲಿಟ್‌-ಸ್ಕ್ರೀನ್‌ಗೆ ಪ್ರವೇಶಿಸಿ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ಮೆನು"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವಾಗಿದೆ"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> ಈ ವೈಶಿಷ್ಟ್ಯ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> ಈ ಫೀಚರ್ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="pip_play" msgid="3496151081459417097">"ಪ್ಲೇ"</string>
     <string name="pip_pause" msgid="690688849510295232">"ವಿರಾಮಗೊಳಿಸಿ"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ಮುಂದಕ್ಕೆ ಸ್ಕಿಪ್‌ ಮಾಡಿ"</string>

@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Caller ID defaults to not restricted. Next call: Not restricted"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Service not provisioned."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"You can\'t change the caller ID setting."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Switched data to <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"You can change this anytime in Settings"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"No mobile data service"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Emergency calling unavailable"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"No voice service"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Allows the app to get preferred nfc payment service information like registered aids and route destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"control Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Allows the app to communicate with Near Field Communication (NFC) tags, cards, and readers."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element transaction event"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Allows the app to receive information about transactions happening on a Secure Element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"disable your screen lock"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Allows the app to disable the keylock and any associated password security. For example, the phone disables the keylock when receiving an incoming phone call, then re-enables the keylock when the call is finished."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"request screen lock complexity"</string>
@@ -1528,7 +1532,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Add account"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Increase"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Decrease"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> touch &amp; hold."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> touch and hold."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Slide up to increase and down to decrease."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Increase minute"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Decrease minute"</string>
@@ -1555,7 +1559,7 @@
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Couldn\'t launch <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Share with"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Share with <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="982510275422590757">"Sliding handle. Touch &amp; hold."</string>
+    <string name="content_description_sliding_handle" msgid="982510275422590757">"Sliding handle. Touch and hold."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Swipe to unlock."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Navigate home"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Navigate up"</string>
@@ -1687,7 +1691,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"View and control screen"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"It can read all content on the screen and display content over other apps."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"View and perform actions"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"It can track your interactions with an app or a hardware sensor, and interact with apps on your behalf."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"It can track your interactions with an app or a hardware sensor and interact with apps on your behalf."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Allow"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Deny"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tap a feature to start using it:"</string>
@@ -1708,7 +1712,7 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Choose a feature to use when you tap the accessibility button:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"To switch between features, touch &amp; hold the accessibility button."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"To switch between features, touch and hold the accessibility button."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"To switch between features, swipe up with two fingers and hold."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"To switch between features, swipe up with three fingers and hold."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Magnification"</string>
@@ -2045,7 +2049,7 @@
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Harmful app detected"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Allow <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> to access all device logs?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Allow one-time access"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Don’t allow"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Don\'t allow"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs. \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device."</string>
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs. \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.\n\nLearn more at g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Don’t show again"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Can’t access the tablet’s camera from your <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"This can’t be accessed while streaming. Try on your phone instead."</string>
     <string name="system_locale_title" msgid="711882686834677268">"System default"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"CARD <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

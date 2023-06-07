@@ -96,6 +96,7 @@ type libraryProps struct {
 	Sdk_version *string
 	Static_libs []string
 	Visibility  []string
+	Defaults    []string
 }
 
 type fgProps struct {
@@ -362,6 +363,30 @@ func createApiContributionDefaults(ctx android.LoadHookContext, modules []string
 	}
 }
 
+func createFullApiLibraries(ctx android.LoadHookContext) {
+	javaLibraryNames := []string{
+		"android_stubs_current",
+		"android_system_stubs_current",
+		"android_test_stubs_current",
+		"android_module_lib_stubs_current",
+		"android_system_server_stubs_current",
+	}
+
+	for _, libraryName := range javaLibraryNames {
+		props := libraryProps{}
+		props.Name = proptools.StringPtr(libraryName)
+		staticLib := libraryName + ".from-source"
+		if ctx.Config().BuildFromTextStub() {
+			staticLib = libraryName + ".from-text"
+		}
+		props.Static_libs = []string{staticLib}
+		props.Defaults = []string{"android.jar_defaults"}
+		props.Visibility = []string{"//visibility:public"}
+
+		ctx.CreateModule(java.LibraryFactory, &props)
+	}
+}
+
 func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	bootclasspath := a.properties.Bootclasspath
 	system_server_classpath := a.properties.System_server_classpath
@@ -382,6 +407,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createPublicStubsSourceFilegroup(ctx, bootclasspath)
 
 	createApiContributionDefaults(ctx, bootclasspath)
+
+	createFullApiLibraries(ctx)
 }
 
 func combinedApisModuleFactory() android.Module {
