@@ -49,8 +49,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     private class State {
         SurfaceControl mSurfaceControl;
-        final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
-        final WindowManager.LayoutParams mLastReportedParams = new WindowManager.LayoutParams();
+        WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
         int mDisplayId;
         IBinder mInputChannelToken;
         Region mInputRegion;
@@ -94,8 +93,6 @@ public class WindowlessWindowManager implements IWindowSession {
     private final ClientWindowFrames mTmpFrames = new ClientWindowFrames();
     private final MergedConfiguration mTmpConfig = new MergedConfiguration();
     private final WindowlessWindowLayout mLayout = new WindowlessWindowLayout();
-
-    private ISurfaceControlViewHostParent mParentInterface;
 
     public WindowlessWindowManager(Configuration c, SurfaceControl rootSurface,
             IBinder hostInputToken) {
@@ -247,7 +244,6 @@ public class WindowlessWindowManager implements IWindowSession {
         final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE |
                         WindowManagerGlobal.ADD_FLAG_USE_BLAST;
 
-        sendLayoutParamsToParent();
         // Include whether the window is in touch mode.
         return isInTouchModeInternal(displayId) ? res | WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE
                 : res;
@@ -429,7 +425,6 @@ public class WindowlessWindowManager implements IWindowSession {
             outInsetsState.set(mInsetsState);
         }
 
-        sendLayoutParamsToParent();
         return 0;
     }
 
@@ -649,46 +644,5 @@ public class WindowlessWindowManager implements IWindowSession {
         Log.e(TAG, "Received request to transferEmbeddedTouch focus on WindowlessWindowManager" +
             " we shouldn't get here!");
         return false;
-    }
-
-    void setParentInterface(@Nullable ISurfaceControlViewHostParent parentInterface) {
-        IBinder oldInterface = mParentInterface == null ? null : mParentInterface.asBinder();
-        IBinder newInterface = parentInterface == null ? null : parentInterface.asBinder();
-        // If the parent interface has changed, it needs to clear the last reported params so it
-        // will update the new interface with the params.
-        if (oldInterface != newInterface) {
-            clearLastReportedParams();
-        }
-        mParentInterface = parentInterface;
-        sendLayoutParamsToParent();
-    }
-
-    private void clearLastReportedParams() {
-        WindowManager.LayoutParams emptyParam = new WindowManager.LayoutParams();
-        for (State windowInfo : mStateForWindow.values()) {
-            windowInfo.mLastReportedParams.copyFrom(emptyParam);
-        }
-    }
-
-    private void sendLayoutParamsToParent() {
-        if (mParentInterface == null) {
-            return;
-        }
-        WindowManager.LayoutParams[] params =
-                new WindowManager.LayoutParams[mStateForWindow.size()];
-        int index = 0;
-        boolean hasChanges = false;
-        for (State windowInfo : mStateForWindow.values()) {
-            int changes = windowInfo.mLastReportedParams.copyFrom(windowInfo.mParams);
-            hasChanges |= (changes != 0);
-            params[index++] = windowInfo.mParams;
-        }
-
-        if (hasChanges) {
-            try {
-                mParentInterface.updateParams(params);
-            } catch (RemoteException e) {
-            }
-        }
     }
 }
