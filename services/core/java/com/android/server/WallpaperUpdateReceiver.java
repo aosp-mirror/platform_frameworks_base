@@ -88,7 +88,7 @@ public class WallpaperUpdateReceiver extends BroadcastReceiver {
         } else {
             //live wallpaper
             ComponentName currCN = info.getComponent();
-            ComponentName defaultCN = WallpaperManager.getCmfDefaultWallpaperComponent(context);
+            ComponentName defaultCN = WallpaperManager.getDefaultWallpaperComponent(context);
             if (!currCN.equals(defaultCN)) {
                 return true;
             }
