@@ -335,7 +335,8 @@ public final class AutofillManagerService
         // of time.
 
         synchronized (mLock) {
-            final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+            final AutofillManagerServiceImpl service =
+                    peekServiceForUserWithLocalBinderIdentityLocked(userId);
             if (service != null) {
                 service.onSwitchInputMethod();
             }
@@ -367,11 +368,12 @@ public final class AutofillManagerService
             boolean isTemporary) {
         mAugmentedAutofillState.setServiceInfo(userId, serviceName, isTemporary);
         synchronized (mLock) {
-            final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+            final AutofillManagerServiceImpl service =
+                    peekServiceForUserWithLocalBinderIdentityLocked(userId);
             if (service == null) {
                 // If we cannot get the service from the services cache, it will call
                 // updateRemoteAugmentedAutofillService() finally. Skip call this update again.
-                getServiceForUserLocked(userId);
+                getServiceForUserWithLocalBinderIdentityLocked(userId);
             } else {
                 service.updateRemoteAugmentedAutofillService();
             }
@@ -381,15 +383,44 @@ public final class AutofillManagerService
     private void onFieldClassificationServiceNameChanged(
             @UserIdInt int userId, @Nullable String serviceName, boolean isTemporary) {
         synchronized (mLock) {
-            final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+            final AutofillManagerServiceImpl service =
+                    peekServiceForUserWithLocalBinderIdentityLocked(userId);
             if (service == null) {
                 // If we cannot get the service from the services cache, it will call
                 // updateRemoteFieldClassificationService() finally. Skip call this update again.
-                getServiceForUserLocked(userId);
+                getServiceForUserWithLocalBinderIdentityLocked(userId);
             } else {
                 service.updateRemoteFieldClassificationService();
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private AutofillManagerServiceImpl getServiceForUserWithLocalBinderIdentityLocked(int userId) {
+        final long token = Binder.clearCallingIdentity();
+        AutofillManagerServiceImpl managerService = null;
+        try {
+            managerService = getServiceForUserLocked(userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return managerService;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private AutofillManagerServiceImpl peekServiceForUserWithLocalBinderIdentityLocked(int userId) {
+        final long token = Binder.clearCallingIdentity();
+        AutofillManagerServiceImpl managerService = null;
+        try {
+            managerService = peekServiceForUserLocked(userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return managerService;
     }
 
     @Override // from AbstractMasterSystemService
@@ -1027,7 +1058,8 @@ public final class AutofillManagerService
             mUi.hideAll(null);
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service =
-                        getServiceForUserLocked(UserHandle.getCallingUserId());
+                        getServiceForUserWithLocalBinderIdentityLocked(
+                            UserHandle.getCallingUserId());
                 service.onBackKeyPressed();
             }
         }
@@ -1528,8 +1560,9 @@ public final class AutofillManagerService
             int flags = 0;
             try {
                 synchronized (mLock) {
-                    final int enabledFlags = getServiceForUserLocked(userId).addClientLocked(client,
-                            componentName);
+                    final int enabledFlags =
+                            getServiceForUserWithLocalBinderIdentityLocked(userId)
+                            .addClientLocked(client, componentName);
                     if (enabledFlags != 0) {
                         flags |= enabledFlags;
                     }
@@ -1564,7 +1597,8 @@ public final class AutofillManagerService
         public void setAuthenticationResult(Bundle data, int sessionId, int authenticationId,
                 int userId) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service =
+                        getServiceForUserWithLocalBinderIdentityLocked(userId);
                 service.setAuthenticationResultLocked(data, sessionId, authenticationId,
                         getCallingUid());
             }
@@ -1573,7 +1607,8 @@ public final class AutofillManagerService
         @Override
         public void setHasCallback(int sessionId, int userId, boolean hasIt) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service =
+                        getServiceForUserWithLocalBinderIdentityLocked(userId);
                 service.setHasCallback(sessionId, getCallingUid(), hasIt);
             }
         }
@@ -1603,7 +1638,8 @@ public final class AutofillManagerService
             final int taskId = mAm.getTaskIdForActivity(activityToken, false);
             final long result;
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service =
+                        getServiceForUserWithLocalBinderIdentityLocked(userId);
                 result = service.startSessionLocked(activityToken, taskId, getCallingUid(),
                         clientCallback, autofillId, bounds, value, hasCallback, clientActivity,
                         compatMode, mAllowInstantService, flags);
@@ -1619,11 +1655,13 @@ public final class AutofillManagerService
 
         @Override
         public void getFillEventHistory(@NonNull IResultReceiver receiver) throws RemoteException {
-            final int userId = UserHandle.getCallingUserId();
             FillEventHistory fillEventHistory = null;
+            final int userId = UserHandle.getCallingUserId();
+
             try {
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     if (service != null) {
                         fillEventHistory = service.getFillEventHistory(getCallingUid());
                     } else if (sVerbose) {
@@ -1641,11 +1679,12 @@ public final class AutofillManagerService
         @Override
         public void getUserData(@NonNull IResultReceiver receiver) throws RemoteException {
             UserData userData = null;
+            final int userId = UserHandle.getCallingUserId();
 
             try {
-                final int userId = UserHandle.getCallingUserId();
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     if (service != null) {
                         userData = service.getUserData(getCallingUid());
                     } else if (sVerbose) {
@@ -1667,7 +1706,8 @@ public final class AutofillManagerService
 
             try {
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     if (service != null) {
                         userData = service.getUserData(getCallingUid());
                     } else if (sVerbose) {
@@ -1675,7 +1715,7 @@ public final class AutofillManagerService
                     }
                 }
             } catch (Exception ex) {
-                // Do not raie the exception, just send back null
+                // Do not raise the exception, just send back the null response
                 Log.wtf(TAG, "getUserDataId(): failed " + ex.toString());
             } finally {
                 final String userDataId = userData == null ? null : userData.getId();
@@ -1688,7 +1728,8 @@ public final class AutofillManagerService
             final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
                     service.setUserData(getCallingUid(), userData);
                 } else if (sVerbose) {
@@ -1701,10 +1742,12 @@ public final class AutofillManagerService
         public void isFieldClassificationEnabled(@NonNull IResultReceiver receiver)
                 throws RemoteException {
             boolean enabled = false;
+            final int userId = UserHandle.getCallingUserId();
+
             try {
-                final int userId = UserHandle.getCallingUserId();
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     if (service != null) {
                         enabled = service.isFieldClassificationEnabled(getCallingUid());
                     } else if (sVerbose) {
@@ -1723,11 +1766,12 @@ public final class AutofillManagerService
         public void getDefaultFieldClassificationAlgorithm(@NonNull IResultReceiver receiver)
                 throws RemoteException {
             String algorithm = null;
+            final int userId = UserHandle.getCallingUserId();
 
             try {
-                final int userId = UserHandle.getCallingUserId();
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     if (service != null) {
                         algorithm = service.getDefaultFieldClassificationAlgorithm(getCallingUid());
                     } else {
@@ -1750,11 +1794,12 @@ public final class AutofillManagerService
                 @Nullable List<ComponentName> activities, @NonNull IResultReceiver receiver)
                 throws RemoteException {
             boolean ok = false;
+            final int userId = UserHandle.getCallingUserId();
 
             try {
-                final int userId = UserHandle.getCallingUserId();
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     if (service != null) {
                         ok = service.setAugmentedAutofillWhitelistLocked(packages, activities,
                                 getCallingUid());
@@ -1779,11 +1824,12 @@ public final class AutofillManagerService
         public void getAvailableFieldClassificationAlgorithms(@NonNull IResultReceiver receiver)
                 throws RemoteException {
             String[] algorithms = null;
+            final int userId = UserHandle.getCallingUserId();
 
             try {
-                final int userId = UserHandle.getCallingUserId();
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     if (service != null) {
                         algorithms = service
                             .getAvailableFieldClassificationAlgorithms(getCallingUid());
@@ -1806,12 +1852,12 @@ public final class AutofillManagerService
         public void getAutofillServiceComponentName(@NonNull IResultReceiver receiver)
                 throws RemoteException {
             ComponentName componentName = null;
+            final int userId = UserHandle.getCallingUserId();
 
             try {
-                final int userId = UserHandle.getCallingUserId();
-
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     if (service != null) {
                         componentName = service.getServiceComponentName();
                     } else if (sVerbose) {
@@ -1830,14 +1876,15 @@ public final class AutofillManagerService
                 @NonNull IBinder appCallback, @NonNull IResultReceiver receiver)
                 throws RemoteException {
             boolean restored = false;
+            final int userId = UserHandle.getCallingUserId();
 
             try {
                 Objects.requireNonNull(activityToken, "activityToken");
                 Objects.requireNonNull(appCallback, "appCallback");
 
-                final int userId = UserHandle.getCallingUserId();
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     if (service != null) {
                         restored = service.restoreSession(sessionId, getCallingUid(), activityToken,
                                 appCallback);
@@ -1857,7 +1904,8 @@ public final class AutofillManagerService
         public void updateSession(int sessionId, AutofillId autoFillId, Rect bounds,
                 AutofillValue value, int action, int flags, int userId) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
                     service.updateSessionLocked(sessionId, getCallingUid(), autoFillId, bounds,
                             value, action, flags);
@@ -1870,7 +1918,8 @@ public final class AutofillManagerService
         @Override
         public void setAutofillFailure(int sessionId, @NonNull List<AutofillId> ids, int userId) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
                     service.setAutofillFailureLocked(sessionId, getCallingUid(), ids);
                 } else if (sVerbose) {
@@ -1883,7 +1932,8 @@ public final class AutofillManagerService
         public void finishSession(int sessionId, int userId,
                 @AutofillCommitReason int commitReason) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
                     service.finishSessionLocked(sessionId, getCallingUid(), commitReason);
                 } else if (sVerbose) {
@@ -1895,19 +1945,22 @@ public final class AutofillManagerService
         @Override
         public void cancelSession(int sessionId, int userId) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
                     service.cancelSessionLocked(sessionId, getCallingUid());
                 } else if (sVerbose) {
                     Slog.v(TAG, "cancelSession(): no service for " + userId);
                 }
             }
+
         }
 
         @Override
         public void disableOwnedAutofillServices(int userId) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
                     service.disableOwnedAutofillServicesLocked(Binder.getCallingUid());
                 } else if (sVerbose) {
@@ -1939,7 +1992,8 @@ public final class AutofillManagerService
 
             try {
                 synchronized (mLock) {
-                    final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+                    final AutofillManagerServiceImpl service =
+                            peekServiceForUserWithLocalBinderIdentityLocked(userId);
                     enabled = Objects.equals(packageName, service.getServicePackageName());
                 }
             } catch (Exception ex) {
@@ -1957,8 +2011,9 @@ public final class AutofillManagerService
                     || operation == AutofillManager.PENDING_UI_OPERATION_RESTORE,
                     "invalid operation: %d", operation);
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(
-                        UserHandle.getCallingUserId());
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(
+                            UserHandle.getCallingUserId());
                 if (service != null) {
                     service.onPendingSaveUi(operation, token);
                 }
@@ -1973,7 +2028,7 @@ public final class AutofillManagerService
             boolean uiOnly = false;
             if (args != null) {
                 for (String arg : args) {
-                    switch(arg) {
+                    switch (arg) {
                         case "--no-history":
                             showHistory = false;
                             break;
@@ -2000,27 +2055,38 @@ public final class AutofillManagerService
             try {
                 sDebug = sVerbose = true;
                 synchronized (mLock) {
-                    pw.print("sDebug: "); pw.print(realDebug);
-                    pw.print(" sVerbose: "); pw.println(realVerbose);
+                    pw.print("sDebug: ");
+                    pw.print(realDebug);
+                    pw.print(" sVerbose: ");
+                    pw.println(realVerbose);
                     pw.print("Flags: ");
                     synchronized (mFlagLock) {
-                        pw.print("mPccClassificationEnabled="); pw.print(mPccClassificationEnabled);
+                        pw.print("mPccClassificationEnabled=");
+                        pw.print(mPccClassificationEnabled);
                         pw.print(";");
-                        pw.print("mPccPreferProviderOverPcc="); pw.print(mPccPreferProviderOverPcc);
+                        pw.print("mPccPreferProviderOverPcc=");
+                        pw.print(mPccPreferProviderOverPcc);
                         pw.print(";");
-                        pw.print("mPccUseFallbackDetection="); pw.print(mPccUseFallbackDetection);
+                        pw.print("mPccUseFallbackDetection=");
+                        pw.print(mPccUseFallbackDetection);
                         pw.print(";");
-                        pw.print("mPccProviderHints="); pw.println(mPccProviderHints);
+                        pw.print("mPccProviderHints=");
+                        pw.println(mPccProviderHints);
                     }
                     // Dump per-user services
                     dumpLocked("", pw);
-                    mAugmentedAutofillResolver.dumpShort(pw); pw.println();
-                    pw.print("Max partitions per session: "); pw.println(sPartitionMaxCount);
-                    pw.print("Max visible datasets: "); pw.println(sVisibleDatasetsMaxCount);
+                    mAugmentedAutofillResolver.dumpShort(pw);
+                    pw.println();
+                    pw.print("Max partitions per session: ");
+                    pw.println(sPartitionMaxCount);
+                    pw.print("Max visible datasets: ");
+                    pw.println(sVisibleDatasetsMaxCount);
                     if (sFullScreenMode != null) {
-                        pw.print("Overridden full-screen mode: "); pw.println(sFullScreenMode);
+                        pw.print("Overridden full-screen mode: ");
+                        pw.println(sFullScreenMode);
                     }
-                    pw.println("User data constraints: "); UserData.dumpConstraints(prefix, pw);
+                    pw.println("User data constraints: ");
+                    UserData.dumpConstraints(prefix, pw);
                     mUi.dump(pw);
                     pw.print("Autofill Compat State: ");
                     mAutofillCompatState.dump(prefix, pw);
@@ -2035,11 +2101,17 @@ public final class AutofillManagerService
                     pw.print("Augmented Service Request Timeout: ");
                     pw.println(mAugmentedServiceRequestTimeoutMs);
                     if (showHistory) {
-                        pw.println(); pw.println("Requests history:"); pw.println();
+                        pw.println();
+                        pw.println("Requests history:");
+                        pw.println();
                         mRequestsHistory.reverseDump(fd, pw, args);
-                        pw.println(); pw.println("UI latency history:"); pw.println();
+                        pw.println();
+                        pw.println("UI latency history:");
+                        pw.println();
                         mUiLatencyHistory.reverseDump(fd, pw, args);
-                        pw.println(); pw.println("WTF history:"); pw.println();
+                        pw.println();
+                        pw.println("WTF history:");
+                        pw.println();
                         mWtfHistory.reverseDump(fd, pw, args);
                     }
                     pw.println("Augmented Autofill State: ");
