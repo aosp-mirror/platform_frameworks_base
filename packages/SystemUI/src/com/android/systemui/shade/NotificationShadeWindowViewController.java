@@ -58,6 +58,7 @@ import com.android.systemui.log.BouncerLogger;
 import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
 import com.android.systemui.multishade.domain.interactor.MultiShadeMotionEventInteractor;
 import com.android.systemui.multishade.ui.view.MultiShadeView;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -113,6 +114,7 @@ public class NotificationShadeWindowViewController {
     private PhoneStatusBarViewController mStatusBarViewController;
     private final CentralSurfaces mService;
     private final BackActionInteractor mBackActionInteractor;
+    private final PowerInteractor mPowerInteractor;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
     private boolean mExpandingBelowNotch;
@@ -147,6 +149,7 @@ public class NotificationShadeWindowViewController {
             LockIconViewController lockIconViewController,
             CentralSurfaces centralSurfaces,
             BackActionInteractor backActionInteractor,
+            PowerInteractor powerInteractor,
             NotificationShadeWindowController controller,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -179,6 +182,7 @@ public class NotificationShadeWindowViewController {
         mBackActionInteractor = backActionInteractor;
         mLockIconViewController.init();
         mService = centralSurfaces;
+        mPowerInteractor = powerInteractor;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mAmbientState = ambientState;
@@ -311,8 +315,7 @@ public class NotificationShadeWindowViewController {
                         /* onGestureDetectedRunnable */
                         () -> {
                             mService.userActivity();
-                            mService.wakeUpIfDozing(
-                                    mClock.uptimeMillis(),
+                            mPowerInteractor.wakeUpIfDozing(
                                     "LOCK_ICON_TOUCH",
                                     PowerManager.WAKE_REASON_GESTURE);
                         }
