@@ -22,13 +22,14 @@ import android.content.Context;
 import android.os.UserManager;
 import android.provider.Settings;
 
+import com.android.settingslib.testutils.shadow.ShadowUserManager;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadow.api.Shadow;
-import org.robolectric.shadows.ShadowUserManager;
 
 @RunWith(RobolectricTestRunner.class)
 public class DevelopmentSettingsEnablerTest {

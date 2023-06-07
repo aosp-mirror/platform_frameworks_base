@@ -37,6 +37,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.LongSparseArray;
 
+import com.android.settingslib.testutils.shadow.ShadowPermissionChecker;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +47,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowPermissionChecker;
 
 import java.time.Clock;
 import java.util.ArrayList;
