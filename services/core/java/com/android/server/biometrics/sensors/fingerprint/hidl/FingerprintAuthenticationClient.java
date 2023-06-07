@@ -27,6 +27,7 @@ import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlay;
@@ -273,7 +274,7 @@ class FingerprintAuthenticationClient
     }
 
     @Override
-    public void onUiReady() {
+    public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event) {
         // Unsupported in HIDL.
     }
 }

@@ -669,14 +669,15 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public void onUiReady(long requestId, int sensorId) {
+    public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event, long requestId,
+            int sensorId) {
         mFingerprintSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(
                 requestId, (client) -> {
                     if (!(client instanceof Udfps)) {
-                        Slog.e(getTag(), "onUiReady received during client: " + client);
+                        Slog.e(getTag(), "onUdfpsUiEvent received during client: " + client);
                         return;
                     }
-                    ((Udfps) client).onUiReady();
+                    ((Udfps) client).onUdfpsUiEvent(event);
                 });
     }
 
