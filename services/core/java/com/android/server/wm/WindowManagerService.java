@@ -88,6 +88,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
@@ -3591,6 +3592,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setCurrentUser(@UserIdInt int newUserId) {
         synchronized (mGlobalLock) {
+            mAtmService.getTransitionController().requestTransitionIfNeeded(TRANSIT_OPEN, null);
             mCurrentUserId = newUserId;
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
