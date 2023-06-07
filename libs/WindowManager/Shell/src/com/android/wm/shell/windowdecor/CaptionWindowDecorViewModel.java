@@ -33,6 +33,8 @@ import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.Nullable;
+
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -254,7 +256,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
          * @return {@code true} if a drag is happening; or {@code false} if it is not
          */
         @Override
-        public boolean handleMotionEvent(MotionEvent e) {
+        public boolean handleMotionEvent(@Nullable View v, MotionEvent e) {
             final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             if (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
                 return false;

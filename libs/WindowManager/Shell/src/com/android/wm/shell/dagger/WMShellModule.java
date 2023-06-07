@@ -57,6 +57,7 @@ import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
@@ -690,6 +691,7 @@ public abstract class WMShellModule {
             Transitions transitions,
             EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
             ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
+            ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             LaunchAdjacentController launchAdjacentController,
             @ShellMainThread ShellExecutor mainExecutor
@@ -697,7 +699,8 @@ public abstract class WMShellModule {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 transitions, enterDesktopTransitionHandler, exitDesktopTransitionHandler,
-                desktopModeTaskRepository, launchAdjacentController, mainExecutor);
+                toggleResizeDesktopTaskTransitionHandler, desktopModeTaskRepository,
+                launchAdjacentController, mainExecutor);
     }
 
     @WMSingleton
@@ -705,6 +708,13 @@ public abstract class WMShellModule {
     static EnterDesktopTaskTransitionHandler provideEnterDesktopModeTaskTransitionHandler(
             Transitions transitions) {
         return new EnterDesktopTaskTransitionHandler(transitions);
+    }
+
+    @WMSingleton
+    @Provides
+    static ToggleResizeDesktopTaskTransitionHandler provideToggleResizeDesktopTaskTransitionHandler(
+            Transitions transitions) {
+        return new ToggleResizeDesktopTaskTransitionHandler(transitions);
     }
 
     @WMSingleton

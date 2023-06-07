@@ -55,7 +55,7 @@ class DragDetectorTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(eventHandler.handleMotionEvent(any())).thenReturn(true)
+        `when`(eventHandler.handleMotionEvent(any(), any())).thenReturn(true)
 
         dragDetector = DragDetector(eventHandler)
         dragDetector.setTouchSlop(SLOP)
@@ -72,13 +72,13 @@ class DragDetectorTest {
     @Test
     fun testNoMove_passesDownAndUp() {
         assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_DOWN)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_DOWN && it.x == X && it.y == Y &&
                     it.source == InputDevice.SOURCE_TOUCHSCREEN
         })
 
         assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_UP)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_UP && it.x == X && it.y == Y &&
                     it.source == InputDevice.SOURCE_TOUCHSCREEN
         })
@@ -86,12 +86,12 @@ class DragDetectorTest {
 
     @Test
     fun testMoveInSlop_touch_passesDownAndUp() {
-        `when`(eventHandler.handleMotionEvent(argThat {
+        `when`(eventHandler.handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_DOWN
         })).thenReturn(false)
 
         assertFalse(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_DOWN)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_DOWN && it.x == X && it.y == Y &&
                     it.source == InputDevice.SOURCE_TOUCHSCREEN
         })
@@ -99,12 +99,12 @@ class DragDetectorTest {
         val newX = X + SLOP - 1
         assertFalse(
                 dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_MOVE, newX, Y)))
-        verify(eventHandler, never()).handleMotionEvent(argThat {
+        verify(eventHandler, never()).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_MOVE
         })
 
         assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_UP, newX, Y)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_UP && it.x == newX && it.y == Y &&
                     it.source == InputDevice.SOURCE_TOUCHSCREEN
         })
@@ -112,13 +112,13 @@ class DragDetectorTest {
 
     @Test
     fun testMoveInSlop_mouse_passesDownMoveAndUp() {
-        `when`(eventHandler.handleMotionEvent(argThat {
+        `when`(eventHandler.handleMotionEvent(any(), argThat {
             it.action == MotionEvent.ACTION_DOWN
         })).thenReturn(false)
 
         assertFalse(dragDetector.onMotionEvent(
                 createMotionEvent(MotionEvent.ACTION_DOWN, isTouch = false)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_DOWN && it.x == X && it.y == Y &&
                     it.source == InputDevice.SOURCE_MOUSE
         })
@@ -126,14 +126,14 @@ class DragDetectorTest {
         val newX = X + SLOP - 1
         assertTrue(dragDetector.onMotionEvent(
                 createMotionEvent(MotionEvent.ACTION_MOVE, newX, Y, isTouch = false)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_MOVE && it.x == newX && it.y == Y &&
                     it.source == InputDevice.SOURCE_MOUSE
         })
 
         assertTrue(dragDetector.onMotionEvent(
                 createMotionEvent(MotionEvent.ACTION_UP, newX, Y, isTouch = false)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_UP && it.x == newX && it.y == Y &&
                     it.source == InputDevice.SOURCE_MOUSE
         })
@@ -141,25 +141,25 @@ class DragDetectorTest {
 
     @Test
     fun testMoveBeyondSlop_passesDownMoveAndUp() {
-        `when`(eventHandler.handleMotionEvent(argThat {
+        `when`(eventHandler.handleMotionEvent(any(), argThat {
             it.action == MotionEvent.ACTION_DOWN
         })).thenReturn(false)
 
         assertFalse(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_DOWN)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_DOWN && it.x == X && it.y == Y &&
                     it.source == InputDevice.SOURCE_TOUCHSCREEN
         })
 
         val newX = X + SLOP + 1
         assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_MOVE, newX, Y)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_MOVE && it.x == newX && it.y == Y &&
                     it.source == InputDevice.SOURCE_TOUCHSCREEN
         })
 
         assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_UP, newX, Y)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_UP && it.x == newX && it.y == Y &&
                     it.source == InputDevice.SOURCE_TOUCHSCREEN
         })
@@ -167,12 +167,12 @@ class DragDetectorTest {
 
     @Test
     fun testPassesHoverEnter() {
-        `when`(eventHandler.handleMotionEvent(argThat {
+        `when`(eventHandler.handleMotionEvent(any(), argThat {
             it.action == MotionEvent.ACTION_HOVER_ENTER
         })).thenReturn(false)
 
         assertFalse(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_HOVER_ENTER)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_HOVER_ENTER && it.x == X && it.y == Y
         })
     }
@@ -180,7 +180,7 @@ class DragDetectorTest {
     @Test
     fun testPassesHoverMove() {
         assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_HOVER_MOVE)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_HOVER_MOVE && it.x == X && it.y == Y
         })
     }
@@ -188,7 +188,7 @@ class DragDetectorTest {
     @Test
     fun testPassesHoverExit() {
         assertTrue(dragDetector.onMotionEvent(createMotionEvent(MotionEvent.ACTION_HOVER_EXIT)))
-        verify(eventHandler).handleMotionEvent(argThat {
+        verify(eventHandler).handleMotionEvent(any(), argThat {
             return@argThat it.action == MotionEvent.ACTION_HOVER_EXIT && it.x == X && it.y == Y
         })
     }

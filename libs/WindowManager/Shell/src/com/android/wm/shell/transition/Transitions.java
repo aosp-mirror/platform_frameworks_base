@@ -160,6 +160,10 @@ public class Transitions implements RemoteCallable<Transitions>,
     public static final int TRANSIT_CANCEL_ENTERING_DESKTOP_MODE =
             WindowManager.TRANSIT_FIRST_CUSTOM + 13;
 
+    /** Transition type to animate the toggle resize between the max and default desktop sizes. */
+    public static final int TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE =
+            WindowManager.TRANSIT_FIRST_CUSTOM + 14;
+
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
