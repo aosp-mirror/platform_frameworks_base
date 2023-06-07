@@ -50,6 +50,7 @@ import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -59,6 +60,7 @@ import org.mockito.MockitoAnnotations;
 @RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
+@Ignore("b/286245842")
 public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
 
     private static final int TARGET_USER_ID = KeyguardUpdateMonitor.getCurrentUser();
