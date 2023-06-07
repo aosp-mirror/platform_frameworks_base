@@ -24,7 +24,11 @@ import android.os.PowerManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -47,6 +51,8 @@ import org.mockito.MockitoAnnotations
 @RunWith(JUnit4::class)
 class PowerRepositoryImplTest : SysuiTestCase() {
 
+    private val systemClock = FakeSystemClock()
+
     @Mock private lateinit var manager: PowerManager
     @Mock private lateinit var dispatcher: BroadcastDispatcher
     @Captor private lateinit var receiverCaptor: ArgumentCaptor<BroadcastReceiver>
@@ -62,7 +68,13 @@ class PowerRepositoryImplTest : SysuiTestCase() {
         isInteractive = true
         whenever(manager.isInteractive).then { isInteractive }
 
-        underTest = PowerRepositoryImpl(manager = manager, dispatcher = dispatcher)
+        underTest =
+            PowerRepositoryImpl(
+                manager,
+                context.applicationContext,
+                systemClock,
+                dispatcher,
+            )
     }
 
     @Test
@@ -159,6 +171,27 @@ class PowerRepositoryImplTest : SysuiTestCase() {
             assertThat(values).isEqualTo(listOf(true, false, true, false))
             job.cancel()
         }
+
+    @Test
+    fun wakeUp_notifiesPowerManager() {
+        systemClock.setUptimeMillis(345000)
+
+        underTest.wakeUp("fakeWhy", PowerManager.WAKE_REASON_GESTURE)
+
+        val reasonCaptor = argumentCaptor<String>()
+        verify(manager)
+            .wakeUp(eq(345000L), eq(PowerManager.WAKE_REASON_GESTURE), capture(reasonCaptor))
+        assertThat(reasonCaptor.value).contains("fakeWhy")
+    }
+
+    @Test
+    fun wakeUp_usesApplicationPackageName() {
+        underTest.wakeUp("fakeWhy", PowerManager.WAKE_REASON_GESTURE)
+
+        val reasonCaptor = argumentCaptor<String>()
+        verify(manager).wakeUp(any(), any(), capture(reasonCaptor))
+        assertThat(reasonCaptor.value).contains(context.applicationContext.packageName)
+    }
 
     private fun verifyRegistered() {
         // We must verify with all arguments, even those that are optional because they have default

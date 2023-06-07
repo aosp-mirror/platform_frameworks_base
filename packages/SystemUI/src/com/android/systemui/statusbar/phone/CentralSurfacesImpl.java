@@ -136,6 +136,7 @@ import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenu
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthRippleController;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.charging.WiredChargingRippleController;
@@ -157,7 +158,6 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -1587,10 +1587,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     /**
      * Ask the display to wake up if currently dozing, else do nothing
      *
+     * @deprecated Use {@link PowerInteractor#wakeUpIfDozing(String, int)} instead.
+     *
      * @param time when to wake up
      * @param why the reason for the wake up
      */
     @Override
+    @Deprecated
     public void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason) {
         if (mDozing && mScreenOffAnimationController.allowWakeUpIfDozing()) {
             mPowerManager.wakeUp(
