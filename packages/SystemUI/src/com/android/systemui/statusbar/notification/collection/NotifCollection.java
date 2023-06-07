@@ -274,10 +274,6 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         Assert.isMainThread();
         checkForReentrantCall();
 
-        // TODO (b/206842750): This method is called from (silent) clear all and non-clear all
-        // contexts and should be checking the NO_CLEAR flag, rather than depending on NSSL
-        // to pass in a properly filtered list of notifications
-
         final List<NotificationEntry> entriesToLocallyDismiss = new ArrayList<>();
         for (int i = 0; i < entriesToDismiss.size(); i++) {
             NotificationEntry entry = entriesToDismiss.get(i).first;
