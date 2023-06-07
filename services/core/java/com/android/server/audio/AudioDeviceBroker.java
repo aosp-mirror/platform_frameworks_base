@@ -2214,6 +2214,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 mDeviceInventory.removePreferredDevicesForStrategyInt(mAccessibilityStrategyId);
             }
             mDeviceInventory.applyConnectedDevicesRoles();
+            mDeviceInventory.reapplyExternalDevicesRoles();
         } else {
             mDeviceInventory.setPreferredDevicesForStrategyInt(
                     mCommunicationStrategyId, Arrays.asList(preferredCommunicationDevice));
