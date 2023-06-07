@@ -720,9 +720,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
         if (a != null) {
             if (!a.isInitialized()) {
-                final int width = endBounds.width();
-                final int height = endBounds.height();
-                a.initialize(width, height, width, height);
+                final Rect animationRange = TransitionUtil.isClosingType(changeMode)
+                        ? change.getStartAbsBounds() : change.getEndAbsBounds();
+                a.initialize(animationRange.width(), animationRange.height(),
+                        endBounds.width(), endBounds.height());
             }
             a.restrictDuration(MAX_ANIMATION_DURATION);
             a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
