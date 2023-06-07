@@ -598,7 +598,7 @@ object Flags {
 
     // 1300 - screenshots
     // TODO(b/264916608): Tracking Bug
-    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata", teamfood = true)
+    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
 
     // TODO(b/266955521): Tracking bug
     @JvmField val SCREENSHOT_DETECTION = releasedFlag(1303, "screenshot_detection")
