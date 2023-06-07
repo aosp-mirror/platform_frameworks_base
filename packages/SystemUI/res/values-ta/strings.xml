@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"உறுதிப்படுத்தப்பட்டது"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்துக\' என்பதை தட்டவும்"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"முகம் மூலம் அன்லாக் செய்யப்பட்டது."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"முகம் மூலம் அன்லாக் செய்யப்பட்டது. தொடர அழுத்தவும்."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"முகம் அங்கீகரிக்கப்பட்டது. தொடர அழுத்தவும்."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"முகம் அங்கீகரிக்கப்பட்டது. தொடர அன்லாக் ஐகானை அழுத்தவும்."</string>
@@ -243,7 +244,8 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ஆடியோ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ஹெட்செட்"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"உள்ளீடு"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"செவித்துணை கருவிகள்"</string>
+    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (5553051568867097111) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ஆன் செய்கிறது…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"தானாகச் சுழற்று"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"திரையைத் தானாகச் சுழற்று"</string>
@@ -1004,7 +1006,8 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"சேமிக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"சேமிக்க முடியவில்லை."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"குறைந்தது 4 எழுத்துகளைப் பயன்படுத்துங்கள்"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"16 எழுத்துகளுக்குக் குறைவாகப் பயன்படுத்துங்கள்"</string>
+    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"பதிப்பு எண்"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"பதிப்பு எண் கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது."</string>
     <string name="basic_status" msgid="2315371112182658176">"திறந்தநிலை உரையாடல்"</string>
@@ -1108,10 +1111,8 @@
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant கேட்டுக்கொண்டிருக்கிறது"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# அறிவிப்பு}other{# அறிவிப்புகள்}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (230135078402003532) -->
-    <skip />
-    <!-- no translation found for note_task_shortcut_long_label (7729325091147319409) -->
-    <skip />
+    <string name="note_task_button_label" msgid="230135078402003532">"குறிப்பெடுத்தல்"</string>
+    <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"குறிப்பெடுத்தல், <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ஒலிபரப்புதல்"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் ஒலிபரப்பப்படுவதை நிறுத்தவா?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"நீங்கள் <xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பினாலோ அவுட்புட்டை மாற்றினாலோ உங்களின் தற்போதைய ஒலிபரப்பு நிறுத்தப்படும்"</string>

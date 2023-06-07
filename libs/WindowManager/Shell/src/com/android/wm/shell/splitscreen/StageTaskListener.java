@@ -51,8 +51,10 @@ import com.android.wm.shell.common.SurfaceUtils;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -87,6 +89,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     private final SurfaceSession mSurfaceSession;
     private final SyncTransactionQueue mSyncQueue;
     private final IconProvider mIconProvider;
+    private final Optional<WindowDecorViewModel> mWindowDecorViewModel;
 
     protected ActivityManager.RunningTaskInfo mRootTaskInfo;
     protected SurfaceControl mRootLeash;
@@ -98,12 +101,14 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     StageTaskListener(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider) {
+            SurfaceSession surfaceSession, IconProvider iconProvider,
+            Optional<WindowDecorViewModel> windowDecorViewModel) {
         mContext = context;
         mCallbacks = callbacks;
         mSyncQueue = syncQueue;
         mSurfaceSession = surfaceSession;
         mIconProvider = iconProvider;
+        mWindowDecorViewModel = windowDecorViewModel;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
 
@@ -200,6 +205,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        mWindowDecorViewModel.ifPresent(viewModel -> viewModel.onTaskInfoChanged(taskInfo));
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             // Inflates split decor view only when the root task is visible.
             if (!ENABLE_SHELL_TRANSITIONS && mRootTaskInfo.isVisible != taskInfo.isVisible) {

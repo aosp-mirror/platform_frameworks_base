@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ಪೂರ್ಣಗೊಳಿಸಲು ದೃಢೀಕರಿಸಿ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"ಮುಖವನ್ನು ಬಳಸಿ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ಮುಖವನ್ನು ಬಳಸಿ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಅನ್‌ಲಾಕ್ ಐಕಾನ್ ಅನ್ನು ಒತ್ತಿ."</string>
@@ -243,7 +244,8 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ಆಡಿಯೋ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ಹೆಡ್‌ಸೆಟ್"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"ಇನ್‌ಪುಟ್"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"ಶ್ರವಣ ಸಾಧನಗಳು"</string>
+    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (5553051568867097111) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ಆನ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ಸ್ವಯಂ-ತಿರುಗುವಿಕೆ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ಪರದೆಯನ್ನು ಸ್ವಯಂ-ತಿರುಗಿಸಿ"</string>
@@ -1004,7 +1006,8 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"ಕನಿಷ್ಠ 4 ಅಕ್ಷರಗಳನ್ನು ಬಳಸಿ"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"16 ಕ್ಕಿಂತ ಕಡಿಮೆ ಅಕ್ಷರಗಳನ್ನು ಬಳಸಿ"</string>
+    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ಬಿಲ್ಡ್ ಸಂಖ್ಯೆ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ಬಿಲ್ಡ್ ಸಂಖ್ಯೆಯನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ ನಕಲಿಸಲಾಗಿದೆ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ಸಂಭಾಷಣೆಯನ್ನು ತೆರೆಯಿರಿ"</string>
@@ -1108,10 +1111,8 @@
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"ಅಸಿಸ್ಟೆಂಟ್ ಆಲಿಸುತ್ತಿದೆ"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ನೋಟಿಫಿಕೇಶನ್}one{# ನೋಟಿಫಿಕೇಶನ್‌ಗಳು}other{# ನೋಟಿಫಿಕೇಶನ್‌ಗಳು}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (230135078402003532) -->
-    <skip />
-    <!-- no translation found for note_task_shortcut_long_label (7729325091147319409) -->
-    <skip />
+    <string name="note_task_button_label" msgid="230135078402003532">"ಟಿಪ್ಪಣಿ ಮಾಡಿಕೊಳ್ಳುವಿಕೆ"</string>
+    <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"ಟಿಪ್ಪಣಿ ಮಾಡಿಕೊಳ್ಳುವಿಕೆ, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ಪ್ರಸಾರ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಪ್ರಸಾರವನ್ನು ನಿಲ್ಲಿಸಬೇಕೆ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"ನೀವು <xliff:g id="SWITCHAPP">%1$s</xliff:g> ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿದರೆ ಅಥವಾ ಔಟ್‌ಪುಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿದರೆ, ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಪ್ರಸಾರವು ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ"</string>

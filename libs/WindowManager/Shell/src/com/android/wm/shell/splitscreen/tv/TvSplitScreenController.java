@@ -86,7 +86,8 @@ public class TvSplitScreenController extends SplitScreenController {
         super(context, shellInit, shellCommandHandler, shellController, shellTaskOrganizer,
                 syncQueue, rootTDAOrganizer, displayController, displayImeController,
                 displayInsetsController, dragAndDropController, transitions, transactionPool,
-                iconProvider, recentTasks, launchAdjacentController, mainExecutor);
+                iconProvider, recentTasks, launchAdjacentController, Optional.empty(),
+                mainExecutor);
 
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;

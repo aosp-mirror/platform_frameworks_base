@@ -22,6 +22,7 @@ import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 /**
  * The interface used by some {@link com.android.wm.shell.ShellTaskOrganizer.TaskListener} to help
@@ -37,6 +38,11 @@ public interface WindowDecorViewModel {
      * @param transitionStarter the transition starter that starts freeform task transitions
      */
     void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter);
+
+    /**
+     * Sets the {@link SplitScreenController} if available.
+     */
+    void setSplitScreenController(SplitScreenController splitScreenController);
 
     /**
      * Creates a window decoration for the given task. Can be {@code null} for Fullscreen tasks but

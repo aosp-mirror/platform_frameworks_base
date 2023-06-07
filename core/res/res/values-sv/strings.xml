@@ -1715,7 +1715,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Färgkorrigering"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enhandsläge"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extradimmat"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörapparater"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörhjälpmedel"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har aktiverats."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har inaktiverats."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Släpp volymknapparna. Du kan aktivera <xliff:g id="SERVICE_NAME">%1$s</xliff:g> genom att hålla båda volymknapparna nedtryckta i tre sekunder igen."</string>
