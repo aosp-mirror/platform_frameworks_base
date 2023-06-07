@@ -296,10 +296,8 @@ public class MeasuredText {
             Preconditions.checkArgument(length > 0, "length can not be negative");
             final int end = mCurrentOffset + length;
             Preconditions.checkArgument(end <= mText.length, "Style exceeds the text length");
-            int lbStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakStyle() :
-                    LineBreakConfig.LINE_BREAK_STYLE_NONE;
-            int lbWordStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakWordStyle() :
-                    LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
+            int lbStyle = LineBreakConfig.getResolvedLineBreakStyle(lineBreakConfig);
+            int lbWordStyle = LineBreakConfig.getResolvedLineBreakWordStyle(lineBreakConfig);
             nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle,
                     mCurrentOffset, end, isRtl);
             mCurrentOffset = end;

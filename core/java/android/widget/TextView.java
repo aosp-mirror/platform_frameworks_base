@@ -5132,8 +5132,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mBreakStrategy = params.getBreakStrategy();
         mHyphenationFrequency = params.getHyphenationFrequency();
         LineBreakConfig lineBreakConfig = params.getLineBreakConfig();
-        mLineBreakStyle = lineBreakConfig.getLineBreakStyle();
-        mLineBreakWordStyle = lineBreakConfig.getLineBreakWordStyle();
+        mLineBreakStyle = LineBreakConfig.getResolvedLineBreakStyle(lineBreakConfig);
+        mLineBreakWordStyle = LineBreakConfig.getResolvedLineBreakWordStyle(lineBreakConfig);
         mUserSpeficiedLineBreakwordStyle = true;
         if (mLayout != null) {
             nullLayouts();

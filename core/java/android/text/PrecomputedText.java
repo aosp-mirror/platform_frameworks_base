@@ -329,22 +329,17 @@ public class PrecomputedText implements Spannable {
         @Override
         public int hashCode() {
             // TODO: implement MinikinPaint::hashCode and use it to keep consistency with equals.
-            int lineBreakStyle = (mLineBreakConfig != null)
-                    ? mLineBreakConfig.getLineBreakStyle() : LineBreakConfig.LINE_BREAK_STYLE_NONE;
             return Objects.hash(mPaint.getTextSize(), mPaint.getTextScaleX(), mPaint.getTextSkewX(),
                     mPaint.getLetterSpacing(), mPaint.getWordSpacing(), mPaint.getFlags(),
                     mPaint.getTextLocales(), mPaint.getTypeface(),
                     mPaint.getFontVariationSettings(), mPaint.isElegantTextHeight(), mTextDir,
-                    mBreakStrategy, mHyphenationFrequency, lineBreakStyle);
+                    mBreakStrategy, mHyphenationFrequency,
+                    LineBreakConfig.getResolvedLineBreakStyle(mLineBreakConfig),
+                    LineBreakConfig.getResolvedLineBreakWordStyle(mLineBreakConfig));
         }
 
         @Override
         public String toString() {
-            int lineBreakStyle = (mLineBreakConfig != null)
-                    ? mLineBreakConfig.getLineBreakStyle() : LineBreakConfig.LINE_BREAK_STYLE_NONE;
-            int lineBreakWordStyle = (mLineBreakConfig != null)
-                    ? mLineBreakConfig.getLineBreakWordStyle()
-                            : LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
             return "{"
                 + "textSize=" + mPaint.getTextSize()
                 + ", textScaleX=" + mPaint.getTextScaleX()
@@ -357,8 +352,9 @@ public class PrecomputedText implements Spannable {
                 + ", textDir=" + mTextDir
                 + ", breakStrategy=" + mBreakStrategy
                 + ", hyphenationFrequency=" + mHyphenationFrequency
-                + ", lineBreakStyle=" + lineBreakStyle
-                + ", lineBreakWordStyle=" + lineBreakWordStyle
+                + ", lineBreakStyle=" + LineBreakConfig.getResolvedLineBreakStyle(mLineBreakConfig)
+                + ", lineBreakWordStyle="
+                    + LineBreakConfig.getResolvedLineBreakWordStyle(mLineBreakConfig)
                 + "}";
         }
     };

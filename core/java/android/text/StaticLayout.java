@@ -448,7 +448,7 @@ public class StaticLayout extends Layout {
 
         private void reviseLineBreakConfig() {
             boolean autoPhraseBreaking = mLineBreakConfig.getAutoPhraseBreaking();
-            int wordStyle = mLineBreakConfig.getLineBreakWordStyle();
+            int wordStyle = LineBreakConfig.getResolvedLineBreakWordStyle(mLineBreakConfig);
             if (autoPhraseBreaking) {
                 if (wordStyle != LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE) {
                     if (shouldEnablePhraseBreaking()) {
