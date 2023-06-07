@@ -1417,6 +1417,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
 
+            synchronized (mLock) {
+                saveSettingsLocked(mNewWallpaper.userId);
+            }
+
             if (DEBUG) {
                 Slog.v(TAG, "--- wallpaper changed --");
                 Slog.v(TAG, "new sysWp: " + mWallpaperMap.get(mCurrentUserId));
