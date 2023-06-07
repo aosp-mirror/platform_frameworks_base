@@ -190,7 +190,9 @@ enum class ClockTickRate(val value: Int) {
 data class ClockMetadata(
     val clockId: ClockId,
     val name: String,
-)
+) {
+    constructor(clockId: ClockId) : this(clockId, clockId) {}
+}
 
 /** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
 data class ClockConfig(
