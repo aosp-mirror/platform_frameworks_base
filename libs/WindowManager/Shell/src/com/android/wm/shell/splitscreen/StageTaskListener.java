@@ -127,7 +127,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
      * Returns the top visible child task's id.
      */
     int getTopVisibleChildTaskId() {
-        final ActivityManager.RunningTaskInfo taskInfo = getChildTaskInfo(t -> t.isVisible);
+        final ActivityManager.RunningTaskInfo taskInfo = getChildTaskInfo(t -> t.isVisible
+                && t.isVisibleRequested);
         return taskInfo != null ? taskInfo.taskId : INVALID_TASK_ID;
     }
 
@@ -183,7 +184,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             final int taskId = taskInfo.taskId;
             mChildrenLeashes.put(taskId, leash);
             mChildrenTaskInfo.put(taskId, taskInfo);
-            mCallbacks.onChildTaskStatusChanged(taskId, true /* present */, taskInfo.isVisible);
+            mCallbacks.onChildTaskStatusChanged(taskId, true /* present */,
+                    taskInfo.isVisible && taskInfo.isVisibleRequested);
             if (ENABLE_SHELL_TRANSITIONS) {
                 // Status is managed/synchronized by the transition lifecycle.
                 return;
@@ -223,7 +225,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             }
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
             mCallbacks.onChildTaskStatusChanged(taskInfo.taskId, true /* present */,
-                    taskInfo.isVisible);
+                    taskInfo.isVisible && taskInfo.isVisibleRequested);
             if (!ENABLE_SHELL_TRANSITIONS) {
                 updateChildTaskSurface(
                         taskInfo, mChildrenLeashes.get(taskInfo.taskId), false /* firstAppeared */);
