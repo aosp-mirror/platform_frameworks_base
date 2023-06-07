@@ -623,7 +623,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         expect.that(after.longVersionCode).isEqualTo(38654705667)
         expect.that(after.requestedPermissions)
             .containsExactlyElementsIn(after.usesPermissions.map { it.name })
-            .inOrder()
 
         expect.that(after.mimeGroups).containsExactly(
             "TestActivityName/mimeGroup",

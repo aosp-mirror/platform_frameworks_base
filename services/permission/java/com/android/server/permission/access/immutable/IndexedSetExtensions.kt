@@ -80,6 +80,6 @@ inline operator fun <T> MutableIndexedSet<T>.plusAssign(element: T) {
     add(element)
 }
 
-operator fun <T> MutableIndexedSet<T>.plusAssign(list: List<T>) {
-    list.forEachIndexed { _, it -> this += it }
+operator fun <T> MutableIndexedSet<T>.plusAssign(collection: Collection<T>) {
+    collection.forEach { this += it }
 }

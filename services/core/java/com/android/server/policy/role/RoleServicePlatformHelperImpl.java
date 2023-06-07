@@ -57,7 +57,6 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -314,11 +313,10 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
                 dataOutputStream.writeInt(packageManagerInternal.getApplicationEnabledState(
                         pkg.getPackageName(), userId));
 
-                final List<String> requestedPermissions = pkg.getRequestedPermissions();
-                final int requestedPermissionsSize = requestedPermissions.size();
-                dataOutputStream.writeInt(requestedPermissionsSize);
-                for (int i = 0; i < requestedPermissionsSize; i++) {
-                    dataOutputStream.writeUTF(requestedPermissions.get(i));
+                final Set<String> requestedPermissions = pkg.getRequestedPermissions();
+                dataOutputStream.writeInt(requestedPermissions.size());
+                for (String permissionName : requestedPermissions) {
+                    dataOutputStream.writeUTF(permissionName);
                 }
 
                 final ArraySet<String> enabledComponents =
