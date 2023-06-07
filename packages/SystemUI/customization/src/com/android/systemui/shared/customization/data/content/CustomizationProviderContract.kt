@@ -81,7 +81,6 @@ object CustomizationProviderContract {
             const val TABLE_NAME = "affordances"
             val URI: Uri =
                 LOCK_SCREEN_QUICK_AFFORDANCE_BASE_URI.buildUpon().appendPath(TABLE_NAME).build()
-            const val ENABLEMENT_INSTRUCTIONS_DELIMITER = "]["
 
             object Columns {
                 /** String. Unique ID for this affordance. */
@@ -96,11 +95,10 @@ object CustomizationProviderContract {
                 /** Integer. `1` if the affordance is enabled or `0` if it disabled. */
                 const val IS_ENABLED = "is_enabled"
                 /**
-                 * String. List of strings, delimited by [ENABLEMENT_INSTRUCTIONS_DELIMITER] to be
-                 * shown to the user if the affordance is disabled and the user selects the
-                 * affordance.
+                 * String. Text to be shown to the user if the affordance is disabled and the user
+                 * selects the affordance.
                  */
-                const val ENABLEMENT_INSTRUCTIONS = "enablement_instructions"
+                const val ENABLEMENT_EXPLANATION = "enablement_explanation"
                 /**
                  * String. Optional label for a button that, when clicked, opens a destination
                  * activity where the user can re-enable the disabled affordance.
