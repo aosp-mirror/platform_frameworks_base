@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Лице је потврђено"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Потврђено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Додирните Потврди да бисте завршили"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"Откључано је лицем."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Откључано је лицем. Притисните да бисте наставили."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лице је препознато. Притисните да бисте наставили."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лице препознато. Притисните икону откључавања за наставак."</string>
@@ -1003,7 +1004,8 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Чување није успело. Пробајте поново."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Чување није успело."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Користите бар 4 знака"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Користите мање од 16 знакова"</string>
+    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Број верзије"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Број верзије је копиран у привремену меморију."</string>
     <string name="basic_status" msgid="2315371112182658176">"Отворите конверзацију"</string>

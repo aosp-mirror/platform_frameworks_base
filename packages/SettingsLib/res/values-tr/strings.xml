@@ -545,12 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Az önce"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Bu telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Bu tablet"</string>
-    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
-    <skip />
-    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
-    <skip />
-    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
-    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Yuva hoparlörü"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Harici Cihaz"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Bağlı cihaz"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Bu telefon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Bu cihazda oynatılamıyor"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Geçiş yapmak için hesabı yükseltin"</string>

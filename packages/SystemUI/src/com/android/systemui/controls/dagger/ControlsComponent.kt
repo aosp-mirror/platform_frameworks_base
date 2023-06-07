@@ -29,9 +29,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
-import kotlinx.coroutines.flow.StateFlow
 import java.util.Optional
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Pseudo-component to inject into classes outside `com.android.systemui.controls`.
@@ -40,26 +40,26 @@ import javax.inject.Inject
  * instantiated if `featureEnabled` is true. Can also be queried for the availability of controls.
  */
 @SysUISingleton
-class ControlsComponent @Inject constructor(
-        @ControlsFeatureEnabled private val featureEnabled: Boolean,
-        private val context: Context,
-        private val lazyControlsController: Lazy<ControlsController>,
-        private val lazyControlsUiController: Lazy<ControlsUiController>,
-        private val lazyControlsListingController: Lazy<ControlsListingController>,
-        private val lockPatternUtils: LockPatternUtils,
-        private val keyguardStateController: KeyguardStateController,
-        private val userTracker: UserTracker,
-        controlsSettingsRepository: ControlsSettingsRepository,
-        optionalControlsTileResourceConfiguration: Optional<ControlsTileResourceConfiguration>
+class ControlsComponent
+@Inject
+constructor(
+    @ControlsFeatureEnabled private val featureEnabled: Boolean,
+    private val context: Context,
+    private val lazyControlsController: Lazy<ControlsController>,
+    private val lazyControlsUiController: Lazy<ControlsUiController>,
+    private val lazyControlsListingController: Lazy<ControlsListingController>,
+    private val lockPatternUtils: LockPatternUtils,
+    private val keyguardStateController: KeyguardStateController,
+    private val userTracker: UserTracker,
+    controlsSettingsRepository: ControlsSettingsRepository,
+    optionalControlsTileResourceConfiguration: Optional<ControlsTileResourceConfiguration>
 ) {
 
     val canShowWhileLockedSetting: StateFlow<Boolean> =
-            controlsSettingsRepository.canShowControlsInLockscreen
+        controlsSettingsRepository.canShowControlsInLockscreen
 
     private val controlsTileResourceConfiguration: ControlsTileResourceConfiguration =
-        optionalControlsTileResourceConfiguration.orElse(
-            ControlsTileResourceConfigurationImpl()
-        )
+        optionalControlsTileResourceConfiguration.orElse(ControlsTileResourceConfigurationImpl())
 
     fun getControlsController(): Optional<ControlsController> {
         return if (featureEnabled) Optional.of(lazyControlsController.get()) else Optional.empty()
@@ -77,9 +77,7 @@ class ControlsComponent @Inject constructor(
         }
     }
 
-    /**
-     * @return true if controls are feature-enabled and the user has the setting enabled
-     */
+    /** @return true if controls are feature-enabled and the user has the setting enabled */
     fun isEnabled() = featureEnabled
 
     /**
@@ -90,8 +88,10 @@ class ControlsComponent @Inject constructor(
      */
     fun getVisibility(): Visibility {
         if (!isEnabled()) return Visibility.UNAVAILABLE
-        if (lockPatternUtils.getStrongAuthForUser(userTracker.userHandle.identifier)
-                == STRONG_AUTH_REQUIRED_AFTER_BOOT) {
+        if (
+            lockPatternUtils.getStrongAuthForUser(userTracker.userHandle.identifier) ==
+                STRONG_AUTH_REQUIRED_AFTER_BOOT
+        ) {
             return Visibility.AVAILABLE_AFTER_UNLOCK
         }
         if (!canShowWhileLockedSetting.value && !keyguardStateController.isUnlocked()) {
@@ -102,7 +102,13 @@ class ControlsComponent @Inject constructor(
     }
 
     enum class Visibility {
-        AVAILABLE, AVAILABLE_AFTER_UNLOCK, UNAVAILABLE
+        AVAILABLE,
+        AVAILABLE_AFTER_UNLOCK,
+        UNAVAILABLE
+    }
+
+    fun getPackageName(): String? {
+        return controlsTileResourceConfiguration.getPackageName()
     }
 
     fun getTileTitleId(): Int {
