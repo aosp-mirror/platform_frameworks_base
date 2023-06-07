@@ -1110,6 +1110,10 @@ public final class ActivityThread extends ClientTransactionHandler
             s.token = token;
             s.info = info;
 
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleCreateService. token="
+                        + token);
+            }
             sendMessage(H.CREATE_SERVICE, s);
         }
 
@@ -1125,6 +1129,11 @@ public final class ActivityThread extends ClientTransactionHandler
             if (DEBUG_SERVICE)
                 Slog.v(TAG, "scheduleBindService token=" + token + " intent=" + intent + " uid="
                         + Binder.getCallingUid() + " pid=" + Binder.getCallingPid());
+
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleBindService. token="
+                        + token + " bindSeq=" + bindSeq);
+            }
             sendMessage(H.BIND_SERVICE, s);
         }
 
@@ -1134,6 +1143,10 @@ public final class ActivityThread extends ClientTransactionHandler
             s.intent = intent;
             s.bindSeq = -1;
 
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleUnbindService. token="
+                        + token);
+            }
             sendMessage(H.UNBIND_SERVICE, s);
         }
 
@@ -1149,16 +1162,28 @@ public final class ActivityThread extends ClientTransactionHandler
                 s.flags = ssa.flags;
                 s.args = ssa.args;
 
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                    Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleServiceArgs. token="
+                            + token + " startId=" + s.startId);
+                }
                 sendMessage(H.SERVICE_ARGS, s);
             }
         }
 
         public final void scheduleStopService(IBinder token) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleStopService. token="
+                        + token);
+            }
             sendMessage(H.STOP_SERVICE, token);
         }
 
         @Override
         public final void scheduleTimeoutService(IBinder token, int startId) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleTimeoutService. token="
+                        + token);
+            }
             sendMessage(H.TIMEOUT_SERVICE, token, startId);
         }
 
