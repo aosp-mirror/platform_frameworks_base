@@ -66,7 +66,6 @@ import android.system.StructStat;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
@@ -2507,7 +2506,6 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
-    @FlakyTest(bugId = 283797480)
     public void testCheckSignaturesRotatedAgainstRotated() throws Exception {
         // checkSignatures should be successful when both apps have been signed with the same
         // rotated key since the initial signature comparison between the two apps should
