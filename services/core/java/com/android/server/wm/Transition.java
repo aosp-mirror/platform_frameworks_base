@@ -2244,11 +2244,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             WindowContainer<?> ancestor = findCommonAncestor(sortedTargets, wc);
 
             // Make leash based on highest (z-order) direct child of ancestor with a participant.
+            // Check whether the ancestor is belonged to last parent, shouldn't happen.
+            final boolean hasReparent = !wc.isDescendantOf(ancestor);
             WindowContainer leashReference = wc;
-            while (leashReference.getParent() != ancestor) {
-                leashReference = leashReference.getParent();
+            if (hasReparent) {
+                Slog.e(TAG, "Did not find common ancestor! Ancestor= " + ancestor
+                        + " target= " + wc);
+            } else {
+                while (leashReference.getParent() != ancestor) {
+                    leashReference = leashReference.getParent();
+                }
             }
-
             final SurfaceControl rootLeash = leashReference.makeAnimationLeash().setName(
                     "Transition Root: " + leashReference.getName()).build();
             rootLeash.setUnreleasedWarningCallSite("Transition.calculateTransitionRoots");
@@ -2452,6 +2458,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (isWallpaper(wc) || getDisplayId(wc) != displayId) {
                 // Skip the non-app window or windows on a different display
                 continue;
+            }
+            // Re-initiate the last parent as the initial ancestor instead of the top target.
+            // When move a leaf task from organized task to display area, try to keep the transition
+            // root be the original organized task for close transition animation.
+            // Otherwise, shell will use wrong root layer to play animation.
+            // Note: Since the target is sorted, so only need to do this at the lowest target.
+            if (change.mStartParent != null && wc.getParent() != null
+                    && change.mStartParent.isAttached() && wc.getParent() != change.mStartParent
+                    && i == targets.size() - 1) {
+                final int transitionMode = change.getTransitMode(wc);
+                if (transitionMode == TRANSIT_CLOSE || transitionMode == TRANSIT_TO_BACK) {
+                    ancestor = change.mStartParent;
+                    continue;
+                }
             }
             while (!wc.isDescendantOf(ancestor)) {
                 ancestor = ancestor.getParent();
