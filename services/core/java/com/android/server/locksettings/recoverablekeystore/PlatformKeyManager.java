@@ -166,6 +166,7 @@ public class PlatformKeyManager {
      * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never happen.
      * @throws KeyStoreException if there is an error in AndroidKeyStore.
+     * @throws InsecureUserException if the user does not have a lock screen set.
      * @throws IOException if there was an issue with local database update.
      * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      *
@@ -174,7 +175,7 @@ public class PlatformKeyManager {
     @VisibleForTesting
     void regenerate(int userId)
             throws NoSuchAlgorithmException, KeyStoreException, IOException,
-                    RemoteException {
+                    RemoteException, InsecureUserException {
         int generationId = getGenerationId(userId);
         int nextId;
         if (generationId == -1) {
@@ -195,13 +196,14 @@ public class PlatformKeyManager {
      * @throws UnrecoverableKeyException if the key could not be recovered.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
      * @throws IOException if there was an issue with local database update.
+     * @throws InsecureUserException if the user does not have a lock screen set.
      * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      *
      * @hide
      */
     public PlatformEncryptionKey getEncryptKey(int userId)
             throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException,
-                    IOException, RemoteException {
+                    IOException, RemoteException, InsecureUserException {
         init(userId);
         try {
             // Try to see if the decryption key is still accessible before using the encryption key.
@@ -254,7 +256,7 @@ public class PlatformKeyManager {
      */
     public PlatformDecryptionKey getDecryptKey(int userId)
             throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException,
-                    IOException, RemoteException {
+                    IOException, InsecureUserException, RemoteException {
         init(userId);
         try {
             PlatformDecryptionKey decryptionKey = getDecryptKeyInternal(userId);
@@ -328,7 +330,7 @@ public class PlatformKeyManager {
      */
     void init(int userId)
             throws KeyStoreException, NoSuchAlgorithmException, IOException,
-                    RemoteException {
+                    RemoteException, InsecureUserException {
         int generationId = getGenerationId(userId);
         if (isKeyLoaded(userId, generationId)) {
             Log.i(TAG, String.format(
@@ -414,7 +416,8 @@ public class PlatformKeyManager {
      * @throws RemoteException if there was an issue communicating with {@link IGateKeeperService}.
      */
     private void generateAndLoadKey(int userId, int generationId)
-            throws NoSuchAlgorithmException, KeyStoreException, IOException, RemoteException {
+            throws NoSuchAlgorithmException, KeyStoreException, IOException, RemoteException,
+                InsecureUserException {
         String encryptAlias = getEncryptAlias(userId, generationId);
         String decryptAlias = getDecryptAlias(userId, generationId);
         // SecretKey implementation doesn't provide reliable way to destroy the secret
@@ -427,23 +430,31 @@ public class PlatformKeyManager {
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE);
         // Skip UserAuthenticationRequired for main user
         if (userId ==  UserHandle.USER_SYSTEM) {
+            // attempt to store key will fail if screenlock is not set.
             decryptionKeyProtection.setUnlockedDeviceRequired(true);
         } else {
             // Don't set protection params to prevent losing key.
         }
         // Store decryption key first since it is more likely to fail.
-        mKeyStore.setEntry(
-                decryptAlias,
-                new KeyStore.SecretKeyEntry(secretKey),
-                decryptionKeyProtection.build());
-        mKeyStore.setEntry(
-                encryptAlias,
-                new KeyStore.SecretKeyEntry(secretKey),
-                new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT)
-                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                    .build());
-
+        try {
+            mKeyStore.setEntry(
+                    decryptAlias,
+                    new KeyStore.SecretKeyEntry(secretKey),
+                    decryptionKeyProtection.build());
+            mKeyStore.setEntry(
+                    encryptAlias,
+                    new KeyStore.SecretKeyEntry(secretKey),
+                    new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT)
+                        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                        .build());
+        } catch (KeyStoreException e) {
+            if (!isDeviceSecure(userId)) {
+                throw new InsecureUserException("Screenlock is not set");
+            } else {
+                throw e;
+            }
+        }
         setGenerationId(userId, generationId);
     }
 
@@ -475,6 +486,10 @@ public class PlatformKeyManager {
             throw new KeyStoreException("Unable to load keystore.", e);
         }
         return keyStore;
+    }
+
+    private boolean isDeviceSecure(int userId) {
+        return mContext.getSystemService(KeyguardManager.class).isDeviceSecure(userId);
     }
 
 }
