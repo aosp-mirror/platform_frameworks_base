@@ -133,16 +133,14 @@ class WallpaperData {
      */
     final Rect cropHint = new Rect(0, 0, 0, 0);
 
-    WallpaperData(int userId, File wallpaperDir, String inputFileName, String cropFileName) {
-        this.userId = userId;
-        wallpaperFile = new File(wallpaperDir, inputFileName);
-        cropFile = new File(wallpaperDir, cropFileName);
-    }
-
     WallpaperData(int userId, @SetWallpaperFlags int wallpaperType) {
-        this(userId, getWallpaperDir(userId),
-                (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_ORIG : WALLPAPER,
-                (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_CROP : WALLPAPER_CROP);
+        this.userId = userId;
+        this.mWhich = wallpaperType;
+        File wallpaperDir = getWallpaperDir(userId);
+        String wallpaperFileName = (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_ORIG : WALLPAPER;
+        String cropFileName = (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_CROP : WALLPAPER_CROP;
+        this.wallpaperFile = new File(wallpaperDir, wallpaperFileName);
+        this.cropFile = new File(wallpaperDir, cropFileName);
     }
 
     /**
