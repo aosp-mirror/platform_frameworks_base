@@ -1413,7 +1413,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
                             pushActiveAdminPackagesLocked(userHandle);
-                            pushMeteredDisabledPackages(userHandle);
                         }
                     }
                 } catch (RemoteException re) {
@@ -1454,6 +1453,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (removedAdmin) {
             // The removed admin might have disabled camera, so update user restrictions.
             pushUserRestrictions(userHandle);
+            pushMeteredDisabledPackages(userHandle);
         }
     }
 
@@ -17882,41 +17882,44 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return packageNames;
         }
-        synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
-            return mInjector.binderWithCleanCallingIdentity(() -> {
-                final List<String> excludedPkgs = removeInvalidPkgsForMeteredDataRestriction(
-                        caller.getUserId(), packageNames);
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            final List<String> excludedPkgs = removeInvalidPkgsForMeteredDataRestriction(
+                    caller.getUserId(), packageNames);
+
+            synchronized (getLockObject()) {
+                final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
                 admin.meteredDisabledPackages = packageNames;
-                pushMeteredDisabledPackages(caller.getUserId());
                 saveSettingsLocked(caller.getUserId());
-                return excludedPkgs;
-            });
-        }
+            }
+            pushMeteredDisabledPackages(caller.getUserId());
+            return excludedPkgs;
+        });
     }
 
     private List<String> removeInvalidPkgsForMeteredDataRestriction(
             int userId, List<String> pkgNames) {
-        final Set<String> activeAdmins = getActiveAdminPackagesLocked(userId);
-        final List<String> excludedPkgs = new ArrayList<>();
-        for (int i = pkgNames.size() - 1; i >= 0; --i) {
-            final String pkgName = pkgNames.get(i);
-            // If the package is an active admin, don't restrict it.
-            if (activeAdmins.contains(pkgName)) {
-                excludedPkgs.add(pkgName);
-                continue;
-            }
-            // If the package doesn't exist, don't restrict it.
-            try {
-                if (!mInjector.getIPackageManager().isPackageAvailable(pkgName, userId)) {
+        synchronized (getLockObject()) {
+            final Set<String> activeAdmins = getActiveAdminPackagesLocked(userId);
+            final List<String> excludedPkgs = new ArrayList<>();
+            for (int i = pkgNames.size() - 1; i >= 0; --i) {
+                final String pkgName = pkgNames.get(i);
+                // If the package is an active admin, don't restrict it.
+                if (activeAdmins.contains(pkgName)) {
                     excludedPkgs.add(pkgName);
+                    continue;
                 }
-            } catch (RemoteException e) {
-                // Should not happen
+                // If the package doesn't exist, don't restrict it.
+                try {
+                    if (!mInjector.getIPackageManager().isPackageAvailable(pkgName, userId)) {
+                        excludedPkgs.add(pkgName);
+                    }
+                } catch (RemoteException e) {
+                    // Should not happen
+                }
             }
+            pkgNames.removeAll(excludedPkgs);
+            return excludedPkgs;
         }
-        pkgNames.removeAll(excludedPkgs);
-        return excludedPkgs;
     }
 
     @Override
