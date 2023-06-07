@@ -359,20 +359,16 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
                 // Draw current touch ellipse.
                 mPaint.setARGB(255, pressureLevel, 255 - pressureLevel, 128);
-                drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.touchMajor * mDensity,
-                        ps.mCoords.touchMinor * mDensity, ps.mCoords.orientation, mPaint);
+                drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.touchMajor,
+                        ps.mCoords.touchMinor, ps.mCoords.orientation, mPaint);
 
                 // Draw current tool ellipse.
                 mPaint.setARGB(255, pressureLevel, 128, 255 - pressureLevel);
-                drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.toolMajor * mDensity,
-                        ps.mCoords.toolMinor * mDensity, ps.mCoords.orientation, mPaint);
+                drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.toolMajor,
+                        ps.mCoords.toolMinor, ps.mCoords.orientation, mPaint);
 
-                // Draw the orientation arrow.
-                float arrowSize = ps.mCoords.toolMajor * 0.7f;
-                if (arrowSize < 20) {
-                    arrowSize = 20;
-                }
-                arrowSize *= mDensity;
+                // Draw the orientation arrow, and ensure it has a minimum size of 24dp.
+                final float arrowSize = Math.max(ps.mCoords.toolMajor * 0.7f, 24 * mDensity);
                 mPaint.setARGB(255, pressureLevel, 255, 0);
                 float orientationVectorX = (float) (Math.sin(ps.mCoords.orientation)
                         * arrowSize);
