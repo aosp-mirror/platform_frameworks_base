@@ -12,3 +12,5 @@ per-file /apct-tests/perftests/core/src/android/content/res/* = file:/core/java/
 per-file /apct-tests/perftests/core/src/android/content/om/* = felkachang@google.com
 per-file /apct-tests/perftests/core/src/android/content/om/* = file:/core/java/android/content/om/OWNERS
 
+# Bug component: 44215
+per-file **Accessibility* = file:/core/java/android/view/accessibility/OWNERS

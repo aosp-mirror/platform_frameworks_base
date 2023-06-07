@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Ikke begrænset"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Tjenesten provisioneres ikke."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Du kan ikke ændre indstillingen for opkalds-id\'et."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Der blev skiftet til <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-data"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Du kan altid ændre dette under Indstillinger"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ingen mobildatatjeneste"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Det er ikke muligt at foretage nødopkald"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ingen taletjeneste"</string>
@@ -262,7 +264,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Indstillinger"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Assistance"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Taleassistent"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Lås enhed"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Ekstralås"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Ny notifikation"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtuelt tastatur"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillader, at appen får foretrukne oplysninger vedrørende NFC-betalingstjeneste, f.eks. registrerede hjælpemidler og rutedestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"administrere Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Tillader, at appen kan kommunikere med NFC-tags (Near Field Communication), -kort og -læsere."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element-transaktion"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Tillader, at appen kan modtage oplysninger om transaktioner, der foretages via Secure Element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktivere din skærmlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Tillader, at appen kan deaktivere tastaturlåsen og anden form for tilknyttet adgangskodesikkerhed. Telefonen deaktiverer f.eks. tastaturlåsen ved indgående telefonopkald og aktiverer tastaturlåsen igen, når opkaldet er afsluttet."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"anmode om skærmlåsens kompleksitet"</string>
@@ -570,7 +574,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillader, at appen kan læse lokationer fra din mediesamling."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Brug biometri"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Brug biometri eller skærmlås"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Bekræft, at det er dig"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verificer, at det er dig"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Brug dine biometriske data for at fortsætte"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Brug dine biometriske data eller din skærmlås for at fortsætte"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk hardware er ikke tilgængelig"</string>
@@ -640,7 +644,7 @@
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Løft telefonen højere op"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Sænk telefonen"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Flyt telefonen længere til venstre for dig"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flyt telefonen længere til højre for dig"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flyt telefonen længere til højre"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Kig mere direkte på din enhed."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dit ansigt kan ikke registreres. Hold din telefon i øjenhøjde."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Der er for meget bevægelse. Hold telefonen stille."</string>
@@ -661,7 +665,7 @@
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansigtsdækning er registreret. Dit ansigt skal være helt synligt."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansigt ikke bekræftet. Hardware ikke tilgængelig."</string>
+    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansigt ikke verificeret. Hardware ikke tilgængelig."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Prøv ansigtslås igen"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Der kan ikke gemmes nye ansigtsdata. Slet et gammelt først."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansigtshandlingen blev annulleret."</string>
@@ -1082,7 +1086,7 @@
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Vil du aktivere Udforsk ved berøring?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er tændt, kan du høre eller se beskrivelser af, hvad der er under din finger eller udføre bevægelser for at interagere med tabletten."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er aktiveret, kan du høre eller se beskrivelser af, hvad der er under din finger, eller udføre bevægelser for at interagere med telefonen."</string>
-    <string name="oneMonthDurationPast" msgid="4538030857114635777">"for 1 måned siden"</string>
+    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 måned siden"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Før for 1 måned siden"</string>
     <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Seneste dag}one{De seneste # dag}other{De seneste # dage}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Seneste måned"</string>
@@ -1112,8 +1116,8 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d."</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{For # minut siden}one{For # minut siden}other{For # minutter siden}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{For # time siden}one{For # time siden}other{For # timer siden}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{For # dag siden}one{For # dag siden}other{For # dage siden}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# time siden}one{# time siden}other{# timer siden}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{1 dag siden}one{1 dag siden}other{# dag siden}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{For # år siden}one{For # år siden}other{For # år siden}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}one{# minut}other{# minutter}}"</string>
     <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# time}one{# time}other{# timer}}"</string>
@@ -1142,7 +1146,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Markér tekst"</string>
     <string name="undo" msgid="3175318090002654673">"Fortryd"</string>
     <string name="redo" msgid="7231448494008532233">"Annuller fortryd"</string>
-    <string name="autofill" msgid="511224882647795296">"AutoFyld"</string>
+    <string name="autofill" msgid="511224882647795296">"Autofyld"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Tekstmarkering"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Føj til ordbog"</string>
     <string name="deleteText" msgid="4200807474529938112">"Slet"</string>
@@ -1249,8 +1253,8 @@
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen, mens du konfigurerer dit fingeraftryk."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Sluk skærmen for at afslutte konfigurationen"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktiver"</string>
-    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du bekræfte dit fingeraftryk?"</string>
-    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at bekræfte dit fingeraftryk."</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du verificere dit fingeraftryk?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at verificere dit fingeraftryk."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sluk skærm"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsæt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> er i gang"</string>
@@ -1893,7 +1897,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishingadvarsel"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Arbejdsprofil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Underrettet"</string>
-    <string name="notification_verified_content_description" msgid="6401483602782359391">"Bekræftet"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Verificeret"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Udvid"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Skjul"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Slå udvidelse til eller fra"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kameraet på din tablet kan ikke tilgås via din <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Der er ikke adgang til dette indhold under streaming. Prøv på din telefon i stedet."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systemstandard"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"KORT <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

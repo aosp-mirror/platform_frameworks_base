@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"सेवेची तरतूद केलेली नाही."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"तुम्ही कॉलर आयडी सेटिंग बदलू शकत नाही."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"डेटा <xliff:g id="CARRIERDISPLAY">%s</xliff:g> वर स्विच केला"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"तुम्ही हे सेटिंग्जमध्ये कधीही बदलू शकता"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"मोबाइल डेटा सेवा नाही"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"आणीबाणी कॉलिंग अनुपलब्‍ध आहे"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"व्हॉइस सेवा नाही"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"नोंदणीकृत एड्स आणि मार्ग गंतव्यस्थान सारखी प्राधान्यकृत एनएफसी पेमेंट सेवेची माहिती मिळवण्यासाठी अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"फील्ड जवळील कम्युनिकेशन नियंत्रित करा"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"फील्ड जवळील कम्युनिकेशन (NFC) टॅग, कार्डे आणि वाचक यांच्यासह संवाद करण्यासाठी ॲपला अनुमती देते."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"सुरक्षित घटक यावरील व्यवहार इव्हेंट"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"अ‍ॅपला सुरक्षित घटक यावर होत असलेल्या व्यवहारांविषयी माहिती मिळवू देते."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"तुमचे स्क्रीन लॉक अक्षम करा"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"कीलॉक आणि कोणतीही संबद्ध पासवर्ड सुरक्षितता अक्षम करण्यासाठी अ‍ॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"स्क्रीन लॉक क्लिष्टतेची विनंती करा"</string>
@@ -581,11 +585,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"एरर ऑथेंटिकेट करत आहे"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रीन लॉक वापरा"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"पुढे सुरू ठेवण्यासाठी तुमचे स्क्रीन लॉक एंटर करा"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरवर जोरात दाबा"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरवर जोरात प्रेस करा"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फिंगरप्रिंट ओळखता आली नाही. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फिंगरप्रिंट सेन्सर स्वच्छ करा आणि पुन्हा प्रयत्न करा"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"सेन्सर स्वच्छ करा आणि पुन्हा प्रयत्न करा"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरवर जोरात दाबा"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरवर जोरात प्रेस करा"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"बोट खूप सावकाश हलविले. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"दुसरी फिंगरप्रिंट वापरून पहा"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"खूप प्रखर"</string>
@@ -594,14 +598,14 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"तुमच्या बोटाची स्थिती प्रत्येक वेळी थोडीशी बदला"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिंट ओळखले नाही"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखले नाही"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिंट ओळखली नाही"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखली नाही"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
-    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म दाबा"</string>
+    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म प्रेस करा"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फिंगरप्रिंट सेट करता आली नाही"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिट सेट करण्याची वेळ संपली आहे. पुन्हा प्रयत्न करा."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिंट सेट करण्याची वेळ संपली आहे. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिंट ऑपरेशन रद्द झाले."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"वापरकर्त्याने फिंगरप्रिंट ऑपरेशन रद्द केले."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"खूप जास्त प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
@@ -910,12 +914,12 @@
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"अनलॉक करण्यासाठी पासवर्ड टाइप करा"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"अनलॉक करण्यासाठी पिन टाइप करा"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"अयोग्य पिन कोड."</string>
-    <string name="keyguard_label_text" msgid="3841953694564168384">"अनलॉक करण्यासाठी, मेनू दाबा नंतर 0."</string>
+    <string name="keyguard_label_text" msgid="3841953694564168384">"अनलॉक करण्यासाठी, आधी मेनू व नंतर 0 प्रेस करा."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"आणीबाणीचा नंबर"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"सेवा नाही"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"स्क्रीन लॉक केली."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"अनलॉक करण्‍यासाठी मेनू दाबा किंवा आणीबाणीचा कॉल करा."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"अनलॉक करण्यासाठी मेनू दाबा."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"अनलॉक करण्‍यासाठी मेनू प्रेस करा किंवा आणीबाणीचा कॉल करा."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"अनलॉक करण्यासाठी मेनू प्रेस करा."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"अनलॉक करण्यासाठी पॅटर्न काढा"</string>
     <string name="lockscreen_emergency_call" msgid="7500692654885445299">"आणीबाणी"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"कॉलवर परत या"</string>
@@ -1011,10 +1015,10 @@
     <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST कृती फक्त /सिस्टीम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी सपोर्ट आहे."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करा"</string>
-    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पृष्ठ हे म्हणते:"</string>
+    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पेज पुढील गोष्टी दर्शवते:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"नेव्हिगेशनची पुष्टी करा"</string>
-    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पृष्ठ सोडा"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पेज सोडा"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"या पेजवर रहा"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nआपल्‍याला खात्री आहे की तुम्ही या पृष्‍ठावरून नेव्‍हिगेट करू इच्‍छिता?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"पुष्टी करा"</string>
@@ -1054,7 +1058,7 @@
     <string name="save_password_notnow" msgid="2878327088951240061">"आता नको"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"लक्षात ठेवा"</string>
     <string name="save_password_never" msgid="6776808375903410659">"कधीही नाही"</string>
-    <string name="open_permission_deny" msgid="5136793905306987251">"तुम्हाला हे पृष्ठ उघडण्याची परवानगी नाही."</string>
+    <string name="open_permission_deny" msgid="5136793905306987251">"तुम्हाला हे पेज उघडण्याची परवानगी नाही."</string>
     <string name="text_copied" msgid="2531420577879738860">"मजकूर क्लिपबोर्डवर कॉपी केला."</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> वरून <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> पेस्ट केले"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ने तुमच्या क्लिपबोर्डवरून पेस्ट केले"</string>
@@ -1072,7 +1076,7 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"स्पेस"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"एंटर"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"हटवा"</string>
-    <string name="search_go" msgid="2141477624421347086">"शोध"</string>
+    <string name="search_go" msgid="2141477624421347086">"शोधा"</string>
     <string name="search_hint" msgid="455364685740251925">"शोधा…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"शोधा"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"शोध क्वेरी"</string>
@@ -1218,7 +1222,7 @@
     <string name="force_close" msgid="9035203496368973803">"ठीक"</string>
     <string name="report" msgid="2149194372340349521">"अहवाल द्या"</string>
     <string name="wait" msgid="7765985809494033348">"प्रतीक्षा करा"</string>
-    <string name="webpage_unresponsive" msgid="7850879412195273433">"पृष्ठ प्रतिसाद न देणारे झाले आहे.\n\nतुम्ही हे बंद करू इच्छिता?"</string>
+    <string name="webpage_unresponsive" msgid="7850879412195273433">"पेज प्रतिसाद देत नाही.\n\nतुम्ही ते बंद करू इच्छिता का?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"अ‍ॅप पुनर्निर्देशित केला"</string>
     <string name="launch_warning_replace" msgid="3073392976283203402">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता चालत आहे."</string>
     <string name="launch_warning_original" msgid="3332206576800169626">"<xliff:g id="APP_NAME">%1$s</xliff:g> मूळतः लाँच केले."</string>
@@ -1608,7 +1612,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"टॅबलेट"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"टीव्ही"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"फोन"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"स्पीकर डॉक करा"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"डॉक स्पीकर"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"बाह्य डिव्हाइस"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"हेडफोन"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1672,7 +1676,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"काढा"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"प्रवेशयोग्यता शॉर्टकट वापरायचा?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी दाबून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी प्रेस करून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"अ‍ॅक्सेसिबिलिटी वैशिष्ट्यांसाठी शॉर्टकट सुरू करायचा आहे का?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्ये सुरू होतात. यामुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nसध्याची वैशिष्ट्ये:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये बदलू शकता."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
@@ -1687,7 +1691,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन पहा आणि नियंत्रित करा"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ते स्क्रीनवरील सर्व आशय वाचू शकते आणि इतर ॲप्सवर आशय प्रदर्शित करू शकते."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"पहा आणि क्रिया करा"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"हे तुम्ही ॲप किंवा हार्डवेअर सेन्सर कसे वापरता ते ट्रॅक करू शकते आणि इतर ॲप्ससोबत तुमच्या वतीने संवाद साधू शकते."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"हे तुमचा ॲप किंवा हार्डवेअर सेन्सरसोबतचा परस्‍परसंवाद ट्रॅक करू शकते आणि इतर ॲप्ससोबत तुमच्या वतीने संवाद साधू शकते."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमती द्या"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"नकार द्या"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"वैशिष्ट्य वापरणे सुरू करण्यासाठी त्यावर टॅप करा:"</string>
@@ -1704,7 +1708,7 @@
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"आणखी डिम"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद प्रेस करून धरून ठेवा"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"तुम्ही अ‍ॅक्सेसिबिलिटी बटणावर टॅप केल्यास वापरण्यासाठी एक वैशिष्ट्य निवडा:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"अ‍ॅक्सेसिबिलिटी जेश्चरसोबत वापराचे असलेले वैशिष्‍ट्य निवडा (दोन बोटांनी स्क्रीनच्या तळापासून वर स्वाइप करा):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"अ‍ॅक्सेसिबिलिटी जेश्चरसोबत वापराचे असलेले वैशिष्‍ट्य निवडा (तीनन बोटांनी स्क्रीनच्या तळापासून वर स्वाइप करा):"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वरून टॅबलेटचा कॅमेरा अ‍ॅक्सेस करू शकत नाही"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"स्ट्रीम करताना हे अ‍ॅक्सेस केले जाऊ शकत नाही. त्याऐवजी तुमच्या फोनवर अ‍ॅक्सेस करून पहा."</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टीम डीफॉल्ट"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"कार्ड <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

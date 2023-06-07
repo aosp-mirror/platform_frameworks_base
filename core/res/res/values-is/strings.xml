@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Númerabirting er sjálfgefið án takmarkana. Næsta símtal: Án takmarkana"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Þjónustu ekki útdeilt."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Þú getur ekki breytt stillingu númerabirtingar."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Skipt yfir í farsímagögn hjá <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Þú getur breytt þessu hvenær sem er í stillingum"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Engin gagnaþjónusta fyrir farsíma"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Neyðarsímtöl eru ekki í boði"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Símtöl eru ekki í boði"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Gerir forritinu kleift að fá valda NFC-greiðsluþjónustu, svo sem skráða aðstoð og áfangastað leiðar."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"stjórna nándarsamskiptum (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Leyfir forriti að eiga samskipti við NFC-merki, -spjöld og -lesara (nándarsamskipti)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Færslutilvik í öryggiseiningu"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Gerir forritinu kleift að móttaka upplýsingar um færslur sem fara fram í öryggiseiningu."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"slökkva á skjálásnum"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Leyfir forriti að slökkva á símalásnum og öðrum öryggisaðgerðum tengdum aðgangsorði. Til dæmis gerir síminn lásinn óvirkan þegar símtal berst og læsist svo aftur að símtali loknu."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"biðja um flókinn skjálás"</string>
@@ -594,7 +598,7 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Breyttu stöðu fingursins örlítið í hvert skipti"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Ekki þekkt fingrafar"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Fingrafar þekkist ekki"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Fingrafar þekkist ekki"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingrafar staðfest"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Andlit staðfest"</string>
@@ -634,7 +638,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Þú verður að fara á verkstæði."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Ekki tekst að búa til andlitslíkan. Reyndu aftur."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Of bjart. Prófaðu mýkri lýsingu."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Of lítið ljós"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Ekki næg birta"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Færðu símann lengra frá"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Færðu símann nær"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Færðu símann hærra"</string>
@@ -1682,7 +1686,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ekki kveikja"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"KVEIKT"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"SLÖKKT"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Viltu leyfa <xliff:g id="SERVICE">%1$s</xliff:g> að hafa fulla stjórn yfir tækinu þínu?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Viltu leyfa „<xliff:g id="SERVICE">%1$s</xliff:g>“ að hafa fulla stjórn yfir tækinu þínu?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Full stjórnun er viðeigandi fyrir forrit sem hjálpa þér ef þú hefur ekki aðgang, en ekki fyrir flest forrit."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skoða og stjórna skjá"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Það getur lesið allt efni á skjánum og birt efni yfir öðrum forritum."</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ekki er hægt að opna myndavél spjaldtölvunnar úr <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Ekki er hægt að opna þetta á meðan streymi stendur yfir. Prófaðu það í símanum í staðinn."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sjálfgildi kerfis"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"KORT <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

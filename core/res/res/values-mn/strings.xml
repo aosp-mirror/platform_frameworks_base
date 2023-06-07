@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Дуудлага хийгчийн ID хязгаарлагдсан. Дараагийн дуудлага: Хязгаарлагдсан"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Үйлчилгээ провишн хийгдээгүй ."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Та дуудлага хийгчийн ID тохиргоог солиж чадахгүй."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Өгөгдлийг <xliff:g id="CARRIERDISPLAY">%s</xliff:g> руу шилжүүлсэн"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Та үүнийг Тохиргооноос хэдийд ч өөрчлөх боломжтой."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Мобайл дата үйлчилгээ алга"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Яаралтай дуудлага боломжтой"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Дуу хоолойны үйлчилгээ алга"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Бүртгүүлсэн төхөөрөмж болон маршрутын хүрэх цэг зэрэг сонгосон nfc төлбөрийн үйлчилгээний мэдээллийг авахыг аппад зөвшөөрдөг."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ойролцоо талбарын холбоог удирдах"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Апп нь Ойролцоо Талбарын Холболт(NFC) таг, карт, болон уншигчтай холбогдох боломжтой."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Аюулгүй элементийн гүйлгээний үйл явдал"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Аппад Аюулгүй элементэд хийгдэж буй гүйлгээний талаарх мэдээллийг хүлээн авахыг зөвшөөрнө."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"дэлгэцний түгжээг идэвхгүй болгох"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Апп нь түгжээ болон бусад холбоотой нууц үгийн аюулгүй байдлыг идэвхгүй болгох боломжтой. Жишээ нь бол утас нь дуудлага ирэх үед түгжээг идэвхгүй болгох ба дуудлага дуусахад буцаан идэвхтэй болгодог."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"дэлгэцийн түгжээний төвөгтэй байдлын хүсэлт тавих"</string>
@@ -650,7 +654,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Утас руугаа аль болох эгц харна уу"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Утас руугаа аль болох эгц харна уу"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Утас руугаа аль болох эгц харна уу"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Таны нүүрийг далдалж буй аливаа зүйлийг хасна уу."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Таны нүүрийг далдалж буй аливаа зүйлийг авна уу."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Хар хэсэг зэрэг дэлгэцийнхээ дээд хэсгийг цэвэрлэнэ үү"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1496,7 +1500,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Сүлжээ эсвэл VPN тохиргоог өөрчлөх"</string>
     <string name="upload_file" msgid="8651942222301634271">"Файл сонгох"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Сонгосон файл байхгүй"</string>
-    <string name="reset" msgid="3865826612628171429">"Бүгдийг цэвэрлэх"</string>
+    <string name="reset" msgid="3865826612628171429">"Шинэчлэх"</string>
     <string name="submit" msgid="862795280643405865">"Илгээх"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Жолоо барих апп ажиллаж байна"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Жолооны аппаас гарахын тулд товшино уу."</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с таблетын камерт хандах боломжгүй"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Стримингийн үед үүнд хандах боломжгүй. Оронд нь утас дээрээ туршиж үзнэ үү."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Системийн өгөгдмөл"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"КАРТ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
