@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import com.android.systemui.statusbar.NotificationPresenter;
-import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 
 import dagger.Binds;
 import dagger.Module;
@@ -26,8 +25,4 @@ import dagger.Module;
 public abstract class StatusBarNotificationPresenterModule {
     @Binds
     abstract NotificationPresenter bindPresenter(StatusBarNotificationPresenter impl);
-
-    @Binds
-    abstract NotificationRowBinderImpl.BindRowCallback bindBindRowCallback(
-            StatusBarNotificationPresenter impl);
 }
