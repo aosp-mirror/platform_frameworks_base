@@ -67,7 +67,8 @@ internal object NoteTaskRoleManagerExt {
         val icon = Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
 
         return ShortcutInfo.Builder(context, NoteTaskController.SHORTCUT_ID)
-            .setIntent(LaunchNoteTaskActivity.newIntent(context = context))
+            .setIntent(LaunchNoteTaskActivity.createIntent(context))
+            .setActivity(LaunchNoteTaskActivity.createComponent(context))
             .setShortLabel(shortLabel)
             .setLongLabel(longLabel)
             .setLongLived(true)
