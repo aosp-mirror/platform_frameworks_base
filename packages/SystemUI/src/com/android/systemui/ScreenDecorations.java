@@ -104,7 +104,7 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class ScreenDecorations implements CoreStartable, Dumpable {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_LOGGING = false;
     private static final String TAG = "ScreenDecorations";
 
     // Provide a way for factory to disable ScreenDecorations to run the Display tests.
@@ -112,7 +112,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             SystemProperties.getBoolean("debug.disable_screen_decorations", false);
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
-    static final boolean DEBUG_COLOR = DEBUG_SCREENSHOT_ROUNDED_CORNERS;
+    private boolean mDebug = DEBUG_SCREENSHOT_ROUNDED_CORNERS;
+    private int mDebugColor = Color.RED;
 
     private static final int[] DISPLAY_CUTOUT_IDS = {
             R.id.display_cutout,
@@ -357,6 +358,26 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mAuthController.addCallback(mAuthControllerCallback);
     }
 
+    /**
+     * Change the value of {@link ScreenDecorations#mDebug}. This operation is heavyweight, since
+     * it requires essentially re-init-ing this screen decorations process with the debug
+     * information taken into account.
+     */
+    private void setDebug(boolean debug) {
+        if (mDebug == debug) {
+            return;
+        }
+
+        mExecutor.execute(() -> {
+            // Re-trigger all of the screen decorations setup here so that the debug values
+            // can be picked up
+            removeAllOverlays();
+            removeHwcOverlay();
+            startOnScreenDecorationsThread();
+            updateColorInversionDefault();
+        });
+    }
+
     private boolean isPrivacyDotEnabled() {
         return mDotFactory.getHasProviders();
     }
@@ -436,15 +457,12 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
                     // - we are trying to redraw. This because WM resized our window and told us to.
                     // - the config change has been dispatched, so WM is no longer deferring layout.
                     mPendingConfigChange = true;
-                    if (DEBUG) {
-                        if (mRotation != newRotation) {
-                            Log.i(TAG, "Rotation changed, deferring " + newRotation
-                                            + ", staying at " + mRotation);
-                        }
-                        if (displayModeChanged(mDisplayMode, newDisplayMode)) {
-                            Log.i(TAG, "Resolution changed, deferring " + newDisplayMode
-                                    + ", staying at " + mDisplayMode);
-                        }
+                    if (mRotation != newRotation) {
+                        mLogger.logRotationChangeDeferred(mRotation, newRotation);
+                    }
+                    if (displayModeChanged(mDisplayMode, newDisplayMode)) {
+                        mLogger.logDisplayModeChanged(
+                                newDisplayMode.getModeId(), mDisplayMode.getModeId());
                     }
 
                     if (mOverlays != null) {
@@ -757,7 +775,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         }
         mScreenDecorHwcWindow = (ViewGroup) LayoutInflater.from(mContext).inflate(
                 R.layout.screen_decor_hwc_layer, null);
-        mScreenDecorHwcLayer = new ScreenDecorHwcLayer(mContext, mHwcScreenDecorationSupport);
+        mScreenDecorHwcLayer =
+                new ScreenDecorHwcLayer(mContext, mHwcScreenDecorationSupport, mDebug);
         mScreenDecorHwcWindow.addView(mScreenDecorHwcLayer, new FrameLayout.LayoutParams(
                 MATCH_PARENT, MATCH_PARENT, Gravity.TOP | Gravity.START));
         mWindowManager.addView(mScreenDecorHwcWindow, getHwcWindowLayoutParams());
@@ -805,7 +824,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         lp.height = MATCH_PARENT;
         lp.setTitle("ScreenDecorHwcOverlay");
         lp.gravity = Gravity.TOP | Gravity.START;
-        if (!DEBUG_COLOR) {
+        if (!mDebug) {
             lp.setColorMode(ActivityInfo.COLOR_MODE_A8);
         }
         return lp;
@@ -913,19 +932,40 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             new UserTracker.Callback() {
                 @Override
                 public void onUserChanged(int newUser, @NonNull Context userContext) {
-                    if (DEBUG) {
-                        Log.d(TAG, "UserSwitched newUserId=" + newUser);
-                    }
+                    mLogger.logUserSwitched(newUser);
                     // update color inversion setting to the new user
                     mColorInversionSetting.setUserId(newUser);
                     updateColorInversion(mColorInversionSetting.getValue());
                 }
             };
 
+    /**
+     * Use the current value of {@link ScreenDecorations#mColorInversionSetting} and passes it
+     * to {@link ScreenDecorations#updateColorInversion}
+     */
+    private void updateColorInversionDefault() {
+        int inversion = 0;
+        if (mColorInversionSetting != null) {
+            inversion = mColorInversionSetting.getValue();
+        }
+
+        updateColorInversion(inversion);
+    }
+
+    /**
+     * Update the tint color of screen decoration assets. Defaults to Color.BLACK. In the case of
+     * a color inversion being set, use Color.WHITE (which inverts to black).
+     *
+     * When {@link ScreenDecorations#mDebug} is {@code true}, this value is updated to use
+     * {@link ScreenDecorations#mDebugColor}, and does not handle inversion.
+     *
+     * @param colorsInvertedValue if non-zero, assume that colors are inverted, and use Color.WHITE
+     *                            for screen decoration tint
+     */
     private void updateColorInversion(int colorsInvertedValue) {
         mTintColor = colorsInvertedValue != 0 ? Color.WHITE : Color.BLACK;
-        if (DEBUG_COLOR) {
-            mTintColor = Color.RED;
+        if (mDebug) {
+            mTintColor = mDebugColor;
         }
 
         updateOverlayProviderViews(new Integer[] {
@@ -966,7 +1006,9 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             int oldRotation = mRotation;
             mPendingConfigChange = false;
             updateConfiguration();
-            if (DEBUG) Log.i(TAG, "onConfigChanged from rot " + oldRotation + " to " + mRotation);
+            if (oldRotation != mRotation) {
+                mLogger.logRotationChanged(oldRotation, mRotation);
+            }
             setupDecorations();
             if (mOverlays != null) {
                 // Updating the layout params ensures that ViewRootImpl will call relayoutWindow(),
@@ -1199,7 +1241,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
 
             paint.setColor(mColor);
             paint.setStyle(Paint.Style.FILL);
-            if (DEBUG) {
+            if (DEBUG_LOGGING) {
                 getViewTreeObserver().addOnDrawListener(() -> Log.i(TAG,
                         getWindowTitleByPos(pos) + " drawn in rot " + mRotation));
             }
@@ -1392,7 +1434,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             mView.getViewTreeObserver().removeOnPreDrawListener(this);
             if (mTargetRotation == mRotation
                     && !displayModeChanged(mDisplayMode, mTargetDisplayMode)) {
-                if (DEBUG) {
+                if (DEBUG_LOGGING) {
                     final String title = mPosition < 0 ? "ScreenDecorHwcLayer"
                             : getWindowTitleByPos(mPosition);
                     Log.i(TAG, title + " already in target rot "
@@ -1408,7 +1450,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             // This changes the window attributes - we need to restart the traversal for them to
             // take effect.
             updateConfiguration();
-            if (DEBUG) {
+            if (DEBUG_LOGGING) {
                 final String title = mPosition < 0 ? "ScreenDecorHwcLayer"
                         : getWindowTitleByPos(mPosition);
                 Log.i(TAG, title
@@ -1443,7 +1485,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             final Display.Mode displayMode = mDisplayInfo.getMode();
             if ((displayRotation != mRotation || displayModeChanged(mDisplayMode, displayMode))
                     && !mPendingConfigChange) {
-                if (DEBUG) {
+                if (DEBUG_LOGGING) {
                     if (displayRotation != mRotation) {
                         Log.i(TAG, "Drawing rot " + mRotation + ", but display is at rot "
                                 + displayRotation + ". Restarting draw");
