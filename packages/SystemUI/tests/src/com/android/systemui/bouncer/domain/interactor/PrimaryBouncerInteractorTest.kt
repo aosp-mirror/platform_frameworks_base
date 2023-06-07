@@ -407,6 +407,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
         whenever(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
             .thenReturn(true)
+        whenever(keyguardUpdateMonitor.doesCurrentPostureAllowFaceAuth()).thenReturn(true)
 
         // WHEN bouncer show is requested
         underTest.show(true)
@@ -419,6 +420,25 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         mainHandler.dispatchQueuedMessages()
 
         // THEN primary show & primary showing soon are updated
+        verify(repository).setPrimaryShow(true)
+        verify(repository).setPrimaryShowingSoon(false)
+    }
+
+    @Test
+    fun noDelayBouncer_biometricsAllowed_postureDoesNotAllowFaceAuth() {
+        mainHandler.setMode(FakeHandler.Mode.QUEUEING)
+
+        // GIVEN bouncer should not be delayed because device isn't in the right posture for
+        // face auth
+        whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
+        whenever(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
+            .thenReturn(true)
+        whenever(keyguardUpdateMonitor.doesCurrentPostureAllowFaceAuth()).thenReturn(false)
+
+        // WHEN bouncer show is requested
+        underTest.show(true)
+
+        // THEN primary show & primary showing soon are updated immediately
         verify(repository).setPrimaryShow(true)
         verify(repository).setPrimaryShowingSoon(false)
     }

@@ -391,7 +391,8 @@ constructor(
     private fun usePrimaryBouncerPassiveAuthDelay(): Boolean {
         val canRunFaceAuth =
             keyguardStateController.isFaceAuthEnabled &&
-                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE)
+                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE) &&
+                keyguardUpdateMonitor.doesCurrentPostureAllowFaceAuth()
         val canRunActiveUnlock =
             currentUserActiveUnlockRunning &&
                 keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState()

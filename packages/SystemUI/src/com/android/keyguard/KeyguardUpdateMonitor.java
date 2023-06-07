@@ -3168,6 +3168,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 || (posture == mConfigFaceAuthSupportedPosture);
     }
 
+    /**
+     * If the current device posture allows face auth to run.
+     */
+    public boolean doesCurrentPostureAllowFaceAuth() {
+        return doesPostureAllowFaceAuth(mPostureState);
+    }
+
     private void logListenerModelData(@NonNull KeyguardListenModel model) {
         mLogger.logKeyguardListenerModel(model);
         if (model instanceof KeyguardFingerprintListenModel) {
