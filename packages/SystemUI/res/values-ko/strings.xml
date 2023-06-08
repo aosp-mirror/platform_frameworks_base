@@ -742,8 +742,8 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g>을(를) 통해 데이터 또는 인터넷에 액세스할 수 없게 됩니다. 인터넷은 Wi-Fi를 통해서만 사용할 수 있습니다."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"이동통신사"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"다시 <xliff:g id="CARRIER">%s</xliff:g>(으)로 전환할까요?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"모바일 데이터가 가용성에 따라 자동으로 전환하지 않습니다."</string>
-    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"나중에"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"모바일 데이터를 사용할 수 있어도 자동으로 전환되지 않습니다"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"아니요"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"예, 전환합니다"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"앱이 권한 요청을 가리고 있기 때문에 설정에서 내 응답을 확인할 수 없습니다."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하도록 허용하시겠습니까?"</string>
@@ -806,7 +806,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"다음 위치로 이동: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"제어"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"빠른 설정에서 액세스할 컨트롤 선택"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"길게 누르고 드래그하여 컨트롤 재정렬"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"길게 누른 다음 드래그하여 컨트롤 재정렬"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"모든 컨트롤 삭제됨"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"변경사항이 저장되지 않음"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"다른 앱 보기"</string>
@@ -820,7 +820,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"잠금 화면에서 기기를 표시하고 제어하시겠습니까?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"외부 기기에 대한 제어 권한을 잠금 화면에 추가할 수 있습니다.\n\n기기 앱을 사용하여 휴대전화나 태블릿의 잠금을 해제하지 않고 해당 기기를 제어할 수도 있습니다.\n\n언제든지 설정에서 옵션을 변경할 수 있습니다."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"잠금 화면에서 기기를 제어하시겠습니까?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"휴대전화나 태블릿의 화면을 잠금 해제하지 않고 해당 기기를 제어할 수 있습니다.\n\n기기 앱에 이러한 방식으로 어떤 기기를 제어할 수 있는지 표시됩니다."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"일부 기기의 경우 휴대전화나 태블릿을 잠금 해제하지 않고 해당 기기를 제어할 수 있습니다.\n\n이러한 방식으로 제어 가능한 기기를 기기 앱에서 결정합니다."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"아니요"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"예"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN에 문자나 기호가 포함됨"</string>
@@ -832,7 +832,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"자세히 보려면 스와이프하세요."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"추천 제어 기능 로드 중"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"미디어"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g>에 대한 미디어 컨트롤을 숨길까요?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 미디어 컨트롤을 숨길까요?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"현재 미디어 세션은 숨길 수 없습니다."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"숨기기"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"다시 시작"</string>

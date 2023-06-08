@@ -368,7 +368,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"כל האפליקציות והנתונים של המשתמש הזה יימחקו."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"הסרה"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"‏לאפליקציית <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל המידע הגלוי במסך שלך ולכל תוכן שמופעל במכשיר שלך בזמן הקלטה או העברה (casting). המידע הזה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast) – כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל המידע שגלוי במסך שלך או מופעל מהמכשיר שלך בזמן הקלטה או העברה (cast) – כולל מידע כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"‏להתחיל להקליט או להעביר (cast)?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"לאפשר לאפליקציה <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> לשתף או להקליט?"</string>
@@ -806,7 +806,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"העברה למיקום <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"פקדים"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"יש לבחור פקדים לגישה מההגדרות המהירות"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"יש ללחוץ לחיצה ארוכה ולגרור כדי לארגן מחדש את הפקדים"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"כדי לארגן מחדש את הפקדים, צריך ללחוץ לחיצה ארוכה ולגרור"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"כל הפקדים הוסרו"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"השינויים לא נשמרו"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"הצגת אפליקציות אחרות"</string>
@@ -858,7 +858,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"לא נמצא"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"הפקד לא זמין"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"לא ניתן להתחבר אל <xliff:g id="DEVICE">%1$s</xliff:g>. יש לבדוק את האפליקציה <xliff:g id="APPLICATION">%2$s</xliff:g> כדי לוודא שהפקד עדיין זמין ושהגדרות האפליקציה לא השתנו."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"לפתיחת האפליקציה"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"פתיחת האפליקציה"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"לא ניתן לטעון את הסטטוס"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"שגיאה, יש לנסות שוב"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"הוספת פקדים"</string>

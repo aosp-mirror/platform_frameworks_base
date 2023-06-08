@@ -258,7 +258,7 @@
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Chiudi"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Connesso"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Connesso, batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="2381969772953268809">"Connessione..."</string>
+    <string name="quick_settings_connecting" msgid="2381969772953268809">"Connessione in corso..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Attivazione…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Risp. dati attivo"</string>
@@ -289,7 +289,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC non attiva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC attiva"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Registrazione dello schermo"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Registrazione schermo"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Inizia"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Interrompi"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modalità a una mano"</string>
@@ -395,7 +395,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Avvia adesso"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nessuna notifica"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nessuna nuova notifica"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Sblocca per notifiche meno recenti"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Sblocca per vedere le notifiche meno recenti"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Questo dispositivo è gestito dai tuoi genitori"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Questo dispositivo appartiene alla tua organizzazione, che potrebbe monitorare il traffico di rete"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, che potrebbe monitorare il traffico di rete"</string>
@@ -741,7 +741,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Disattivare i dati mobili?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Non avrai accesso ai dati o a Internet tramite <xliff:g id="CARRIER">%s</xliff:g>. Internet sarà disponibile soltanto tramite Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"il tuo operatore"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Vuoi passare nuovamente all\'operatore <xliff:g id="CARRIER">%s</xliff:g>?"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Vuoi tornare a <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"I dati mobili non passeranno automaticamente all\'operatore in base alla disponibilità"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"No, grazie"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Sì, confermo"</string>
@@ -754,7 +754,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Rifiuta"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Tocca per programmare il Risparmio energetico"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Attiva questa funzionalità se è probabile che la batteria si scarichi"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"No grazie"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"No, grazie"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump heap SysUI"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"In uso"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Le app stanno usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
@@ -939,7 +939,7 @@
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Telefonata in corso"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dati mobili"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
-    <string name="mobile_data_connection_active" msgid="944490013299018227">"Connessione attiva"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Connessa"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Connessa temporaneamente"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Connessione debole"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Nessuna connessione dati mobili automatica"</string>

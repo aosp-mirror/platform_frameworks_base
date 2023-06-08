@@ -249,7 +249,7 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"प्रसारण गर्दै"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"बेनाम उपकरण"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"कुनै उपकरणहरू उपलब्ध छैन"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi जडान गरिएको छैन"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi कनेक्ट गरिएको छैन"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"उज्यालपन"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"कलर इन्भर्सन"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"कलर करेक्सन"</string>
@@ -258,7 +258,7 @@
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"बन्द गर्नुहोस्"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"जोडिएको"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"यन्त्र जडान भयो, ब्याट्रीको चार्ज स्तर <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="2381969772953268809">"जडान हुँदै..."</string>
+    <string name="quick_settings_connecting" msgid="2381969772953268809">"कनेक्ट गरिँदै छ..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"हटस्पट"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"सक्रिय गर्दै…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"डेटा सेभर सक्रिय छ"</string>
@@ -734,8 +734,8 @@
     <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Do Not Disturb अन छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"कुनै अनुप्रयोगले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"कुनै स्वचालित नियम वा अनुप्रयोगले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो।"</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"कुनै एपले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"कुनै स्वचालित नियम वा एपले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो।"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"पृष्ठभूमिमा चल्ने एपहरू"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ब्याट्री र डेटाका प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"मोबाइल डेटा निष्क्रिय पार्ने हो?"</string>
@@ -826,7 +826,7 @@
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN मा अक्षर वा चिन्हहरू समाविष्ट हुन्छन्"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> पुष्टि गर्नुहोस्"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN मिलेन"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN हाल्नुहोस्"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"अर्को PIN प्रयोग गरी हेर्नु…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> का हकमा गरिएको परिवर्तन पुष्टि गर्नुहोस्"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>
@@ -852,7 +852,7 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> मा प्ले गर्न आफ्नो डिभाइस नजिकै लैजानुहोस्"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"तपाईं यहाँ प्ले गर्न चाहनुहुन्छ भने आफ्नो डिभाइस <xliff:g id="DEVICENAME">%1$s</xliff:g> नजिकै लैजानुहोस्"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> मा प्ले गरिँदै छ"</string>
-    <string name="media_transfer_failed" msgid="7955354964610603723">"केही चिज गडबड भयो। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"कुनै समस्या आयो। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"लोड हुँदै छ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, एप जाँच गर्नु…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"फेला परेन"</string>
@@ -862,7 +862,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"वस्तुस्थिति लोड गर्न सकिएन"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"त्रुटि भयो, फेरि प्रयास गर्नु…"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"कन्ट्रोल थप्नुहोस्"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"कन्ट्रोल सम्पादन गर्नुहोस्"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"सेटिङ सम्पादन गर्नुहोस्"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"आउटपुट यन्त्रहरू थप्नुहोस्"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"समूह"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"१ यन्त्र चयन गरियो"</string>
@@ -940,7 +940,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"इन्टरनेटमा कनेक्ट गरिएको छ"</string>
-    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"केही समयका लागि मोबाइल डेटामा कनेक्ट गरिएको छ"</string>
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"यसमा केही समयका लागि कनेक्ट गरिएको हो"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"इन्टरनेट राम्री चलेको छैन"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"मोबाइल डेटा स्वतः कनेक्ट हुँदैन"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"इन्टरनेट छैन"</string>

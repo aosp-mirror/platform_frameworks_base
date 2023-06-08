@@ -364,7 +364,7 @@
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Ak pridáte nového používatelia, ukončí sa režim pre hostí a odstránia sa všetky aplikácie a údaje z aktuálnej relácie hosťa."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dosiahnutý limit počtu používateľov"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Môžete vytvoriť iba jedného používateľa.}few{Môžete pridať až # používateľov.}many{You can add up to # users.}other{Môžete pridať až # používateľov.}}"</string>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"Odstrániť používateľa?"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"Odobrať používateľa?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Všetky aplikácie a údaje tohto používateľa budú odstránené."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Odstrániť"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Povolenie <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mať prístup k všetkým informáciám zobrazovaným na obrazovke alebo prehrávaným v zariadení počas nahrávania či prenosu. Patria medzi ne informácie, akými sú napríklad heslá, platobné podrobnosti, fotky, správy a prehrávaný zvuk."</string>
@@ -387,7 +387,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovať"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"História"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nové"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Ticho"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tichý"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Upozornenia"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzácie"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazať všetky tiché upozornenia"</string>
@@ -395,7 +395,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Spustiť"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Žiadne upozornenia"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Žiadne nové upozornenia"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Odomknutím si zobrazte staršie upozor."</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Odomknutím zobrazíte staršie upozornenia"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Toto zariadenie spravuje tvoj rodič"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša organizácia spravuje toto zariadenie a môže sledovať sieťovú premávku"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> vlastní toto zariadenie a môže sledovať sieťovú premávku"</string>
@@ -649,7 +649,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ľavá ikona"</string>
     <string name="right_icon" msgid="1103955040645237425">"Pravá ikona"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pridržaním a presunutím pridáte karty"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Dlaždice môžete usporiadať pridržaním a presunutím"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Karty môžete usporiadať pridržaním a presunutím"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Presunutím sem odstránite"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Minimálny počet vyžadovaných dlaždíc: <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Upraviť"</string>
@@ -724,7 +724,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"Aplikácia <xliff:g id="APP">%1$s</xliff:g> je spustená"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Aplikácia bola otvorená bez inštalácie."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Aplikácia bola otvorená bez inštalácie. Klepnutím zobrazíte ďalšie informácie."</string>
-    <string name="app_info" msgid="5153758994129963243">"Aplikácia"</string>
+    <string name="app_info" msgid="5153758994129963243">"O aplikácii"</string>
     <string name="go_to_web" msgid="636673528981366511">"Otvoriť prehliadač"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobilné dáta"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -805,7 +805,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odstránite z obľúbených"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Presunúť na pozíciu <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládacie prvky"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vyberte ovládače, ku ktorému chcete mať prístup z rýchlych nastavení"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vyberte ovládače, ku ktorým chcete mať prístup z rýchlych nastavení"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Polohu každého ovládača môžete zmeniť jeho pridržaním a presunutím"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všetky ovládače boli odstránené"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmeny neboli uložené"</string>
@@ -832,7 +832,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Potiahnutím zobrazíte ďalšie položky"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Načítavajú sa odporúčania"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Médiá"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Chcete tento ovládač médií pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> skryť?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Chcete tento ovládač médií pre <xliff:g id="APP_NAME">%1$s</xliff:g> skryť?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Aktuálna relácia média sa nedá skryť."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skryť"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Pokračovať"</string>
@@ -862,7 +862,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Stav sa nepodarilo načítať"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Chyba, skúste to znova"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Pridať ovládače"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Upraviť ovládače"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Upraviť ovládanie"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Pridanie výstupov"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Skupina"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 vybrané zariadenie"</string>
@@ -917,7 +917,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Počúvam"</string>
     <string name="game_status" msgid="1340694320630973259">"Hrám hru"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Priatelia"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Poďme sa rozprávať."</string>
+    <string name="empty_status" msgid="5938893404951307749">"Poďme večer četovať."</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah sa čoskoro zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

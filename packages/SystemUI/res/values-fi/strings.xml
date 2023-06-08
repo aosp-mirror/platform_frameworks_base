@@ -395,7 +395,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Aloita nyt"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ei ilmoituksia"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Ei uusia ilmoituksia"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Avaa lukitus uusia ilmoituksia varten"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Avaa lukitus niin näet ilmoituksia"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Vanhempasi ylläpitää tätä laitetta"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisaatiosi omistaa laitteen ja voi valvoa verkkoliikennettä"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> omistaa laitteen ja voi valvoa verkkoliikennettä"</string>
@@ -744,7 +744,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Palauta käyttöön <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobiilidata ei vaihdu automaattisesti saatavuuden perusteella"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Ei kiitos"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Kyllä, vaihda"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Kyllä, palauta"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Sovellus peittää käyttöoikeuspyynnön, joten Asetukset ei voi vahvistaa valintaasi."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Saako <xliff:g id="APP_0">%1$s</xliff:g> näyttää osia sovelluksesta <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"– Se voi lukea tietoja sovelluksesta <xliff:g id="APP">%1$s</xliff:g>."</string>

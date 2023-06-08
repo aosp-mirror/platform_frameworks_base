@@ -233,7 +233,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматично завъртане на екрана"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Местоположение"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Скрийнсейвър"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Камера: достъп"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Достъп до камерата"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Достъп до микрофона"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Налице"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Блокирано"</string>
@@ -249,11 +249,11 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"Предава се"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Устройство без име"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Няма налични устройства"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"не е установена връзка с Wi-Fi"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Не е установена връзка с Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркост"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Цветове: инверт."</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инвертиране на цветовете"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Корекция на цветове"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Управление на потребителите"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Управляване"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Затваряне"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Установена е връзка"</string>
@@ -273,7 +273,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ограничение от <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Служебни приложения"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нощно осветл."</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нощно осветление"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ще се вкл. по залез"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До изгрев"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Ще се включи в <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -317,7 +317,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Този режим блокира ВСИЧКИ звуци и вибрирания, включително от будилници, музика, видеоклипове и игри."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Докоснете отново, за да отворите"</string>
     <string name="tap_again" msgid="1315420114387908655">"Докоснете отново"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Прекарайте пръст нагоре, за да отключите"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Плъзнете нагоре, за да отключите"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Натиснете иконата за отключване, за да отворите"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Отключено с лице. Прекарайте пръст нагоре за отваряне."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Отключено с лице. Натиснете иконата за отключване, за да отворите."</string>
@@ -500,7 +500,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отключване с цел използване"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"При извличането на картите ви възникна проблем. Моля, опитайте отново по-късно"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Настройки за заключения екран"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"скенер за QR кодове"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Скенер за QR кодове"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Актуализира се"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Потребителски профил в Work"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Самолетен режим"</string>
@@ -618,7 +618,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Отваряне на настройките"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Слушалките (без микрофон) са свързани"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Слушалките са свързани"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Данни: икономия"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Икономия на данни"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Функцията „Икономия на данни“ е включена"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Вкл."</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Изкл."</string>
@@ -741,7 +741,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Да се изключат ли мобилните данни?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Няма да можете да използвате данни или интернет чрез <xliff:g id="CARRIER">%s</xliff:g>. Ще имате достъп до интернет само през Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"оператора си"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Искате ли да се върнете към <xliff:g id="CARRIER">%s</xliff:g>?"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Искате ли да превключите обратно към <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Мрежата за мобилни данни няма да се превключва автоматично въз основа на наличността"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Не, благодаря"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Да, превключване"</string>
@@ -832,7 +832,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Прекарайте пръст, за да видите повече"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Препоръките се зареждат"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мултимедия"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Скриване за <xliff:g id="APP_NAME">%1$s</xliff:g> на контролата за мултимедия?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Скриване на мултимед. контрола за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Текущата сесия за мултимедия не бе скрита."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скриване"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Възобновяване"</string>
@@ -942,7 +942,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Свързано"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Установена е временна връзка"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Слаба връзка"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Връзката за мобилни данни няма да е автоматична"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Връзката за мобилни данни няма да е автом."</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Няма връзка"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Няма други налични мрежи"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Няма налични мрежи"</string>
@@ -955,7 +955,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Вижте всички"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"За да превключите мрежите, прекъснете връзката с Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"С цел подобряване на практическата работа с устройството приложенията и услугите пак могат да сканират за Wi‑Fi мрежи по всяко време дори когато функцията за Wi‑Fi e изключена. Можете да промените съответното поведение от настройките за сканиране за Wi‑Fi. "<annotation id="link">"Промяна"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Изключване на самолетния режим"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Изключване на режима"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> иска да добави следния панел към бързите настройки"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Добавяне на панел"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Отмяна на добавянето"</string>
