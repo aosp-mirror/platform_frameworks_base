@@ -54,8 +54,6 @@ import org.mockito.Mockito.`when` as whenever
 @SmallTest
 class PulsingGestureListenerTest : SysuiTestCase() {
     @Mock
-    private lateinit var view: NotificationShadeWindowView
-    @Mock
     private lateinit var dockManager: DockManager
     @Mock
     private lateinit var falsingManager: FalsingManager
@@ -87,7 +85,6 @@ class PulsingGestureListenerTest : SysuiTestCase() {
         powerRepository = FakePowerRepository()
 
         underTest = PulsingGestureListener(
-                view,
                 falsingManager,
                 dockManager,
                 PowerInteractor(
