@@ -996,7 +996,6 @@
             android:name=".notetask.shortcut.LaunchNoteTaskActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" >
 
             <intent-filter>
@@ -1012,7 +1011,6 @@
             android:exported="false"
             android:enabled="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" />
 
         <activity
