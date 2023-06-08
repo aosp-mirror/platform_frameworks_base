@@ -242,15 +242,17 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     }
 
     private boolean isOwnerInForeground() {
-        final String clientPackage = mCurrentDialog.getOpPackageName();
-        final List<ActivityManager.RunningTaskInfo> runningTasks =
-                mActivityTaskManager.getTasks(1);
-        if (!runningTasks.isEmpty()) {
-            final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-            if (!topPackage.contentEquals(clientPackage)
-                    && !Utils.isSystem(mContext, clientPackage)) {
-                Log.w(TAG, "Evicting client due to: " + topPackage);
-                return false;
+        if (mCurrentDialog != null) {
+            final String clientPackage = mCurrentDialog.getOpPackageName();
+            final List<ActivityManager.RunningTaskInfo> runningTasks =
+                    mActivityTaskManager.getTasks(1);
+            if (!runningTasks.isEmpty()) {
+                final String topPackage = runningTasks.get(0).topActivity.getPackageName();
+                if (!topPackage.contentEquals(clientPackage)
+                        && !Utils.isSystem(mContext, clientPackage)) {
+                    Log.w(TAG, "Evicting client due to: " + topPackage);
+                    return false;
+                }
             }
         }
         return true;
