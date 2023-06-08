@@ -71,6 +71,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
+import com.android.systemui.decor.DebugRoundedCornerDelegate;
 import com.android.systemui.decor.DecorProvider;
 import com.android.systemui.decor.DecorProviderFactory;
 import com.android.systemui.decor.DecorProviderKt;
@@ -145,6 +146,10 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     protected RoundedCornerResDelegateImpl mRoundedCornerResDelegate;
     @VisibleForTesting
     protected DecorProviderFactory mRoundedCornerFactory;
+    @VisibleForTesting
+    protected DebugRoundedCornerDelegate mDebugRoundedCornerDelegate =
+            new DebugRoundedCornerDelegate();
+    protected DecorProviderFactory mDebugRoundedCornerFactory;
     private CutoutDecorProviderFactory mCutoutFactory;
     private int mProviderRefreshToken = 0;
     @VisibleForTesting
@@ -363,9 +368,15 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
      * it requires essentially re-init-ing this screen decorations process with the debug
      * information taken into account.
      */
-    private void setDebug(boolean debug) {
+    @VisibleForTesting
+    protected void setDebug(boolean debug) {
         if (mDebug == debug) {
             return;
+        }
+
+        mDebug = debug;
+        if (!mDebug) {
+            mDebugRoundedCornerDelegate.removeDebugState();
         }
 
         mExecutor.execute(() -> {
@@ -383,11 +394,16 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     }
 
     @NonNull
-    private List<DecorProvider> getProviders(boolean hasHwLayer) {
+    @VisibleForTesting
+    protected List<DecorProvider> getProviders(boolean hasHwLayer) {
         List<DecorProvider> decorProviders = new ArrayList<>(mDotFactory.getProviders());
         decorProviders.addAll(mFaceScanningFactory.getProviders());
         if (!hasHwLayer) {
-            decorProviders.addAll(mRoundedCornerFactory.getProviders());
+            if (mDebug && mDebugRoundedCornerFactory.getHasProviders()) {
+                decorProviders.addAll(mDebugRoundedCornerFactory.getProviders());
+            } else {
+                decorProviders.addAll(mRoundedCornerFactory.getProviders());
+            }
             decorProviders.addAll(mCutoutFactory.getProviders());
         }
         return decorProviders;
@@ -434,6 +450,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(
                 getPhysicalPixelDisplaySizeRatio());
         mRoundedCornerFactory = new RoundedCornerDecorProviderFactory(mRoundedCornerResDelegate);
+        mDebugRoundedCornerFactory =
+                new RoundedCornerDecorProviderFactory(mDebugRoundedCornerDelegate);
         mCutoutFactory = getCutoutFactory();
         mHwcScreenDecorationSupport = mContext.getDisplay().getDisplayDecorationSupport();
         updateHwLayerRoundedCornerDrawable();
@@ -966,6 +984,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mTintColor = colorsInvertedValue != 0 ? Color.WHITE : Color.BLACK;
         if (mDebug) {
             mTintColor = mDebugColor;
+            mDebugRoundedCornerDelegate.setColor(mTintColor);
+            //TODO(b/285941724): update the hwc layer color here too (or disable it in debug mode)
         }
 
         updateOverlayProviderViews(new Integer[] {
@@ -1038,6 +1058,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
             return;
         }
+        ipw.println("mDebug:" + mDebug);
 
         ipw.println("mIsPrivacyDotEnabled:" + isPrivacyDotEnabled());
         ipw.println("shouldOptimizeOverlayVisibility:" + shouldOptimizeVisibility());
@@ -1093,6 +1114,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             }
         }
         mRoundedCornerResDelegate.dump(pw, args);
+        mDebugRoundedCornerDelegate.dump(pw);
     }
 
     @VisibleForTesting
@@ -1115,8 +1137,9 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             mRotation = newRotation;
             mDisplayMode = newMod;
             mDisplayCutout = newCutout;
-            mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(
-                    getPhysicalPixelDisplaySizeRatio());
+            float ratio = getPhysicalPixelDisplaySizeRatio();
+            mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(ratio);
+            mDebugRoundedCornerDelegate.setPhysicalPixelDisplaySizeRatio(ratio);
             if (mScreenDecorHwcLayer != null) {
                 mScreenDecorHwcLayer.pendingConfigChange = false;
                 mScreenDecorHwcLayer.updateConfiguration(mDisplayUniqueId);
@@ -1139,7 +1162,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     }
 
     private boolean hasRoundedCorners() {
-        return mRoundedCornerFactory.getHasProviders();
+        return mRoundedCornerFactory.getHasProviders()
+                || mDebugRoundedCornerFactory.getHasProviders();
     }
 
     private boolean shouldOptimizeVisibility() {
@@ -1197,8 +1221,12 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             return;
         }
 
-        final Drawable topDrawable = mRoundedCornerResDelegate.getTopRoundedDrawable();
-        final Drawable bottomDrawable = mRoundedCornerResDelegate.getBottomRoundedDrawable();
+        Drawable topDrawable = mRoundedCornerResDelegate.getTopRoundedDrawable();
+        Drawable bottomDrawable = mRoundedCornerResDelegate.getBottomRoundedDrawable();
+        if (mDebug && (mDebugRoundedCornerFactory.getHasProviders())) {
+            topDrawable = mDebugRoundedCornerDelegate.getTopRoundedDrawable();
+            bottomDrawable = mDebugRoundedCornerDelegate.getBottomRoundedDrawable();
+        }
 
         if (topDrawable == null || bottomDrawable == null) {
             return;
@@ -1210,11 +1238,19 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         if (mScreenDecorHwcLayer == null) {
             return;
         }
-        mScreenDecorHwcLayer.updateRoundedCornerExistenceAndSize(
-                mRoundedCornerResDelegate.getHasTop(),
-                mRoundedCornerResDelegate.getHasBottom(),
-                mRoundedCornerResDelegate.getTopRoundedSize().getWidth(),
-                mRoundedCornerResDelegate.getBottomRoundedSize().getWidth());
+        if (mDebug && mDebugRoundedCornerFactory.getHasProviders()) {
+            mScreenDecorHwcLayer.updateRoundedCornerExistenceAndSize(
+                    mDebugRoundedCornerDelegate.getHasTop(),
+                    mDebugRoundedCornerDelegate.getHasBottom(),
+                    mDebugRoundedCornerDelegate.getTopRoundedSize().getWidth(),
+                    mDebugRoundedCornerDelegate.getBottomRoundedSize().getWidth());
+        } else {
+            mScreenDecorHwcLayer.updateRoundedCornerExistenceAndSize(
+                    mRoundedCornerResDelegate.getHasTop(),
+                    mRoundedCornerResDelegate.getHasBottom(),
+                    mRoundedCornerResDelegate.getTopRoundedSize().getWidth(),
+                    mRoundedCornerResDelegate.getBottomRoundedSize().getWidth());
+        }
     }
 
     @VisibleForTesting

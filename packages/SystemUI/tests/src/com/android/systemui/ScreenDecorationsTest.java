@@ -62,6 +62,7 @@ import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.PathParser;
 import android.util.Size;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -82,6 +83,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.decor.CornerDecorProvider;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
 import com.android.systemui.decor.CutoutDecorProviderImpl;
+import com.android.systemui.decor.DebugRoundedCornerModel;
 import com.android.systemui.decor.DecorProvider;
 import com.android.systemui.decor.DecorProviderFactory;
 import com.android.systemui.decor.FaceScanningOverlayProviderImpl;
@@ -258,6 +260,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
             }
         });
         mScreenDecorations.mDisplayInfo = mDisplayInfo;
+        // Make sure tests are never run starting in debug mode
+        mScreenDecorations.setDebug(false);
         doReturn(1f).when(mScreenDecorations).getPhysicalPixelDisplaySizeRatio();
         doNothing().when(mScreenDecorations).updateOverlayProviderViews(any());
 
@@ -1051,6 +1055,82 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertEquals(2, providers.size());
         assertEquals(true, providers.get(0).getAlignedBounds().contains(BOUNDS_POSITION_BOTTOM));
         assertEquals(true, providers.get(1).getAlignedBounds().contains(BOUNDS_POSITION_BOTTOM));
+    }
+
+    @Test
+    public void testDebugRoundedCorners_noDeviceCornersSet() {
+        setupResources(0 /* radius */, 0 /* radiusTop */, 0 /* radiusBottom */,
+                null /* roundedTopDrawable */, null /* roundedBottomDrawable */,
+                0 /* roundedPadding */, false /* privacyDot */, false /* faceScanning */);
+
+        mScreenDecorations.start();
+        // No rounded corners exist at this point
+        verifyOverlaysExistAndAdded(false, false, false, false, View.VISIBLE);
+
+        // Path from rounded.xml, scaled by 10x to produce 80x80 corners
+        Path debugPath = PathParser.createPathFromPathData("M8,0H0v8C0,3.6,3.6,0,8,0z");
+        // WHEN debug corners are added to the delegate
+        DebugRoundedCornerModel debugCorner = new DebugRoundedCornerModel(
+                debugPath,
+                80,
+                80,
+                10f,
+                10f
+        );
+        mScreenDecorations.mDebugRoundedCornerDelegate
+                .applyNewDebugCorners(debugCorner, debugCorner);
+
+        // AND debug mode is entered
+        mScreenDecorations.setDebug(true);
+        mExecutor.runAllReady();
+
+        // THEN the debug corners provide decor
+        List<DecorProvider> providers = mScreenDecorations.getProviders(false);
+        assertEquals(4, providers.size());
+
+        // Top and bottom overlays contain the debug rounded corners
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
+    }
+
+    @Test
+    public void testDebugRoundedCornersRemoved_noDeviceCornersSet() {
+        // GIVEN a device with no rounded corners defined
+        setupResources(0 /* radius */, 0 /* radiusTop */, 0 /* radiusBottom */,
+                null /* roundedTopDrawable */, null /* roundedBottomDrawable */,
+                0 /* roundedPadding */, false /* privacyDot */, false /* faceScanning */);
+
+        mScreenDecorations.start();
+        // No rounded corners exist at this point
+        verifyOverlaysExistAndAdded(false, false, false, false, View.VISIBLE);
+
+        // Path from rounded.xml, scaled by 10x to produce 80x80 corners
+        Path debugPath = PathParser.createPathFromPathData("M8,0H0v8C0,3.6,3.6,0,8,0z");
+        // WHEN debug corners are added to the delegate
+        DebugRoundedCornerModel debugCorner = new DebugRoundedCornerModel(
+                debugPath,
+                80,
+                80,
+                10f,
+                10f
+        );
+        mScreenDecorations.mDebugRoundedCornerDelegate
+                .applyNewDebugCorners(debugCorner, debugCorner);
+
+        // AND debug mode is entered
+        mScreenDecorations.setDebug(true);
+        mExecutor.runAllReady();
+
+        // Top and bottom overlays contain the debug rounded corners
+        verifyOverlaysExistAndAdded(false, true, false, true, View.VISIBLE);
+
+        // WHEN debug is exited
+        mScreenDecorations.setDebug(false);
+        mExecutor.runAllReady();
+
+        // THEN the decor is removed
+        verifyOverlaysExistAndAdded(false, false, false, false, View.VISIBLE);
+        assertThat(mScreenDecorations.mDebugRoundedCornerDelegate.getHasBottom()).isFalse();
+        assertThat(mScreenDecorations.mDebugRoundedCornerDelegate.getHasTop()).isFalse();
     }
 
     @Test
