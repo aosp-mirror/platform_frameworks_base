@@ -1509,6 +1509,8 @@ public class LockPatternView extends View {
             int resultColor = ColorUtils.blendARGB(mDotColor, mDotActivatedColor,
                     /* ratio= */ activationAnimationProgress);
             mPaint.setColor(resultColor);
+        } else if (!mFadePattern && partOfPattern){
+            mPaint.setColor(mDotActivatedColor);
         } else {
             mPaint.setColor(getDotColor());
         }
