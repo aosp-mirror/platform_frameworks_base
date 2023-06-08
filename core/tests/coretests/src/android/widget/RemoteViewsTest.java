@@ -63,6 +63,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
@@ -720,6 +721,43 @@ public class RemoteViewsTest {
     }
 
     @Test
+    public void visitUris_themedIcons() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final Icon iconLight = Icon.createWithContentUri("content://light/icon");
+        final Icon iconDark = Icon.createWithContentUri("content://dark/icon");
+        views.setIcon(R.id.layout, "setLargeIcon", iconLight, iconDark);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        views.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(iconLight.getUri()));
+        verify(visitor, times(1)).accept(eq(iconDark.getUri()));
+    }
+
+    @Test
+    public void visitUris_nestedViews() {
+        final RemoteViews outer = new RemoteViews(mPackage, R.layout.remote_views_test);
+
+        final RemoteViews inner = new RemoteViews(mPackage, 33);
+        final Uri imageUriI = Uri.parse("content://inner/image");
+        final Icon icon1 = Icon.createWithContentUri("content://inner/icon1");
+        final Icon icon2 = Icon.createWithContentUri("content://inner/icon2");
+        final Icon icon3 = Icon.createWithContentUri("content://inner/icon3");
+        final Icon icon4 = Icon.createWithContentUri("content://inner/icon4");
+        inner.setImageViewUri(R.id.image, imageUriI);
+        inner.setTextViewCompoundDrawables(R.id.text, icon1, icon2, icon3, icon4);
+
+        outer.addView(R.id.layout, inner);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        outer.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(imageUriI));
+        verify(visitor, times(1)).accept(eq(icon1.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4.getUri()));
+    }
+
+    @Test
     public void visitUris_separateOrientation() {
         final RemoteViews landscape = new RemoteViews(mPackage, R.layout.remote_views_test);
         final Uri imageUriL = Uri.parse("content://landscape/image");
@@ -753,5 +791,44 @@ public class RemoteViewsTest {
         verify(visitor, times(1)).accept(eq(icon2P.getUri()));
         verify(visitor, times(1)).accept(eq(icon3P.getUri()));
         verify(visitor, times(1)).accept(eq(icon4P.getUri()));
+    }
+
+    @Test
+    public void visitUris_sizedViews() {
+        final RemoteViews large = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final Uri imageUriL = Uri.parse("content://large/image");
+        final Icon icon1L = Icon.createWithContentUri("content://large/icon1");
+        final Icon icon2L = Icon.createWithContentUri("content://large/icon2");
+        final Icon icon3L = Icon.createWithContentUri("content://large/icon3");
+        final Icon icon4L = Icon.createWithContentUri("content://large/icon4");
+        large.setImageViewUri(R.id.image, imageUriL);
+        large.setTextViewCompoundDrawables(R.id.text, icon1L, icon2L, icon3L, icon4L);
+
+        final RemoteViews small = new RemoteViews(mPackage, 33);
+        final Uri imageUriS = Uri.parse("content://small/image");
+        final Icon icon1S = Icon.createWithContentUri("content://small/icon1");
+        final Icon icon2S = Icon.createWithContentUri("content://small/icon2");
+        final Icon icon3S = Icon.createWithContentUri("content://small/icon3");
+        final Icon icon4S = Icon.createWithContentUri("content://small/icon4");
+        small.setImageViewUri(R.id.image, imageUriS);
+        small.setTextViewCompoundDrawables(R.id.text, icon1S, icon2S, icon3S, icon4S);
+
+        HashMap<SizeF, RemoteViews> sizedViews = new HashMap<>();
+        sizedViews.put(new SizeF(300, 300), large);
+        sizedViews.put(new SizeF(100, 100), small);
+        RemoteViews views = new RemoteViews(sizedViews);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        views.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(imageUriL));
+        verify(visitor, times(1)).accept(eq(icon1L.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2L.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3L.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4L.getUri()));
+        verify(visitor, times(1)).accept(eq(imageUriS));
+        verify(visitor, times(1)).accept(eq(icon1S.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2S.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3S.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4S.getUri()));
     }
 }
