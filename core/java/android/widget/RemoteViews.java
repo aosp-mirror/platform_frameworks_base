@@ -1672,6 +1672,11 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return VIEW_GROUP_ACTION_ADD_TAG;
         }
+
+        @Override
+        public final void visitUris(@NonNull Consumer<Uri> visitor) {
+            mNestedViews.visitUris(visitor);
+        }
     }
 
     /**

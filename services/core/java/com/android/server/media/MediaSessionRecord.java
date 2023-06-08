@@ -18,6 +18,8 @@ package com.android.server.media;
 
 import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
@@ -49,11 +51,13 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
 
 import com.android.server.LocalServices;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -67,6 +71,10 @@ import java.util.List;
 // TODO(jaewan): Do not call service method directly -- introduce listener instead.
 public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionRecordImpl {
     private static final String TAG = "MediaSessionRecord";
+    private static final String[] ART_URIS = new String[] {
+            MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+            MediaMetadata.METADATA_KEY_ART_URI,
+            MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI};
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
@@ -120,6 +128,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     private final SessionStub mSession;
     private final SessionCb mSessionCb;
     private final MediaSessionService mService;
+    private final UriGrantsManagerInternal mUgmInternal;
     private final Context mContext;
 
     private final Object mLock = new Object();
@@ -182,6 +191,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mAudioAttrs = DEFAULT_ATTRIBUTES;
         mPolicies = policies;
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
 
         // May throw RemoteException if the session app is killed.
         mSessionCb.mCb.asBinder().linkToDeath(this, 0);
@@ -859,19 +869,43 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void setMetadata(MediaMetadata metadata, long duration, String metadataDescription)
                 throws RemoteException {
             synchronized (mLock) {
-                MediaMetadata temp = metadata == null ? null : new MediaMetadata.Builder(metadata)
-                        .build();
-                // This is to guarantee that the underlying bundle is unparceled
-                // before we set it to prevent concurrent reads from throwing an
-                // exception
-                if (temp != null) {
-                    temp.size();
-                }
-                mMetadata = temp;
                 mDuration = duration;
                 mMetadataDescription = metadataDescription;
+                mMetadata = sanitizeMediaMetadata(metadata);
             }
             mHandler.post(MessageHandler.MSG_UPDATE_METADATA);
+        }
+
+        private MediaMetadata sanitizeMediaMetadata(MediaMetadata metadata) {
+            if (metadata == null) {
+                return null;
+            }
+            MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder(metadata);
+            for (String key: ART_URIS) {
+                String uriString = metadata.getString(key);
+                if (TextUtils.isEmpty(uriString)) {
+                    continue;
+                }
+                Uri uri = Uri.parse(uriString);
+                if (!ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+                    continue;
+                }
+                try {
+                    mUgmInternal.checkGrantUriPermission(getUid(),
+                            getPackageName(),
+                            ContentProvider.getUriWithoutUserId(uri),
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                            ContentProvider.getUserIdFromUri(uri, getUserId()));
+                } catch (SecurityException e) {
+                    metadataBuilder.putString(key, null);
+                }
+            }
+            MediaMetadata sanitizedMetadata = metadataBuilder.build();
+            // sanitizedMetadata.size() guarantees that the underlying bundle is unparceled
+            // before we set it to prevent concurrent reads from throwing an
+            // exception
+            sanitizedMetadata.size();
+            return sanitizedMetadata;
         }
 
         @Override
