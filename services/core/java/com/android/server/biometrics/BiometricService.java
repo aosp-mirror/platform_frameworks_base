@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
@@ -123,6 +124,8 @@ public class BiometricService extends SystemService {
     @VisibleForTesting
     AuthSession mAuthSession;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    private final BiometricSensorPrivacy mBiometricSensorPrivacy;
 
     /**
      * Tracks authenticatorId invalidation. For more details, see
@@ -933,7 +936,7 @@ public class BiometricService extends SystemService {
 
         return PreAuthInfo.create(mTrustManager, mDevicePolicyManager, mSettingObserver, mSensors,
                 userId, promptInfo, opPackageName, false /* checkDevicePolicyManager */,
-                getContext());
+                getContext(), mBiometricSensorPrivacy);
     }
 
     /**
@@ -1026,6 +1029,11 @@ public class BiometricService extends SystemService {
         public UserManager getUserManager(Context context) {
             return context.getSystemService(UserManager.class);
         }
+
+        public BiometricSensorPrivacy getBiometricSensorPrivacy(Context context) {
+            return new BiometricSensorPrivacyImpl(context.getSystemService(
+                    SensorPrivacyManager.class));
+        }
     }
 
     /**
@@ -1054,6 +1062,7 @@ public class BiometricService extends SystemService {
         mRequestCounter = mInjector.getRequestGenerator();
         mBiometricContext = injector.getBiometricContext(context);
         mUserManager = injector.getUserManager(context);
+        mBiometricSensorPrivacy = injector.getBiometricSensorPrivacy(context);
 
         try {
             injector.getActivityManagerService().registerUserSwitchObserver(
@@ -1290,7 +1299,7 @@ public class BiometricService extends SystemService {
                 final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager,
                         mDevicePolicyManager, mSettingObserver, mSensors, userId, promptInfo,
                         opPackageName, promptInfo.isDisallowBiometricsIfPolicyExists(),
-                        getContext());
+                        getContext(), mBiometricSensorPrivacy);
 
                 final Pair<Integer, Integer> preAuthStatus = preAuthInfo.getPreAuthenticateStatus();
 
@@ -1300,9 +1309,7 @@ public class BiometricService extends SystemService {
                         + promptInfo.isIgnoreEnrollmentState());
                 // BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED is added so that BiometricPrompt can
                 // be shown for this case.
-                if (preAuthStatus.second == BiometricConstants.BIOMETRIC_SUCCESS
-                        || preAuthStatus.second
-                        == BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED) {
+                if (preAuthStatus.second == BiometricConstants.BIOMETRIC_SUCCESS) {
                     // If BIOMETRIC_WEAK or BIOMETRIC_STRONG are allowed, but not enrolled, but
                     // CREDENTIAL is requested and available, set the bundle to only request
                     // CREDENTIAL.

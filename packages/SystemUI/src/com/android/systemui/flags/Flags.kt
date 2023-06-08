@@ -598,7 +598,7 @@ object Flags {
 
     // 1300 - screenshots
     // TODO(b/264916608): Tracking Bug
-    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata", teamfood = true)
+    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
 
     // TODO(b/266955521): Tracking bug
     @JvmField val SCREENSHOT_DETECTION = releasedFlag(1303, "screenshot_detection")
@@ -721,7 +721,7 @@ object Flags {
     // TODO(b/277201412): Tracking Bug
     @JvmField
     val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION =
-            unreleasedFlag(2805, "split_shade_subpixel_optimization", teamfood = true)
+            releasedFlag(2805, "split_shade_subpixel_optimization")
 
     // TODO(b/278761837): Tracking Bug
     @JvmField

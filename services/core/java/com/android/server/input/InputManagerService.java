@@ -393,10 +393,12 @@ public class InputManagerService extends IInputManager.Stub
     static class Injector {
         private final Context mContext;
         private final Looper mLooper;
+        private final UEventManager mUEventManager;
 
-        Injector(Context context, Looper looper) {
+        Injector(Context context, Looper looper, UEventManager uEventManager) {
             mContext = context;
             mLooper = looper;
+            mUEventManager = uEventManager;
         }
 
         Context getContext() {
@@ -405,6 +407,10 @@ public class InputManagerService extends IInputManager.Stub
 
         Looper getLooper() {
             return mLooper;
+        }
+
+        UEventManager getUEventManager() {
+            return mUEventManager;
         }
 
         NativeInputManagerService getNativeService(InputManagerService service) {
@@ -417,7 +423,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     public InputManagerService(Context context) {
-        this(new Injector(context, DisplayThread.get().getLooper()));
+        this(new Injector(context, DisplayThread.get().getLooper(), new UEventManager() {}));
     }
 
     @VisibleForTesting
@@ -432,10 +438,12 @@ public class InputManagerService extends IInputManager.Stub
         mSettingsObserver = new InputSettingsObserver(mContext, mHandler, this, mNative);
         mKeyboardLayoutManager = new KeyboardLayoutManager(mContext, mNative, mDataStore,
                 injector.getLooper());
-        mBatteryController = new BatteryController(mContext, mNative, injector.getLooper());
+        mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
+                injector.getUEventManager());
         mKeyboardBacklightController = InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
                 ? new KeyboardBacklightController(mContext, mNative, mDataStore,
-                injector.getLooper()) : new KeyboardBacklightControllerInterface() {};
+                        injector.getLooper(), injector.getUEventManager())
+                : new KeyboardBacklightControllerInterface() {};
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
 
         mUseDevInputEventForAudioJack =

@@ -30,6 +30,9 @@ import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -41,6 +44,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -53,6 +57,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.NotificationListenerService;
@@ -72,6 +77,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -183,6 +190,7 @@ public class PreferencesHelper implements RankingConfig {
     private final RankingHandler mRankingHandler;
     private final ZenModeHelper mZenModeHelper;
     private final PermissionHelper mPermissionHelper;
+    private final PermissionManager mPermissionManager;
     private final NotificationChannelLogger mNotificationChannelLogger;
     private final AppOpsManager mAppOps;
 
@@ -198,7 +206,7 @@ public class PreferencesHelper implements RankingConfig {
     private boolean mAllowInvalidShortcuts = false;
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
-            ZenModeHelper zenHelper, PermissionHelper permHelper,
+            ZenModeHelper zenHelper, PermissionHelper permHelper, PermissionManager permManager,
             NotificationChannelLogger notificationChannelLogger,
             AppOpsManager appOpsManager,
             SysUiStatsEvent.BuilderFactory statsEventBuilderFactory,
@@ -207,6 +215,7 @@ public class PreferencesHelper implements RankingConfig {
         mZenModeHelper = zenHelper;
         mRankingHandler = rankingHandler;
         mPermissionHelper = permHelper;
+        mPermissionManager = permManager;
         mPm = pm;
         mNotificationChannelLogger = notificationChannelLogger;
         mAppOps = appOpsManager;
@@ -2027,6 +2036,43 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     /**
+     * @return State of the full screen intent permission for this package.
+     */
+    @VisibleForTesting
+    int getFsiState(String pkg, int uid, boolean requestedFSIPermission, boolean isFlagEnabled) {
+        if (!isFlagEnabled) {
+            return 0;
+        }
+        if (!requestedFSIPermission) {
+            return PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
+        }
+        final AttributionSource attributionSource =
+                new AttributionSource.Builder(uid).setPackageName(pkg).build();
+
+        final int result = mPermissionManager.checkPermissionForPreflight(
+                android.Manifest.permission.USE_FULL_SCREEN_INTENT, attributionSource);
+
+        if (result == PermissionManager.PERMISSION_GRANTED) {
+            return PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
+        }
+        return PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED;
+    }
+
+    /**
+     * @return True if the current full screen intent permission state for this package was set by
+     * the user.
+     */
+    @VisibleForTesting
+    boolean isFsiPermissionUserSet(String pkg, int uid, int fsiState, int currentPermissionFlags,
+                                   boolean isStickyHunFlagEnabled) {
+        if (!isStickyHunFlagEnabled
+                || fsiState == PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED) {
+            return false;
+        }
+        return (currentPermissionFlags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
+    }
+
+    /**
      * Fills out {@link PackageNotificationPreferences} proto and wraps it in a {@link StatsEvent}.
      */
     public void pullPackagePreferencesStats(List<StatsEvent> events,
@@ -2070,7 +2116,33 @@ public class PreferencesHelper implements RankingConfig {
 
                 event.writeInt(r.visibility);
                 event.writeInt(r.lockedAppFields);
-                event.writeBoolean(importanceIsUserSet);  // optional bool user_set_importance = 5;
+
+                // optional bool user_set_importance = 5;
+                event.writeBoolean(importanceIsUserSet);
+
+                // optional FsiState fsi_state = 6;
+                final boolean isStickyHunFlagEnabled = SystemUiSystemPropertiesFlags.getResolver()
+                        .isEnabled(NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI);
+
+                final boolean requestedFSIPermission = mPermissionHelper.hasRequestedPermission(
+                        android.Manifest.permission.USE_FULL_SCREEN_INTENT, r.pkg, r.uid);
+
+                final int fsiState = getFsiState(r.pkg, r.uid, requestedFSIPermission,
+                        isStickyHunFlagEnabled);
+
+                event.writeInt(fsiState);
+
+                // optional bool is_fsi_permission_user_set = 7;
+                final int currentPermissionFlags = mPm.getPermissionFlags(
+                        android.Manifest.permission.USE_FULL_SCREEN_INTENT, r.pkg,
+                        UserHandle.getUserHandleForUid(r.uid));
+
+                final boolean isUserSet =
+                        isFsiPermissionUserSet(r.pkg, r.uid, fsiState, currentPermissionFlags,
+                                isStickyHunFlagEnabled);
+
+                event.writeBoolean(isUserSet);
+
                 events.add(event.build());
             }
         }
