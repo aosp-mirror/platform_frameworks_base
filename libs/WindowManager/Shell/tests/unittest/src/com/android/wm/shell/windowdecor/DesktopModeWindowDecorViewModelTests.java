@@ -90,6 +90,7 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
     @Mock private DesktopModeWindowDecorViewModel.InputMonitorFactory mMockInputMonitorFactory;
     @Mock private Supplier<SurfaceControl.Transaction> mTransactionFactory;
     @Mock private SurfaceControl.Transaction mTransaction;
+    @Mock private Display mDisplay;
     private final List<InputManager> mMockInputManagers = new ArrayList<>();
 
     private DesktopModeWindowDecorViewModel mDesktopModeWindowDecorViewModel;
@@ -126,6 +127,9 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
         final InputChannel[] inputChannels = InputChannel.openInputChannelPair(TAG);
         inputChannels[0].dispose();
         when(mInputMonitor.getInputChannel()).thenReturn(inputChannels[1]);
+
+        mDesktopModeWindowDecoration.mDisplay = mDisplay;
+        doReturn(Display.DEFAULT_DISPLAY).when(mDisplay).getDisplayId();
     }
 
     @Test

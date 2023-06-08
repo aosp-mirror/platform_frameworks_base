@@ -419,4 +419,8 @@
     <dimen name="freeform_resize_handle">15dp</dimen>
 
     <dimen name="freeform_resize_corner">44dp</dimen>
+
+    <!-- The height of the area at the top of the screen where a freeform task will transition to
+    fullscreen if dragged until the top bound of the task is within the area. -->
+    <dimen name="desktop_mode_transition_area_height">16dp</dimen>
 </resources>
