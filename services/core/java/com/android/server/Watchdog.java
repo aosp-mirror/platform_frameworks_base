@@ -142,6 +142,7 @@ public class Watchdog implements Dumpable {
             "android.hardware.camera.provider@2.4::ICameraProvider",
             "android.hardware.gnss@1.0::IGnss",
             "android.hardware.graphics.allocator@2.0::IAllocator",
+            "android.hardware.graphics.allocator@4.0::IAllocator",
             "android.hardware.graphics.composer@2.1::IComposer",
             "android.hardware.health@2.0::IHealth",
             "android.hardware.light@2.0::ILight",
