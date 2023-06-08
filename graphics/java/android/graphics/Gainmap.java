@@ -122,6 +122,16 @@ public final class Gainmap implements Parcelable {
     }
 
     /**
+     * Creates a new gainmap using the provided gainmap as the metadata source and the provided
+     * bitmap as the replacement for the gainmapContents
+     * TODO: Make public, it's useful
+     * @hide
+     */
+    public Gainmap(@NonNull Gainmap gainmap, @NonNull Bitmap gainmapContents) {
+        this(gainmapContents, nCreateCopy(gainmap.mNativePtr));
+    }
+
+    /**
      * @return Returns the image data of the gainmap represented as a Bitmap. This is represented
      * as a Bitmap for broad API compatibility, however certain aspects of the Bitmap are ignored
      * such as {@link Bitmap#getColorSpace()} or {@link Bitmap#getGainmap()} as they are not
@@ -325,6 +335,7 @@ public final class Gainmap implements Parcelable {
 
     private static native long nGetFinalizer();
     private static native long nCreateEmpty();
+    private static native long nCreateCopy(long source);
 
     private static native void nSetBitmap(long ptr, Bitmap bitmap);
 
