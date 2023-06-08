@@ -1092,6 +1092,17 @@ public final class BroadcastQueueModernImplTest {
         verifyPendingRecords(greenQueue, List.of(screenOff, screenOn));
         verifyPendingRecords(redQueue, List.of(screenOff));
         verifyPendingRecords(blueQueue, List.of(screenOff, screenOn));
+
+        final BroadcastRecord screenOffRecord = makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), resultTo, false);
+        screenOffRecord.setDeliveryState(2, BroadcastRecord.DELIVERY_DEFERRED,
+                "testDeliveryGroupPolicy_resultTo_diffReceivers");
+        mImpl.enqueueBroadcastLocked(screenOffRecord);
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), resultTo, false));
+        verifyPendingRecords(greenQueue, List.of(screenOff, screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOn));
     }
 
     @Test
@@ -1274,6 +1285,36 @@ public final class BroadcastQueueModernImplTest {
                 "TAG_A", now + 2000, 10);
         verifyPendingRecords(queue, List.of(
                 dropboxEntryBroadcast2.first, expectedMergedBroadcast.first));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_merged_multipleReceivers() {
+        final long now = SystemClock.elapsedRealtime();
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast1 = createDropboxBroadcast(
+                "TAG_A", now, 2);
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast2 = createDropboxBroadcast(
+                "TAG_A", now + 1000, 4);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast1.first,
+                dropboxEntryBroadcast1.second,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_RED, CLASS_RED)),
+                false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast2.first,
+                dropboxEntryBroadcast2.second,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_RED, CLASS_RED)),
+                false));
+
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+
+        verifyPendingRecords(greenQueue,
+                List.of(dropboxEntryBroadcast1.first, dropboxEntryBroadcast2.first));
+        verifyPendingRecords(redQueue,
+                List.of(dropboxEntryBroadcast1.first, dropboxEntryBroadcast2.first));
     }
 
     @Test
