@@ -77,6 +77,7 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
             )
 
         whenever(controller.users).thenAnswer { users }
+        whenever(controller.isUserSwitcherEnabled).thenReturn(true)
 
         underTest =
             object : BaseUserSwitcherAdapter(controller) {
@@ -158,6 +159,19 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
                     ),
                 )
             )
+        assertThat(underTest.count).isEqualTo(users.size)
+    }
+
+    @Test
+    fun count_onlyShowsCurrentUserWhenMultiUserDisabled() {
+        whenever(controller.isUserSwitcherEnabled).thenReturn(false)
+        assertThat(underTest.count).isEqualTo(1)
+        assertThat(underTest.getItem(0).isCurrent).isTrue()
+    }
+
+    @Test
+    fun count_doesNotIgnoreAllOtherUsersWhenMultiUserEnabled() {
+        whenever(controller.isUserSwitcherEnabled).thenReturn(true)
         assertThat(underTest.count).isEqualTo(users.size)
     }
 
