@@ -960,7 +960,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     "Virtual device doesn't have a virtual display with ID " + displayId);
         }
 
-        releaseOwnedVirtualDisplayResources(virtualDisplayWrapper);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            releaseOwnedVirtualDisplayResources(virtualDisplayWrapper);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void checkVirtualInputDeviceDisplayIdAssociation(int displayId) {
