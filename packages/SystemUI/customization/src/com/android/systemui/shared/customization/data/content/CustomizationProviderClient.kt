@@ -148,11 +148,11 @@ interface CustomizationProviderClient {
          */
         val isEnabled: Boolean = true,
         /**
-         * If the affordance is disabled, this is a set of instruction messages to be shown to the
-         * user when the disabled affordance is selected. The instructions should help the user
-         * figure out what to do in order to re-neable this affordance.
+         * If the affordance is disabled, this is the explanation to be shown to the user when the
+         * disabled affordance is selected. The instructions should help the user figure out what to
+         * do in order to re-neable this affordance.
          */
-        val enablementInstructions: List<String>? = null,
+        val enablementExplanation: String? = null,
         /**
          * If the affordance is disabled, this is a label for a button shown together with the set
          * of instruction messages when the disabled affordance is selected. The button should help
@@ -326,10 +326,10 @@ class CustomizationProviderClientImpl(
                                 Contract.LockScreenQuickAffordances.AffordanceTable.Columns
                                     .IS_ENABLED
                             )
-                        val enablementInstructionsColumnIndex =
+                        val enablementExplanationColumnIndex =
                             cursor.getColumnIndex(
                                 Contract.LockScreenQuickAffordances.AffordanceTable.Columns
-                                    .ENABLEMENT_INSTRUCTIONS
+                                    .ENABLEMENT_EXPLANATION
                             )
                         val enablementActionTextColumnIndex =
                             cursor.getColumnIndex(
@@ -351,7 +351,7 @@ class CustomizationProviderClientImpl(
                                 nameColumnIndex == -1 ||
                                 iconColumnIndex == -1 ||
                                 isEnabledColumnIndex == -1 ||
-                                enablementInstructionsColumnIndex == -1 ||
+                                enablementExplanationColumnIndex == -1 ||
                                 enablementActionTextColumnIndex == -1 ||
                                 enablementActionIntentColumnIndex == -1 ||
                                 configureIntentColumnIndex == -1
@@ -367,13 +367,8 @@ class CustomizationProviderClientImpl(
                                     name = cursor.getString(nameColumnIndex),
                                     iconResourceId = cursor.getInt(iconColumnIndex),
                                     isEnabled = cursor.getInt(isEnabledColumnIndex) == 1,
-                                    enablementInstructions =
-                                        cursor
-                                            .getString(enablementInstructionsColumnIndex)
-                                            ?.split(
-                                                Contract.LockScreenQuickAffordances.AffordanceTable
-                                                    .ENABLEMENT_INSTRUCTIONS_DELIMITER
-                                            ),
+                                    enablementExplanation =
+                                        cursor.getString(enablementExplanationColumnIndex),
                                     enablementActionText =
                                         cursor.getString(enablementActionTextColumnIndex),
                                     enablementActionIntent =
