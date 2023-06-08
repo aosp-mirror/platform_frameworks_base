@@ -86,6 +86,16 @@ jlong Gainmap_createEmpty(JNIEnv*, jobject) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(gainmap));
 }
 
+jlong Gainmap_createCopy(JNIEnv*, jobject, jlong sourcePtr) {
+    Gainmap* gainmap = new Gainmap();
+    gainmap->incStrong(0);
+    if (sourcePtr) {
+        Gainmap* src = fromJava(sourcePtr);
+        gainmap->info = src->info;
+    }
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(gainmap));
+}
+
 static void Gainmap_setBitmap(JNIEnv* env, jobject, jlong gainmapPtr, jobject jBitmap) {
     android::Bitmap* bitmap = GraphicsJNI::getNativeBitmap(env, jBitmap);
     fromJava(gainmapPtr)->bitmap = sk_ref_sp(bitmap);
@@ -237,6 +247,7 @@ static void Gainmap_readFromParcel(JNIEnv* env, jobject, jlong nativeObject, job
 static const JNINativeMethod gGainmapMethods[] = {
         {"nGetFinalizer", "()J", (void*)Gainmap_getNativeFinalizer},
         {"nCreateEmpty", "()J", (void*)Gainmap_createEmpty},
+        {"nCreateCopy", "(J)J", (void*)Gainmap_createCopy},
         {"nSetBitmap", "(JLandroid/graphics/Bitmap;)V", (void*)Gainmap_setBitmap},
         {"nSetRatioMin", "(JFFF)V", (void*)Gainmap_setRatioMin},
         {"nGetRatioMin", "(J[F)V", (void*)Gainmap_getRatioMin},

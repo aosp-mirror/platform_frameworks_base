@@ -55,7 +55,9 @@ private val AllDemos = listOf(
                 Demo("Color Grid", R.layout.color_grid),
                 Demo("Gradient Sweep", R.layout.gradient_sweep),
                 Demo("Gainmap Image", R.layout.gainmap_image),
-                Demo("Gainmap Decode Test", R.layout.gainmap_decode_test, commonControls = false)
+                Demo("Gainmap Decode Test", R.layout.gainmap_decode_test, commonControls = false),
+                Demo("Gainmap Transform Test", R.layout.gainmap_transform_test,
+                        commonControls = false)
         )),
         DemoGroup("Materials", listOf(
                 Demo("Glass", GlassActivity::class),
