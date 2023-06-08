@@ -27,7 +27,6 @@ import com.android.internal.os.RoSystemProperties
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
-import com.android.server.permission.access.AccessUri
 import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.MutateStateScope
@@ -66,22 +65,6 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     override val objectScheme: String
         get() = PermissionUri.SCHEME
-
-    override fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int {
-        subject as UidUri
-        `object` as PermissionUri
-        return getPermissionFlags(subject.appId, subject.userId, `object`.permissionName)
-    }
-
-    override fun MutateStateScope.setDecision(
-        subject: AccessUri,
-        `object`: AccessUri,
-        decision: Int
-    ) {
-        subject as UidUri
-        `object` as PermissionUri
-        setPermissionFlags(subject.appId, subject.userId, `object`.permissionName, decision)
-    }
 
     override fun GetStateScope.onStateMutated() {
         onPermissionFlagsChangedListeners.forEachIndexed { _, it -> it.onStateMutated() }

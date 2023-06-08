@@ -130,17 +130,6 @@ class AccessCheckingService(context: Context) : SystemService(context) {
             }
         } as IndexedMap<String, IndexedListSet<String>>
 
-    fun getDecision(subject: AccessUri, `object`: AccessUri): Int =
-        getState {
-            with(policy) { getDecision(subject, `object`) }
-        }
-
-    fun setDecision(subject: AccessUri, `object`: AccessUri, decision: Int) {
-        mutateState {
-            with(policy) { setDecision(subject, `object`, decision) }
-        }
-    }
-
     internal fun onUserAdded(userId: Int) {
         mutateState {
             with(policy) { onUserAdded(userId) }
