@@ -52,7 +52,6 @@ import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
@@ -755,8 +754,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             // Alpha progress should be linear on lockscreen shade expansion.
             return progress;
         }
-        if (mIsSmallScreen || !mFeatureFlags.isEnabled(
-                Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+        if (mIsSmallScreen) {
             return ShadeInterpolation.getContentAlpha(progress);
         } else {
             return mLargeScreenShadeInterpolator.getQsAlpha(progress);

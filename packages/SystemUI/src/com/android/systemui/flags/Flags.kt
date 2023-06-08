@@ -714,11 +714,6 @@ object Flags {
     val KEYBOARD_EDUCATION =
         unreleasedFlag(2603, "keyboard_education", teamfood = false)
 
-    // TODO(b/272036292): Tracking Bug
-    @JvmField
-    val LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION =
-            releasedFlag(2602, "large_shade_granular_alpha_interpolation")
-
     // TODO(b/277201412): Tracking Bug
     @JvmField
     val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION =
