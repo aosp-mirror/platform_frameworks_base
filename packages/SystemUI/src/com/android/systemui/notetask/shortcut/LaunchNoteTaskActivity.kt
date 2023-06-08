@@ -16,6 +16,7 @@
 
 package com.android.systemui.notetask.shortcut
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -72,7 +73,13 @@ constructor(
                 controller.startNoteTaskProxyActivityForUser(mainUser)
             }
         } else {
-            controller.showNoteTask(entryPoint = NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT)
+            val entryPoint =
+                if (isInMultiWindowMode) {
+                    NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE
+                } else {
+                    NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
+                }
+            controller.showNoteTask(entryPoint)
         }
         finish()
     }
@@ -80,11 +87,14 @@ constructor(
     companion object {
 
         /** Creates a new [Intent] set to start [LaunchNoteTaskActivity]. */
-        fun newIntent(context: Context): Intent {
-            return Intent(context, LaunchNoteTaskActivity::class.java).apply {
+        fun createIntent(context: Context): Intent =
+            Intent(context, LaunchNoteTaskActivity::class.java).apply {
                 // Intent's action must be set in shortcuts, or an exception will be thrown.
                 action = Intent.ACTION_CREATE_NOTE
             }
-        }
+
+        /** Creates a new [ComponentName] for [LaunchNoteTaskActivity]. */
+        fun createComponent(context: Context): ComponentName =
+            ComponentName(context, LaunchNoteTaskActivity::class.java)
     }
 }
