@@ -151,10 +151,11 @@ public class SurfaceControlViewHost {
         private SurfaceControl mSurfaceControl;
         private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
         private final IBinder mInputToken;
+        @NonNull
         private final ISurfaceControlViewHost mRemoteInterface;
 
         SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection,
-               IBinder inputToken, ISurfaceControlViewHost ri) {
+                IBinder inputToken, @NonNull ISurfaceControlViewHost ri) {
             mSurfaceControl = sc;
             mAccessibilityEmbeddedConnection = connection;
             mInputToken = inputToken;
@@ -216,6 +217,7 @@ public class SurfaceControlViewHost {
         /**
          * @hide
          */
+        @NonNull
         public ISurfaceControlViewHost getRemoteInterface() {
             return mRemoteInterface;
         }
