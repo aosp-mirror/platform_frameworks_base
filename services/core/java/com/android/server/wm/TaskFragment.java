@@ -86,7 +86,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -1325,14 +1324,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
         }
 
-        // Launching this app's activity, make sure the app is no longer
-        // considered stopped.
         try {
             mTaskSupervisor.getActivityMetricsLogger()
                     .notifyBeforePackageUnstopped(next.packageName);
-            mAtmService.getPackageManager().setPackageStoppedState(
-                    next.packageName, false, next.mUserId); /* TODO: Verify if correct userid */
-        } catch (RemoteException e1) {
+            mAtmService.getPackageManagerInternalLocked().notifyComponentUsed(
+                    next.packageName, next.mUserId,
+                    next.packageName); /* TODO: Verify if correct userid */
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
                     + next.packageName + ": " + e);
