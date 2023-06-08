@@ -690,6 +690,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (!wc.mDisplayContent.getDisplayPolicy().isScreenOnFully()
                 || wc.mDisplayContent.getDisplayInfo().state == Display.STATE_OFF) {
             mFlags |= WindowManager.TRANSIT_FLAG_INVISIBLE;
+            return;
         }
 
         if (mContainerFreezer == null) {
