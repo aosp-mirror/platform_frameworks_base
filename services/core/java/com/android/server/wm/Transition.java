@@ -2317,23 +2317,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 task.fillTaskInfo(tinfo);
                 change.setTaskInfo(tinfo);
                 change.setRotationAnimation(getTaskRotationAnimation(task));
-                final ActivityRecord topMostActivity = task.getTopMostActivity();
-                change.setAllowEnterPip(topMostActivity != null
-                        && topMostActivity.checkEnterPictureInPictureAppOpsState());
                 final ActivityRecord topRunningActivity = task.topRunningActivity();
-                if (topRunningActivity != null && task.mDisplayContent != null
-                        // Display won't be rotated for multi window Task, so the fixed rotation
-                        // won't be applied. This can happen when the windowing mode is changed
-                        // before the previous fixed rotation is applied.
-                        && (!task.inMultiWindowMode() || !topRunningActivity.inMultiWindowMode())) {
-                    // If Activity is in fixed rotation, its will be applied with the next rotation,
-                    // when the Task is still in the previous rotation.
-                    final int taskRotation = task.getWindowConfiguration().getDisplayRotation();
-                    final int activityRotation = topRunningActivity.getWindowConfiguration()
-                            .getDisplayRotation();
-                    if (taskRotation != activityRotation) {
-                        change.setEndFixedRotation(activityRotation);
+                if (topRunningActivity != null) {
+                    if (topRunningActivity.info.supportsPictureInPicture()) {
+                        change.setAllowEnterPip(
+                                topRunningActivity.checkEnterPictureInPictureAppOpsState());
                     }
+                    setEndFixedRotationIfNeeded(change, task, topRunningActivity);
                 }
             } else if ((info.mFlags & ChangeInfo.FLAG_SEAMLESS_ROTATION) != 0) {
                 change.setRotationAnimation(ROTATION_ANIMATION_SEAMLESS);
@@ -2441,6 +2431,48 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         return animOptions;
     }
+
+    private static void setEndFixedRotationIfNeeded(@NonNull TransitionInfo.Change change,
+            @NonNull Task task, @NonNull ActivityRecord taskTopRunning) {
+        if (!taskTopRunning.isVisibleRequested()) {
+            // Fixed rotation only applies to opening or changing activity.
+            return;
+        }
+        if (task.inMultiWindowMode() && taskTopRunning.inMultiWindowMode()) {
+            // Display won't be rotated for multi window Task, so the fixed rotation won't be
+            // applied. This can happen when the windowing mode is changed before the previous
+            // fixed rotation is applied. Check both task and activity because the activity keeps
+            // fullscreen mode when the task is entering PiP.
+            return;
+        }
+        final int taskRotation = task.getWindowConfiguration().getDisplayRotation();
+        final int activityRotation = taskTopRunning.getWindowConfiguration()
+                .getDisplayRotation();
+        // If the Activity uses fixed rotation, its rotation will be applied to display after
+        // the current transition is done, while the Task is still in the previous rotation.
+        if (taskRotation != activityRotation) {
+            change.setEndFixedRotation(activityRotation);
+            return;
+        }
+
+        // For example, the task is entering PiP so it no longer decides orientation. If the next
+        // orientation source (it could be an activity which was behind the PiP or launching to top)
+        // will change display rotation, then set the fixed rotation hint as well so the animation
+        // can consider the rotated position.
+        if (!task.inPinnedWindowingMode() || taskTopRunning.mDisplayContent.inTransition()) {
+            return;
+        }
+        final WindowContainer<?> orientationSource =
+                taskTopRunning.mDisplayContent.getLastOrientationSource();
+        if (orientationSource == null) {
+            return;
+        }
+        final int nextRotation = orientationSource.getWindowConfiguration().getDisplayRotation();
+        if (taskRotation != nextRotation) {
+            change.setEndFixedRotation(nextRotation);
+        }
+    }
+
     /**
      * Finds the top-most common ancestor of app targets.
      *
