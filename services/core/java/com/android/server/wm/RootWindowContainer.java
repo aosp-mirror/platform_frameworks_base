@@ -2374,10 +2374,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 final Transition transition = new Transition(TRANSIT_SLEEP, 0 /* flags */,
                         display.mTransitionController, mWmService.mSyncEngine);
                 final TransitionController.OnStartCollect sendSleepTransition = (deferred) -> {
-                    display.mTransitionController.requestStartTransition(transition,
-                            null /* trigger */, null /* remote */, null /* display */);
-                    // Force playing immediately so that unrelated ops can't be collected.
-                    transition.playNow();
+                    if (deferred && !display.shouldSleep()) {
+                        transition.abort();
+                    } else {
+                        display.mTransitionController.requestStartTransition(transition,
+                                null /* trigger */, null /* remote */, null /* display */);
+                        // Force playing immediately so that unrelated ops can't be collected.
+                        transition.playNow();
+                    }
                 };
                 if (!display.mTransitionController.isCollecting()) {
                     // Since this bypasses sync, submit directly ignoring whether sync-engine
