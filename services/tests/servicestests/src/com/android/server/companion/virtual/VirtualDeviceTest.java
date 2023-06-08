@@ -37,34 +37,36 @@ import org.junit.runner.RunWith;
 public class VirtualDeviceTest {
 
     private static final int VIRTUAL_DEVICE_ID = 42;
-    private static final String VIRTUAL_DEVICE_NAME = "VirtualDeviceName";
+    private static final String PERSISTENT_ID = "persistentId";
+    private static final String DEVICE_NAME = "VirtualDeviceName";
 
     @Test
     public void build_invalidId_shouldThrowIllegalArgumentException() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new VirtualDevice(DEVICE_ID_INVALID, VIRTUAL_DEVICE_NAME));
+                () -> new VirtualDevice(DEVICE_ID_INVALID, PERSISTENT_ID, DEVICE_NAME));
     }
 
     @Test
     public void build_defaultId_shouldThrowIllegalArgumentException() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new VirtualDevice(DEVICE_ID_DEFAULT, VIRTUAL_DEVICE_NAME));
+                () -> new VirtualDevice(DEVICE_ID_DEFAULT, PERSISTENT_ID, DEVICE_NAME));
     }
 
     @Test
-    public void build_nameIsOptional() {
+    public void build_onlyRequiredFields() {
         VirtualDevice virtualDevice =
-                new VirtualDevice(VIRTUAL_DEVICE_ID, /* name= */ null);
+                new VirtualDevice(VIRTUAL_DEVICE_ID, /*persistentId=*/null, /*name=*/null);
         assertThat(virtualDevice.getDeviceId()).isEqualTo(VIRTUAL_DEVICE_ID);
+        assertThat(virtualDevice.getPersistentDeviceId()).isNull();
         assertThat(virtualDevice.getName()).isNull();
     }
 
     @Test
     public void parcelable_shouldRecreateSuccessfully() {
         VirtualDevice originalDevice =
-                new VirtualDevice(VIRTUAL_DEVICE_ID, VIRTUAL_DEVICE_NAME);
+                new VirtualDevice(VIRTUAL_DEVICE_ID, PERSISTENT_ID, DEVICE_NAME);
         Parcel parcel = Parcel.obtain();
         originalDevice.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
@@ -72,6 +74,7 @@ public class VirtualDeviceTest {
         VirtualDevice device = VirtualDevice.CREATOR.createFromParcel(parcel);
         assertThat(device).isEqualTo(originalDevice);
         assertThat(device.getDeviceId()).isEqualTo(VIRTUAL_DEVICE_ID);
-        assertThat(device.getName()).isEqualTo(VIRTUAL_DEVICE_NAME);
+        assertThat(device.getPersistentDeviceId()).isEqualTo(PERSISTENT_ID);
+        assertThat(device.getName()).isEqualTo(DEVICE_NAME);
     }
 }

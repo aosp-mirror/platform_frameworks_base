@@ -396,7 +396,8 @@ public class VirtualDeviceManagerService extends SystemService {
                 for (int i = 0; i < mVirtualDevices.size(); i++) {
                     final VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
                     virtualDevices.add(
-                            new VirtualDevice(device.getDeviceId(), device.getDeviceName()));
+                            new VirtualDevice(device.getDeviceId(), device.getPersistentDeviceId(),
+                                    device.getDeviceName()));
                 }
             }
             return virtualDevices;

@@ -160,6 +160,14 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @Nullable String getPersistentDeviceId() {
+        try {
+            return mVirtualDevice.getPersistentDeviceId();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @NonNull Context createContext() {
         try {
             return mContext.createDeviceContext(mVirtualDevice.getDeviceId());

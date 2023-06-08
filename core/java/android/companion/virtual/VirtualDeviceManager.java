@@ -367,6 +367,13 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * Returns the persistent ID of this virtual device.
+         */
+        public @Nullable String getPersistentDeviceId() {
+            return mVirtualDeviceInternal.getPersistentDeviceId();
+        }
+
+        /**
          * Returns a new context bound to this device.
          *
          * <p>This is a convenience method equivalent to calling
