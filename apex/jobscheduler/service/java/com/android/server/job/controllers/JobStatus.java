@@ -1088,13 +1088,77 @@ public final class JobStatus {
         return UserHandle.getUserId(callingUid);
     }
 
+    private boolean shouldBlameSourceForTimeout() {
+        // If the system scheduled the job on behalf of an app, assume the app is the one
+        // doing the work and blame the app directly. This is the case with things like
+        // syncs via SyncManager.
+        // If the system didn't schedule the job on behalf of an app, then
+        // blame the app doing the actual work. Proxied jobs are a little tricky.
+        // Proxied jobs scheduled by built-in system apps like DownloadManager may be fine
+        // and we could consider exempting those jobs. For example, in DownloadManager's
+        // case, all it does is download files and the code is vetted. A timeout likely
+        // means it's downloading a large file, which isn't an error. For now, DownloadManager
+        // is an exempted app, so this shouldn't be an issue.
+        // However, proxied jobs coming from other system apps (such as those that can
+        // be updated separately from an OTA) may not be fine and we would want to apply
+        // this policy to those jobs/apps.
+        // TODO(284512488): consider exempting DownloadManager or other system apps
+        return UserHandle.isCore(callingUid);
+    }
+
+    /**
+     * Returns the package name that should most likely be blamed for the job timing out.
+     */
+    public String getTimeoutBlamePackageName() {
+        if (shouldBlameSourceForTimeout()) {
+            return sourcePackageName;
+        }
+        return getServiceComponent().getPackageName();
+    }
+
+    /**
+     * Returns the UID that should most likely be blamed for the job timing out.
+     */
+    public int getTimeoutBlameUid() {
+        if (shouldBlameSourceForTimeout()) {
+            return sourceUid;
+        }
+        return callingUid;
+    }
+
+    /**
+     * Returns the userId that should most likely be blamed for the job timing out.
+     */
+    public int getTimeoutBlameUserId() {
+        if (shouldBlameSourceForTimeout()) {
+            return sourceUserId;
+        }
+        return UserHandle.getUserId(callingUid);
+    }
+
     /**
      * Returns an appropriate standby bucket for the job, taking into account any standby
      * exemptions.
      */
     public int getEffectiveStandbyBucket() {
+        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
+        final boolean isBuggy = jsi.isAppConsideredBuggy(
+                getUserId(), getServiceComponent().getPackageName(),
+                getTimeoutBlameUserId(), getTimeoutBlamePackageName());
+
         final int actualBucket = getStandbyBucket();
         if (actualBucket == EXEMPTED_INDEX) {
+            // EXEMPTED apps always have their jobs exempted, even if they're buggy, because the
+            // user has explicitly told the system to avoid restricting the app for power reasons.
+            if (isBuggy) {
+                final String pkg;
+                if (getServiceComponent().getPackageName().equals(sourcePackageName)) {
+                    pkg = sourcePackageName;
+                } else {
+                    pkg = getServiceComponent().getPackageName() + "/" + sourcePackageName;
+                }
+                Slog.w(TAG, "Exempted app " + pkg + " considered buggy");
+            }
             return actualBucket;
         }
         if (uidActive || getJob().isExemptedFromAppStandby()) {
@@ -1102,13 +1166,18 @@ public final class JobStatus {
             // like other ACTIVE apps.
             return ACTIVE_INDEX;
         }
+        // If the app is considered buggy, but hasn't yet been put in the RESTRICTED bucket
+        // (potentially because it's used frequently by the user), limit its effective bucket
+        // so that it doesn't get to run as much as a normal ACTIVE app.
+        final int highestBucket = isBuggy ? WORKING_INDEX : ACTIVE_INDEX;
         if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
                 && mHasMediaBackupExemption) {
-            // Cap it at WORKING_INDEX as media back up jobs are important to the user, and the
+            // Treat it as if it's at least WORKING_INDEX since media backup jobs are important
+            // to the user, and the
             // source package may not have been used directly in a while.
-            return Math.min(WORKING_INDEX, actualBucket);
+            return Math.max(highestBucket, Math.min(WORKING_INDEX, actualBucket));
         }
-        return actualBucket;
+        return Math.max(highestBucket, actualBucket);
     }
 
     /** Returns the real standby bucket of the job. */
