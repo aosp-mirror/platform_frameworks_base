@@ -41,9 +41,11 @@ import android.os.RemoteException;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.FakeLatencyTracker;
+import com.android.modules.utils.testing.TestableDeviceConfig.TestableDeviceConfigRule;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -53,6 +55,9 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class SoundTriggerMiddlewareLoggingLatencyTest {
+
+    @Rule
+    public TestableDeviceConfigRule mDeviceConfigRule = new TestableDeviceConfigRule();
 
     private FakeLatencyTracker mLatencyTracker;
     @Mock
