@@ -49,7 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.SystemUIAppComponentFactoryBase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -72,13 +72,13 @@ import javax.inject.Inject;
 /**
  * Simple Slice provider that shows the current date.
  *
- * Injection is handled by {@link SystemUIAppComponentFactory} +
+ * Injection is handled by {@link SystemUIAppComponentFactoryBase} +
  * {@link com.android.systemui.dagger.GlobalRootComponent#inject(KeyguardSliceProvider)}.
  */
 public class KeyguardSliceProvider extends SliceProvider implements
         NextAlarmController.NextAlarmChangeCallback, ZenModeController.Callback,
         NotificationMediaManager.MediaListener, StatusBarStateController.StateListener,
-        SystemUIAppComponentFactory.ContextInitializer {
+        SystemUIAppComponentFactoryBase.ContextInitializer {
 
     private static final String TAG = "KgdSliceProvider";
 
@@ -148,7 +148,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     protected boolean mDozing;
     private int mStatusBarState;
     private boolean mMediaIsVisible;
-    private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
+    private SystemUIAppComponentFactoryBase.ContextAvailableCallback mContextAvailableCallback;
     @Inject
     WakeLockLogger mWakeLockLogger;
 
@@ -533,7 +533,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public void setContextAvailableCallback(
-            SystemUIAppComponentFactory.ContextAvailableCallback callback) {
+            SystemUIAppComponentFactoryBase.ContextAvailableCallback callback) {
         mContextAvailableCallback = callback;
     }
 }
