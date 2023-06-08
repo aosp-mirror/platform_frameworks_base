@@ -74,7 +74,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Операцията с ПИН кода за SIM картата не бе успешна!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Операцията с PUK кода за SIM картата не бе успешна!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Превключване на метода на въвеждане"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"Самолет. режим"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"Самолетен режим"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"След рестартиране на устройството се изисква фигура"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"След рестартиране на устройството се изисква ПИН код"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"След рестартиране на устройството се изисква парола"</string>
@@ -90,5 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Стандартен"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Балонен"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналогов"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Отключете устройството си, за да продължите"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Отключете устройството, за да продължите"</string>
 </resources>
