@@ -250,7 +250,12 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
             val nameExt = if (starveUiThread) "_BUSY_UI_THREAD" else ""
             val newConfig =
                 ScenarioBuilder()
-                    .fromScenario(originalScenario)
+                    .forClass(originalScenario.testClass)
+                    .withStartRotation(originalScenario.startRotation)
+                    .withEndRotation(originalScenario.endRotation)
+                    .withNavBarMode(originalScenario.navBarMode)
+                    .withExtraConfigs(originalScenario.extraConfig)
+                    .withDescriptionOverride(originalScenario.description)
                     .withExtraConfig(
                         ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD,
                         starveUiThread
