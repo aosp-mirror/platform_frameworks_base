@@ -1371,7 +1371,8 @@ public final class PermissionManager {
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
         try {
             mPermissionManager.startOneTimePermissionSession(packageName, mContext.getUserId(),
-                    timeoutMillis, revokeAfterKilledDelayMillis);
+                    timeoutMillis, revokeAfterKilledDelayMillis, importanceToResetTimer,
+                    importanceToKeepSessionAlive);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
