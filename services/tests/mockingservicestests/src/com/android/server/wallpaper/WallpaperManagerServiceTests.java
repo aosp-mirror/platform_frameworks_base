@@ -17,8 +17,10 @@
 package com.android.server.wallpaper;
 
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
+import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.os.FileObserver.CLOSE_WRITE;
+import static android.os.UserHandle.MIN_SECONDARY_USER_ID;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -106,6 +108,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Tests for the {@link WallpaperManagerService} class.
@@ -172,12 +175,12 @@ public class WallpaperManagerServiceTests {
         sImageWallpaperComponentName = ComponentName.unflattenFromString(
                 sContext.getResources().getString(R.string.image_wallpaper_component));
         // Mock default wallpaper as image wallpaper if there is no pre-defined default wallpaper.
-        sDefaultWallpaperComponent = WallpaperManager.getCmfDefaultWallpaperComponent(sContext);
+        sDefaultWallpaperComponent = WallpaperManager.getDefaultWallpaperComponent(sContext);
 
         if (sDefaultWallpaperComponent == null) {
             sDefaultWallpaperComponent = sImageWallpaperComponentName;
             doReturn(sImageWallpaperComponentName).when(() ->
-                    WallpaperManager.getCmfDefaultWallpaperComponent(any()));
+                    WallpaperManager.getDefaultWallpaperComponent(any()));
         } else {
             sContext.addMockService(sDefaultWallpaperComponent, sWallpaperService);
         }
@@ -258,6 +261,25 @@ public class WallpaperManagerServiceTests {
         @Override
         public boolean isSetWallpaperAllowed(String callingPackage) {
             return true;
+        }
+    }
+
+    /**
+     * Tests that the fundamental fields are set by the main WallpaperData constructor
+     */
+    @Test
+    public void testWallpaperDataConstructor() {
+        final int testUserId = MIN_SECONDARY_USER_ID;
+        for (int which: List.of(FLAG_LOCK, FLAG_SYSTEM)) {
+            WallpaperData newWallpaperData = new WallpaperData(testUserId, which);
+            assertEquals(which, newWallpaperData.mWhich);
+            assertEquals(testUserId, newWallpaperData.userId);
+
+            WallpaperData wallpaperData = mService.getWallpaperSafeLocked(testUserId, which);
+            assertEquals(wallpaperData.cropFile.getAbsolutePath(),
+                    newWallpaperData.cropFile.getAbsolutePath());
+            assertEquals(wallpaperData.wallpaperFile.getAbsolutePath(),
+                    newWallpaperData.wallpaperFile.getAbsolutePath());
         }
     }
 
@@ -405,10 +427,7 @@ public class WallpaperManagerServiceTests {
             fail("exception occurred while writing system wallpaper attributes");
         }
 
-        WallpaperData shouldMatchSystem = new WallpaperData(systemWallpaperData.userId,
-                systemWallpaperData.wallpaperFile.getParentFile(),
-                systemWallpaperData.wallpaperFile.getAbsolutePath(),
-                systemWallpaperData.cropFile.getAbsolutePath());
+        WallpaperData shouldMatchSystem = new WallpaperData(0, FLAG_SYSTEM);
         try {
             TypedXmlPullParser parser = Xml.newBinaryPullParser();
             mService.mWallpaperDataParser.parseWallpaperAttributes(parser, shouldMatchSystem, true);
