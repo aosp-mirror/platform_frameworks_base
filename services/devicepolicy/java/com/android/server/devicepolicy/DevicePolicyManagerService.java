@@ -2093,7 +2093,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mUserData = new SparseArray<>();
         mOwners = makeOwners(injector, pathProvider);
 
-        mDevicePolicyEngine = new DevicePolicyEngine(mContext, mDeviceAdminServiceController);
+        mDevicePolicyEngine = new DevicePolicyEngine(
+                mContext, mDeviceAdminServiceController, getLockObject());
 
         if (!mHasFeature) {
             // Skip the rest of the initialization
