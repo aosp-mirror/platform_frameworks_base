@@ -366,6 +366,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     if (lockedWallpaper != null) {
                         detachWallpaperLocked(lockedWallpaper);
                     }
+                    clearWallpaperBitmaps(mWallpaper.userId, FLAG_LOCK);
                     mLockWallpaperMap.remove(wallpaper.userId);
                     notifyColorsWhich |= FLAG_LOCK;
                 }
@@ -3318,8 +3319,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             });
                         }
                     }
+                    boolean lockBitmapCleared = false;
                     if (!mImageWallpaper.equals(newWallpaper.wallpaperComponent)) {
                         clearWallpaperBitmaps(newWallpaper);
+                        lockBitmapCleared = newWallpaper.mWhich == FLAG_LOCK;
                     }
                     newWallpaper.wallpaperId = makeWallpaperIdLocked();
                     notifyCallbacksLocked(newWallpaper);
@@ -3336,6 +3339,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             if (same) {
                                 updateEngineFlags(newWallpaper);
                             }
+                        }
+                        if (!lockBitmapCleared) {
+                            clearWallpaperBitmaps(newWallpaper.userId, FLAG_LOCK);
                         }
                         mLockWallpaperMap.remove(newWallpaper.userId);
                     }
