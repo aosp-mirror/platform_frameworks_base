@@ -215,7 +215,7 @@ constructor(
                     debugLog { "onShowNoteTask - opened as app bubble: $info" }
                 }
                 is NoteTaskLaunchMode.Activity -> {
-                    if (activityManager.isInForeground(info.packageName)) {
+                    if (info.isKeyguardLocked && activityManager.isInForeground(info.packageName)) {
                         // Force note task into background by calling home.
                         val intent = createHomeIntent()
                         context.startActivityAsUser(intent, user)
