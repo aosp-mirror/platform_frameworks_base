@@ -18,6 +18,7 @@ package com.android.systemui.dagger;
 
 import com.android.systemui.globalactions.ShutdownUiModule;
 import com.android.systemui.keyguard.CustomizationProvider;
+import com.android.systemui.scene.startable.SceneContainerStartableModule;
 import com.android.systemui.statusbar.NotificationInsetsModule;
 import com.android.systemui.statusbar.QsFrameTranslateModule;
 
@@ -33,6 +34,7 @@ import dagger.Subcomponent;
         NotificationInsetsModule.class,
         QsFrameTranslateModule.class,
         ShutdownUiModule.class,
+        SceneContainerStartableModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,
         SystemUICoreStartableModule.class,

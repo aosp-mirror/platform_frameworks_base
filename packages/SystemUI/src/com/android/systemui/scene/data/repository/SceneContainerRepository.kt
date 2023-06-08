@@ -16,7 +16,7 @@
 
 package com.android.systemui.scene.data.repository
 
-import com.android.systemui.scene.data.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
@@ -28,11 +28,9 @@ import kotlinx.coroutines.flow.asStateFlow
 class SceneContainerRepository
 @Inject
 constructor(
-    containerConfigurations: Set<SceneContainerConfig>,
+    private val containerConfigByName: Map<String, SceneContainerConfig>,
 ) {
 
-    private val containerConfigByName: Map<String, SceneContainerConfig> =
-        containerConfigurations.associateBy { config -> config.name }
     private val containerVisibilityByName: Map<String, MutableStateFlow<Boolean>> =
         containerConfigByName
             .map { (containerName, _) -> containerName to MutableStateFlow(true) }
@@ -47,21 +45,6 @@ constructor(
         containerConfigByName
             .map { (containerName, _) -> containerName to MutableStateFlow(1f) }
             .toMap()
-
-    init {
-        val repeatedContainerNames =
-            containerConfigurations
-                .groupingBy { config -> config.name }
-                .eachCount()
-                .filter { (_, count) -> count > 1 }
-        check(repeatedContainerNames.isEmpty()) {
-            "Container names must be unique. The following container names appear more than once: ${
-                repeatedContainerNames
-                        .map { (name, count) -> "\"$name\" appears $count times" }
-                        .joinToString(", ")
-            }"
-        }
-    }
 
     /**
      * Returns the keys to all scenes in the container with the given name.
