@@ -600,8 +600,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // What we do when the user double-taps on home
     private int mDoubleTapOnHomeBehavior;
 
-    // Whether to lock the device after the next app transition has finished.
-    boolean mLockAfterAppTransitionFinished;
+    // Whether to lock the device after the next dreaming transition has finished.
+    private boolean mLockAfterDreamingTransitionFinished;
 
     // Allowed theater mode wake actions
     private boolean mAllowTheaterModeWakeFromKey;
@@ -1104,7 +1104,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             // If the setting to lock instantly on power button press is true, then set the flag to
             // lock after the dream transition has finished.
-            mLockAfterAppTransitionFinished =
+            mLockAfterDreamingTransitionFinished =
                     mLockPatternUtils.getPowerButtonInstantlyLocks(mCurrentUserId);
         }
 
@@ -2253,20 +2253,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         true /* notifyOccluded */);
 
                 synchronized (mLock) {
-                    mLockAfterAppTransitionFinished = false;
+                    mLockAfterDreamingTransitionFinished = false;
                 }
             }
 
             @Override
             public void onAppTransitionFinishedLocked(IBinder token) {
                 synchronized (mLock) {
-                    if (!mLockAfterAppTransitionFinished) {
-                        return;
+                    final DreamManagerInternal dreamManagerInternal = getDreamManagerInternal();
+                    // check both isDreaming and mLockAfterDreamingTransitionFinished before lockNow
+                    // so it won't relock after dreaming has stopped
+                    if (dreamManagerInternal != null && dreamManagerInternal.isDreaming()
+                            && mLockAfterDreamingTransitionFinished) {
+                        lockNow(null);
                     }
-                    mLockAfterAppTransitionFinished = false;
+                    mLockAfterDreamingTransitionFinished = false;
                 }
-
-                lockNow(null);
             }
         });
 
