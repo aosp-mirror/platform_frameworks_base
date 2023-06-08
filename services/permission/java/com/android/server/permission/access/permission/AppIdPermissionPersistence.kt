@@ -74,8 +74,8 @@ class AppIdPermissionPersistence {
             if (packageName !in externalState.packageStates &&
                 packageName !in externalState.disabledSystemPackageStates) {
                 Slog.w(
-                    LOG_TAG,
-                    "Dropping permission with unknown package $packageName when parsing permissions"
+                    LOG_TAG, "Dropping permission ${permission.name} from unknown package" +
+                        " $packageName when parsing permissions"
                 )
                 permissions.removeAt(permissionIndex)
                 systemState.requestWriteMode(WriteMode.ASYNCHRONOUS)
