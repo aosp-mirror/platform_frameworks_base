@@ -2815,7 +2815,11 @@
         android:protectionLevel="normal" />
 
     <!-- Allows an application to call
-        {@link android.app.ActivityManager#killBackgroundProcesses}.
+         {@link android.app.ActivityManager#killBackgroundProcesses}.
+
+         <p class="note">Third party applications can only use this API to kill their own
+         processes.</p>
+
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"
