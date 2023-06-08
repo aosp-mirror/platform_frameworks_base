@@ -534,17 +534,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
-        if (ENABLE_SHELL_TRANSITIONS) {
-            if (requestEnterSplit && mSplitScreenOptional.isPresent()) {
-                mSplitScreenOptional.get().prepareEnterSplitScreen(wct, mTaskInfo,
-                        isPipTopLeft()
-                                ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
-                mPipTransitionController.startExitTransition(
-                        TRANSIT_EXIT_PIP_TO_SPLIT, wct, null /* destinationBounds */);
-                return;
-            }
-        }
-
         final Rect displayBounds = mPipBoundsState.getDisplayBounds();
         final Rect destinationBounds = new Rect(displayBounds);
         final int direction = syncWithSplitScreenBounds(destinationBounds, requestEnterSplit)
@@ -553,10 +542,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         // For exiting to fullscreen, the windowing mode of task will be changed to fullscreen
         // until the animation is finished. Otherwise if the activity is resumed and focused at the
         // begin of aniamtion, the app may do something too early to distub the animation.
-        final boolean toFullscreen = destinationBounds.equals(displayBounds);
 
-        if (Transitions.SHELL_TRANSITIONS_ROTATION || (Transitions.ENABLE_SHELL_TRANSITIONS
-                && !toFullscreen)) {
+        if (Transitions.SHELL_TRANSITIONS_ROTATION) {
             // When exit to fullscreen with Shell transition enabled, we update the Task windowing
             // mode directly so that it can also trigger display rotation and visibility update in
             // the same transition if there will be any.
@@ -588,9 +575,29 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipTransitionState.setTransitionState(PipTransitionState.EXITING_PIP);
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            if (requestEnterSplit && mSplitScreenOptional.isPresent()) {
+                wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+                mSplitScreenOptional.get().prepareEnterSplitScreen(wct, mTaskInfo,
+                        isPipToTopLeft()
+                                ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
+                mPipTransitionController.startExitTransition(
+                        TRANSIT_EXIT_PIP_TO_SPLIT, wct, destinationBounds);
+                return;
+            }
+
+            if (mSplitScreenOptional.isPresent()) {
+                // If pip activity will reparent to origin task case and if the origin task still
+                // under split root, apply exit split transaction to make it expand to fullscreen.
+                SplitScreenController split = mSplitScreenOptional.get();
+                if (split.isTaskInSplitScreen(mTaskInfo.lastParentTaskIdBeforePip)) {
+                    split.prepareExitSplitScreen(wct, split.getStageOfTask(
+                            mTaskInfo.lastParentTaskIdBeforePip));
+                }
+            }
             mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct, destinationBounds);
             return;
         }
+
         if (mSplitScreenOptional.isPresent()) {
             // If pip activity will reparent to origin task case and if the origin task still under
             // split root, just exit split screen here to ensure it could expand to fullscreen.
@@ -1664,17 +1671,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         } else {
             mTaskOrganizer.applyTransaction(wct);
         }
-    }
-
-    private boolean isPipTopLeft() {
-        if (!mSplitScreenOptional.isPresent()) {
-            return false;
-        }
-        final Rect topLeft = new Rect();
-        final Rect bottomRight = new Rect();
-        mSplitScreenOptional.get().getStageBounds(topLeft, bottomRight);
-
-        return topLeft.contains(mPipBoundsState.getBounds());
     }
 
     private boolean isPipToTopLeft() {
