@@ -598,6 +598,17 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     // Don't consider order-only & non-leaf changes as changing apps.
                     if (!TransitionUtil.isOrderOnly(change) && isLeafTask) {
                         hasChangingApp = true;
+                    } else if (isLeafTask && taskInfo.topActivityType == ACTIVITY_TYPE_HOME
+                            && !mRecentsTask.equals(change.getContainer())) {
+                        // Unless it is a 3p launcher. This means that the 3p launcher was already
+                        // visible (eg. the "pausing" task is translucent over the 3p launcher).
+                        // Treat it as if we are "re-opening" the 3p launcher.
+                        if (openingTasks == null) {
+                            openingTasks = new ArrayList<>();
+                            openingTaskIsLeafs = new IntArray();
+                        }
+                        openingTasks.add(change);
+                        openingTaskIsLeafs.add(1);
                     }
                 }
             }
