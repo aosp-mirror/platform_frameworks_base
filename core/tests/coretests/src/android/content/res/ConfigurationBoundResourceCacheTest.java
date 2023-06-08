@@ -45,7 +45,7 @@ public class ConfigurationBoundResourceCacheTest
     @SmallTest
     public void testGetEmpty() {
         final Resources res = getActivity().getResources();
-        assertNull(mCache.getInstance(-1, res, null).getValue());
+        assertNull(mCache.getInstance(-1, res, null));
     }
 
     @SmallTest
@@ -53,9 +53,9 @@ public class ConfigurationBoundResourceCacheTest
         mCache.put(1, null, new DummyFloatConstantState(5f),
                 ThemedResourceCache.UNDEFINED_GENERATION);
         final Resources res = getActivity().getResources();
-        assertEquals(5f, mCache.getInstance(1, res, null).getValue());
-        assertNotSame(5f, mCache.getInstance(1, res, null).getValue());
-        assertEquals(false, mCache.getInstance(1, res, getActivity().getTheme()).hasValue());
+        assertEquals(5f, mCache.getInstance(1, res, null));
+        assertNotSame(5f, mCache.getInstance(1, res, null));
+        assertEquals(null, mCache.getInstance(1, res, getActivity().getTheme()));
     }
 
     @SmallTest
@@ -63,9 +63,9 @@ public class ConfigurationBoundResourceCacheTest
         mCache.put(1, getActivity().getTheme(), new DummyFloatConstantState(5f),
                 ThemedResourceCache.UNDEFINED_GENERATION);
         final Resources res = getActivity().getResources();
-        assertEquals(false, mCache.getInstance(1, res, null).hasValue());
-        assertEquals(5f, mCache.getInstance(1, res, getActivity().getTheme()).getValue());
-        assertNotSame(5f, mCache.getInstance(1, res, getActivity().getTheme()).getValue());
+        assertEquals(null, mCache.getInstance(1, res, null));
+        assertEquals(5f, mCache.getInstance(1, res, getActivity().getTheme()));
+        assertNotSame(5f, mCache.getInstance(1, res, getActivity().getTheme()));
     }
 
     @SmallTest
@@ -75,10 +75,10 @@ public class ConfigurationBoundResourceCacheTest
         mCache.put(1, null, new DummyFloatConstantState(10f),
                 ThemedResourceCache.UNDEFINED_GENERATION);
         final Resources res = getActivity().getResources();
-        assertEquals(10f, mCache.getInstance(1, res, null).getValue());
-        assertNotSame(10f, mCache.getInstance(1, res, null).getValue());
-        assertEquals(5f, mCache.getInstance(1, res, getActivity().getTheme()).getValue());
-        assertNotSame(5f, mCache.getInstance(1, res, getActivity().getTheme()).getValue());
+        assertEquals(10f, mCache.getInstance(1, res, null));
+        assertNotSame(10f, mCache.getInstance(1, res, null));
+        assertEquals(5f, mCache.getInstance(1, res, getActivity().getTheme()));
+        assertNotSame(5f, mCache.getInstance(1, res, getActivity().getTheme()));
     }
 
     @SmallTest
@@ -98,9 +98,9 @@ public class ConfigurationBoundResourceCacheTest
                 Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
         int changes = calcConfigChanges(res, newCnf);
-        assertEquals(staticDim, mCache.getInstance(key, res, getActivity().getTheme()).getValue());
+        assertEquals(staticDim, mCache.getInstance(key, res, getActivity().getTheme()));
         mCache.onConfigurationChange(changes);
-        assertEquals(staticDim, mCache.getInstance(key, res, getActivity().getTheme()).getValue());
+        assertEquals(staticDim, mCache.getInstance(key, res, getActivity().getTheme()));
     }
 
     @SmallTest
@@ -123,9 +123,9 @@ public class ConfigurationBoundResourceCacheTest
                 : Configuration.ORIENTATION_LANDSCAPE;
         int changes = calcConfigChanges(res, newCnf);
         assertEquals(changingDim,
-                mCache.getInstance(key, res, getActivity().getTheme()).getValue());
+                mCache.getInstance(key, res, getActivity().getTheme()));
         mCache.onConfigurationChange(changes);
-        assertNull(mCache.get(key, getActivity().getTheme()).getValue());
+        assertNull(mCache.get(key, getActivity().getTheme()));
     }
 
     @SmallTest
@@ -152,15 +152,15 @@ public class ConfigurationBoundResourceCacheTest
                 : Configuration.ORIENTATION_LANDSCAPE;
         int changes = calcConfigChanges(res, newCnf);
         assertEquals(staticDim, mCache.getInstance(R.dimen.resource_cache_test_generic, res,
-                getActivity().getTheme()).getValue());
+                getActivity().getTheme()));
         assertEquals(changingDim,
                 mCache.getInstance(R.dimen.resource_cache_test_orientation_dependent, res,
-                        getActivity().getTheme()).getValue());
+                        getActivity().getTheme()));
         mCache.onConfigurationChange(changes);
         assertEquals(staticDim, mCache.getInstance(R.dimen.resource_cache_test_generic, res,
-                getActivity().getTheme()).getValue());
+                getActivity().getTheme()));
         assertNull(mCache.getInstance(R.dimen.resource_cache_test_orientation_dependent, res,
-                getActivity().getTheme()).getValue());
+                getActivity().getTheme()));
     }
 
     @SmallTest
@@ -198,18 +198,18 @@ public class ConfigurationBoundResourceCacheTest
         for (int i = 0; i < 2; i++) {
             final Resources.Theme theme = i == 0 ? getActivity().getTheme() : null;
             assertEquals(staticDim,
-                    mCache.getInstance(R.dimen.resource_cache_test_generic, res, theme).getValue());
+                    mCache.getInstance(R.dimen.resource_cache_test_generic, res, theme));
             assertEquals(changingDim,
                     mCache.getInstance(R.dimen.resource_cache_test_orientation_dependent, res,
-                            theme).getValue());
+                            theme));
         }
         mCache.onConfigurationChange(changes);
         for (int i = 0; i < 2; i++) {
             final Resources.Theme theme = i == 0 ? getActivity().getTheme() : null;
             assertEquals(staticDim,
-                    mCache.getInstance(R.dimen.resource_cache_test_generic, res, theme).getValue());
+                    mCache.getInstance(R.dimen.resource_cache_test_generic, res, theme));
             assertNull(mCache.getInstance(R.dimen.resource_cache_test_orientation_dependent, res,
-                    theme).getValue());
+                    theme));
         }
     }
 

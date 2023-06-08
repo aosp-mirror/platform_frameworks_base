@@ -37,16 +37,16 @@ public class ConfigurationBoundResourceCache<T> extends ThemedResourceCache<Cons
      * @param key a key that uniquely identifies the drawable resource
      * @param resources a Resources object from which to create new instances.
      * @param theme the theme where the resource will be used
-     * @return an Entry wrapping a new instance of the resource, or {@code null} if not in
+     * @return a new instance of the resource, or {@code null} if not in
      *         the cache
      */
-    public Entry<T> getInstance(long key, Resources resources, Resources.Theme theme) {
-        final Entry<ConstantState<T>> e = get(key, theme);
-        if (e.hasValue()) {
-            return new Entry<>(e.getValue().newInstance(resources, theme), e.getGeneration());
+    public T getInstance(long key, Resources resources, Resources.Theme theme) {
+        final ConstantState<T> entry = get(key, theme);
+        if (entry != null) {
+            return entry.newInstance(resources, theme);
         }
 
-        return new Entry<>(null, e.getGeneration());
+        return null;
     }
 
     @Override
