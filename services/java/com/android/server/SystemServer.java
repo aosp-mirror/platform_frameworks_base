@@ -2194,12 +2194,13 @@ public final class SystemServer implements Dumpable {
             }
 
             // WallpaperEffectsGeneration manager service
-            // TODO (b/135218095): Use deviceHasConfigString(context,
-            //  R.string.config_defaultWallpaperEffectsGenerationService)
-            t.traceBegin("StartWallpaperEffectsGenerationService");
-            mSystemServiceManager.startService(
+            if (deviceHasConfigString(context,
+                R.string.config_defaultWallpaperEffectsGenerationService)) {
+                t.traceBegin("StartWallpaperEffectsGenerationService");
+                mSystemServiceManager.startService(
                     WALLPAPER_EFFECTS_GENERATION_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
+                t.traceEnd();
+            }
 
             t.traceBegin("StartAudioService");
             if (!isArc) {
