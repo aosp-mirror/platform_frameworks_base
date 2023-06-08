@@ -58,6 +58,7 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
@@ -1975,15 +1976,15 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             if (!mBgCurrentDrainHighThresholdByBgLocation) {
                 return false;
             }
-            final AppRestrictionController controller = mTracker.mAppRestrictionController;
-            if (mInjector.getPermissionManagerServiceInternal().checkUidPermission(
-                    uid, ACCESS_BACKGROUND_LOCATION) == PERMISSION_GRANTED) {
+            if (mTracker.mContext.checkPermission(ACCESS_BACKGROUND_LOCATION,
+                    Process.INVALID_PID, uid) == PERMISSION_GRANTED) {
                 return true;
             }
             if (!mBgCurrentDrainEventDurationBasedThresholdEnabled) {
                 return false;
             }
             final long since = Math.max(0, now - window);
+            final AppRestrictionController controller = mTracker.mAppRestrictionController;
             final long locationDuration = controller.getForegroundServiceTotalDurationsSince(
                     uid, since, now, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
             return locationDuration >= mBgCurrentDrainLocationMinDuration;
