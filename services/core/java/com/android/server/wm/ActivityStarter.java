@@ -1691,7 +1691,9 @@ class ActivityStarter {
             }
             // When running transient transition, the transient launch target should keep on top.
             // So disallow the transient hide activity to move itself to front, e.g. trampoline.
-            if (!mAvoidMoveToFront && r.mTransitionController.isTransientHide(targetTask)) {
+            if (!mAvoidMoveToFront && (mService.mHomeProcess == null
+                    || mService.mHomeProcess.mUid != realCallingUid)
+                    && r.mTransitionController.isTransientHide(targetTask)) {
                 mAvoidMoveToFront = true;
             }
             mPriorAboveTask = TaskDisplayArea.getRootTaskAbove(targetTask.getRootTask());
@@ -2973,7 +2975,9 @@ class ActivityStarter {
                     // should be START_DELIVERED_TO_TOP instead of START_TASK_TO_FRONT.
                     final boolean wasTopOfVisibleRootTask = intentActivity.isVisibleRequested()
                             && intentActivity.inMultiWindowMode()
-                            && intentActivity == mTargetRootTask.topRunningActivity();
+                            && intentActivity == mTargetRootTask.topRunningActivity()
+                            && !intentActivity.mTransitionController.isTransientHide(
+                                    mTargetRootTask);
                     // We only want to move to the front, if we aren't going to launch on a
                     // different root task. If we launch on a different root task, we will put the
                     // task on top there.
