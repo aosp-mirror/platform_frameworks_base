@@ -13598,6 +13598,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     : SecurityLog.TAG_USER_RESTRICTION_REMOVED;
             SecurityLog.writeEvent(eventTag, caller.getPackageName(), caller.getUserId(), key);
         }
+
+        Slogf.i(LOG_TAG, "Changing user restriction %s to: %b caller: %s",
+                key, enabled, caller.toString());
     }
 
     private void saveUserRestrictionsLocked(int userId) {
