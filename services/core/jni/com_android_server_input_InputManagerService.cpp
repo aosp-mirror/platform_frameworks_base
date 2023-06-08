@@ -1159,6 +1159,8 @@ void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
 }
 
 void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) {
+    bool refresh = false;
+
     { // acquire lock
         std::scoped_lock _l(mLock);
 
@@ -1166,14 +1168,18 @@ void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) 
         bool currentlyEnabled = it == mLocked.disabledInputDevices.end();
         if (!enabled && currentlyEnabled) {
             mLocked.disabledInputDevices.insert(deviceId);
+            refresh = true;
         }
         if (enabled && !currentlyEnabled) {
             mLocked.disabledInputDevices.erase(deviceId);
+            refresh = true;
         }
     } // release lock
 
-    mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::Change::ENABLED_STATE);
+    if (refresh) {
+        mInputManager->getReader().requestRefreshConfiguration(
+                InputReaderConfiguration::Change::ENABLED_STATE);
+    }
 }
 
 void NativeInputManager::setShowTouches(bool enabled) {
