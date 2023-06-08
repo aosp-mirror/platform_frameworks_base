@@ -4680,7 +4680,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if ((policyFlags & FLAG_WAKE) != 0) {
             if (wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotion,
                     PowerManager.WAKE_REASON_WAKE_MOTION, "android.policy:MOTION")) {
-                return 0;
+                // Woke up. Pass motion events to user.
+                return ACTION_PASS_TO_USER;
             }
         }
 
@@ -4692,8 +4693,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // there will be no dream to intercept the touch and wake into ambient.  The device should
         // wake up in this case.
         if (isTheaterModeEnabled() && (policyFlags & FLAG_WAKE) != 0) {
-            wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotionWhenNotDreaming,
-                    PowerManager.WAKE_REASON_WAKE_MOTION, "android.policy:MOTION");
+            if (wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotionWhenNotDreaming,
+                    PowerManager.WAKE_REASON_WAKE_MOTION, "android.policy:MOTION")) {
+                // Woke up. Pass motion events to user.
+                return ACTION_PASS_TO_USER;
+            }
         }
 
         return 0;
@@ -4709,28 +4713,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean displayOff = (display == null
                 || display.getState() == STATE_OFF);
 
-        if (displayOff && !mHasFeatureWatch) {
+        if (displayOff) {
             return false;
         }
 
         // Send events to keyguard while the screen is on and it's showing.
-        if (isKeyguardShowingAndNotOccluded() && !displayOff) {
+        if (isKeyguardShowingAndNotOccluded()) {
             return true;
         }
 
-        // Watches handle BACK and hardware buttons specially
-        if (mHasFeatureWatch && (keyCode == KeyEvent.KEYCODE_BACK
-                || keyCode == KeyEvent.KEYCODE_STEM_PRIMARY
-                || keyCode == KeyEvent.KEYCODE_STEM_1
-                || keyCode == KeyEvent.KEYCODE_STEM_2
-                || keyCode == KeyEvent.KEYCODE_STEM_3)) {
+        // Watches consume all key events during ambient when keyguard is not showing.
+        if (mHasFeatureWatch) {
             return false;
         }
 
         // TODO(b/123372519): Refine when dream can support multi display.
         if (isDefaultDisplay) {
-            // Send events to a dozing dream even if the screen is off since the dream
-            // is in control of the state of the screen.
+            // Send events to a dozing dream since the dream is in control of the state of the
+            // screen.
             IDreamManager dreamManager = getDreamManager();
 
             try {
