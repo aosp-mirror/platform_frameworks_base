@@ -775,7 +775,7 @@ public interface AndroidPackage {
      * @hide
      */
     @NonNull
-    List<String> getImplicitPermissions();
+    Set<String> getImplicitPermissions();
 
     /**
      * @see ApplicationInfo#installLocation
@@ -1123,7 +1123,7 @@ public interface AndroidPackage {
      * @hide
      */
     @NonNull
-    List<String> getRequestedPermissions();
+    Set<String> getRequestedPermissions();
 
     /**
      * Whether or not the app requested explicitly resizeable Activities. Null value means nothing

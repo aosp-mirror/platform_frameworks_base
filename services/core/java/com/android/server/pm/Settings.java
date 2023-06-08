@@ -5021,10 +5021,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         if ((permissionNames != null || dumpAll) && pkg != null
                 && pkg.getRequestedPermissions() != null
                 && pkg.getRequestedPermissions().size() > 0) {
-            final List<String> perms = pkg.getRequestedPermissions();
+            final Set<String> perms = pkg.getRequestedPermissions();
             pw.print(prefix); pw.println("  requested permissions:");
-            for (int i=0; i<perms.size(); i++) {
-                String perm = perms.get(i);
+            for (String perm : perms) {
                 if (permissionNames != null
                         && !permissionNames.contains(perm)) {
                     continue;

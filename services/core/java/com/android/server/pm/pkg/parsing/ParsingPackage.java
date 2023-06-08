@@ -456,7 +456,7 @@ public interface ParsingPackage {
     List<ParsedActivity> getReceivers();
 
     @NonNull
-    List<String> getRequestedPermissions();
+    Set<String> getRequestedPermissions();
 
     @Nullable
     Boolean getResizeableActivity();

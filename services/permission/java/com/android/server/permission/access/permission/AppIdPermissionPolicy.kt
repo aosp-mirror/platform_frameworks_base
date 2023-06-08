@@ -199,16 +199,16 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
         val androidPackage = packageState.androidPackage ?: return
         val appId = packageState.appId
-        androidPackage.requestedPermissions.forEachIndexed { _, permissionName ->
+        androidPackage.requestedPermissions.forEach { permissionName ->
             val permission = newState.systemState.permissions[permissionName]
-                ?: return@forEachIndexed
+                ?: return@forEach
             if (!permission.isHardOrSoftRestricted) {
-                return@forEachIndexed
+                return@forEach
             }
             val isRequestedBySystemPackage =
                 anyRequestingPackageInAppId(appId, permissionName) { it.isSystem }
             if (isRequestedBySystemPackage) {
-                return@forEachIndexed
+                return@forEach
             }
             val oldFlags = getPermissionFlags(appId, userId, permissionName)
             var newFlags = oldFlags andInv PermissionFlags.UPGRADE_EXEMPT
@@ -241,21 +241,21 @@ class AppIdPermissionPolicy : SchemePolicy() {
         val packageState = newState.externalState.packageStates[packageName] ?: return
         val androidPackage = packageState.androidPackage ?: return
         val appId = packageState.appId
-        androidPackage.requestedPermissions.forEachIndexed { _, permissionName ->
+        androidPackage.requestedPermissions.forEach { permissionName ->
             val permission = newState.systemState.permissions[permissionName]
-                ?: return@forEachIndexed
+                ?: return@forEach
             if (permission.isRemoved) {
-                return@forEachIndexed
+                return@forEach
             }
             val isRequestedByOtherPackages = anyRequestingPackageInAppId(appId, permissionName) {
                 it.packageName != packageName
             }
             if (isRequestedByOtherPackages) {
-                return@forEachIndexed
+                return@forEach
             }
             val oldFlags = getPermissionFlags(appId, userId, permissionName)
             if (oldFlags.hasAnyBit(SYSTEM_OR_POLICY_FIXED_MASK)) {
-                return@forEachIndexed
+                return@forEach
             }
             var newFlags = oldFlags
             newFlags = if (
@@ -688,7 +688,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         userId: Int,
         installedPackageState: PackageState?
     ) {
-        packageState.androidPackage?.requestedPermissions?.forEachIndexed { _, permissionName ->
+        packageState.androidPackage?.requestedPermissions?.forEach { permissionName ->
             evaluatePermissionState(
                 packageState.appId, userId, permissionName, installedPackageState
             )

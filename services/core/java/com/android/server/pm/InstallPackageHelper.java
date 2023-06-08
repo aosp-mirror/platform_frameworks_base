@@ -692,7 +692,7 @@ final class InstallPackageHelper {
                     if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS)
                             != 0) {
                         permissionParamsBuilder.setAllowlistedRestrictedPermissions(
-                                pkgSetting.getPkg().getRequestedPermissions());
+                                new ArrayList<>(pkgSetting.getPkg().getRequestedPermissions()));
                     }
                     mPm.mPermissionManager.onPackageInstalled(pkgSetting.getPkg(),
                             Process.INVALID_UID /* previousAppId */,
@@ -2314,9 +2314,7 @@ final class InstallPackageHelper {
                         & PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS) != 0;
                 if (grantRequestedPermissions) {
                     var permissionStates = new ArrayMap<String, Integer>();
-                    var requestedPermissions = pkg.getRequestedPermissions();
-                    for (int index = 0; index < requestedPermissions.size(); index++) {
-                        var permissionName = requestedPermissions.get(index);
+                    for (var permissionName : pkg.getRequestedPermissions()) {
                         permissionStates.put(permissionName,
                                 PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED);
                     }
@@ -2332,7 +2330,8 @@ final class InstallPackageHelper {
                         (installRequest.getInstallFlags()
                                 & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS) != 0;
                 final List<String> allowlistedRestrictedPermissions =
-                        allowlistAllRestrictedPermissions ? pkg.getRequestedPermissions()
+                        allowlistAllRestrictedPermissions
+                                ? new ArrayList<>(pkg.getRequestedPermissions())
                                 : installRequest.getAllowlistedRestrictedPermissions();
                 if (allowlistedRestrictedPermissions != null) {
                     permissionParamsBuilder.setAllowlistedRestrictedPermissions(

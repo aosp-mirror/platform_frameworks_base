@@ -231,8 +231,8 @@ public class PackageParserTest {
         assertSame(deserialized.getPackageName(), deserialized2.getPackageName());
         assertSame(deserialized.getPermission(),
                 deserialized2.getPermission());
-        assertSame(deserialized.getRequestedPermissions().get(0),
-                deserialized2.getRequestedPermissions().get(0));
+        assertSame(deserialized.getRequestedPermissions().iterator().next(),
+                deserialized2.getRequestedPermissions().iterator().next());
 
         List<String> protectedBroadcastsOne = new ArrayList<>(1);
         protectedBroadcastsOne.addAll(deserialized.getProtectedBroadcasts());
