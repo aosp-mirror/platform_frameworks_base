@@ -2420,7 +2420,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun playTurbulenceNoise_finishesAfterDuration() {
-        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
         fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
 
         val semanticActions =
@@ -2449,6 +2448,29 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
             assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
         }
+    }
+
+    @Test
+    fun playTurbulenceNoise_whenPlaybackStateIsNotPlaying_doesNotPlayTurbulence() {
+        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
+
+        val semanticActions =
+            MediaButton(
+                custom0 =
+                    MediaAction(
+                        icon = null,
+                        action = {},
+                        contentDescription = "custom0",
+                        background = null
+                    ),
+            )
+        val data = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.action0.callOnClick()
+
+        assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
     }
 
     @Test
