@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -104,40 +105,62 @@ public class UidObserverController {
         }
     }
 
-    void addUidToObserver(@NonNull IBinder observerToken, int uid) {
-        synchronized (mLock) {
-            int i = mUidObservers.beginBroadcast();
-            while (i-- > 0) {
-                var reg = (UidObserverRegistration) mUidObservers.getBroadcastCookie(i);
-                if (reg.getToken().equals(observerToken)) {
-                    reg.addUid(uid);
-                    break;
-                }
-
-                if (i == 0) {
-                    Slog.e(TAG_UID_OBSERVERS, "Unable to find UidObserver by token");
-                }
-            }
-            mUidObservers.finishBroadcast();
-        }
+    final void addUidToObserver(@NonNull IBinder observerToken, int uid) {
+        Message msg = Message.obtain(mHandler, ActivityManagerService.ADD_UID_TO_OBSERVER_MSG,
+                uid, /*arg2*/ 0, observerToken);
+        mHandler.sendMessage(msg);
     }
 
-    void removeUidFromObserver(@NonNull IBinder observerToken, int uid) {
-        synchronized (mLock) {
-            int i = mUidObservers.beginBroadcast();
-            while (i-- > 0) {
-                var reg = (UidObserverRegistration) mUidObservers.getBroadcastCookie(i);
-                if (reg.getToken().equals(observerToken)) {
-                    reg.removeUid(uid);
-                    break;
-                }
-
-                if (i == 0) {
-                    Slog.e(TAG_UID_OBSERVERS, "Unable to find UidObserver by token");
-                }
+    /**
+     * Add a uid to the list of uids an observer is interested in. Must be run on the same thread
+     * as mDispatchRunnable.
+     *
+     * @param observerToken The token identifier for a UidObserver
+     * @param uid The uid to add to the list of watched uids
+     */
+    public final void addUidToObserverImpl(@NonNull IBinder observerToken, int uid) {
+        int i = mUidObservers.beginBroadcast();
+        while (i-- > 0) {
+            var reg = (UidObserverRegistration) mUidObservers.getBroadcastCookie(i);
+            if (reg.getToken().equals(observerToken)) {
+                reg.addUid(uid);
+                break;
             }
-            mUidObservers.finishBroadcast();
+
+            if (i == 0) {
+                Slog.e(TAG_UID_OBSERVERS, "Unable to find UidObserver by token");
+            }
         }
+        mUidObservers.finishBroadcast();
+    }
+
+    final void removeUidFromObserver(@NonNull IBinder observerToken, int uid) {
+        Message msg = Message.obtain(mHandler, ActivityManagerService.REMOVE_UID_FROM_OBSERVER_MSG,
+                uid, /*arg2*/ 0, observerToken);
+        mHandler.sendMessage(msg);
+    }
+
+    /**
+     * Remove a uid from the list of uids an observer is interested in. Must be run on the same
+     * thread as mDispatchRunnable.
+     *
+     * @param observerToken The token identifier for a UidObserver
+     * @param uid The uid to remove from the list of watched uids
+     */
+    public final void removeUidFromObserverImpl(@NonNull IBinder observerToken, int uid) {
+        int i = mUidObservers.beginBroadcast();
+        while (i-- > 0) {
+            var reg = (UidObserverRegistration) mUidObservers.getBroadcastCookie(i);
+            if (reg.getToken().equals(observerToken)) {
+                reg.removeUid(uid);
+                break;
+            }
+
+            if (i == 0) {
+                Slog.e(TAG_UID_OBSERVERS, "Unable to find UidObserver by token");
+            }
+        }
+        mUidObservers.finishBroadcast();
     }
 
     int enqueueUidChange(@Nullable ChangeRecord currentRecord, int uid, int change, int procState,
