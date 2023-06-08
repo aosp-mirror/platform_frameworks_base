@@ -300,9 +300,12 @@ public class DisplayLayout {
         return mAllowSeamlessRotationDespiteNavBarMoving;
     }
 
-    /** @return whether the navigation bar will change sides during rotation. */
+    /**
+     * Returns {@code true} if the navigation bar will change sides during rotation and the display
+     * is not square.
+     */
     public boolean navigationBarCanMove() {
-        return mNavigationBarCanMove;
+        return mNavigationBarCanMove && mWidth != mHeight;
     }
 
     /** @return the rotation that would make the physical display "upside down". */
