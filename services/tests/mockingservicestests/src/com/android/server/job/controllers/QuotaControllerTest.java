@@ -85,6 +85,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.PowerAllowlistInternal;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobStore;
 import com.android.server.job.controllers.QuotaController.ExecutionStats;
@@ -190,6 +191,8 @@ public class QuotaControllerTest {
         doReturn(mPowerAllowlistInternal)
                 .when(() -> LocalServices.getService(PowerAllowlistInternal.class));
         // Used in JobStatus.
+        doReturn(mock(JobSchedulerInternal.class))
+                .when(() -> LocalServices.getService(JobSchedulerInternal.class));
         doReturn(mPackageManagerInternal)
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
         // Used in QuotaController.Handler.
