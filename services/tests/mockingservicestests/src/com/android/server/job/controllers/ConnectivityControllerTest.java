@@ -73,6 +73,7 @@ import android.telephony.TelephonyManager;
 import android.util.DataUnit;
 
 import com.android.server.LocalServices;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -123,6 +124,10 @@ public class ConnectivityControllerTest {
 
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
         LocalServices.addService(NetworkPolicyManagerInternal.class, mNetPolicyManagerInternal);
+
+        // Used in JobStatus.
+        LocalServices.removeServiceForTest(JobSchedulerInternal.class);
+        LocalServices.addService(JobSchedulerInternal.class, mock(JobSchedulerInternal.class));
 
         // Freeze the clocks at this moment in time
         JobSchedulerService.sSystemClock =
