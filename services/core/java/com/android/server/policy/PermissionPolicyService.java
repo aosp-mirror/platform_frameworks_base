@@ -583,6 +583,10 @@ public final class PermissionPolicyService extends SystemService {
     }
 
     private void grantOrUpgradeDefaultRuntimePermissionsIfNeeded(@UserIdInt int userId) {
+        if (PermissionManager.USE_ACCESS_CHECKING_SERVICE) {
+            return;
+        }
+
         if (DEBUG) Slog.i(LOG_TAG, "grantOrUpgradeDefaultPermsIfNeeded(" + userId + ")");
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
