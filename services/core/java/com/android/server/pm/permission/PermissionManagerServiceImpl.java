@@ -2894,7 +2894,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             } else if (!permissionPolicyInitialized
                                     || (!hardRestricted || restrictionExempt)) {
                                 if ((origPermState != null && origPermState.isGranted())) {
-                                    uidState.grantPermission(bp);
+                                    if (!uidState.grantPermission(bp)) {
+                                        wasChanged = true;
+                                    }
                                 }
                             }
                             if (mIsLeanback && NOTIFICATION_PERMISSIONS.contains(permName)) {
