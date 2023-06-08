@@ -11369,7 +11369,8 @@ public class DevicePolicyManager {
      * @throws SecurityException     if the caller is not a profile owner on an organization-owned
      *                               managed profile.
      * @throws IllegalStateException if called after the device setup has been completed.
-     * @throws UnsupportedOperationException if the api is not enabled.
+     * @throws UnsupportedOperationException if managed subscriptions policy is not explicitly
+     *         enabled by the device policy management role holder during device setup.
      * @see ManagedSubscriptionsPolicy
      */
     public void setManagedSubscriptionsPolicy(@Nullable ManagedSubscriptionsPolicy policy) {
