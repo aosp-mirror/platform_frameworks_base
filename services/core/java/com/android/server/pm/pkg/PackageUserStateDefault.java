@@ -129,6 +129,11 @@ class PackageUserStateDefault implements PackageUserStateInternal {
         return false;
     }
 
+    @Override
+    public boolean isQuarantined() {
+        return false;
+    }
+
     @Nullable
     @Override
     public String getSplashScreenTheme() {

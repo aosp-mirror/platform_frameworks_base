@@ -1918,9 +1918,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
                         ArraySet<String> enabledComponents = null;
                         ArraySet<String> disabledComponents = null;
-                        PersistableBundle suspendedAppExtras = null;
-                        PersistableBundle suspendedLauncherExtras = null;
                         SuspendDialogInfo oldSuspendDialogInfo = null;
+                        PersistableBundle oldSuspendedAppExtras = null;
+                        PersistableBundle oldSuspendedLauncherExtras = null;
                         ArchiveState archiveState = null;
 
                         int packageDepth = parser.getDepth();
@@ -1939,15 +1939,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 case TAG_DISABLED_COMPONENTS:
                                     disabledComponents = readComponentsLPr(parser);
                                     break;
-                                case TAG_SUSPENDED_APP_EXTRAS:
-                                    suspendedAppExtras = PersistableBundle.restoreFromXml(parser);
-                                    break;
-                                case TAG_SUSPENDED_LAUNCHER_EXTRAS:
-                                    suspendedLauncherExtras = PersistableBundle.restoreFromXml(
-                                            parser);
-                                    break;
                                 case TAG_SUSPENDED_DIALOG_INFO:
                                     oldSuspendDialogInfo = SuspendDialogInfo.restoreFromXml(parser);
+                                    break;
+                                case TAG_SUSPENDED_APP_EXTRAS:
+                                    oldSuspendedAppExtras = PersistableBundle.restoreFromXml(
+                                            parser);
+                                    break;
+                                case TAG_SUSPENDED_LAUNCHER_EXTRAS:
+                                    oldSuspendedLauncherExtras = PersistableBundle.restoreFromXml(
+                                            parser);
                                     break;
                                 case TAG_SUSPEND_PARAMS:
                                     final String suspendingPackage = parser.getAttributeValue(null,
@@ -1979,8 +1980,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         if (suspended && suspendParamsMap == null) {
                             final SuspendParams suspendParams = new SuspendParams(
                                     oldSuspendDialogInfo,
-                                    suspendedAppExtras,
-                                    suspendedLauncherExtras);
+                                    oldSuspendedAppExtras,
+                                    oldSuspendedLauncherExtras,
+                                    false /* quarantined */);
                             suspendParamsMap = new ArrayMap<>();
                             suspendParamsMap.put(oldSuspendingPackage, suspendParams);
                         }
@@ -1989,13 +1991,12 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                             setBlockUninstallLPw(userId, name, true);
                         }
                         ps.setUserState(userId, ceDataInode, enabled, installed, stopped,
-                                notLaunched,
-                                hidden, distractionFlags, suspendParamsMap, instantApp,
-                                virtualPreload,
-                                enabledCaller, enabledComponents, disabledComponents, installReason,
-                                uninstallReason, harmfulAppWarning, splashScreenTheme,
-                                firstInstallTime != 0 ? firstInstallTime :
-                                        origFirstInstallTimes.getOrDefault(name, 0L),
+                                notLaunched, hidden, distractionFlags, suspendParamsMap, instantApp,
+                                virtualPreload, enabledCaller, enabledComponents,
+                                disabledComponents, installReason, uninstallReason,
+                                harmfulAppWarning, splashScreenTheme,
+                                firstInstallTime != 0 ? firstInstallTime
+                                        : origFirstInstallTimes.getOrDefault(name, 0L),
                                 minAspectRatio, archiveState);
 
                         mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
@@ -4824,6 +4825,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 pw.print(userState.isNotLaunched() ? "l" : "L");
                 pw.print(userState.isInstantApp() ? "IA" : "ia");
                 pw.print(userState.isVirtualPreload() ? "VPI" : "vpi");
+                pw.print(userState.isQuarantined() ? "Q" : "q");
                 String harmfulAppWarning = userState.getHarmfulAppWarning();
                 pw.print(harmfulAppWarning != null ? "HA" : "ha");
                 pw.print(",");
@@ -5185,6 +5187,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pw.print(userState.isInstantApp());
             pw.print(" virtual=");
             pw.println(userState.isVirtualPreload());
+            pw.print(" quarantined=");
+            pw.print(userState.isQuarantined());
             pw.print("      installReason=");
             pw.println(userState.getInstallReason());
 
@@ -5207,6 +5211,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     if (params != null) {
                         pw.print(" dialogInfo=");
                         pw.print(params.getDialogInfo());
+                        pw.print(" quarantined=");
+                        pw.println(params.isQuarantined());
                     }
                     pw.println();
                 }

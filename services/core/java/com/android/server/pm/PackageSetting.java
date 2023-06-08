@@ -937,8 +937,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 otherState.isHidden(), otherState.getDistractionFlags(),
                 otherState.getSuspendParams() == null
                         ? null : otherState.getSuspendParams().untrackedStorage(),
-                otherState.isInstantApp(),
-                otherState.isVirtualPreload(), otherState.getLastDisableAppCaller(),
+                otherState.isInstantApp(), otherState.isVirtualPreload(),
+                otherState.getLastDisableAppCaller(),
                 otherState.getEnabledComponentsNoCopy() == null
                         ? null : otherState.getEnabledComponentsNoCopy().untrackedStorage(),
                 otherState.getDisabledComponentsNoCopy() == null

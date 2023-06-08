@@ -1374,7 +1374,7 @@ public abstract class PackageManagerInternal {
      * and the package should get out of stopped state and be enabled.
      */
     public abstract void notifyComponentUsed(@NonNull String packageName,
-            @UserIdInt int userId, @NonNull String recentCallingPackage);
+            @UserIdInt int userId, @NonNull String recentCallingPackage, @NonNull String debugInfo);
 
     /** @deprecated For legacy shell command only. */
     @Deprecated
@@ -1403,4 +1403,10 @@ public abstract class PackageManagerInternal {
      */
     public abstract int[] getDistractingPackageRestrictionsAsUser(
             @NonNull String[] packageNames, int userId);
+
+    /**
+     * Checks if package is quarantined for a specific user.
+     */
+    public abstract boolean isPackageQuarantined(@NonNull String packageName,
+            @UserIdInt int userId);
 }

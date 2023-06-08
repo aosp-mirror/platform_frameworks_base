@@ -5309,11 +5309,12 @@ public class AccountManagerService
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "performing bindService to " + authenticatorInfo.componentName);
             }
-            int flags = Context.BIND_AUTO_CREATE;
+            long flags = Context.BIND_FILTER_OUT_QUARANTINED_COMPONENTS | Context.BIND_AUTO_CREATE;
             if (mAuthenticatorCache.getBindInstantServiceAllowed(mAccounts.userId)) {
                 flags |= Context.BIND_ALLOW_INSTANT;
             }
-            if (!mContext.bindServiceAsUser(intent, this, flags, UserHandle.of(mAccounts.userId))) {
+            if (!mContext.bindServiceAsUser(intent, this, Context.BindServiceFlags.of(flags),
+                    UserHandle.of(mAccounts.userId))) {
                 Log.w(TAG, "bindService to " + authenticatorInfo.componentName + " failed");
                 // Perform unbind as per documentation at Context.bindServiceAsUser
                 mContext.unbindService(this);

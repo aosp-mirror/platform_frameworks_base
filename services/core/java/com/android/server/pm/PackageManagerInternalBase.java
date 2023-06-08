@@ -746,10 +746,18 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     }
 
     @Override
-    public void notifyComponentUsed(@NonNull String packageName,
-            @UserIdInt int userId, @NonNull String recentCallingPackage) {
+    public void notifyComponentUsed(@NonNull String packageName, @UserIdInt int userId,
+            @NonNull String recentCallingPackage, @NonNull String debugInfo) {
         mService.notifyComponentUsed(snapshot(), packageName, userId,
-                recentCallingPackage);
+                recentCallingPackage, debugInfo);
+    }
+
+    @Override
+    public boolean isPackageQuarantined(@NonNull String packageName,
+            @UserIdInt int userId) {
+        final PackageStateInternal packageState = getPackageStateInternal(packageName);
+        return (packageState == null) ? false
+                : packageState.getUserStateOrDefault(userId).isQuarantined();
     }
 
     @NonNull

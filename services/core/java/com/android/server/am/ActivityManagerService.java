@@ -58,6 +58,7 @@ import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_INSTRUMENTAT
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_PERSISTENT;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_SYSTEM;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
+import static android.content.pm.PackageManager.FILTER_OUT_QUARANTINED_COMPONENTS;
 import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
@@ -14221,7 +14222,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private List<ResolveInfo> collectReceiverComponents(Intent intent, String resolvedType,
             int callingUid, int[] users, int[] broadcastAllowList) {
         // TODO: come back and remove this assumption to triage all broadcasts
-        int pmFlags = STOCK_PM_FLAGS | MATCH_DEBUG_TRIAGED_MISSING;
+        long pmFlags = STOCK_PM_FLAGS | MATCH_DEBUG_TRIAGED_MISSING
+                | FILTER_OUT_QUARANTINED_COMPONENTS;
 
         List<ResolveInfo> receivers = null;
         HashSet<ComponentName> singleUserReceivers = null;
@@ -14849,6 +14851,16 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                             mAtmInternal.onPackagesSuspendedChanged(packageNames, suspended,
                                     userIdExtra);
+
+                            final boolean quarantined = intent.getBooleanExtra(
+                                    Intent.EXTRA_QUARANTINED, false);
+                            if (suspended && quarantined && packageNames != null) {
+                                for (int i = 0; i < packageNames.length; i++) {
+                                    forceStopPackageLocked(packageNames[i], -1, false, true, true,
+                                            false, false, userId, "suspended");
+                                }
+                            }
+
                             break;
                     }
                     break;

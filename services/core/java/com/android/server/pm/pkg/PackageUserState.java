@@ -209,6 +209,13 @@ public interface PackageUserState {
     boolean isVirtualPreload();
 
     /**
+     * @return whether the package is quarantined in order to minimize ad-spam and pop ups
+     * when-not-in-use.
+     * @hide
+     */
+    boolean isQuarantined();
+
+    /**
      * The "package:type/entry" form of the theme resource ID previously set as the splash screen.
      *
      * @hide
@@ -225,6 +232,7 @@ public interface PackageUserState {
      */
     @PackageManager.UserMinAspectRatio
     int getMinAspectRatio();
+
     /**
      * Information about the archived state of an app. Set only if an app is archived.
      *
@@ -233,4 +241,5 @@ public interface PackageUserState {
     @Immutable.Ignore
     @Nullable
     ArchiveState getArchiveState();
+
 }

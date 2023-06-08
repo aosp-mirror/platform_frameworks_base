@@ -16,6 +16,7 @@
 
 package com.android.server.pm.pkg;
 
+import static android.content.pm.PackageManager.FILTER_OUT_QUARANTINED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
 
@@ -120,6 +121,10 @@ public class PackageUserStateUtils {
             long flags) {
         if ((flags & MATCH_DISABLED_COMPONENTS) != 0) {
             return true;
+        }
+
+        if ((flags & FILTER_OUT_QUARANTINED_COMPONENTS) != 0 && state.isQuarantined()) {
+            return false;
         }
 
         // First check if the overall package is disabled; if the package is

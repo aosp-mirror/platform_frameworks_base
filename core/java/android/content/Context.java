@@ -323,6 +323,7 @@ public abstract class Context {
             // Make sure no flag uses the sign bit (most significant bit) of the long integer,
             // to avoid future confusion.
             BIND_BYPASS_USER_NETWORK_RESTRICTIONS,
+            BIND_FILTER_OUT_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlagsLongBits {}
@@ -696,6 +697,13 @@ public abstract class Context {
      * @hide
      */
     public static final long BIND_BYPASS_USER_NETWORK_RESTRICTIONS = 0x1_0000_0000L;
+
+    /**
+     * Flag for {@link #bindService}.
+     *
+     * @hide
+     */
+    public static final long BIND_FILTER_OUT_QUARANTINED_COMPONENTS = 0x2_0000_0000L;
 
 
     /**

@@ -97,7 +97,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public final class AppHibernationService extends SystemService {
     private static final String TAG = "AppHibernationService";
-    private static final int PACKAGE_MATCH_FLAGS =
+    private static final long PACKAGE_MATCH_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE
                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.MATCH_UNINSTALLED_PACKAGES

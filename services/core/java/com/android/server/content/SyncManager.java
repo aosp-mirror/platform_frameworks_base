@@ -220,8 +220,10 @@ public class SyncManager {
     private static final int SYNC_OP_STATE_INVALID_SYNC_DISABLED = 5;
 
     /** Flags used when connecting to a sync adapter service */
-    private static final int SYNC_ADAPTER_CONNECTION_FLAGS = Context.BIND_AUTO_CREATE
-            | Context.BIND_NOT_FOREGROUND | Context.BIND_ALLOW_OOM_MANAGEMENT;
+    private static final Context.BindServiceFlags SYNC_ADAPTER_CONNECTION_FLAGS =
+            Context.BindServiceFlags.of(
+                    Context.BIND_FILTER_OUT_QUARANTINED_COMPONENTS | Context.BIND_AUTO_CREATE
+                            | Context.BIND_NOT_FOREGROUND | Context.BIND_ALLOW_OOM_MANAGEMENT);
 
     /** Singleton instance. */
     @GuardedBy("SyncManager.class")

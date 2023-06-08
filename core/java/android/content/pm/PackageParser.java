@@ -8005,7 +8005,7 @@ public class PackageParser {
             ai.enabled = true;
         } else if (state.getEnabledState()
                 == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
-            ai.enabled = (flags&PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) != 0;
+            ai.enabled = (flags & PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) != 0;
         } else if (state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
                 || state.getEnabledState()
                 == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {

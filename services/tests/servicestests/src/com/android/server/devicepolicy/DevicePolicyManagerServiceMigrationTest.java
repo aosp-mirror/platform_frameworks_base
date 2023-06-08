@@ -236,7 +236,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         verify(getServices().packageManagerInternal, never())
                 .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, USER_SYSTEM);
         verify(getServices().ipackageManager, never()).setPackagesSuspendedAsUser(
-                any(), anyBoolean(), any(), any(), any(), any(), anyInt());
+                any(), anyBoolean(), any(), any(), any(), anyInt(), any(), anyInt());
 
         final DpmMockContext poContext = new DpmMockContext(getServices(), mRealTestContext);
         poContext.binder.callingUid = UserHandle.getUid(COPE_PROFILE_USER_ID, COPE_ADMIN1_APP_ID);

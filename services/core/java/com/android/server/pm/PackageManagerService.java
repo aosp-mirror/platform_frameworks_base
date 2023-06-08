@@ -4583,7 +4583,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     void notifyComponentUsed(@NonNull Computer snapshot, @NonNull String packageName,
-            @UserIdInt int userId, @NonNull String recentCallingPackage) {
+            @UserIdInt int userId, @NonNull String recentCallingPackage,
+            @NonNull String debugInfo) {
+        synchronized (mLock) {
+            final PackageUserStateInternal userState = mSettings.getPackageLPr(
+                    packageName).getUserStateOrDefault(userId);
+            if (userState.isQuarantined()) {
+                Slog.i(TAG,
+                        "Component is quarantined+suspended but being used: "
+                                + packageName + " by " + recentCallingPackage + ", debugInfo: "
+                                + debugInfo);
+            }
+        }
         PackageManagerService.this
                 .setPackageStoppedState(snapshot, packageName, false /* stopped */,
                         userId);
@@ -6120,14 +6131,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
                 PersistableBundle appExtras, PersistableBundle launcherExtras,
-                SuspendDialogInfo dialogInfo, String callingPackage, int userId) {
+                SuspendDialogInfo dialogInfo, int flags, String callingPackage, int userId) {
             final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshotComputer();
             enforceCanSetPackagesSuspendedAsUser(snapshot, callingPackage, callingUid, userId,
                     "setPackagesSuspendedAsUser");
+            boolean quarantined = ((flags & PackageManager.FLAG_SUSPEND_QUARANTINED) != 0)
+                    && Flags.quarantinedEnabled();
             return mSuspendPackageHelper.setPackagesSuspended(snapshot, packageNames, suspended,
                     appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid,
-                    false /* forQuietMode */);
+                    false /* forQuietMode */, quarantined);
         }
 
         @Override

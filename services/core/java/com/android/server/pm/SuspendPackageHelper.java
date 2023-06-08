@@ -115,17 +115,18 @@ public final class SuspendPackageHelper {
             boolean suspended, @Nullable PersistableBundle appExtras,
             @Nullable PersistableBundle launcherExtras, @Nullable SuspendDialogInfo dialogInfo,
             @NonNull String callingPackage, @UserIdInt int userId, int callingUid,
-            boolean forQuietMode) {
+            boolean forQuietMode, boolean quarantined) {
         if (ArrayUtils.isEmpty(packageNames)) {
             return packageNames;
         }
-        if (suspended && !forQuietMode && !isSuspendAllowedForUser(snapshot, userId, callingUid)) {
+        if (suspended && !quarantined && !forQuietMode && !isSuspendAllowedForUser(snapshot, userId,
+                callingUid)) {
             Slog.w(TAG, "Cannot suspend due to restrictions on user " + userId);
             return packageNames;
         }
 
         final SuspendParams newSuspendParams =
-                new SuspendParams(dialogInfo, appExtras, launcherExtras);
+                new SuspendParams(dialogInfo, appExtras, launcherExtras, quarantined);
 
         final List<String> unmodifiablePackages = new ArrayList<>(packageNames.length);
 
@@ -160,7 +161,6 @@ public final class SuspendPackageHelper {
 
             final WatchedArrayMap<String, SuspendParams> suspendParamsMap =
                     packageState.getUserStateOrDefault(userId).getSuspendParams();
-
             SuspendParams oldSuspendParams = suspendParamsMap == null
                     ? null : suspendParamsMap.get(packageName);
             boolean changed = !Objects.equals(oldSuspendParams, newSuspendParams);
@@ -213,14 +213,15 @@ public final class SuspendPackageHelper {
             sendPackagesSuspendedForUser(
                     suspended ? Intent.ACTION_PACKAGES_SUSPENDED
                             : Intent.ACTION_PACKAGES_UNSUSPENDED,
-                    changedPackages, notifyUids.toArray(), userId);
+                    changedPackages, notifyUids.toArray(), quarantined, userId);
             sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
         // Send the suspension changed broadcast to ensure suspension state is not stale.
         if (!changedPackagesList.isEmpty()) {
             sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
-                    changedPackagesList.toArray(new String[0]), changedUids.toArray(), userId);
+                    changedPackagesList.toArray(new String[0]), changedUids.toArray(), quarantined,
+                    userId);
         }
         return unmodifiablePackages.toArray(new String[0]);
     }
@@ -354,7 +355,7 @@ public final class SuspendPackageHelper {
                     new String[unsuspendedPackages.size()]);
             sendMyPackageSuspendedOrUnsuspended(packageArray, false, userId);
             sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_UNSUSPENDED,
-                    packageArray, unsuspendedUids.toArray(), userId);
+                    packageArray, unsuspendedUids.toArray(), false, userId);
         }
     }
 
@@ -618,11 +619,14 @@ public final class SuspendPackageHelper {
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     void sendPackagesSuspendedForUser(@NonNull String intent, @NonNull String[] pkgList,
-            @NonNull int[] uidList, int userId) {
+            @NonNull int[] uidList, boolean quarantined, int userId) {
         final Handler handler = mInjector.getHandler();
         final Bundle extras = new Bundle(3);
         extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
         extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
+        if (quarantined) {
+            extras.putBoolean(Intent.EXTRA_QUARANTINED, true);
+        }
         final int flags = Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND;
         final Bundle options = new BroadcastOptions()
                 .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
@@ -672,7 +676,7 @@ public final class SuspendPackageHelper {
                             snapshot, toSuspend.toArray(new String[0]), suspend,
                             null /* appExtras */, null /* launcherExtras */, null /* dialogInfo */,
                             PackageManagerService.PLATFORM_PACKAGE_NAME, userId, Process.SYSTEM_UID,
-                            false /* forQuietMode */)));
+                            false /* forQuietMode */, false /* quarantined */)));
         }
         return unsuspendable.toArray(String[]::new);
     }
@@ -716,7 +720,7 @@ public final class SuspendPackageHelper {
         setPackagesSuspended(snapshot, toSuspend.toArray(new String[0]),
                 suspend, null /* appExtras */, null /* launcherExtras */, null /* dialogInfo */,
                 PackageManagerService.PLATFORM_PACKAGE_NAME, userId, Process.SYSTEM_UID,
-                true /* forQuietMode */);
+                true /* forQuietMode */, false /* quarantined */);
     }
 
     private Set<String> packagesToSuspendInQuietMode(Computer snapshot, int userId) {
