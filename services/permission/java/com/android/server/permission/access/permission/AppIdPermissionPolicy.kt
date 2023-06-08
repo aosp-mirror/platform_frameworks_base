@@ -427,7 +427,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     // It's a config permission and has no owner, take ownership now.
                     oldPermission.copy(
                         permissionInfo = newPermissionInfo, isReconciled = true,
-                        appId = packageState.appId
+                        type = Permission.TYPE_MANIFEST, appId = packageState.appId
                     )
                 } else if (newState.externalState.packageStates[oldPackageName]?.isSystem != true) {
                     Slog.w(
@@ -461,11 +461,12 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     val isPermissionGroupChanged = newPermissionInfo.isRuntime &&
                         newPermissionInfo.group != null &&
                         newPermissionInfo.group != oldPermission.groupName
-                    val isPermissionTypeChanged = oldPermission.type != Permission.TYPE_CONFIG && (
-                        (newPermissionInfo.isRuntime && !oldPermission.isRuntime) ||
-                            (newPermissionInfo.isInternal && !oldPermission.isInternal)
-                    )
-                    if (isPermissionGroupChanged || isPermissionTypeChanged) {
+                    val isPermissionProtectionChanged =
+                        oldPermission.type != Permission.TYPE_CONFIG && (
+                            (newPermissionInfo.isRuntime && !oldPermission.isRuntime) ||
+                                (newPermissionInfo.isInternal && !oldPermission.isInternal)
+                        )
+                    if (isPermissionGroupChanged || isPermissionProtectionChanged) {
                         newState.externalState.userIds.forEachIndexed { _, userId ->
                             newState.externalState.appIdPackageNames.forEachIndexed { _, appId, _ ->
                                 if (isPermissionGroupChanged) {
@@ -480,11 +481,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
                                             " to ${newPermissionInfo.group}"
                                     )
                                 }
-                                if (isPermissionTypeChanged) {
+                                if (isPermissionProtectionChanged) {
                                     Slog.w(
                                         LOG_TAG, "Revoking permission $permissionName for" +
                                             " appId $appId and userId $userId as the permission" +
-                                            " type changed."
+                                            " protection changed."
                                     )
                                 }
                                 setPermissionFlags(appId, userId, permissionName, 0)
@@ -500,7 +501,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 if (oldPermission != null) {
                     oldPermission.copy(
                         permissionInfo = newPermissionInfo, isReconciled = true,
-                        appId = packageState.appId
+                        type = Permission.TYPE_MANIFEST, appId = packageState.appId
                     )
                 } else {
                     Permission(
@@ -513,8 +514,17 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 newState.mutateSystemState().mutatePermissionTrees()[permissionName] = newPermission
             } else {
                 newState.mutateSystemState().mutatePermissions()[permissionName] = newPermission
+                val isPermissionChanged = oldPermission == null ||
+                    newPackageName != oldPermission.packageName ||
+                    newPermission.protectionLevel != oldPermission.protectionLevel || (
+                        oldPermission.isReconciled && newPermission.isRuntime &&
+                            newPermission.groupName != null &&
+                            newPermission.groupName != oldPermission.groupName
+                    )
+                if (isPermissionChanged) {
+                    changedPermissionNames += permissionName
+                }
             }
-            changedPermissionNames += permissionName
         }
     }
 
