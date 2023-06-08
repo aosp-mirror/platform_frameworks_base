@@ -773,6 +773,14 @@ public final class QuotaController extends StateController {
             // If quota is currently "free", then the job can run for the full amount of time,
             // regardless of bucket (hence using charging instead of isQuotaFreeLocked()).
             if (mService.isBatteryCharging()
+                    // The top and foreground cases here were added because apps in those states
+                    // aren't really restricted and the work could be something the user is
+                    // waiting for. Now that user-initiated jobs are a defined concept, we may
+                    // not need these exemptions as much. However, UIJs are currently limited
+                    // (as of UDC) to data transfer work. There may be other work that could
+                    // rely on this exception. Once we add more UIJ types, we can re-evaluate
+                    // the need for these exceptions.
+                    // TODO: re-evaluate the need for these exceptions
                     || mTopAppCache.get(jobStatus.getSourceUid())
                     || isTopStartedJobLocked(jobStatus)
                     || isUidInForeground(jobStatus.getSourceUid())) {

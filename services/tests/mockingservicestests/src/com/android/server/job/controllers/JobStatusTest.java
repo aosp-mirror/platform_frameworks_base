@@ -21,6 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
+import static com.android.server.job.JobSchedulerService.EXEMPTED_INDEX;
 import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
 import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
 import static com.android.server.job.JobSchedulerService.RARE_INDEX;
@@ -45,6 +46,8 @@ import static com.android.server.job.controllers.JobStatus.NO_LATEST_RUNTIME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
@@ -579,6 +582,40 @@ public class JobStatusTest {
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
                 numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
+    }
+
+    @Test
+    public void testGetEffectiveStandbyBucket_buggyApp() {
+        when(mJobSchedulerInternal.isAppConsideredBuggy(
+                anyInt(), anyString(), anyInt(), anyString()))
+                .thenReturn(true);
+
+        final JobInfo jobInfo = new JobInfo.Builder(1234, TEST_JOB_COMPONENT).build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        // Exempt apps be exempting.
+        job.setStandbyBucket(EXEMPTED_INDEX);
+        assertEquals(EXEMPTED_INDEX, job.getEffectiveStandbyBucket());
+
+        // Actual bucket is higher than the buggy cap, so the cap comes into effect.
+        job.setStandbyBucket(ACTIVE_INDEX);
+        assertEquals(WORKING_INDEX, job.getEffectiveStandbyBucket());
+
+        // Buckets at the cap or below shouldn't be affected.
+        job.setStandbyBucket(WORKING_INDEX);
+        assertEquals(WORKING_INDEX, job.getEffectiveStandbyBucket());
+
+        job.setStandbyBucket(FREQUENT_INDEX);
+        assertEquals(FREQUENT_INDEX, job.getEffectiveStandbyBucket());
+
+        job.setStandbyBucket(RARE_INDEX);
+        assertEquals(RARE_INDEX, job.getEffectiveStandbyBucket());
+
+        job.setStandbyBucket(RESTRICTED_INDEX);
+        assertEquals(RESTRICTED_INDEX, job.getEffectiveStandbyBucket());
+
+        job.setStandbyBucket(NEVER_INDEX);
+        assertEquals(NEVER_INDEX, job.getEffectiveStandbyBucket());
     }
 
     @Test
