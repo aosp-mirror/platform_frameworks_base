@@ -43,7 +43,7 @@
 
     <!-- Not quite optimal but needed to translate these items as a group. The
          NotificationIconContainer has its own logic for translation. -->
-    <LinearLayout
+    <com.android.keyguard.KeyguardStatusAreaView
         android:id="@+id/keyguard_status_area"
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -63,5 +63,5 @@
           android:paddingStart="@dimen/below_clock_padding_start_icons"
           android:visibility="invisible"
           />
-    </LinearLayout>
+    </com.android.keyguard.KeyguardStatusAreaView>
 </com.android.keyguard.KeyguardClockSwitch>
