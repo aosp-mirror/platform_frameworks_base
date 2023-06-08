@@ -396,14 +396,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     int mPrepareSyncSeqId = 0;
 
     /**
-     * {@code true} when the client was still drawing for sync when the sync-set was finished or
-     * cancelled. This can happen if the window goes away during a sync. In this situation we need
-     * to make sure to still apply the postDrawTransaction when it finishes to prevent the client
-     * from getting stuck in a bad state.
-     */
-    boolean mClientWasDrawingForSync = false;
-
-    /**
      * Special mode that is intended only for the rounded corner overlay: during rotation
      * transition, we un-rotate the window token such that the window appears as it did before the
      * rotation.
@@ -1551,6 +1543,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 winAnimator.mDrawState = DRAW_PENDING;
                 if (mActivityRecord != null) {
                     mActivityRecord.clearAllDrawn();
+                    if (mAttrs.type == TYPE_APPLICATION_STARTING
+                            && mActivityRecord.mStartingData != null) {
+                        mActivityRecord.mStartingData.mIsDisplayed = false;
+                    }
                 }
             }
             if (!mWmService.mResizingWindows.contains(this)) {
@@ -2395,7 +2391,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // IME parent may failed to attach to the app during rotating the screen.
         // See DisplayContent#shouldImeAttachedToApp, DisplayContent#isImeControlledByApp
         if (windowConfigChanged) {
-            getDisplayContent().updateImeControlTarget();
+            // If the window was the IME layering target, updates the IME surface parent in case
+            // the IME surface may be wrongly positioned when the window configuration affects the
+            // IME surface association. (e.g. Attach IME surface on the display instead of the
+            // app when the app bounds being letterboxed.)
+            mDisplayContent.updateImeControlTarget(isImeLayeringTarget() /* updateImeParent */);
         }
     }
 
@@ -3079,12 +3079,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private Configuration getLastReportedConfiguration() {
         return mLastReportedConfiguration.getMergedConfiguration();
-    }
-
-    /** Returns the last window configuration bounds reported to the client. */
-    Rect getLastReportedBounds() {
-        final Rect bounds = getLastReportedConfiguration().windowConfiguration.getBounds();
-        return !bounds.isEmpty() ? bounds : getBounds();
     }
 
     void adjustStartingWindowFlags() {
@@ -4421,6 +4415,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.print("null");
         }
 
+        if (mXOffset != 0 || mYOffset != 0) {
+            pw.println(prefix + "mXOffset=" + mXOffset + " mYOffset=" + mYOffset);
+        }
         if (mHScale != 1 || mVScale != 1) {
             pw.println(prefix + "mHScale=" + mHScale
                     + " mVScale=" + mVScale);
@@ -4584,7 +4581,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void requestUpdateWallpaperIfNeeded() {
         final DisplayContent dc = getDisplayContent();
-        if (dc != null && hasWallpaper()) {
+        if (dc != null && ((mIsWallpaper && !mLastConfigReportedToClient) || hasWallpaper())) {
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             dc.setLayoutNeeded();
             mWmService.mWindowPlacerLocked.requestTraversal();
@@ -5573,7 +5570,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mSurfacePosition);
 
         if (mWallpaperScale != 1f) {
-            final Rect bounds = getLastReportedBounds();
+            final Rect bounds = getParentFrame();
             Matrix matrix = mTmpMatrix;
             matrix.setTranslate(mXOffset, mYOffset);
             matrix.postScale(mWallpaperScale, mWallpaperScale, bounds.exactCenterX(),
@@ -5596,8 +5593,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (surfaceInsetsChanged) {
                 mLastSurfaceInsets.set(mAttrs.surfaceInsets);
             }
-            if (surfaceSizeChanged && mWinAnimator.getShown() && !canPlayMoveAnimation()
-                    && okToDisplay() && mSyncState == SYNC_STATE_NONE) {
+            final boolean surfaceResizedWithoutMoveAnimation = surfaceSizeChanged
+                    && mWinAnimator.getShown() && !canPlayMoveAnimation() && okToDisplay()
+                    && mSyncState == SYNC_STATE_NONE;
+            final ActivityRecord activityRecord = getActivityRecord();
+            // If this window belongs to an activity that is relaunching due to an orientation
+            // change then delay the position update until it has redrawn to avoid any flickers.
+            final boolean isLetterboxedAndRelaunching = activityRecord != null
+                    && activityRecord.areBoundsLetterboxed()
+                    && activityRecord.mLetterboxUiController
+                        .getIsRelaunchingAfterRequestedOrientationChanged();
+            if (surfaceResizedWithoutMoveAnimation || isLetterboxedAndRelaunching) {
                 applyWithNextDraw(mSetSurfacePositionConsumer);
             } else {
                 mSetSurfacePositionConsumer.accept(t);
@@ -6019,9 +6025,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void finishSync(Transaction outMergedTransaction, boolean cancel) {
-        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mRedrawForSyncReported) {
-            mClientWasDrawingForSync = true;
-        }
         mPrepareSyncSeqId = 0;
         if (cancel) {
             // This is leaving sync so any buffers left in the sync have a chance of
@@ -6039,7 +6042,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Slog.i(TAG, "finishDrawing of orientation change: " + this + " " + duration + "ms");
             mOrientationChangeRedrawRequestTime = 0;
         } else if (mActivityRecord != null && mActivityRecord.mRelaunchStartTime != 0
-                && mActivityRecord.findMainWindow() == this) {
+                && mActivityRecord.findMainWindow(false /* includeStartingApp */) == this) {
             final long duration =
                     SystemClock.elapsedRealtime() - mActivityRecord.mRelaunchStartTime;
             Slog.i(TAG, "finishDrawing of relaunch: " + this + " " + duration + "ms");
@@ -6089,9 +6092,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutNeeded = onSyncFinishedDrawing();
         }
 
-        layoutNeeded |=
-                mWinAnimator.finishDrawingLocked(postDrawTransaction, mClientWasDrawingForSync);
-        mClientWasDrawingForSync = false;
+        layoutNeeded |= mWinAnimator.finishDrawingLocked(postDrawTransaction);
         // We always want to force a traversal after a finish draw for blast sync.
         return !skipLayout && (hasSyncHandlers || layoutNeeded);
     }

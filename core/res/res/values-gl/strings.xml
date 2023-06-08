@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode rexistrar os xestos realizados no sensor de impresión dixital do dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Facer captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pode facer capturas de pantalla."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Vista previa, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar ou modificar a barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite á aplicación desactivar a barra de estado ou engadir e quitar as iconas do sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"actuar como a barra de estado"</string>
@@ -1324,8 +1325,8 @@
     <string name="sms_control_yes" msgid="4858845109269524622">"Permitir"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Rexeitar"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; quere enviar unha mensaxe a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="2723725738333388351">"Esta acción "<b>"pode supoñer custos"</b>" na túa conta de teléfono móbil."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Esta acción suporá custos na túa conta de teléfono móbil."</b></string>
+    <string name="sms_short_code_details" msgid="2723725738333388351">"Esta acción "<b>"pode supoñer custos"</b>" na conta do teu operador móbil."</string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Esta acción suporá custos na conta do teu operador móbil."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Enviar"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Cancelar"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Lembrar a miña opción"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Vendo pantalla completa"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para saír, pasa o dedo cara abaixo desde a parte superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Xira a pantalla para que se vexa mellor"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Sae da pantalla dividida para que se vexa mellor"</string>
     <string name="done_label" msgid="7283767013231718521">"Feito"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Control desprazable circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Control desprazable circular dos minutos"</string>

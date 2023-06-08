@@ -44,6 +44,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.IWallpaperManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -110,6 +111,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -117,12 +119,14 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -177,8 +181,6 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
-import dagger.Lazy;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -190,6 +192,8 @@ import org.mockito.MockitoAnnotations;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Optional;
+
+import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -215,6 +219,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationPanelView mNotificationPanelView;
+    @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private IStatusBarService mBarService;
     @Mock private IDreamManager mDreamManager;
     @Mock private LightRevealScrimViewModel mLightRevealScrimViewModel;
@@ -297,6 +302,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
     @Mock private CameraLauncher mCameraLauncher;
+    @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     /**
      * The process of registering/unregistering a predictive back callback requires a
      * ViewRootImpl, which is present IRL, but may be missing during a Mockito unit test.
@@ -304,6 +310,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
      */
     @Mock private ViewRootImpl mViewRootImpl;
     @Mock private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
+    @Mock private UserTracker mUserTracker;
+    @Mock private FingerprintManager mFingerprintManager;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
     @Mock IPowerManager mPowerManagerService;
 
@@ -319,6 +327,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        // CentralSurfacesImpl's runtime flag check fails if the flag is absent.
+        // This value is unused, because test manifest is opted in.
+        mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI, false);
+
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
                 Handler.createAsync(Looper.myLooper()));
@@ -326,7 +338,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mNotificationInterruptStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
                         mPowerManager,
-                        mDreamManager,
                         mAmbientDisplayConfiguration,
                         mStatusBarStateController,
                         mKeyguardStateController,
@@ -336,7 +347,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         new Handler(TestableLooper.get(this).getLooper()),
                         mock(NotifPipelineFlags.class),
                         mock(KeyguardNotificationVisibilityProvider.class),
-                        mock(UiEventLogger.class));
+                        mock(UiEventLogger.class),
+                        mUserTracker);
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -378,7 +390,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
 
         mWakefulnessLifecycle =
-                new WakefulnessLifecycle(mContext, mIWallpaperManager, mDumpManager);
+                new WakefulnessLifecycle(mContext, mIWallpaperManager, mFakeSystemClock,
+                        mDumpManager);
         mWakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         mWakefulnessLifecycle.dispatchFinishedWakingUp();
 
@@ -416,6 +429,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         when(mOperatorNameViewControllerFactory.create(any()))
                 .thenReturn(mOperatorNameViewController);
+        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
+        when(mUserTracker.getUserHandle()).thenReturn(
+                UserHandle.of(ActivityManager.getCurrentUser()));
 
         mCentralSurfaces = new CentralSurfacesImpl(
                 mContext,
@@ -504,7 +520,11 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mWiredChargingRippleController,
                 mDreamManager,
                 mCameraLauncherLazy,
-                () -> mLightRevealScrimViewModel) {
+                () -> mLightRevealScrimViewModel,
+                mAlternateBouncerInteractor,
+                mUserTracker,
+                () -> mFingerprintManager
+        ) {
             @Override
             protected ViewRootImpl getViewRootImpl() {
                 return mViewRootImpl;
@@ -529,6 +549,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // initialized automatically and make NPVC private.
         mCentralSurfaces.mNotificationShadeWindowView = mNotificationShadeWindowView;
         mCentralSurfaces.mNotificationPanelViewController = mNotificationPanelViewController;
+        mCentralSurfaces.mQsController = mQuickSettingsController;
         mCentralSurfaces.mDozeScrimController = mDozeScrimController;
         mCentralSurfaces.mPresenter = mNotificationPresenter;
         mCentralSurfaces.mKeyguardIndicationController = mKeyguardIndicationController;
@@ -539,6 +560,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.startKeyguard();
         mInitController.executePostInitTasks();
         notificationLogger.setUpWithContainer(mNotificationListContainer);
+        mCentralSurfaces.registerCallbacks();
     }
 
     @Test
@@ -698,7 +720,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testShouldHeadsUp_nonSuppressedGroupSummary() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
 
         Notification n = new Notification.Builder(getContext(), "a")
                 .setGroup("a")
@@ -721,7 +743,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testShouldHeadsUp_suppressedGroupSummary() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
 
         Notification n = new Notification.Builder(getContext(), "a")
                 .setGroup("a")
@@ -744,7 +766,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testShouldHeadsUp_suppressedHeadsUp() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
 
@@ -765,7 +787,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testShouldHeadsUp_noSuppressedHeadsUp() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
 
@@ -992,6 +1014,57 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetDozingNotUnlocking_transitionToAOD_cancelKeyguardFadingAway() {
+        setDozing(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
+
+        mCentralSurfaces.updateScrimController();
+
+        verify(mScrimController, times(2)).transitionTo(eq(ScrimState.AOD));
+        verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
+    }
+
+    @Test
+    public void testSetDozingNotUnlocking_transitionToAuthScrimmed_cancelKeyguardFadingAway() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
+
+        mCentralSurfaces.updateScrimController();
+
+        verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
+        verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
+    }
+
+    @Test
+    public void testOccludingQSNotExpanded_transitionToAuthScrimmed() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // GIVEN device occluded and panel is NOT expanded
+        mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        mCentralSurfaces.mPanelExpanded = false;
+
+        mCentralSurfaces.updateScrimController();
+
+        verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED));
+    }
+
+    @Test
+    public void testOccludingQSExpanded_transitionToAuthScrimmedShade() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // GIVEN device occluded and qs IS expanded
+        mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        mCentralSurfaces.mPanelExpanded = true;
+
+        mCentralSurfaces.updateScrimController();
+
+        verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
+    }
+
+    @Test
     public void testShowKeyguardImplementation_setsState() {
         when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(new SparseArray<>());
 
@@ -1215,6 +1288,15 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         verify(mPowerManagerService, never()).wakeUp(anyLong(), anyInt(), anyString(), anyString());
     }
 
+    @Test
+    public void frpLockedDevice_shadeDisabled() {
+        when(mDeviceProvisionedController.isFrpActive()).thenReturn(true);
+        when(mDozeServiceHost.isPulsing()).thenReturn(true);
+        mCentralSurfaces.updateNotificationPanelTouchState();
+
+        verify(mNotificationPanelViewController).setTouchAndAnimationDisabled(true);
+    }
+
     /**
      * Configures the appropriate mocks and then calls {@link CentralSurfacesImpl#updateIsKeyguard}
      * to reconfigure the keyguard to reflect the requested showing/occluded states.
@@ -1264,7 +1346,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         TestableNotificationInterruptStateProviderImpl(
                 ContentResolver contentResolver,
                 PowerManager powerManager,
-                IDreamManager dreamManager,
                 AmbientDisplayConfiguration ambientDisplayConfiguration,
                 StatusBarStateController controller,
                 KeyguardStateController keyguardStateController,
@@ -1274,11 +1355,11 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 Handler mainHandler,
                 NotifPipelineFlags flags,
                 KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
-                UiEventLogger uiEventLogger) {
+                UiEventLogger uiEventLogger,
+                UserTracker userTracker) {
             super(
                     contentResolver,
                     powerManager,
-                    dreamManager,
                     ambientDisplayConfiguration,
                     batteryController,
                     controller,
@@ -1288,7 +1369,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                     mainHandler,
                     flags,
                     keyguardNotificationVisibilityProvider,
-                    uiEventLogger
+                    uiEventLogger,
+                    userTracker
             );
             mUseHeadsUp = true;
         }

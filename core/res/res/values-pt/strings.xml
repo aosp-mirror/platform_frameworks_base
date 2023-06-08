@@ -53,7 +53,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Falha. Ative o bloqueio do chip/R-UIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
       <item quantity="other">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
@@ -343,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode captar gestos realizados no sensor de impressão digital do dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fazer uma captura de tela"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pode fazer uma captura de tela."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Visualização, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desativar ou modificar a barra de status"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite que o app desative a barra de status ou adicione e remova ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ser a barra de status"</string>
@@ -1534,7 +1535,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Adicionar conta"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Diminuir"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e mantenha pressionado."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e pressione."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Deslize para cima para aumentar e para baixo para diminuir."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Aumentar minuto"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Diminuir minuto"</string>
@@ -1841,6 +1842,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização em tela cheia"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para sair, deslize de cima para baixo."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendi"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gire a tela para ter uma visualização melhor"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Saia da tela dividida para ter uma visualização melhor"</string>
     <string name="done_label" msgid="7283767013231718521">"Concluído"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Controle deslizante circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Controle deslizante circular dos minutos"</string>

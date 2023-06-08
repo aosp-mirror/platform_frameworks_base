@@ -37,6 +37,20 @@
         <item name="android:padding">4dp</item>
     </style>
 
+    <style name="CaptionWindowingButtonStyle">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:padding">4dp</item>
+    </style>
+
+    <style name="CaptionMenuButtonStyle" parent="@style/Widget.AppCompat.Button.Borderless">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:gravity">start|center_vertical</item>
+    </style>
+
     <style name="DockedDividerBackground">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/split_divider_bar_width</item>
@@ -63,4 +77,87 @@
         <item name="android:lineHeight">16sp</item>
         <item name="android:textColor">@color/tv_pip_edu_text</item>
     </style>
+
+    <style name="LetterboxDialog" parent="@android:style/Theme.Holo">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@color/letterbox_dialog_background</item>
+    </style>
+
+    <style name="RestartDialogTitleText">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:lineSpacingExtra">2sp</item>
+        <item name="android:textAppearance">
+            @*android:style/TextAppearance.DeviceDefault.Headline
+        </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamilyMedium
+        </item>
+    </style>
+
+    <style name="RestartDialogBodyText">
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:lineSpacingExtra">2sp</item>
+        <item name="android:textAppearance">
+            @*android:style/TextAppearance.DeviceDefault.Body2
+        </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamily
+        </item>
+    </style>
+
+    <style name="RestartDialogCheckboxText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:lineSpacingExtra">4sp</item>
+        <item name="android:textAppearance">
+            @*android:style/TextAppearance.DeviceDefault.Headline
+        </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamilyMedium
+        </item>
+    </style>
+
+    <style name="RestartDialogDismissButton">
+        <item name="android:lineSpacingExtra">2sp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textAppearance">
+            @*android:style/TextAppearance.DeviceDefault.Body2
+        </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamily
+        </item>
+    </style>
+
+    <style name="RestartDialogConfirmButton">
+        <item name="android:lineSpacingExtra">2sp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textAppearance">
+            @*android:style/TextAppearance.DeviceDefault.Body2
+        </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamily
+        </item>
+    </style>
+
+    <style name="ReachabilityEduHandLayout">
+        <item name="android:focusable">false</item>
+        <item name="android:focusableInTouchMode">false</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:contentDescription">@string/restart_button_description</item>
+        <item name="android:visibility">invisible</item>
+        <item name="android:lineSpacingExtra">-1sp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textAppearance">
+            @*android:style/TextAppearance.DeviceDefault.Body2
+        </item>
+    </style>
+
 </resources>

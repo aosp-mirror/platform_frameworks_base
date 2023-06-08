@@ -17,12 +17,17 @@ package com.android.server.audio;
 
 import com.android.server.audio.SpatializerHelper.SADeviceState;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
+import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
+import android.media.AudioFormat;
 import android.media.AudioSystem;
 import android.util.Log;
 
@@ -36,6 +41,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @MediumTest
@@ -49,14 +55,35 @@ public class SpatializerHelperTest {
 
     @Mock private AudioService mMockAudioService;
     @Spy private AudioSystemAdapter mSpyAudioSystem;
+    @Mock private AudioSystemAdapter mMockAudioSystem;
 
     @Before
     public void setUp() throws Exception {
         mMockAudioService = mock(AudioService.class);
-        mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
+    }
 
-        mSpatHelper = new SpatializerHelper(mMockAudioService, mSpyAudioSystem,
-                false /*headTrackingEnabledByDefault*/);
+    /**
+     * Initializes mSpatHelper, the SpatizerHelper instance under test, to use the mock or spy
+     * AudioSystemAdapter
+     * @param useSpyAudioSystem true to use the spy adapter, mSpyAudioSystem, or false to use
+     *                          the mock adapter, mMockAudioSystem.
+     */
+    private void setUpSpatHelper(boolean useSpyAudioSystem) {
+        final AudioSystemAdapter asAdapter;
+        if (useSpyAudioSystem) {
+            mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
+            asAdapter = mSpyAudioSystem;
+            mMockAudioSystem = null;
+        } else {
+            mSpyAudioSystem = null;
+            mMockAudioSystem = mock(NoOpAudioSystemAdapter.class);
+            asAdapter = mMockAudioSystem;
+        }
+        mSpatHelper = new SpatializerHelper(mMockAudioService, asAdapter,
+                true /*binauralEnabledDefault*/,
+                true /*transauralEnabledDefault*/,
+                false /*headTrackingEnabledDefault*/);
+
     }
 
     /**
@@ -66,6 +93,7 @@ public class SpatializerHelperTest {
      */
     @Test
     public void testSADeviceStateNullAddressCtor() throws Exception {
+        setUpSpatHelper(true /*useSpyAudioSystem*/);
         try {
             SADeviceState devState = new SADeviceState(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, null);
             devState = new SADeviceState(AudioDeviceInfo.TYPE_BLUETOOTH_A2DP, null);
@@ -76,6 +104,7 @@ public class SpatializerHelperTest {
     @Test
     public void testSADeviceStateStringSerialization() throws Exception {
         Log.i(TAG, "starting testSADeviceStateStringSerialization");
+        setUpSpatHelper(true /*useSpyAudioSystem*/);
         final SADeviceState devState = new SADeviceState(
                 AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, "bla");
         devState.mHasHeadTracker = false;
@@ -91,6 +120,7 @@ public class SpatializerHelperTest {
     @Test
     public void testSADeviceSettings() throws Exception {
         Log.i(TAG, "starting testSADeviceSettings");
+        setUpSpatHelper(true /*useSpyAudioSystem*/);
         final AudioDeviceAttributes dev1 =
                 new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_SPEAKER, "");
         final AudioDeviceAttributes dev2 =
@@ -140,5 +170,35 @@ public class SpatializerHelperTest {
         String settingsRestored = mSpatHelper.getSADeviceSettings();
         Log.i(TAG, "device settingsRestored: " + settingsRestored);
         Assert.assertEquals(settings, settingsRestored);
+    }
+
+    /**
+     * Test that null devices for routing do not break canBeSpatialized
+     * @throws Exception
+     */
+    @Test
+    public void testNoRoutingCanBeSpatialized() throws Exception {
+        Log.i(TAG, "Starting testNoRoutingCanBeSpatialized");
+        setUpSpatHelper(false /*useSpyAudioSystem*/);
+        mSpatHelper.forceStateForTest(SpatializerHelper.STATE_ENABLED_AVAILABLE);
+
+        final ArrayList<AudioDeviceAttributes> emptyList = new ArrayList<>(0);
+        final ArrayList<AudioDeviceAttributes> listWithNull = new ArrayList<>(1);
+        listWithNull.add(null);
+        final AudioAttributes media = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA).build();
+        final AudioFormat spatialFormat = new AudioFormat.Builder()
+                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                .setChannelMask(AudioFormat.CHANNEL_OUT_5POINT1).build();
+
+        when(mMockAudioSystem.getDevicesForAttributes(any(AudioAttributes.class), anyBoolean()))
+                .thenReturn(emptyList);
+        Assert.assertFalse("can be spatialized on empty routing",
+                mSpatHelper.canBeSpatialized(media, spatialFormat));
+
+        when(mMockAudioSystem.getDevicesForAttributes(any(AudioAttributes.class), anyBoolean()))
+                .thenReturn(listWithNull);
+        Assert.assertFalse("can be spatialized on null routing",
+                mSpatHelper.canBeSpatialized(media, spatialFormat));
     }
 }

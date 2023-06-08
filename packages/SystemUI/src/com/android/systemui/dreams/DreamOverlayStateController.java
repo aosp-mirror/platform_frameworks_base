@@ -27,6 +27,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
@@ -83,6 +85,12 @@ public class DreamOverlayStateController implements
          */
         default void onAvailableComplicationTypesChanged() {
         }
+
+        /**
+         * Called when the low light dream is exiting and transitioning back to the user dream.
+         */
+        default void onExitLowLight() {
+        }
     }
 
     private final Executor mExecutor;
@@ -96,14 +104,26 @@ public class DreamOverlayStateController implements
 
     private final Collection<Complication> mComplications = new HashSet();
 
+    private final FeatureFlags mFeatureFlags;
+
+    private final int mSupportedTypes;
+
     @VisibleForTesting
     @Inject
     public DreamOverlayStateController(@Main Executor executor,
-            @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled) {
+            @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled,
+            FeatureFlags featureFlags) {
         mExecutor = executor;
         mOverlayEnabled = overlayEnabled;
+        mFeatureFlags = featureFlags;
         if (DEBUG) {
             Log.d(TAG, "Dream overlay enabled:" + mOverlayEnabled);
+        }
+        if (mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)) {
+            mSupportedTypes = Complication.COMPLICATION_TYPE_NONE
+                    | Complication.COMPLICATION_TYPE_HOME_CONTROLS;
+        } else {
+            mSupportedTypes = Complication.COMPLICATION_TYPE_NONE;
         }
     }
 
@@ -162,6 +182,10 @@ public class DreamOverlayStateController implements
      * Returns collection of present {@link Complication}.
      */
     public Collection<Complication> getComplications(boolean filterByAvailability) {
+        if (isLowLightActive()) {
+            // Don't show complications on low light.
+            return Collections.emptyList();
+        }
         return Collections.unmodifiableCollection(filterByAvailability
                 ? mComplications
                 .stream()
@@ -173,7 +197,8 @@ public class DreamOverlayStateController implements
                     if (mShouldShowComplications) {
                         return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
                     }
-                    return requiredTypes == Complication.COMPLICATION_TYPE_NONE;
+                    final int typesToAlwaysShow = mSupportedTypes & getAvailableComplicationTypes();
+                    return (requiredTypes & typesToAlwaysShow) == requiredTypes;
                 })
                 .collect(Collectors.toCollection(HashSet::new))
                 : mComplications);
@@ -278,6 +303,10 @@ public class DreamOverlayStateController implements
      * @param active {@code true} if low light mode is active, {@code false} otherwise.
      */
     public void setLowLightActive(boolean active) {
+        if (isLowLightActive() && !active) {
+            // Notify that we're exiting low light only on the transition from active to not active.
+            mCallbacks.forEach(Callback::onExitLowLight);
+        }
         modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_LOW_LIGHT_ACTIVE);
     }
 

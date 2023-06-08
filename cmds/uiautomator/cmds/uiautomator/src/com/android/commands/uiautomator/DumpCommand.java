@@ -107,7 +107,7 @@ public class DumpCommand extends Command {
                         DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
                 int rotation = display.getRotation();
                 Point size = new Point();
-                display.getSize(size);
+                display.getRealSize(size);
                 AccessibilityNodeInfoDumper.dumpWindowToFile(info, dumpFile, rotation, size.x,
                         size.y);
             }

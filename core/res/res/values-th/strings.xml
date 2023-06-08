@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"สามารถจับท่าทางสัมผัสที่เกิดขึ้นบนเซ็นเซอร์ลายนิ้วมือของอุปกรณ์"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ถ่ายภาพหน้าจอ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ถ่ายภาพหน้าจอได้"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"ตัวอย่าง <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ปิดการใช้งานหรือแก้ไขแถบสถานะ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"อนุญาตให้แอปพลิเคชันปิดใช้งานแถบสถานะหรือเพิ่มและนำไอคอนระบบออก"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"เป็นแถบสถานะ"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"กำลังดูแบบเต็มหน้าจอ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"หากต้องการออก ให้เลื่อนลงจากด้านบน"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"รับทราบ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"หมุนเพื่อรับมุมมองที่ดียิ่งขึ้น"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ออกจากโหมดแยกหน้าจอเพื่อรับมุมมองที่ดียิ่งขึ้น"</string>
     <string name="done_label" msgid="7283767013231718521">"เสร็จสิ้น"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ตัวเลื่อนหมุนระบุชั่วโมง"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ตัวเลื่อนหมุนระบุนาที"</string>

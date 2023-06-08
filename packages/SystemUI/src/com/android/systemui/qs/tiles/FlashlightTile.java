@@ -49,6 +49,7 @@ import javax.inject.Inject;
 public class FlashlightTile extends QSTileImpl<BooleanState> implements
         FlashlightController.FlashlightListener {
 
+    public static final String TILE_SPEC = "flashlight";
     private final FlashlightController mFlashlightController;
 
     @Inject

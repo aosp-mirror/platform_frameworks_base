@@ -16,24 +16,21 @@
 
 package com.android.systemui.statusbar.events
 
+import android.annotation.IntRange
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
-import com.android.settingslib.graph.ThemedBatteryDrawable
-import com.android.systemui.R
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
+import com.android.systemui.statusbar.BatteryStatusChip
 
 typealias ViewCreator = (context: Context) -> BackgroundAnimatableView
 
 interface StatusEvent {
     val priority: Int
     // Whether or not to force the status bar open and show a dot
-    val forceVisible: Boolean
+    var forceVisible: Boolean
     // Whether or not to show an animation for this event
     val showAnimation: Boolean
     val viewCreator: ViewCreator
@@ -73,17 +70,16 @@ class BGImageView(
     }
 }
 
-class BatteryEvent : StatusEvent {
+class BatteryEvent(@IntRange(from = 0, to = 100) val batteryLevel: Int) : StatusEvent {
     override val priority = 50
-    override val forceVisible = false
+    override var forceVisible = false
     override val showAnimation = true
     override var contentDescription: String? = ""
 
-    override val viewCreator: (context: Context) -> BGImageView = { context ->
-        val iv = BGImageView(context)
-        iv.setImageDrawable(ThemedBatteryDrawable(context, Color.WHITE))
-        iv.setBackgroundDrawable(ColorDrawable(Color.GREEN))
-        iv
+    override val viewCreator: ViewCreator = { context ->
+        BatteryStatusChip(context).apply {
+            setBatteryLevel(batteryLevel)
+        }
     }
 
     override fun toString(): String {
@@ -94,13 +90,12 @@ class BatteryEvent : StatusEvent {
 class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
     override var contentDescription: String? = null
     override val priority = 100
-    override val forceVisible = true
+    override var forceVisible = true
     var privacyItems: List<PrivacyItem> = listOf()
     private var privacyChip: OngoingPrivacyChip? = null
 
     override val viewCreator: ViewCreator = { context ->
-        val v = LayoutInflater.from(context)
-                .inflate(R.layout.ongoing_privacy_chip, null) as OngoingPrivacyChip
+        val v = OngoingPrivacyChip(context)
         v.privacyList = privacyItems
         v.contentDescription = contentDescription
         privacyChip = v

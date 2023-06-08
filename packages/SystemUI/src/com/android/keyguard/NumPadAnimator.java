@@ -92,12 +92,16 @@ class NumPadAnimator {
     }
 
     void onLayout(int height) {
+        boolean shouldUpdateHeight = height != mHeight;
         mHeight = height;
         mStartRadius = height / 2f;
         mEndRadius = height / 4f;
-        mBackground.setCornerRadius(mStartRadius);
         mExpandAnimator.setFloatValues(mStartRadius, mEndRadius);
         mContractAnimator.setFloatValues(mEndRadius, mStartRadius);
+        // Set initial corner radius.
+        if (shouldUpdateHeight) {
+            mBackground.setCornerRadius(mStartRadius);
+        }
     }
 
     /**

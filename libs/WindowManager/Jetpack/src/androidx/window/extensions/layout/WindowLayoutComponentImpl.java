@@ -45,6 +45,7 @@ import androidx.annotation.UiContext;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
+import androidx.window.extensions.core.util.function.Consumer;
 import androidx.window.util.DataProducer;
 
 import java.util.ArrayList;
@@ -53,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Reference implementation of androidx.window.extensions.layout OEM interface for use with
@@ -82,6 +82,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private final Map<IBinder, ConfigurationChangeListener> mConfigurationChangeListeners =
             new ArrayMap<>();
 
+    @GuardedBy("mLock")
+    private final Map<java.util.function.Consumer<WindowLayoutInfo>, Consumer<WindowLayoutInfo>>
+            mJavaToExtConsumers = new ArrayMap<>();
+
     private final TaskFragmentOrganizer mTaskFragmentOrganizer;
 
     public WindowLayoutComponentImpl(@NonNull Context context,
@@ -95,7 +99,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     }
 
     /** Registers to listen to {@link CommonFoldingFeature} changes */
-    public void addFoldingStateChangedCallback(Consumer<List<CommonFoldingFeature>> consumer) {
+    public void addFoldingStateChangedCallback(
+            java.util.function.Consumer<List<CommonFoldingFeature>> consumer) {
         synchronized (mLock) {
             mFoldingFeatureProducer.addDataChangedCallback(consumer);
         }
@@ -109,13 +114,27 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      */
     @Override
     public void addWindowLayoutInfoListener(@NonNull Activity activity,
-            @NonNull Consumer<WindowLayoutInfo> consumer) {
-        addWindowLayoutInfoListener((Context) activity, consumer);
+            @NonNull java.util.function.Consumer<WindowLayoutInfo> consumer) {
+        final Consumer<WindowLayoutInfo> extConsumer = consumer::accept;
+        synchronized (mLock) {
+            mJavaToExtConsumers.put(consumer, extConsumer);
+        }
+        addWindowLayoutInfoListener(activity, extConsumer);
+    }
+
+    @Override
+    public void addWindowLayoutInfoListener(@NonNull @UiContext Context context,
+            @NonNull java.util.function.Consumer<WindowLayoutInfo> consumer) {
+        final Consumer<WindowLayoutInfo> extConsumer = consumer::accept;
+        synchronized (mLock) {
+            mJavaToExtConsumers.put(consumer, extConsumer);
+        }
+        addWindowLayoutInfoListener(context, extConsumer);
     }
 
     /**
-     * Similar to {@link #addWindowLayoutInfoListener(Activity, Consumer)}, but takes a UI Context
-     * as a parameter.
+     * Similar to {@link #addWindowLayoutInfoListener(Activity, java.util.function.Consumer)}, but
+     * takes a UI Context as a parameter.
      *
      * Jetpack {@link androidx.window.layout.ExtensionWindowLayoutInfoBackend} makes sure all
      * consumers related to the same {@link Context} gets updated {@link WindowLayoutInfo}
@@ -153,6 +172,18 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 context.registerComponentCallbacks(listener);
                 mConfigurationChangeListeners.put(windowContextToken, listener);
             }
+        }
+    }
+
+    @Override
+    public void removeWindowLayoutInfoListener(
+            @NonNull java.util.function.Consumer<WindowLayoutInfo> consumer) {
+        final Consumer<WindowLayoutInfo> extConsumer;
+        synchronized (mLock) {
+            extConsumer = mJavaToExtConsumers.remove(consumer);
+        }
+        if (extConsumer != null) {
+            removeWindowLayoutInfoListener(extConsumer);
         }
     }
 

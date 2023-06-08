@@ -232,7 +232,7 @@
     <item msgid="8612549335720461635">"4K (segur)"</item>
     <item msgid="7322156123728520872">"4K (ampliat)"</item>
     <item msgid="7735692090314849188">"4K (ampliat, segur)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (pantalla doble)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (pantalla dual)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Cap"</item>
@@ -272,5 +272,11 @@
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
   <string-array name="avatar_image_descriptions">
+  </string-array>
+  <string-array name="entries_font_size">
+    <item msgid="9181293769180886675">"Petit"</item>
+    <item msgid="1484561228522634915">"Predeterminat"</item>
+    <item msgid="4014311587094503943">"Gran"</item>
+    <item msgid="2904569270831156685">"Més gran possible"</item>
   </string-array>
 </resources>

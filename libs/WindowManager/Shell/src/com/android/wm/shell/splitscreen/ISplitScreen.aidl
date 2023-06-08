@@ -122,9 +122,9 @@ interface ISplitScreen {
      * Start a pair of intents using legacy transition system.
      */
     oneway void startIntentsWithLegacyTransition(in PendingIntent pendingIntent1,
-            in Bundle options1, in PendingIntent pendingIntent2, in Bundle options2,
-            int splitPosition, float splitRatio, in RemoteAnimationAdapter adapter,
-            in InstanceId instanceId) = 18;
+            in ShortcutInfo shortcutInfo1, in Bundle options1, in PendingIntent pendingIntent2,
+            in ShortcutInfo shortcutInfo2, in Bundle options2, int splitPosition, float splitRatio,
+            in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 18;
 
     /**
      * Start a pair of intents in one transition.

@@ -300,7 +300,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Byt till jobbprofilen"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"få tillgång till dina kontakter"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Plats"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"plats"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"komma åt enhetens platsuppgifter"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"få tillgång till din kalender"</string>
@@ -341,7 +341,8 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingeravtrycksrörelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrera rörelser som utförs med hjälp av enhetens fingeravtryckssensor."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmbild"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmbild av skärmen."</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ta en skärmbild av skärmen."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Förhandsgranskar <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillåter att appen inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"visas i statusfältet"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visar på fullskärm"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Svep nedåt från skärmens överkant för att avsluta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotera för att få en bättre vy"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Stäng delad skärm för att få en bättre vy"</string>
     <string name="done_label" msgid="7283767013231718521">"Klart"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkelreglage för timmar"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkelreglage för minuter"</string>

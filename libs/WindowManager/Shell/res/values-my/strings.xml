@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"အပေါ်ဘက် မျက်နှာပြင် ၅၀%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"အပေါ်ဘက် မျက်နှာပြင် ၃၀%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"အောက်ခြေ မျက်နှာပြင်အပြည့်"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"ဘယ်ဘက်ကို ခွဲရန်"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"ညာဘက်ကို ခွဲရန်"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"ထိပ်ပိုင်းကို ခွဲရန်"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"အောက်ခြေကို ခွဲရန်"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"လက်တစ်ဖက်သုံးမုဒ် အသုံးပြုခြင်း"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ထွက်ရန် ဖန်သားပြင်၏အောက်ခြေမှ အပေါ်သို့ပွတ်ဆွဲပါ သို့မဟုတ် အက်ပ်အပေါ်ဘက် မည်သည့်နေရာတွင်မဆို တို့ပါ"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"လက်တစ်ဖက်သုံးမုဒ်ကို စတင်လိုက်သည်"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"နေရာပြန်ချရန် အက်ပ်အပြင်ဘက်ကို နှစ်ချက်တို့ပါ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"နားလည်ပြီ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"နောက်ထပ်အချက်အလက်များအတွက် ချဲ့နိုင်သည်။"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"ပိုကောင်းသောမြင်ကွင်းအတွက် ပြန်စမလား။"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"အက်ပ်ကို ပြန်စပါက ၎င်းသည် စခရင်ပေါ်တွင် ပိုကြည့်ကောင်းသွားသော်လည်း သင်၏ လုပ်ငန်းစဉ် (သို့) မသိမ်းရသေးသော အပြောင်းအလဲများကို ဆုံးရှုံးနိုင်သည်"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"မလုပ်တော့"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"ပြန်စရန်"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"နောက်ထပ်မပြပါနှင့်"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"ဤအက်ပ်ကို ရွှေ့ရန်\nနှစ်ချက်တို့ပါ"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ချဲ့ရန်"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ချုံ့ရန်"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ပိတ်ရန်"</string>
     <string name="back_button_text" msgid="1469718707134137085">"နောက်သို့"</string>
     <string name="handle_text" msgid="1766582106752184456">"သုံးသူအမည်"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"အက်ပ်သင်္ကေတ"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"ဖန်သားပြင်အပြည့်"</string>
     <string name="desktop_text" msgid="1077633567027630454">"ဒက်စ်တော့မုဒ်"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"မျက်နှာပြင် ခွဲ၍ပြသရန်"</string>
     <string name="more_button_text" msgid="3655388105592893530">"ပိုပြပါ"</string>
     <string name="float_button_text" msgid="9221657008391364581">"မျှောရန်"</string>
+    <string name="select_text" msgid="5139083974039906583">"ရွေးရန်"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
+    <string name="close_text" msgid="4986518933445178928">"ပိတ်ရန်"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"မီနူး ပိတ်ရန်"</string>
 </resources>

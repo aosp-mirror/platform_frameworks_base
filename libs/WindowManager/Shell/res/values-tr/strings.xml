@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Üstte %50"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Üstte %30"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Altta tam ekran"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Sol tarafta böl"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Sağ tarafta böl"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Üst tarafta böl"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Alt tarafta böl"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Tek el modunu kullanma"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Çıkmak için ekranın alt kısmından yukarı kaydırın veya uygulamanın üzerinde herhangi bir yere dokunun"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Tek el modunu başlat"</string>
@@ -82,14 +86,26 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Yeniden konumlandırmak için uygulamanın dışına iki kez dokunun"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Anladım"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Daha fazla bilgi için genişletin."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Daha iyi bir görünüm için yeniden başlatılsın mı?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Ekranınızda daha iyi görünmesi için uygulamayı yeniden başlatabilirsiniz, ancak ilerlemenizi ve kaydedilmemiş değişikliklerinizi kaybedebilirsiniz"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"İptal"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Yeniden başlat"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Bir daha gösterme"</string>
+    <!-- no translation found for letterbox_reachability_reposition_text (3522042240665748268) -->
+    <skip />
     <string name="maximize_button_text" msgid="1650859196290301963">"Ekranı Kapla"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Küçült"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Kapat"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Geri"</string>
     <string name="handle_text" msgid="1766582106752184456">"Herkese açık kullanıcı adı"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Uygulama Simgesi"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Tam Ekran"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Masaüstü Modu"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Bölünmüş Ekran"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Daha Fazla"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Havada Süzülen"</string>
+    <string name="select_text" msgid="5139083974039906583">"Seç"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Ekran görüntüsü"</string>
+    <string name="close_text" msgid="4986518933445178928">"Kapat"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Menüyü kapat"</string>
 </resources>

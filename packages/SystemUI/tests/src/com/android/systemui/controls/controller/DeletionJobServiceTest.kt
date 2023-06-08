@@ -18,9 +18,13 @@ package com.android.systemui.controls.controller
 
 import android.app.job.JobParameters
 import android.content.Context
+import android.os.PersistableBundle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapper.DeletionJobService.Companion.USER
+import com.android.systemui.util.mockito.whenever
+import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -28,18 +32,15 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.TimeUnit
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class DeletionJobServiceTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var context: Context
+    @Mock private lateinit var context: Context
 
     private lateinit var service: AuxiliaryPersistenceWrapper.DeletionJobService
 
@@ -53,6 +54,10 @@ class DeletionJobServiceTest : SysuiTestCase() {
 
     @Test
     fun testOnStartJob() {
+        val bundle = PersistableBundle().also { it.putInt(USER, 0) }
+        val params = mock(JobParameters::class.java)
+        whenever(params.getExtras()).thenReturn(bundle)
+
         // false means job is terminated
         assertFalse(service.onStartJob(mock(JobParameters::class.java)))
         verify(context).deleteFile(AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME)
@@ -67,13 +72,17 @@ class DeletionJobServiceTest : SysuiTestCase() {
     @Test
     fun testJobHasRightParameters() {
         val userId = 10
-        `when`(context.userId).thenReturn(userId)
-        `when`(context.packageName).thenReturn(mContext.packageName)
+        whenever(context.userId).thenReturn(userId)
+        whenever(context.packageName).thenReturn(mContext.packageName)
 
-        val jobInfo = AuxiliaryPersistenceWrapper.DeletionJobService.getJobForContext(context)
+        val jobInfo =
+            AuxiliaryPersistenceWrapper.DeletionJobService.getJobForContext(context, userId)
         assertEquals(
-            AuxiliaryPersistenceWrapper.DeletionJobService.DELETE_FILE_JOB_ID + userId, jobInfo.id)
+            AuxiliaryPersistenceWrapper.DeletionJobService.DELETE_FILE_JOB_ID + userId,
+            jobInfo.id
+        )
         assertTrue(jobInfo.isPersisted)
+        assertEquals(userId, jobInfo.getExtras().getInt(USER))
         assertEquals(TimeUnit.DAYS.toMillis(7), jobInfo.minLatencyMillis)
     }
 }

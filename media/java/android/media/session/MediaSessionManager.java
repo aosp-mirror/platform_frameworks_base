@@ -107,7 +107,7 @@ public final class MediaSessionManager {
     private final Map<OnMediaKeyEventSessionChangedListener, Executor>
             mMediaKeyEventSessionChangedCallbacks = new HashMap<>();
     @GuardedBy("mLock")
-    private String mCurMediaKeyEventSessionPackage;
+    private String mCurMediaKeyEventSessionPackage = "";
     @GuardedBy("mLock")
     private MediaSession.Token mCurMediaKeyEventSession;
     @GuardedBy("mLock")

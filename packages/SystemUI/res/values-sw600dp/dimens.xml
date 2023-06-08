@@ -16,8 +16,9 @@
 */
 -->
 <resources>
-    <!-- Height of the status bar header bar when on Keyguard -->
-    <dimen name="status_bar_header_height_keyguard">60dp</dimen>
+    <!-- Height of the status bar header bar when on Keyguard.
+         On large screens should be the same as the regular status bar. -->
+    <dimen name="status_bar_header_height_keyguard">@dimen/status_bar_height</dimen>
 
     <!-- Size of user icon + frame in the qs user picker (incl. frame) -->
     <dimen name="qs_framed_avatar_size">60dp</dimen>
@@ -29,10 +30,6 @@
 
     <!-- Margin on the left side of the carrier text on Keyguard -->
     <dimen name="keyguard_carrier_text_margin">24dp</dimen>
-
-    <!-- The width/height of the phone/camera/unlock icon on keyguard. -->
-    <dimen name="keyguard_affordance_height">80dp</dimen>
-    <dimen name="keyguard_affordance_width">120dp</dimen>
 
     <!-- Screen pinning request width -->
     <dimen name="screen_pinning_request_width">400dp</dimen>
@@ -55,9 +52,6 @@
     <!-- Text size for user name in user switcher -->
     <dimen name="kg_user_switcher_text_size">18sp</dimen>
 
-    <dimen name="controls_header_bottom_margin">12dp</dimen>
-    <dimen name="controls_top_margin">24dp</dimen>
-
     <dimen name="global_actions_grid_item_layout_height">80dp</dimen>
 
     <dimen name="qs_brightness_margin_bottom">16dp</dimen>
@@ -68,7 +62,6 @@
     <dimen name="qs_security_footer_background_inset">0dp</dimen>
 
     <dimen name="qs_panel_padding_top">8dp</dimen>
-    <dimen name="qs_panel_padding_top_combined_headers">@dimen/qs_panel_padding_top</dimen>
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
     <dimen name="large_dialog_width">472dp</dimen>
@@ -92,4 +85,9 @@
     <dimen name="lockscreen_shade_status_bar_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
     <dimen name="lockscreen_shade_keyguard_transition_distance">@dimen/lockscreen_shade_media_transition_distance</dimen>
 
+    <!-- Biometric Auth pattern view size, better to align keyguard_security_width -->
+    <dimen name="biometric_auth_pattern_view_size">348dp</dimen>
+
+    <dimen name="controls_header_horizontal_padding">12dp</dimen>
+    <dimen name="controls_content_margin_horizontal">24dp</dimen>
 </resources>

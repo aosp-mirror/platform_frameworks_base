@@ -618,7 +618,7 @@ final class ProcessStateRecord {
     void forceProcessStateUpTo(int newState) {
         if (mRepProcState > newState) {
             synchronized (mProcLock) {
-                mRepProcState = newState;
+                setReportedProcState(newState);
                 setCurProcState(newState);
                 setCurRawProcState(newState);
                 mApp.getPkgList().forEachPackage((pkgName, holder) ->

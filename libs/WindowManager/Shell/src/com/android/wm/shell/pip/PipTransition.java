@@ -50,6 +50,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.SystemProperties;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -64,6 +65,8 @@ import androidx.annotation.Nullable;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -82,6 +85,7 @@ public class PipTransition extends PipTransitionController {
 
     private final Context mContext;
     private final PipTransitionState mPipTransitionState;
+    private final PipSizeSpecHandler mPipSizeSpecHandler;
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<SplitScreenController> mSplitScreenOptional;
@@ -112,6 +116,7 @@ public class PipTransition extends PipTransitionController {
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
             @NonNull Transitions transitions,
             PipBoundsState pipBoundsState,
+            PipSizeSpecHandler pipSizeSpecHandler,
             PipTransitionState pipTransitionState,
             PipMenuController pipMenuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
@@ -122,6 +127,7 @@ public class PipTransition extends PipTransitionController {
                 pipBoundsAlgorithm, pipAnimationController);
         mContext = context;
         mPipTransitionState = pipTransitionState;
+        mPipSizeSpecHandler = pipSizeSpecHandler;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = pipSurfaceTransactionHelper;
@@ -307,7 +313,12 @@ public class PipTransition extends PipTransitionController {
             // initial state under the new rotation.
             int rotationDelta = deltaRotation(startRotation, endRotation);
             if (rotationDelta != Surface.ROTATION_0) {
-                mPipBoundsState.getDisplayLayout().rotateTo(mContext.getResources(), endRotation);
+                DisplayLayout layoutCopy = mPipBoundsState.getDisplayLayout();
+
+                layoutCopy.rotateTo(mContext.getResources(), endRotation);
+                mPipBoundsState.setDisplayLayout(layoutCopy);
+                mPipSizeSpecHandler.setDisplayLayout(layoutCopy);
+
                 final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
                 wct.setBounds(mRequestedEnterTask, destinationBounds);
                 return true;
@@ -662,8 +673,8 @@ public class PipTransition extends PipTransitionController {
             }
 
             // Please file a bug to handle the unexpected transition type.
-            throw new IllegalStateException("Entering PIP with unexpected transition type="
-                    + transitTypeToString(transitType));
+            android.util.Slog.e(TAG, "Found new PIP in transition with mis-matched type="
+                    + transitTypeToString(transitType), new Throwable());
         }
         return false;
     }
@@ -792,7 +803,21 @@ public class PipTransition extends PipTransitionController {
             if (sourceHintRect == null) {
                 // We use content overlay when there is no source rect hint to enter PiP use bounds
                 // animation.
-                animator.setColorContentOverlay(mContext);
+                // TODO(b/272819817): cleanup the null-check and extra logging.
+                final boolean hasTopActivityInfo = taskInfo.topActivityInfo != null;
+                if (!hasTopActivityInfo) {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "%s: TaskInfo.topActivityInfo is null", TAG);
+                }
+                if (SystemProperties.getBoolean(
+                        "persist.wm.debug.enable_pip_app_icon_overlay", true)
+                        && hasTopActivityInfo) {
+                    animator.setAppIconContentOverlay(
+                            mContext, currentBounds, taskInfo.topActivityInfo,
+                            mPipBoundsState.getLauncherState().getAppIconSizePx());
+                } else {
+                    animator.setColorContentOverlay(mContext);
+                }
             }
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,
@@ -817,7 +842,12 @@ public class PipTransition extends PipTransitionController {
     /** Computes destination bounds in old rotation and updates source hint rect if available. */
     private void computeEnterPipRotatedBounds(int rotationDelta, int startRotation, int endRotation,
             TaskInfo taskInfo, Rect outDestinationBounds, @Nullable Rect outSourceHintRect) {
-        mPipBoundsState.getDisplayLayout().rotateTo(mContext.getResources(), endRotation);
+        DisplayLayout layoutCopy = mPipBoundsState.getDisplayLayout();
+
+        layoutCopy.rotateTo(mContext.getResources(), endRotation);
+        mPipBoundsState.setDisplayLayout(layoutCopy);
+        mPipSizeSpecHandler.setDisplayLayout(layoutCopy);
+
         final Rect displayBounds = mPipBoundsState.getDisplayBounds();
         outDestinationBounds.set(mPipBoundsAlgorithm.getEntryDestinationBounds());
         // Transform the destination bounds to current display coordinates.

@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ડિવાઇસના ફિંગરપ્રિન્ટ સેન્સર પર કરવામાં આવેલા સંકેતો કૅપ્ચર કરી શકે છે."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"સ્ક્રીનશૉટ લો"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ડિસ્પ્લેનો સ્ક્રીનશૉટ લઈ શકે છે."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"પ્રીવ્યૂ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"સ્ટેટસ બારને અક્ષમ કરો અથવા તેમાં ફેરફાર કરો"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ઍપ્લિકેશનને સ્ટેટસ બાર અક્ષમ કરવાની અથવા સિસ્ટમ આયકન્સ ઉમેરવા અને દૂર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"સ્ટેટસ બારમાં બતાવો"</string>
@@ -1353,7 +1354,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"કોઈ પરવાનગીઓ જરૂરી નથી"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"આનાથી તમારા પૈસા ખર્ચ થઈ શકે છે"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ઓકે"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"આ ડિવાઇસને USB મારફતે ચાર્જ કરી રહ્યાં છીએ"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"આ ડિવાઇસને USB મારફતે ચાર્જ કરી રહ્યાં છીએ."</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"કનેક્ટેડ ઉપકરણને USB મારફતે ચાર્જ કરી રહ્યાં છીએ"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ફાઇલ ટ્રાન્સફર ચાલુ છે"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB મારફતે PTP ચાલુ કર્યું"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"પૂર્ણ સ્ક્રીન પર જુઓ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"બહાર નીકળવા માટે, ટોચ પરથી નીચે સ્વાઇપ કરો."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"સમજાઈ ગયું"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"બહેતર વ્યૂ માટે ફેરવો"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"બહેતર વ્યૂ માટે, વિભાજિત સ્ક્રીનમાંથી બહાર નીકળો"</string>
     <string name="done_label" msgid="7283767013231718521">"થઈ ગયું"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"કલાકનું વર્તુળાકાર સ્લાઇડર"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"મિનિટનું વર્તુળાકાર સ્લાઇડર"</string>

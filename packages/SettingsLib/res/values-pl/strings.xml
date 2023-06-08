@@ -532,7 +532,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmy i przypomnienia"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Zezwalaj na ustawianie alarmów i przypomnień"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmy i przypomnienia"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Zezwól na ustawianie alarmów i planowanie innych działań, w przypadku których czas jest istotny. Dzięki temu aplikacja będzie mogła działać w tle, co może zwiększyć wykorzystanie baterii.\n\nJeśli nie włączysz tych uprawnień, istniejące alarmy i zaplanowane wydarzenia z tej aplikacji nie będą działać."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Zezwalaj tej aplikacji na ustawianie alarmów i planowanie działań, w przypadku których czas jest istotny. Aplikacja będzie mogła działać w tle, co może zwiększyć wykorzystanie baterii.\n\nJeśli nie włączysz tego uprawnienia, istniejące alarmy i zaplanowane wydarzenia z tej aplikacji nie będą działać."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"harmonogram, alarm, przypomnienie, zegar"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Włącz"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Włącz tryb Nie przeszkadzać"</string>

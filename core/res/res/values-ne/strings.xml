@@ -334,14 +334,15 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"ट्याप गरिएका वस्तुहरू चर्को स्वरमा बोलिने छन् र इसाराहरूको प्रयोग गरेर स्क्रिनमा अन्वेषण गर्न सकिन्छ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"आफुले टाइप गरेको पाठको निरीक्षण गर्नुहोस्"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"व्यक्तिगत डेटा जस्तै क्रेडिट कार्ड नम्बरहरू र पासवर्डहरू समावेश गर्दछ।"</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"प्रदर्शन आवर्धन नियन्त्रण गर्नुहोस्"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"प्रदर्शनको जुम स्तर र स्थिति नियन्त्रण गर्नुहोस्।"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"डिस्प्ले म्याग्निफिकेसन नियन्त्रण गर्नुहोस्"</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"डिस्प्लेको जुम लेबल र स्थिति नियन्त्रण गर्नुहोस्।"</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"इसाराहरू सम्बन्धी कार्य गर्नुहोस्"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ट्याप, स्वाइप गर्न, थिच्न र अन्य इसाराहरू सम्बन्धी कार्य गर्न सक्छ"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"फिंगरप्रिन्टका इसाराहरू"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"यसले यन्त्रक‍ो फिंगरप्रिन्टसम्बन्धी सेन्सरमा गरिएका इसाराहरूलाई खिच्‍न सक्छ।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"स्क्रिनसट लिनुहोस्"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"डिस्प्लेको स्क्रिनसट लिन सकिन्छ।"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"प्रिभ्यू, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"स्थिति पट्टिलाई अक्षम वा संशोधित गर्नुहोस्"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"स्थिति पट्टि असक्षम पार्न वा प्रणाली आइकनहरू थप्न र हटाउन एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"स्टाटस बार हुन दिनुहोस्"</string>
@@ -1280,13 +1281,13 @@
     <string name="volume_call" msgid="7625321655265747433">"इन-कल भोल्युम"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ब्लुटुथ भित्री-कल मात्रा"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"आलर्मको भोल्युम"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"सूचना मात्रा"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"सूचनाको भोल्युम"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"मात्रा"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ब्लुटुथ भोल्युम"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"घन्टिको आवाज मात्रा"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"कला मात्रा"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"मिडियाको भोल्युम"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"सूचना भोल्युम"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"सूचनाको भोल्युम"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"डिफल्ट रिङटोन"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"डिफल्ट (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"कुनै पनि होइन"</string>
@@ -1694,7 +1695,7 @@
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"कारबाहीहरू हेर्नुहोस् र तिनमा कार्य गर्नुहोस्"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यसले कुनै एप वा हार्डवेयर सेन्सरसँग तपाईंले गर्ने अन्तर्क्रियाको ट्र्याक गर्न सक्छ र तपाईंका तर्फबाट एपहरूसँग अन्तर्क्रिया गर्न सक्छ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दिनुहोस्"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"इन्कार गर्नु⋯"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"नदिनुहोस्"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"कुनै सुविधा प्रयोग गर्न थाल्न उक्त सुविधामा ट्याप गर्नुहोस्:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"पहुँचको बटनमार्फत प्रयोग गर्न चाहेका सुविधाहरू छनौट गर्नुहोस्"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"भोल्युम कुञ्जीको सर्टकटमार्फत प्रयोग गर्न चाहेका सुविधाहरू छनौट गर्नुहोस्"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"पूरा पर्दा हेर्दै"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहिर निस्कन, माथिबाट तल स्वाइप गर्नुहोस्।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"बुझेँ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"अझ राम्रो दृश्य हेर्न चाहनुहुन्छ भने रोटेट गर्नुहोस्"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"अझ राम्रो दृश्य हेर्न चाहनुहुन्छ भने \"स्प्लिट स्क्रिन\" बाट बाहिरिनुहोस्"</string>
     <string name="done_label" msgid="7283767013231718521">"भयो"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"घन्टा गोलाकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनेट गोलाकार स्लाइडर"</string>

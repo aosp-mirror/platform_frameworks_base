@@ -328,7 +328,7 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ਆਪਣੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਚਿੰਨ੍ਹਾਂ ਬਾਰੇ ਸੰਵੇਦਕ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨਾ"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ-ਪ੍ਰਾਪਤ ਕਰਨਾ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ਉਸ ਵਿੰਡੋ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਅੰਤਰਕਿਰਿਆ ਕਰ ਰਹੇ ਹੋ"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"\'ਸਪੱਰਸ਼ ਰਾਹੀਂ ਪੜਚੋਲ ਕਰੋ\' ਚਾਲੂ ਕਰਨਾ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"ਟੈਪ ਕੀਤੀਆਂ ਆਈਟਮਾਂ ਨੂੰ ਉੱਚੀ ਆਵਾਜ਼ ਵਿੱਚ ਬੋਲਿਆ ਜਾਵੇਗਾ ਅਤੇ ਸਕ੍ਰੀਨ ਦੀ ਸੰਕੇਤਾਂ ਦੀ ਵਰਤੋਂ ਨਾਲ ਪੜਚੋਲ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ਡੀਵਾਈਸਾਂ ਦੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ \'ਤੇ ਕੀਤੇ ਗਏ ਸੰਕੇਤਾਂ ਨੂੰ ਕੈਪਚਰ ਕਰ ਸਕਦੇ ਹਨ।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਓ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ਡਿਸਪਲੇ ਦਾ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈ ਸਕਦੀ ਹੈ।"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"ਪੂਰਵ-ਝਲਕ ਦੇਖੋ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ਸਥਿਤੀ ਪੱਟੀ ਬੰਦ ਕਰੋ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਪੱਟੀ ਨੂੰ ਚਾਲੂ ਕਰਨ ਜਾਂ ਸਿਸਟਮ ਪ੍ਰਤੀਕਾਂ ਨੂੰ ਜੋੜਨ ਅਤੇ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ਸਥਿਤੀ ਪੱਟੀ ਬਣਨ ਦਿਓ"</string>
@@ -1280,13 +1281,13 @@
     <string name="volume_call" msgid="7625321655265747433">"ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ਬਲੂਟੁੱਥ ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"ਅਲਾਰਮ ਦੀ ਅਵਾਜ਼"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"ਸੂਚਨਾ ਦੀ ਅਵਾਜ਼"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ਰਿੰਗਟੋਨ ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"ਮੀਡੀਆ ਦੀ ਅਵਾਜ਼"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"ਸੂਚਨਾ ਦੀ ਅਵਾਜ਼"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ਕੋਈ ਨਹੀਂ"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"ਪੂਰੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦੇਖੋ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ਬਾਹਰ ਜਾਣ ਲਈ, ਉਪਰੋਂ ਹੇਠਾਂ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ਸਮਝ ਲਿਆ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਘੁਮਾਓ"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਤੋਂ ਬਾਹਰ ਆਓ"</string>
     <string name="done_label" msgid="7283767013231718521">"ਹੋ ਗਿਆ"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ਘੰਟੇ ਸਰਕੁਲਰ ਸਲਾਈਡਰ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ਮਿੰਟ ਸਰਕੁਲਰ ਸਲਾਈਡਰ"</string>

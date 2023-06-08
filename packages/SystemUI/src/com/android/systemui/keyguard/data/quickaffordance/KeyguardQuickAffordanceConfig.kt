@@ -46,7 +46,7 @@ interface KeyguardQuickAffordanceConfig {
      * Returns the [PickerScreenState] representing the affordance in the settings or selector
      * experience.
      */
-    suspend fun getPickerScreenState(): PickerScreenState = PickerScreenState.Default
+    suspend fun getPickerScreenState(): PickerScreenState = PickerScreenState.Default()
 
     /**
      * Notifies that the affordance was clicked by the user.
@@ -63,7 +63,10 @@ interface KeyguardQuickAffordanceConfig {
     sealed class PickerScreenState {
 
         /** The picker shows the item for selecting this affordance as it normally would. */
-        object Default : PickerScreenState()
+        data class Default(
+            /** Optional [Intent] to use to start an activity to configure this affordance. */
+            val configureIntent: Intent? = null,
+        ) : PickerScreenState()
 
         /**
          * The picker does not show an item for selecting this affordance as it is not supported on

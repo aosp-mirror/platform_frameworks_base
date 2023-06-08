@@ -59,7 +59,8 @@ final class DisplayWhiteBalanceTintController extends TintController {
     private float[] mCurrentColorTemperatureXYZ;
     @VisibleForTesting
     boolean mSetUp = false;
-    private float[] mMatrixDisplayWhiteBalance = new float[16];
+    private final float[] mMatrixDisplayWhiteBalance = new float[16];
+    private long mTransitionDuration;
     private Boolean mIsAvailable;
     // This feature becomes disallowed if the device is in an unsupported strong/light state.
     private boolean mIsAllowed = true;
@@ -118,6 +119,9 @@ final class DisplayWhiteBalanceTintController extends TintController {
 
         final int colorTemperature = res.getInteger(
                 R.integer.config_displayWhiteBalanceColorTemperatureDefault);
+
+        mTransitionDuration = res.getInteger(
+                R.integer.config_displayWhiteBalanceTransitionTime);
 
         synchronized (mLock) {
             mDisplayColorSpaceRGB = displayColorSpaceRGB;
@@ -229,6 +233,11 @@ final class DisplayWhiteBalanceTintController extends TintController {
             mIsAvailable = ColorDisplayManager.isDisplayWhiteBalanceAvailable(context);
         }
         return mIsAvailable;
+    }
+
+    @Override
+    public long getTransitionDurationMilliseconds() {
+        return mTransitionDuration;
     }
 
     @Override

@@ -23,6 +23,8 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.shade.PanelState
 import com.android.systemui.shade.STATE_OPENING
 import com.android.systemui.shade.ShadeExpansionChangeEvent
@@ -45,7 +47,8 @@ constructor(
     private val scrimController: ScrimController,
     @Main private val resources: Resources,
     private val statusBarStateController: SysuiStatusBarStateController,
-    private val headsUpManager: HeadsUpManager
+    private val headsUpManager: HeadsUpManager,
+    private val featureFlags: FeatureFlags,
 ) {
 
     private var inSplitShade = false
@@ -106,7 +109,8 @@ constructor(
                 // in case of HUN we can't always use predefined distances to manage scrim
                 // transition because dragDownPxAmount can start from value bigger than
                 // splitShadeScrimTransitionDistance
-                !headsUpManager.isTrackingHeadsUp
+                !headsUpManager.isTrackingHeadsUp &&
+                !featureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)
 
     private fun isScreenUnlocked() =
         statusBarStateController.currentOrUpcomingState == StatusBarState.SHADE

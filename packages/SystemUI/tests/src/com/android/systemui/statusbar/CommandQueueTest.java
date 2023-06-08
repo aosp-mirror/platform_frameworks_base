@@ -45,6 +45,7 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 
 import org.junit.After;
@@ -62,12 +63,14 @@ public class CommandQueueTest extends SysuiTestCase {
     };
 
     private CommandQueue mCommandQueue;
+
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private Callbacks mCallbacks;
     private static final int SECONDARY_DISPLAY = 1;
 
     @Before
     public void setup() {
-        mCommandQueue = new CommandQueue(mContext);
+        mCommandQueue = new CommandQueue(mContext, mDisplayTracker);
         mCallbacks = mock(Callbacks.class);
         mCommandQueue.addCallback(mCallbacks);
         verify(mCallbacks).disable(anyInt(), eq(0), eq(0), eq(false));
@@ -415,7 +418,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testOnDisplayRemoved() {
-        mCommandQueue.onDisplayRemoved(SECONDARY_DISPLAY);
+        mDisplayTracker.triggerOnDisplayRemoved(SECONDARY_DISPLAY);
         waitForIdleSync();
         verify(mCallbacks).onDisplayRemoved(eq(SECONDARY_DISPLAY));
     }

@@ -63,6 +63,12 @@ android_library_import {
     sdk_version: "current",
 }
 
+android_library_import {
+    name: "window-extensions-core",
+    aars: ["window-extensions-core-release.aar"],
+    sdk_version: "current",
+}
+
 java_library {
     name: "androidx.window.extensions",
     srcs: [
@@ -70,7 +76,10 @@ java_library {
         "src/androidx/window/util/**/*.java",
         "src/androidx/window/common/**/*.java",
     ],
-    static_libs: ["window-extensions"],
+    static_libs: [
+        "window-extensions",
+        "window-extensions-core",
+    ],
     installable: true,
     sdk_version: "core_platform",
     system_ext_specific: true,

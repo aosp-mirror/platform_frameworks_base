@@ -24,10 +24,12 @@ import android.graphics.drawable.Drawable
  * and conflicts due to media notifications arriving at any time during an animation. It does this
  * in two parts.
  * - Exit animations fired as a result of user input are tracked. When these are running, any
+ *
  * ```
  *      bind actions are delayed until the animation completes (and then fired in sequence).
  * ```
  * - Continuous animations are tracked using their rebind id. Later calls using the same
+ *
  * ```
  *      rebind id will be totally ignored to prevent the continuous animation from restarting.
  * ```

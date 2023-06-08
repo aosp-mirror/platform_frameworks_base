@@ -31,10 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -69,7 +66,7 @@ public class ColorSchemeTest extends SysuiTestCase {
         // Expressive applies hue rotations to the theme color. The input theme color has hue
         // 117, ensuring the hue changed significantly is a strong signal styles are being applied.
         ColorScheme colorScheme = new ColorScheme(wallpaperColors, false, Style.EXPRESSIVE);
-        Assert.assertEquals(357.77, Cam.fromInt(colorScheme.getAccent1().get(6)).getHue(), 0.1);
+        Assert.assertEquals(357.77, Cam.fromInt(colorScheme.getAccent1().getS500()).getHue(), 0.1);
     }
 
 
@@ -111,7 +108,8 @@ public class ColorSchemeTest extends SysuiTestCase {
     public void testTertiaryHueWrapsProperly() {
         int colorInt = 0xffB3588A; // H350 C50 T50
         ColorScheme colorScheme = new ColorScheme(colorInt, false /* darkTheme */);
-        int tertiaryMid = colorScheme.getAccent3().get(colorScheme.getAccent3().size() / 2);
+        int tertiaryMid = colorScheme.getAccent3().getAllShades().get(
+                colorScheme.getShadeCount() / 2);
         Cam cam = Cam.fromInt(tertiaryMid);
         Assert.assertEquals(cam.getHue(), 50.0, 10.0);
     }
@@ -121,7 +119,8 @@ public class ColorSchemeTest extends SysuiTestCase {
         int colorInt = 0xffB3588A; // H350 C50 T50
         ColorScheme colorScheme = new ColorScheme(colorInt, false /* darkTheme */,
                 Style.SPRITZ /* style */);
-        int primaryMid = colorScheme.getAccent1().get(colorScheme.getAccent1().size() / 2);
+        int primaryMid = colorScheme.getAccent1().getAllShades().get(
+                colorScheme.getShadeCount() / 2);
         Cam cam = Cam.fromInt(primaryMid);
         Assert.assertEquals(cam.getChroma(), 12.0, 1.0);
     }
@@ -131,7 +130,8 @@ public class ColorSchemeTest extends SysuiTestCase {
         int colorInt = 0xffB3588A; // H350 C50 T50
         ColorScheme colorScheme = new ColorScheme(colorInt, false /* darkTheme */,
                 Style.VIBRANT /* style */);
-        int neutralMid = colorScheme.getNeutral1().get(colorScheme.getNeutral1().size() / 2);
+        int neutralMid = colorScheme.getNeutral1().getAllShades().get(
+                colorScheme.getShadeCount() / 2);
         Cam cam = Cam.fromInt(neutralMid);
         Assert.assertTrue("chroma was " + cam.getChroma(), Math.floor(cam.getChroma()) <= 12.0);
     }
@@ -141,7 +141,8 @@ public class ColorSchemeTest extends SysuiTestCase {
         int colorInt = 0xffB3588A; // H350 C50 T50
         ColorScheme colorScheme = new ColorScheme(colorInt, false /* darkTheme */,
                 Style.EXPRESSIVE /* style */);
-        int neutralMid = colorScheme.getNeutral1().get(colorScheme.getNeutral1().size() / 2);
+        int neutralMid = colorScheme.getNeutral1().getAllShades().get(
+                colorScheme.getShadeCount() / 2);
         Cam cam = Cam.fromInt(neutralMid);
         Assert.assertTrue(cam.getChroma() <= 8.0);
     }
@@ -151,10 +152,11 @@ public class ColorSchemeTest extends SysuiTestCase {
         int colorInt = 0xffB3588A; // H350 C50 T50
         ColorScheme colorScheme = new ColorScheme(colorInt, false /* darkTheme */,
                 Style.MONOCHROMATIC /* style */);
-        int neutralMid = colorScheme.getNeutral1().get(colorScheme.getNeutral1().size() / 2);
+        int neutralMid = colorScheme.getNeutral1().getAllShades().get(
+                colorScheme.getShadeCount() / 2);
         Assert.assertTrue(
                 Color.red(neutralMid) == Color.green(neutralMid)
-                && Color.green(neutralMid) == Color.blue(neutralMid)
+                        && Color.green(neutralMid) == Color.blue(neutralMid)
         );
     }
 
@@ -190,15 +192,14 @@ public class ColorSchemeTest extends SysuiTestCase {
                 xml.append("        <").append(styleName).append(">");
 
                 List<String> colors = new ArrayList<>();
-                for (Stream<Integer> stream: Arrays.asList(colorScheme.getAccent1().stream(),
-                        colorScheme.getAccent2().stream(),
-                        colorScheme.getAccent3().stream(),
-                        colorScheme.getNeutral1().stream(),
-                        colorScheme.getNeutral2().stream())) {
+
+                colorScheme.getAllHues().forEach(schemeHue -> {
                     colors.add("ffffff");
-                    colors.addAll(stream.map(Integer::toHexString).map(s -> s.substring(2)).collect(
-                            Collectors.toList()));
-                }
+                    schemeHue.getAllShades().forEach(tone -> {
+                        colors.add(Integer.toHexString(tone).substring(2));
+                    });
+                });
+
                 xml.append(String.join(",", colors));
                 xml.append("</").append(styleName).append(">\n");
             }

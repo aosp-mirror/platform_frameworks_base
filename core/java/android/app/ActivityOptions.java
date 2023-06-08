@@ -318,6 +318,20 @@ public class ActivityOptions extends ComponentOptions {
             "android:activity.applyActivityFlagsForBubbles";
 
     /**
+     * Indicates to apply {@link Intent#FLAG_ACTIVITY_MULTIPLE_TASK} to the launching shortcut.
+     * @hide
+     */
+    private static final String KEY_APPLY_MULTIPLE_TASK_FLAG_FOR_SHORTCUT =
+            "android:activity.applyMultipleTaskFlagForShortcut";
+
+    /**
+     * Indicates to apply {@link Intent#FLAG_ACTIVITY_NO_USER_ACTION} to the launching shortcut.
+     * @hide
+     */
+    private static final String KEY_APPLY_NO_USER_ACTION_FLAG_FOR_SHORTCUT =
+            "android:activity.applyNoUserActionFlagForShortcut";
+
+    /**
      * For Activity transitions, the calling Activity's TransitionListener used to
      * notify the called Activity when the shared element and the exit transitions
      * complete.
@@ -449,6 +463,8 @@ public class ActivityOptions extends ComponentOptions {
     private boolean mLockTaskMode = false;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mApplyActivityFlagsForBubbles;
+    private boolean mApplyMultipleTaskFlagForShortcut;
+    private boolean mApplyNoUserActionFlagForShortcut;
     private boolean mTaskAlwaysOnTop;
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
@@ -1246,6 +1262,10 @@ public class ActivityOptions extends ComponentOptions {
                 KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING, false);
         mApplyActivityFlagsForBubbles = opts.getBoolean(
                 KEY_APPLY_ACTIVITY_FLAGS_FOR_BUBBLES, false);
+        mApplyMultipleTaskFlagForShortcut = opts.getBoolean(
+                KEY_APPLY_MULTIPLE_TASK_FLAG_FOR_SHORTCUT, false);
+        mApplyNoUserActionFlagForShortcut = opts.getBoolean(
+                KEY_APPLY_NO_USER_ACTION_FLAG_FOR_SHORTCUT, false);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
             mAnimSpecs = new AppTransitionAnimationSpec[specs.length];
@@ -1815,6 +1835,26 @@ public class ActivityOptions extends ComponentOptions {
         return mApplyActivityFlagsForBubbles;
     }
 
+    /** @hide */
+    public void setApplyMultipleTaskFlagForShortcut(boolean apply) {
+        mApplyMultipleTaskFlagForShortcut = apply;
+    }
+
+    /** @hide */
+    public boolean isApplyMultipleTaskFlagForShortcut() {
+        return mApplyMultipleTaskFlagForShortcut;
+    }
+
+    /** @hide */
+    public void setApplyNoUserActionFlagForShortcut(boolean apply) {
+        mApplyNoUserActionFlagForShortcut = apply;
+    }
+
+    /** @hide */
+    public boolean isApplyNoUserActionFlagForShortcut() {
+        return mApplyNoUserActionFlagForShortcut;
+    }
+
     /**
      * Sets a launch cookie that can be used to track the activity and task that are launch as a
      * result of this option. If the launched activity is a trampoline that starts another activity
@@ -2142,6 +2182,13 @@ public class ActivityOptions extends ComponentOptions {
         }
         if (mApplyActivityFlagsForBubbles) {
             b.putBoolean(KEY_APPLY_ACTIVITY_FLAGS_FOR_BUBBLES, mApplyActivityFlagsForBubbles);
+        }
+        if (mApplyMultipleTaskFlagForShortcut) {
+            b.putBoolean(KEY_APPLY_MULTIPLE_TASK_FLAG_FOR_SHORTCUT,
+                    mApplyMultipleTaskFlagForShortcut);
+        }
+        if (mApplyNoUserActionFlagForShortcut) {
+            b.putBoolean(KEY_APPLY_NO_USER_ACTION_FLAG_FOR_SHORTCUT, true);
         }
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);

@@ -18,18 +18,20 @@ package com.android.systemui.accessibility;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.ActivityManager;
 import android.content.Context;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.UserTracker;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 /** Test for {@link SecureSettingsContentObserver}. */
 @RunWith(AndroidTestingRunner.class)
@@ -40,7 +42,9 @@ public class SecureSettingsContentObserverTest extends SysuiTestCase {
 
     @Before
     public void setUpObserver() {
-        mTestObserver = new FakeSecureSettingsContentObserver(mContext,
+        UserTracker userTracker = Mockito.mock(UserTracker.class);
+        Mockito.when(userTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
+        mTestObserver = new FakeSecureSettingsContentObserver(mContext, userTracker,
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE);
     }
 
@@ -57,7 +61,7 @@ public class SecureSettingsContentObserverTest extends SysuiTestCase {
     @Test
     public void checkValue() {
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, 1, UserHandle.USER_CURRENT);
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, 1, ActivityManager.getCurrentUser());
 
         assertThat(mTestObserver.getSettingsValue()).isEqualTo("1");
     }
@@ -66,9 +70,9 @@ public class SecureSettingsContentObserverTest extends SysuiTestCase {
     private static class FakeSecureSettingsContentObserver extends
             SecureSettingsContentObserver<Object> {
 
-        protected FakeSecureSettingsContentObserver(Context context,
+        protected FakeSecureSettingsContentObserver(Context context, UserTracker userTracker,
                 String secureSettingsKey) {
-            super(context, secureSettingsKey);
+            super(context, userTracker, secureSettingsKey);
         }
 
         @Override

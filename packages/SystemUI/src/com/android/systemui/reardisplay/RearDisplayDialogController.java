@@ -27,7 +27,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.SystemUIDialog;

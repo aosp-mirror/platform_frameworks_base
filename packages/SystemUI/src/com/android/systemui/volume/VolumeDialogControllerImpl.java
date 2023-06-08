@@ -46,7 +46,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.service.notification.Condition;
@@ -69,6 +68,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
@@ -133,6 +133,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final CaptioningManager mCaptioningManager;
     private final KeyguardManager mKeyguardManager;
     private final ActivityManager mActivityManager;
+    private final UserTracker mUserTracker;
     protected C mCallbacks = new C();
     private final State mState = new State();
     protected final MediaSessionsCallbacks mMediaSessionsCallbacksW;
@@ -180,6 +181,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             CaptioningManager captioningManager,
             KeyguardManager keyguardManager,
             ActivityManager activityManager,
+            UserTracker userTracker,
             DumpManager dumpManager
     ) {
         mContext = context.getApplicationContext();
@@ -209,6 +211,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mCaptioningManager = captioningManager;
         mKeyguardManager = keyguardManager;
         mActivityManager = activityManager;
+        mUserTracker = userTracker;
         dumpManager.registerDumpable("VolumeDialogControllerImpl", this);
 
         boolean accessibilityVolumeStreamActive = accessibilityManager
@@ -371,7 +374,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         if (System.currentTimeMillis() - mLastToggledRingerOn < TOUCH_FEEDBACK_TIMEOUT_MS) {
             try {
                 mAudioService.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD,
-                        UserHandle.USER_CURRENT);
+                        mUserTracker.getUserId());
             } catch (RemoteException e) {
                 // ignore
             }

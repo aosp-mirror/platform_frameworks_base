@@ -18,6 +18,7 @@ package com.android.systemui.biometrics
 
 import android.annotation.RawRes
 import android.content.Context
+import android.content.Context.FINGERPRINT_SERVICE
 import android.content.res.Configuration
 import android.hardware.fingerprint.FingerprintManager
 import android.view.DisplayInfo
@@ -46,6 +47,8 @@ open class AuthBiometricFingerprintIconController(
 
     private var isDeviceFolded: Boolean = false
     private val isSideFps: Boolean
+    private val isReverseDefaultRotation =
+            context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
     private val screenSizeFoldProvider: ScreenSizeFoldProvider = ScreenSizeFoldProvider(context)
     var iconLayoutParamSize: Pair<Int, Int> = Pair(1, 1)
         set(value) {
@@ -64,19 +67,14 @@ open class AuthBiometricFingerprintIconController(
                 R.dimen.biometric_dialog_fingerprint_icon_width),
                 context.resources.getDimensionPixelSize(
                         R.dimen.biometric_dialog_fingerprint_icon_height))
-        var sideFps = false
-        (context.getSystemService(Context.FINGERPRINT_SERVICE)
-                as FingerprintManager?)?.let { fpm ->
-            for (prop in fpm.sensorPropertiesInternal) {
-                if (prop.isAnySidefpsType) {
-                    sideFps = true
-                }
-            }
-        }
-        isSideFps = sideFps
+        isSideFps =
+            (context.getSystemService(FINGERPRINT_SERVICE) as FingerprintManager?)?.let { fpm ->
+                fpm.sensorPropertiesInternal.any { it.isAnySidefpsType }
+            } ?: false
+        preloadAssets(context)
         val displayInfo = DisplayInfo()
         context.display?.getDisplayInfo(displayInfo)
-        if (isSideFps && displayInfo.rotation == Surface.ROTATION_180) {
+        if (isSideFps && getRotationFromDefault(displayInfo.rotation) == Surface.ROTATION_180) {
             iconView.rotation = 180f
         }
         screenSizeFoldProvider.registerCallback(this, context.mainExecutor)
@@ -86,7 +84,7 @@ open class AuthBiometricFingerprintIconController(
     private fun updateIconSideFps(@BiometricState lastState: Int, @BiometricState newState: Int) {
         val displayInfo = DisplayInfo()
         context.display?.getDisplayInfo(displayInfo)
-        val rotation = displayInfo.rotation
+        val rotation = getRotationFromDefault(displayInfo.rotation)
         val iconAnimation = getSideFpsAnimationForTransition(rotation)
         val iconViewOverlayAnimation =
                 getSideFpsOverlayAnimationForTransition(lastState, newState, rotation) ?: return
@@ -99,17 +97,18 @@ open class AuthBiometricFingerprintIconController(
         val iconContentDescription = getIconContentDescription(newState)
         if (iconContentDescription != null) {
             iconView.contentDescription = iconContentDescription
-            iconViewOverlay.contentDescription = iconContentDescription
         }
 
         iconView.frame = 0
         iconViewOverlay.frame = 0
-        if (shouldAnimateForTransition(lastState, newState)) {
-            iconView.playAnimation()
-            iconViewOverlay.playAnimation()
-        } else if (lastState == STATE_IDLE && newState == STATE_AUTHENTICATING_ANIMATING_IN) {
+        if (shouldAnimateSfpsIconViewForTransition(lastState, newState)) {
             iconView.playAnimation()
         }
+
+        if (shouldAnimateIconViewOverlayForTransition(lastState, newState)) {
+            iconViewOverlay.playAnimation()
+        }
+
         LottieColorUtils.applyDynamicColors(context, iconView)
         LottieColorUtils.applyDynamicColors(context, iconViewOverlay)
     }
@@ -127,7 +126,7 @@ open class AuthBiometricFingerprintIconController(
         }
 
         iconView.frame = 0
-        if (shouldAnimateForTransition(lastState, newState)) {
+        if (shouldAnimateIconViewForTransition(lastState, newState)) {
             iconView.playAnimation()
         }
         LottieColorUtils.applyDynamicColors(context, iconView)
@@ -152,7 +151,7 @@ open class AuthBiometricFingerprintIconController(
             STATE_AUTHENTICATING_ANIMATING_IN,
             STATE_AUTHENTICATING,
             STATE_PENDING_CONFIRMATION,
-            STATE_AUTHENTICATED -> R.string.accessibility_fingerprint_dialog_fingerprint_icon
+            STATE_AUTHENTICATED -> R.string.security_settings_sfps_enroll_find_sensor_message
             STATE_ERROR,
             STATE_HELP -> R.string.biometric_dialog_try_again
             else -> null
@@ -160,7 +159,32 @@ open class AuthBiometricFingerprintIconController(
         return if (id != null) context.getString(id) else null
     }
 
-    protected open fun shouldAnimateForTransition(
+    protected open fun shouldAnimateIconViewForTransition(
+            @BiometricState oldState: Int,
+            @BiometricState newState: Int
+    ) = when (newState) {
+        STATE_HELP,
+        STATE_ERROR -> true
+        STATE_AUTHENTICATING_ANIMATING_IN,
+        STATE_AUTHENTICATING -> oldState == STATE_ERROR || oldState == STATE_HELP
+        STATE_AUTHENTICATED -> true
+        else -> false
+    }
+
+    private fun shouldAnimateSfpsIconViewForTransition(
+            @BiometricState oldState: Int,
+            @BiometricState newState: Int
+    ) = when (newState) {
+        STATE_HELP,
+        STATE_ERROR -> true
+        STATE_AUTHENTICATING_ANIMATING_IN,
+        STATE_AUTHENTICATING ->
+            oldState == STATE_ERROR || oldState == STATE_HELP || oldState == STATE_IDLE
+        STATE_AUTHENTICATED -> true
+        else -> false
+    }
+
+    protected open fun shouldAnimateIconViewOverlayForTransition(
             @BiometricState oldState: Int,
             @BiometricState newState: Int
     ) = when (newState) {
@@ -201,6 +225,9 @@ open class AuthBiometricFingerprintIconController(
         }
         return if (id != null) return id else null
     }
+
+    private fun getRotationFromDefault(rotation: Int): Int =
+            if (isReverseDefaultRotation) (rotation + 1) % 4 else rotation
 
     @RawRes
     private fun getSideFpsAnimationForTransition(rotation: Int): Int = when (rotation) {
@@ -295,6 +322,40 @@ open class AuthBiometricFingerprintIconController(
             }
         }
         else -> null
+    }
+
+    private fun preloadAssets(context: Context) {
+        if (isSideFps) {
+            cacheLottieAssetsInContext(
+                context,
+                R.raw.biometricprompt_fingerprint_to_error_landscape,
+                R.raw.biometricprompt_folded_base_bottomright,
+                R.raw.biometricprompt_folded_base_default,
+                R.raw.biometricprompt_folded_base_topleft,
+                R.raw.biometricprompt_landscape_base,
+                R.raw.biometricprompt_portrait_base_bottomright,
+                R.raw.biometricprompt_portrait_base_topleft,
+                R.raw.biometricprompt_symbol_error_to_fingerprint_landscape,
+                R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_bottomright,
+                R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_topleft,
+                R.raw.biometricprompt_symbol_error_to_success_landscape,
+                R.raw.biometricprompt_symbol_error_to_success_portrait_bottomright,
+                R.raw.biometricprompt_symbol_error_to_success_portrait_topleft,
+                R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright,
+                R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft,
+                R.raw.biometricprompt_symbol_fingerprint_to_success_landscape,
+                R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_bottomright,
+                R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_topleft
+            )
+        } else {
+            cacheLottieAssetsInContext(
+                context,
+                R.raw.fingerprint_dialogue_error_to_fingerprint_lottie,
+                R.raw.fingerprint_dialogue_error_to_success_lottie,
+                R.raw.fingerprint_dialogue_fingerprint_to_error_lottie,
+                R.raw.fingerprint_dialogue_fingerprint_to_success_lottie
+            )
+        }
     }
 
     override fun onFoldUpdated(isFolded: Boolean) {

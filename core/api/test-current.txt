@@ -797,6 +797,7 @@ package android.content.pm {
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_MEDIUM = 180326845L; // 0xabf91bdL
     field public static final float OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE = 1.5f;
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // 0xc2368d6L
+    field public static final long OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS = 237531167L; // 0xe28701fL
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
   }
 
@@ -1139,7 +1140,6 @@ package android.hardware.camera2 {
   public final class CameraManager {
     method public String[] getCameraIdListNoLazy() throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(allOf={android.Manifest.permission.SYSTEM_CAMERA, android.Manifest.permission.CAMERA}) public void openCamera(@NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraDevice.StateCallback) throws android.hardware.camera2.CameraAccessException;
-    field public static final long OVERRIDE_FRONT_CAMERA_APP_COMPAT = 250678880L; // 0xef10e60L
   }
 
   public abstract static class CameraManager.AvailabilityCallback {
@@ -2412,6 +2412,7 @@ package android.service.dreams {
   public abstract class DreamOverlayService extends android.app.Service {
     ctor public DreamOverlayService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public void onEndDream();
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
     method public final void requestExit();
     method public final boolean shouldShowComplications();
@@ -2917,7 +2918,9 @@ package android.view {
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method public void getBoundsOnScreen(@NonNull android.graphics.Rect, boolean);
     method public android.view.View getTooltipView();
+    method public void getWindowDisplayFrame(@NonNull android.graphics.Rect);
     method public boolean isAutofilled();
     method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);

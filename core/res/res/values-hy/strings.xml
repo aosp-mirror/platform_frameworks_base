@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Կարող է արձանագրել մատնահետքերի սկաների վրա կատարվող ժեստերը"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Սքրինշոթի ստեղծում"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Կարող է ստեղծել էկրանի սքրինշոթ։"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Նախադիտում, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"անջատել կամ փոփոխել կարգավիճակի գոտին"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Թույլ է տալիս հավելվածին անջատել կարգավիճակի գոտին կամ ավելացնել ու հեռացնել համակարգի պատկերակները:"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"լինել կարգավիճակի գոտի"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Լիաէկրան դիտում"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Դուրս գալու համար վերևից սահահարվածեք դեպի ներքև:"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Պարզ է"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Պտտեք՝ դիտակերպը լավացնելու համար"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Դուրս եկեք կիսված էկրանի ռեժիմից՝ դիտակերպը լավացնելու համար"</string>
     <string name="done_label" msgid="7283767013231718521">"Պատրաստ է"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ժամերի ընտրություն թվատախտակից"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Րոպեների ընտրություն թվատախտակից"</string>
@@ -1944,7 +1947,7 @@
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>՝ անհասանելի է"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Անհրաժեշտ է թույլտվություն"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Տեսախցիկն անհասանելի է"</string>
-    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Շարունակեք հեռախոսով"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Շարու­նակեք հեռախոսով"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Խոսափողն անհասանելի է"</string>
     <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Խանութը հասանելի չէ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-ի կարգավորումներն անհասանելի են"</string>
@@ -2118,7 +2121,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Հավելվածը ձայնագրելու թույլտվություն չունի, սակայն կկարողանա գրանցել ձայնն այս USB սարքի միջոցով։"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Սկիզբ"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Հետ"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Վերջին օգտագործած հավելվածները"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Վերջին հավելվածներ"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Ծանուցումներ"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Արագ կարգավորումներ"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Սնուցման պատուհան"</string>

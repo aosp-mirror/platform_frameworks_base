@@ -88,7 +88,13 @@ data class MediaData(
     val instanceId: InstanceId,
 
     /** The UID of the app, used for logging */
-    val appUid: Int
+    val appUid: Int,
+
+    /** Whether explicit indicator exists */
+    val isExplicit: Boolean = false,
+
+    /** Track progress (0 - 1) to display for players where [resumption] is true */
+    val resumeProgress: Double? = null,
 ) {
     companion object {
         /** Media is playing on the local device */

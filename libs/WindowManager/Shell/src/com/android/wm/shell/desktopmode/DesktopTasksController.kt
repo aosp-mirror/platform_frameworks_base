@@ -25,12 +25,15 @@ import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
 import android.os.IBinder
+import android.os.SystemProperties
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
+import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
 import com.android.internal.protolog.common.ProtoLog
@@ -84,17 +87,22 @@ class DesktopTasksController(
     fun showDesktopApps() {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "showDesktopApps")
         val wct = WindowContainerTransaction()
-
         bringDesktopAppsToFront(wct)
 
         // Execute transaction if there are pending operations
         if (!wct.isEmpty) {
             if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-                transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
+                // TODO(b/268662477): add animation for the transition
+                transitions.startTransition(TRANSIT_NONE, wct, null /* handler */)
             } else {
                 shellTaskOrganizer.applyTransaction(wct)
             }
         }
+    }
+
+    /** Get number of tasks that are marked as visible */
+    fun getVisibleTaskCount(): Int {
+        return desktopModeTaskRepository.getVisibleTaskCount()
     }
 
     /** Move a task with given `taskId` to desktop */
@@ -109,10 +117,7 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         // Bring other apps to front first
         bringDesktopAppsToFront(wct)
-
-        wct.setWindowingMode(task.getToken(), WINDOWING_MODE_FREEFORM)
-        wct.reorder(task.getToken(), true /* onTop */)
-
+        addMoveToDesktopChanges(wct, task.token)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
@@ -130,8 +135,7 @@ class DesktopTasksController(
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveToFullscreen: %d", task.taskId)
 
         val wct = WindowContainerTransaction()
-        wct.setWindowingMode(task.getToken(), WINDOWING_MODE_FULLSCREEN)
-        wct.setBounds(task.getToken(), null)
+        addMoveToFullscreenChanges(wct, task.token)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
@@ -151,18 +155,8 @@ class DesktopTasksController(
     }
 
     private fun bringDesktopAppsToFront(wct: WindowContainerTransaction) {
-        val activeTasks = desktopModeTaskRepository.getActiveTasks()
-
-        // Skip if all tasks are already visible
-        if (activeTasks.isNotEmpty() && activeTasks.all(desktopModeTaskRepository::isVisibleTask)) {
-            ProtoLog.d(
-                WM_SHELL_DESKTOP_MODE,
-                "bringDesktopAppsToFront: active tasks are already in front, skipping."
-            )
-            return
-        }
-
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront")
+        val activeTasks = desktopModeTaskRepository.getActiveTasks()
 
         // First move home to front and then other tasks on top of it
         moveHomeTaskToFront(wct)
@@ -238,8 +232,8 @@ class DesktopTasksController(
                         " taskId=%d",
                     task.taskId
                 )
-                return WindowContainerTransaction().apply {
-                    setWindowingMode(task.token, WINDOWING_MODE_FREEFORM)
+                return WindowContainerTransaction().also { wct ->
+                    addMoveToDesktopChanges(wct, task.token)
                 }
             }
         }
@@ -255,13 +249,42 @@ class DesktopTasksController(
                         " taskId=%d",
                     task.taskId
                 )
-                return WindowContainerTransaction().apply {
-                    setWindowingMode(task.token, WINDOWING_MODE_FULLSCREEN)
-                    setBounds(task.token, null)
+                return WindowContainerTransaction().also { wct ->
+                    addMoveToFullscreenChanges(wct, task.token)
                 }
             }
         }
         return null
+    }
+
+    private fun addMoveToDesktopChanges(
+        wct: WindowContainerTransaction,
+        token: WindowContainerToken
+    ) {
+        wct.setWindowingMode(token, WINDOWING_MODE_FREEFORM)
+        wct.reorder(token, true /* onTop */)
+        if (isDesktopDensityOverrideSet()) {
+            wct.setDensityDpi(token, getDesktopDensityDpi())
+        }
+    }
+
+    private fun addMoveToFullscreenChanges(
+        wct: WindowContainerTransaction,
+        token: WindowContainerToken
+    ) {
+        wct.setWindowingMode(token, WINDOWING_MODE_FULLSCREEN)
+        wct.setBounds(token, null)
+        if (isDesktopDensityOverrideSet()) {
+            wct.setDensityDpi(token, getFullscreenDensityDpi())
+        }
+    }
+
+    private fun getFullscreenDensityDpi(): Int {
+        return context.resources.displayMetrics.densityDpi
+    }
+
+    private fun getDesktopDensityDpi(): Int {
+        return DESKTOP_DENSITY_OVERRIDE
     }
 
     /** Creates a new instance of the external interface to pass to another process. */
@@ -309,6 +332,31 @@ class DesktopTasksController(
                 "showDesktopApps",
                 Consumer(DesktopTasksController::showDesktopApps)
             )
+        }
+
+        override fun getVisibleTaskCount(): Int {
+            val result = IntArray(1)
+            ExecutorUtils.executeRemoteCallWithTaskPermission(
+                controller,
+                "getVisibleTaskCount",
+                { controller -> result[0] = controller.getVisibleTaskCount() },
+                true /* blocking */
+            )
+            return result[0]
+        }
+    }
+
+    companion object {
+        private val DESKTOP_DENSITY_OVERRIDE =
+            SystemProperties.getInt("persist.wm.debug.desktop_mode_density", 0)
+        private val DESKTOP_DENSITY_ALLOWED_RANGE = (100..1000)
+
+        /**
+         * Check if desktop density override is enabled
+         */
+        @JvmStatic
+        fun isDesktopDensityOverrideSet(): Boolean {
+            return DESKTOP_DENSITY_OVERRIDE in DESKTOP_DENSITY_ALLOWED_RANGE
         }
     }
 }

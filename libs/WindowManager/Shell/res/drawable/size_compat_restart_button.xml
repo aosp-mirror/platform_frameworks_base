@@ -25,12 +25,10 @@
         android:fillAlpha="0.8"
         android:pathData="M0,24 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0"/>
     <group
-        android:scaleX="0.8"
-        android:scaleY="0.8"
-        android:translateX="10"
-        android:translateY="10">
+        android:translateX="12"
+        android:translateY="12">
         <path
-            android:pathData="M0,36V24.5H3V30.85L10.4,23.45L12.55,25.6L5.15,33H11.5V36H0ZM24.5,36V33H30.85L23.5,25.65L25.65,23.5L33,30.85V24.5H36V36H24.5ZM10.35,12.5L3,5.15V11.5H0V0H11.5V3H5.15L12.5,10.35L10.35,12.5ZM25.65,12.5L23.5,10.35L30.85,3H24.5V0H36V11.5H33V5.15L25.65,12.5Z"
-            android:fillColor="@color/compat_controls_text"/>
+            android:fillColor="@color/compat_controls_text"
+            android:pathData="M3,21V15H5V17.6L8.1,14.5L9.5,15.9L6.4,19H9V21ZM15,21V19H17.6L14.5,15.9L15.9,14.5L19,17.6V15H21V21ZM8.1,9.5 L5,6.4V9H3V3H9V5H6.4L9.5,8.1ZM15.9,9.5 L14.5,8.1 17.6,5H15V3H21V9H19V6.4Z"/>
     </group>
 </vector>

@@ -54,6 +54,9 @@ import javax.inject.Inject;
  */
 public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         implements RecordingController.RecordingStateChangeCallback {
+
+    public static final String TILE_SPEC = "screenrecord";
+
     private static final String TAG = "ScreenRecordTile";
     private static final String INTERACTION_JANK_TAG = "screen_record";
 
@@ -171,8 +174,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             getHost().collapsePanels();
         };
 
-        Dialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
+        final Dialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
                 mDialogLaunchAnimator, mActivityStarter, onStartRecordingClicked);
+
         ActivityStarter.OnDismissAction dismissAction = () -> {
             if (shouldAnimateFromView) {
                 mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(

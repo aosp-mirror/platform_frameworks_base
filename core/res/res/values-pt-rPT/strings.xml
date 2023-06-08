@@ -52,7 +52,7 @@
     <string name="needPuk2" msgid="7032612093451537186">"Introduza o PUK2 para desbloquear o cartão SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Ação sem êxito. Ative o bloqueio do SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas antes de o cartão SIM ficar bloqueado.</item>
       <item quantity="other">Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas antes de o cartão SIM ficar bloqueado.</item>
       <item quantity="one">Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar bloqueado.</item>
     </plurals>
@@ -343,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode capturar gestos realizados no sensor de impressões digitais do dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fazer captura de ecrã"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"É possível tirar uma captura de ecrã."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Pré-visualização, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desativar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite à app desativar a barra de estado ou adicionar e remover ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ser apresentada na barra de estado"</string>
@@ -560,7 +561,7 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite que a app aprenda o nível de complexidade do bloqueio de ecrã (elevado, médio, baixo ou nenhum), que indica o intervalo de comprimento e o tipo de bloqueio de ecrã possíveis. A app também pode sugerir aos utilizadores que atualizem o bloqueio de ecrã para um determinado nível, mas estes podem ignorar livremente a sugestão e continuar a navegação. Tenha em atenção que o bloqueio de ecrã não é armazenado em texto simples, pelo que a app desconhece a palavra-passe exata."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"mostrar notificações"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Permite à app mostrar notificações"</string>
-    <string name="permlab_useBiometric" msgid="6314741124749633786">"Utilizar hardware biométrico"</string>
+    <string name="permlab_useBiometric" msgid="6314741124749633786">"Usar hardware biométrico"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permite que a app utilize hardware biométrico para autenticação."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gerir o hardware de impressão digital"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permite que a app invoque métodos para adicionar e eliminar modelos de impressão digital para utilização."</string>
@@ -574,8 +575,8 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Permite que a app modifique a sua coleção de fotos."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ler as localizações a partir da sua coleção de multimédia"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite que a app leia as localizações a partir da sua coleção de multimédia."</string>
-    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Utilizar a biometria"</string>
-    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Utilizar a biometria ou o bloqueio de ecrã"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Usar a biometria"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Usar a biometria ou o bloqueio de ecrã"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirme a sua identidade"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Utilize a biometria para continuar."</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Utilize a biometria ou o bloqueio de ecrã para continuar"</string>
@@ -585,7 +586,7 @@
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autenticação cancelada"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nenhum PIN, padrão ou palavra-passe definidos."</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erro ao autenticar."</string>
-    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utilizar o bloqueio de ecrã"</string>
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar o bloqueio de ecrã"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduza o bloqueio de ecrã para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Prima firmemente o sensor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Não é possível reconhecer a impressão digital. Tente novamente."</string>
@@ -619,8 +620,8 @@
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Não é possível usar o sensor de impressões digitais. Visite um fornecedor de serviços de reparação"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Botão ligar/desligar premido"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utilizar a impressão digital"</string>
-    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Utilizar o bloqueio de ecrã ou a impressão digital"</string>
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar a impressão digital"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar o bloqueio de ecrã ou a impressão digital"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utilize a sua impressão digital para continuar."</string>
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Utilize a impressão digital ou o bloqueio de ecrã para continuar"</string>
   <string-array name="fingerprint_error_vendor">
@@ -680,8 +681,8 @@
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"O Desbloqueio facial não é suportado neste dispositivo"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor temporariamente desativado."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Utilizar o Desbloqueio facial"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Utilizar o bloqueio através do rosto ou de ecrã"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Usar o Desbloqueio facial"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar o bloqueio através do rosto ou de ecrã"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Utilize o rosto para continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilize o rosto ou o bloqueio de ecrã para continuar"</string>
   <string-array name="face_error_vendor">
@@ -1195,13 +1196,13 @@
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"Enviar com %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"Enviar"</string>
     <string name="whichHomeApplication" msgid="8276350727038396616">"Selecione uma app Página inicial"</string>
-    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"Utilizar %1$s como Página inicial"</string>
+    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"Usar %1$s como Página inicial"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"Capturar imagem"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"Capturar imagem com"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"Capturar imagem com o %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"Capturar imagem"</string>
-    <string name="alwaysUse" msgid="3153558199076112903">"Utilizar por predefinição para esta ação."</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"Utilizar outra app"</string>
+    <string name="alwaysUse" msgid="3153558199076112903">"Usar por predefinição para esta ação."</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"Usar outra app"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Limpar a predefinição nas Definições do Sistema &gt; Apps &gt; Transferidas."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"Escolha uma ação"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Escolher uma app para o dispositivo USB"</string>
@@ -1235,7 +1236,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostrar sempre"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> foi concebida para uma versão incompatível do SO Android e pode ter um comportamento inesperado. Pode estar disponível uma versão atualizada da app."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostrar sempre"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Verificar atualizações"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Rever atualizações"</string>
     <string name="smv_application" msgid="3775183542777792638">"A app <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) violou a política StrictMode auto-imposta."</string>
     <string name="smv_process" msgid="1398801497130695446">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> violou a política StrictMode auto-imposta."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"O telemóvel está a atualizar…"</string>
@@ -1703,7 +1704,7 @@
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atalhos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Concluído"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desativar atalho"</string>
-    <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atalho"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usar atalho"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correção da cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
@@ -1841,6 +1842,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização de ecrã inteiro"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para sair, deslize rapidamente para baixo a partir da parte superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rode para uma melhor visualização"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Saia do ecrã dividido para uma melhor visualização"</string>
     <string name="done_label" msgid="7283767013231718521">"Concluído"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Controlo de deslize circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Controlo de deslize circular dos minutos"</string>
@@ -1961,7 +1964,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Não é possível aceder a esta app no seu dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no tablet."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Não é possível aceder a esta app no seu dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no telemóvel."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Esta app foi concebida para uma versão mais antiga do Android e pode não funcionar corretamente. Experimente verificar se existem atualizações ou contacte o programador."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Verificar atualizações"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Rever atualizações"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tem mensagens novas"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Abra a app de SMS para ver"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Algumas funcionalidades limitadas"</string>
@@ -2157,8 +2160,8 @@
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Sem apps pessoais"</string>
     <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Abrir a app <xliff:g id="APP">%s</xliff:g> no seu perfil pessoal?"</string>
     <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Abrir a app <xliff:g id="APP">%s</xliff:g> no seu perfil de trabalho?"</string>
-    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utilizar navegador pessoal"</string>
-    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utilizar navegador de trabalho"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar navegador pessoal"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar navegador de trabalho"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para desbloqueio de rede do cartão SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN para desbloqueio do subconjunto da rede do cartão SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN para desbloqueio empresarial do cartão SIM"</string>
@@ -2291,7 +2294,7 @@
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Uma app ainda está ativa"</string>
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"A app <xliff:g id="APP">%1$s</xliff:g> está a ser executada em segundo plano Toque para gerir a utilização da bateria."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"A app <xliff:g id="APP">%1$s</xliff:g> pode afetar a autonomia da bateria. Toque para rever as apps ativas."</string>
-    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificar apps ativas"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Rever apps ativas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível aceder à câmara do telemóvel a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível aceder à câmara do tablet a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Não é possível aceder a isto durante o streaming. Em alternativa, experimente no telemóvel."</string>

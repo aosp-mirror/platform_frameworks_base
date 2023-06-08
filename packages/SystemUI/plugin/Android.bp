@@ -29,6 +29,7 @@ java_library {
         "src/**/*.java",
         "src/**/*.kt",
         "bcsmartspace/src/**/*.java",
+        "bcsmartspace/src/**/*.kt",
     ],
 
     static_libs: [

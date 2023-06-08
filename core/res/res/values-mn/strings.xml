@@ -303,7 +303,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Календарь"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарьд хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"Файлууд"</string>
@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Төхөөрөмжийн хурууны хээ мэдрэгчид зангасан зангааг танина."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Дэлгэцийн зургийг дарах"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Дэлгэцийн зургийг дарах боломжтой."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Урьдчилан үзэх, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"статус самбарыг идэвхгүй болгох болон өөрчлөх"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Апп нь статус самбарыг идэвхгүй болгох эсвэл систем дүрсийг нэмэх, хасах боломжтой."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"статусын хэсэг болох"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Бүтэн дэлгэцээр үзэж байна"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Гарахаар бол дээрээс нь доош нь чирнэ үү."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ойлголоо"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Харагдах байдлыг сайжруулах бол эргүүлнэ үү"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Харагдах байдлыг сайжруулах бол дэлгэцийг хуваах горимоос гарна уу"</string>
     <string name="done_label" msgid="7283767013231718521">"Дууссан"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Цаг гүйлгэгч"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Минут гүйлгэгч"</string>

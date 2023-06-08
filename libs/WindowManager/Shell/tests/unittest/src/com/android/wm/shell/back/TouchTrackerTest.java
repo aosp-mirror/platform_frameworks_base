@@ -19,6 +19,7 @@ package com.android.wm.shell.back;
 import static org.junit.Assert.assertEquals;
 
 import android.window.BackEvent;
+import android.window.BackMotionEvent;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +39,7 @@ public class TouchTrackerTest {
     @Test
     public void generatesProgress_onStart() {
         mTouchTracker.setGestureStartLocation(INITIAL_X_LEFT_EDGE, 0, BackEvent.EDGE_LEFT);
-        BackEvent event = mTouchTracker.createStartEvent(null);
+        BackMotionEvent event = mTouchTracker.createStartEvent(null);
         assertEquals(event.getProgress(), 0f, 0f);
     }
 

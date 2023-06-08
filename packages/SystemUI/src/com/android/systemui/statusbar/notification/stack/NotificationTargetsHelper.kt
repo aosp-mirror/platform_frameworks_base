@@ -25,9 +25,10 @@ constructor(
     /**
      * This method looks for views that can be rounded (and implement [Roundable]) during a
      * notification swipe.
+     *
      * @return The [Roundable] targets above/below the [viewSwiped] (if available). The
-     * [RoundableTargets.before] and [RoundableTargets.after] parameters can be `null` if there is
-     * no above/below notification or the notification is not part of the same section.
+     *   [RoundableTargets.before] and [RoundableTargets.after] parameters can be `null` if there is
+     *   no above/below notification or the notification is not part of the same section.
      */
     fun findRoundableTargets(
         viewSwiped: ExpandableNotificationRow,

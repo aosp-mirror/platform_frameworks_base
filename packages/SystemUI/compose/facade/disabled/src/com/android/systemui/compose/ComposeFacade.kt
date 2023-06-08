@@ -17,12 +17,20 @@
 
 package com.android.systemui.compose
 
+import android.content.Context
+import android.view.View
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 
 /** The Compose facade, when Compose is *not* available. */
 object ComposeFacade : BaseComposeFacade {
     override fun isComposeAvailable(): Boolean = false
+
+    override fun composeInitializer(): ComposeInitializer {
+        throwComposeUnavailableError()
+    }
 
     override fun setPeopleSpaceActivityContent(
         activity: ComponentActivity,
@@ -32,7 +40,15 @@ object ComposeFacade : BaseComposeFacade {
         throwComposeUnavailableError()
     }
 
-    private fun throwComposeUnavailableError() {
+    override fun createFooterActionsView(
+        context: Context,
+        viewModel: FooterActionsViewModel,
+        qsVisibilityLifecycleOwner: LifecycleOwner
+    ): View {
+        throwComposeUnavailableError()
+    }
+
+    private fun throwComposeUnavailableError(): Nothing {
         error(
             "Compose is not available. Make sure to check isComposeAvailable() before calling any" +
                 " other function on ComposeFacade."

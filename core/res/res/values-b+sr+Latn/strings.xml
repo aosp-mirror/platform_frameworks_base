@@ -343,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Može da registruje pokrete na senzoru za otisak prsta na uređaju."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Napravi snimak ekrana"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Može da napravi snimak ekrana."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Pregled, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"onemogućavanje ili izmena statusne trake"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Dozvoljava aplikaciji da onemogući statusnu traku ili da dodaje i uklanja sistemske ikone."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"funkcionisanje kao statusna traka"</string>
@@ -1841,6 +1842,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Prikazuje se ceo ekran"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Da biste izašli, prevucite nadole odozgo."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Važi"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotirajte radi boljeg prikaza"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Izađite iz podeljenog ekrana radi boljeg prikaza"</string>
     <string name="done_label" msgid="7283767013231718521">"Gotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kružni klizač za sate"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kružni klizač za minute"</string>

@@ -30,20 +30,19 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
@@ -71,11 +70,10 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
     protected @Mock SystemUIDialogManager mDialogManager;
     protected @Mock UdfpsController mUdfpsController;
     protected @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
-    protected @Mock KeyguardBouncer mBouncer;
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
+    protected @Mock AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     protected FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
-    protected FakeSystemClock mSystemClock = new FakeSystemClock();
 
     protected UdfpsKeyguardViewController mController;
 
@@ -85,10 +83,6 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
 
     private @Captor ArgumentCaptor<ShadeExpansionListener> mExpansionListenerCaptor;
     protected List<ShadeExpansionListener> mExpansionListeners;
-
-    private @Captor ArgumentCaptor<StatusBarKeyguardViewManager.AlternateBouncer>
-            mAlternateBouncerCaptor;
-    protected StatusBarKeyguardViewManager.AlternateBouncer mAlternateBouncer;
 
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallbackCaptor;
@@ -135,12 +129,6 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
         }
     }
 
-    protected void captureAltAuthInterceptor() {
-        verify(mStatusBarKeyguardViewManager).setAlternateBouncer(
-                mAlternateBouncerCaptor.capture());
-        mAlternateBouncer = mAlternateBouncerCaptor.getValue();
-    }
-
     protected void captureKeyguardStateControllerCallback() {
         verify(mKeyguardStateController).addCallback(
                 mKeyguardStateControllerCallbackCaptor.capture());
@@ -159,10 +147,8 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
 
     protected UdfpsKeyguardViewController createUdfpsKeyguardViewController(
             boolean useModernBouncer, boolean useExpandedOverlay) {
-        mFeatureFlags.set(Flags.MODERN_BOUNCER, useModernBouncer);
+        mFeatureFlags.set(Flags.MODERN_ALTERNATE_BOUNCER, useModernBouncer);
         mFeatureFlags.set(Flags.UDFPS_NEW_TOUCH_DETECTION, useExpandedOverlay);
-        when(mStatusBarKeyguardViewManager.getPrimaryBouncer()).thenReturn(
-                useModernBouncer ? null : mBouncer);
         UdfpsKeyguardViewController controller = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
@@ -172,14 +158,14 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
                 mDumpManager,
                 mLockscreenShadeTransitionController,
                 mConfigurationController,
-                mSystemClock,
                 mKeyguardStateController,
                 mUnlockedScreenOffAnimationController,
                 mDialogManager,
                 mUdfpsController,
                 mActivityLaunchAnimator,
                 mFeatureFlags,
-                mPrimaryBouncerInteractor);
+                mPrimaryBouncerInteractor,
+                mAlternateBouncerInteractor);
         return controller;
     }
 }

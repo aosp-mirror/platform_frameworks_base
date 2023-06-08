@@ -1127,6 +1127,14 @@ class AutomaticBrightnessController {
         }
     }
 
+    public float convertToFloatScale(float nits) {
+        if (mCurrentBrightnessMapper != null) {
+            return mCurrentBrightnessMapper.convertToFloatScale(nits);
+        } else {
+            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        }
+    }
+
     public void recalculateSplines(boolean applyAdjustment, float[] adjustment) {
         mCurrentBrightnessMapper.recalculateSplines(applyAdjustment, adjustment);
 

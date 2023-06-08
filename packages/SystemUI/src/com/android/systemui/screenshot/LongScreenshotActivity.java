@@ -49,6 +49,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.screenshot.ScrollCaptureController.LongScreenshot;
+import com.android.systemui.settings.UserTracker;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -79,6 +80,7 @@ public class LongScreenshotActivity extends Activity {
     private final LongScreenshotData mLongScreenshotHolder;
     private final ActionIntentExecutor mActionExecutor;
     private final FeatureFlags mFeatureFlags;
+    private final UserTracker mUserTracker;
 
     private ImageView mPreview;
     private ImageView mTransitionView;
@@ -110,7 +112,7 @@ public class LongScreenshotActivity extends Activity {
     public LongScreenshotActivity(UiEventLogger uiEventLogger, ImageExporter imageExporter,
             @Main Executor mainExecutor, @Background Executor bgExecutor,
             LongScreenshotData longScreenshotHolder, ActionIntentExecutor actionExecutor,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags, UserTracker userTracker) {
         mUiEventLogger = uiEventLogger;
         mUiExecutor = mainExecutor;
         mBackgroundExecutor = bgExecutor;
@@ -118,6 +120,7 @@ public class LongScreenshotActivity extends Activity {
         mLongScreenshotHolder = longScreenshotHolder;
         mActionExecutor = actionExecutor;
         mFeatureFlags = featureFlags;
+        mUserTracker = userTracker;
     }
 
 
@@ -363,7 +366,7 @@ public class LongScreenshotActivity extends Activity {
 
     private void doShare(Uri uri) {
         if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
-            Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri, null);
+            Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri);
             mActionExecutor.launchIntentAsync(shareIntent, null,
                     mScreenshotUserHandle.getIdentifier(), false);
         } else {
@@ -375,7 +378,7 @@ public class LongScreenshotActivity extends Activity {
             Intent sharingChooserIntent = Intent.createChooser(intent, null)
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            startActivityAsUser(sharingChooserIntent, UserHandle.CURRENT);
+            startActivityAsUser(sharingChooserIntent, mUserTracker.getUserHandle());
         }
     }
 
@@ -478,7 +481,6 @@ public class LongScreenshotActivity extends Activity {
             mCropView.setExtraPadding(extraPadding + mPreview.getPaddingTop(),
                     extraPadding + mPreview.getPaddingBottom());
             imageTop += (previewHeight - imageHeight) / 2;
-            mCropView.setExtraPadding(extraPadding, extraPadding);
             mCropView.setImageWidth(previewWidth);
             scale = previewWidth / (float) mPreview.getDrawable().getIntrinsicWidth();
         } else {

@@ -20,15 +20,13 @@ import android.content.Context
 import android.content.Intent
 import android.provider.MediaStore
 import android.text.TextUtils
-
 import com.android.systemui.R
 
 class CameraIntents {
     companion object {
-        val DEFAULT_SECURE_CAMERA_INTENT_ACTION =
-                MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
-        val DEFAULT_INSECURE_CAMERA_INTENT_ACTION =
-                MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA
+        val DEFAULT_SECURE_CAMERA_INTENT_ACTION = MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
+        val DEFAULT_INSECURE_CAMERA_INTENT_ACTION = MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA
+        private val VIDEO_CAMERA_INTENT_ACTION = MediaStore.INTENT_ACTION_VIDEO_CAMERA
         const val EXTRA_LAUNCH_SOURCE = "com.android.systemui.camera_launch_source"
 
         @JvmStatic
@@ -44,18 +42,14 @@ class CameraIntents {
         @JvmStatic
         fun getInsecureCameraIntent(context: Context): Intent {
             val intent = Intent(DEFAULT_INSECURE_CAMERA_INTENT_ACTION)
-            getOverrideCameraPackage(context)?.let {
-                intent.setPackage(it)
-            }
+            getOverrideCameraPackage(context)?.let { intent.setPackage(it) }
             return intent
         }
 
         @JvmStatic
         fun getSecureCameraIntent(context: Context): Intent {
             val intent = Intent(DEFAULT_SECURE_CAMERA_INTENT_ACTION)
-            getOverrideCameraPackage(context)?.let {
-                intent.setPackage(it)
-            }
+            getOverrideCameraPackage(context)?.let { intent.setPackage(it) }
             return intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
         }
 
@@ -67,6 +61,12 @@ class CameraIntents {
         @JvmStatic
         fun isInsecureCameraIntent(intent: Intent?): Boolean {
             return intent?.getAction()?.equals(DEFAULT_INSECURE_CAMERA_INTENT_ACTION) ?: false
+        }
+
+        /** Returns an [Intent] that can be used to start the camera in video mode. */
+        @JvmStatic
+        fun getVideoCameraIntent(): Intent {
+            return Intent(VIDEO_CAMERA_INTENT_ACTION)
         }
     }
 }

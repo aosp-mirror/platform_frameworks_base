@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"50% górnej części ekranu"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"30% górnej części ekranu"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Dolna część ekranu na pełnym ekranie"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Podziel po lewej"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Podziel po prawej"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Podziel u góry"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Podziel u dołu"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Korzystanie z trybu jednej ręki"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Aby zamknąć, przesuń palcem z dołu ekranu w górę lub kliknij dowolne miejsce nad aplikacją"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Uruchom tryb jednej ręki"</string>
@@ -78,18 +82,29 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Naprawa się nie udała?\nKliknij, aby cofnąć"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Brak problemów z aparatem? Kliknij, aby zamknąć"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Zobacz i zrób więcej"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Przeciągnij drugą aplikację, aby podzielić ekran"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Aby podzielić ekran, przeciągnij drugą aplikację"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Kliknij dwukrotnie poza aplikacją, aby ją przenieść"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Rozwiń, aby wyświetlić więcej informacji."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Uruchomić ponownie dla lepszego wyglądu?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Możesz ponownie uruchomić aplikację, aby lepiej wyglądała na ekranie, ale istnieje ryzyko, że utracisz postępy i niezapisane zmiany"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Anuluj"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Uruchom ponownie"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Nie pokazuj ponownie"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Aby przenieść aplikację,\nkliknij dwukrotnie"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksymalizuj"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimalizuj"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Zamknij"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Wstecz"</string>
     <string name="handle_text" msgid="1766582106752184456">"Uchwyt"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Ikona aplikacji"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Pełny ekran"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Tryb pulpitu"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Podzielony ekran"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Więcej"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Pływające"</string>
+    <string name="select_text" msgid="5139083974039906583">"Wybierz"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Zrzut ekranu"</string>
+    <string name="close_text" msgid="4986518933445178928">"Zamknij"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Zamknij menu"</string>
 </resources>

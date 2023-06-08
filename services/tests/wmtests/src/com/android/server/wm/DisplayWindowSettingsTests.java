@@ -236,8 +236,8 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSetForcedDensity() {
-        mDisplayWindowSettings.setForcedDensity(mSecondaryDisplay, 600 /* density */,
-                0 /* userId */);
+        mDisplayWindowSettings.setForcedDensity(mSecondaryDisplay.getDisplayInfo(),
+                600 /* density */, 0 /* userId */);
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(600 /* density */, mSecondaryDisplay.mBaseDisplayDensity);
@@ -439,8 +439,9 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void testDisplayWindowSettingsAppliedOnDisplayReady() {
         // Set forced densities for two displays in DisplayWindowSettings
         final DisplayContent dc = createMockSimulatedDisplay();
-        mDisplayWindowSettings.setForcedDensity(mPrimaryDisplay, 123, 0 /* userId */);
-        mDisplayWindowSettings.setForcedDensity(dc, 456, 0 /* userId */);
+        mDisplayWindowSettings.setForcedDensity(mPrimaryDisplay.getDisplayInfo(), 123,
+                0 /* userId */);
+        mDisplayWindowSettings.setForcedDensity(dc.getDisplayInfo(), 456, 0 /* userId */);
 
         // Apply settings to displays - the settings will be stored, but config will not be
         // recalculated immediately.

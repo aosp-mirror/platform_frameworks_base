@@ -107,7 +107,7 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
      *
      * @param fraction the fraction from the expansion in [0, 1]
      * @param expanded whether the panel is currently expanded; this is independent from the
-     * fraction as the panel also might be expanded if the fraction is 0.
+     *   fraction as the panel also might be expanded if the fraction is 0.
      * @param tracking whether we're currently tracking the user's gesture.
      */
     fun onPanelExpansionChanged(

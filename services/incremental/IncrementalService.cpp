@@ -2816,6 +2816,12 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
 
 binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mountId, int newStatus) {
     if (!isValid()) {
+        if (newStatus == IDataLoaderStatusListener::DATA_LOADER_BOUND) {
+            // Async "bound" came to already destroyed stub.
+            // Unbind immediately to avoid invalid stub sitting around in DataLoaderManagerService.
+            mService.mDataLoaderManager->unbindFromDataLoader(mountId);
+            return binder::Status::ok();
+        }
         return binder::Status::
                 fromServiceSpecificError(-EINVAL, "onStatusChange came to invalid DataLoaderStub");
     }

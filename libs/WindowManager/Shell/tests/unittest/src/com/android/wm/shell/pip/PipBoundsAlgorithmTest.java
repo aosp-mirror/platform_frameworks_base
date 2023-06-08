@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,17 +58,22 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
     private DisplayInfo mDefaultDisplayInfo;
     private PipBoundsState mPipBoundsState;
+    private PipSizeSpecHandler mPipSizeSpecHandler;
 
 
     @Before
     public void setUp() throws Exception {
         initializeMockResources();
-        mPipBoundsState = new PipBoundsState(mContext);
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext);
+        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler);
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
-                new PipSnapAlgorithm(), new PipKeepClearAlgorithm() {});
+                new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {},
+                mPipSizeSpecHandler);
 
-        mPipBoundsState.setDisplayLayout(
-                new DisplayLayout(mDefaultDisplayInfo, mContext.getResources(), true, true));
+        DisplayLayout layout =
+                new DisplayLayout(mDefaultDisplayInfo, mContext.getResources(), true, true);
+        mPipBoundsState.setDisplayLayout(layout);
+        mPipSizeSpecHandler.setDisplayLayout(layout);
     }
 
     private void initializeMockResources() {
@@ -120,9 +126,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
 
     @Test
     public void getDefaultBounds_noOverrideMinSize_matchesDefaultSizeAndAspectRatio() {
-        final Size defaultSize = mPipBoundsAlgorithm.getSizeForAspectRatio(DEFAULT_ASPECT_RATIO,
-                DEFAULT_MIN_EDGE_SIZE, mDefaultDisplayInfo.logicalWidth,
-                mDefaultDisplayInfo.logicalHeight);
+        final Size defaultSize = mPipSizeSpecHandler.getDefaultSize(DEFAULT_ASPECT_RATIO);
 
         mPipBoundsState.setOverrideMinSize(null);
         final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
@@ -296,9 +300,9 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
                 (MAX_ASPECT_RATIO + DEFAULT_ASPECT_RATIO) / 2
         };
         final Size[] minimalSizes = new Size[] {
-                new Size((int) (100 * aspectRatios[0]), 100),
-                new Size((int) (100 * aspectRatios[1]), 100),
-                new Size((int) (100 * aspectRatios[2]), 100)
+                new Size((int) (200 * aspectRatios[0]), 200),
+                new Size((int) (200 * aspectRatios[1]), 200),
+                new Size((int) (200 * aspectRatios[2]), 200)
         };
         for (int i = 0; i < aspectRatios.length; i++) {
             final float aspectRatio = aspectRatios[i];

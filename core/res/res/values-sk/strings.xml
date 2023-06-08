@@ -335,7 +335,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Zapnúť funkciu Preskúmanie dotykom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Po klepnutí na položku sa vysloví jej názov a obrazovku je možné preskúmať pomocou gest."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Sledovať zadávaný text"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje, ako sú čísla kreditných kariet a heslá."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Ovládať priblíženie obrazovky"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Gestá"</string>
@@ -344,6 +344,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Dokáže zaznamenať gestá na senzore odtlačkov prstov zariadenia."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Vytvoriť snímku obrazovky"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Je možné vytvoriť snímku obrazovky."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Ukážka, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vydávanie sa za stavový riadok"</string>
@@ -1366,7 +1367,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pripojené zariadenie sa nabíja. Ďalšie možností získate klepnutím."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bolo zistené analógové zvukové príslušenstvo"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Pripojené zariadenie nie je kompatibilné s týmto telefónom. Ďalšie informácie zobrazíte klepnutím."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Ladenie cez USB pripojené"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Ladenie cez USB je pripojené"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Klepnutím vypnite ladenie cez USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Vyberte, ak chcete zakázať ladenie cez USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Bezdrôtové ladenie je pripojené"</string>
@@ -1842,6 +1843,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Zobrazenie na celú obrazovku"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ukončíte potiahnutím zhora nadol."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Dobre"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Otočte zariadenie pre lepšie zobrazenie"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Ukončite rozdelenú obrazovku pre lepšie zobrazenie"</string>
     <string name="done_label" msgid="7283767013231718521">"Hotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kruhový posúvač hodín"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kruhový posúvač minút"</string>
@@ -2124,7 +2127,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Upozornenia"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Rýchle nastavenia"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialógové okno napájania"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Uzamknúť obrazovku"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zamknúť obrazovku"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snímka obrazovky"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Hák na slúchadlá s mikrofónom"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Skratka dostupnosti na obrazovke"</string>

@@ -273,4 +273,10 @@
   </string-array>
   <string-array name="avatar_image_descriptions">
   </string-array>
+  <string-array name="entries_font_size">
+    <item msgid="9181293769180886675">"Kicsi"</item>
+    <item msgid="1484561228522634915">"Alapértelmezett"</item>
+    <item msgid="4014311587094503943">"Nagy"</item>
+    <item msgid="2904569270831156685">"Legnagyobb"</item>
+  </string-array>
 </resources>

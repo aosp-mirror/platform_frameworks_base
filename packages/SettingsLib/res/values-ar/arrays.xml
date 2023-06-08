@@ -60,7 +60,7 @@
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"غير مفعّل"</item>
-    <item msgid="6336372935919715515">"تمّ تفعيل التصفية"</item>
+    <item msgid="6336372935919715515">"تمّ تفعيل الفلترة"</item>
     <item msgid="2779123106632690576">"مفعّل"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
@@ -272,5 +272,11 @@
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
   <string-array name="avatar_image_descriptions">
+  </string-array>
+  <string-array name="entries_font_size">
+    <item msgid="9181293769180886675">"صغير"</item>
+    <item msgid="1484561228522634915">"تلقائي"</item>
+    <item msgid="4014311587094503943">"كبير"</item>
+    <item msgid="2904569270831156685">"أكبر حجمًا"</item>
   </string-array>
 </resources>

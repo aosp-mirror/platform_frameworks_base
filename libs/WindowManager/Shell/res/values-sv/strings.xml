@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Övre 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Övre 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Helskärm på nedre skärm"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Till vänster på delad skärm"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Till höger på delad skärm"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Upptill på delad skärm"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Nedtill på delad skärm"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Använda enhandsläge"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Avsluta genom att svepa uppåt från skärmens nederkant eller trycka ovanför appen"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Starta enhandsläge"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Tryck snabbt två gånger utanför en app för att flytta den"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Utöka för mer information."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Vill du starta om för en bättre vy?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Du kan starta om appen så den passar bättre på skärmen men du kan förlora dina framsteg och eventuella osparade ändringar."</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Avbryt"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Starta om"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Visa inte igen"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Tryck snabbt två gånger\nför att flytta denna app"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Utöka"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimera"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Stäng"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Tillbaka"</string>
     <string name="handle_text" msgid="1766582106752184456">"Handtag"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Appikon"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Helskärm"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Datorläge"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Delad skärm"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Mer"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Svävande"</string>
+    <string name="select_text" msgid="5139083974039906583">"Välj"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Skärmbild"</string>
+    <string name="close_text" msgid="4986518933445178928">"Stäng"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Stäng menyn"</string>
 </resources>

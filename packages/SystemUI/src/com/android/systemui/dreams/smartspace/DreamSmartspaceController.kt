@@ -30,14 +30,15 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
+import com.android.systemui.plugins.BcSmartspaceDataPlugin.UI_SURFACE_DREAM
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
+import com.android.systemui.smartspace.dagger.SmartspaceModule
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_PRECONDITION
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_TARGET_FILTER
 import com.android.systemui.smartspace.dagger.SmartspaceViewComponent
 import com.android.systemui.util.concurrency.Execution
-import java.lang.RuntimeException
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -56,13 +57,16 @@ class DreamSmartspaceController @Inject constructor(
     @Named(DREAM_SMARTSPACE_PRECONDITION) private val precondition: SmartspacePrecondition,
     @Named(DREAM_SMARTSPACE_TARGET_FILTER)
     private val optionalTargetFilter: Optional<SmartspaceTargetFilter>,
-    @Named(DREAM_SMARTSPACE_DATA_PLUGIN) optionalPlugin: Optional<BcSmartspaceDataPlugin>
+    @Named(DREAM_SMARTSPACE_DATA_PLUGIN) optionalPlugin: Optional<BcSmartspaceDataPlugin>,
+    @Named(SmartspaceModule.WEATHER_SMARTSPACE_DATA_PLUGIN)
+    optionalWeatherPlugin: Optional<BcSmartspaceDataPlugin>,
 ) {
     companion object {
         private const val TAG = "DreamSmartspaceCtrlr"
     }
 
     private var session: SmartspaceSession? = null
+    private val weatherPlugin: BcSmartspaceDataPlugin? = optionalWeatherPlugin.orElse(null)
     private val plugin: BcSmartspaceDataPlugin? = optionalPlugin.orElse(null)
     private var targetFilter: SmartspaceTargetFilter? = optionalTargetFilter.orElse(null)
 
@@ -116,31 +120,54 @@ class DreamSmartspaceController @Inject constructor(
     private val sessionListener = SmartspaceSession.OnTargetsAvailableListener { targets ->
         execution.assertIsMainThread()
 
+        // The weather data plugin takes unfiltered targets and performs the filtering internally.
+        weatherPlugin?.onTargetsAvailable(targets)
+
         onTargetsAvailableUnfiltered(targets)
         val filteredTargets = targets.filter { targetFilter?.filterSmartspaceTarget(it) ?: true }
         plugin?.onTargetsAvailable(filteredTargets)
     }
 
     /**
+     * Constructs the weather view with custom layout and connects it to the weather plugin.
+     */
+    fun buildAndConnectWeatherView(parent: ViewGroup, customView: View?): View? {
+        return buildAndConnectViewWithPlugin(parent, weatherPlugin, customView)
+    }
+
+    /**
      * Constructs the smartspace view and connects it to the smartspace service.
      */
     fun buildAndConnectView(parent: ViewGroup): View? {
+        return buildAndConnectViewWithPlugin(parent, plugin, null)
+    }
+
+    private fun buildAndConnectViewWithPlugin(
+        parent: ViewGroup,
+        smartspaceDataPlugin: BcSmartspaceDataPlugin?,
+        customView: View?
+    ): View? {
         execution.assertIsMainThread()
 
         if (!precondition.conditionsMet()) {
             throw RuntimeException("Cannot build view when not enabled")
         }
 
-        val view = buildView(parent)
+        val view = buildView(parent, smartspaceDataPlugin, customView)
 
         connectSession()
 
         return view
     }
 
-    private fun buildView(parent: ViewGroup): View? {
-        return if (plugin != null) {
-            var view = smartspaceViewComponentFactory.create(parent, plugin, stateChangeListener)
+    private fun buildView(
+        parent: ViewGroup,
+        smartspaceDataPlugin: BcSmartspaceDataPlugin?,
+        customView: View?
+    ): View? {
+        return if (smartspaceDataPlugin != null) {
+            val view = smartspaceViewComponentFactory.create(parent, smartspaceDataPlugin,
+                stateChangeListener, customView)
                 .getView()
             if (view !is View) {
                 return null
@@ -157,7 +184,10 @@ class DreamSmartspaceController @Inject constructor(
     }
 
     private fun connectSession() {
-        if (plugin == null || session != null || !hasActiveSessionListeners()) {
+        if (plugin == null && weatherPlugin == null) {
+            return
+        }
+        if (session != null || !hasActiveSessionListeners()) {
             return
         }
 
@@ -166,13 +196,14 @@ class DreamSmartspaceController @Inject constructor(
         }
 
         val newSession = smartspaceManager.createSmartspaceSession(
-            SmartspaceConfig.Builder(context, "dream").build()
+            SmartspaceConfig.Builder(context, UI_SURFACE_DREAM).build()
         )
         Log.d(TAG, "Starting smartspace session for dream")
         newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 
-        plugin.registerSmartspaceEventNotifier {
+        weatherPlugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
+        plugin?.registerSmartspaceEventNotifier {
                 e ->
             session?.notifySmartspaceEvent(e)
         }
@@ -199,22 +230,47 @@ class DreamSmartspaceController @Inject constructor(
 
         session = null
 
+        weatherPlugin?.registerSmartspaceEventNotifier(null)
+        weatherPlugin?.onTargetsAvailable(emptyList())
+
         plugin?.registerSmartspaceEventNotifier(null)
         plugin?.onTargetsAvailable(emptyList())
         Log.d(TAG, "Ending smartspace session for dream")
     }
 
     fun addListener(listener: SmartspaceTargetListener) {
+        addAndRegisterListener(listener, plugin)
+    }
+
+    fun removeListener(listener: SmartspaceTargetListener) {
+        removeAndUnregisterListener(listener, plugin)
+    }
+
+    fun addListenerForWeatherPlugin(listener: SmartspaceTargetListener) {
+        addAndRegisterListener(listener, weatherPlugin)
+    }
+
+    fun removeListenerForWeatherPlugin(listener: SmartspaceTargetListener) {
+        removeAndUnregisterListener(listener, weatherPlugin)
+    }
+
+    private fun addAndRegisterListener(
+        listener: SmartspaceTargetListener,
+        smartspaceDataPlugin: BcSmartspaceDataPlugin?
+    ) {
         execution.assertIsMainThread()
-        plugin?.registerListener(listener)
+        smartspaceDataPlugin?.registerListener(listener)
         listeners.add(listener)
 
         connectSession()
     }
 
-    fun removeListener(listener: SmartspaceTargetListener) {
+    private fun removeAndUnregisterListener(
+        listener: SmartspaceTargetListener,
+        smartspaceDataPlugin: BcSmartspaceDataPlugin?
+    ) {
         execution.assertIsMainThread()
-        plugin?.unregisterListener(listener)
+        smartspaceDataPlugin?.unregisterListener(listener)
         listeners.remove(listener)
         disconnect()
     }

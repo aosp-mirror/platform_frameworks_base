@@ -52,7 +52,7 @@
     <string name="needPuk2" msgid="7032612093451537186">"Digita il PUK2 per sbloccare la SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Operazione non riuscita; attiva blocco SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata.</item>
       <item quantity="other">Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata.</item>
       <item quantity="one">Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM venga bloccata.</item>
     </plurals>
@@ -298,7 +298,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Modalità provvisoria"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Passa al profilo personale"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Passa a profilo di lavoro"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Passa al profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"Possono accedere ai contatti"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Posizione"</string>
@@ -343,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"È in grado di rilevare i gesti compiuti con il sensore di impronte dei dispositivi."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Acquisire screenshot"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Può acquisire uno screenshot del display."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> in anteprima"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"disattivazione o modifica della barra di stato"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Consente all\'applicazione di disattivare la barra di stato o di aggiungere e rimuovere icone di sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ruolo di barra di stato"</string>
@@ -992,7 +993,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Selettore utente"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Stato"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotocamera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Controlli media"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Controlli multimediali"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Riordino dei widget iniziato."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Riordino dei widget terminato."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> eliminato."</string>
@@ -1628,7 +1629,7 @@
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Impostazioni"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Disconnetti"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Ricerca in corso..."</string>
-    <string name="media_route_status_connecting" msgid="5845597961412010540">"Connessione..."</string>
+    <string name="media_route_status_connecting" msgid="5845597961412010540">"Connessione in corso..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Disponibile"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"Non disponibili"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"In uso"</string>
@@ -1691,7 +1692,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vuoi consentire a <xliff:g id="SERVICE">%1$s</xliff:g> di avere il controllo totale del tuo dispositivo?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Il controllo totale è appropriato per le app che rispondono alle tue esigenze di accessibilità, ma non per gran parte delle app."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visualizzare e controllare lo schermo"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Può leggere i contenuti presenti sullo schermo e mostrare i contenuti su altre app."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Può leggere tutti i contenuti presenti sullo schermo e mostrare i contenuti sopra altre app."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visualizzare ed eseguire azioni"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Può tenere traccia delle tue interazioni con un\'app o un sensore hardware e interagire con app per tuo conto."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Consenti"</string>
@@ -1841,6 +1842,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualizzazione a schermo intero"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Per uscire, scorri dall\'alto verso il basso."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ruota per migliorare l\'anteprima"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Esci dallo schermo diviso per migliorare l\'anteprima"</string>
     <string name="done_label" msgid="7283767013231718521">"Fine"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Dispositivo di scorrimento circolare per le ore"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Dispositivo di scorrimento circolare per i minuti"</string>
@@ -1969,14 +1972,14 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Tocca per sbloc. prof. di lav."</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Connesso a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Tocca per visualizzare i file"</string>
-    <string name="pin_target" msgid="8036028973110156895">"Blocca"</string>
+    <string name="pin_target" msgid="8036028973110156895">"Fissa"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"Blocca <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Sgancia"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Sblocca <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Informazioni app"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Avvio della demo…"</string>
-    <string name="demo_restarting_message" msgid="1160053183701746766">"Ripristino del dispositivo…"</string>
+    <string name="demo_restarting_message" msgid="1160053183701746766">"Reset del dispositivo…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"Widget <xliff:g id="LABEL">%1$s</xliff:g> disattivato"</string>
     <string name="conference_call" msgid="5731633152336490471">"Audioconferenza"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Descrizione comando"</string>
@@ -2052,8 +2055,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Consentire all\'app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> di accedere a tutti i log del dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Consenti accesso una tantum"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Non consentire"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"I log del dispositivo registrano tutto ciò che succede sul tuo dispositivo. Le app possono usare questi log per individuare problemi e correggerli.\n\nAlcuni log potrebbero contenere informazioni sensibili, quindi concedi l\'accesso a tutti i log del dispositivo soltanto alle app attendibili. \n\nSe le neghi l\'accesso a tutti i log del dispositivo, questa app può comunque accedere ai propri log. Il produttore del tuo dispositivo potrebbe essere comunque in grado di accedere ad alcuni log o informazioni sul dispositivo."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"I log del dispositivo registrano tutto ciò che succede sul tuo dispositivo. Le app possono usare questi log per individuare problemi e correggerli.\n\nAlcuni log potrebbero contenere informazioni sensibili, quindi concedi l\'accesso a tutti i log del dispositivo soltanto alle app attendibili. \n\nSe le neghi l\'accesso a tutti i log del dispositivo, questa app può comunque accedere ai propri log. Il produttore del tuo dispositivo potrebbe essere comunque in grado di accedere ad alcuni log o informazioni sul dispositivo.\n\nScopri di più all\'indirizzo g.co/android/devicelogs."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"I log del dispositivo registrano tutto ciò che succede sul tuo dispositivo. Le app possono usare questi log per individuare problemi e correggerli.\n\nAlcuni log potrebbero contenere informazioni sensibili, quindi concedi l\'accesso a tutti i log del dispositivo soltanto alle app attendibili. \n\nSe neghi l\'accesso a tutti i log del dispositivo, questa app può comunque accedere ai propri log. Il produttore del tuo dispositivo potrebbe essere comunque in grado di accedere ad alcuni log o informazioni sul dispositivo."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"I log del dispositivo registrano tutto ciò che succede sul tuo dispositivo. Le app possono usare questi log per individuare problemi e correggerli.\n\nAlcuni log potrebbero contenere informazioni sensibili, quindi concedi l\'accesso a tutti i log del dispositivo soltanto alle app attendibili. \n\nSe neghi l\'accesso a tutti i log del dispositivo, questa app può comunque accedere ai propri log. Il produttore del tuo dispositivo potrebbe essere comunque in grado di accedere ad alcuni log o informazioni sul dispositivo.\n\nScopri di più all\'indirizzo g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Non mostrare più"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"L\'app <xliff:g id="APP_0">%1$s</xliff:g> vuole mostrare porzioni dell\'app <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifica"</string>

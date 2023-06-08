@@ -84,6 +84,15 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
                 String[] groups = Arrays.copyOfRange(args, 1, args.length);
                 return mShellProtoLog.stopTextLogging(groups, pw) == 0;
             }
+            case "save-for-bugreport": {
+                if (!mShellProtoLog.isProtoEnabled()) {
+                    pw.println("Logging to proto is not enabled for WMShell.");
+                    return false;
+                }
+                mShellProtoLog.stopProtoLog(pw, true /* writeToFile */);
+                mShellProtoLog.startProtoLog(pw);
+                return true;
+            }
             default: {
                 pw.println("Invalid command: " + args[0]);
                 printShellCommandHelp(pw, "");
@@ -108,5 +117,7 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
         pw.println(prefix + "  Enable logcat logging for given groups.");
         pw.println(prefix + "disable-text [group...]");
         pw.println(prefix + "  Disable logcat logging for given groups.");
+        pw.println(prefix + "save-for-bugreport");
+        pw.println(prefix + "  Flush proto logging to file, only if it's enabled.");
     }
 }

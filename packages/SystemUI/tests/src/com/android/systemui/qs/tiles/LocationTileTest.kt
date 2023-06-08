@@ -29,12 +29,13 @@ import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.qs.QSTileHost
+import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.LocationController
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,7 +53,7 @@ class LocationTileTest : SysuiTestCase() {
     @Mock
     private lateinit var qsLogger: QSLogger
     @Mock
-    private lateinit var qsHost: QSTileHost
+    private lateinit var qsHost: QSHost
     @Mock
     private lateinit var metricsLogger: MetricsLogger
     private val falsingManager = FalsingManagerFake()
@@ -86,6 +87,12 @@ class LocationTileTest : SysuiTestCase() {
             qsLogger,
             locationController,
             keyguardStateController)
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
+        testableLooper.processAllMessages()
     }
 
     @Test

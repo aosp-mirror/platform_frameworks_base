@@ -119,11 +119,11 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
 
     /**
      * Default constructor for {@link ObservableServiceConnection}.
-     * @param context The context from which the service will be bound with.
+     * @param context       The context from which the service will be bound with.
      * @param serviceIntent The intent to  bind service with.
-     * @param executor The executor for connection callbacks to be delivered on
-     * @param transformer A {@link ServiceTransformer} for transforming the resulting service
-     *                    into a desired type.
+     * @param executor      The executor for connection callbacks to be delivered on
+     * @param transformer   A {@link ServiceTransformer} for transforming the resulting service
+     *                      into a desired type.
      */
     @Inject
     public ObservableServiceConnection(Context context, Intent serviceIntent,
@@ -143,7 +143,13 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
      * @return {@code true} if initiating binding succeed, {@code false} otherwise.
      */
     public boolean bind() {
-        final boolean bindResult = mContext.bindService(mServiceIntent, mFlags, mExecutor, this);
+        boolean bindResult = false;
+        try {
+            bindResult = mContext.bindService(mServiceIntent, mFlags, mExecutor, this);
+        } catch (SecurityException e) {
+            Log.d(TAG, "Could not bind to service", e);
+            mContext.unbindService(this);
+        }
         mBoundCalled = true;
         if (DEBUG) {
             Log.d(TAG, "bind. bound:" + bindResult);
@@ -197,7 +203,7 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
             Log.d(TAG, "removeCallback:" + callback);
         }
 
-        mExecutor.execute(()-> mCallbacks.removeIf(el -> el.get() == callback));
+        mExecutor.execute(() -> mCallbacks.removeIf(el-> el.get() == callback));
     }
 
     private void onDisconnected(@DisconnectReason int reason) {

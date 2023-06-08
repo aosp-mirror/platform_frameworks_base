@@ -223,7 +223,7 @@
     <item msgid="581904787661470707">"Kasi zaidi"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Chagua wasifu"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Ya Binafsi"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Binafsi"</string>
     <string name="category_work" msgid="4014193632325996115">"Ya Kazini"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Chaguo za wasanidi"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Washa chaguo za wasanidi programu"</string>
@@ -528,7 +528,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Muda kidogo."</string>
     <string name="cancel" msgid="5665114069455378395">"Ghairi"</string>
     <string name="okay" msgid="949938843324579502">"Sawa"</string>
-    <string name="done" msgid="381184316122520313">"Imemaliza"</string>
+    <string name="done" msgid="381184316122520313">"Nimemaliza"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ving\'ora na vikumbusho"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Ruhusu iweke kengele na vikumbusho"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Kengele na vikumbusho"</string>

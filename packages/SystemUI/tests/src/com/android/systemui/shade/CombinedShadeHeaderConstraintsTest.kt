@@ -90,7 +90,7 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
     fun testEdgeElementsAlignedWithEdgeOrGuide_qs() {
         with(qsConstraint) {
             assertThat(getConstraint(R.id.clock).layout.startToStart).isEqualTo(PARENT_ID)
-            assertThat(getConstraint(R.id.clock).layout.horizontalBias).isEqualTo(0f)
+            assertThat(getConstraint(R.id.clock).layout.horizontalBias).isEqualTo(0.5f)
 
             assertThat(getConstraint(R.id.date).layout.startToStart).isEqualTo(PARENT_ID)
             assertThat(getConstraint(R.id.date).layout.horizontalBias).isEqualTo(0.5f)
@@ -109,11 +109,12 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
     @Test
     fun testEdgeElementsAlignedWithEdge_largeScreen() {
         with(largeScreenConstraint) {
-            assertThat(getConstraint(R.id.clock).layout.startToStart).isEqualTo(PARENT_ID)
-            assertThat(getConstraint(R.id.clock).layout.horizontalBias).isEqualTo(0f)
+            assertThat(getConstraint(R.id.clock).layout.startToEnd).isEqualTo(R.id.begin_guide)
+            assertThat(getConstraint(R.id.clock).layout.horizontalBias).isEqualTo(0.5f)
 
-            assertThat(getConstraint(R.id.privacy_container).layout.endToEnd).isEqualTo(PARENT_ID)
-            assertThat(getConstraint(R.id.privacy_container).layout.horizontalBias).isEqualTo(1f)
+            assertThat(getConstraint(R.id.privacy_container).layout.endToStart)
+                .isEqualTo(R.id.end_guide)
+            assertThat(getConstraint(R.id.privacy_container).layout.horizontalBias).isEqualTo(0.5f)
         }
     }
 
@@ -219,7 +220,12 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
                 .isEqualTo(cutoutEnd - padding)
         }
 
-        assertThat(changes.largeScreenConstraintsChanges).isNull()
+        with(largeScreenConstraint) {
+            assertThat(getConstraint(R.id.begin_guide).layout.guideBegin)
+                .isEqualTo(cutoutStart - padding)
+            assertThat(getConstraint(R.id.end_guide).layout.guideEnd)
+                .isEqualTo(cutoutEnd - padding)
+        }
     }
 
     @Test
@@ -246,7 +252,10 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
             assertThat(getConstraint(R.id.end_guide).layout.guideEnd).isEqualTo(0)
         }
 
-        assertThat(changes.largeScreenConstraintsChanges).isNull()
+        with(largeScreenConstraint) {
+            assertThat(getConstraint(R.id.begin_guide).layout.guideBegin).isEqualTo(0)
+            assertThat(getConstraint(R.id.end_guide).layout.guideEnd).isEqualTo(0)
+        }
     }
 
     @Test
@@ -333,7 +342,6 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
                 R.id.clock to "clock",
                 R.id.date to "date",
                 R.id.privacy_container to "privacy",
-                R.id.carrier_group to "carriers",
         )
         views.forEach { (id, name) ->
             assertWithMessage("$name has 0 height in qqs")
@@ -352,7 +360,6 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
         val views = mapOf(
                 R.id.clock to "clock",
                 R.id.privacy_container to "privacy",
-                R.id.carrier_group to "carriers",
         )
         views.forEach { (id, name) ->
             expect.withMessage("$name changes height")

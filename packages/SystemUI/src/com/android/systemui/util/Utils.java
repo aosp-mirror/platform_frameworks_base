@@ -14,8 +14,6 @@
 
 package com.android.systemui.util;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +24,7 @@ import android.view.DisplayCutout;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.util.List;
@@ -71,8 +70,9 @@ public class Utils {
      * {@link android.view.WindowManagerPolicyConstants#NAV_BAR_MODE_GESTURAL} AND
      * the context is that of the default display
      */
-    public static boolean isGesturalModeOnDefaultDisplay(Context context, int navMode) {
-        return context.getDisplayId() == DEFAULT_DISPLAY
+    public static boolean isGesturalModeOnDefaultDisplay(Context context,
+            DisplayTracker displayTracker, int navMode) {
+        return context.getDisplayId() == displayTracker.getDefaultDisplayId()
                 && QuickStepContract.isGesturalMode(navMode);
     }
 

@@ -22,7 +22,10 @@ import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.provider.Settings;
+
+import com.android.systemui.settings.UserTracker;
 
 /**
  * Used to interact with Settings.Secure, Settings.Global, and Settings.System.
@@ -46,10 +49,26 @@ public interface SettingsProxy {
     ContentResolver getContentResolver();
 
     /**
+     * Returns that {@link UserTracker} this instance was constructed with.
+     */
+    UserTracker getUserTracker();
+
+    /**
      * Returns the user id for the associated {@link ContentResolver}.
      */
     default int getUserId() {
         return getContentResolver().getUserId();
+    }
+
+    /**
+     * Returns the actual current user handle when querying with the current user. Otherwise,
+     * returns the passed in user id.
+     */
+    default int getRealUserHandle(int userHandle) {
+        if (userHandle != UserHandle.USER_CURRENT) {
+            return userHandle;
+        }
+        return getUserTracker().getUserId();
     }
 
     /**
@@ -84,18 +103,18 @@ public interface SettingsProxy {
      *
      * Implicitly calls {@link #getUriFor(String)} on the passed in name.
      */
-    default void registerContentObserver(String name, boolean notifyForDescendents,
+    default void registerContentObserver(String name, boolean notifyForDescendants,
             ContentObserver settingsObserver) {
-        registerContentObserver(getUriFor(name), notifyForDescendents, settingsObserver);
+        registerContentObserver(getUriFor(name), notifyForDescendants, settingsObserver);
     }
 
     /**
      * Convenience wrapper around
      * {@link ContentResolver#registerContentObserver(Uri, boolean, ContentObserver)}.'
      */
-    default void registerContentObserver(Uri uri, boolean notifyForDescendents,
+    default void registerContentObserver(Uri uri, boolean notifyForDescendants,
             ContentObserver settingsObserver) {
-        registerContentObserverForUser(uri, notifyForDescendents, settingsObserver, getUserId());
+        registerContentObserverForUser(uri, notifyForDescendants, settingsObserver, getUserId());
     }
 
     /**
@@ -127,10 +146,10 @@ public interface SettingsProxy {
      * Implicitly calls {@link #getUriFor(String)} on the passed in name.
      */
     default void registerContentObserverForUser(
-            String name, boolean notifyForDescendents, ContentObserver settingsObserver,
+            String name, boolean notifyForDescendants, ContentObserver settingsObserver,
             int userHandle) {
         registerContentObserverForUser(
-                getUriFor(name), notifyForDescendents, settingsObserver, userHandle);
+                getUriFor(name), notifyForDescendants, settingsObserver, userHandle);
     }
 
     /**
@@ -138,10 +157,10 @@ public interface SettingsProxy {
      * {@link ContentResolver#registerContentObserver(Uri, boolean, ContentObserver, int)}
      */
     default void registerContentObserverForUser(
-            Uri uri, boolean notifyForDescendents, ContentObserver settingsObserver,
+            Uri uri, boolean notifyForDescendants, ContentObserver settingsObserver,
             int userHandle) {
         getContentResolver().registerContentObserver(
-                uri, notifyForDescendents, settingsObserver, userHandle);
+                uri, notifyForDescendants, settingsObserver, getRealUserHandle(userHandle));
     }
 
     /** See {@link ContentResolver#unregisterContentObserver(ContentObserver)}. */

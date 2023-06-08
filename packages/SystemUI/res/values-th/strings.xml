@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"อินเทอร์เฟซผู้ใช้ของระบบ"</string>
+    <string name="app_label" msgid="4811759950673118541">"UI ของระบบ"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"เปิดโหมดประหยัดแบตเตอรี่ใช่ไหม"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"คุณมีแบตเตอรี่เหลืออยู่ <xliff:g id="PERCENTAGE">%s</xliff:g> โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ขอบเขตด้านล่าง <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ขอบเขตด้านซ้าย <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ขอบเขตด้านขวา <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"บันทึกไว้ที่ <xliff:g id="APP">%1$s</xliff:g> ในโปรไฟล์งาน"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ไฟล์"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ตรวจพบภาพหน้าจอนี้"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> และแอปอื่นๆ ที่เปิดอยู่ตรวจพบภาพหน้าจอนี้"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมบันทึกหน้าจอ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
@@ -164,7 +168,6 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"หากคุณป้อน PIN ไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"หากคุณป้อนรหัสผ่านไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"แตะเซ็นเซอร์ลายนิ้วมือ"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ไอคอนลายนิ้วมือ"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ไม่รู้จักใบหน้า ใช้ลายนิ้วมือแทน"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -193,6 +196,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"หน้าต่างแจ้งเตือน"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"การตั้งค่าด่วน"</string>
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"การตั้งค่าด่วนและหน้าต่างแจ้งเตือน"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ล็อกหน้าจอ"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"หน้าจอล็อกของโปรไฟล์งาน"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ปิด"</string>
@@ -253,6 +257,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ความสว่าง"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"การกลับสี"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"การแก้สี"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"ขนาดแบบอักษร"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"จัดการผู้ใช้"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"เสร็จสิ้น"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"ปิด"</string>
@@ -530,8 +535,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"อัตโนมัติ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ไม่มีเสียงหรือการสั่น"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ไม่มีเสียงหรือการสั่น และปรากฏต่ำลงมาในส่วนการสนทนา"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"อาจส่งเสียงหรือสั่นโดยขึ้นอยู่กับการตั้งค่าโทรศัพท์"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"อาจส่งเสียงหรือสั่นโดยขึ้นอยู่กับการตั้งค่าโทรศัพท์ การสนทนาจาก <xliff:g id="APP_NAME">%1$s</xliff:g> จะแสดงเป็นบับเบิลโดยค่าเริ่มต้น"</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"อาจส่งเสียงหรือสั่นโดยขึ้นอยู่กับการตั้งค่าอุปกรณ์"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"อาจส่งเสียงหรือสั่นโดยขึ้นอยู่กับการตั้งค่าอุปกรณ์ การสนทนาจาก <xliff:g id="APP_NAME">%1$s</xliff:g> จะแสดงเป็นบับเบิลโดยค่าเริ่มต้น"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ให้ระบบพิจารณาว่าจะให้การแจ้งเตือนนี้ส่งเสียงหรือสั่นหรือไม่"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;สถานะ:&lt;/b&gt; เลื่อนระดับเป็นค่าเริ่มต้น"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;สถานะ:&lt;/b&gt; ลดระดับเป็นปิดเสียง"</string>
@@ -773,6 +778,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"การบันทึกหน้าจอ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ไม่มีชื่อ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"สแตนด์บาย"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"ขนาดแบบอักษร"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"ทำให้เล็กลง"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"ทำให้ใหญ่ขึ้น"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"หน้าต่างการขยาย"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"การควบคุมหน้าต่างการขยาย"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"ซูมเข้า"</string>
@@ -798,6 +806,9 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"เลือกแอปเพื่อเพิ่มตัวควบคุม"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{เพิ่มตัวควบคุม # ตัวแล้ว}other{เพิ่มตัวควบคุม # ตัวแล้ว}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"นำออกแล้ว"</string>
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"เพิ่ม <xliff:g id="APPNAME">%s</xliff:g> ไหม"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> สามารถเลือกตัวควบคุมและเนื้อหาที่จะปรากฏขึ้นที่นี่"</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"นำการควบคุมสำหรับ <xliff:g id="APPNAME">%s</xliff:g> ออกไหม"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ตั้งเป็นรายการโปรดแล้ว"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ตั้งเป็นรายการโปรดแล้ว โดยอยู่ลำดับที่ <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"นำออกจากรายการโปรดแล้ว"</string>
@@ -815,14 +826,15 @@
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"อื่นๆ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"เพิ่มไปยังระบบควบคุมอุปกรณ์"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"เพิ่ม"</string>
+    <string name="controls_dialog_remove" msgid="3775288002711561936">"นำออก"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"แนะนำโดย <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"อุปกรณ์ถูกล็อก"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"แสดงและควบคุมอุปกรณ์จากหน้าจอล็อกไหม"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"คุณเพิ่มการควบคุมอุปกรณ์ภายนอกลงในหน้าจอล็อกได้\n\nแอปของอุปกรณ์อาจอนุญาตให้คุณควบคุมอุปกรณ์บางอย่างได้โดยไม่ต้องปลดล็อกโทรศัพท์หรือแท็บเล็ต\n\nคุณเปลี่ยนแปลงได้ทุกเมื่อในการตั้งค่า"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ควบคุมอุปกรณ์จากหน้าจอล็อกไหม"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"คุณควบคุมอุปกรณ์บางอย่างได้โดยไม่ต้องปลดล็อกโทรศัพท์หรือแท็บเล็ต\n\nแอปของอุปกรณ์จะระบุอุปกรณ์ที่สามารถควบคุมด้วยวิธีนี้ได้"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"คุณควบคุมอุปกรณ์บางอย่างได้โดยไม่ต้องปลดล็อกโทรศัพท์หรือแท็บเล็ต แอปจัดการอุปกรณ์จะระบุอุปกรณ์ที่สามารถควบคุมด้วยวิธีนี้ได้"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ไม่เป็นไร"</string>
-    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"มี"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ใช่"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN ประกอบด้วยตัวอักษรหรือสัญลักษณ์"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"ยืนยัน <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN ไม่ถูกต้อง"</string>
@@ -848,13 +860,16 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"เปิด <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"เปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> ของ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> จาก <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"เปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> จาก <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"สำหรับคุณ"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"เลิกทำ"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"ขยับเข้ามาใกล้ขึ้นเพื่อเล่นใน <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ขยับไปใกล้ <xliff:g id="DEVICENAME">%1$s</xliff:g> มากขึ้นเพื่อเล่นที่นี่"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"ขยับไปใกล้มากขึ้นเพื่อเล่นใน <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"ขยับไปใกล้ <xliff:g id="DEVICENAME">%1$s</xliff:g> มากขึ้นเพื่อเล่นที่นี่"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"กำลังเล่นใน <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"เกิดข้อผิดพลาด โปรดลองอีกครั้ง"</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"กำลังโหลด"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"แท็บเล็ต"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"กำลังแคสต์สื่อ"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"กำลังแคสต์ <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ไม่มีการใช้งาน โปรดตรวจสอบแอป"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ไม่พบ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ใช้การควบคุมไม่ได้"</string>
@@ -864,6 +879,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"พบข้อผิดพลาด โปรดลองอีกครั้ง"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"เพิ่มตัวควบคุม"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"แก้ไขตัวควบคุม"</string>
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"เพิ่มแอป"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"นำแอปออก"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"เพิ่มเอาต์พุต"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"กลุ่ม"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"เลือกอุปกรณ์ไว้ 1 รายการ"</string>
@@ -878,6 +895,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ระดับเสียง"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ลำโพงและจอแสดงผล"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"อุปกรณ์ที่แนะนำ"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"ต้องใช้บัญชี Premium"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"วิธีการทำงานของการออกอากาศ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ประกาศ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ผู้ที่อยู่ใกล้คุณและมีอุปกรณ์บลูทูธที่รองรับสามารถรับฟังสื่อที่คุณกำลังออกอากาศได้"</string>
@@ -889,6 +908,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ออกอากาศไม่ได้"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"บันทึกไม่ได้ โปรดลองอีกครั้ง"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"บันทึกไม่ได้"</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"ใช้อักขระอย่างน้อย 4 ตัว"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"ใช้อักขระไม่เกิน 16 ตัว"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"หมายเลขบิลด์"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"คัดลอกหมายเลขบิลด์ไปยังคลิปบอร์ดแล้ว"</string>
     <string name="basic_status" msgid="2315371112182658176">"เปิดการสนทนา"</string>
@@ -1008,12 +1029,25 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• มีอุปกรณ์พร้อมใช้งานอย่างน้อย 1 รายการ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"แตะแป้นพิมพ์ลัดค้างไว้"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ยกเลิก"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"พลิกเลย"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"กางโทรศัพท์เพื่อเซลฟีที่ดียิ่งขึ้น"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"พลิกเป็นหน้าจอด้านหน้าเพื่อภาพเซลฟีที่ดีขึ้นไหม"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ใช้กล้องหลังเพื่อถ่ายภาพกว้างขึ้นด้วยความละเอียดสูงขึ้น"</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ หน้าจอนี้จะปิดไป"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"สลับหน้าจอเลย"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"กางโทรศัพท์ออก"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"สลับหน้าจอไหม"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"ใช้กล้องหลังเพื่อให้ได้ภาพที่มีความละเอียดมากขึ้น"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"พลิกด้านโทรศัพท์เพื่อให้ได้ภาพที่มีความละเอียดมากขึ้น"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"อุปกรณ์ที่พับได้กำลังกางออก"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"อุปกรณ์ที่พับได้กำลังพลิกไปมา"</string>
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"เหลือแบตเตอรี่ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"เชื่อมต่อสไตลัสกับที่ชาร์จ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"แบตเตอรี่สไตลัสเหลือน้อย"</string>
+    <string name="video_camera" msgid="7654002575156149298">"กล้องวิดีโอ"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"โทรจากโปรไฟล์นี้ไม่ได้"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"นโยบายการทำงานอนุญาตให้คุณโทรออกได้จากโปรไฟล์งานเท่านั้น"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"สลับไปใช้โปรไฟล์งาน"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"ปิด"</string>
+    <string name="lock_screen_settings" msgid="9197175446592718435">"การตั้งค่าหน้าจอล็อก"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi ไม่พร้อมใช้งาน"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"กล้องถูกบล็อกอยู่"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"กล้องและไมโครโฟนถูกบล็อกอยู่"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ไมโครโฟนถูกบล็อกอยู่"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"โหมดลำดับความสำคัญเปิดอยู่"</string>
 </resources>

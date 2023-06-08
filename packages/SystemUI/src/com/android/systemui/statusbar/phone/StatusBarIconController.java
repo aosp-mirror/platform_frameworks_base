@@ -81,27 +81,21 @@ public interface StatusBarIconController {
     void refreshIconGroup(IconManager iconManager);
 
     /**
-     * Adds or updates an icon for a given slot for a **tile service icon**.
+     * Adds or updates an icon that comes from an active tile service.
      *
-     * TODO(b/265307726): Merge with {@link #setIcon(String, StatusBarIcon)} or make this method
-     *   much more clearly distinct from that method.
+     * If the icon is null, the icon will be removed.
      */
-    void setExternalIcon(String slot);
+    void setIconFromTile(String slot, @Nullable StatusBarIcon icon);
+
+    /** Removes an icon that had come from an active tile service. */
+    void removeIconForTile(String slot);
 
     /**
      * Adds or updates an icon for the given slot for **internal system icons**.
      *
-     * TODO(b/265307726): Rename to `setInternalIcon`, or merge this appropriately with the
-     * {@link #setIcon(String, StatusBarIcon)} method.
+     * TODO(b/265307726): Re-name this to `setInternalIcon`.
      */
     void setIcon(String slot, int resourceId, CharSequence contentDescription);
-
-    /**
-     * Adds or updates an icon for the given slot for an **externally-provided icon**.
-     *
-     * TODO(b/265307726): Rename to `setExternalIcon` or something similar.
-     */
-    void setIcon(String slot, StatusBarIcon icon);
 
     /** */
     void setWifiIcon(String slot, WifiIconState state);
@@ -152,15 +146,10 @@ public interface StatusBarIconController {
      */
     void removeIcon(String slot, int tag);
 
-    /** */
-    void removeAllIconsForSlot(String slot);
-
     /**
-     * Removes all the icons for the given slot.
-     *
-     * Only use this for icons that have come from **an external process**.
+     * TODO(b/265307726): Re-name this to `removeAllIconsForInternalSlot`.
      */
-    void removeAllIconsForExternalSlot(String slot);
+    void removeAllIconsForSlot(String slot);
 
     // TODO: See if we can rename this tunable name.
     String ICON_HIDE_LIST = "icon_blacklist";
@@ -501,7 +490,7 @@ public interface StatusBarIconController {
         @VisibleForTesting
         protected StatusIconDisplayable addWifiIcon(int index, String slot, WifiIconState state) {
             if (mStatusBarPipelineFlags.useNewWifiIcon()) {
-                throw new IllegalStateException("Attempting to add a mobile icon while the new "
+                throw new IllegalStateException("Attempting to add a wifi icon while the new "
                         + "icons are enabled is not supported");
             }
 
@@ -569,7 +558,10 @@ public interface StatusBarIconController {
             mGroup.addView(view, index, onCreateLayoutParams());
 
             if (mIsInDemoMode) {
-                mDemoStatusIcons.addModernMobileView(mContext, subId);
+                mDemoStatusIcons.addModernMobileView(
+                        mContext,
+                        mMobileIconsViewModel.getLogger(),
+                        subId);
             }
 
             return view;
@@ -601,6 +593,7 @@ public interface StatusBarIconController {
             return ModernStatusBarMobileView
                     .constructAndBind(
                             mobileContext,
+                            mMobileIconsViewModel.getLogger(),
                             slot,
                             mMobileIconsViewModel.viewModelForSub(subId, mLocation)
                         );
@@ -612,13 +605,6 @@ public interface StatusBarIconController {
 
         protected void destroy() {
             mGroup.removeAllViews();
-        }
-
-        protected void onIconExternal(int viewIndex, int height) {
-            ImageView imageView = (ImageView) mGroup.getChildAt(viewIndex);
-            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            imageView.setAdjustViewBounds(true);
-            setHeightAndCenter(imageView, height);
         }
 
         protected void onDensityOrFontScaleChanged() {

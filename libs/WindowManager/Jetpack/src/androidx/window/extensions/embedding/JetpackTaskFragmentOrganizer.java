@@ -191,10 +191,25 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      */
     void createTaskFragment(@NonNull WindowContainerTransaction wct, @NonNull IBinder fragmentToken,
             @NonNull IBinder ownerToken, @NonNull Rect bounds, @WindowingMode int windowingMode) {
+        createTaskFragment(wct, fragmentToken, ownerToken, bounds, windowingMode,
+                null /* pairedActivityToken */);
+    }
+
+    /**
+     * @param ownerToken The token of the activity that creates this task fragment. It does not
+     *                   have to be a child of this task fragment, but must belong to the same task.
+     * @param pairedActivityToken The token of the activity that will be reparented to this task
+     *                            fragment. When it is not {@code null}, the task fragment will be
+     *                            positioned right above it.
+     */
+    void createTaskFragment(@NonNull WindowContainerTransaction wct, @NonNull IBinder fragmentToken,
+            @NonNull IBinder ownerToken, @NonNull Rect bounds, @WindowingMode int windowingMode,
+            @Nullable IBinder pairedActivityToken) {
         final TaskFragmentCreationParams fragmentOptions = new TaskFragmentCreationParams.Builder(
                 getOrganizerToken(), fragmentToken, ownerToken)
                 .setInitialBounds(bounds)
                 .setWindowingMode(windowingMode)
+                .setPairedActivityToken(pairedActivityToken)
                 .build();
         createTaskFragment(wct, fragmentOptions);
     }
@@ -216,8 +231,10 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     private void createTaskFragmentAndReparentActivity(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken, @NonNull Rect bounds,
             @WindowingMode int windowingMode, @NonNull Activity activity) {
-        createTaskFragment(wct, fragmentToken, ownerToken, bounds, windowingMode);
-        wct.reparentActivityToTaskFragment(fragmentToken, activity.getActivityToken());
+        final IBinder reparentActivityToken = activity.getActivityToken();
+        createTaskFragment(wct, fragmentToken, ownerToken, bounds, windowingMode,
+                reparentActivityToken);
+        wct.reparentActivityToTaskFragment(fragmentToken, reparentActivityToken);
     }
 
     void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,

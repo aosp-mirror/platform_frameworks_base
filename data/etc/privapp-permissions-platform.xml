@@ -306,6 +306,7 @@ applications that come with the platform
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <!-- Permission required for UiModeManager CTS test -->
         <permission name="android.permission.READ_PROJECTION_STATE"/>
+        <permission name="android.permission.READ_WALLPAPER_INTERNAL"/>
         <permission name="android.permission.READ_WIFI_CREDENTIAL"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
@@ -514,6 +515,12 @@ applications that come with the platform
     <privapp-permissions package="com.android.wallpaper.livepicker">
         <permission name="android.permission.SET_WALLPAPER_COMPONENT"/>
         <permission name="android.permission.BIND_WALLPAPER"/>
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.wallpaper">
+        <permission name="android.permission.SET_WALLPAPER_COMPONENT"/>
+        <permission name="android.permission.BIND_WALLPAPER"/>
+        <permission name="android.permission.CUSTOMIZE_SYSTEM_UI"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.dynsystem">

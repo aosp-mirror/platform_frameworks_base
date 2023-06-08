@@ -35,7 +35,6 @@ import kotlin.math.max
  * as the result of taking a bug report).
  *
  * You can dump the entire buffer at any time by running:
- *
  * ```
  * $ adb shell dumpsys activity service com.android.systemui/.SystemUIService <bufferName>
  * ```
@@ -46,13 +45,11 @@ import kotlin.math.max
  * locally (usually for debugging purposes).
  *
  * To enable logcat echoing for an entire buffer:
- *
  * ```
  * $ adb shell settings put global systemui/buffer/<bufferName> <level>
  * ```
  *
  * To enable logcat echoing for a specific tag:
- *
  * ```
  * $ adb shell settings put global systemui/tag/<tag> <level>
  * ```
@@ -64,10 +61,10 @@ import kotlin.math.max
  * LogBufferFactory.
  *
  * @param name The name of this buffer, printed when the buffer is dumped and in some other
- * situations.
+ *   situations.
  * @param maxSize The maximum number of messages to keep in memory at any one time. Buffers start
- * out empty and grow up to [maxSize] as new messages are logged. Once the buffer's size reaches the
- * maximum, it behaves like a ring buffer.
+ *   out empty and grow up to [maxSize] as new messages are logged. Once the buffer's size reaches
+ *   the maximum, it behaves like a ring buffer.
  */
 class LogBuffer
 @JvmOverloads
@@ -116,22 +113,22 @@ constructor(
      * initializer stored and converts it to a human-readable log message.
      *
      * @param tag A string of at most 23 characters, used for grouping logs into categories or
-     * subjects. If this message is echoed to logcat, this will be the tag that is used.
+     *   subjects. If this message is echoed to logcat, this will be the tag that is used.
      * @param level Which level to log the message at, both to the buffer and to logcat if it's
-     * echoed. In general, a module should split most of its logs into either INFO or DEBUG level.
-     * INFO level should be reserved for information that other parts of the system might care
-     * about, leaving the specifics of code's day-to-day operations to DEBUG.
+     *   echoed. In general, a module should split most of its logs into either INFO or DEBUG level.
+     *   INFO level should be reserved for information that other parts of the system might care
+     *   about, leaving the specifics of code's day-to-day operations to DEBUG.
      * @param messageInitializer A function that will be called immediately to store relevant data
-     * on the log message. The value of `this` will be the LogMessage to be initialized.
+     *   on the log message. The value of `this` will be the LogMessage to be initialized.
      * @param messagePrinter A function that will be called if and when the message needs to be
-     * dumped to logcat or a bug report. It should read the data stored by the initializer and
-     * convert it to a human-readable string. The value of `this` will be the LogMessage to be
-     * printed. **IMPORTANT:** The printer should ONLY ever reference fields on the LogMessage and
-     * NEVER any variables in its enclosing scope. Otherwise, the runtime will need to allocate a
-     * new instance of the printer for each call, thwarting our attempts at avoiding any sort of
-     * allocation.
+     *   dumped to logcat or a bug report. It should read the data stored by the initializer and
+     *   convert it to a human-readable string. The value of `this` will be the LogMessage to be
+     *   printed. **IMPORTANT:** The printer should ONLY ever reference fields on the LogMessage and
+     *   NEVER any variables in its enclosing scope. Otherwise, the runtime will need to allocate a
+     *   new instance of the printer for each call, thwarting our attempts at avoiding any sort of
+     *   allocation.
      * @param exception Provide any exception that need to be logged. This is saved as
-     * [LogMessage.exception]
+     *   [LogMessage.exception]
      */
     @JvmOverloads
     inline fun log(
@@ -159,8 +156,13 @@ constructor(
      * bug report more actionable, so using the [log] with a messagePrinter to add more detail to
      * every log may do more to improve overall logging than adding more logs with this method.
      */
-    fun log(tag: String, level: LogLevel, @CompileTimeConstant message: String) =
-        log(tag, level, { str1 = message }, { str1!! })
+    @JvmOverloads
+    fun log(
+        tag: String,
+        level: LogLevel,
+        @CompileTimeConstant message: String,
+        exception: Throwable? = null,
+    ) = log(tag, level, { str1 = message }, { str1!! }, exception)
 
     /**
      * You should call [log] instead of this method.

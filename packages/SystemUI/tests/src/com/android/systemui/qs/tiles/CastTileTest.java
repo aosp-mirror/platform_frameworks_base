@@ -42,7 +42,7 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;
@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,7 +79,7 @@ public class CastTileTest extends SysuiTestCase {
     @Mock
     private NetworkController mNetworkController;
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     SignalCallback mSignalCallback;
     @Mock
@@ -139,6 +140,12 @@ public class CastTileTest extends SysuiTestCase {
         verify(mHotspotController).observe(any(LifecycleOwner.class),
                 hotspotCallbackArgumentCaptor.capture());
         mHotspotCallback = hotspotCallbackArgumentCaptor.getValue();
+    }
+
+    @After
+    public void tearDown() {
+        mCastTile.destroy();
+        mTestableLooper.processAllMessages();
     }
 
     // -------------------------------------------------

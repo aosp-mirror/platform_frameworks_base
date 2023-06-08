@@ -69,7 +69,8 @@ object CombinedShadeHeadersConstraintManagerImpl : CombinedShadeHeadersConstrain
         }
         return ConstraintsChanges(
             qqsConstraintsChanges = change,
-            qsConstraintsChanges = change
+            qsConstraintsChanges = change,
+            largeScreenConstraintsChanges = change,
         )
     }
 

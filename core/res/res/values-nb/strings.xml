@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan fange inn bevegelser som utføres på enhetens fingeravtrykkssensor."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skjermdump"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ikke ta en skjermdump av skjermen."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Forhåndsvisning, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Lar appen deaktivere statusfeltet eller legge til og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vise appen i statusfeltet"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visning i fullskjerm"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Sveip ned fra toppen for å avslutte."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Skjønner"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Roter for å få en bedre visning"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Avslutt delt skjerm for å få en bedre visning"</string>
     <string name="done_label" msgid="7283767013231718521">"Ferdig"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Sirkulær glidebryter for timer"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Sirkulær glidebryter for minutter"</string>

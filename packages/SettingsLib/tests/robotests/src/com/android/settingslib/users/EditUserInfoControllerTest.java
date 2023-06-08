@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
@@ -143,7 +143,7 @@ public class EditUserInfoControllerTest {
         dialog.show();
         dialog.cancel();
 
-        verifyZeroInteractions(successCallback);
+        verifyNoInteractions(successCallback);
         verify(cancelCallback, times(1))
                 .run();
     }
@@ -159,7 +159,7 @@ public class EditUserInfoControllerTest {
         dialog.show();
         dialog.getButton(Dialog.BUTTON_NEGATIVE).performClick();
 
-        verifyZeroInteractions(successCallback);
+        verifyNoInteractions(successCallback);
         verify(cancelCallback, times(1))
                 .run();
     }
@@ -180,7 +180,7 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept("test", oldUserIcon);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept("test", null);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -219,7 +219,7 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept(expectedNewName, mCurrentIcon);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -238,7 +238,7 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept("test", newPhoto);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -257,7 +257,7 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept("test", newPhoto);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test

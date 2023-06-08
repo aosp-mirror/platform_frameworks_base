@@ -328,20 +328,21 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"пристапува до податоците од сензорите за виталните знаци"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Известувања"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"да прикажува известувања"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Преземе содржина на прозорец"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Ја следи содржината на прозорецот со кој се комуницира."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Вклучи „Истражувај со допир“"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Допрените ставки ќе се изговорат на глас и екранот може да се истражува со движења."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Го следи напишаниот текст"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Опфаќа лични податоци како што се броеви на кредитни картички и лозинки."</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Го контролира зголемувањето на екранот"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Го контролира нивото на зумирање и позиционирање на екранот."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"да ги вчитува содржините од прозорците"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"да ги проверува содржините од прозорецот што го користите"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"да вклучи „Истражувај со допир“"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"допрените ставки ќе се изговараат наглас и екранот ќе може да се истражува со движења"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"да го следи текстот што го пишувате"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"вклучително и лични податоци како што се броеви на кредитни картички и лозинки"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"да го контролира зголемувањето на екранот"</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"да го контролира нивото на зумирање и позиционирањето на екранот"</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Користете движења"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Може да допрете, повлечете, штипнете и да користите други движења."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Движења за отпечатоци"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може да сними движења што се направени на сензорот за отпечатоци на уредот."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Зачувување слика од екранот"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да направи слика од екранот."</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да зачува слика од екранот."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Преглед, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"оневозможи или измени статусна лента"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволува апликацијата да ја оневозможи статусната лента или да додава или отстранува системски икони."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"да стане статусна лента"</string>
@@ -1691,7 +1692,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини врз другите апликации."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење на дејствата"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење дејства"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или хардверскиот сензор и да врши интеракција со апликациите во ваше име."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Се прикажува на цел екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"За да излезете, повлечете одозгора надолу."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Сфатив"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ротирајте за подобар приказ"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"За подобар приказ, излезете од поделениот екран"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Приказ на часови во кружно движење"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Приказ на минути во кружно движење"</string>

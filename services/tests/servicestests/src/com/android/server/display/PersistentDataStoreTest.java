@@ -377,6 +377,33 @@ public class PersistentDataStoreTest {
         assertTrue(Float.isNaN(mDataStore.getBrightness(testDisplayDevice)));
     }
 
+    @Test
+    public void testStoreAndRestoreBrightnessNitsForDefaultDisplay() {
+        float brightnessNitsForDefaultDisplay = 190;
+        mDataStore.loadIfNeeded();
+        mDataStore.setBrightnessNitsForDefaultDisplay(brightnessNitsForDefaultDisplay);
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        mInjector.setWriteStream(baos);
+        mDataStore.saveIfNeeded();
+        mTestLooper.dispatchAll();
+        assertTrue(mInjector.wasWriteSuccessful());
+        TestInjector newInjector = new TestInjector();
+        PersistentDataStore newDataStore = new PersistentDataStore(newInjector);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        newInjector.setReadStream(bais);
+        newDataStore.loadIfNeeded();
+        assertEquals(brightnessNitsForDefaultDisplay,
+                mDataStore.getBrightnessNitsForDefaultDisplay(), 0);
+        assertEquals(brightnessNitsForDefaultDisplay,
+                newDataStore.getBrightnessNitsForDefaultDisplay(), 0);
+    }
+
+    @Test
+    public void testInitialBrightnessNitsForDefaultDisplay() {
+        mDataStore.loadIfNeeded();
+        assertEquals(-1, mDataStore.getBrightnessNitsForDefaultDisplay(), 0);
+    }
 
     public class TestInjector extends PersistentDataStore.Injector {
         private InputStream mReadStream;

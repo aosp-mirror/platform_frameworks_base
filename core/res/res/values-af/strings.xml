@@ -330,11 +330,11 @@
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"wys kennisgewings"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Venster-inhoud ophaal"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Die inhoud ondersoek van \'n venster waarmee jy interaksie het."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Verken deur raak aanskakel"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Verken-met-raak aanskakel"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Items waarop getik word, sal hardop gesê word en die skerm kan met behulp van gebare verken word."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Teks wat jy tik waarneem"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Neem teks wat jy tik waar"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Dit sluit persoonlike data soos kredietkaartnommers en wagwoorde in."</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Vertoonskermvergroting beheer"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Beheer vertoonskerm-vergroting"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Die vertoonskerm se zoemvlak en posisionering beheer."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Voer gebare uit"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan tik, swiep, knyp en ander gebare uitvoer."</string>
@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan gebare vasvang wat op die toestel se vingerafdruksensor uitgevoer word."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Neem skermkiekie"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan \'n skermkiekie neem."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Voorskou, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktiveer of verander statusbalk"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Laat die program toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"wees die statusbalk"</string>
@@ -1688,11 +1689,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AAN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Gee <xliff:g id="SERVICE">%1$s</xliff:g> volle beheer oor jou toestel?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volle beheer is gepas vir programme wat jou help met toeganklikheidsbehoeftes, maar nie vir die meeste programme nie."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volle beheer is gepas vir apps wat jou help met toeganklikheidsbehoeftes, maar nie vir die meeste apps nie."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Bekyk en beheer skerm"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Dit kan alle inhoud op die skerm lees en inhoud bo-oor ander programme vertoon."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Dit kan alle inhoud op die skerm lees en inhoud bo-oor ander apps vertoon."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Bekyk en voer handelinge uit"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Dit kan jou interaksies met \'n program of \'n hardewaresensor naspoor en namens jou met programme interaksie hê."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Dit kan jou interaksies met \'n app of \'n hardewaresensor naspoor en namens jou met apps interaksie hê."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Laat toe"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Weier"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tik op \'n kenmerk om dit te begin gebruik:"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Bekyk tans volskerm"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Swiep van bo na onder as jy wil uitgaan."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Het dit"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Draai vir ’n beter aansig"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Verlaat gedeelde skerm vir ’n beter aansig"</string>
     <string name="done_label" msgid="7283767013231718521">"Klaar"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ure se sirkelglyer"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Minute se sirkelglyer"</string>

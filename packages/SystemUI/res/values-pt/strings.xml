@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Borda inferior em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Borda esquerda em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Borda direita em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Salva no app <xliff:g id="APP">%1$s</xliff:g> no perfil de trabalho"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"O app <xliff:g id="APPNAME">%1$s</xliff:g> detectou essa captura de tela."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> e outros apps abertos detectaram essa captura de tela."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravador de tela"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processando gravação de tela"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação contínua para uma sessão de gravação de tela"</string>
@@ -164,7 +168,6 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Se você informar um PIN incorreto na próxima tentativa, seu perfil de trabalho e os dados dele serão excluídos."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Se você informar uma senha incorreta na próxima tentativa, seu perfil de trabalho e os dados dele serão excluídos."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toque no sensor de impressão digital"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícone de impressão digital"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Não foi possível reconhecer o rosto Use a impressão digital."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -193,6 +196,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Aba de notificações."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Configurações rápidas."</string>
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Configurações rápidas e aba de notificações."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Tela de bloqueio."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Tela de bloqueio de trabalho"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Fechar"</string>
@@ -253,6 +257,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brilho"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversão de cores"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Correção de cor"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Tamanho da fonte"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Gerenciar usuários"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Concluído"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Fechar"</string>
@@ -395,7 +400,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Iniciar agora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Sem notificações"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nenhuma notificação nova"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueie para conferir as notificações antigas"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueie p/ acessar notificações antigas"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Este dispositivo é gerenciado pelo seu familiar responsável"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Sua organização é dona deste dispositivo e pode monitorar o tráfego de rede"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"A organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> é dona deste dispositivo e pode monitorar o tráfego de rede"</string>
@@ -450,7 +455,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"O app está fixado"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Visão geral e mantenha essas opções pressionadas para liberar."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Início e mantenha essas opções pressionadas para liberar."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ele é mantido à vista até que seja liberado. Deslize para cima e mantenha pressionado para liberar."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ele é mantido à vista até que seja liberado. Deslize para cima pressione para liberar."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ela é mantida à vista até que seja liberada. Toque em Visão geral e mantenha essa opção pressionada para liberar."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ela é mantida à vista até que seja liberada. Toque em Início e mantenha essa opção pressionada para liberar."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dados pessoais podem ficar acessíveis (como contatos e conteúdo de e-mail)."</string>
@@ -487,7 +492,7 @@
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Chamadas e notificações farão o smartphone tocar (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sintonizador System UI"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de status"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Modo de demonstração da IU do sistema"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Modo de demonstração da interface do sistema"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Ativar modo de demonstração"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo de demonstração"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
@@ -530,8 +535,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Som e vibração desativados"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"O som e a vibração estão desativados, e o balão aparece na parte inferior da seção de conversa"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pode vibrar ou tocar com base nas configurações do smartphone"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pode vibrar ou tocar com base nas configurações do smartphone. As conversas do app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem em balões por padrão."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Pode vibrar ou tocar com base nas configurações do dispositivo"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Pode vibrar ou tocar com base nas configurações do dispositivo. As conversas do app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem em balões por padrão."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Faça com que o sistema determine se a notificação resultará em som ou vibração"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; promovida a Padrão"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; rebaixada a Silenciosa"</string>
@@ -773,6 +778,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"gravação de tela"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sem título"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Em espera"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Tamanho da fonte"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Diminuir"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Aumentar"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Janela de ampliação"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controles da janela de ampliação"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Aumentar zoom"</string>
@@ -798,6 +806,9 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolha um app para adicionar controles"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# controle adicionado.}one{# controle adicionado.}many{# de controles adicionados.}other{# controles adicionados.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Removido"</string>
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Adicionar o app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> pode escolher quais controles e conteúdos aparecem aqui."</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Remover controles do app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Adicionado como favorito"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Adicionado como favorito (posição <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Removido dos favoritos"</string>
@@ -815,12 +826,13 @@
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outro"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Adicionar aos controles do dispositivo"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Adicionar"</string>
+    <string name="controls_dialog_remove" msgid="3775288002711561936">"Remover"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Sugerido por <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Dispositivo bloq."</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Mostrar e controlar dispositivos na tela de bloqueio?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Você pode adicionar à tela de bloqueio controles para dispositivos externos.\n\nO app do dispositivo pode permitir que você controle alguns dispositivos sem desbloquear o smartphone ou tablet.\n\nÉ possível fazer mudanças a qualquer momento nas Configurações."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Controlar dispositivos na tela de bloqueio?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"É possível controle alguns dispositivos sem desbloquear o smartphone ou tablet.\n\nO app do dispositivo determina quais dispositivos podem ser controlados dessa maneira."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"É possível controlar alguns dispositivos sem desbloquear o smartphone ou tablet. O app determina quais dispositivos podem ser controlados dessa maneira."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Agora não"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Sim"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"O PIN contém letras ou símbolos"</string>
@@ -848,13 +860,16 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Abrir <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Tocar <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> no app <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Tocar <xliff:g id="SONG_NAME">%1$s</xliff:g> no app <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Para você"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Desfazer"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Aproxime os dispositivos para tocar a mídia neste: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Aproxime-se do dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g> para abrir a mídia aqui"</string>
-    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Mídia aberta no dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Para abrir aqui, aproxime-se do dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Tocando no dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Algo deu errado. Tente novamente."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Carregando"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Transmitindo sua mídia"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Transmitindo o app <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inativo, verifique o app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Não encontrado"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"O controle está indisponível"</string>
@@ -864,6 +879,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Erro. Tente novamente"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Adicionar controles"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editar controles"</string>
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Adicionar app"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"Remover o app"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Adicionar saídas"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupo"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 dispositivo selecionado"</string>
@@ -878,6 +895,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Alto-falantes e telas"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Dispositivos sugeridos"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Requer uma conta premium"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmitir"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As pessoas próximas a você com dispositivos Bluetooth compatíveis podem ouvir a mídia que você está transmitindo"</string>
@@ -889,6 +908,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Não foi possível fazer a transmissão"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Falha ao salvar. Tente de novo."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Falha ao salvar."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Use pelo menos 4 caracteres"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Use menos de 16 caracteres"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número da versão"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Número da versão copiado para a área de transferência."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversa aberta"</string>
@@ -1006,14 +1027,27 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Um app de câmera está instalado"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• O app está disponível"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Pelo menos um dispositivo está disponível"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantenha o atalho pressionado"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Toque e pressione o atalho"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Virar agora"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Abra o smartphone para tirar uma selfie melhor"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Usar o display frontal para tirar uma selfie melhor?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Use a câmera traseira para tirar uma foto mais ampla e com maior resolução."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Esta tela vai ser desativada"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Trocar de tela agora"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Abra o smartphone"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Trocar de tela?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Para uma resolução maior, use a câmera traseira"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Para uma resolução maior, vire o smartphone"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo dobrável sendo aberto"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo dobrável sendo virado"</string>
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Bateria restante: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conecte sua stylus a um carregador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria da stylus fraca"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Filmadora"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Não é possível fazer uma ligação por este perfil"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Sua política de trabalho só permite fazer ligações pelo perfil de trabalho"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Alternar para o perfil de trabalho"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Fechar"</string>
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Configurações de tela de bloqueio"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi indisponível"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Câmara bloqueada"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Câmera e microfone bloqueados"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Microfone bloqueado"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Modo de prioridade ativado"</string>
 </resources>

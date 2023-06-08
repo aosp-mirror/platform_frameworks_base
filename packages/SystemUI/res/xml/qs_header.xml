@@ -41,9 +41,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/privacy_container"
             app:layout_constraintBottom_toBottomOf="@id/carrier_group"
-            app:layout_constraintEnd_toStartOf="@id/carrier_group"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintHorizontal_chainStyle="spread_inside"
         />
         <Transform
             android:scaleX="2.57"
@@ -62,18 +59,18 @@
         />
     </Constraint>
 
+    <!-- LargeScreenShadeHeaderController helps with managing clock width to layout this view -->
     <Constraint
         android:id="@+id/carrier_group">
         <Layout
-            app:layout_constraintWidth_min="48dp"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="@dimen/large_screen_shade_header_min_height"
-            app:layout_constraintStart_toEndOf="@id/clock"
+            app:layout_constraintWidth_min="48dp"
+            app:layout_constraintWidth_default="wrap"
+            app:layout_constraintStart_toStartOf="@id/clock"
             app:layout_constraintTop_toBottomOf="@id/privacy_container"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1"
             app:layout_constraintBottom_toTopOf="@id/batteryRemainingIcon"
-            app:layout_constraintHorizontal_chainStyle="spread_inside"
             />
         <PropertySet
             android:alpha="1"

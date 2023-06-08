@@ -18,10 +18,16 @@ package com.android.wm.shell.draganddrop;
 
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
+import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -68,6 +74,7 @@ public class DragLayout extends LinearLayout {
     private final SplitScreenController mSplitScreenController;
     private final IconProvider mIconProvider;
     private final StatusBarManager mStatusBarManager;
+    private final Configuration mLastConfiguration = new Configuration();
 
     private DragAndDropPolicy.Target mCurrentTarget = null;
     private DropZoneView mDropZoneView1;
@@ -88,6 +95,7 @@ public class DragLayout extends LinearLayout {
         mIconProvider = iconProvider;
         mPolicy = new DragAndDropPolicy(context, splitScreenController);
         mStatusBarManager = context.getSystemService(StatusBarManager.class);
+        mLastConfiguration.setTo(context.getResources().getConfiguration());
 
         mDisplayMargin = context.getResources().getDimensionPixelSize(
                 R.dimen.drop_layout_display_margin);
@@ -114,7 +122,7 @@ public class DragLayout extends LinearLayout {
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mInsets = insets.getInsets(Type.systemBars() | Type.displayCutout());
+        mInsets = insets.getInsets(Type.tappableElement() | Type.displayCutout());
         recomputeDropTargets();
 
         final int orientation = getResources().getConfiguration().orientation;
@@ -128,11 +136,6 @@ public class DragLayout extends LinearLayout {
         return super.onApplyWindowInsets(insets);
     }
 
-    public void onThemeChange() {
-        mDropZoneView1.onThemeChange();
-        mDropZoneView2.onThemeChange();
-    }
-
     public void onConfigChanged(Configuration newConfig) {
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
                 && getOrientation() != HORIZONTAL) {
@@ -143,6 +146,15 @@ public class DragLayout extends LinearLayout {
             setOrientation(LinearLayout.VERTICAL);
             updateContainerMargins(newConfig.orientation);
         }
+
+        final int diff = newConfig.diff(mLastConfiguration);
+        final boolean themeChanged = (diff & CONFIG_ASSETS_PATHS) != 0
+                || (diff & CONFIG_UI_MODE) != 0;
+        if (themeChanged) {
+            mDropZoneView1.onThemeChange();
+            mDropZoneView2.onThemeChange();
+        }
+        mLastConfiguration.setTo(newConfig);
     }
 
     private void updateContainerMarginsForSingleTask() {
@@ -315,6 +327,25 @@ public class DragLayout extends LinearLayout {
                 // Switching between targets
                 mDropZoneView1.animateSwitch();
                 mDropZoneView2.animateSwitch();
+                // Announce for accessibility.
+                switch (target.type) {
+                    case TYPE_SPLIT_LEFT:
+                        mDropZoneView1.announceForAccessibility(
+                                mContext.getString(R.string.accessibility_split_left));
+                        break;
+                    case TYPE_SPLIT_RIGHT:
+                        mDropZoneView2.announceForAccessibility(
+                                mContext.getString(R.string.accessibility_split_right));
+                        break;
+                    case TYPE_SPLIT_TOP:
+                        mDropZoneView1.announceForAccessibility(
+                                mContext.getString(R.string.accessibility_split_top));
+                        break;
+                    case TYPE_SPLIT_BOTTOM:
+                        mDropZoneView2.announceForAccessibility(
+                                mContext.getString(R.string.accessibility_split_bottom));
+                        break;
+                }
             }
             mCurrentTarget = target;
         }
@@ -346,7 +377,9 @@ public class DragLayout extends LinearLayout {
 
         // Start animating the drop UI out with the drag surface
         hide(event, dropCompleteCallback);
-        hideDragSurface(dragSurface);
+        if (handledDrop) {
+            hideDragSurface(dragSurface);
+        }
         return handledDrop;
     }
 
@@ -424,12 +457,10 @@ public class DragLayout extends LinearLayout {
     }
 
     private void animateHighlight(DragAndDropPolicy.Target target) {
-        if (target.type == DragAndDropPolicy.Target.TYPE_SPLIT_LEFT
-                || target.type == DragAndDropPolicy.Target.TYPE_SPLIT_TOP) {
+        if (target.type == TYPE_SPLIT_LEFT || target.type == TYPE_SPLIT_TOP) {
             mDropZoneView1.setShowingHighlight(true);
             mDropZoneView2.setShowingHighlight(false);
-        } else if (target.type == DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT
-                || target.type == DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM) {
+        } else if (target.type == TYPE_SPLIT_RIGHT || target.type == TYPE_SPLIT_BOTTOM) {
             mDropZoneView1.setShowingHighlight(false);
             mDropZoneView2.setShowingHighlight(true);
         }

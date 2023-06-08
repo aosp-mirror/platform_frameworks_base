@@ -28,7 +28,6 @@ import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
-import android.util.Log
 import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +40,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeStateEvents
@@ -93,6 +93,7 @@ constructor(
     private val keyguardStateController: KeyguardStateController,
     private val bypassController: KeyguardBypassController,
     private val mediaCarouselController: MediaCarouselController,
+    private val mediaManager: MediaDataManager,
     private val keyguardViewController: KeyguardViewController,
     private val dreamOverlayStateController: DreamOverlayStateController,
     configurationController: ConfigurationController,
@@ -224,9 +225,9 @@ constructor(
 
     private var inSplitShade = false
 
-    /** Is there any active media in the carousel? */
-    private var hasActiveMedia: Boolean = false
-        get() = mediaHosts.get(LOCATION_QQS)?.visible == true
+    /** Is there any active media or recommendation in the carousel? */
+    private var hasActiveMediaOrRecommendation: Boolean = false
+        get() = mediaManager.hasActiveMediaOrRecommendation()
 
     /** Are we currently waiting on an animation to start? */
     private var animationPending: Boolean = false
@@ -316,13 +317,16 @@ constructor(
 
     /**
      * Returns the amount of translationY of the media container, during the current guided
-     * transformation, if running. If there is no guided transformation running, it will return 0.
+     * transformation, if running. If there is no guided transformation running, it will return -1.
      */
     fun getGuidedTransformationTranslationY(): Int {
         if (!isCurrentlyInGuidedTransformation()) {
             return -1
         }
-        val startHost = getHost(previousLocation) ?: return 0
+        val startHost = getHost(previousLocation)
+        if (startHost == null || !startHost.visible) {
+            return 0
+        }
         return targetBounds.top - startHost.currentBounds.top
     }
 
@@ -416,8 +420,8 @@ constructor(
      * Calculate the alpha of the view when given a cross-fade progress.
      *
      * @param crossFadeProgress The current cross fade progress. 0.5f means it's just switching
-     * between the start and the end location and the content is fully faded, while 0.75f means that
-     * we're halfway faded in again in the target state.
+     *   between the start and the end location and the content is fully faded, while 0.75f means
+     *   that we're halfway faded in again in the target state.
      */
     private fun calculateAlphaFromCrossFade(crossFadeProgress: Float): Float {
         if (crossFadeProgress <= 0.5f) {
@@ -582,12 +586,8 @@ constructor(
         val viewHost = createUniqueObjectHost()
         mediaObject.hostView = viewHost
         mediaObject.addVisibilityChangeListener {
-            // If QQS changes visibility, we need to force an update to ensure the transition
-            // goes into the correct state
-            val stateUpdate = mediaObject.location == LOCATION_QQS
-
             // Never animate because of a visibility change, only state changes should do that
-            updateDesiredLocation(forceNoAnimation = true, forceStateUpdate = stateUpdate)
+            updateDesiredLocation(forceNoAnimation = true)
         }
         mediaHosts[mediaObject.location] = mediaObject
         if (mediaObject.location == desiredLocation) {
@@ -631,6 +631,7 @@ constructor(
      *
      * @param forceNoAnimation optional parameter telling the system not to animate
      * @param forceStateUpdate optional parameter telling the system to update transition state
+     *
      * ```
      *                         even if location did not change
      * ```
@@ -641,7 +642,9 @@ constructor(
     ) =
         traceSection("MediaHierarchyManager#updateDesiredLocation") {
             val desiredLocation = calculateLocation()
-            if (desiredLocation != this.desiredLocation || forceStateUpdate) {
+            if (
+                desiredLocation != this.desiredLocation || forceStateUpdate && !blockLocationChanges
+            ) {
                 if (this.desiredLocation >= 0 && desiredLocation != this.desiredLocation) {
                     // Only update previous location when it actually changes
                     previousLocation = this.desiredLocation
@@ -908,7 +911,7 @@ constructor(
     fun isCurrentlyInGuidedTransformation(): Boolean {
         return hasValidStartAndEndLocations() &&
             getTransformationProgress() >= 0 &&
-            areGuidedTransitionHostsVisible()
+            (areGuidedTransitionHostsVisible() || !hasActiveMediaOrRecommendation)
     }
 
     private fun hasValidStartAndEndLocations(): Boolean {
@@ -946,7 +949,7 @@ constructor(
 
     /**
      * @return the current transformation progress if we're in a guided transformation and -1
-     * otherwise
+     *   otherwise
      */
     private fun getTransformationProgress(): Float {
         if (skipQqsOnExpansion) {
@@ -965,7 +968,7 @@ constructor(
     private fun getQSTransformationProgress(): Float {
         val currentHost = getHost(desiredLocation)
         val previousHost = getHost(previousLocation)
-        if (hasActiveMedia && (currentHost?.location == LOCATION_QS && !inSplitShade)) {
+        if (currentHost?.location == LOCATION_QS && !inSplitShade) {
             if (previousHost?.location == LOCATION_QQS) {
                 if (previousHost.visible || statusbarState != StatusBarState.KEYGUARD) {
                     return qsExpansion
@@ -1028,7 +1031,8 @@ constructor(
     private fun updateHostAttachment() =
         traceSection("MediaHierarchyManager#updateHostAttachment") {
             var newLocation = resolveLocationForFading()
-            var canUseOverlay = !isCurrentlyFading()
+            // Don't use the overlay when fading or when we don't have active media
+            var canUseOverlay = !isCurrentlyFading() && hasActiveMediaOrRecommendation
             if (isCrossFadeAnimatorRunning) {
                 if (
                     getHost(newLocation)?.visible == true &&
@@ -1056,17 +1060,6 @@ constructor(
                     // This will either do a full layout pass and remeasure, or it will bypass
                     // that and directly set the mediaFrame's bounds within the premeasured host.
                     targetHost.addView(mediaFrame)
-
-                    if (mediaFrame.childCount > 0) {
-                        val child = mediaFrame.getChildAt(0)
-                        if (mediaFrame.height < child.height) {
-                            Log.wtf(
-                                TAG,
-                                "mediaFrame height is too small for child: " +
-                                    "${mediaFrame.height} vs ${child.height}"
-                            )
-                        }
-                    }
                 }
                 if (isCrossFadeAnimatorRunning) {
                     // When cross-fading with an animation, we only notify the media carousel of the
@@ -1122,7 +1115,6 @@ constructor(
                 dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
                 (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
                 qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
-                !hasActiveMedia -> LOCATION_QS
                 onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
                 onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
                 onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN

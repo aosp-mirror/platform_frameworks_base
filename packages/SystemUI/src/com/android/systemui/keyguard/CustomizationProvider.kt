@@ -31,10 +31,12 @@ import android.os.Bundle
 import android.util.Log
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 
 class CustomizationProvider :
@@ -42,6 +44,7 @@ class CustomizationProvider :
 
     @Inject lateinit var interactor: KeyguardQuickAffordanceInteractor
     @Inject lateinit var previewManager: KeyguardRemotePreviewManager
+    @Inject @Main lateinit var mainDispatcher: CoroutineDispatcher
 
     private lateinit var contextAvailableCallback: ContextAvailableCallback
 
@@ -128,7 +131,7 @@ class CustomizationProvider :
             throw UnsupportedOperationException()
         }
 
-        return insertSelection(values)
+        return runBlocking(mainDispatcher) { insertSelection(values) }
     }
 
     override fun query(
@@ -138,12 +141,14 @@ class CustomizationProvider :
         selectionArgs: Array<out String>?,
         sortOrder: String?,
     ): Cursor? {
-        return when (uriMatcher.match(uri)) {
-            MATCH_CODE_ALL_AFFORDANCES -> runBlocking { queryAffordances() }
-            MATCH_CODE_ALL_SLOTS -> querySlots()
-            MATCH_CODE_ALL_SELECTIONS -> runBlocking { querySelections() }
-            MATCH_CODE_ALL_FLAGS -> queryFlags()
-            else -> null
+        return runBlocking(mainDispatcher) {
+            when (uriMatcher.match(uri)) {
+                MATCH_CODE_ALL_AFFORDANCES -> queryAffordances()
+                MATCH_CODE_ALL_SLOTS -> querySlots()
+                MATCH_CODE_ALL_SELECTIONS -> querySelections()
+                MATCH_CODE_ALL_FLAGS -> queryFlags()
+                else -> null
+            }
         }
     }
 
@@ -166,7 +171,7 @@ class CustomizationProvider :
             throw UnsupportedOperationException()
         }
 
-        return deleteSelection(uri, selectionArgs)
+        return runBlocking(mainDispatcher) { deleteSelection(uri, selectionArgs) }
     }
 
     override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
@@ -184,7 +189,7 @@ class CustomizationProvider :
         }
     }
 
-    private fun insertSelection(values: ContentValues?): Uri? {
+    private suspend fun insertSelection(values: ContentValues?): Uri? {
         if (values == null) {
             throw IllegalArgumentException("Cannot insert selection, no values passed in!")
         }
@@ -282,6 +287,7 @@ class CustomizationProvider :
                         .ENABLEMENT_ACTION_TEXT,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
                         .ENABLEMENT_COMPONENT_NAME,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.Columns.CONFIGURE_INTENT,
                 )
             )
             .apply {
@@ -298,13 +304,14 @@ class CustomizationProvider :
                             ),
                             representation.actionText,
                             representation.actionComponentName,
+                            representation.configureIntent?.toUri(0),
                         )
                     )
                 }
             }
     }
 
-    private fun querySlots(): Cursor {
+    private suspend fun querySlots(): Cursor {
         return MatrixCursor(
                 arrayOf(
                     Contract.LockScreenQuickAffordances.SlotTable.Columns.ID,
@@ -323,7 +330,7 @@ class CustomizationProvider :
             }
     }
 
-    private fun queryFlags(): Cursor {
+    private suspend fun queryFlags(): Cursor {
         return MatrixCursor(
                 arrayOf(
                     Contract.FlagsTable.Columns.NAME,
@@ -346,7 +353,7 @@ class CustomizationProvider :
             }
     }
 
-    private fun deleteSelection(
+    private suspend fun deleteSelection(
         uri: Uri,
         selectionArgs: Array<out String>?,
     ): Int {

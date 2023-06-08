@@ -55,14 +55,14 @@ class RotationHelper {
     private static AudioDisplayListener sDisplayListener;
     private static FoldStateListener sFoldStateListener;
     /** callback to send rotation updates to AudioSystem */
-    private static Consumer<String> sRotationUpdateCb;
+    private static Consumer<Integer> sRotationCallback;
     /** callback to send folded state updates to AudioSystem */
-    private static Consumer<String> sFoldUpdateCb;
+    private static Consumer<Boolean> sFoldStateCallback;
 
     private static final Object sRotationLock = new Object();
     private static final Object sFoldStateLock = new Object();
-    private static int sDeviceRotation = Surface.ROTATION_0; // R/W synchronized on sRotationLock
-    private static boolean sDeviceFold = true; // R/W synchronized on sFoldStateLock
+    private static Integer sRotation = null; // R/W synchronized on sRotationLock
+    private static Boolean sFoldState = null; // R/W synchronized on sFoldStateLock
 
     private static Context sContext;
     private static Handler sHandler;
@@ -73,15 +73,15 @@ class RotationHelper {
      * - sContext != null
      */
     static void init(Context context, Handler handler,
-            Consumer<String> rotationUpdateCb, Consumer<String> foldUpdateCb) {
+            Consumer<Integer> rotationCallback, Consumer<Boolean> foldStateCallback) {
         if (context == null) {
             throw new IllegalArgumentException("Invalid null context");
         }
         sContext = context;
         sHandler = handler;
         sDisplayListener = new AudioDisplayListener();
-        sRotationUpdateCb = rotationUpdateCb;
-        sFoldUpdateCb = foldUpdateCb;
+        sRotationCallback = rotationCallback;
+        sFoldStateCallback = foldStateCallback;
         enable();
     }
 
@@ -112,9 +112,9 @@ class RotationHelper {
         int newRotation = DisplayManagerGlobal.getInstance()
                 .getDisplayInfo(Display.DEFAULT_DISPLAY).rotation;
         synchronized(sRotationLock) {
-            if (newRotation != sDeviceRotation) {
-                sDeviceRotation = newRotation;
-                publishRotation(sDeviceRotation);
+            if (sRotation == null || sRotation != newRotation) {
+                sRotation = newRotation;
+                publishRotation(sRotation);
             }
         }
     }
@@ -123,43 +123,52 @@ class RotationHelper {
         if (DEBUG_ROTATION) {
             Log.i(TAG, "publishing device rotation =" + rotation + " (x90deg)");
         }
-        String rotationParam;
+        int rotationDegrees;
         switch (rotation) {
             case Surface.ROTATION_0:
-                rotationParam = "rotation=0";
+                rotationDegrees = 0;
                 break;
             case Surface.ROTATION_90:
-                rotationParam = "rotation=90";
+                rotationDegrees = 90;
                 break;
             case Surface.ROTATION_180:
-                rotationParam = "rotation=180";
+                rotationDegrees = 180;
                 break;
             case Surface.ROTATION_270:
-                rotationParam = "rotation=270";
+                rotationDegrees = 270;
                 break;
             default:
                 Log.e(TAG, "Unknown device rotation");
-                rotationParam = null;
+                rotationDegrees = -1;
         }
-        if (rotationParam != null) {
-            sRotationUpdateCb.accept(rotationParam);
+        if (rotationDegrees != -1) {
+            sRotationCallback.accept(rotationDegrees);
         }
     }
 
     /**
      * publish the change of device folded state if any.
      */
-    static void updateFoldState(boolean newFolded) {
+    static void updateFoldState(boolean foldState) {
         synchronized (sFoldStateLock) {
-            if (sDeviceFold != newFolded) {
-                sDeviceFold = newFolded;
-                String foldParam;
-                if (newFolded) {
-                    foldParam = "device_folded=on";
-                } else {
-                    foldParam = "device_folded=off";
-                }
-                sFoldUpdateCb.accept(foldParam);
+            if (sFoldState == null || sFoldState != foldState) {
+                sFoldState = foldState;
+                sFoldStateCallback.accept(foldState);
+            }
+        }
+    }
+
+    /**
+     *  forceUpdate is called when audioserver restarts.
+     */
+    static void forceUpdate() {
+        synchronized (sRotationLock) {
+            sRotation = null;
+        }
+        updateOrientation(); // We will get at least one orientation update now.
+        synchronized (sFoldStateLock) {
+            if (sFoldState  != null) {
+                sFoldStateCallback.accept(sFoldState);
             }
         }
     }

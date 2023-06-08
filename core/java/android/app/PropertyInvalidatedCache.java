@@ -1406,6 +1406,17 @@ public class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
+     * Return the number of entries in the cache.  This is used for testing and has package-only
+     * visibility.
+     * @hide
+     */
+    public int size() {
+        synchronized (mLock) {
+            return mCache.size();
+        }
+    }
+
+    /**
      * Returns a list of caches alive at the current time.
      */
     @GuardedBy("sGlobalLock")
@@ -1612,8 +1623,12 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @hide
      */
     public static void onTrimMemory() {
-        for (PropertyInvalidatedCache pic : getActiveCaches()) {
-            pic.clear();
+        ArrayList<PropertyInvalidatedCache> activeCaches;
+        synchronized (sGlobalLock) {
+            activeCaches = getActiveCaches();
+        }
+        for (int i = 0; i < activeCaches.size(); i++) {
+            activeCaches.get(i).clear();
         }
     }
 }

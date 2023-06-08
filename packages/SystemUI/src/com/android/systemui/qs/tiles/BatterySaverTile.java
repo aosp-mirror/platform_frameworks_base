@@ -48,6 +48,8 @@ import javax.inject.Inject;
 public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         BatteryController.BatteryStateChangeCallback {
 
+    public static final String TILE_SPEC = "battery";
+
     private final BatteryController mBatteryController;
     @VisibleForTesting
     protected final SettingObserver mSetting;

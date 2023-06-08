@@ -20,10 +20,10 @@ import android.content.ContentResolver;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.service.dreams.IDreamManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
@@ -38,7 +38,6 @@ public class TestableNotificationInterruptStateProviderImpl
     TestableNotificationInterruptStateProviderImpl(
             ContentResolver contentResolver,
             PowerManager powerManager,
-            IDreamManager dreamManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             StatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
@@ -48,10 +47,10 @@ public class TestableNotificationInterruptStateProviderImpl
             Handler mainHandler,
             NotifPipelineFlags flags,
             KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker) {
         super(contentResolver,
                 powerManager,
-                dreamManager,
                 ambientDisplayConfiguration,
                 batteryController,
                 statusBarStateController,
@@ -61,7 +60,8 @@ public class TestableNotificationInterruptStateProviderImpl
                 mainHandler,
                 flags,
                 keyguardNotificationVisibilityProvider,
-                uiEventLogger);
+                uiEventLogger,
+                userTracker);
         mUseHeadsUp = true;
     }
 }

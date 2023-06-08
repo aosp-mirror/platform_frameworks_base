@@ -29,14 +29,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.R
+import com.android.systemui.common.ui.binder.ContentDescriptionViewBinder
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
+import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewBinding
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -47,6 +50,7 @@ object MobileIconBinder {
     fun bind(
         view: ViewGroup,
         viewModel: LocationBasedMobileViewModel,
+        logger: MobileViewLogger,
     ): ModernStatusBarViewBinding {
         val mobileGroupView = view.requireViewById<ViewGroup>(R.id.mobile_group)
         val activityContainer = view.requireViewById<View>(R.id.inout_container)
@@ -69,8 +73,13 @@ object MobileIconBinder {
         val iconTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
         val decorTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
 
+        var isCollecting: Boolean = false
+
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                logger.logCollectionStarted(view, viewModel)
+                isCollecting = true
+
                 launch {
                     visibilityState.collect { state ->
                         when (state) {
@@ -90,16 +99,39 @@ object MobileIconBinder {
                     }
                 }
 
+                launch { viewModel.isVisible.collect { isVisible -> view.isVisible = isVisible } }
+
                 // Set the icon for the triangle
                 launch {
-                    viewModel.iconId.distinctUntilChanged().collect { iconId ->
-                        mobileDrawable.level = iconId
+                    viewModel.icon.distinctUntilChanged().collect { icon ->
+                        viewModel.verboseLogger?.logBinderReceivedSignalIcon(
+                            view,
+                            viewModel.subscriptionId,
+                            icon,
+                        )
+                        mobileDrawable.level =
+                            SignalDrawable.getState(
+                                icon.level,
+                                icon.numberOfLevels,
+                                icon.showExclamationMark,
+                            )
+                    }
+                }
+
+                launch {
+                    viewModel.contentDescription.distinctUntilChanged().collect {
+                        ContentDescriptionViewBinder.bind(it, view)
                     }
                 }
 
                 // Set the network type icon
                 launch {
                     viewModel.networkTypeIcon.distinctUntilChanged().collect { dataTypeId ->
+                        viewModel.verboseLogger?.logBinderReceivedNetworkTypeIcon(
+                            view,
+                            viewModel.subscriptionId,
+                            dataTypeId,
+                        )
                         dataTypeId?.let { IconViewBinder.bind(dataTypeId, networkTypeView) }
                         networkTypeView.visibility = if (dataTypeId != null) VISIBLE else GONE
                     }
@@ -136,13 +168,19 @@ object MobileIconBinder {
                 }
 
                 launch { decorTint.collect { tint -> dotView.setDecorColor(tint) } }
+
+                try {
+                    awaitCancellation()
+                } finally {
+                    isCollecting = false
+                    logger.logCollectionStopped(view, viewModel)
+                }
             }
         }
 
         return object : ModernStatusBarViewBinding {
             override fun getShouldIconBeVisible(): Boolean {
-                // If this view model exists, then the icon should be visible.
-                return true
+                return viewModel.isVisible.value
             }
 
             override fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int) {
@@ -161,6 +199,10 @@ object MobileIconBinder {
                     return
                 }
                 decorTint.value = newTint
+            }
+
+            override fun isCollecting(): Boolean {
+                return isCollecting
             }
         }
     }

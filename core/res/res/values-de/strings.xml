@@ -296,7 +296,7 @@
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Android-System"</string>
-    <string name="user_owner_label" msgid="8628726904184471211">"Zum persönlichen Profil wechseln"</string>
+    <string name="user_owner_label" msgid="8628726904184471211">"Zum privaten Profil wechseln"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Zum Arbeitsprofil wechseln"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"auf deine Kontakte zugreifen"</string>
@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Erfasst Touch-Gesten auf dem Fingerabdrucksensor des Geräts."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot erstellen"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Es kann ein Screenshot des Displays erstellt werden."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Vorschau – <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ermöglicht der App, die Statusleiste zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Statusleiste darstellen"</string>
@@ -1252,7 +1253,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Start wird abgeschlossen..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um deinen Fingerabdruck einzurichten."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden der Einrichtung Bildschirm deaktivieren"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden Bildschirm deaktivieren"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktivieren"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Mit der Fingerabdruckprüfung fortfahren?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um mit deinem Fingerabdruck deine Identität zu bestätigen."</string>
@@ -1688,9 +1689,9 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AUS"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"„<xliff:g id="SERVICE">%1$s</xliff:g>“ die vollständige Kontrolle über dein Gerät geben?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Die vollständige Kontrolle sollte nur für Apps aktiviert werden, die dir Zugang zu App-Funktionen erleichtern. Das ist in der Regel nur ein kleiner Teil der Apps."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Die vollständige Kontrolle sollte nur für Apps aktiviert werden, die dir bei der Barrierefreiheit helfen. Das ist in der Regel nur ein kleiner Teil der Apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Bildschirm aufrufen und steuern"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Die Funktion kann alle Inhalte auf dem Bildschirm lesen und diese Inhalte über andere Apps anzeigen."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Die Funktion kann alle Inhalte auf dem Bildschirm lesen und diese Inhalte über anderen Apps anzeigen."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Aktionen aufrufen und durchführen"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Die Funktion kann deine Interaktionen mit einer App oder einem Hardwaresensor verfolgen und in deinem Namen mit Apps interagieren."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Zulassen"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Vollbildmodus wird aktiviert"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Zum Beenden von oben nach unten wischen"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ok"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Drehen, um die Ansicht zu verbessern"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Modus für geteilten Bildschirm beenden, um die Ansicht zu verbessern"</string>
     <string name="done_label" msgid="7283767013231718521">"Fertig"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kreisförmiger Schieberegler für Stunden"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kreisförmiger Schieberegler für Minuten"</string>

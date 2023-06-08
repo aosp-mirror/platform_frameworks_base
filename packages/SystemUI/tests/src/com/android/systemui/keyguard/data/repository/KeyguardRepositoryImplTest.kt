@@ -18,12 +18,14 @@ package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.common.shared.model.Position
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.DozeHost
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
@@ -38,25 +40,27 @@ import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
+import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class KeyguardRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarStateController: StatusBarStateController
@@ -68,6 +72,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
+    @Mock private lateinit var dozeParameters: DozeParameters
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
@@ -84,6 +89,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 keyguardStateController,
                 keyguardUpdateMonitor,
                 dozeTransitionListener,
+                dozeParameters,
                 authController,
                 dreamOverlayCallbackController,
             )
@@ -170,6 +176,26 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun isAodAvailable() = runTest {
+        val flow = underTest.isAodAvailable
+        var isAodAvailable = collectLastValue(flow)
+        runCurrent()
+
+        val callback =
+            withArgCaptor<DozeParameters.Callback> { verify(dozeParameters).addCallback(capture()) }
+
+        whenever(dozeParameters.getAlwaysOn()).thenReturn(false)
+        callback.onAlwaysOnChange()
+        assertThat(isAodAvailable()).isEqualTo(false)
+
+        whenever(dozeParameters.getAlwaysOn()).thenReturn(true)
+        callback.onAlwaysOnChange()
+        assertThat(isAodAvailable()).isEqualTo(true)
+
+        flow.onCompletion { verify(dozeParameters).removeCallback(callback) }
+    }
+
+    @Test
     fun isKeyguardOccluded() =
         runTest(UnconfinedTestDispatcher()) {
             whenever(keyguardStateController.isOccluded).thenReturn(false)
@@ -187,6 +213,29 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             whenever(keyguardStateController.isOccluded).thenReturn(false)
             captor.value.onKeyguardShowingChanged()
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isKeyguardUnlocked() =
+        runTest(UnconfinedTestDispatcher()) {
+            whenever(keyguardStateController.isUnlocked).thenReturn(false)
+            var latest: Boolean? = null
+            val job = underTest.isKeyguardUnlocked.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isFalse()
+
+            val captor = argumentCaptor<KeyguardStateController.Callback>()
+            verify(keyguardStateController).addCallback(captor.capture())
+
+            whenever(keyguardStateController.isUnlocked).thenReturn(true)
+            captor.value.onUnlockedChanged()
+            assertThat(latest).isTrue()
+
+            whenever(keyguardStateController.isUnlocked).thenReturn(false)
+            captor.value.onUnlockedChanged()
             assertThat(latest).isFalse()
 
             job.cancel()
@@ -295,29 +344,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             whenever(keyguardUpdateMonitor.isUdfpsSupported).thenReturn(false)
             assertThat(underTest.isUdfpsSupported()).isFalse()
-        }
-
-    @Test
-    fun isBouncerShowing() =
-        runTest(UnconfinedTestDispatcher()) {
-            whenever(keyguardStateController.isBouncerShowing).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isBouncerShowing.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isFalse()
-
-            val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
-
-            whenever(keyguardStateController.isBouncerShowing).thenReturn(true)
-            captor.value.onBouncerShowingChanged()
-            assertThat(latest).isTrue()
-
-            whenever(keyguardStateController.isBouncerShowing).thenReturn(false)
-            captor.value.onBouncerShowingChanged()
-            assertThat(latest).isFalse()
-
-            job.cancel()
         }
 
     @Test

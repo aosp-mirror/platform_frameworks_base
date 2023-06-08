@@ -75,7 +75,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
          * - Get the associated [Context].
          * - Compute whether we are expanding fully above the launch container.
          * - Get to overlay to which we initially put the window background layer, until the opening
-         * window is made visible (see [openingWindowSyncView]).
+         *   window is made visible (see [openingWindowSyncView]).
          *
          * This container can be changed to force this [Controller] to animate the expanding view
          * inside a different location, for instance to ensure correct layering during the

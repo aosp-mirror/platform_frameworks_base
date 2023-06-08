@@ -284,7 +284,7 @@
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN 狀態"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"來自 IT 管理員的快訊"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"快訊"</string>
-    <string name="notification_channel_retail_mode" msgid="3732239154256431213">"零售商示範模式"</string>
+    <string name="notification_channel_retail_mode" msgid="3732239154256431213">"零售商展示模式"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB 連線"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"應用程式執行中"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"正在耗用電量的應用程式"</string>
@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以擷取使用者對裝置的指紋感應器執行的手勢。"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"擷取螢幕畫面"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"可以擷取螢幕畫面。"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"預覽，<xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"以狀態列顯示"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"以全螢幕檢視"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"如要退出，請從畫面頂端向下滑動。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋轉螢幕以瀏覽完整的檢視畫面"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"結束分割畫面以全螢幕瀏覽"</string>
     <string name="done_label" msgid="7283767013231718521">"完成"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"小時數環狀滑桿"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"分鐘數環狀滑桿"</string>

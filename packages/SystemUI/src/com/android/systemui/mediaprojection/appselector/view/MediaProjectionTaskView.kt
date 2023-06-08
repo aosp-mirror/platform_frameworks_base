@@ -33,7 +33,7 @@ import com.android.systemui.R
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.shared.recents.model.ThumbnailData
 import com.android.systemui.shared.recents.utilities.PreviewPositionHelper
-import com.android.systemui.shared.recents.utilities.Utilities.isTablet
+import com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen
 
 /**
  * Custom view that shows a thumbnail preview of one recent task based on [ThumbnailData].
@@ -150,9 +150,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         val displayWidthPx = windowMetrics.bounds.width()
         val displayHeightPx = windowMetrics.bounds.height()
         val isRtl = layoutDirection == LAYOUT_DIRECTION_RTL
-        val isTablet = isTablet(context)
+        val isLargeScreen = isLargeScreen(context)
         val taskbarSize =
-            if (isTablet) {
+            if (isLargeScreen) {
                 resources.getDimensionPixelSize(AndroidR.dimen.taskbar_frame_height)
             } else {
                 0
@@ -166,7 +166,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             displayWidthPx,
             displayHeightPx,
             taskbarSize,
-            isTablet,
+            isLargeScreen,
             currentRotation,
             isRtl
         )

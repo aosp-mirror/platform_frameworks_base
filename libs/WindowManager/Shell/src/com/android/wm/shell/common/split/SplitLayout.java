@@ -120,6 +120,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private int mOrientation;
     private int mRotation;
     private int mDensity;
+    private int mUiMode;
 
     private final boolean mDimNonImeSide;
     private ValueAnimator mDividerFlingAnimator;
@@ -295,10 +296,12 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
         final int orientation = configuration.orientation;
         final int density = configuration.densityDpi;
+        final int uiMode = configuration.uiMode;
 
         if (mOrientation == orientation
                 && mRotation == rotation
                 && mDensity == density
+                && mUiMode == uiMode
                 && mRootBounds.equals(rootBounds)) {
             return false;
         }
@@ -310,6 +313,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mRootBounds.set(rootBounds);
         mRotation = rotation;
         mDensity = density;
+        mUiMode = uiMode;
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
         updateDividerConfig(mContext);
         initDividerPosition(mTempRect);
@@ -699,19 +703,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return bounds.width() > bounds.height();
     }
 
-    /** Reverse the split position. */
-    @SplitPosition
-    public static int reversePosition(@SplitPosition int position) {
-        switch (position) {
-            case SPLIT_POSITION_TOP_OR_LEFT:
-                return SPLIT_POSITION_BOTTOM_OR_RIGHT;
-            case SPLIT_POSITION_BOTTOM_OR_RIGHT:
-                return SPLIT_POSITION_TOP_OR_LEFT;
-            default:
-                return SPLIT_POSITION_UNDEFINED;
-        }
-    }
-
     /**
      * Return if this layout is landscape.
      */
@@ -736,6 +727,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         getRefBounds2(mTempRect);
         t.setPosition(leash2, mTempRect.left, mTempRect.top)
                 .setWindowCrop(leash2, mTempRect.width(), mTempRect.height());
+        // Make right or bottom side surface always higher than left or top side to avoid weird
+        // animation when dismiss split. e.g. App surface fling above on decor surface.
+        t.setLayer(leash1, 1);
+        t.setLayer(leash2, 2);
 
         if (mImePositionProcessor.adjustSurfaceLayoutForIme(
                 t, dividerLeash, leash1, leash2, dimLayer1, dimLayer2)) {

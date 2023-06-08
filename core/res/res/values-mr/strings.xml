@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"डिव्‍हाइसच्‍या फिंगरप्रिंट सेंन्सरवरील जेश्चर कॅप्‍चर करू शकते."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"स्क्रीनशॉट घ्या"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"डिस्प्लेचा स्क्रीनशॉट घेऊ शकतो."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"पूर्वावलोकन, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"स्टेटस बार अक्षम करा किंवा सुधारित करा"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"स्टेटस बार अक्षम करण्यासाठी किंवा सिस्टम चिन्हे जोडण्यासाठी आणि काढण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"स्टेटस बार होऊ द्या"</string>
@@ -586,11 +587,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"एरर ऑथेंटिकेट करत आहे"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रीन लॉक वापरा"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"पुढे सुरू ठेवण्यासाठी तुमचे स्क्रीन लॉक एंटर करा"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरवर जोरात दाबा"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरवर जोरात प्रेस करा"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फिंगरप्रिंट ओळखता आली नाही. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फिंगरप्रिंट सेन्सर स्वच्छ करा आणि पुन्हा प्रयत्न करा"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"सेन्सर स्वच्छ करा आणि पुन्हा प्रयत्न करा"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरवर जोरात दाबा"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरवर जोरात प्रेस करा"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"बोट खूप सावकाश हलविले. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"दुसरी फिंगरप्रिंट वापरून पहा"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"खूप प्रखर"</string>
@@ -603,7 +604,7 @@
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखले नाही"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
-    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म दाबा"</string>
+    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म प्रेस करा"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फिंगरप्रिंट सेट करता आली नाही"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिट सेट करण्याची वेळ संपली आहे. पुन्हा प्रयत्न करा."</string>
@@ -915,12 +916,12 @@
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"अनलॉक करण्यासाठी पासवर्ड टाइप करा"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"अनलॉक करण्यासाठी पिन टाइप करा"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"अयोग्य पिन कोड."</string>
-    <string name="keyguard_label_text" msgid="3841953694564168384">"अनलॉक करण्यासाठी, मेनू दाबा नंतर 0."</string>
+    <string name="keyguard_label_text" msgid="3841953694564168384">"अनलॉक करण्यासाठी, आधी मेनू व नंतर 0 प्रेस करा."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"आणीबाणीचा नंबर"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"सेवा नाही"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"स्क्रीन लॉक केली."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"अनलॉक करण्‍यासाठी मेनू दाबा किंवा आणीबाणीचा कॉल करा."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"अनलॉक करण्यासाठी मेनू दाबा."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"अनलॉक करण्‍यासाठी मेनू प्रेस करा किंवा आणीबाणीचा कॉल करा."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"अनलॉक करण्यासाठी मेनू प्रेस करा."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"अनलॉक करण्यासाठी पॅटर्न काढा"</string>
     <string name="lockscreen_emergency_call" msgid="7500692654885445299">"आणीबाणी"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"कॉलवर परत या"</string>
@@ -1677,7 +1678,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"काढा"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"प्रवेशयोग्यता शॉर्टकट वापरायचा?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी दाबून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी प्रेस करून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"अ‍ॅक्सेसिबिलिटी वैशिष्ट्यांसाठी शॉर्टकट सुरू करायचा आहे का?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्ये सुरू होतात. यामुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nसध्याची वैशिष्ट्ये:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये बदलू शकता."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
@@ -1692,7 +1693,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन पहा आणि नियंत्रित करा"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ते स्क्रीनवरील सर्व आशय वाचू शकते आणि इतर ॲप्सवर आशय प्रदर्शित करू शकते."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"पहा आणि क्रिया करा"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"हे तुम्ही ॲप किंवा हार्डवेअर सेन्सर कसे वापरता ते ट्रॅक करू शकते आणि इतर ॲप्ससोबत तुमच्या वतीने संवाद साधू शकते."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"हे तुमचा ॲप किंवा हार्डवेअर सेन्सरसोबतचा परस्‍परसंवाद ट्रॅक करू शकते आणि इतर ॲप्ससोबत तुमच्या वतीने संवाद साधू शकते."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमती द्या"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"नकार द्या"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"वैशिष्ट्य वापरणे सुरू करण्यासाठी त्यावर टॅप करा:"</string>
@@ -1709,7 +1710,7 @@
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"आणखी डिम"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद प्रेस करून धरून ठेवा"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"तुम्ही अ‍ॅक्सेसिबिलिटी बटणावर टॅप केल्यास वापरण्यासाठी एक वैशिष्ट्य निवडा:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"अ‍ॅक्सेसिबिलिटी जेश्चरसोबत वापराचे असलेले वैशिष्‍ट्य निवडा (दोन बोटांनी स्क्रीनच्या तळापासून वर स्वाइप करा):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"अ‍ॅक्सेसिबिलिटी जेश्चरसोबत वापराचे असलेले वैशिष्‍ट्य निवडा (तीनन बोटांनी स्क्रीनच्या तळापासून वर स्वाइप करा):"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"पूर्ण स्क्रीनवर पाहत आहात"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहेर पडण्यासाठी, वरून खाली स्वाइप करा."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"समजले"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"अधिक चांगल्या दृश्यासाठी फिरवा"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"अधिक चांगल्या दृश्यासाठी स्प्लिट स्क्रीनमधून बाहेर पडा"</string>
     <string name="done_label" msgid="7283767013231718521">"पूर्ण झाले"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"तास परिपत्रक स्लायडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनिटे परिपत्रक स्लायडर"</string>

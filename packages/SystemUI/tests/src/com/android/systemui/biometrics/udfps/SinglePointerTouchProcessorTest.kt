@@ -39,7 +39,8 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
 
     @Test
     fun processTouch() {
-        overlapDetector.shouldReturn = testCase.isGoodOverlap
+        overlapDetector.shouldReturn =
+            testCase.currentPointers.associate { pointer -> pointer.id to pointer.onSensor }
 
         val actual =
             underTest.processTouch(
@@ -56,7 +57,7 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
 
     data class TestCase(
         val event: MotionEvent,
-        val isGoodOverlap: Boolean,
+        val currentPointers: List<TestPointer>,
         val previousPointerOnSensorId: Int,
         val overlayParams: UdfpsOverlayParams,
         val expected: TouchProcessorResult,
@@ -91,28 +92,43 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_DOWN,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isGoodOverlap = true,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
                         expectedInteractionEvent = InteractionEvent.DOWN,
-                        expectedPointerOnSensorId = POINTER_ID,
-                    ),
-                    genPositiveTestCases(
-                        motionEventAction = MotionEvent.ACTION_DOWN,
-                        previousPointerOnSensorId = POINTER_ID,
-                        isGoodOverlap = true,
-                        expectedInteractionEvent = InteractionEvent.DOWN,
-                        expectedPointerOnSensorId = POINTER_ID,
+                        expectedPointerOnSensorId = POINTER_ID_1,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_DOWN,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isGoodOverlap = false,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_DOWN,
-                        previousPointerOnSensorId = POINTER_ID,
-                        isGoodOverlap = false,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    // MotionEvent.ACTION_HOVER_ENTER
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_ENTER,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
+                        expectedInteractionEvent = InteractionEvent.DOWN,
+                        expectedPointerOnSensorId = POINTER_ID_1,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_ENTER,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_ENTER,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
@@ -120,28 +136,79 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_MOVE,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isGoodOverlap = true,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
                         expectedInteractionEvent = InteractionEvent.DOWN,
-                        expectedPointerOnSensorId = POINTER_ID,
+                        expectedPointerOnSensorId = POINTER_ID_1,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_MOVE,
-                        previousPointerOnSensorId = POINTER_ID,
-                        isGoodOverlap = true,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
-                        expectedPointerOnSensorId = POINTER_ID,
+                        expectedPointerOnSensorId = POINTER_ID_1,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_MOVE,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isGoodOverlap = false,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_MOVE,
-                        previousPointerOnSensorId = POINTER_ID,
-                        isGoodOverlap = false,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_MOVE,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = false),
+                                TestPointer(id = POINTER_ID_2, onSensor = true)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.DOWN,
+                        expectedPointerOnSensorId = POINTER_ID_2,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_MOVE,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = false),
+                                TestPointer(id = POINTER_ID_2, onSensor = true)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = POINTER_ID_2,
+                    ),
+                    // MotionEvent.ACTION_HOVER_MOVE
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_MOVE,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
+                        expectedInteractionEvent = InteractionEvent.DOWN,
+                        expectedPointerOnSensorId = POINTER_ID_1,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_MOVE,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = POINTER_ID_1,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_MOVE,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_MOVE,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
@@ -149,77 +216,196 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_UP,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isGoodOverlap = true,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_UP,
-                        previousPointerOnSensorId = POINTER_ID,
-                        isGoodOverlap = true,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_UP,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isGoodOverlap = false,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
+                    // MotionEvent.ACTION_HOVER_EXIT
                     genPositiveTestCases(
-                        motionEventAction = MotionEvent.ACTION_UP,
-                        previousPointerOnSensorId = POINTER_ID,
-                        isGoodOverlap = false,
+                        motionEventAction = MotionEvent.ACTION_HOVER_EXIT,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
                         expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_EXIT,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
+                        expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_EXIT,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     // MotionEvent.ACTION_CANCEL
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_CANCEL,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isGoodOverlap = true,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
                         expectedInteractionEvent = InteractionEvent.CANCEL,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_CANCEL,
-                        previousPointerOnSensorId = POINTER_ID,
-                        isGoodOverlap = true,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
                         expectedInteractionEvent = InteractionEvent.CANCEL,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_CANCEL,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
-                        isGoodOverlap = false,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
                         expectedInteractionEvent = InteractionEvent.CANCEL,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_CANCEL,
-                        previousPointerOnSensorId = POINTER_ID,
-                        isGoodOverlap = false,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
                         expectedInteractionEvent = InteractionEvent.CANCEL,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
-                )
-                .flatten() +
-                listOf(
-                        // Unsupported MotionEvent actions.
-                        genTestCasesForUnsupportedAction(MotionEvent.ACTION_POINTER_DOWN),
-                        genTestCasesForUnsupportedAction(MotionEvent.ACTION_POINTER_UP),
-                        genTestCasesForUnsupportedAction(MotionEvent.ACTION_HOVER_ENTER),
-                        genTestCasesForUnsupportedAction(MotionEvent.ACTION_HOVER_MOVE),
-                        genTestCasesForUnsupportedAction(MotionEvent.ACTION_HOVER_EXIT),
+                    // MotionEvent.ACTION_POINTER_DOWN
+                    genPositiveTestCases(
+                        motionEventAction =
+                            MotionEvent.ACTION_POINTER_DOWN +
+                                (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = true),
+                                TestPointer(id = POINTER_ID_2, onSensor = false)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.DOWN,
+                        expectedPointerOnSensorId = POINTER_ID_1,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction =
+                            MotionEvent.ACTION_POINTER_DOWN +
+                                (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = false),
+                                TestPointer(id = POINTER_ID_2, onSensor = true)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.DOWN,
+                        expectedPointerOnSensorId = POINTER_ID_2
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction =
+                            MotionEvent.ACTION_POINTER_DOWN +
+                                (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = true),
+                                TestPointer(id = POINTER_ID_2, onSensor = false)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = POINTER_ID_1,
+                    ),
+                    // MotionEvent.ACTION_POINTER_UP
+                    genPositiveTestCases(
+                        motionEventAction =
+                            MotionEvent.ACTION_POINTER_UP +
+                                (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = false),
+                                TestPointer(id = POINTER_ID_2, onSensor = false)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction =
+                            MotionEvent.ACTION_POINTER_UP +
+                                (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+                        previousPointerOnSensorId = POINTER_ID_2,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = false),
+                                TestPointer(id = POINTER_ID_2, onSensor = true)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_POINTER_UP,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = true),
+                                TestPointer(id = POINTER_ID_2, onSensor = false)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction =
+                            MotionEvent.ACTION_POINTER_UP +
+                                (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = true),
+                                TestPointer(id = POINTER_ID_2, onSensor = false)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = POINTER_ID_1
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_POINTER_UP,
+                        previousPointerOnSensorId = POINTER_ID_2,
+                        currentPointers =
+                            listOf(
+                                TestPointer(id = POINTER_ID_1, onSensor = false),
+                                TestPointer(id = POINTER_ID_2, onSensor = true)
+                            ),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = POINTER_ID_2
                     )
-                    .flatten()
+                )
+                .flatten()
     }
 }
+
+data class TestPointer(val id: Int, val onSensor: Boolean)
 
 /* Display dimensions in native resolution and natural orientation. */
 private const val ROTATION_0_NATIVE_DISPLAY_WIDTH = 400
 private const val ROTATION_0_NATIVE_DISPLAY_HEIGHT = 600
+
+/* Placeholder touch parameters. */
+private const val POINTER_ID_1 = 42
+private const val POINTER_ID_2 = 43
+private const val NATIVE_MINOR = 2.71828f
+private const val NATIVE_MAJOR = 3.14f
+private const val ORIENTATION = 1.2345f
+private const val TIME = 12345699L
+private const val GESTURE_START = 12345600L
 
 /*
  * ROTATION_0 map:
@@ -244,6 +430,7 @@ private val ROTATION_0_NATIVE_SENSOR_BOUNDS =
 private val ROTATION_0_INPUTS =
     OrientationBasedInputs(
         rotation = Surface.ROTATION_0,
+        nativeOrientation = ORIENTATION,
         nativeXWithinSensor = ROTATION_0_NATIVE_SENSOR_BOUNDS.exactCenterX(),
         nativeYWithinSensor = ROTATION_0_NATIVE_SENSOR_BOUNDS.exactCenterY(),
         nativeXOutsideSensor = 250f,
@@ -271,6 +458,7 @@ private val ROTATION_90_NATIVE_SENSOR_BOUNDS =
 private val ROTATION_90_INPUTS =
     OrientationBasedInputs(
         rotation = Surface.ROTATION_90,
+        nativeOrientation = (ORIENTATION - Math.PI.toFloat() / 2),
         nativeXWithinSensor = ROTATION_90_NATIVE_SENSOR_BOUNDS.exactCenterX(),
         nativeYWithinSensor = ROTATION_90_NATIVE_SENSOR_BOUNDS.exactCenterY(),
         nativeXOutsideSensor = 150f,
@@ -304,25 +492,18 @@ private val ROTATION_270_NATIVE_SENSOR_BOUNDS =
 private val ROTATION_270_INPUTS =
     OrientationBasedInputs(
         rotation = Surface.ROTATION_270,
+        nativeOrientation = (ORIENTATION + Math.PI.toFloat() / 2),
         nativeXWithinSensor = ROTATION_270_NATIVE_SENSOR_BOUNDS.exactCenterX(),
         nativeYWithinSensor = ROTATION_270_NATIVE_SENSOR_BOUNDS.exactCenterY(),
         nativeXOutsideSensor = 450f,
         nativeYOutsideSensor = 250f,
     )
 
-/* Placeholder touch parameters. */
-private const val POINTER_ID = 42
-private const val NATIVE_MINOR = 2.71828f
-private const val NATIVE_MAJOR = 3.14f
-private const val ORIENTATION = 1.23f
-private const val TIME = 12345699L
-private const val GESTURE_START = 12345600L
-
 /* Template [MotionEvent]. */
 private val MOTION_EVENT =
     obtainMotionEvent(
         action = 0,
-        pointerId = POINTER_ID,
+        pointerId = POINTER_ID_1,
         x = 0f,
         y = 0f,
         minor = 0f,
@@ -335,7 +516,7 @@ private val MOTION_EVENT =
 /* Template [NormalizedTouchData]. */
 private val NORMALIZED_TOUCH_DATA =
     NormalizedTouchData(
-        POINTER_ID,
+        POINTER_ID_1,
         x = 0f,
         y = 0f,
         NATIVE_MINOR,
@@ -352,6 +533,7 @@ private val NORMALIZED_TOUCH_DATA =
  */
 private data class OrientationBasedInputs(
     @Rotation val rotation: Int,
+    val nativeOrientation: Float,
     val nativeXWithinSensor: Float,
     val nativeYWithinSensor: Float,
     val nativeXOutsideSensor: Float,
@@ -380,7 +562,7 @@ private data class OrientationBasedInputs(
 private fun genPositiveTestCases(
     motionEventAction: Int,
     previousPointerOnSensorId: Int,
-    isGoodOverlap: Boolean,
+    currentPointers: List<TestPointer>,
     expectedInteractionEvent: InteractionEvent,
     expectedPointerOnSensorId: Int
 ): List<SinglePointerTouchProcessorTest.TestCase> {
@@ -395,21 +577,47 @@ private fun genPositiveTestCases(
     return scaleFactors.flatMap { scaleFactor ->
         orientations.map { orientation ->
             val overlayParams = orientation.toOverlayParams(scaleFactor)
-            val nativeX = orientation.getNativeX(isGoodOverlap)
-            val nativeY = orientation.getNativeY(isGoodOverlap)
+
+            val pointerProperties =
+                currentPointers
+                    .map { pointer ->
+                        val pp = MotionEvent.PointerProperties()
+                        pp.id = pointer.id
+                        pp
+                    }
+                    .toList()
+
+            val pointerCoords =
+                currentPointers
+                    .map { pointer ->
+                        val pc = MotionEvent.PointerCoords()
+                        pc.x = orientation.getNativeX(pointer.onSensor) * scaleFactor
+                        pc.y = orientation.getNativeY(pointer.onSensor) * scaleFactor
+                        pc.touchMinor = NATIVE_MINOR * scaleFactor
+                        pc.touchMajor = NATIVE_MAJOR * scaleFactor
+                        pc.orientation = orientation.nativeOrientation
+                        pc
+                    }
+                    .toList()
+
             val event =
                 MOTION_EVENT.copy(
                     action = motionEventAction,
-                    x = nativeX * scaleFactor,
-                    y = nativeY * scaleFactor,
-                    minor = NATIVE_MINOR * scaleFactor,
-                    major = NATIVE_MAJOR * scaleFactor,
+                    pointerProperties = pointerProperties,
+                    pointerCoords = pointerCoords
                 )
+
             val expectedTouchData =
-                NORMALIZED_TOUCH_DATA.copy(
-                    x = ROTATION_0_INPUTS.getNativeX(isGoodOverlap),
-                    y = ROTATION_0_INPUTS.getNativeY(isGoodOverlap),
-                )
+                if (expectedPointerOnSensorId != INVALID_POINTER_ID) {
+                    NORMALIZED_TOUCH_DATA.copy(
+                        pointerId = expectedPointerOnSensorId,
+                        x = ROTATION_0_INPUTS.getNativeX(isWithinSensor = true),
+                        y = ROTATION_0_INPUTS.getNativeY(isWithinSensor = true)
+                    )
+                } else {
+                    NormalizedTouchData()
+                }
+
             val expected =
                 TouchProcessorResult.ProcessedTouch(
                     event = expectedInteractionEvent,
@@ -418,7 +626,7 @@ private fun genPositiveTestCases(
                 )
             SinglePointerTouchProcessorTest.TestCase(
                 event = event,
-                isGoodOverlap = isGoodOverlap,
+                currentPointers = currentPointers,
                 previousPointerOnSensorId = previousPointerOnSensorId,
                 overlayParams = overlayParams,
                 expected = expected,
@@ -431,7 +639,7 @@ private fun genTestCasesForUnsupportedAction(
     motionEventAction: Int
 ): List<SinglePointerTouchProcessorTest.TestCase> {
     val isGoodOverlap = true
-    val previousPointerOnSensorIds = listOf(INVALID_POINTER_ID, POINTER_ID)
+    val previousPointerOnSensorIds = listOf(INVALID_POINTER_ID, POINTER_ID_1)
     return previousPointerOnSensorIds.map { previousPointerOnSensorId ->
         val overlayParams = ROTATION_0_INPUTS.toOverlayParams(scaleFactor = 1f)
         val nativeX = ROTATION_0_INPUTS.getNativeX(isGoodOverlap)
@@ -446,7 +654,7 @@ private fun genTestCasesForUnsupportedAction(
             )
         SinglePointerTouchProcessorTest.TestCase(
             event = event,
-            isGoodOverlap = isGoodOverlap,
+            currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = isGoodOverlap)),
             previousPointerOnSensorId = previousPointerOnSensorId,
             overlayParams = overlayParams,
             expected = TouchProcessorResult.Failure(),
@@ -473,13 +681,23 @@ private fun obtainMotionEvent(
     pc.touchMinor = minor
     pc.touchMajor = major
     pc.orientation = orientation
+    return obtainMotionEvent(action, arrayOf(pp), arrayOf(pc), time, gestureStart)
+}
+
+private fun obtainMotionEvent(
+    action: Int,
+    pointerProperties: Array<MotionEvent.PointerProperties>,
+    pointerCoords: Array<MotionEvent.PointerCoords>,
+    time: Long,
+    gestureStart: Long,
+): MotionEvent {
     return MotionEvent.obtain(
         gestureStart /* downTime */,
         time /* eventTime */,
         action /* action */,
-        1 /* pointerCount */,
-        arrayOf(pp) /* pointerProperties */,
-        arrayOf(pc) /* pointerCoords */,
+        pointerCoords.size /* pointerCount */,
+        pointerProperties /* pointerProperties */,
+        pointerCoords /* pointerCoords */,
         0 /* metaState */,
         0 /* buttonState */,
         1f /* xPrecision */,
@@ -502,5 +720,20 @@ private fun MotionEvent.copy(
     time: Long = this.eventTime,
     gestureStart: Long = this.downTime,
 ) = obtainMotionEvent(action, pointerId, x, y, minor, major, orientation, time, gestureStart)
+
+private fun MotionEvent.copy(
+    action: Int = this.action,
+    pointerProperties: List<MotionEvent.PointerProperties>,
+    pointerCoords: List<MotionEvent.PointerCoords>,
+    time: Long = this.eventTime,
+    gestureStart: Long = this.downTime
+) =
+    obtainMotionEvent(
+        action,
+        pointerProperties.toTypedArray(),
+        pointerCoords.toTypedArray(),
+        time,
+        gestureStart
+    )
 
 private fun Rect.scaled(scaleFactor: Float) = Rect(this).apply { scale(scaleFactor) }

@@ -137,21 +137,21 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Ligado a um dispositivo de entrada"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Lig. ao disposit. p/ acesso à Internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"A partilhar lig. à Internet local c/ dispos."</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Utilizar para acesso à Internet"</string>
-    <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Utilizar para o mapa"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Utilizar para acesso ao SIM"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Utilizar para áudio de multimédia"</string>
-    <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Utilizar para áudio do telefone"</string>
-    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Utilizar para transferência de ficheiros"</string>
-    <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Utilizar para entrada"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Utilizar para aparelhos auditivos"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Utilizar para LE_AUDIO"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Usar para acesso à Internet"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Usar para o mapa"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Usar para acesso ao SIM"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Usar para áudio de multimédia"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Usar para áudio do telefone"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Usar para transferência de ficheiros"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Usar para entrada"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Usar para aparelhos auditivos"</string>
+    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Usar para LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sincr."</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SINCRONIZAR"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A sincronização concede acesso aos seus contactos e ao histórico de chamadas quando tem uma ligação estabelecida."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> devido a PIN ou chave de acesso incorreto."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> devido a PIN ou token de acesso incorreto."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Não é possível comunicar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Emparelhamento rejeitado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computador"</string>
@@ -335,8 +335,8 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Revogar acesso à depuração USB de todos os computadores anteriormente autorizados?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Permitir definições de programação?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Estas definições destinam-se apenas a programação. Podem fazer com que o seu aparelho e as aplicações nele existentes falhem ou funcionem mal."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verificar apps por USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Verificar as aplicações instaladas via ADB/ADT para detetar comportamento perigoso"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Rever apps por USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Rever as aplicações instaladas via ADB/ADT para detetar comportamento perigoso"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"São apresentados os dispositivos Bluetooth sem nomes (apenas endereços MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desativa a funcionalidade de volume absoluto do Bluetooth caso existam problemas de volume com dispositivos remotos, como um volume insuportavelmente alto ou a ausência de controlo"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Ativa a pilha de funcionalidades Bluetooth Gabeldorche."</string>
@@ -349,7 +349,7 @@
     <string name="debug_app" msgid="8903350241392391766">"Selecionar a aplicação a depurar"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Nenhuma aplicação a depurar definida"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"A depurar aplicação: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="2543228890535466325">"Selecionar aplicação"</string>
+    <string name="select_application" msgid="2543228890535466325">"Selecionar app"</string>
     <string name="no_application" msgid="9038334538870247690">"Nenhuma"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Aguarde pelo depurador"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"A aplicação depurada aguarda a anexação do depurador antes da execução"</string>
@@ -442,7 +442,7 @@
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Definir implementação WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Esta opção já não é válida. Tente novamente."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modo de cor da imagem"</string>
-    <string name="picture_color_mode_desc" msgid="151780973768136200">"Utilizar sRGB"</string>
+    <string name="picture_color_mode_desc" msgid="151780973768136200">"Usar sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desativado"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monocromacia"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalia (vermelho-verde)"</string>
@@ -514,9 +514,9 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Próximo"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Palavra-passe obrigatória"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Métodos de introdução activos"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Utilizar idiomas do sistema"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Usar idiomas do sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Falha ao abrir as definições para <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"Este método de introdução pode permitir a recolha de todo o texto que digitar, incluindo dados pessoais como, por exemplo, palavras-passe e números de cartões de crédito. Decorre da aplicação <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Utilizar este método de introdução?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"Este método de introdução pode permitir a recolha de todo o texto que digitar, incluindo dados pessoais como, por exemplo, palavras-passe e números de cartões de crédito. Decorre da aplicação <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Usar este método de introdução?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: após reiniciar, só é possível iniciar esta aplicação quando o telemóvel for desbloqueado."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado do registo IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registado"</string>
@@ -530,7 +530,7 @@
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Concluir"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes e lembretes"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir a definição de alarmes e lembretes"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir alarmes e lembretes"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes e lembretes"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permita que esta app defina alarmes e agende outras ações com base no tempo. Esta ação permite que a app seja executada em segundo plano, o que pode utilizar mais bateria.\n\nSe esta autorização estiver desativada, os alarmes existentes e os eventos com base no tempo agendados por esta app não funcionam."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"agendar, alarme, lembrete, relógio"</string>
@@ -662,7 +662,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Escolha um esquema de teclado"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predefinição"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ative o ecrã"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ativação do ecrã"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir a ativação do ecrã"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permita que uma app ative o ecrã. Se a autorização for concedida, a app pode ativar o ecrã em qualquer altura sem a sua intenção explícita."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão da app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

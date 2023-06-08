@@ -87,6 +87,7 @@ public class CameraDeviceImpl extends CameraDevice
 
     // TODO: guard every function with if (!mRemoteDevice) check (if it was closed)
     private ICameraDeviceUserWrapper mRemoteDevice;
+    private boolean mRemoteDeviceInit = false;
 
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock = new Object(); // access from this class and Session only!
@@ -338,6 +339,8 @@ public class CameraDeviceImpl extends CameraDevice
 
             mDeviceExecutor.execute(mCallOnOpened);
             mDeviceExecutor.execute(mCallOnUnconfigured);
+
+            mRemoteDeviceInit = true;
         }
     }
 
@@ -1754,8 +1757,8 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         synchronized(mInterfaceLock) {
-            if (mRemoteDevice == null) {
-                return; // Camera already closed
+            if (mRemoteDevice == null && mRemoteDeviceInit) {
+                return; // Camera already closed, user is not interested in errors anymore.
             }
 
             // Redirect device callback to the offline session in case we are in the middle

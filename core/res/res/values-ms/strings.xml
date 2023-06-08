@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Boleh menangkap gerak isyarat yang dilakukan pada penderia cap jari peranti."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ambil tangkapan skrin"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Boleh mengambil tangkapan skrin paparan."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Pratonton, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"lumpuhkan atau ubah suai bar status"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Membenarkan apl melumpuhkan bar status atau menambah dan mengalih keluar ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"jadi bar status"</string>
@@ -1692,7 +1693,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Lihat dan laksanakan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejak interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejaki interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Benarkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketik ciri untuk mula menggunakan ciri itu:"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Melihat skrin penuh"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Untuk keluar, leret dari atas ke bawah."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Faham"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Putar untuk mendapatkan paparan yang lebih baik"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Keluar daripada skrin pisah untuk mendapatkan paparan yang lebih baik"</string>
     <string name="done_label" msgid="7283767013231718521">"Selesai"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Penggelangsar bulatan jam"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Penggelangsar bulatan minit"</string>
@@ -2011,7 +2014,7 @@
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Kemas kini <xliff:g id="TYPE_0">%1$s</xliff:g> dan <xliff:g id="TYPE_1">%2$s</xliff:g> dalam "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Kemas kini item ini dalam "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dan <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Simpan"</string>
-    <string name="autofill_save_no" msgid="9212826374207023544">"Tidak, terima kasih"</string>
+    <string name="autofill_save_no" msgid="9212826374207023544">"Tidak perlu"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Bukan sekarang"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"Jangan"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Kemas kini"</string>

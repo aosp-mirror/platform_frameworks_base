@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone
 
 import android.app.AlarmManager
-import android.app.IActivityManager
 import android.app.admin.DevicePolicyManager
 import android.content.SharedPreferences
 import android.os.UserManager
@@ -31,6 +30,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.screenrecord.RecordingController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.android.systemui.statusbar.policy.CastController
@@ -71,61 +71,36 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         private const val ALARM_SLOT = "alarm"
     }
 
-    @Mock
-    private lateinit var iconController: StatusBarIconController
-    @Mock
-    private lateinit var commandQueue: CommandQueue
-    @Mock
-    private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock
-    private lateinit var castController: CastController
-    @Mock
-    private lateinit var hotspotController: HotspotController
-    @Mock
-    private lateinit var bluetoothController: BluetoothController
-    @Mock
-    private lateinit var nextAlarmController: NextAlarmController
-    @Mock
-    private lateinit var userInfoController: UserInfoController
-    @Mock
-    private lateinit var rotationLockController: RotationLockController
-    @Mock
-    private lateinit var dataSaverController: DataSaverController
-    @Mock
-    private lateinit var zenModeController: ZenModeController
-    @Mock
-    private lateinit var deviceProvisionedController: DeviceProvisionedController
-    @Mock
-    private lateinit var keyguardStateController: KeyguardStateController
-    @Mock
-    private lateinit var locationController: LocationController
-    @Mock
-    private lateinit var sensorPrivacyController: SensorPrivacyController
-    @Mock
-    private lateinit var iActivityManager: IActivityManager
-    @Mock
-    private lateinit var alarmManager: AlarmManager
-    @Mock
-    private lateinit var userManager: UserManager
-    @Mock
-    private lateinit var devicePolicyManager: DevicePolicyManager
-    @Mock
-    private lateinit var recordingController: RecordingController
-    @Mock
-    private lateinit var telecomManager: TelecomManager
-    @Mock
-    private lateinit var sharedPreferences: SharedPreferences
-    @Mock
-    private lateinit var dateFormatUtil: DateFormatUtil
+    @Mock private lateinit var iconController: StatusBarIconController
+    @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock private lateinit var castController: CastController
+    @Mock private lateinit var hotspotController: HotspotController
+    @Mock private lateinit var bluetoothController: BluetoothController
+    @Mock private lateinit var nextAlarmController: NextAlarmController
+    @Mock private lateinit var userInfoController: UserInfoController
+    @Mock private lateinit var rotationLockController: RotationLockController
+    @Mock private lateinit var dataSaverController: DataSaverController
+    @Mock private lateinit var zenModeController: ZenModeController
+    @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var locationController: LocationController
+    @Mock private lateinit var sensorPrivacyController: SensorPrivacyController
+    @Mock private lateinit var alarmManager: AlarmManager
+    @Mock private lateinit var userManager: UserManager
+    @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var recordingController: RecordingController
+    @Mock private lateinit var telecomManager: TelecomManager
+    @Mock private lateinit var sharedPreferences: SharedPreferences
+    @Mock private lateinit var dateFormatUtil: DateFormatUtil
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private lateinit var ringerModeTracker: RingerModeTracker
-    @Mock
-    private lateinit var privacyItemController: PrivacyItemController
-    @Mock
-    private lateinit var privacyLogger: PrivacyLogger
+    @Mock private lateinit var privacyItemController: PrivacyItemController
+    @Mock private lateinit var privacyLogger: PrivacyLogger
     @Captor
     private lateinit var alarmCallbackCaptor:
-            ArgumentCaptor<NextAlarmController.NextAlarmChangeCallback>
+        ArgumentCaptor<NextAlarmController.NextAlarmChangeCallback>
 
     private lateinit var executor: FakeExecutor
     private lateinit var statusBarPolicy: PhoneStatusBarPolicy
@@ -137,8 +112,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         executor = FakeExecutor(FakeSystemClock())
         testableLooper = TestableLooper.get(this)
         context.orCreateTestableResources.addOverride(
-                com.android.internal.R.string.status_bar_alarm_clock,
-                ALARM_SLOT
+            com.android.internal.R.string.status_bar_alarm_clock,
+            ALARM_SLOT
         )
         statusBarPolicy = createStatusBarPolicy()
     }
@@ -195,36 +170,37 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
     private fun createStatusBarPolicy(): PhoneStatusBarPolicy {
         return PhoneStatusBarPolicy(
-                iconController,
-                commandQueue,
-                broadcastDispatcher,
-                executor,
-                testableLooper.looper,
-                context.resources,
-                castController,
-                hotspotController,
-                bluetoothController,
-                nextAlarmController,
-                userInfoController,
-                rotationLockController,
-                dataSaverController,
-                zenModeController,
-                deviceProvisionedController,
-                keyguardStateController,
-                locationController,
-                sensorPrivacyController,
-                iActivityManager,
-                alarmManager,
-                userManager,
-                devicePolicyManager,
-                recordingController,
-                telecomManager,
-                /* displayId = */ 0,
-                sharedPreferences,
-                dateFormatUtil,
-                ringerModeTracker,
-                privacyItemController,
-                privacyLogger
+            iconController,
+            commandQueue,
+            broadcastDispatcher,
+            executor,
+            executor,
+            testableLooper.looper,
+            context.resources,
+            castController,
+            hotspotController,
+            bluetoothController,
+            nextAlarmController,
+            userInfoController,
+            rotationLockController,
+            dataSaverController,
+            zenModeController,
+            deviceProvisionedController,
+            keyguardStateController,
+            locationController,
+            sensorPrivacyController,
+            alarmManager,
+            userManager,
+            userTracker,
+            devicePolicyManager,
+            recordingController,
+            telecomManager,
+            /* displayId = */ 0,
+            sharedPreferences,
+            dateFormatUtil,
+            ringerModeTracker,
+            privacyItemController,
+            privacyLogger
         )
     }
 }

@@ -98,6 +98,8 @@ public class ActivityStartController {
     /** Whether an {@link ActivityStarter} is currently executing (starting an Activity). */
     private boolean mInExecution = false;
 
+    private final BackgroundActivityStartController mBalController;
+
     /**
      * TODO(b/64750076): Capture information necessary for dump and
      * {@link #postStartActivityProcessingForLastStarter} rather than keeping the entire object
@@ -120,6 +122,7 @@ public class ActivityStartController {
         mFactory.setController(this);
         mPendingRemoteAnimationRegistry = new PendingRemoteAnimationRegistry(service.mGlobalLock,
                 service.mH);
+        mBalController = new BackgroundActivityStartController(mService, mSupervisor);
     }
 
     /**
@@ -669,5 +672,9 @@ public class ActivityStartController {
             pw.print(prefix);
             pw.println("(nothing)");
         }
+    }
+
+    BackgroundActivityStartController getBackgroundActivityLaunchController() {
+        return mBalController;
     }
 }

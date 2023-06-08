@@ -879,6 +879,26 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         }
     }
 
+    @Test
+    public void getMobileNetworkSummary_withCarrierNetworkChange() {
+        Resources res = mock(Resources.class);
+        doReturn("Carrier network changing").when(res).getString(anyInt());
+        when(SubscriptionManager.getResourcesForSubId(any(), eq(SUB_ID))).thenReturn(res);
+        InternetDialogController spyController = spy(mInternetDialogController);
+        Map<Integer, TelephonyDisplayInfo> mSubIdTelephonyDisplayInfoMap =
+                spyController.mSubIdTelephonyDisplayInfoMap;
+        TelephonyDisplayInfo info = new TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_LTE,
+                TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
+
+        mSubIdTelephonyDisplayInfoMap.put(SUB_ID, info);
+        doReturn(true).when(spyController).isMobileDataEnabled();
+        doReturn(true).when(spyController).activeNetworkIsCellular();
+        spyController.mCarrierNetworkChangeMode = true;
+        String dds = spyController.getMobileNetworkSummary(SUB_ID);
+
+        assertThat(dds).contains(mContext.getString(R.string.carrier_network_change_mode));
+    }
+
     private String getResourcesString(String name) {
         return mContext.getResources().getString(getResourcesId(name));
     }

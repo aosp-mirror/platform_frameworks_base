@@ -100,6 +100,15 @@
     <!-- Accessibility action for moving docked stack divider to make the bottom screen full screen [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_divider_bottom_full">Bottom full screen</string>
 
+    <!-- Accessibility label for splitting to the left drop zone [CHAR LIMIT=NONE] -->
+    <string name="accessibility_split_left">Split left</string>
+    <!-- Accessibility label for splitting to the right drop zone [CHAR LIMIT=NONE] -->
+    <string name="accessibility_split_right">Split right</string>
+    <!-- Accessibility label for splitting to the top drop zone [CHAR LIMIT=NONE] -->
+    <string name="accessibility_split_top">Split top</string>
+    <!-- Accessibility label for splitting to the bottom drop zone [CHAR LIMIT=NONE] -->
+    <string name="accessibility_split_bottom">Split bottom</string>
+
     <!-- One-Handed Tutorial title [CHAR LIMIT=60] -->
     <string name="one_handed_tutorial_title">Using one-handed mode</string>
     <!-- One-Handed Tutorial description [CHAR LIMIT=NONE] -->
@@ -188,6 +197,35 @@
     <!-- Accessibility description of the letterbox education toast expand to dialog button. [CHAR LIMIT=NONE] -->
     <string name="letterbox_education_expand_button_description">Expand for more information.</string>
 
+    <!-- The title of the restart confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_restart_dialog_title">Restart for a better view?</string>
+
+    <!-- The description of the restart confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_restart_dialog_description">You can restart the app so it looks better on
+        your screen, but you may lose your progress or any unsaved changes
+    </string>
+
+    <!-- Button text for dismissing the restart confirmation dialog. [CHAR LIMIT=20] -->
+    <string name="letterbox_restart_cancel">Cancel</string>
+
+    <!-- Button text for dismissing the restart confirmation dialog. [CHAR LIMIT=20] -->
+    <string name="letterbox_restart_restart">Restart</string>
+
+    <!-- Checkbox text for asking to not show the restart confirmation dialog again. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_restart_dialog_checkbox_title">Don\u2019t show again</string>
+
+    <!-- When an app is letterboxed, it is initially centered on the screen but the user can
+         double tap to move the app to a different position. With a double-tap on the right,
+         the app moves the right of the screen and with a double-tap on the left the app moves
+         on the left. The same happens if the app has space to be moved to the top or bottom of
+         the screen. This time the double-tap can happen on the top or bottom of the screen.
+         To teach the user about this feature, we display an education explaining how the double-tap
+         works and how the app can be moved on the screen.
+         This is the text we show to the user below an icon visualizing the double-tap
+         action. The description should be split in two lines separated by "\n" like for this
+         locale. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_reachability_reposition_text">Double-tap to\nmove this app</string>
+
     <!-- Freeform window caption strings -->
     <!-- Accessibility text for the maximize window button [CHAR LIMIT=NONE] -->
     <string name="maximize_button_text">Maximize</string>
@@ -199,6 +237,8 @@
     <string name="back_button_text">Back</string>
     <!-- Accessibility text for the caption handle [CHAR LIMIT=NONE] -->
     <string name="handle_text">Handle</string>
+    <!-- Accessibility text for the handle menu app icon [CHAR LIMIT=NONE] -->
+    <string name="app_icon_text">App Icon</string>
     <!-- Accessibility text for the handle fullscreen button [CHAR LIMIT=NONE] -->
     <string name="fullscreen_text">Fullscreen</string>
     <!-- Accessibility text for the handle desktop button [CHAR LIMIT=NONE] -->
@@ -209,4 +249,12 @@
     <string name="more_button_text">More</string>
     <!-- Accessibility text for the handle floating window button [CHAR LIMIT=NONE] -->
     <string name="float_button_text">Float</string>
+    <!-- Accessibility text for the handle menu select button [CHAR LIMIT=NONE] -->
+    <string name="select_text">Select</string>
+    <!-- Accessibility text for the handle menu screenshot button [CHAR LIMIT=NONE] -->
+    <string name="screenshot_text">Screenshot</string>
+    <!-- Accessibility text for the handle menu close button [CHAR LIMIT=NONE] -->
+    <string name="close_text">Close</string>
+    <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->
+    <string name="collapse_menu_text">Close Menu</string>
 </resources>

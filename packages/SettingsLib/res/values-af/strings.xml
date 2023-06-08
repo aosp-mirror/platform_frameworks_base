@@ -532,7 +532,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en onthounotas"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Laat toe dat wekkers en onthounotas gestel word"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wekkers en onthounotas"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Laat hierdie program toe om wekkers te stel en tydsensitiewe handelinge te skeduleer. Dit laat die program op die agtergrond werk, wat meer batterykrag kan gebruik.\n\nAs hierdie toestemming af is, sal bestaande wekkers en tydgegronde geleenthede wat deur hierdie program geskeduleer is, nie werk nie."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Laat hierdie app toe om wekkers te stel en tydsensitiewe handelinge te skeduleer. Dit laat die app op die agtergrond werk, wat meer batterykrag kan gebruik.\n\nAs hierdie toestemming af is, sal bestaande wekkers en tydgegronde geleenthede wat deur hierdie app geskeduleer is, nie werk nie."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"skedule, wekker, onthounota, horlosie"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Skakel aan"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Skakel Moenie steur nie aan"</string>

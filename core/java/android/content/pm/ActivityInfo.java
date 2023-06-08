@@ -1035,6 +1035,20 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             254631730L; // buganizer id
 
     /**
+     * This change id enables compat policy that ignores app requested orientation in
+     * response to an app calling {@link android.app.Activity#setRequestedOrientation} more
+     * than twice in one second if an activity is not letterboxed for fixed orientation.
+     * See com.android.server.wm.LetterboxUiController#shouldIgnoreRequestedOrientation
+     * for details.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
+            273509367L; // buganizer id
+
+    /**
      * This change id forces the packages it is applied to never have Display API sandboxing
      * applied for a letterbox or SCM activity. The Display APIs will continue to provide
      * DisplayArea bounds.
@@ -1056,6 +1070,80 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Disabled
     @TestApi
     public static final long ALWAYS_SANDBOX_DISPLAY_APIS = 185004937L; // buganizer id
+
+    /**
+     * This change id excludes the packages it is applied to from ignoreOrientationRequest behaviour
+     * that can be enabled by the device manufacturers for the com.android.server.wm.DisplayArea
+     * or for the whole display.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_RESPECT_REQUESTED_ORIENTATION = 236283604L; // buganizer id
+
+    /**
+     * This change id excludes the packages it is applied to from the camera compat force rotation
+     * treatment. See com.android.server.wm.DisplayRotationCompatPolicy for context.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION =
+            263959004L; // buganizer id
+
+    /**
+     * This change id excludes the packages it is applied to from activity refresh after camera
+     * compat force rotation treatment. See com.android.server.wm.DisplayRotationCompatPolicy for
+     * context.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH = 264304459L; // buganizer id
+
+    /**
+     * This change id makes the packages it is applied to do activity refresh after camera compat
+     * force rotation treatment using "resumed -> paused -> resumed" cycle rather than "resumed ->
+     * ... -> stopped -> ... -> resumed" cycle. See
+     * com.android.server.wm.DisplayRotationCompatPolicy for context.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
+            264301586L; // buganizer id
+
+    /**
+     * This change id forces the packages it is applied to sandbox {@link android.view.View} API to
+     * an activity bounds for:
+     *
+     * <p>{@link android.view.View#getLocationOnScreen},
+     * {@link android.view.View#getWindowVisibleDisplayFrame},
+     * {@link android.view.View}#getWindowDisplayFrame,
+     * {@link android.view.View}#getBoundsOnScreen.
+     *
+     * <p>For {@link android.view.View#getWindowVisibleDisplayFrame} and
+     * {@link android.view.View}#getWindowDisplayFrame this sandboxing is happening indirectly
+     * through
+     * {@link android.view.ViewRootImpl}#getWindowVisibleDisplayFrame,
+     * {@link android.view.ViewRootImpl}#getDisplayFrame respectively.
+     *
+     * <p>Some applications assume that they occupy the whole screen and therefore use the display
+     * coordinates in their calculations as if an activity is  positioned in the top-left corner of
+     * the screen, with left coordinate equal to 0. This may not be the case of applications in
+     * multi-window and in letterbox modes. This can lead to shifted or out of bounds UI elements in
+     * case the activity is Letterboxed or is in multi-window mode.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS = 237531167L; // buganizer id
 
     /**
      * This change id is the gatekeeper for all treatments that force a given min aspect ratio.
@@ -1151,6 +1239,91 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Disabled
     @Overridable
     public static final long OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS = 263259275L;
+
+    // Compat framework that per-app overrides rely on only supports booleans. That's why we have
+    // multiple OVERRIDE_*_ORIENTATION_* change ids below instead of just one override with
+    // the integer value.
+
+    /**
+     * Enables {@link #SCREEN_ORIENTATION_PORTRAIT}. Unless OVERRIDE_ANY_ORIENTATION
+     * is enabled, this override is used only when no other fixed orientation was specified by the
+     * activity.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT = 265452344L;
+
+    /**
+     * Enables {@link #SCREEN_ORIENTATION_NOSENSOR}. Unless OVERRIDE_ANY_ORIENTATION
+     * is enabled, this override is used only when no other fixed orientation was specified by the
+     * activity.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR = 265451093L;
+
+    /**
+     * Enables {@link #SCREEN_ORIENTATION_REVERSE_LANDSCAPE}. Unless OVERRIDE_ANY_ORIENTATION
+     * is enabled, this override is used only when activity specify landscape orientation.
+     * This can help apps that assume that landscape display orientation corresponds to {@link
+     * android.view.Surface#ROTATION_90}, while on some devices it can be {@link
+     * android.view.Surface#ROTATION_270}.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE = 266124927L;
+
+    /**
+     * When enabled, allows OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE,
+     * OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR and OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
+     * to override any orientation requested by the activity.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_ANY_ORIENTATION = 265464455L;
+
+    /**
+     * When enabled, activates OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE,
+     * OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR and OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
+     * only when an app is connected to the camera. See
+     * com.android.server.wm.DisplayRotationCompatPolicy for more context.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA = 265456536L;
+
+    /**
+     * This override fixes display orientation to landscape natural orientation when a task is
+     * fullscreen. While display rotation is fixed to landscape, the orientation requested by the
+     * activity will be still respected by bounds resolution logic. For instance, if an activity
+     * requests portrait orientation and this override is set, then activity will appear in the
+     * letterbox mode for fixed orientation with the display rotated to the lanscape natural
+     * orientation.
+     *
+     * <p>This override is applicable only when natural orientation of the device is
+     * landscape and display ignores orientation requestes.
+     *
+     * <p>Main use case for this override are camera-using activities that are portrait-only and
+     * assume alignment with natural device orientation. Such activities can automatically be
+     * rotated with com.android.server.wm.DisplayRotationCompatPolicy but not all of them can
+     * handle dynamic rotation and thus can benefit from this override.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
 
     /**
      * Compares activity window layout min width/height with require space for multi window to
@@ -1370,8 +1543,19 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public boolean isFixedOrientation() {
-        return isFixedOrientationLandscape() || isFixedOrientationPortrait()
-                || screenOrientation == SCREEN_ORIENTATION_LOCKED;
+        return isFixedOrientation(screenOrientation);
+    }
+
+    /**
+     * Returns true if the passed activity's orientation is fixed.
+     * @hide
+     */
+    public static boolean isFixedOrientation(@ScreenOrientation int orientation) {
+        return orientation == SCREEN_ORIENTATION_LOCKED
+                // Orientation is fixed to natural display orientation
+                || orientation == SCREEN_ORIENTATION_NOSENSOR
+                || isFixedOrientationLandscape(orientation)
+                || isFixedOrientationPortrait(orientation);
     }
 
     /**

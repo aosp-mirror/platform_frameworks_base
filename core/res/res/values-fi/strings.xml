@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Voi tallentaa laitteen sormenjälkitunnistimelle tehtyjä eleitä."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ota kuvakaappaus"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Voi ottaa kuvakaappauksen näytöstä."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Esikatselu, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"poista tilapalkki käytöstä tai muokkaa tilapalkkia"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Antaa sovelluksen poistaa tilapalkin käytöstä ja lisätä tai poistaa järjestelmäkuvakkeita."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"sijaita tilapalkissa"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Koko ruudun tilassa"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Sulje palkki pyyhkäisemällä alas ruudun ylälaidasta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Selvä"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Kierrä, niin saat paremman näkymän"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Poistu jaetulta näytöltä, niin saat paremman näkymän"</string>
     <string name="done_label" msgid="7283767013231718521">"Valmis"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Tuntien ympyränmuotoinen liukusäädin"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Minuuttien ympyränmuotoinen liukusäädin"</string>

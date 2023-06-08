@@ -23,6 +23,7 @@ import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_T
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT;
 
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
@@ -58,6 +59,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.AlarmManager;
 import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyResourcesManager;
@@ -99,6 +101,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -177,9 +180,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Mock
     private FaceHelpMessageDeferral mFaceHelpMessageDeferral;
     @Mock
+    private AlternateBouncerInteractor mAlternateBouncerInteractor;
+    @Mock
     private ScreenLifecycle mScreenLifecycle;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private AlarmManager mAlarmManager;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     @Captor
@@ -273,7 +280,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mUserManager, mExecutor, mExecutor, mFalsingManager,
                 mAuthController, mLockPatternUtils, mScreenLifecycle,
                 mKeyguardBypassController, mAccessibilityManager,
-                mFaceHelpMessageDeferral, mock(KeyguardLogger.class));
+                mFaceHelpMessageDeferral, mock(KeyguardLogger.class),
+                mAlternateBouncerInteractor,
+                mAlarmManager
+        );
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
@@ -611,6 +621,109 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBiometricHelp_coEx_faceUnavailable() {
+        createController();
+
+        // GIVEN unlocking with fingerprint is possible
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(anyInt()))
+                .thenReturn(true);
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a face unavailable message
+        mController.getKeyguardCallback().onBiometricHelp(
+                BIOMETRIC_HELP_FACE_NOT_AVAILABLE,
+                message,
+                BiometricSourceType.FACE);
+
+        // THEN show sequential messages such as: 'face unlock unavailable' and
+        // 'try fingerprint instead'
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                message);
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
+    }
+
+    @Test
+    public void onBiometricHelp_coEx_fpFailure_faceAlreadyUnlocked() {
+        createController();
+
+        // GIVEN face has already unlocked the device
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithFace(anyInt())).thenReturn(true);
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a fingerprint not recognized message
+        mController.getKeyguardCallback().onBiometricHelp(
+                BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                message,
+                BiometricSourceType.FINGERPRINT);
+
+        // THEN show sequential messages such as: 'Unlocked by face' and
+        // 'Swipe up to open'
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                mContext.getString(R.string.keyguard_face_successful_unlock));
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onBiometricHelp_coEx_fpFailure_trustAgentAlreadyUnlocked() {
+        createController();
+
+        // GIVEN trust agent has already unlocked the device
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a fingerprint not recognized message
+        mController.getKeyguardCallback().onBiometricHelp(
+                BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                message,
+                BiometricSourceType.FINGERPRINT);
+
+        // THEN show sequential messages such as: 'Kept unlocked by TrustAgent' and
+        // 'Swipe up to open'
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                mContext.getString(R.string.keyguard_indication_trust_unlocked));
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onBiometricHelp_coEx_fpFailure_trustAgentUnlocked_emptyTrustGrantedMessage() {
+        createController();
+
+        // GIVEN trust agent has already unlocked the device & trust granted message is empty
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        mController.showTrustGrantedMessage(false, "");
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a fingerprint not recognized message
+        mController.getKeyguardCallback().onBiometricHelp(
+                BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                message,
+                BiometricSourceType.FINGERPRINT);
+
+        // THEN show action to unlock (ie: 'Swipe up to open')
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
     public void transientIndication_visibleWhenDozing_unlessSwipeUp_fromError() {
         createController();
         String message = mContext.getString(R.string.keyguard_unlock);
@@ -903,24 +1016,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void onRefreshBatteryInfo_chargingWithOverheat_presentChargingLimited() {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
-                80 /* level */, BatteryManager.BATTERY_PLUGGED_AC,
-                BatteryManager.BATTERY_HEALTH_OVERHEAT, 0 /* maxChargingWattage */,
-                true /* present */);
-
-        mController.getKeyguardCallback().onRefreshBatteryInfo(status);
-        mController.setVisible(true);
-
-        verifyIndicationMessage(
-                INDICATION_TYPE_BATTERY,
-                mContext.getString(
-                        R.string.keyguard_plugged_in_charging_limited,
-                        NumberFormat.getPercentInstance().format(80 / 100f)));
-    }
-
-    @Test
-    public void onRefreshBatteryInfo_pluggedWithOverheat_presentChargingLimited() {
-        createController();
-        BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_DISCHARGING,
                 80 /* level */, BatteryManager.BATTERY_PLUGGED_AC,
                 BatteryManager.BATTERY_HEALTH_OVERHEAT, 0 /* maxChargingWattage */,
                 true /* present */);

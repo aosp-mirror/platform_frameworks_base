@@ -248,7 +248,7 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"ଜରୁରୀକାଳୀନ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ସେସନ୍‍ ଶେଷ କରନ୍ତୁ"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରିନସଟ୍‌"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରିନସଟ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ଇ-ମେଲ୍ ମେସେଜ୍‍ ଭାବରେ ପଠାଇବାକୁ, ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ଡିଭାଇସ୍‌ ବିଷୟରେ ଏହା ସୂଚନା ସଂଗ୍ରହ କରିବ। ବଗ୍ ରିପୋର୍ଟ ଆରମ୍ଭ ହେବାପରଠାରୁ ଏହାକୁ ପଠାଇବା ପାଇଁ କିଛି ସମୟ ଲାଗିବ, ଦୟାକରି ଧୈର୍ଯ୍ୟ ରଖନ୍ତୁ।"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ଇଣ୍ଟରାକ୍ଟିଭ୍‍ ରିପୋର୍ଟ"</string>
@@ -342,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ଡିଭାଇସ୍‌ର ଟିପଚିହ୍ନ ସେନସର୍ ଉପରେ ଜେଶ୍ଚର୍‍ କ୍ୟାପଚର୍‍ କାର୍ଯ୍ୟ କରାଯାଇପାରିବ।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ସ୍କ୍ରିନସଟ୍ ନିଅନ୍ତୁ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ଡିସପ୍ଲେର ଏକ ସ୍କ୍ରିନସଟ୍ ନିଆଯାଇପାରେ।"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"ପ୍ରିଭ୍ୟୁ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ଷ୍ଟାଟସ୍‌ ବାର୍‌କୁ ଅକ୍ଷମ କିମ୍ୱା ସଂଶୋଧନ କରନ୍ତୁ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ଆପ୍‍କୁ, ସ୍ଥିତି ବାର୍‍ ଅକ୍ଷମ କରିବାକୁ କିମ୍ବା ସିଷ୍ଟମ୍‍ ଆଇକନ୍‍ ଯୋଡ଼ିବା କିମ୍ବା ବାହାର କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ଷ୍ଟାଟସ୍‍ ବାର୍‍ ରହିବାକୁ ଦିଅନ୍ତୁ"</string>
@@ -1077,13 +1078,13 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"ସ୍ପେସ୍‍"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"ଏଣ୍ଟର୍"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
-    <string name="search_go" msgid="2141477624421347086">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
-    <string name="search_hint" msgid="455364685740251925">"ସନ୍ଧାନ…"</string>
-    <string name="searchview_description_search" msgid="1045552007537359343">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
+    <string name="search_go" msgid="2141477624421347086">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
+    <string name="search_hint" msgid="455364685740251925">"ସର୍ଚ୍ଚ କରନ୍ତୁ…"</string>
+    <string name="searchview_description_search" msgid="1045552007537359343">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"କ୍ୱେରୀ ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"କ୍ୱେରୀ ଖାଲି କରନ୍ତୁ"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"କ୍ୱେରୀ ଦାଖଲ କରନ୍ତୁ"</string>
-    <string name="searchview_description_voice" msgid="42360159504884679">"ଭଏସ୍‍ ସର୍ଚ୍ଚ"</string>
+    <string name="searchview_description_voice" msgid="42360159504884679">"ଭଏସ ସର୍ଚ୍ଚ"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍‍ କରନ୍ତୁ’ ସକ୍ଷମ କରିବେ?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍ କରନ୍ତୁ’ ସକ୍ଷମ କରିବାକୁ ଚାହେଁ। ’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍ କରନ୍ତୁ’ ଅନ୍‌ ଥିବାବେଳେ, ଆପଣଙ୍କ ଆଙ୍ଗୁଠି ତଳେ କ’ଣ ଅଛି, ତାହାର ବ୍ୟାଖ୍ୟା ଦେଖିପାରିବେ କିମ୍ବା ଟାବ୍‍ଲେଟ୍‍ ସହ କଥାବାର୍ତ୍ତା କରିବାକୁ ଜେଶ୍ଚର୍‌ କରିପାରିବେ।"</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍ କରନ୍ତୁ’ ସକ୍ଷମ କରିବାକୁ ଚାହେଁ। ’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍ କରନ୍ତୁ’ ଅନ୍‌ ଥିବାବେଳେ, ଆପଣଙ୍କ ଆଙ୍ଗୁଠି ତଳେ କ’ଣ ଅଛି, ତାହାର ବ୍ୟାଖ୍ୟା ଦେଖିପାରିବେ କିମ୍ବା ଫୋନ୍‍ ସହ କଥାବାର୍ତ୍ତା କରିବାକୁ ଜେଶ୍ଚର୍‌ କରିପାରିବେ।"</string>
@@ -1274,18 +1275,18 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"ଆପଣ ପାଇଁ ସେୟାର୍ କରିବାକୁ <xliff:g id="PROC">%1$s</xliff:g> ପ୍ରକ୍ରିୟାର ଏକ ହିପ୍ ଡମ୍ପ ଉପଲବ୍ଧ ଅଛି। ସାବଧାନ: ଏହି ପ୍ରକ୍ରିୟାର ଆକ୍ସେସ୍‍ ରହିଥିବା ଆପଣଙ୍କର କୌଣସି ବ୍ୟକ୍ତିଗତ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଏହି ହିପ୍‍ ଡମ୍ପରେ ରହିପାରେ, ଯେଉଁଥିରେ ଆପଣ ଟାଇପ୍ କରିଥିବା କିଛି ଡାଟା ବି ସାମିଲ୍ ହୋଇପାରେ।"</string>
     <string name="sendText" msgid="493003724401350724">"ଟେକ୍ସଟ୍‍ ପାଇଁ ଏକ କାର୍ଯ୍ୟ ବାଛନ୍ତୁ"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"ରିଙ୍ଗର୍‌ ଭଲ୍ୟୁମ୍"</string>
-    <string name="volume_music" msgid="7727274216734955095">"ମିଡିଆ ଭଲ୍ୟୁମ୍‌"</string>
+    <string name="volume_music" msgid="7727274216734955095">"ମିଡିଆ ଭଲ୍ୟୁମ"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"ବ୍ଲୁଟୂଥ୍‍ ମାଧ୍ୟମରେ ଚାଲୁଛି"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ସାଇଲେଣ୍ଟ ରିଂଟୋନ ସେଟ ହୋଇଛି"</string>
     <string name="volume_call" msgid="7625321655265747433">"ଇନ୍‍-କଲ୍‍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ବ୍ଲୁଟୂଥ୍‍ ଇନ୍-କଲ୍ ଭଲ୍ୟୁମ୍‌"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"ଆଲାରାମ୍ ଭଲ୍ୟୁମ୍‌"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"ଆଲାରାମ ଭଲ୍ୟୁମ"</string>
     <string name="volume_notification" msgid="6864412249031660057">"ବିଜ୍ଞପ୍ତି ଭଲ୍ୟୁମ୍‍"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"ଭଲ୍ୟୁମ୍"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ବ୍ଲୁଟୂଥ୍‍‍ ଭଲ୍ୟୁମ୍‍"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ରିଙ୍ଗଟୋନ୍‌ ଭଲ୍ୟୁମ୍"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"କଲ୍‍ ଭଲ୍ୟୁମ୍‍"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"ମିଡିଆ ଭଲ୍ୟୁମ୍‍"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"ମିଡିଆ ଭଲ୍ୟୁମ"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"ବିଜ୍ଞପ୍ତି ଭଲ୍ୟୁମ୍‍"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ଡିଫଲ୍ଟ ରିଙ୍ଗଟୋନ୍‌"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ଡିଫଲ୍ଟ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1463,7 +1464,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ଜୁମ୍ ନିୟନ୍ତ୍ରଣ ପାଇଁ ଦୁଇଥର ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ୱିଜେଟ୍‍ ଯୋଡ଼ିପାରିବ ନାହିଁ।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ଯାଆନ୍ତୁ"</string>
-    <string name="ime_action_search" msgid="4501435960587287668">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
+    <string name="ime_action_search" msgid="4501435960587287668">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"ପଠାନ୍ତୁ"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"ପରବର୍ତ୍ତୀ"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"ହୋଇଗଲା"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ଦେଖାଯାଉଛି"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ବାହାରିବା ପାଇଁ, ଉପରୁ ତଳକୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ବୁଝିଗଲି"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ରୋଟେଟ କରନ୍ତୁ"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନରୁ ବାହାରି ଯାଆନ୍ତୁ"</string>
     <string name="done_label" msgid="7283767013231718521">"ହୋଇଗଲା"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ଘଣ୍ଟା ସର୍କୁଲାର୍‍ ସ୍ଲାଇଡର୍‍"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ମିନିଟ୍ସ ସର୍କୁଲାର୍‍ ସ୍ଲାଇଡର୍‍"</string>
@@ -1858,7 +1861,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ଠିକ୍ ଅଛି"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ବ୍ୟାଟେରୀ ସେଭର୍ ଗାଢ଼ା ଥିମକୁ ଚାଲୁ କରେ ଏବଂ ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ, କିଛି ଭିଜୁଆଲ୍ ଇଫେକ୍ଟ, କିଛି ଫିଚର୍ ଏବଂ କିଛି ନେଟୱାର୍କ ସଂଯୋଗକୁ ସୀମିତ କିମ୍ବା ବନ୍ଦ କରେ।"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ବେଟେରୀ ସେଭର ଗାଢ଼ା ଥିମକୁ ଚାଲୁ କରେ ଏବଂ ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ, କିଛି ଭିଜୁଆଲ ଇଫେକ୍ଟ, କିଛି ଫିଚର ଏବଂ କିଛି ନେଟୱାର୍କ ସଂଯୋଗକୁ ସୀମିତ କିମ୍ବା ବନ୍ଦ କରେ।"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ବ୍ୟାଟେରୀ ସେଭର୍ ଗାଢ଼ା ଥିମକୁ ଚାଲୁ କରେ ଏବଂ ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ, କିଛି ଭିଜୁଆଲ୍ ଇଫେକ୍ଟ, କିଛି ଫିଚର୍ ଏବଂ କିଛି ନେଟୱାର୍କ ସଂଯୋଗକୁ ସୀମିତ କିମ୍ବା ବନ୍ଦ କରେ।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବାରଣ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ଥର କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ ଯେମିତି ଆପଣ ଇମେଜଗୁଡ଼ିକୁ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ସେଗୁଡ଼ିକ ଡିସପ୍ଲେ ହୁଏ ନାହିଁ।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ଡାଟା ସେଭର୍‌ ଚାଲୁ କରିବେ?"</string>
@@ -1931,7 +1934,7 @@
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
-    <string name="locale_search_menu" msgid="6258090710176422934">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
+    <string name="locale_search_menu" msgid="6258090710176422934">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"ଆପ୍‌ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"ବର୍ତ୍ତମାନ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ଉପଲବ୍ଧ ନାହିଁ। ଏହା <xliff:g id="APP_NAME_1">%2$s</xliff:g> ଦ୍ଵାରା ପରିଚାଳିତ ହେଉଛି।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ଅଧିକ ଜାଣନ୍ତୁ"</string>

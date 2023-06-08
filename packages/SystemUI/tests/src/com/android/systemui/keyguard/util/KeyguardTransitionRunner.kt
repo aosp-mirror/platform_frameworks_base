@@ -71,7 +71,7 @@ class KeyguardTransitionRunner(
         waitUntilComplete(info.animator!!)
     }
 
-    suspend private fun waitUntilComplete(animator: ValueAnimator) {
+    private suspend fun waitUntilComplete(animator: ValueAnimator) {
         withContext(Dispatchers.Main) {
             val startTime = System.currentTimeMillis()
             while (!isTerminated && animator.isRunning()) {
@@ -96,6 +96,6 @@ class KeyguardTransitionRunner(
     override fun setFrameDelay(delay: Long) {}
 
     companion object {
-        private const val MAX_TEST_DURATION = 100L
+        private const val MAX_TEST_DURATION = 200L
     }
 }

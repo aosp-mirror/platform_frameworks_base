@@ -26,28 +26,28 @@ data class NormalizedTouchData(
      * Value obtained from [MotionEvent.getPointerId], or [MotionEvent.INVALID_POINTER_ID] if the ID
      * is not available.
      */
-    val pointerId: Int,
+    val pointerId: Int = MotionEvent.INVALID_POINTER_ID,
 
     /** [MotionEvent.getRawX] mapped to natural orientation and native resolution. */
-    val x: Float,
+    val x: Float = 0f,
 
     /** [MotionEvent.getRawY] mapped to natural orientation and native resolution. */
-    val y: Float,
+    val y: Float = 0f,
 
     /** [MotionEvent.getTouchMinor] mapped to natural orientation and native resolution. */
-    val minor: Float,
+    val minor: Float = 0f,
 
     /** [MotionEvent.getTouchMajor] mapped to natural orientation and native resolution. */
-    val major: Float,
+    val major: Float = 0f,
 
     /** [MotionEvent.getOrientation] mapped to natural orientation. */
-    val orientation: Float,
+    val orientation: Float = 0f,
 
     /** [MotionEvent.getEventTime]. */
-    val time: Long,
+    val time: Long = 0,
 
     /** [MotionEvent.getDownTime]. */
-    val gestureStart: Long,
+    val gestureStart: Long = 0,
 ) {
 
     /**

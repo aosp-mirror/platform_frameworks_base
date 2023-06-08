@@ -16,10 +16,14 @@
 
 package com.android.wm.shell.kidsmode;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
@@ -32,6 +36,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
@@ -42,6 +47,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -68,7 +74,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
     private static final String TAG = "KidsModeTaskOrganizer";
 
     private static final int[] CONTROLLED_ACTIVITY_TYPES =
-            {ACTIVITY_TYPE_UNDEFINED, ACTIVITY_TYPE_STANDARD};
+            {ACTIVITY_TYPE_UNDEFINED, ACTIVITY_TYPE_STANDARD, ACTIVITY_TYPE_HOME};
     private static final int[] CONTROLLED_WINDOWING_MODES =
             {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED};
 
@@ -78,6 +84,12 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
     private final SyncTransactionQueue mSyncQueue;
     private final DisplayController mDisplayController;
     private final DisplayInsetsController mDisplayInsetsController;
+
+    /**
+     * The value of the {@link R.bool.config_reverseDefaultRotation} property which defines how
+     * {@link Display#getRotation} values are mapped to screen orientations
+     */
+    private final boolean mReverseDefaultRotationEnabled;
 
     @VisibleForTesting
     ActivityManager.RunningTaskInfo mLaunchRootTask;
@@ -92,6 +104,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     private KidsModeSettingsObserver mKidsModeSettingsObserver;
     private boolean mEnabled;
+
+    private ActivityManager.RunningTaskInfo mHomeTask;
 
     private final BroadcastReceiver mUserSwitchIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -165,6 +179,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         mDisplayInsetsController = displayInsetsController;
         mKidsModeSettingsObserver = kidsModeSettingsObserver;
         shellInit.addInitCallback(this::onInit, this);
+        mReverseDefaultRotationEnabled = context.getResources().getBoolean(
+                R.bool.config_reverseDefaultRotation);
     }
 
     public KidsModeTaskOrganizer(
@@ -188,6 +204,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
         shellInit.addInitCallback(this::onInit, this);
+        mReverseDefaultRotationEnabled = context.getResources().getBoolean(
+                R.bool.config_reverseDefaultRotation);
     }
 
     /**
@@ -219,6 +237,13 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         }
         super.onTaskAppeared(taskInfo, leash);
 
+        // Only allow home to draw under system bars.
+        if (taskInfo.getActivityType() == ACTIVITY_TYPE_HOME) {
+            final WindowContainerTransaction wct = getWindowContainerTransaction();
+            wct.setBounds(taskInfo.token, new Rect(0, 0, mDisplayWidth, mDisplayHeight));
+            mSyncQueue.queue(wct);
+            mHomeTask = taskInfo;
+        }
         mSyncQueue.runInSync(t -> {
             // Reset several properties back to fullscreen (PiP, for example, leaves all these
             // properties in a bad state).
@@ -235,6 +260,11 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         if (mLaunchRootTask != null && mLaunchRootTask.taskId == taskInfo.taskId
                 && !taskInfo.equals(mLaunchRootTask)) {
             mLaunchRootTask = taskInfo;
+        }
+
+        if (mHomeTask != null && mHomeTask.taskId == taskInfo.taskId
+                && !taskInfo.equals(mHomeTask)) {
+            mHomeTask = taskInfo;
         }
 
         super.onTaskInfoChanged(taskInfo);
@@ -259,7 +289,17 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         // Needed since many Kids apps aren't optimised to support both orientations and it will be
         // hard for kids to understand the app compat mode.
         // TODO(229961548): Remove ignoreOrientationRequest exception for Kids Mode once possible.
-        setIsIgnoreOrientationRequestDisabled(true);
+        if (mReverseDefaultRotationEnabled) {
+            setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled */ true,
+                    /* fromOrientations */
+                    new int[]{SCREEN_ORIENTATION_LANDSCAPE, SCREEN_ORIENTATION_REVERSE_LANDSCAPE},
+                    /* toOrientations */
+                    new int[]{SCREEN_ORIENTATION_SENSOR_LANDSCAPE,
+                            SCREEN_ORIENTATION_SENSOR_LANDSCAPE});
+        } else {
+            setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled */ true,
+                    /* fromOrientations */ null, /* toOrientations */ null);
+        }
         final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
         if (displayLayout != null) {
             mDisplayWidth = displayLayout.width();
@@ -280,7 +320,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     @VisibleForTesting
     void disable() {
-        setIsIgnoreOrientationRequestDisabled(false);
+        setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled */ false,
+                /* fromOrientations */ null, /* toOrientations */ null);
         mDisplayInsetsController.removeInsetsChangedListener(DEFAULT_DISPLAY,
                 mOnInsetsChangedListener);
         mDisplayController.removeDisplayWindowListener(mOnDisplaysChangedListener);
@@ -291,6 +332,13 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         }
         mLaunchRootTask = null;
         mLaunchRootLeash = null;
+        if (mHomeTask != null && mHomeTask.token != null) {
+            final WindowContainerToken homeToken = mHomeTask.token;
+            final WindowContainerTransaction wct = getWindowContainerTransaction();
+            wct.setBounds(homeToken, null);
+            mSyncQueue.queue(wct);
+        }
+        mHomeTask = null;
         unregisterOrganizer();
     }
 
@@ -320,7 +368,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             final SurfaceControl rootLeash = mLaunchRootLeash;
             mSyncQueue.runInSync(t -> {
                 t.setPosition(rootLeash, taskBounds.left, taskBounds.top);
-                t.setWindowCrop(rootLeash, taskBounds.width(), taskBounds.height());
+                t.setWindowCrop(rootLeash, mDisplayWidth, mDisplayHeight);
             });
         }
     }
@@ -347,11 +395,12 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         final WindowContainerTransaction wct = getWindowContainerTransaction();
         final Rect taskBounds = calculateBounds();
         wct.setBounds(mLaunchRootTask.token, taskBounds);
+        wct.setBounds(mHomeTask.token, new Rect(0, 0, mDisplayWidth, mDisplayHeight));
         mSyncQueue.queue(wct);
         final SurfaceControl finalLeash = mLaunchRootLeash;
         mSyncQueue.runInSync(t -> {
             t.setPosition(finalLeash, taskBounds.left, taskBounds.top);
-            t.setWindowCrop(finalLeash, taskBounds.width(), taskBounds.height());
+            t.setWindowCrop(finalLeash, mDisplayWidth, mDisplayHeight);
         });
     }
 

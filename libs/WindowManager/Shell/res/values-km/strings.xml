@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ខាងលើ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ខាងលើ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"អេក្រង់ពេញខាងក្រោម"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"បំបែក​ខាងឆ្វេង"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"បំបែក​ខាងស្ដាំ"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"បំបែក​ខាងលើ"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"បំបែក​ខាងក្រោម"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"កំពុងប្រើ​មុខងារប្រើដៃម្ខាង"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ដើម្បីចាកចេញ សូមអូសឡើងលើ​ពីផ្នែកខាងក្រោមអេក្រង់ ឬចុចផ្នែកណាមួយ​នៅខាងលើកម្មវិធី"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ចាប់ផ្ដើម​មុខងារប្រើដៃម្ខាង"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ចុចពីរដង​នៅ​ក្រៅ​កម្មវិធី ដើម្បី​ប្ដូរ​ទីតាំង​កម្មវិធី​នោះ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"យល់ហើយ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ពង្រីកដើម្បីទទួលបានព័ត៌មានបន្ថែម។"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"ចាប់ផ្ដើម​ឡើងវិញ ដើម្បីទទួលបានទិដ្ឋភាពកាន់តែស្អាតឬ?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"អ្នកអាចចាប់ផ្ដើម​កម្មវិធីឡើងវិញ ដើម្បីឱ្យកម្មវិធីនេះមើលទៅស្អាតជាងមុននៅលើអេក្រង់របស់អ្នក ប៉ុន្តែអ្នកអាចនឹងបាត់បង់ដំណើរការរបស់អ្នក ឬការកែប្រែណាមួយដែលអ្នកមិនបានរក្សាទុក"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"បោះបង់"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"ចាប់ផ្ដើម​ឡើង​វិញ"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"កុំ​បង្ហាញ​ម្ដង​ទៀត"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"ចុចពីរដងដើម្បី\nផ្លាស់ទីកម្មវិធីនេះ"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ពង្រីក"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"បង្រួម"</string>
     <string name="close_button_text" msgid="2913281996024033299">"បិទ"</string>
     <string name="back_button_text" msgid="1469718707134137085">"ថយក្រោយ"</string>
     <string name="handle_text" msgid="1766582106752184456">"ឈ្មោះអ្នកប្រើប្រាស់"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"រូប​កម្មវិធី"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"អេក្រង់​ពេញ"</string>
     <string name="desktop_text" msgid="1077633567027630454">"មុខងារកុំព្យូទ័រ"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"មុខងារ​បំបែក​អេក្រង់"</string>
     <string name="more_button_text" msgid="3655388105592893530">"ច្រើនទៀត"</string>
     <string name="float_button_text" msgid="9221657008391364581">"អណ្ដែត"</string>
+    <string name="select_text" msgid="5139083974039906583">"ជ្រើសរើស"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"រូបថតអេក្រង់"</string>
+    <string name="close_text" msgid="4986518933445178928">"បិទ"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"បិទ​ម៉ឺនុយ"</string>
 </resources>

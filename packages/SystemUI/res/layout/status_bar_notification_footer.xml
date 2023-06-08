@@ -26,6 +26,17 @@
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/unlock_prompt_footer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:drawablePadding="8dp"
+            android:visibility="gone"
+            android:textAppearance="?android:attr/textAppearanceButton"
+            android:text="@string/unlock_to_see_notif_text"/>
         <com.android.systemui.statusbar.notification.row.FooterViewButton
             style="@style/TextAppearance.NotificationSectionHeaderButton"
             android:id="@+id/manage_text"

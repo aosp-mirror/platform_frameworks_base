@@ -544,7 +544,12 @@ public class WindowStateTests extends WindowTestsBase {
         win.applyWithNextDraw(t -> handledT[0] = t);
         assertTrue(win.useBLASTSync());
         final SurfaceControl.Transaction drawT = new StubTransaction();
+        final SurfaceControl.Transaction currT = win.getSyncTransaction();
+        clearInvocations(currT);
+        win.mWinAnimator.mLastHidden = true;
         assertTrue(win.finishDrawing(drawT, Integer.MAX_VALUE));
+        // The draw transaction should be merged to current transaction even if the state is hidden.
+        verify(currT).merge(eq(drawT));
         assertEquals(drawT, handledT[0]);
         assertFalse(win.useBLASTSync());
 
@@ -1119,7 +1124,9 @@ public class WindowStateTests extends WindowTestsBase {
         spyOn(app.getDisplayContent());
         app.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        verify(app.getDisplayContent()).updateImeControlTarget();
+        // Expect updateImeParent will be invoked when the configuration of the IME control
+        // target has changed.
+        verify(app.getDisplayContent()).updateImeControlTarget(eq(true) /* updateImeParent */);
         assertEquals(mAppWindow, mDisplayContent.getImeTarget(IME_TARGET_CONTROL).getWindow());
     }
 

@@ -23,14 +23,20 @@ fun fakeDialogLaunchAnimator(
     isUnlocked: Boolean = true,
     isShowingAlternateAuthOnUnlock: Boolean = false,
     interactionJankMonitor: InteractionJankMonitor = mock(InteractionJankMonitor::class.java),
+    isPredictiveBackQsDialogAnim: Boolean = false,
 ): DialogLaunchAnimator {
     return DialogLaunchAnimator(
-        FakeCallback(
-            isUnlocked = isUnlocked,
-            isShowingAlternateAuthOnUnlock = isShowingAlternateAuthOnUnlock,
-        ),
-        interactionJankMonitor,
-        fakeLaunchAnimator(),
+        callback =
+            FakeCallback(
+                isUnlocked = isUnlocked,
+                isShowingAlternateAuthOnUnlock = isShowingAlternateAuthOnUnlock,
+            ),
+        interactionJankMonitor = interactionJankMonitor,
+        featureFlags =
+            object : AnimationFeatureFlags {
+                override val isPredictiveBackQsDialogAnim = isPredictiveBackQsDialogAnim
+            },
+        launchAnimator = fakeLaunchAnimator(),
         isForTesting = true,
     )
 }

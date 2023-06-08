@@ -166,7 +166,7 @@ public final class FillEventHistory implements Parcelable {
     }
 
     /**
-     * Description of an event that occured after the latest call to
+     * Description of an event that occurred after the latest call to
      * {@link FillCallback#onSuccess(FillResponse)}.
      */
     public static final class Event {

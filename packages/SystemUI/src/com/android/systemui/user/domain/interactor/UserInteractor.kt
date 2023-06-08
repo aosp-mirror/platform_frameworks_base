@@ -32,6 +32,8 @@ import android.os.UserManager
 import android.provider.Settings
 import android.util.Log
 import com.android.internal.util.UserIcons
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.R
 import com.android.systemui.SystemUISecondaryUserService
 import com.android.systemui.animation.Expandable
@@ -46,7 +48,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
-import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -86,9 +87,11 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val featureFlags: FeatureFlags,
     private val manager: UserManager,
+    private val headlessSystemUserMode: HeadlessSystemUserMode,
     @Application private val applicationScope: CoroutineScope,
     telephonyInteractor: TelephonyInteractor,
     broadcastDispatcher: BroadcastDispatcher,
+    keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val activityManager: ActivityManager,
     private val refreshUsersScheduler: RefreshUsersScheduler,
@@ -115,9 +118,7 @@ constructor(
     private val callbackMutex = Mutex()
     private val callbacks = mutableSetOf<UserCallback>()
     private val userInfos: Flow<List<UserInfo>> =
-        repository.userInfos.map { userInfos ->
-            userInfos.filter { it.isFull }
-        }
+        repository.userInfos.map { userInfos -> userInfos.filter { it.isFull } }
 
     /** List of current on-device users to select from. */
     val users: Flow<List<UserModel>>
@@ -287,6 +288,12 @@ constructor(
 
     val isSimpleUserSwitcher: Boolean
         get() = repository.isSimpleUserSwitcher()
+    val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onKeyguardGoingAway() {
+                dismissDialog()
+            }
+        }
 
     init {
         refreshUsersScheduler.refreshIfNotPaused()
@@ -317,6 +324,7 @@ constructor(
                 onBroadcastReceived(intent, previousSelectedUser)
             }
             .launchIn(applicationScope)
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
     }
 
     fun addCallback(callback: UserCallback) {
@@ -445,7 +453,8 @@ constructor(
                     )
                 )
             }
-            UserActionModel.ADD_SUPERVISED_USER ->
+            UserActionModel.ADD_SUPERVISED_USER -> {
+                dismissDialog()
                 activityStarter.startActivity(
                     Intent()
                         .setAction(UserManager.ACTION_CREATE_SUPERVISED_USER)
@@ -453,6 +462,7 @@ constructor(
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     /* dismissShade= */ true,
                 )
+            }
             UserActionModel.NAVIGATE_TO_USER_MANAGEMENT ->
                 activityStarter.startActivity(
                     Intent(Settings.ACTION_USER_SETTINGS),
@@ -491,24 +501,12 @@ constructor(
         }
     }
 
-    fun showUserSwitcher(context: Context, expandable: Expandable) {
-        if (!featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
-            showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog)
-            return
+    fun showUserSwitcher(expandable: Expandable) {
+        if (featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+            showDialog(ShowDialogRequestModel.ShowUserSwitcherFullscreenDialog(expandable))
+        } else {
+            showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog(expandable))
         }
-
-        val intent =
-            Intent(context, UserSwitcherActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-
-        activityStarter.startActivity(
-            intent,
-            true /* dismissShade */,
-            expandable.activityLaunchController(),
-            true /* showOverlockscreenwhenlocked */,
-            UserHandle.SYSTEM,
-        )
     }
 
     private fun showDialog(request: ShowDialogRequestModel) {
@@ -560,7 +558,10 @@ constructor(
             actionType = action,
             isRestricted = isRestricted,
             isSwitchToEnabled =
-                canSwitchUsers(selectedUserId) &&
+                canSwitchUsers(
+                    selectedUserId = selectedUserId,
+                    isAction = true,
+                ) &&
                     // If the user is auto-created is must not be currently resetting.
                     !(isGuestUserAutoCreated && isGuestUserResetting),
         )
@@ -712,10 +713,32 @@ constructor(
         }
     }
 
-    private suspend fun canSwitchUsers(selectedUserId: Int): Boolean {
-        return withContext(backgroundDispatcher) {
-            manager.getUserSwitchability(UserHandle.of(selectedUserId))
-        } == UserManager.SWITCHABILITY_STATUS_OK
+    private suspend fun canSwitchUsers(
+        selectedUserId: Int,
+        isAction: Boolean = false,
+    ): Boolean {
+        val isHeadlessSystemUserMode =
+            withContext(backgroundDispatcher) { headlessSystemUserMode.isHeadlessSystemUserMode() }
+        // Whether menu item should be active. True if item is a user or if any user has
+        // signed in since reboot or in all cases for non-headless system user mode.
+        val isItemEnabled = !isAction || !isHeadlessSystemUserMode || isAnyUserUnlocked()
+        return isItemEnabled &&
+            withContext(backgroundDispatcher) {
+                manager.getUserSwitchability(UserHandle.of(selectedUserId))
+            } == UserManager.SWITCHABILITY_STATUS_OK
+    }
+
+    private suspend fun isAnyUserUnlocked(): Boolean {
+        return manager
+            .getUsers(
+                /* excludePartial= */ true,
+                /* excludeDying= */ true,
+                /* excludePreCreated= */ true
+            )
+            .any { user ->
+                user.id != UserHandle.USER_SYSTEM &&
+                    withContext(backgroundDispatcher) { manager.isUserUnlocked(user.userHandle) }
+            }
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")

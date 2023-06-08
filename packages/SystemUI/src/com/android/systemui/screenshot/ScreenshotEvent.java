@@ -46,6 +46,8 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
     SCREENSHOT_SAVED(306),
     @UiEvent(doc = "screenshot failed to save")
     SCREENSHOT_NOT_SAVED(336),
+    @UiEvent(doc = "failed to capture screenshot")
+    SCREENSHOT_CAPTURE_FAILED(1281),
     @UiEvent(doc = "screenshot preview tapped")
     SCREENSHOT_PREVIEW_TAPPED(307),
     @UiEvent(doc = "screenshot edit button tapped")

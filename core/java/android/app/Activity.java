@@ -997,6 +997,8 @@ public class Activity extends ContextThemeWrapper
 
     private ComponentCallbacksController mCallbacksController;
 
+    @Nullable private IVoiceInteractionManagerService mVoiceInteractionManagerService;
+
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
         /**
@@ -1606,18 +1608,17 @@ public class Activity extends ContextThemeWrapper
 
     private void notifyVoiceInteractionManagerServiceActivityEvent(
             @VoiceInteractionSession.VoiceInteractionActivityEventType int type) {
-
-        final IVoiceInteractionManagerService service =
-                IVoiceInteractionManagerService.Stub.asInterface(
-                        ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
-        if (service == null) {
-            Log.w(TAG, "notifyVoiceInteractionManagerServiceActivityEvent: Can not get "
-                    + "VoiceInteractionManagerService");
-            return;
+        if (mVoiceInteractionManagerService == null) {
+            mVoiceInteractionManagerService = IVoiceInteractionManagerService.Stub.asInterface(
+                    ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+            if (mVoiceInteractionManagerService == null) {
+                Log.w(TAG, "notifyVoiceInteractionManagerServiceActivityEvent: Can not get "
+                        + "VoiceInteractionManagerService");
+                return;
+            }
         }
-
         try {
-            service.notifyActivityEventChanged(mToken, type);
+            mVoiceInteractionManagerService.notifyActivityEventChanged(mToken, type);
         } catch (RemoteException e) {
             // Empty
         }

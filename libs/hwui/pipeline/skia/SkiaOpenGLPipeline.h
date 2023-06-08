@@ -53,6 +53,14 @@ public:
     bool isSurfaceReady() override;
     bool isContextReady() override;
 
+    const SkM44& getPixelSnapMatrix() const override {
+        // Small (~1/16th) nudge to ensure that pixel-aligned non-AA'd draws fill the
+        // desired fragment
+        static const SkScalar kOffset = 0.063f;
+        static const SkM44 sSnapMatrix = SkM44::Translate(kOffset, kOffset);
+        return sSnapMatrix;
+    }
+
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
 
 protected:

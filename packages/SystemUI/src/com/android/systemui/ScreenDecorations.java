@@ -36,10 +36,10 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.hardware.display.DisplayManager;
 import android.hardware.graphics.common.AlphaInterpretation;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.provider.Settings.Secure;
@@ -64,6 +64,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.Preconditions;
 import com.android.settingslib.Utils;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
@@ -75,7 +76,9 @@ import com.android.systemui.decor.OverlayWindow;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegate;
+import com.android.systemui.log.ScreenDecorationsLogger;
 import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.tuner.TunerService;
@@ -119,8 +122,11 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             R.id.display_cutout_right,
             R.id.display_cutout_bottom
     };
+    private final ScreenDecorationsLogger mLogger;
 
-    private DisplayManager mDisplayManager;
+    private final AuthController mAuthController;
+
+    private DisplayTracker mDisplayTracker;
     @VisibleForTesting
     protected boolean mIsRegistered;
     private final Context mContext;
@@ -128,7 +134,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     private final TunerService mTunerService;
     private final SecureSettings mSecureSettings;
     @VisibleForTesting
-    DisplayManager.DisplayListener mDisplayListener;
+    DisplayTracker.Callback mDisplayListener;
     private CameraAvailabilityListener mCameraListener;
     private final UserTracker mUserTracker;
     private final PrivacyDotViewController mDotViewController;
@@ -152,6 +158,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     private WindowManager mWindowManager;
     private int mRotation;
     private SettingObserver mColorInversionSetting;
+    @Nullable
     private DelayableExecutor mExecutor;
     private Handler mHandler;
     boolean mPendingConfigChange;
@@ -171,6 +178,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             DisplayCutoutView overlay = (DisplayCutoutView) getOverlayView(
                     mFaceScanningViewId);
             if (overlay != null) {
+                mLogger.cameraProtectionBoundsForScanningOverlay(bounds);
                 overlay.setProtection(protectionPath, bounds);
                 overlay.enableShowProtection(true);
                 updateOverlayWindowVisibilityIfViewExists(
@@ -183,6 +191,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         }
 
         if (mScreenDecorHwcLayer != null) {
+            mLogger.hwcLayerCameraProtectionBounds(bounds);
             mScreenDecorHwcLayer.setProtection(protectionPath, bounds);
             mScreenDecorHwcLayer.enableShowProtection(true);
             return;
@@ -196,11 +205,12 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             }
             ++setProtectionCnt;
             final DisplayCutoutView dcv = (DisplayCutoutView) view;
+            mLogger.dcvCameraBounds(id, bounds);
             dcv.setProtection(protectionPath, bounds);
             dcv.enableShowProtection(true);
         }
         if (setProtectionCnt == 0) {
-            Log.e(TAG, "CutoutView not initialized showCameraProtection");
+            mLogger.cutoutViewNotInitialized();
         }
     }
 
@@ -302,21 +312,40 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             SecureSettings secureSettings,
             TunerService tunerService,
             UserTracker userTracker,
+            DisplayTracker displayTracker,
             PrivacyDotViewController dotViewController,
             ThreadFactory threadFactory,
             PrivacyDotDecorProviderFactory dotFactory,
-            FaceScanningProviderFactory faceScanningFactory) {
+            FaceScanningProviderFactory faceScanningFactory,
+            ScreenDecorationsLogger logger,
+            AuthController authController) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mSecureSettings = secureSettings;
         mTunerService = tunerService;
         mUserTracker = userTracker;
+        mDisplayTracker = displayTracker;
         mDotViewController = dotViewController;
         mThreadFactory = threadFactory;
         mDotFactory = dotFactory;
         mFaceScanningFactory = faceScanningFactory;
         mFaceScanningViewId = com.android.systemui.R.id.face_scanning_anim;
+        mLogger = logger;
+        mAuthController = authController;
     }
+
+
+    private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
+        @Override
+        public void onFaceSensorLocationChanged() {
+            mLogger.onSensorLocationChanged();
+            if (mExecutor != null) {
+                mExecutor.execute(
+                        () -> updateOverlayProviderViews(
+                                new Integer[]{mFaceScanningViewId}));
+            }
+        }
+    };
 
     @Override
     public void start() {
@@ -328,6 +357,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         mExecutor = mThreadFactory.buildDelayableExecutorOnHandler(mHandler);
         mExecutor.execute(this::startOnScreenDecorationsThread);
         mDotViewController.setUiExecutor(mExecutor);
+        mAuthController.addCallback(mAuthControllerCallback);
     }
 
     private boolean isPrivacyDotEnabled() {
@@ -376,7 +406,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     private void startOnScreenDecorationsThread() {
         Trace.beginSection("ScreenDecorations#startOnScreenDecorationsThread");
         mWindowManager = mContext.getSystemService(WindowManager.class);
-        mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mContext.getDisplay().getDisplayInfo(mDisplayInfo);
         mRotation = mDisplayInfo.rotation;
         mDisplayMode = mDisplayInfo.getMode();
@@ -393,17 +422,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         setupDecorations();
         setupCameraListener();
 
-        mDisplayListener = new DisplayManager.DisplayListener() {
-            @Override
-            public void onDisplayAdded(int displayId) {
-                // do nothing
-            }
-
-            @Override
-            public void onDisplayRemoved(int displayId) {
-                // do nothing
-            }
-
+        mDisplayListener = new DisplayTracker.Callback() {
             @Override
             public void onDisplayChanged(int displayId) {
                 mContext.getDisplay().getDisplayInfo(mDisplayInfo);
@@ -474,8 +493,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
                 }
             }
         };
-
-        mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
+        mDisplayTracker.addDisplayChangeCallback(mDisplayListener, new HandlerExecutor(mHandler));
         updateConfiguration();
         Trace.endSection();
     }
@@ -1315,7 +1333,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
 
             if (showProtection) {
                 // Make sure that our measured height encompasses the protection
-                mTotalBounds.union(mBoundingRect);
+                mTotalBounds.set(mBoundingRect);
                 mTotalBounds.union((int) protectionRect.left, (int) protectionRect.top,
                         (int) protectionRect.right, (int) protectionRect.bottom);
                 setMeasuredDimension(

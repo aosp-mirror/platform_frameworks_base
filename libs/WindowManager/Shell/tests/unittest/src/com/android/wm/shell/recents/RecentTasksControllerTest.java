@@ -253,10 +253,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testGetRecentTasks_groupActiveFreeformTasks() {
+    public void testGetRecentTasks_hasActiveDesktopTasks_proto2Enabled_groupFreeformTasks() {
         StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
                 DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isActive(any())).thenReturn(true);
+        when(DesktopModeStatus.isProto2Enabled()).thenReturn(true);
 
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -288,6 +288,39 @@ public class RecentTasksControllerTest extends ShellTestCase {
         // Check single entries
         assertEquals(t2, singleGroup1.getTaskInfo1());
         assertEquals(t4, singleGroup2.getTaskInfo1());
+
+        mockitoSession.finishMocking();
+    }
+
+    @Test
+    public void testGetRecentTasks_hasActiveDesktopTasks_proto2Disabled_doNotGroupFreeformTasks() {
+        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
+                DesktopModeStatus.class).startMocking();
+        when(DesktopModeStatus.isProto2Enabled()).thenReturn(false);
+
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
+        ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
+        setRawList(t1, t2, t3, t4);
+
+        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
+
+        ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
+                MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
+
+        // Expect no grouping of tasks
+        assertEquals(4, recentTasks.size());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, recentTasks.get(0).getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, recentTasks.get(1).getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, recentTasks.get(2).getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, recentTasks.get(3).getType());
+
+        assertEquals(t1, recentTasks.get(0).getTaskInfo1());
+        assertEquals(t2, recentTasks.get(1).getTaskInfo1());
+        assertEquals(t3, recentTasks.get(2).getTaskInfo1());
+        assertEquals(t4, recentTasks.get(3).getTaskInfo1());
 
         mockitoSession.finishMocking();
     }

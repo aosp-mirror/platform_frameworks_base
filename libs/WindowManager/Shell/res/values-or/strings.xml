@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ଉପର ଆଡ଼କୁ 50% କରନ୍ତୁ"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ଉପର ଆଡ଼କୁ 30% କରନ୍ତୁ"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"ତଳ ଅଂଶର ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"ବାମପଟକୁ ସ୍ପ୍ଲିଟ କରନ୍ତୁ"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"ଡାହାଣପଟକୁ ସ୍ପ୍ଲିଟ କରନ୍ତୁ"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"ଶୀର୍ଷକୁ ସ୍ପ୍ଲିଟ କରନ୍ତୁ"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"ନିମ୍ନକୁ ସ୍ଲିଟ କରନ୍ତୁ"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ଏକ-ହାତ ମୋଡ୍ ବ୍ୟବହାର କରି"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ବାହାରି ଯିବା ପାଇଁ, ସ୍କ୍ରିନର ତଳୁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ କିମ୍ବା ଆପରେ ଯେ କୌଣସି ସ୍ଥାନରେ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ଏକ-ହାତ ମୋଡ୍ ଆରମ୍ଭ କରନ୍ତୁ"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ଏକ ଆପକୁ ରିପୋଜିସନ କରିବା ପାଇଁ ଏହାର ବାହାରେ ଦୁଇଥର-ଟାପ କରନ୍ତୁ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ବୁଝିଗଲି"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ଅଧିକ ସୂଚନା ପାଇଁ ବିସ୍ତାର କରନ୍ତୁ।"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ରିଷ୍ଟାର୍ଟ କରିବେ?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"ଆପଣ ଆପକୁ ରିଷ୍ଟାର୍ଟ କରିପାରିବେ ଯାହା ଫଳରେ ଏହା ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଆହୁରି ଭଲ ଦେଖାଯିବ, କିନ୍ତୁ ଆପଣ ଆପଣଙ୍କ ପ୍ରଗତି କିମ୍ବା ସେଭ ହୋଇନଥିବା ଯେ କୌଣସି ପରିବର୍ତ୍ତନ ହରାଇପାରନ୍ତି"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ବାତିଲ କରନ୍ତୁ"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"ଏହି ଆପକୁ ମୁଭ\nକରିବା ପାଇଁ ଦୁଇଥର-ଟାପ କରନ୍ତୁ"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ବଡ଼ କରନ୍ତୁ"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="back_button_text" msgid="1469718707134137085">"ପଛକୁ ଫେରନ୍ତୁ"</string>
     <string name="handle_text" msgid="1766582106752184456">"ହେଣ୍ଡେଲ"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"ଆପ ଆଇକନ"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"ପୂର୍ଣ୍ଣସ୍କ୍ରିନ"</string>
     <string name="desktop_text" msgid="1077633567027630454">"ଡେସ୍କଟପ ମୋଡ"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ"</string>
     <string name="more_button_text" msgid="3655388105592893530">"ଅଧିକ"</string>
     <string name="float_button_text" msgid="9221657008391364581">"ଫ୍ଲୋଟ"</string>
+    <string name="select_text" msgid="5139083974039906583">"ଚୟନ କରନ୍ତୁ"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"ସ୍କ୍ରିନସଟ"</string>
+    <string name="close_text" msgid="4986518933445178928">"ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"ମେନୁ ବନ୍ଦ କରନ୍ତୁ"</string>
 </resources>

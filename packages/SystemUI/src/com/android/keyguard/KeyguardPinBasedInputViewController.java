@@ -71,13 +71,17 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     protected void onViewAttached() {
         super.onViewAttached();
 
-        for (NumPadKey button: mView.getButtons()) {
+        boolean showAnimations = !mLockPatternUtils
+                .isPinEnhancedPrivacyEnabled(KeyguardUpdateMonitor.getCurrentUser());
+        mPasswordEntry.setShowPassword(showAnimations);
+        for (NumPadKey button : mView.getButtons()) {
             button.setOnTouchListener((v, event) -> {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                     mFalsingCollector.avoidGesture();
                 }
                 return false;
             });
+            button.setAnimationEnabled(showAnimations);
         }
         mPasswordEntry.setOnKeyListener(mOnKeyListener);
         mPasswordEntry.setUserActivityListener(this::onUserInput);
@@ -102,12 +106,9 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
         View okButton = mView.findViewById(R.id.key_enter);
         if (okButton != null) {
             okButton.setOnTouchListener(mActionButtonTouchListener);
-            okButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mPasswordEntry.isEnabled()) {
-                        verifyPasswordAndUnlock();
-                    }
+            okButton.setOnClickListener(v -> {
+                if (mPasswordEntry.isEnabled()) {
+                    verifyPasswordAndUnlock();
                 }
             });
             okButton.setOnHoverListener(mLiftToActivateListener);
@@ -118,7 +119,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     protected void onViewDetached() {
         super.onViewDetached();
 
-        for (NumPadKey button: mView.getButtons()) {
+        for (NumPadKey button : mView.getButtons()) {
             button.setOnTouchListener(null);
         }
     }

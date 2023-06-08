@@ -6,6 +6,7 @@ import android.view.InputEvent
 import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.settings.FakeDisplayTracker
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -17,6 +18,7 @@ import org.junit.runner.RunWith
 class GenericGestureDetectorTest : SysuiTestCase() {
 
     private lateinit var gestureDetector: TestGestureDetector
+    private val displayTracker = FakeDisplayTracker(mContext)
 
     @Before
     fun setUp() {
@@ -101,12 +103,21 @@ class GenericGestureDetectorTest : SysuiTestCase() {
         gestureDetector.addOnGestureDetectedCallback("tag2"){}
 
         gestureDetector.removeOnGestureDetectedCallback("tag")
-        gestureDetector.onInputEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, CORRECT_X, 0f, 0))
+        gestureDetector.onInputEvent(
+            MotionEvent.obtain(
+                0,
+                0,
+                MotionEvent.ACTION_DOWN,
+                CORRECT_X,
+                0f,
+                0
+            )
+        )
 
         assertThat(oldCallbackNotified).isFalse()
     }
 
-    inner class TestGestureDetector : GenericGestureDetector("fakeTag") {
+    inner class TestGestureDetector : GenericGestureDetector("fakeTag", displayTracker) {
         var isGestureListening = false
 
         override fun onInputEvent(ev: InputEvent) {

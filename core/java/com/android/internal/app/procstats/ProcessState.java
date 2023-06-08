@@ -28,10 +28,9 @@ import static com.android.internal.app.procstats.ProcessStats.PSS_USS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MAXIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MINIMUM;
 import static com.android.internal.app.procstats.ProcessStats.STATE_BACKUP;
-import static com.android.internal.app.procstats.ProcessStats.STATE_BOUND_TOP_OR_FGS;
-import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED_ACTIVITY;
-import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED_ACTIVITY_CLIENT;
-import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED_EMPTY;
+import static com.android.internal.app.procstats.ProcessStats.STATE_BOUND_FGS;
+import static com.android.internal.app.procstats.ProcessStats.STATE_BOUND_TOP;
+import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED;
 import static com.android.internal.app.procstats.ProcessStats.STATE_COUNT;
 import static com.android.internal.app.procstats.ProcessStats.STATE_FGS;
 import static com.android.internal.app.procstats.ProcessStats.STATE_HEAVY_WEIGHT;
@@ -73,6 +72,7 @@ import com.android.internal.app.procstats.ProcessStats.TotalMemoryUseCollection;
 
 import java.io.PrintWriter;
 import java.util.Comparator;
+import java.util.concurrent.TimeUnit;
 
 public final class ProcessState {
     private static final String TAG = "ProcessStats";
@@ -84,9 +84,9 @@ public final class ProcessState {
         STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT
         STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         STATE_TOP,                      // ActivityManager.PROCESS_STATE_TOP
-        STATE_BOUND_TOP_OR_FGS,         // ActivityManager.PROCESS_STATE_BOUND_TOP
+        STATE_BOUND_TOP,                // ActivityManager.PROCESS_STATE_BOUND_TOP
         STATE_FGS,                      // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
-        STATE_BOUND_TOP_OR_FGS,         // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
+        STATE_BOUND_FGS,                // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
         STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         STATE_IMPORTANT_BACKGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         STATE_IMPORTANT_BACKGROUND,     // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
@@ -97,10 +97,10 @@ public final class ProcessState {
         STATE_HEAVY_WEIGHT,             // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
         STATE_HOME,                     // ActivityManager.PROCESS_STATE_HOME
         STATE_LAST_ACTIVITY,            // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
-        STATE_CACHED_ACTIVITY,          // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
-        STATE_CACHED_ACTIVITY_CLIENT,   // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
-        STATE_CACHED_ACTIVITY,          // ActivityManager.PROCESS_STATE_CACHED_RECENT
-        STATE_CACHED_EMPTY,             // ActivityManager.PROCESS_STATE_CACHED_EMPTY
+        STATE_CACHED,                   // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
+        STATE_CACHED,                   // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        STATE_CACHED,                   // ActivityManager.PROCESS_STATE_CACHED_RECENT
+        STATE_CACHED,                   // ActivityManager.PROCESS_STATE_CACHED_EMPTY
     };
 
     public static final Comparator<ProcessState> COMPARATOR = new Comparator<ProcessState>() {
@@ -925,8 +925,11 @@ public final class ProcessState {
                 screenStates, memStates, new int[] { STATE_PERSISTENT }, now, totalTime, true);
         dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_TOP],
                 screenStates, memStates, new int[] {STATE_TOP}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_BOUND_TOP_OR_FGS],
-                screenStates, memStates, new int[] { STATE_BOUND_TOP_OR_FGS}, now, totalTime,
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_BOUND_TOP],
+                screenStates, memStates, new int[] { STATE_BOUND_TOP }, now, totalTime,
+                true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_BOUND_FGS],
+                screenStates, memStates, new int[] { STATE_BOUND_FGS }, now, totalTime,
                 true);
         dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_FGS],
                 screenStates, memStates, new int[] { STATE_FGS}, now, totalTime,
@@ -952,9 +955,6 @@ public final class ProcessState {
                 screenStates, memStates, new int[] {STATE_HOME}, now, totalTime, true);
         dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_LAST_ACTIVITY],
                 screenStates, memStates, new int[] {STATE_LAST_ACTIVITY}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABEL_CACHED,
-                screenStates, memStates, new int[] {STATE_CACHED_ACTIVITY,
-                        STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_EMPTY}, now, totalTime, true);
     }
 
     public void dumpProcessState(PrintWriter pw, String prefix,
@@ -1540,6 +1540,75 @@ public final class ProcessState {
         }
         // Write the full process name
         proto.write(fieldId, procName);
+    }
+
+    /** Dumps the duration of each state to statsEventOutput. */
+    public void dumpStateDurationToStatsd(
+            int atomTag, ProcessStats processStats, StatsEventOutput statsEventOutput) {
+        long topMs = 0;
+        long fgsMs = 0;
+        long boundTopMs = 0;
+        long boundFgsMs = 0;
+        long importantForegroundMs = 0;
+        long cachedMs = 0;
+        long frozenMs = 0;
+        long otherMs = 0;
+        for (int i = 0, size = mDurations.getKeyCount(); i < size; i++) {
+            final int key = mDurations.getKeyAt(i);
+            final int type = SparseMappingTable.getIdFromKey(key);
+            int procStateIndex = type % STATE_COUNT;
+            long duration = mDurations.getValue(key);
+            switch (procStateIndex) {
+                case STATE_TOP:
+                    topMs += duration;
+                    break;
+                case STATE_BOUND_FGS:
+                    boundFgsMs += duration;
+                    break;
+                case STATE_BOUND_TOP:
+                    boundTopMs += duration;
+                    break;
+                case STATE_FGS:
+                    fgsMs += duration;
+                    break;
+                case STATE_IMPORTANT_FOREGROUND:
+                case STATE_IMPORTANT_BACKGROUND:
+                    importantForegroundMs += duration;
+                    break;
+                case STATE_BACKUP:
+                case STATE_SERVICE:
+                case STATE_SERVICE_RESTARTING:
+                case STATE_RECEIVER:
+                case STATE_HEAVY_WEIGHT:
+                case STATE_HOME:
+                case STATE_LAST_ACTIVITY:
+                case STATE_PERSISTENT:
+                    otherMs += duration;
+                    break;
+                case STATE_CACHED:
+                    cachedMs += duration;
+                    break;
+                    // TODO (b/261910877) Add support for tracking frozenMs.
+            }
+        }
+        statsEventOutput.write(
+                atomTag,
+                getUid(),
+                getName(),
+                (int) TimeUnit.MILLISECONDS.toSeconds(processStats.mTimePeriodStartUptime),
+                (int) TimeUnit.MILLISECONDS.toSeconds(processStats.mTimePeriodEndUptime),
+                (int)
+                        TimeUnit.MILLISECONDS.toSeconds(
+                                processStats.mTimePeriodEndUptime
+                                        - processStats.mTimePeriodStartUptime),
+                (int) TimeUnit.MILLISECONDS.toSeconds(topMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(fgsMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(boundTopMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(boundFgsMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(importantForegroundMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(cachedMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(frozenMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(otherMs));
     }
 
     /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */

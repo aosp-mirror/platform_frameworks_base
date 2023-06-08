@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams.touch;
 
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.GestureDetector;
 
@@ -77,6 +78,11 @@ public interface DreamTouchHandler {
          * Returns the number of currently active sessions.
          */
         int getActiveSessionCount();
+
+        /**
+         * Returns the bounds of the display the touch region.
+         */
+        Rect getBounds();
     }
 
     /**
@@ -84,7 +90,7 @@ public interface DreamTouchHandler {
      * indicating the entire screen should be considered.
      * @param region A {@link Region} that is passed in to the target entry touch region.
      */
-    default void getTouchInitiationRegion(Region region) {
+    default void getTouchInitiationRegion(Rect bounds, Region region) {
     }
 
     /**

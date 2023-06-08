@@ -22,6 +22,7 @@ import android.widget.TextClock
 import com.android.systemui.shared.R
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.ShadowInfo
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.applyShadows
+import kotlin.math.floor
 
 /** Extension of [TextClock] which draws two shadows on the text (ambient and key shadows) */
 class DoubleShadowTextClock
@@ -89,6 +90,21 @@ constructor(
                     ambientShadowOffsetY.toFloat(),
                     ambientShadowAlpha
                 )
+            val removeTextDescent =
+                attributes.getBoolean(R.styleable.DoubleShadowTextClock_removeTextDescent, false)
+            val textDescentExtraPadding =
+                attributes.getDimensionPixelSize(
+                    R.styleable.DoubleShadowTextClock_textDescentExtraPadding,
+                    0
+                )
+            if (removeTextDescent) {
+                setPaddingRelative(
+                    0,
+                    0,
+                    0,
+                    textDescentExtraPadding - floor(paint.fontMetrics.descent.toDouble()).toInt()
+                )
+            }
         } finally {
             attributes.recycle()
         }

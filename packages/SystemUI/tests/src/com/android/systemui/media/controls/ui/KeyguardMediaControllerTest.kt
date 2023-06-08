@@ -24,12 +24,14 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.FrameLayout
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.UniqueObjectHostView
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
@@ -39,8 +41,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.any
+import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
@@ -61,9 +64,16 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     private lateinit var keyguardMediaController: KeyguardMediaController
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler
+    private lateinit var statusBarStateListener: StatusBarStateController.StateListener
 
     @Before
     fun setup() {
+        doAnswer {
+                statusBarStateListener = it.arguments[0] as StatusBarStateController.StateListener
+                return@doAnswer Unit
+            }
+            .whenever(statusBarStateController)
+            .addCallback(any(StatusBarStateController.StateListener::class.java))
         // default state is positive, media should show up
         whenever(mediaHost.visible).thenReturn(true)
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
@@ -169,5 +179,32 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     @Test
     fun testMediaHost_expandedPlayer() {
         verify(mediaHost).expansion = MediaHostState.EXPANDED
+    }
+
+    @Test
+    fun dozing_inSplitShade_mediaIsHidden() {
+        val splitShadeContainer = FrameLayout(context)
+        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
+        keyguardMediaController.useSplitShade = true
+
+        setDozing()
+
+        assertThat(splitShadeContainer.visibility).isEqualTo(GONE)
+    }
+
+    @Test
+    fun dozing_inSingleShade_mediaIsVisible() {
+        val splitShadeContainer = FrameLayout(context)
+        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
+        keyguardMediaController.useSplitShade = false
+
+        setDozing()
+
+        assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
+    }
+
+    private fun setDozing() {
+        whenever(statusBarStateController.isDozing).thenReturn(true)
+        statusBarStateListener.onDozingChanged(true)
     }
 }
