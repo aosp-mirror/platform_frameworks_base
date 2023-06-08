@@ -595,8 +595,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         cancel(mWillFinishToHome, true /* withScreenshots */, "display change");
                         return;
                     }
-                    // Don't consider order-only changes as changing apps.
-                    if (!TransitionUtil.isOrderOnly(change)) {
+                    // Don't consider order-only & non-leaf changes as changing apps.
+                    if (!TransitionUtil.isOrderOnly(change) && isLeafTask) {
                         hasChangingApp = true;
                     }
                 }
