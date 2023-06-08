@@ -494,7 +494,7 @@ constructor(
                     // this runnable is called right after the keyguard is solved, so we tell
                     // WM that we should dismiss it to avoid flickers when opening an activity
                     // that can also be shown over the keyguard.
-                    options.setDismissKeyguard()
+                    options.setDismissKeyguardIfInsecure()
                     options.setDisallowEnterPictureInPictureWhileLaunching(
                         disallowEnterPictureInPictureWhileLaunching
                     )
