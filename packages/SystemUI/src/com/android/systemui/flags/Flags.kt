@@ -93,7 +93,7 @@ object Flags {
     // TODO(b/277338665): Tracking Bug
     @JvmField
     val NOTIFICATION_SHELF_REFACTOR =
-        unreleasedFlag(271161129, "notification_shelf_refactor", teamfood = true)
+        unreleasedFlag(271161129, "notification_shelf_refactor")
 
     @JvmField
     val ANIMATED_NOTIFICATION_SHADE_INSETS =
