@@ -16,6 +16,7 @@
 
 package com.android.server.companion.virtual;
 
+import static android.companion.virtual.VirtualDeviceManager.ASSOCIATION_ID_INVALID;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
@@ -1711,6 +1712,22 @@ public class VirtualDeviceManagerServiceTest {
         assertThat(displayIds).containsExactly(DISPLAY_ID_1, DISPLAY_ID_2);
     }
 
+    @Test
+    public void getAssociationIdForDevice_invalidDeviceId_returnsInvalidAssociationId() {
+        assertThat(mLocalService.getAssociationIdForDevice(DEVICE_ID_INVALID))
+                .isEqualTo(ASSOCIATION_ID_INVALID);
+        assertThat(mLocalService.getAssociationIdForDevice(DEVICE_ID_DEFAULT))
+                .isEqualTo(ASSOCIATION_ID_INVALID);
+        assertThat(mLocalService.getAssociationIdForDevice(VIRTUAL_DEVICE_ID_2))
+                .isEqualTo(ASSOCIATION_ID_INVALID);
+    }
+
+    @Test
+    public void getAssociationIdForDevice_returnsCorrectAssociationId() {
+        assertThat(mLocalService.getAssociationIdForDevice(VIRTUAL_DEVICE_ID_1))
+                .isEqualTo(mAssociationInfo.getId());
+    }
+
     private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid) {
         VirtualDeviceParams params = new VirtualDeviceParams.Builder()
                 .setBlockedActivities(getBlockedActivities())
@@ -1727,6 +1744,7 @@ public class VirtualDeviceManagerServiceTest {
                 mPendingTrampolineCallback, mActivityListener, mSoundEffectListener,
                 mRunningAppsChangedCallback, params, new DisplayManagerGlobal(mIDisplayManager));
         mVdms.addVirtualDevice(virtualDeviceImpl);
+        assertThat(virtualDeviceImpl.getAssociationId()).isEqualTo(mAssociationInfo.getId());
         return virtualDeviceImpl;
     }
 

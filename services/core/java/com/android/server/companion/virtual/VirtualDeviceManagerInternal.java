@@ -156,4 +156,14 @@ public abstract class VirtualDeviceManagerInternal {
      * @return the set of display ids for all VirtualDisplays owned by the device
      */
     public abstract @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId);
+
+    /**
+     * Gets the CDM association ID for the VirtualDevice with the given device ID.
+     *
+     * @param deviceId which device we're asking about
+     * @return the CDM association ID for this device, or
+     *   {@link android.companion.virtual.VirtualDeviceManager#ASSOCIATION_ID_INVALID} if no such
+     *   association exists.
+     */
+    public abstract int getAssociationIdForDevice(int deviceId);
 }

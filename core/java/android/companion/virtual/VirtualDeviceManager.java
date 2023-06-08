@@ -102,6 +102,13 @@ public final class VirtualDeviceManager {
     public static final String EXTRA_VIRTUAL_DEVICE_ID =
             "android.companion.virtual.extra.VIRTUAL_DEVICE_ID";
 
+    /**
+     * A representation of an invalid CDM association ID. Association IDs must be positive.
+     *
+     * @hide
+     */
+    public static final int ASSOCIATION_ID_INVALID = -1;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(
