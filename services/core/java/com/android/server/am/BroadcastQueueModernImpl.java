@@ -682,10 +682,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             // If this receiver is going to be skipped, skip it now itself and don't even enqueue
             // it.
-            final boolean wouldBeSkipped = (mSkipPolicy.shouldSkipMessage(r, receiver) != null);
-            if (wouldBeSkipped) {
+            final String skipReason = mSkipPolicy.shouldSkipMessage(r, receiver);
+            if (skipReason != null) {
                 setDeliveryState(null, null, r, i, receiver, BroadcastRecord.DELIVERY_SKIPPED,
-                        "skipped by policy at enqueue");
+                        "skipped by policy at enqueue: " + skipReason);
                 continue;
             }
 
