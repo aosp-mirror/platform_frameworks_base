@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.view.contentprotection.flags.Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED;
+import static android.permission.flags.Flags.FLAG_OP_ENABLE_MOBILE_DATA_BY_USER;
 
 import static java.lang.Long.max;
 
@@ -1507,6 +1508,12 @@ public class AppOpsManager {
      */
     public static final int OP_CREATE_ACCESSIBILITY_OVERLAY =
             AppProtoEnums.APP_OP_CREATE_ACCESSIBILITY_OVERLAY;
+    /**
+     * Indicate that the user has enabled or disabled mobile data
+     * @hide
+     */
+    public static final int OP_ENABLE_MOBILE_DATA_BY_USER =
+            AppProtoEnums.APP_OP_ENABLE_MOBILE_DATA_BY_USER;
 
     /**
      * See {@link #OPSTR_MEDIA_ROUTING_CONTROL}.
@@ -1516,7 +1523,7 @@ public class AppOpsManager {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 140;
+    public static final int _NUM_OP = 141;
 
     /**
      * All app ops represented as strings.
@@ -1663,6 +1670,7 @@ public class AppOpsManager {
             OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
             OPSTR_MEDIA_ROUTING_CONTROL,
+            OPSTR_ENABLE_MOBILE_DATA_BY_USER,
     })
     public @interface AppOpString {}
 
@@ -2313,6 +2321,14 @@ public class AppOpsManager {
     @FlaggedApi(FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED)
     public static final String OPSTR_CREATE_ACCESSIBILITY_OVERLAY =
             "android:create_accessibility_overlay";
+    /**
+     * Indicate that the user has enabled or disabled mobile data
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_OP_ENABLE_MOBILE_DATA_BY_USER)
+    public static final String OPSTR_ENABLE_MOBILE_DATA_BY_USER =
+            "android:enable_mobile_data_by_user";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -2872,6 +2888,8 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_MEDIA_ROUTING_CONTROL, OPSTR_MEDIA_ROUTING_CONTROL,
                 "MEDIA_ROUTING_CONTROL")
                 .setPermission(Manifest.permission.MEDIA_ROUTING_CONTROL).build(),
+        new AppOpInfo.Builder(OP_ENABLE_MOBILE_DATA_BY_USER, OPSTR_ENABLE_MOBILE_DATA_BY_USER,
+                "ENABLE_MOBILE_DATA_BY_USER").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
