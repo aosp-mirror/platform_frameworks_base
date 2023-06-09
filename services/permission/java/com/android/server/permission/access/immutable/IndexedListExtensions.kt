@@ -64,6 +64,18 @@ inline fun <T> IndexedList<T>.noneIndexed(predicate: (Int, T) -> Boolean): Boole
 operator fun <T> IndexedList<T>.plus(element: T): MutableIndexedList<T> =
     toMutable().apply { this += element }
 
+// Using Int instead of <R> to avoid autoboxing, since we only have the use case for Int.
+inline fun <T> IndexedList<T>.reduceIndexed(
+    initialValue: Int,
+    accumulator: (Int, Int, T) -> Int
+): Int {
+    var value = initialValue
+    forEachIndexed { index, element ->
+        value = accumulator(value, index, element)
+    }
+    return value
+}
+
 @Suppress("NOTHING_TO_INLINE")
 inline operator fun <T> MutableIndexedList<T>.minusAssign(element: T) {
     remove(element)
