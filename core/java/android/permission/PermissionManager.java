@@ -177,6 +177,13 @@ public final class PermissionManager {
     public static final long CANNOT_INSTALL_WITH_BAD_PERMISSION_GROUPS = 146211400;
 
     /**
+     * Whether to use the new {@link com.android.server.permission.access.AccessCheckingService}.
+     *
+     * @hide
+     */
+    public static final boolean USE_ACCESS_CHECKING_SERVICE = false;
+
+    /**
      * The time to wait in between refreshing the exempted indicator role packages
      */
     private static final long EXEMPTED_INDICATOR_ROLE_UPDATE_FREQUENCY_MS = 15000;

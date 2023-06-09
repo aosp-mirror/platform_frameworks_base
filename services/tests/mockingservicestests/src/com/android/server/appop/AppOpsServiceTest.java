@@ -38,6 +38,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -54,6 +55,7 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
 
@@ -119,6 +121,8 @@ public class AppOpsServiceTest {
 
     @Before
     public void setUp() {
+        assumeFalse(PermissionManager.USE_ACCESS_CHECKING_SERVICE);
+
         mStorageFile = new File(sContext.getFilesDir(), APP_OPS_FILENAME);
         mRecentAccessesFile = new File(sContext.getFilesDir(), APP_OPS_ACCESSES_FILENAME);
         mStorageFile.delete();
@@ -138,6 +142,11 @@ public class AppOpsServiceTest {
 
     @After
     public void tearDown() {
+        // @After methods are still executed even if there's assumption failure in @Before.
+        if (PermissionManager.USE_ACCESS_CHECKING_SERVICE) {
+            return;
+        }
+
         mAppOpsService.shutdown();
 
         mMockingSession.finishMocking();

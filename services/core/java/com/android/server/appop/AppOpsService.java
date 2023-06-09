@@ -924,9 +924,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             mSwitchedOps.put(switchCode,
                     ArrayUtils.appendInt(mSwitchedOps.get(switchCode), switchedCode));
         }
-        mAppOpsCheckingService = new AppOpsCheckingServiceTracingDecorator(
-                new AppOpsCheckingServiceImpl(
-                        storageFile, this, handler, context,  mSwitchedOps));
+        if (PermissionManager.USE_ACCESS_CHECKING_SERVICE) {
+            mAppOpsCheckingService = new AppOpsCheckingServiceTracingDecorator(
+                    LocalServices.getService(AppOpsCheckingServiceInterface.class));
+        } else {
+            mAppOpsCheckingService = new AppOpsCheckingServiceTracingDecorator(
+                    new AppOpsCheckingServiceImpl(storageFile, this, handler, context,
+                            mSwitchedOps));
+        }
         mAppOpsCheckingService.addAppOpsModeChangedListener(
                 new AppOpsCheckingServiceInterface.AppOpsModeChangedListener() {
                     @Override
@@ -944,8 +949,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 packageName, code, mode, userId));
                     }
                 });
-        //mAppOpsCheckingService = new AppOpsCheckingServiceLoggingDecorator(
-        //        LocalServices.getService(AppOpsCheckingServiceInterface.class));
         mAppOpsRestrictions = new AppOpsRestrictionsImpl(context, handler,
                 code -> notifyWatchersOfChange(code, UID_ANY));
 
