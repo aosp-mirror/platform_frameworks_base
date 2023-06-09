@@ -270,12 +270,23 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun moveToDesktop() {
+    fun moveToDesktop_displayFullscreen_windowingModeSetToFreeform() {
         val task = setUpFullscreenTask()
+        task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FULLSCREEN
         controller.moveToDesktop(task)
         val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @Test
+    fun moveToDesktop_displayFreeform_windowingModeSetToUndefined() {
+        val task = setUpFullscreenTask()
+        task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FREEFORM
+        controller.moveToDesktop(task)
+        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_UNDEFINED)
     }
 
     @Test
@@ -325,12 +336,23 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun moveToFullscreen() {
+    fun moveToFullscreen_displayFullscreen_windowingModeSetToUndefined() {
         val task = setUpFreeformTask()
+        task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FULLSCREEN
         controller.moveToFullscreen(task)
         val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
-            .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+            .isEqualTo(WINDOWING_MODE_UNDEFINED)
+    }
+
+    @Test
+    fun moveToFullscreen_displayFreeform_windowingModeSetToFullscreen() {
+        val task = setUpFreeformTask()
+        task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FREEFORM
+        controller.moveToFullscreen(task)
+        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_FULLSCREEN)
     }
 
     @Test
