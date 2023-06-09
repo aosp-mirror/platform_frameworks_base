@@ -6595,7 +6595,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     private PostNotificationTracker acquireWakeLockForPost(String pkg, int uid) {
-        if (mFlagResolver.isEnabled(WAKE_LOCK_FOR_POSTING_NOTIFICATION)) {
+        if (mFlagResolver.isEnabled(WAKE_LOCK_FOR_POSTING_NOTIFICATION)
+                && Binder.withCleanCallingIdentity(
+                    () -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                        SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, false))) {
             // The package probably doesn't have WAKE_LOCK permission and should not require it.
             return Binder.withCleanCallingIdentity(() -> {
                 WakeLock wakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
