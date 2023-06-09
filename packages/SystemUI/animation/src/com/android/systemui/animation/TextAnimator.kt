@@ -108,7 +108,8 @@ class TextAnimator(
         }
 
     // Following two members are for mutable for testing purposes.
-    public var textInterpolator: TextInterpolator = TextInterpolator(layout, typefaceCache)
+    public var textInterpolator: TextInterpolator =
+        TextInterpolator(layout, typefaceCache, numberOfAnimationSteps)
     public var animator: ValueAnimator =
         ValueAnimator.ofFloat(1f).apply {
             duration = DEFAULT_ANIMATION_DURATION
