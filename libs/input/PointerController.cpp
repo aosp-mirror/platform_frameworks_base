@@ -290,7 +290,7 @@ void PointerController::doInactivityTimeout() {
     fade(Transition::GRADUAL);
 }
 
-void PointerController::onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports) {
+void PointerController::onDisplayViewportsUpdated(const std::vector<DisplayViewport>& viewports) {
     std::unordered_set<int32_t> displayIdSet;
     for (const DisplayViewport& viewport : viewports) {
         displayIdSet.insert(viewport.displayId);

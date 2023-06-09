@@ -70,7 +70,7 @@ public:
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
     void reloadPointerResources();
-    void onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports);
+    void onDisplayViewportsUpdated(const std::vector<DisplayViewport>& viewports);
 
     void onDisplayInfosChangedLocked(const std::vector<gui::DisplayInfo>& displayInfos)
             REQUIRES(getLock());
