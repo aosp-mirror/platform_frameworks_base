@@ -31,6 +31,7 @@ import java.lang.Math.max
 class TextInterpolator(
     layout: Layout,
     var typefaceCache: TypefaceVariantCache,
+    numberOfAnimationSteps: Int? = null,
 ) {
     /**
      * Returns base paint used for interpolation.
@@ -85,7 +86,7 @@ class TextInterpolator(
     private class Line(val runs: List<Run>)
 
     private var lines = listOf<Line>()
-    private val fontInterpolator = FontInterpolator()
+    private val fontInterpolator = FontInterpolator(numberOfAnimationSteps)
 
     // Recycling object for glyph drawing and tweaking.
     private val tmpPaint = TextPaint()
