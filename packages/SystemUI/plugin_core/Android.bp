@@ -25,6 +25,9 @@ java_library {
     sdk_version: "current",
     name: "PluginCoreLib",
     srcs: ["src/**/*.java"],
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+    },
 
     // Enforce that the library is built against java 8 so that there are
     // no compatibility issues with launcher
