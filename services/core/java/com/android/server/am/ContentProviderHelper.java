@@ -246,8 +246,12 @@ public class ContentProviderHelper {
                 }
             }
 
+            final int callingProcessState = r != null
+                    ? r.mState.getCurProcState() : ActivityManager.PROCESS_STATE_UNKNOWN;
+
             if (providerRunning) {
                 cpi = cpr.info;
+
 
                 if (r != null && cpr.canRunHere(r)) {
                     checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
@@ -265,7 +269,8 @@ public class ContentProviderHelper {
                             r.uid, callingUid,
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
-                            cpi.packageName, callingPackage);
+                            cpi.packageName, callingPackage,
+                            callingProcessState, callingProcessState);
                     return holder;
                 }
 
@@ -280,6 +285,8 @@ public class ContentProviderHelper {
 
                 checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
                         cpr.name.flattenToShortString(), startTime);
+
+                final int providerProcessState = cpr.proc.mState.getCurProcState();
 
                 final long origId = Binder.clearCallingIdentity();
                 try {
@@ -337,7 +344,8 @@ public class ContentProviderHelper {
                                 cpr.proc.uid, callingUid,
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
-                                cpi.packageName, callingPackage);
+                                cpi.packageName, callingPackage,
+                                callingProcessState, providerProcessState);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(origId);
@@ -514,7 +522,8 @@ public class ContentProviderHelper {
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
-                                    cpi.packageName, callingPackage);
+                                    cpi.packageName, callingPackage,
+                                    callingProcessState, proc.mState.getCurProcState());
                         } else {
                             final int packageState =
                                     ((cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0)
@@ -539,7 +548,8 @@ public class ContentProviderHelper {
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD,
-                                    packageState, cpi.packageName, callingPackage);
+                                    packageState, cpi.packageName, callingPackage,
+                                    callingProcessState, ActivityManager.PROCESS_STATE_NONEXISTENT);
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);
