@@ -52,8 +52,10 @@ import android.util.Log;
 import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
+import android.view.contentprotection.ContentProtectionEventProcessor;
 import android.view.inputmethod.BaseInputConnection;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 
 import java.io.PrintWriter;
@@ -118,9 +120,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     /**
      * Direct interface to the service binder object - it's used to send the events, including the
      * last ones (when the session is finished)
+     *
+     * @hide
      */
-    @NonNull
-    private IContentCaptureDirectManager mDirectServiceInterface;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @Nullable
+    public IContentCaptureDirectManager mDirectServiceInterface;
+
     @Nullable
     private DeathRecipient mDirectServiceVulture;
 
@@ -131,14 +137,19 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Nullable
     private IBinder mShareableActivityToken;
 
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @Nullable
-    private ComponentName mComponentName;
+    public ComponentName mComponentName;
 
     /**
      * List of events held to be sent as a batch.
+     *
+     * @hide
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @Nullable
-    private ArrayList<ContentCaptureEvent> mEvents;
+    public ArrayList<ContentCaptureEvent> mEvents;
 
     // Used just for debugging purposes (on dump)
     private long mNextFlush;
@@ -156,6 +167,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      */
     @NonNull
     private final SessionStateReceiver mSessionStateReceiver;
+
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @Nullable
+    public ContentProtectionEventProcessor mContentProtectionEventProcessor;
 
     private static class SessionStateReceiver extends IResultReceiver.Stub {
         private final WeakReference<MainContentCaptureSession> mMainSession;
@@ -194,8 +210,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
     }
 
-    protected MainContentCaptureSession(@NonNull ContentCaptureManager.StrippedContext context,
-            @NonNull ContentCaptureManager manager, @NonNull Handler handler,
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
+    public MainContentCaptureSession(
+            @NonNull ContentCaptureManager.StrippedContext context,
+            @NonNull ContentCaptureManager manager,
+            @NonNull Handler handler,
             @NonNull IContentCaptureManager systemServerInterface) {
         mContext = context;
         mManager = manager;
@@ -273,15 +293,16 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     /**
-     * Callback from {@code system_server} after call to
-     * {@link IContentCaptureManager#startSession(IBinder, ComponentName, String, int,
-     * IResultReceiver)}.
+     * Callback from {@code system_server} after call to {@link
+     * IContentCaptureManager#startSession(IBinder, ComponentName, String, int, IResultReceiver)}.
      *
      * @param resultCode session state
      * @param binder handle to {@code IContentCaptureDirectManager}
+     * @hide
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @UiThread
-    private void onSessionStarted(int resultCode, @Nullable IBinder binder) {
+    public void onSessionStarted(int resultCode, @Nullable IBinder binder) {
         if (binder != null) {
             mDirectServiceInterface = IContentCaptureDirectManager.Stub.asInterface(binder);
             mDirectServiceVulture = () -> {
@@ -294,6 +315,20 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to link to death on " + binder + ": " + e);
             }
+        }
+
+        // Should not be possible for mComponentName to be null here but check anyway
+        if (mManager.mOptions.contentProtectionOptions.enableReceiver
+                && mManager.getContentProtectionEventBuffer() != null
+                && mComponentName != null) {
+            mContentProtectionEventProcessor =
+                    new ContentProtectionEventProcessor(
+                            mManager.getContentProtectionEventBuffer(),
+                            mHandler,
+                            mSystemServerInterface,
+                            mComponentName.getPackageName());
+        } else {
+            mContentProtectionEventProcessor = null;
         }
 
         if ((resultCode & STATE_DISABLED) != 0) {
@@ -311,8 +346,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
     }
 
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @UiThread
-    private void sendEvent(@NonNull ContentCaptureEvent event) {
+    public void sendEvent(@NonNull ContentCaptureEvent event) {
         sendEvent(event, /* forceFlush= */ false);
     }
 
@@ -337,6 +374,25 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             if (sVerbose) Log.v(TAG, "handleSendEvent(): ignoring when disabled");
             return;
         }
+
+        if (isContentProtectionReceiverEnabled()) {
+            sendContentProtectionEvent(event);
+        }
+        if (isContentCaptureReceiverEnabled()) {
+            sendContentCaptureEvent(event, forceFlush);
+        }
+    }
+
+    @UiThread
+    private void sendContentProtectionEvent(@NonNull ContentCaptureEvent event) {
+        if (mContentProtectionEventProcessor != null) {
+            mContentProtectionEventProcessor.processEvent(event);
+        }
+    }
+
+    @UiThread
+    private void sendContentCaptureEvent(@NonNull ContentCaptureEvent event, boolean forceFlush) {
+        final int eventType = event.getType();
         final int maxBufferSize = mManager.mOptions.maxBufferSize;
         if (mEvents == null) {
             if (sVerbose) {
@@ -528,9 +584,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         flush(reason);
     }
 
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     @Override
     @UiThread
-    void flush(@FlushReason int reason) {
+    public void flush(@FlushReason int reason) {
         if (mEvents == null || mEvents.size() == 0) {
             if (sVerbose) {
                 Log.v(TAG, "Don't flush for empty event buffer.");
@@ -541,6 +599,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (mDisabled.get()) {
             Log.e(TAG, "handleForceFlush(" + getDebugState(reason) + "): should not be when "
                     + "disabled");
+            return;
+        }
+
+        if (!isContentCaptureReceiverEnabled()) {
             return;
         }
 
@@ -607,8 +669,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         return new ParceledListSlice<>(events);
     }
 
+    /** hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @UiThread
-    private void destroySession() {
+    public void destroySession() {
         if (sDebug) {
             Log.d(TAG, "Destroying session (ctx=" + mContext + ", id=" + mId + ") with "
                     + (mEvents == null ? 0 : mEvents.size()) + " event(s) for "
@@ -626,12 +690,15 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             mDirectServiceInterface.asBinder().unlinkToDeath(mDirectServiceVulture, 0);
         }
         mDirectServiceInterface = null;
+        mContentProtectionEventProcessor = null;
     }
 
     // TODO(b/122454205): once we support multiple sessions, we might need to move some of these
     // clearings out.
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @UiThread
-    private void resetSession(int newState) {
+    public void resetSession(int newState) {
         if (sVerbose) {
             Log.v(TAG, "handleResetSession(" + getActivityName() + "): from "
                     + getStateAsString(mState) + " to " + getStateAsString(newState));
@@ -651,6 +718,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             }
         }
         mDirectServiceInterface = null;
+        mContentProtectionEventProcessor = null;
         mHandler.removeMessages(MSG_FLUSH);
     }
 
@@ -877,5 +945,15 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @NonNull
     private String getDebugState(@FlushReason int reason) {
         return getDebugState() + ", reason=" + getFlushReasonAsString(reason);
+    }
+
+    @UiThread
+    private boolean isContentProtectionReceiverEnabled() {
+        return mManager.mOptions.contentProtectionOptions.enableReceiver;
+    }
+
+    @UiThread
+    private boolean isContentCaptureReceiverEnabled() {
+        return mManager.mOptions.enableReceiver;
     }
 }

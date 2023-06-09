@@ -30,6 +30,7 @@ import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.Pair;
@@ -44,6 +45,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
@@ -634,6 +636,17 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             return true;
         }
 
+        return false;
+    }
+
+    /** Use to when split use intent to enter, check if this enter transition should be mixed or
+     * not.*/
+    public boolean shouldSplitEnterMixed(PendingIntent intent) {
+        // Check if this intent package is same as pip one or not, if true we want let the pip
+        // task enter split.
+        if (mPipHandler != null) {
+            return mPipHandler.isInPipPackage(SplitScreenUtils.getPackageName(intent.getIntent()));
+        }
         return false;
     }
 

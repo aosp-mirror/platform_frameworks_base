@@ -16,12 +16,11 @@
 
 package com.android.systemui.dagger;
 
-import android.content.Context;
 import android.os.HandlerThread;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.SystemUIInitializerFactory;
+import com.android.systemui.SystemUIInitializer;
 import com.android.systemui.tv.TvWMComponent;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -49,7 +48,7 @@ import java.util.Optional;
 /**
  * Dagger Subcomponent for WindowManager.  This class explicitly describes the interfaces exported
  * from the WM component into the SysUI component (in
- * {@link SystemUIInitializerFactory#init(Context, boolean)}), and references the specific dependencies
+ * {@link SystemUIInitializer#init(boolean)}), and references the specific dependencies
  * provided by its particular device/form-factor SystemUI implementation.
  *
  * ie. {@link WMComponent} includes {@link WMShellModule}

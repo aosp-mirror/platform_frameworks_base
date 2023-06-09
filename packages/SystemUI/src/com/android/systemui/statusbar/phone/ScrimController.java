@@ -881,24 +881,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     mBehindAlpha = 1;
                     mNotificationsAlpha = behindFraction * mDefaultScrimAlpha;
                 } else {
-                    if (mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
-                        mBehindAlpha = mLargeScreenShadeInterpolator.getBehindScrimAlpha(
-                                mPanelExpansionFraction * mDefaultScrimAlpha);
-                        mNotificationsAlpha =
-                                mLargeScreenShadeInterpolator.getNotificationScrimAlpha(
-                                        mPanelExpansionFraction);
-                    } else {
-                        // Behind scrim will finish fading in at 30% expansion.
-                        float behindFraction = MathUtils
-                                .constrainedMap(0f, 1f, 0f, 0.3f, mPanelExpansionFraction);
-                        mBehindAlpha = behindFraction * mDefaultScrimAlpha;
-                        // Delay fade-in of notification scrim a bit further, to coincide with the
-                        // behind scrim finishing fading in.
-                        // Also to coincide with the view starting to fade in, otherwise the empty
-                        // panel can be quite jarring.
-                        mNotificationsAlpha = MathUtils
-                                .constrainedMap(0f, 1f, 0.3f, 0.75f, mPanelExpansionFraction);
-                    }
+                    mBehindAlpha = mLargeScreenShadeInterpolator.getBehindScrimAlpha(
+                            mPanelExpansionFraction * mDefaultScrimAlpha);
+                    mNotificationsAlpha =
+                            mLargeScreenShadeInterpolator.getNotificationScrimAlpha(
+                                    mPanelExpansionFraction);
                 }
                 mBehindTint = mState.getBehindTint();
                 mInFrontAlpha = 0;

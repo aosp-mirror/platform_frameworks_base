@@ -16,16 +16,11 @@
 
 package com.android.systemui.volume;
 
-import static android.media.AudioManager.RINGER_MODE_NORMAL;
-import static android.media.AudioManager.RINGER_MODE_SILENT;
-import static android.media.AudioManager.RINGER_MODE_VIBRATE;
-
 import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
 import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -298,7 +293,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Test
     public void testSelectVibrateFromDrawer() {
         final State initialUnsetState = new State();
-        initialUnsetState.ringerModeInternal = RINGER_MODE_NORMAL;
+        initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_NORMAL;
         mDialog.onStateChangedH(initialUnsetState);
 
         mActiveRinger.performClick();
@@ -312,7 +307,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Test
     public void testSelectMuteFromDrawer() {
         final State initialUnsetState = new State();
-        initialUnsetState.ringerModeInternal = RINGER_MODE_NORMAL;
+        initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_NORMAL;
         mDialog.onStateChangedH(initialUnsetState);
 
         mActiveRinger.performClick();
@@ -334,7 +329,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         // Make sure we've actually changed the ringer mode.
         verify(mVolumeDialogController, times(1)).setRingerMode(
-                RINGER_MODE_NORMAL, false);
+                AudioManager.RINGER_MODE_NORMAL, false);
     }
 
     /**
@@ -513,85 +508,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         config.orientation = orientation;
         if (mConfigurationController != null) {
             mConfigurationController.onConfigurationChanged(config);
-        }
-    }
-
-    private enum RingerDrawerState {INIT, OPEN, CLOSE}
-
-    @Test
-    public void ringerModeNormal_ringerContainerDescribesItsState() {
-        assertRingerContainerDescribesItsState(RINGER_MODE_NORMAL, RingerDrawerState.INIT);
-    }
-
-    @Test
-    public void ringerModeSilent_ringerContainerDescribesItsState() {
-        assertRingerContainerDescribesItsState(RINGER_MODE_SILENT, RingerDrawerState.INIT);
-    }
-
-    @Test
-    public void ringerModeVibrate_ringerContainerDescribesItsState() {
-        assertRingerContainerDescribesItsState(RINGER_MODE_VIBRATE, RingerDrawerState.INIT);
-    }
-
-    @Test
-    public void ringerModeNormal_openDrawer_ringerContainerDescribesItsState() {
-        assertRingerContainerDescribesItsState(RINGER_MODE_NORMAL, RingerDrawerState.OPEN);
-    }
-
-    @Test
-    public void ringerModeSilent_openDrawer_ringerContainerDescribesItsState() {
-        assertRingerContainerDescribesItsState(RINGER_MODE_SILENT, RingerDrawerState.OPEN);
-    }
-
-    @Test
-    public void ringerModeVibrate_openDrawer_ringerContainerDescribesItsState() {
-        assertRingerContainerDescribesItsState(RINGER_MODE_VIBRATE, RingerDrawerState.OPEN);
-    }
-
-    @Test
-    public void ringerModeNormal_closeDrawer_ringerContainerDescribesItsState() {
-        assertRingerContainerDescribesItsState(RINGER_MODE_NORMAL, RingerDrawerState.CLOSE);
-    }
-
-    @Test
-    public void ringerModeSilent_closeDrawer_ringerContainerDescribesItsState() {
-        assertRingerContainerDescribesItsState(RINGER_MODE_SILENT, RingerDrawerState.CLOSE);
-    }
-
-    @Test
-    public void ringerModeVibrate_closeDrawer_ringerContainerDescribesItsState() {
-        assertRingerContainerDescribesItsState(RINGER_MODE_VIBRATE, RingerDrawerState.CLOSE);
-    }
-
-    /**
-     * The content description should include ringer state, and the correct one.
-     */
-    private void assertRingerContainerDescribesItsState(int ringerMode,
-            RingerDrawerState drawerState) {
-        State state = createShellState();
-        state.ringerModeInternal = ringerMode;
-        mDialog.onStateChangedH(state);
-
-        mDialog.show(SHOW_REASON_UNKNOWN);
-
-        if (drawerState != RingerDrawerState.INIT) {
-            // in both cases we first open the drawer
-            mDialog.toggleRingerDrawer(true);
-
-            if (drawerState == RingerDrawerState.CLOSE) {
-                mDialog.toggleRingerDrawer(false);
-            }
-        }
-
-        String ringerContainerDescription = mDialog.getSelectedRingerContainerDescription();
-        String ringerDescription = mContext.getString(
-                mDialog.getStringDescriptionResourceForRingerMode(ringerMode));
-
-        if (drawerState == RingerDrawerState.OPEN) {
-            assertEquals(ringerDescription, ringerContainerDescription);
-        } else {
-            assertNotSame(ringerDescription, ringerContainerDescription);
-            assertTrue(ringerContainerDescription.startsWith(ringerDescription));
         }
     }
 

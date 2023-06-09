@@ -28,6 +28,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.JobSchedulerService.sUptimeMillisClock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -148,6 +149,9 @@ public class JobSchedulerServiceTest {
         // Used in JobConcurrencyManager.
         doReturn(mock(UserManagerInternal.class))
                 .when(() -> LocalServices.getService(UserManagerInternal.class));
+        // Used in JobStatus.
+        doReturn(mock(JobSchedulerInternal.class))
+                .when(() -> LocalServices.getService(JobSchedulerInternal.class));
         // Called via IdleController constructor.
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         when(mContext.getResources()).thenReturn(mock(Resources.class));
@@ -168,6 +172,8 @@ public class JobSchedulerServiceTest {
         JobSchedulerService.sSystemClock = Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
+        // Make sure the uptime is at least 24 hours so that tests that rely on high uptime work.
+        sUptimeMillisClock = getAdvancedClock(sUptimeMillisClock, 24 * HOUR_IN_MILLIS);
         // Called by DeviceIdlenessTracker
         when(mContext.getSystemService(UiModeManager.class)).thenReturn(mock(UiModeManager.class));
 
@@ -313,6 +319,260 @@ public class JobSchedulerServiceTest {
     }
 
     @Test
+    public void testGetMinJobExecutionGuaranteeMs_timeoutSafeguards_disabled() {
+        JobStatus jobUij = createJobStatus("testGetMinJobExecutionGuaranteeMs_timeoutSafeguards",
+                createJobInfo(1)
+                        .setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        JobStatus jobEj = createJobStatus("testGetMinJobExecutionGuaranteeMs_timeoutSafeguards",
+                createJobInfo(2).setExpedited(true));
+        JobStatus jobReg = createJobStatus("testGetMinJobExecutionGuaranteeMs_timeoutSafeguards",
+                createJobInfo(3));
+        spyOn(jobUij);
+        when(jobUij.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        jobUij.startedAsUserInitiatedJob = true;
+        spyOn(jobEj);
+        when(jobEj.shouldTreatAsExpeditedJob()).thenReturn(true);
+        jobEj.startedAsExpeditedJob = true;
+
+        mService.mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC = false;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT = 2;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT = 2;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT = 2;
+        mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
+
+        // Safeguards disabled -> no penalties.
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 1 UIJ timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 2 UIJ timeouts. Safeguards disabled -> no penalties.
+        jobUij.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 1 EJ timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobEj, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 2 EJ timeouts. Safeguards disabled -> no penalties.
+        jobEj.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobEj, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 1 reg timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobReg, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 2 Reg timeouts. Safeguards disabled -> no penalties.
+        jobReg.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobReg, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+    }
+
+    @Test
+    public void testGetMinJobExecutionGuaranteeMs_timeoutSafeguards_enabled() {
+        JobStatus jobUij = createJobStatus("testGetMinJobExecutionGuaranteeMs_timeoutSafeguards",
+                createJobInfo(1)
+                        .setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        JobStatus jobEj = createJobStatus("testGetMinJobExecutionGuaranteeMs_timeoutSafeguards",
+                createJobInfo(2).setExpedited(true));
+        JobStatus jobReg = createJobStatus("testGetMinJobExecutionGuaranteeMs_timeoutSafeguards",
+                createJobInfo(3));
+        spyOn(jobUij);
+        when(jobUij.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        jobUij.startedAsUserInitiatedJob = true;
+        spyOn(jobEj);
+        when(jobEj.shouldTreatAsExpeditedJob()).thenReturn(true);
+        jobEj.startedAsExpeditedJob = true;
+
+        mService.mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC = true;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT = 2;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT = 2;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT = 2;
+        mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
+
+        // No timeouts -> no penalties.
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 1 UIJ timeout. No execution penalty yet.
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // Not a timeout -> 1 UIJ timeout. No execution penalty yet.
+        jobUij.madeActive = sUptimeMillisClock.millis() - 1;
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 2 UIJ timeouts. Min execution penalty only for UIJs.
+        jobUij.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 1 EJ timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobEj, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 2 EJ timeouts. Max execution penalty for EJs.
+        jobEj.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobEj, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 1 reg timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobReg, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+
+        // 2 Reg timeouts. Max execution penalty for regular jobs.
+        jobReg.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobReg, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobReg));
+    }
+
+    @Test
     public void testGetMaxJobExecutionTimeMs() {
         JobStatus jobUIDT = createJobStatus("testGetMaxJobExecutionTimeMs",
                 createJobInfo(10)
@@ -327,7 +587,7 @@ public class JobSchedulerServiceTest {
         doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                 .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
         doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
-                .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
+                .when(tareController).getMaxJobExecutionTimeMsLocked(any());
 
         grantRunUserInitiatedJobsPermission(true);
         assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
@@ -335,6 +595,306 @@ public class JobSchedulerServiceTest {
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUIDT));
+    }
+
+    @Test
+    public void testGetMaxJobExecutionTimeMs_timeoutSafeguards_disabled() {
+        JobStatus jobUij = createJobStatus("testGetMaxJobExecutionTimeMs_timeoutSafeguards",
+                createJobInfo(1)
+                        .setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        JobStatus jobEj = createJobStatus("testGetMaxJobExecutionTimeMs_timeoutSafeguards",
+                createJobInfo(2).setExpedited(true));
+        JobStatus jobReg = createJobStatus("testGetMaxJobExecutionTimeMs_timeoutSafeguards",
+                createJobInfo(3));
+        spyOn(jobUij);
+        when(jobUij.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        jobUij.startedAsUserInitiatedJob = true;
+        spyOn(jobEj);
+        when(jobEj.shouldTreatAsExpeditedJob()).thenReturn(true);
+        jobEj.startedAsExpeditedJob = true;
+
+        QuotaController quotaController = mService.getQuotaController();
+        spyOn(quotaController);
+        TareController tareController = mService.getTareController();
+        spyOn(tareController);
+        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
+                .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
+        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
+                .when(tareController).getMaxJobExecutionTimeMsLocked(any());
+
+        mService.mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC = false;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT = 2;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT = 2;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT = 2;
+        mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
+
+        // Safeguards disabled -> no penalties.
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 1 UIJ timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 2 UIJ timeouts. Safeguards disabled -> no penalties.
+        jobUij.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 1 EJ timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobEj, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 2 EJ timeouts. Safeguards disabled -> no penalties.
+        jobEj.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobEj, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 1 reg timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobReg, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 2 Reg timeouts. Safeguards disabled -> no penalties.
+        jobReg.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobReg, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+    }
+
+    @Test
+    public void testGetMaxJobExecutionTimeMs_timeoutSafeguards_enabled() {
+        JobStatus jobUij = createJobStatus("testGetMaxJobExecutionTimeMs_timeoutSafeguards",
+                createJobInfo(1)
+                        .setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        JobStatus jobEj = createJobStatus("testGetMaxJobExecutionTimeMs_timeoutSafeguards",
+                createJobInfo(2).setExpedited(true));
+        JobStatus jobReg = createJobStatus("testGetMaxJobExecutionTimeMs_timeoutSafeguards",
+                createJobInfo(3));
+        spyOn(jobUij);
+        when(jobUij.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        jobUij.startedAsUserInitiatedJob = true;
+        spyOn(jobEj);
+        when(jobEj.shouldTreatAsExpeditedJob()).thenReturn(true);
+        jobEj.startedAsExpeditedJob = true;
+
+        QuotaController quotaController = mService.getQuotaController();
+        spyOn(quotaController);
+        TareController tareController = mService.getTareController();
+        spyOn(tareController);
+        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
+                .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
+        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
+                .when(tareController).getMaxJobExecutionTimeMsLocked(any());
+
+        mService.mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC = true;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT = 2;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT = 2;
+        mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT = 2;
+        mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
+
+        // No timeouts -> no penalties.
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 1 UIJ timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // Not a timeout -> 1 UIJ timeout. No max execution penalty yet.
+        jobUij.madeActive = sUptimeMillisClock.millis() - 1;
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 2 UIJ timeouts. Max execution penalty only for UIJs.
+        jobUij.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobUij, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 1 EJ timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobEj, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // Not a timeout -> 1 EJ timeout. No max execution penalty yet.
+        jobEj.madeActive = sUptimeMillisClock.millis() - 1;
+        mService.maybeProcessBuggyJob(jobEj, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 2 EJ timeouts. Max execution penalty for EJs.
+        jobEj.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobEj, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 1 reg timeout. No max execution penalty yet.
+        mService.maybeProcessBuggyJob(jobReg, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // Not a timeout -> 1 reg timeout. No max execution penalty yet.
+        jobReg.madeActive = sUptimeMillisClock.millis() - 1;
+        mService.maybeProcessBuggyJob(jobReg, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
+
+        // 2 Reg timeouts. Max execution penalty for regular jobs.
+        jobReg.madeActive =
+                sUptimeMillisClock.millis() - mService.mConstants.RUNTIME_MIN_GUARANTEE_MS;
+        mService.maybeProcessBuggyJob(jobReg, JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        grantRunUserInitiatedJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        grantRunUserInitiatedJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUij));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMaxJobExecutionTimeMs(jobEj));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMaxJobExecutionTimeMs(jobReg));
     }
 
     /**
@@ -1226,6 +1786,7 @@ public class JobSchedulerServiceTest {
         mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
         mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = true;
         mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
 
         final JobInfo job = createJobInfo().setPersisted(true).build();
         for (int i = 0; i < 500; ++i) {
@@ -1249,6 +1810,7 @@ public class JobSchedulerServiceTest {
         mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
         mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
         mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
 
         final JobInfo job = createJobInfo().setPersisted(true).build();
         for (int i = 0; i < 500; ++i) {
@@ -1270,6 +1832,7 @@ public class JobSchedulerServiceTest {
         mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
         mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = true;
         mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
 
         final JobInfo job = createJobInfo().setPersisted(true).build();
         for (int i = 0; i < 500; ++i) {
@@ -1292,6 +1855,7 @@ public class JobSchedulerServiceTest {
         mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
         mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = true;
         mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
 
         final JobInfo job = createJobInfo().setPersisted(true).build();
         for (int i = 0; i < 500; ++i) {
@@ -1315,6 +1879,7 @@ public class JobSchedulerServiceTest {
         mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
         mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
         mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
 
         final JobInfo job = createJobInfo().setPersisted(false).build();
         final JobWorkItem item = new JobWorkItem.Builder().build();
@@ -1337,6 +1902,7 @@ public class JobSchedulerServiceTest {
         mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
         mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
         mService.updateQuotaTracker();
+        mService.resetScheduleQuota();
 
         final JobInfo job = createJobInfo().setPersisted(true).build();
         final JobWorkItem item = new JobWorkItem.Builder().build();

@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 
 import org.junit.Before;
@@ -51,6 +52,7 @@ import org.mockito.MockitoAnnotations;
 public class DividerViewTest extends ShellTestCase {
     private @Mock SplitWindowManager.ParentContainerCallbacks mCallbacks;
     private @Mock SplitLayout.SplitLayoutHandler mSplitLayoutHandler;
+    private @Mock DisplayController mDisplayController;
     private @Mock DisplayImeController mDisplayImeController;
     private @Mock ShellTaskOrganizer mTaskOrganizer;
     private SplitLayout mSplitLayout;
@@ -62,8 +64,8 @@ public class DividerViewTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         Configuration configuration = getConfiguration();
         mSplitLayout = new SplitLayout("TestSplitLayout", mContext, configuration,
-                mSplitLayoutHandler, mCallbacks, mDisplayImeController, mTaskOrganizer,
-                SplitLayout.PARALLAX_NONE);
+                mSplitLayoutHandler, mCallbacks, mDisplayController, mDisplayImeController,
+                mTaskOrganizer, SplitLayout.PARALLAX_NONE);
         SplitWindowManager splitWindowManager = new SplitWindowManager("TestSplitWindowManager",
                 mContext,
                 configuration, mCallbacks);

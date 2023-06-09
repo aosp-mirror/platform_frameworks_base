@@ -123,21 +123,21 @@ class JobNotificationCoordinator {
         if (oldDetails == null) {
             if (jobStatus.startedAsUserInitiatedJob) {
                 Counter.logIncrementWithUid(
-                        "job_scheduler.value_cntr_w_uid_initial_setNotification_call_required",
+                        "job_scheduler.value_cntr_w_uid_initial_set_notification_call_required",
                         jobStatus.getUid());
             } else {
                 Counter.logIncrementWithUid(
-                        "job_scheduler.value_cntr_w_uid_initial_setNotification_call_optional",
+                        "job_scheduler.value_cntr_w_uid_initial_set_notification_call_optional",
                         jobStatus.getUid());
             }
         } else {
             if (jobStatus.startedAsUserInitiatedJob) {
                 Counter.logIncrementWithUid(
-                        "job_scheduler.value_cntr_w_uid_subsequent_setNotification_call_required",
+                        "job_scheduler.value_cntr_w_uid_subsequent_set_notification_call_required",
                         jobStatus.getUid());
             } else {
                 Counter.logIncrementWithUid(
-                        "job_scheduler.value_cntr_w_uid_subsequent_setNotification_call_optional",
+                        "job_scheduler.value_cntr_w_uid_subsequent_set_notification_call_optional",
                         jobStatus.getUid());
             }
             if (oldDetails.notificationId != notificationId) {
@@ -145,7 +145,7 @@ class JobNotificationCoordinator {
                 removeNotificationAssociation(hostingContext, JobParameters.STOP_REASON_UNDEFINED,
                         jobStatus);
                 Counter.logIncrementWithUid(
-                        "job_scheduler.value_cntr_w_uid_setNotification_changed_notification_ids",
+                        "job_scheduler.value_cntr_w_uid_set_notification_changed_notification_ids",
                         jobStatus.getUid());
             }
         }

@@ -593,9 +593,12 @@ public final class CpuInfoReader {
             List<String> lines = Files.readAllLines(file.toPath());
             IntArray cpuCores = new IntArray(0);
             for (int i = 0; i < lines.size(); i++) {
-                String line = lines.get(i);
-                String[] pairs = line.contains(",") ? line.trim().split(",")
-                        : line.trim().split(" ");
+                String line = lines.get(i).trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                String[] pairs = line.contains(",") ? line.split(",")
+                        : line.split(" ");
                 for (int j = 0; j < pairs.length; j++) {
                     String[] minMaxPairs = pairs[j].split("-");
                     if (minMaxPairs.length >= 2) {
@@ -615,6 +618,9 @@ public final class CpuInfoReader {
                 }
             }
             return cpuCores;
+        } catch (NumberFormatException e) {
+            Slogf.e(TAG, e, "Failed to read CPU cores from %s due to incorrect file format",
+                    file.getAbsolutePath());
         } catch (Exception e) {
             Slogf.e(TAG, e, "Failed to read CPU cores from %s", file.getAbsolutePath());
         }

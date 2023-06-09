@@ -824,7 +824,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override public void onChange(boolean selfChange) {
             updateSettings();
-            updateRotation(false);
         }
     }
 
