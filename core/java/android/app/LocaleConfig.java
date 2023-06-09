@@ -138,6 +138,10 @@ public class LocaleConfig implements Parcelable {
         try {
             //Get the resource id
             resId = new ApplicationInfo(context.getApplicationInfo()).getLocaleConfigRes();
+            if (resId == 0) {
+                mStatus = STATUS_NOT_SPECIFIED;
+                return;
+            }
             //Get the parser to read XML data
             XmlResourceParser parser = res.getXml(resId);
             parseLocaleConfig(parser, res);
