@@ -1680,9 +1680,9 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME,
                 DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS);
-        if (mKillBgRestrictedAndCachedIdleSettleTimeMs != currentSettleTime) {
-            mService.mHandler.removeMessages(
-                    ActivityManagerService.IDLE_UIDS_MSG);
+        if (mKillBgRestrictedAndCachedIdleSettleTimeMs < currentSettleTime) {
+            // Don't remove existing messages in case other IDLE_UIDS_MSG initiators use lower
+            // delays, but send a new message if the settle time has decreased.
             mService.mHandler.sendEmptyMessageDelayed(
                     ActivityManagerService.IDLE_UIDS_MSG,
                     mKillBgRestrictedAndCachedIdleSettleTimeMs);

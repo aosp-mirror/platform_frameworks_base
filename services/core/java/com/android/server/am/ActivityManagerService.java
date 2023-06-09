@@ -1526,6 +1526,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     int mBootPhase;
 
+    volatile boolean mDeterministicUidIdle = false;
+
     @VisibleForTesting
     public WindowManagerService mWindowManager;
     WindowManagerInternal mWmInternal;
@@ -16506,6 +16508,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
+    }
+
+    @Override
+    public void setDeterministicUidIdle(boolean deterministic) {
+        mDeterministicUidIdle = deterministic;
     }
 
     /** Make the currently active UIDs idle after a certain grace period. */
