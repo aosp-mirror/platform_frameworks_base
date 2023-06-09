@@ -390,8 +390,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     public void init(int windowType, Callback callback) {
         initDialog(mActivityManager.getLockTaskModeState());
 
-        mAccessibility.init();
-
         mController.addCallback(mControllerCallbackH, mHandler);
         mController.getState();
 
@@ -677,6 +675,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         initRingerH();
         initSettingsH(lockTaskModeState);
         initODICaptionsH();
+        mAccessibility.init();
     }
 
     private boolean isWindowGravityLeft() {
