@@ -118,6 +118,9 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String NAS_DEFAULT_SERVICE = "nas_default_service";
 
+    /** (boolean) Whether notify() calls to NMS should acquire and hold WakeLocks. */
+    public static final String NOTIFY_WAKELOCK = "nms_notify_wakelock";
+
     // Flags related to media notifications
 
     /**
