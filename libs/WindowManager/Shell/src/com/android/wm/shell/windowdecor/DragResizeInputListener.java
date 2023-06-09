@@ -42,6 +42,7 @@ import android.view.InputEventReceiver;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
 
@@ -303,7 +304,7 @@ class DragResizeInputListener implements AutoCloseable {
         }
 
         @Override
-        public boolean handleMotionEvent(MotionEvent e) {
+        public boolean handleMotionEvent(View v, MotionEvent e) {
             boolean result = false;
             // Check if this is a touch event vs mouse event.
             // Touch events are tracked in four corners. Other events are tracked in resize edges.

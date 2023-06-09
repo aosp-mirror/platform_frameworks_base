@@ -89,6 +89,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
     @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
+    @Mock lateinit var mToggleResizeDesktopTaskTransitionHandler:
+            ToggleResizeDesktopTaskTransitionHandler
     @Mock lateinit var launchAdjacentController: LaunchAdjacentController
 
     private lateinit var mockitoSession: StaticMockitoSession
@@ -129,6 +131,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             transitions,
             enterDesktopTransitionHandler,
             exitDesktopTransitionHandler,
+            mToggleResizeDesktopTaskTransitionHandler,
             desktopModeTaskRepository,
             launchAdjacentController,
             shellExecutor
