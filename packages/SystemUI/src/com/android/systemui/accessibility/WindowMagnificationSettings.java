@@ -101,7 +101,9 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private Button mEditButton;
     private ImageButton mFullScreenButton;
     private int mLastSelectedButtonIndex = MagnificationSize.NONE;
+
     private boolean mAllowDiagonalScrolling = false;
+
     /**
      * Amount by which magnification scale changes compared to seekbar in settings.
      * magnitude = 10 means, for every 1 scale increase, 10 progress increase in seekbar.
@@ -141,7 +143,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mSecureSettings = secureSettings;
 
         mAllowDiagonalScrolling = mSecureSettings.getIntForUser(
-                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 0,
+                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 1,
                 UserHandle.USER_CURRENT) == 1;
 
         mParams = createLayoutParams(context);
@@ -420,6 +422,11 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 UserHandle.USER_CURRENT);
     }
 
+    @VisibleForTesting
+    boolean isDiagonalScrollingEnabled() {
+        return mAllowDiagonalScrolling;
+    }
+
     /**
      * Only called from outside to notify the controlling magnifier scale changed
      *
@@ -632,7 +639,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     private void toggleDiagonalScrolling() {
         boolean enabled = mSecureSettings.getIntForUser(
-                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 0,
+                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 1,
                 UserHandle.USER_CURRENT) == 1;
         setDiagonalScrolling(!enabled);
     }

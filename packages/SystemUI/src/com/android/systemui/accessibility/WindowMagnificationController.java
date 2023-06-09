@@ -262,6 +262,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
                 mResources.getInteger(R.integer.magnification_default_scale),
                 UserHandle.USER_CURRENT);
+        mAllowDiagonalScrolling = secureSettings.getIntForUser(
+                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 1,
+                UserHandle.USER_CURRENT) == 1;
 
         setupMagnificationSizeScaleOptions();
 
@@ -1223,6 +1226,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      */
     float getCenterY() {
         return isActivated() ? mMagnificationFrame.exactCenterY() : Float.NaN;
+    }
+
+
+    @VisibleForTesting
+    boolean isDiagonalScrollingEnabled() {
+        return mAllowDiagonalScrolling;
     }
 
     private CharSequence formatStateDescription(float scale) {
