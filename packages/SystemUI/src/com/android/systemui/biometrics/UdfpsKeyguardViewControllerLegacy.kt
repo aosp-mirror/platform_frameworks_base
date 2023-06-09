@@ -20,6 +20,7 @@ import android.animation.ValueAnimator
 import android.content.res.Configuration
 import android.util.MathUtils
 import android.view.MotionEvent
+import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -71,6 +72,7 @@ constructor(
     featureFlags: FeatureFlags,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
 ) :
     UdfpsAnimationViewController<UdfpsKeyguardViewLegacy>(
         view,
@@ -300,7 +302,10 @@ constructor(
         lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = this
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
         view.mUseExpandedOverlay = useExpandedOverlay
-        view.startIconAsyncInflate()
+        view.startIconAsyncInflate {
+            (view.findViewById(R.id.udfps_animation_view_internal) as View).accessibilityDelegate =
+                udfpsKeyguardAccessibilityDelegate
+        }
     }
 
     override fun onViewDetached() {
