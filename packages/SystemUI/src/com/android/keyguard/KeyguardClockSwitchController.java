@@ -330,10 +330,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /**
-     * Apply dp changes on font/scale change
+     * Apply dp changes on configuration change
      */
-    public void onDensityOrFontScaleChanged() {
-        mView.onDensityOrFontScaleChanged();
+    public void onConfigChanged() {
+        mView.onConfigChanged();
         mKeyguardSmallClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
         mKeyguardLargeClockTopMargin =
@@ -344,6 +344,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         setDateWeatherVisibility();
     }
 
+    /**
+     * Enable or disable split shade center specific positioning
+     */
+    public void setSplitShadeCentered(boolean splitShadeCentered) {
+        mView.setSplitShadeCentered(splitShadeCentered);
+    }
 
     /**
      * Set which clock should be displayed on the keyguard. The other one will be automatically
@@ -407,7 +413,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 scale, props, animate);
 
         if (mStatusArea != null) {
-            PropertyAnimator.setProperty(mStatusArea, AnimatableProperty.TRANSLATION_X,
+            PropertyAnimator.setProperty(mStatusArea, KeyguardStatusAreaView.TRANSLATE_X_AOD,
                     x, props, animate);
         }
     }
