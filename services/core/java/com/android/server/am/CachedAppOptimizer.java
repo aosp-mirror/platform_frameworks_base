@@ -234,7 +234,8 @@ public final class CachedAppOptimizer {
     private static final int FREEZE_BINDER_TIMEOUT_MS = 100;
     private static final int FREEZE_DEADLOCK_TIMEOUT_MS = 1000;
 
-    @VisibleForTesting static final boolean ENABLE_FILE_COMPACT = false;
+    // If enabled, any compaction issued will apply to code mappings and share memory mappings.
+    @VisibleForTesting static final boolean ENABLE_SHARED_AND_CODE_COMPACT = false;
 
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = true;
@@ -1629,7 +1630,7 @@ public final class CachedAppOptimizer {
             }
         }
 
-        if (!ENABLE_FILE_COMPACT) {
+        if (!ENABLE_SHARED_AND_CODE_COMPACT) {
             if (profile == CompactProfile.SOME) {
                 profile = CompactProfile.NONE;
             } else if (profile == CompactProfile.FULL) {
