@@ -21,7 +21,10 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR_BASE;
+import static android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE;
 
+import static com.android.server.biometrics.BiometricSensor.STATE_CANCELING;
+import static com.android.server.biometrics.BiometricSensor.STATE_UNKNOWN;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTHENTICATED_PENDING_SYSUI;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_CALLED;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_IDLE;
@@ -439,6 +442,13 @@ public final class AuthSession implements IBinder.DeathRecipient {
             return false;
         }
 
+        final boolean errorLockout = error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
+                || error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+        if (errorLockout) {
+            cancelAllSensors(sensor -> Utils.isAtLeastStrength(sensorIdToStrength(sensorId),
+                    sensor.getCurrentStrength()));
+        }
+
         mErrorEscrow = error;
         mVendorCodeEscrow = vendorCode;
 
@@ -477,8 +487,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
             case STATE_AUTH_STARTED:
             case STATE_AUTH_STARTED_UI_SHOWING: {
-                final boolean errorLockout = error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
-                        || error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
                 if (isAllowDeviceCredential() && errorLockout) {
                     // SystemUI handles transition from biometric to device credential.
                     mState = STATE_SHOWING_DEVICE_CREDENTIAL;
@@ -675,7 +683,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     private boolean pauseSensorIfSupported(int sensorId) {
-        if (sensorIdToModality(sensorId) == TYPE_FACE) {
+        boolean isSensorCancelling = sensorIdToState(sensorId) == STATE_CANCELING;
+        // If the sensor is locked out, canceling sensors operation is handled in onErrorReceived()
+        if (sensorIdToModality(sensorId) == TYPE_FACE && !isSensorCancelling) {
             cancelAllSensors(sensor -> sensor.id == sensorId);
             return true;
         }
@@ -946,6 +956,27 @@ public final class AuthSession implements IBinder.DeathRecipient {
         }
         Slog.e(TAG, "Unknown sensor: " + sensorId);
         return TYPE_NONE;
+    }
+
+    private @BiometricSensor.SensorState int sensorIdToState(int sensorId) {
+        for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
+            if (sensorId == sensor.id) {
+                return sensor.getSensorState();
+            }
+        }
+        Slog.e(TAG, "Unknown sensor: " + sensorId);
+        return STATE_UNKNOWN;
+    }
+
+    @BiometricManager.Authenticators.Types
+    private int sensorIdToStrength(int sensorId) {
+        for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
+            if (sensorId == sensor.id) {
+                return sensor.getCurrentStrength();
+            }
+        }
+        Slog.e(TAG, "Unknown sensor: " + sensorId);
+        return BIOMETRIC_CONVENIENCE;
     }
 
     private String getAcquiredMessageForSensor(int sensorId, int acquiredInfo, int vendorCode) {
