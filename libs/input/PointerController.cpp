@@ -103,7 +103,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
                                      WindowListenerConsumer unregisterListener)
       : mContext(policy, looper, spriteController, *this),
         mCursorController(mContext),
-        mDisplayInfoListener(new DisplayInfoListener(this)),
+        mDisplayInfoListener(sp<DisplayInfoListener>::make(this)),
         mUnregisterWindowInfosListener(std::move(unregisterListener)) {
     std::scoped_lock lock(getLock());
     mLocked.presentation = Presentation::SPOT;
