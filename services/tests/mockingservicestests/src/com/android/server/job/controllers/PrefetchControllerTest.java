@@ -58,6 +58,7 @@ import android.util.SparseArray;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.controllers.PrefetchController.PcConstants;
 
@@ -135,6 +136,9 @@ public class PrefetchControllerTest {
         when(mJobSchedulerService.getPackagesForUidLocked(anyInt()))
                 .thenAnswer(invocationOnMock
                         -> mPackagesForUid.get(invocationOnMock.getArgument(0)));
+        // Used in JobStatus.
+        doReturn(mock(JobSchedulerInternal.class))
+                .when(() -> LocalServices.getService(JobSchedulerInternal.class));
 
         // Freeze the clocks at 24 hours after this moment in time. Several tests create sessions
         // in the past, and PrefetchController sometimes floors values at 0, so if the test time
