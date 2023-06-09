@@ -621,6 +621,15 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     private fun MutateStateScope.revokePermissionsOnPackageUpdate(appId: Int) {
+        val hasOldPackage = appId in oldState.externalState.appIdPackageNames &&
+            anyPackageInAppId(appId, oldState) { true }
+        if (!hasOldPackage) {
+            // Don't revoke anything if this isn't a package update, i.e. if information about the
+            // old package isn't available. Notably, this also means skipping packages changed via
+            // OTA, but the revocation here is also mostly for normal apps and there's no way to get
+            // information about the package before OTA anyway.
+            return
+        }
         // If the app is updated, and has scoped storage permissions, then it is possible that the
         // app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
         newState.userStates.forEachIndexed { _, userId, userState ->
@@ -1111,9 +1120,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
         return targetSdkVersion
     }
 
-    private inline fun MutateStateScope.anyRequestingPackageInAppId(
+    private inline fun MutateStateScope.anyPackageInAppId(
         appId: Int,
-        permissionName: String,
         state: AccessState = newState,
         predicate: (PackageState) -> Boolean
     ): Boolean {
@@ -1121,10 +1129,20 @@ class AppIdPermissionPolicy : SchemePolicy() {
         return packageNames.anyIndexed { _, packageName ->
             val packageState = state.externalState.packageStates[packageName]!!
             val androidPackage = packageState.androidPackage
-            androidPackage != null && permissionName in androidPackage.requestedPermissions &&
-                predicate(packageState)
+            androidPackage != null && predicate(packageState)
         }
     }
+
+    private inline fun MutateStateScope.anyRequestingPackageInAppId(
+        appId: Int,
+        permissionName: String,
+        state: AccessState = newState,
+        predicate: (PackageState) -> Boolean
+    ): Boolean =
+        anyPackageInAppId(appId, state) { packageState ->
+            permissionName in packageState.androidPackage!!.requestedPermissions &&
+                predicate(packageState)
+        }
 
     private inline fun MutateStateScope.forEachPackageInAppId(
         appId: Int,
@@ -1146,11 +1164,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
         state: AccessState = newState,
         action: (PackageState) -> Unit
     ) {
-        val packageNames = state.externalState.appIdPackageNames[appId]!!
-        packageNames.forEachIndexed { _, packageName ->
-            val packageState = state.externalState.packageStates[packageName]!!
-            val androidPackage = packageState.androidPackage
-            if (androidPackage != null && permissionName in androidPackage.requestedPermissions) {
+        forEachPackageInAppId(appId, state) { packageState ->
+            if (permissionName in packageState.androidPackage!!.requestedPermissions) {
                 action(packageState)
             }
         }
