@@ -827,9 +827,9 @@
     <!-- UI debug setting: show touches location summary [CHAR LIMIT=50] -->
     <string name="show_touches_summary">Show visual feedback for taps</string>
 
-    <!-- UI debug setting: show key presses? [CHAR LIMIT=25] -->
+    <!-- UI debug setting: show key presses? [CHAR LIMIT=50] -->
     <string name="show_key_presses">Show key presses</string>
-    <!-- UI debug setting: show physical key presses summary [CHAR LIMIT=50] -->
+    <!-- UI debug setting: show physical key presses summary [CHAR LIMIT=150] -->
     <string name="show_key_presses_summary">Show visual feedback for physical key presses</string>
 
     <!-- UI debug setting: show where surface updates happen? [CHAR LIMIT=25] -->
