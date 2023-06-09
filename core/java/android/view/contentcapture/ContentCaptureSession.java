@@ -181,8 +181,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int FLUSH_REASON_VIEW_TREE_APPEARING = 9;
     /** @hide */
     public static final int FLUSH_REASON_VIEW_TREE_APPEARED = 10;
-    /** @hide */
-    public static final int FLUSH_REASON_LOGIN_DETECTED = 11;
 
     /**
      * After {@link UPSIDE_DOWN_CAKE}, {@link #notifyViewsDisappeared(AutofillId, long[])} wraps
@@ -205,8 +203,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 FLUSH_REASON_SESSION_CONNECTED,
                 FLUSH_REASON_FORCE_FLUSH,
                 FLUSH_REASON_VIEW_TREE_APPEARING,
-                FLUSH_REASON_VIEW_TREE_APPEARED,
-                FLUSH_REASON_LOGIN_DETECTED
+                FLUSH_REASON_VIEW_TREE_APPEARED
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FlushReason {}
@@ -690,8 +687,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "VIEW_TREE_APPEARING";
             case FLUSH_REASON_VIEW_TREE_APPEARED:
                 return "VIEW_TREE_APPEARED";
-            case FLUSH_REASON_LOGIN_DETECTED:
-                return "LOGIN_DETECTED";
             default:
                 return "UNKNOWN-" + reason;
         }
