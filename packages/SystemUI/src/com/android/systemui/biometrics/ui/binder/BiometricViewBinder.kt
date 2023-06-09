@@ -339,7 +339,13 @@ object BiometricViewBinder {
 
                             launch {
                                 delay(authState.delay)
-                                legacyCallback.onAction(Callback.ACTION_AUTHENTICATED)
+                                legacyCallback.onAction(
+                                    if (authState.isAuthenticatedAndExplicitlyConfirmed) {
+                                        Callback.ACTION_AUTHENTICATED_AND_CONFIRMED
+                                    } else {
+                                        Callback.ACTION_AUTHENTICATED
+                                    }
+                                )
                             }
                         }
                     }

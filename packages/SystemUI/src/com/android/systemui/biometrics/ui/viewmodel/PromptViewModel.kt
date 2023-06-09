@@ -414,7 +414,7 @@ constructor(
             return
         }
 
-        _isAuthenticated.value = authState.asConfirmed()
+        _isAuthenticated.value = authState.asExplicitlyConfirmed()
         _message.value = PromptMessage.Empty
         _legacyState.value = AuthBiometricView.STATE_AUTHENTICATED
 
