@@ -206,6 +206,11 @@ class TransitionController {
      */
     boolean mBuildingFinishLayers = false;
 
+    /**
+     * Whether the surface of navigation bar token is reparented to an app.
+     */
+    boolean mNavigationBarAttachedToApp = false;
+
     private boolean mAnimatingState = false;
 
     final Handler mLoggerHandler = FgThread.getHandler();
