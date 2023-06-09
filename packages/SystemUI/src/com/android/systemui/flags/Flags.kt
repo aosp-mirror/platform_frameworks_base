@@ -438,9 +438,6 @@ object Flags {
     // TODO(b/254512758): Tracking Bug
     @JvmField val ROUNDED_BOX_RIPPLE = releasedFlag(1002, "rounded_box_ripple")
 
-    // TODO(b/265045965): Tracking Bug
-    val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
-
     // TODO(b/273509374): Tracking Bug
     @JvmField
     val ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS = releasedFlag(1006,
