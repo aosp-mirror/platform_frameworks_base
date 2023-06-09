@@ -149,6 +149,17 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             @NonNull String halInstanceName,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull BiometricContext biometricContext) {
+        this(context, biometricStateCallback, props, halInstanceName, lockoutResetDispatcher,
+                biometricContext, null /* daemon */);
+    }
+
+    @VisibleForTesting FaceProvider(@NonNull Context context,
+            @NonNull BiometricStateCallback biometricStateCallback,
+            @NonNull SensorProps[] props,
+            @NonNull String halInstanceName,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull BiometricContext biometricContext,
+            IFace daemon) {
         mContext = context;
         mBiometricStateCallback = biometricStateCallback;
         mHalInstanceName = halInstanceName;
@@ -160,6 +171,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mTaskStackListener = new BiometricTaskStackListener();
         mBiometricContext = biometricContext;
         mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
+        mDaemon = daemon;
 
         for (SensorProps prop : props) {
             final int sensorId = prop.commonProps.sensorId;
