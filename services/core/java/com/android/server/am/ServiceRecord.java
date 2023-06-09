@@ -1076,12 +1076,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (app == null) {
             return;
         }
-        if (mBackgroundStartPrivilegesByStartMerged.allowsAny()
-                || mIsAllowedBgActivityStartsByBinding) {
+        BackgroundStartPrivileges backgroundStartPrivileges =
+                getBackgroundStartPrivilegesWithExclusiveToken();
+        if (backgroundStartPrivileges.allowsAny()) {
             // if the token is already there it's safe to "re-add it" - we're dealing with
             // a set of Binder objects
             app.addOrUpdateBackgroundStartPrivileges(this,
-                    getBackgroundStartPrivilegesWithExclusiveToken());
+                    backgroundStartPrivileges);
         } else {
             app.removeBackgroundStartPrivileges(this);
         }
