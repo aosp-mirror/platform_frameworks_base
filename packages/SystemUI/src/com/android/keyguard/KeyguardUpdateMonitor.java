@@ -3670,7 +3670,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mLogger.logSimState(subId, slotId, state);
 
         boolean becameAbsent = false;
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)
+                && state != TelephonyManager.SIM_STATE_UNKNOWN) {
             mLogger.w("invalid subId in handleSimStateChange()");
             /* Only handle No SIM(ABSENT) and Card Error(CARD_IO_ERROR) due to
              * handleServiceStateChange() handle other case */
@@ -3705,7 +3706,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             data.subId = subId;
             data.slotId = slotId;
         }
-        if ((changed || becameAbsent) && state != TelephonyManager.SIM_STATE_UNKNOWN) {
+        if ((changed || becameAbsent) || state == TelephonyManager.SIM_STATE_UNKNOWN) {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
