@@ -1136,7 +1136,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private boolean isButtonPressFromTrackpad(MotionEvent ev) {
         // We don't allow back for button press from the trackpad, and yet we do with a mouse.
         int sources = InputManager.getInstance().getInputDevice(ev.getDeviceId()).getSources();
-        return (sources & (SOURCE_MOUSE | SOURCE_TOUCHPAD)) == sources && ev.getButtonState() != 0;
+        int sourceTrackpad = (SOURCE_MOUSE | SOURCE_TOUCHPAD);
+        return (sources & sourceTrackpad) == sourceTrackpad && ev.getButtonState() != 0;
     }
 
     private void dispatchToBackAnimation(MotionEvent event) {
