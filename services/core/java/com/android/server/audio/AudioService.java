@@ -10833,6 +10833,10 @@ public class AudioService extends IAudioService.Stub
 
     private void updateA11yVolumeAlias(boolean a11VolEnabled) {
         if (DEBUG_VOL) Log.d(TAG, "Accessibility volume enabled = " + a11VolEnabled);
+        if (mIsSingleVolume) {
+            if (DEBUG_VOL) Log.d(TAG, "Accessibility volume is not set on single volume device");
+            return;
+        }
         if (sIndependentA11yVolume != a11VolEnabled) {
             sIndependentA11yVolume = a11VolEnabled;
             // update the volume mapping scheme
