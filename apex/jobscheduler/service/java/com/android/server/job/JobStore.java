@@ -1184,6 +1184,12 @@ public final class JobStore {
             }
         }
 
+        /** Returns the {@link String#intern() interned} String if it's not null. */
+        @Nullable
+        private static String intern(@Nullable String val) {
+            return val == null ? null : val.intern();
+        }
+
         private List<JobStatus> readJobMapImpl(InputStream fis, boolean rtcIsGood, long nowElapsed)
                 throws XmlPullParserException, IOException {
             TypedXmlPullParser parser = Xml.resolvePullParser(fis);
@@ -1478,8 +1484,8 @@ public final class JobStore {
                 throws XmlPullParserException {
             // Pull out required fields from <job> attributes.
             int jobId = parser.getAttributeInt(null, "jobid");
-            String packageName = parser.getAttributeValue(null, "package");
-            String className = parser.getAttributeValue(null, "class");
+            String packageName = intern(parser.getAttributeValue(null, "package"));
+            String className = intern(parser.getAttributeValue(null, "class"));
             ComponentName cname = new ComponentName(packageName, className);
 
             return new JobInfo.Builder(jobId, cname);
