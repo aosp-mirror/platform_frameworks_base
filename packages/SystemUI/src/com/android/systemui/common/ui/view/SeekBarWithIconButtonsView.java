@@ -171,6 +171,22 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
     }
 
     /**
+     * Only for testing. Get previous set mOnSeekBarChangeListener to the seekbar.
+     */
+    @VisibleForTesting
+    public OnSeekBarWithIconButtonsChangeListener getOnSeekBarWithIconButtonsChangeListener() {
+        return mSeekBarListener.mOnSeekBarChangeListener;
+    }
+
+    /**
+     * Only for testing. Get {@link #mSeekbar} in the layout.
+     */
+    @VisibleForTesting
+    public SeekBar getSeekbar() {
+        return mSeekbar;
+    }
+
+    /**
      * Start and End icons might need to be updated when there is a change in seekbar progress.
      * Icon Start will need to be enabled when the seekbar progress is larger than 0.
      * Icon End will need to be enabled when the seekbar progress is less than Max.

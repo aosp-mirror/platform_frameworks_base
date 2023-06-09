@@ -107,6 +107,10 @@ public class MagnificationSettingsController implements ComponentCallbacks {
         return mWindowMagnificationSettings.isSettingPanelShowing();
     }
 
+    void setMagnificationScale(float scale) {
+        mWindowMagnificationSettings.setMagnificationScale(scale);
+    }
+
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         final int configDiff = newConfig.diff(mConfiguration);

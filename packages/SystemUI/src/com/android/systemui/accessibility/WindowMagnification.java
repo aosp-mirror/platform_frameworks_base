@@ -311,6 +311,10 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
             return;
         }
         scales.put(displayId, scale);
+
+        final MagnificationSettingsController magnificationSettingsController =
+                mMagnificationSettingsSupplier.get(displayId);
+        magnificationSettingsController.setMagnificationScale(scale);
     }
 
     @VisibleForTesting

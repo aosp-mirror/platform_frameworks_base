@@ -86,6 +86,14 @@ public class MagnificationSettingsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetMagnificationScale() {
+        final float scale = 3.0f;
+        mMagnificationSettingsController.setMagnificationScale(scale);
+
+        verify(mWindowMagnificationSettings).setMagnificationScale(eq(scale));
+    }
+
+    @Test
     public void testOnConfigurationChanged_notifySettingsPanel() {
         mMagnificationSettingsController.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
 
