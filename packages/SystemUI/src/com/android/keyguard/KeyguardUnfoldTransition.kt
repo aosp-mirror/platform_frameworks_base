@@ -53,7 +53,10 @@ constructor(
         UnfoldConstantTranslateAnimator(
             viewsIdToTranslate =
                 setOf(
-                    ViewIdToTranslate(R.id.keyguard_status_area, START, filterKeyguard),
+                    ViewIdToTranslate(R.id.keyguard_status_area, START, filterKeyguard,
+                        { view, value ->
+                            (view as? KeyguardStatusAreaView)?.translateXFromUnfold = value
+                        }),
                     ViewIdToTranslate(
                         R.id.lockscreen_clock_view_large, START, filterKeyguardAndSplitShadeOnly),
                     ViewIdToTranslate(R.id.lockscreen_clock_view, START, filterKeyguard),
