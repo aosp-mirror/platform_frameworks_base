@@ -61,6 +61,16 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     private TaskViewBase mTaskViewBase;
     private final Context mContext;
 
+    /**
+     * There could be a situation where we have task info and receive
+     * {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)}, however, the
+     * activity might fail to open, and in this case we need to clean up the task view / notify
+     * listeners of a task removal. This requires task info, so we save the info from onTaskAppeared
+     * in this situation to allow us to notify listeners correctly if the task failed to open.
+     */
+    private ActivityManager.RunningTaskInfo mPendingInfo;
+    /* Indicates that the task we attempted to launch in the task view failed to launch. */
+    private boolean mTaskNotFound;
     protected ActivityManager.RunningTaskInfo mTaskInfo;
     private WindowContainerToken mTaskToken;
     private SurfaceControl mTaskLeash;
@@ -236,6 +246,8 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         mTaskInfo = null;
         mTaskToken = null;
         mTaskLeash = null;
+        mPendingInfo = null;
+        mTaskNotFound = false;
     }
 
     private void updateTaskVisibility() {
@@ -257,6 +269,12 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl leash) {
         if (isUsingShellTransitions()) {
+            mPendingInfo = taskInfo;
+            if (mTaskNotFound) {
+                // If we were already notified by shell transit that we don't have the
+                // the task, clean it up now.
+                cleanUpPendingTask();
+            }
             // Everything else handled by enter transition.
             return;
         }
@@ -455,6 +473,42 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         return mTaskInfo;
     }
 
+    /**
+     * Indicates that the task was not found in the start animation for the transition.
+     * In this case we should clean up the task if we have the pending info. If we don't
+     * have the pending info, we'll do it when we receive it in
+     * {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)}.
+     */
+    void setTaskNotFound() {
+        mTaskNotFound = true;
+        if (mPendingInfo != null) {
+            cleanUpPendingTask();
+        }
+    }
+
+    /**
+     * Called when a task failed to open and we need to clean up task view /
+     * notify users of task view.
+     */
+    void cleanUpPendingTask() {
+        if (mPendingInfo != null) {
+            if (mListener != null) {
+                final int taskId = mPendingInfo.taskId;
+                mListenerExecutor.execute(() -> {
+                    mListener.onTaskRemovalStarted(taskId);
+                });
+            }
+            mTaskViewBase.onTaskVanished(mPendingInfo);
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mPendingInfo.token, false);
+
+            // Make sure the task is removed
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.removeTask(mPendingInfo.token);
+            mTaskViewTransitions.closeTaskView(wct, this);
+        }
+        resetTaskInfo();
+    }
+
     void prepareHideAnimation(@NonNull SurfaceControl.Transaction finishTransaction) {
         if (mTaskToken == null) {
             // Nothing to update, task is not yet available
@@ -492,6 +546,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             @NonNull SurfaceControl.Transaction finishTransaction,
             ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
             WindowContainerTransaction wct) {
+        mPendingInfo = null;
         mTaskInfo = taskInfo;
         mTaskToken = mTaskInfo.token;
         mTaskLeash = leash;
