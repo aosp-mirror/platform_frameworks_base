@@ -114,6 +114,7 @@ java_defaults {
         "flickertestapplib",
         "flickerlib",
         "flickerlib-helpers",
+        "flickerlib-trace_processor_shell",
         "platform-test-annotations",
         "wm-flicker-common-app-helpers",
         "wm-flicker-common-assertions",
