@@ -588,6 +588,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     return wl;
                 });
         mTestFlagResolver.setFlagOverride(WAKE_LOCK_FOR_POSTING_NOTIFICATION, true);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, "true", false);
 
         // apps allowed as convos
         mService.setStringArrayResourceValue(PKG_O);
@@ -1931,8 +1933,24 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void enqueueNotification_wakeLockFlagOff_noWakeLock() throws Exception {
+    public void enqueueNotification_wakeLockSystemPropertyOff_noWakeLock() throws Exception {
         mTestFlagResolver.setFlagOverride(WAKE_LOCK_FOR_POSTING_NOTIFICATION, false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, "true", false);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "enqueueNotification_setsWakeLockWorkSource", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        waitForIdle();
+
+        verifyZeroInteractions(mPowerManager);
+    }
+
+    @Test
+    public void enqueueNotification_wakeLockDeviceConfigOff_noWakeLock() throws Exception {
+        mTestFlagResolver.setFlagOverride(WAKE_LOCK_FOR_POSTING_NOTIFICATION, true);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, "false", false);
 
         mBinderService.enqueueNotificationWithTag(PKG, PKG,
                 "enqueueNotification_setsWakeLockWorkSource", 0,
