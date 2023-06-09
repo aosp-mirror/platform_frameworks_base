@@ -413,16 +413,22 @@ public final class JobServiceContext implements ServiceConnection {
             final Intent intent = new Intent().setComponent(job.getServiceComponent())
                     .setFlags(Intent.FLAG_FROM_BACKGROUND);
             boolean binding = false;
+            boolean startedWithForegroundFlag = false;
             try {
                 final Context.BindServiceFlags bindFlags;
-                if (job.shouldTreatAsUserInitiatedJob()) {
+                if (job.shouldTreatAsUserInitiatedJob() && !job.isUserBgRestricted()) {
+                    // If the user has bg restricted the app, don't give the job FG privileges
+                    // such as bypassing data saver or getting the higher foreground proc state.
+                    // If we've gotten to this point, the app is most likely in the foreground,
+                    // so the job will run just fine while the user keeps the app in the foreground.
                     bindFlags = Context.BindServiceFlags.of(
                             Context.BIND_AUTO_CREATE
                                     | Context.BIND_ALMOST_PERCEPTIBLE
                                     | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
                                     | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS
                                     | Context.BIND_NOT_APP_COMPONENT_USAGE);
-                } else if (job.shouldTreatAsExpeditedJob()) {
+                    startedWithForegroundFlag = true;
+                } else if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob()) {
                     bindFlags = Context.BindServiceFlags.of(
                             Context.BIND_AUTO_CREATE
                                     | Context.BIND_NOT_FOREGROUND
@@ -535,8 +541,11 @@ public final class JobServiceContext implements ServiceConnection {
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;
+            // Wait until after bindService() returns a success value to set these so we don't
+            // have JobStatus objects that aren't running but have these set to true.
             job.startedAsExpeditedJob = job.shouldTreatAsExpeditedJob();
             job.startedAsUserInitiatedJob = job.shouldTreatAsUserInitiatedJob();
+            job.startedWithForegroundFlag = startedWithForegroundFlag;
             return true;
         }
     }

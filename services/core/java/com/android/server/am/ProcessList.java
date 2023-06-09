@@ -5243,7 +5243,9 @@ public final class ProcessList {
                         mAppsInBackgroundRestricted.add(app);
                         final long future = killAppIfBgRestrictedAndCachedIdleLocked(
                                 app, nowElapsed);
-                        if (future > 0 && !mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
+                        if (future > 0
+                                && (mService.mDeterministicUidIdle
+                                        || !mService.mHandler.hasMessages(IDLE_UIDS_MSG))) {
                             mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
                                     future - nowElapsed);
                         }

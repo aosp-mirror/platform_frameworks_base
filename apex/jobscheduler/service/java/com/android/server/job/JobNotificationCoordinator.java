@@ -200,7 +200,10 @@ class JobNotificationCoordinator {
             // No more jobs using this notification. Apply the final job stop policy.
             // If the user attempted to stop the job/app, then always remove the notification
             // so the user doesn't get confused about the app state.
+            // Similarly, if the user background restricted the app, remove the notification so
+            // the user doesn't think the app is continuing to run in the background.
             if (details.jobEndNotificationPolicy == JOB_END_NOTIFICATION_POLICY_REMOVE
+                    || stopReason == JobParameters.STOP_REASON_BACKGROUND_RESTRICTION
                     || stopReason == JobParameters.STOP_REASON_USER) {
                 mNotificationManagerInternal.cancelNotification(
                         packageName, packageName, details.appUid, details.appPid, /* tag */ null,
