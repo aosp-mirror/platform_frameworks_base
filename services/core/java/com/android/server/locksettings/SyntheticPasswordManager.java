@@ -16,9 +16,14 @@
 
 package com.android.server.locksettings;
 
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 import static com.android.internal.widget.LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
+import static com.android.internal.widget.LockPatternUtils.USER_FRP;
+import static com.android.internal.widget.LockPatternUtils.USER_REPAIR_MODE;
+import static com.android.internal.widget.LockPatternUtils.pinOrPasswordQualityToCredentialType;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -718,11 +723,30 @@ class SyntheticPasswordManager {
         return PasswordData.fromBytes(passwordData).credentialType;
     }
 
-    static int getFrpCredentialType(byte[] payload) {
-        if (payload == null) {
+    int getSpecialUserCredentialType(int userId) {
+        final PersistentData data = getSpecialUserPersistentData(userId);
+        if (data.type != PersistentData.TYPE_SP_GATEKEEPER
+                && data.type != PersistentData.TYPE_SP_WEAVER) {
+            return CREDENTIAL_TYPE_NONE;
+        }
+        if (data.payload == null) {
             return LockPatternUtils.CREDENTIAL_TYPE_NONE;
         }
-        return PasswordData.fromBytes(payload).credentialType;
+        final int credentialType = PasswordData.fromBytes(data.payload).credentialType;
+        if (credentialType != CREDENTIAL_TYPE_PASSWORD_OR_PIN) {
+            return credentialType;
+        }
+        return pinOrPasswordQualityToCredentialType(data.qualityForUi);
+    }
+
+    private PersistentData getSpecialUserPersistentData(int userId) {
+        if (userId == USER_FRP) {
+            return mStorage.readPersistentDataBlock();
+        }
+        if (userId == USER_REPAIR_MODE) {
+            return mStorage.readRepairModePersistentData();
+        }
+        throw new IllegalArgumentException("Unknown special user id " + userId);
     }
 
     /**
@@ -1005,10 +1029,10 @@ class SyntheticPasswordManager {
         return sizeOfCredential;
     }
 
-    public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
-            LockscreenCredential userCredential,
+    public VerifyCredentialResponse verifySpecialUserCredential(int sourceUserId,
+            IGateKeeperService gatekeeper, LockscreenCredential userCredential,
             ICheckCredentialProgressCallback progressCallback) {
-        PersistentData persistentData = mStorage.readPersistentDataBlock();
+        final PersistentData persistentData = getSpecialUserPersistentData(sourceUserId);
         if (persistentData.type == PersistentData.TYPE_SP_GATEKEEPER) {
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
             byte[] stretchedLskf = stretchLskf(userCredential, pwd);
@@ -1019,13 +1043,13 @@ class SyntheticPasswordManager {
                         0 /* challenge */, pwd.passwordHandle,
                         stretchedLskfToGkPassword(stretchedLskf));
             } catch (RemoteException e) {
-                Slog.e(TAG, "FRP verifyChallenge failed", e);
+                Slog.e(TAG, "Persistent data credential verifyChallenge failed", e);
                 return VerifyCredentialResponse.ERROR;
             }
             return VerifyCredentialResponse.fromGateKeeperResponse(response);
         } else if (persistentData.type == PersistentData.TYPE_SP_WEAVER) {
             if (!isWeaverAvailable()) {
-                Slog.e(TAG, "No weaver service to verify SP-based FRP credential");
+                Slog.e(TAG, "No weaver service to verify SP-based persistent data credential");
                 return VerifyCredentialResponse.ERROR;
             }
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
@@ -1112,6 +1136,57 @@ class SyntheticPasswordManager {
                 mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, 0, 0, null);
             }
         }
+    }
+
+    /**
+     * Writes the user's synthetic password data to the repair mode file.
+     *
+     * @param protectorId current LSKF based protectorId
+     * @param userId user id of the user
+     */
+    public boolean writeRepairModeCredentialLocked(long protectorId, int userId) {
+        if (!shouldWriteRepairModeCredential(userId)) {
+            return false;
+        }
+        final byte[] data = loadState(PASSWORD_DATA_NAME, protectorId, userId);
+        if (data == null) {
+            Slogf.w(TAG, "Password data not found for user %d", userId);
+            return false;
+        }
+        final PasswordData pwd = PasswordData.fromBytes(data);
+        if (isNoneCredential(pwd)) {
+            Slogf.w(TAG, "User %d has NONE credential", userId);
+            return false;
+        }
+        Slogf.d(TAG, "Writing repair mode credential tied to user %d", userId);
+        final int weaverSlot = loadWeaverSlot(protectorId, userId);
+        if (weaverSlot != INVALID_WEAVER_SLOT) {
+            // write weaver password
+            mStorage.writeRepairModePersistentData(
+                    PersistentData.TYPE_SP_WEAVER, weaverSlot, pwd.toBytes());
+        } else {
+            // write gatekeeper password
+            mStorage.writeRepairModePersistentData(
+                    PersistentData.TYPE_SP_GATEKEEPER, userId, pwd.toBytes());
+        }
+        return true;
+    }
+
+    private boolean shouldWriteRepairModeCredential(int userId) {
+        final UserInfo userInfo = mUserManager.getUserInfo(userId);
+        if (!LockPatternUtils.canUserEnterRepairMode(mContext, userInfo)) {
+            Slogf.w(TAG, "User %d can't enter repair mode", userId);
+            return false;
+        }
+        if (LockPatternUtils.isRepairModeActive(mContext)) {
+            Slog.w(TAG, "Can't write repair mode credential while repair mode is already active");
+            return false;
+        }
+        if (LockPatternUtils.isGsiRunning()) {
+            Slog.w(TAG, "Can't write repair mode credential while GSI is running");
+            return false;
+        }
+        return true;
     }
 
     private ArrayMap<Integer, ArrayMap<Long, TokenData>> tokenMap = new ArrayMap<>();

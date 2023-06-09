@@ -254,6 +254,8 @@ public abstract class BaseLockSettingsServiceTests {
                 .thenReturn(true);
         when(res.getBoolean(eq(com.android.internal.R.bool.config_strongAuthRequiredOnBoot)))
                 .thenReturn(true);
+        when(res.getBoolean(eq(com.android.internal.R.bool.config_repairModeSupported)))
+                .thenReturn(true);
         return res;
     }
 
