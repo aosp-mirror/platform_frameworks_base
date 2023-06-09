@@ -135,6 +135,22 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     }
 
     /**
+     * Looks through the pending transitions for a opening transaction that matches the provided
+     * `taskView`.
+     * @param taskView the pending transition should be for this.
+     */
+    @VisibleForTesting
+    PendingTransition findPendingOpeningTransition(TaskViewTaskController taskView) {
+        for (int i = mPending.size() - 1; i >= 0; --i) {
+            if (mPending.get(i).mTaskView != taskView) continue;
+            if (TransitionUtil.isOpeningType(mPending.get(i).mType)) {
+                return mPending.get(i);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Looks through the pending transitions for one matching `taskView`.
      * @param taskView the pending transition should be for this.
      * @param type the type of transition it's looking for
@@ -369,10 +385,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             }
         }
         if (stillNeedsMatchingLaunch) {
-            throw new IllegalStateException("Expected a TaskView launch in this transition but"
-                    + " didn't get one.");
-        }
-        if (wct == null && pending == null && changesHandled != info.getChanges().size()) {
+            Slog.w(TAG, "Expected a TaskView launch in this transition but didn't get one, "
+                    + "cleaning up the task view");
+            // Didn't find a task so the task must have never launched
+            pending.mTaskView.setTaskNotFound();
+        } else if (wct == null && pending == null && changesHandled != info.getChanges().size()) {
             // Just some house-keeping, let another handler animate.
             return false;
         }
