@@ -25,7 +25,6 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -500,19 +499,15 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 true /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
-        final Runnable callback = mock(Runnable.class);
-        mService.onWakeUp(callback);
-        mMainExecutor.runAllReady();
-        verify(mDreamOverlayContainerViewController).wakeUp(callback, mMainExecutor);
+        mService.onWakeUp();
+        verify(mDreamOverlayContainerViewController).wakeUp();
         verify(mDreamOverlayCallbackController).onWakeUp();
     }
 
     @Test
     public void testWakeUpBeforeStartDoesNothing() {
-        final Runnable callback = mock(Runnable.class);
-        mService.onWakeUp(callback);
-        mMainExecutor.runAllReady();
-        verify(mDreamOverlayContainerViewController, never()).wakeUp(callback, mMainExecutor);
+        mService.onWakeUp();
+        verify(mDreamOverlayContainerViewController, never()).wakeUp();
     }
 
     @Test

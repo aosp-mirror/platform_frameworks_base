@@ -27,11 +27,14 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -46,11 +49,12 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     private lateinit var underTest: KeyguardTransitionInteractor
     private lateinit var repository: FakeKeyguardTransitionRepository
+    private val testScope = TestScope()
 
     @Before
     fun setUp() {
         repository = FakeKeyguardTransitionRepository()
-        underTest = KeyguardTransitionInteractor(repository)
+        underTest = KeyguardTransitionInteractor(repository, testScope.backgroundScope)
     }
 
     @Test
@@ -108,17 +112,17 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun keyguardStateTests() = runTest {
+    fun finishedKeyguardStateTests() = testScope.runTest {
         val finishedSteps by collectValues(underTest.finishedKeyguardState)
-
+        runCurrent()
         val steps = mutableListOf<TransitionStep>()
 
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
-        steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
+        steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 0f, STARTED))
+        steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 0.5f, RUNNING))
+        steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 1f, FINISHED))
+        steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 0f, STARTED))
+        steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 0.9f, RUNNING))
+        steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 1f, FINISHED))
         steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
 
         steps.forEach {
@@ -126,7 +130,29 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
         }
 
-        assertThat(finishedSteps).isEqualTo(listOf(LOCKSCREEN, AOD))
+        assertThat(finishedSteps).isEqualTo(listOf(LOCKSCREEN, PRIMARY_BOUNCER, AOD))
+    }
+
+    @Test
+    fun startedKeyguardStateTests() = testScope.runTest {
+        val finishedSteps by collectValues(underTest.startedKeyguardState)
+        runCurrent()
+        val steps = mutableListOf<TransitionStep>()
+
+        steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 0f, STARTED))
+        steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 0.5f, RUNNING))
+        steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 1f, FINISHED))
+        steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 0f, STARTED))
+        steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 0.9f, RUNNING))
+        steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 1f, FINISHED))
+        steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
+
+        steps.forEach {
+            repository.sendTransitionStep(it)
+            runCurrent()
+        }
+
+        assertThat(finishedSteps).isEqualTo(listOf(OFF, PRIMARY_BOUNCER, AOD, GONE))
     }
 
     @Test
