@@ -707,6 +707,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         }
                     }
                     break;
+                case TelephonyManager.SIM_STATE_UNKNOWN:
+                    mPendingPinLock = false;
+                    break;
                 default:
                     if (DEBUG_SIM_STATES) Log.v(TAG, "Unspecific state: " + simState);
                     break;
