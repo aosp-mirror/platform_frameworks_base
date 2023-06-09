@@ -267,6 +267,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .setColor(mTaskSurface, mTmpColor)
                 .show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
+                .setShadowRadius(mTaskSurface, shadowRadius)
                 .setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
         if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             startT.setCornerRadius(mTaskSurface, params.mCornerRadius);
