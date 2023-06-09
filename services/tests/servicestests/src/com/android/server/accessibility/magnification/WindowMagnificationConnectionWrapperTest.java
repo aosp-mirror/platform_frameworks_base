@@ -122,6 +122,15 @@ public class WindowMagnificationConnectionWrapperTest {
     }
 
     @Test
+    public void onUserMagnificationScaleChanged() throws RemoteException {
+        final int testUserId = 1;
+        final float testScale = 3f;
+        mConnectionWrapper.onUserMagnificationScaleChanged(testUserId, TEST_DISPLAY, testScale);
+        verify(mConnection).onUserMagnificationScaleChanged(
+                eq(testUserId), eq(TEST_DISPLAY), eq(testScale));
+    }
+
+    @Test
     public void setMirrorWindowCallback() throws RemoteException {
         mConnectionWrapper.setConnectionCallback(mCallback);
         verify(mConnection).setConnectionCallback(mCallback);

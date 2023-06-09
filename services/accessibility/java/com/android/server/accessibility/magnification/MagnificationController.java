@@ -502,6 +502,10 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     @Override
     public void onSourceBoundsChanged(int displayId, Rect bounds) {
         if (shouldNotifyMagnificationChange(displayId, MAGNIFICATION_MODE_WINDOW)) {
+            // notify sysui the magnification scale changed on window magnifier
+            mWindowMagnificationMgr.onUserMagnificationScaleChanged(
+                    mUserId, displayId, getWindowMagnificationMgr().getScale(displayId));
+
             final MagnificationConfig config = new MagnificationConfig.Builder()
                     .setMode(MAGNIFICATION_MODE_WINDOW)
                     .setActivated(getWindowMagnificationMgr().isWindowMagnifierEnabled(displayId))
@@ -516,6 +520,10 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     public void onFullScreenMagnificationChanged(int displayId, @NonNull Region region,
             @NonNull MagnificationConfig config) {
         if (shouldNotifyMagnificationChange(displayId, MAGNIFICATION_MODE_FULLSCREEN)) {
+            // notify sysui the magnification scale changed on fullscreen magnifier
+            mWindowMagnificationMgr.onUserMagnificationScaleChanged(
+                    mUserId, displayId, config.getScale());
+
             mAms.notifyMagnificationChanged(displayId, region, config);
         }
     }
