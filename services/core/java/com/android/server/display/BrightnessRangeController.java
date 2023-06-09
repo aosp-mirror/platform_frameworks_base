@@ -20,6 +20,7 @@ import android.hardware.display.BrightnessInfo;
 import android.os.IBinder;
 
 import java.io.PrintWriter;
+import java.util.function.BooleanSupplier;
 
 class BrightnessRangeController {
 
@@ -43,20 +44,10 @@ class BrightnessRangeController {
     }
 
     void onAmbientLuxChange(float ambientLux) {
-        if (NBM_FEATURE_FLAG) {
-            boolean nbmTransitionChanged = mNormalBrightnessModeController.onAmbientLuxChange(
-                    ambientLux);
-            int previousHbm = mHbmController.getHighBrightnessMode();
-            mHbmController.onAmbientLuxChange(ambientLux);
-            int nextHbm = mHbmController.getHighBrightnessMode();
-            // if hbm changed - callback was triggered in mHbmController.onAmbientLuxChange
-            // if nbm transition not changed - no need to trigger callback
-            if (previousHbm == nextHbm && nbmTransitionChanged) {
-                mModeChangeCallback.run();
-            }
-        } else {
-            mHbmController.onAmbientLuxChange(ambientLux);
-        }
+        applyChanges(
+                () -> mNormalBrightnessModeController.onAmbientLuxChange(ambientLux),
+                () -> mHbmController.onAmbientLuxChange(ambientLux)
+        );
     }
 
     float getNormalBrightnessMax() {
@@ -65,10 +56,16 @@ class BrightnessRangeController {
 
     void loadFromConfig(HighBrightnessModeMetadata hbmMetadata, IBinder token,
             DisplayDeviceInfo info, DisplayDeviceConfig displayDeviceConfig) {
-        mHbmController.setHighBrightnessModeMetadata(hbmMetadata);
-        mHbmController.resetHbmData(info.width, info.height, token, info.uniqueId,
-                displayDeviceConfig.getHighBrightnessModeData(),
-                displayDeviceConfig::getHdrBrightnessFromSdr);
+        applyChanges(
+                () -> mNormalBrightnessModeController.resetNbmData(
+                        displayDeviceConfig.getLuxThrottlingData()),
+                () -> {
+                    mHbmController.setHighBrightnessModeMetadata(hbmMetadata);
+                    mHbmController.resetHbmData(info.width, info.height, token, info.uniqueId,
+                            displayDeviceConfig.getHighBrightnessModeData(),
+                            displayDeviceConfig::getHdrBrightnessFromSdr);
+                }
+        );
     }
 
     void stop() {
@@ -76,7 +73,10 @@ class BrightnessRangeController {
     }
 
     void setAutoBrightnessEnabled(int state) {
-        mHbmController.setAutoBrightnessEnabled(state);
+        applyChanges(
+                () -> mNormalBrightnessModeController.setAutoBrightnessState(state),
+                () ->  mHbmController.setAutoBrightnessEnabled(state)
+        );
     }
 
     void onBrightnessChanged(float brightness, float unthrottledBrightness,
@@ -108,5 +108,19 @@ class BrightnessRangeController {
 
     float getTransitionPoint() {
         return mHbmController.getTransitionPoint();
+    }
+
+    private void applyChanges(BooleanSupplier nbmChangesFunc, Runnable hbmChangesFunc) {
+        if (NBM_FEATURE_FLAG) {
+            boolean nbmTransitionChanged = nbmChangesFunc.getAsBoolean();
+            hbmChangesFunc.run();
+            // if nbm transition changed - trigger callback
+            // HighBrightnessModeController handles sending changes itself
+            if (nbmTransitionChanged) {
+                mModeChangeCallback.run();
+            }
+        } else {
+            hbmChangesFunc.run();
+        }
     }
 }
