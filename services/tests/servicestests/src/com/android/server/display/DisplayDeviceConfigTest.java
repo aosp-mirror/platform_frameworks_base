@@ -33,8 +33,8 @@ import android.os.Temperature;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.server.display.config.ThermalStatus;
