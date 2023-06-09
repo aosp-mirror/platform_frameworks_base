@@ -1861,13 +1861,14 @@
          specified -->
     <string name="default_wallpaper_component" translatable="false">@null</string>
 
-    <!-- CMF colors to default wallpaper component map, the component with color matching the device
-         color will be the cmf default wallpapers. The default wallpaper will be default wallpaper
-         component if not specified.
+    <!-- Default wallpaper component per device color map, each item is a comma separated key-value
+         pair with key being a device color and value being the corresponding wallpaper component.
+         The component with its key matching the device color will be the default wallpaper, the
+         default wallpaper component will be the default if this config is not specified.
 
          E.g. for SLV color, and com.android.example/com.android.example.SlVDefaultWallpaper
          <item>SLV,com.android.example/com.android.example.SlVDefaultWallpaper</item> -->
-    <string-array name="cmf_default_wallpaper_component" translatable="false">
+    <string-array name="default_wallpaper_component_per_device_color" translatable="false">
         <!-- Add packages here -->
     </string-array>
 
