@@ -294,23 +294,37 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
-     * Fade in the resize veil
+     * Show the resize veil.
      */
-    void showResizeVeil(Rect taskBounds) {
+    public void showResizeVeil(Rect taskBounds) {
         mResizeVeil.showVeil(mTaskSurface, taskBounds);
+    }
+
+    /**
+     * Show the resize veil.
+     */
+    public void showResizeVeil(SurfaceControl.Transaction tx, Rect taskBounds) {
+        mResizeVeil.showVeil(tx, mTaskSurface, taskBounds, false /* fadeIn */);
     }
 
     /**
      * Set new bounds for the resize veil
      */
-    void updateResizeVeil(Rect newBounds) {
+    public void updateResizeVeil(Rect newBounds) {
         mResizeVeil.updateResizeVeil(newBounds);
+    }
+
+    /**
+     * Set new bounds for the resize veil
+     */
+    public void updateResizeVeil(SurfaceControl.Transaction tx, Rect newBounds) {
+        mResizeVeil.updateResizeVeil(tx, newBounds);
     }
 
     /**
      * Fade the resize veil out.
      */
-    void hideResizeVeil() {
+    public void hideResizeVeil() {
         mResizeVeil.hideVeil();
     }
 
