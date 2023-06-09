@@ -17,4 +17,18 @@
 
 <resources>
     <item type="id" name="header_footer_views_added_tag_key" />
+
+    <!-- animation channels for keyguard status area -->
+    <item type="id" name="translate_x_clock_design_animator_tag" />
+    <item type="id" name="translate_x_clock_design_animator_start_tag" />
+    <item type="id" name="translate_x_clock_design_animator_end_tag" />
+    <item type="id" name="translate_x_aod_animator_tag" />
+    <item type="id" name="translate_x_aod_animator_start_tag" />
+    <item type="id" name="translate_x_aod_animator_end_tag" />
+    <item type="id" name="translate_y_clock_size_animator_tag" />
+    <item type="id" name="translate_y_clock_size_animator_start_tag" />
+    <item type="id" name="translate_y_clock_size_animator_end_tag" />
+    <item type="id" name="translate_y_clock_design_animator_tag" />
+    <item type="id" name="translate_y_clock_design_animator_start_tag" />
+    <item type="id" name="translate_y_clock_design_animator_end_tag" />
 </resources>
