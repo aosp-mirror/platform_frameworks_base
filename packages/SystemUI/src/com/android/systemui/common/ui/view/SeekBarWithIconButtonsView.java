@@ -16,6 +16,7 @@
 
 package com.android.systemui.common.ui.view;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -29,6 +30,9 @@ import android.widget.SeekBar;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * The layout contains a seekbar whose progress could be modified
@@ -46,6 +50,8 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
     private ImageView mIconEnd;
     private SeekBar mSeekbar;
     private int mSeekBarChangeMagnitude = 1;
+
+    private boolean mSetProgressFromButtonFlag = false;
 
     private SeekBarChangeListener mSeekBarListener = new SeekBarChangeListener();
     private String[] mStateLabels = null;
@@ -121,21 +127,8 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
 
         mSeekbar.setOnSeekBarChangeListener(mSeekBarListener);
 
-        mIconStartFrame.setOnClickListener((view) -> {
-            final int progress = mSeekbar.getProgress();
-            if (progress > 0) {
-                mSeekbar.setProgress(progress - mSeekBarChangeMagnitude);
-                setIconViewAndFrameEnabled(mIconStart, mSeekbar.getProgress() > 0);
-            }
-        });
-
-        mIconEndFrame.setOnClickListener((view) -> {
-            final int progress = mSeekbar.getProgress();
-            if (progress < mSeekbar.getMax()) {
-                mSeekbar.setProgress(progress + mSeekBarChangeMagnitude);
-                setIconViewAndFrameEnabled(mIconEnd, mSeekbar.getProgress() < mSeekbar.getMax());
-            }
-        });
+        mIconStartFrame.setOnClickListener((view) -> onIconStartClicked());
+        mIconEndFrame.setOnClickListener((view) -> onIconEndClicked());
     }
 
     private static void setIconViewAndFrameEnabled(View iconView, boolean enabled) {
@@ -172,9 +165,9 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
      * Sets a onSeekbarChangeListener to the seekbar in the layout.
      * We update the Start Icon and End Icon if needed when the seekbar progress is changed.
      */
-    public void setOnSeekBarChangeListener(
-            @Nullable SeekBar.OnSeekBarChangeListener onSeekBarChangeListener) {
-        mSeekBarListener.setOnSeekBarChangeListener(onSeekBarChangeListener);
+    public void setOnSeekBarWithIconButtonsChangeListener(
+            @Nullable OnSeekBarWithIconButtonsChangeListener onSeekBarChangeListener) {
+        mSeekBarListener.setOnSeekBarWithIconButtonsChangeListener(onSeekBarChangeListener);
     }
 
     /**
@@ -216,16 +209,72 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
      */
     public void setProgress(int progress) {
         mSeekbar.setProgress(progress);
-        updateIconViewIfNeeded(progress);
+        updateIconViewIfNeeded(mSeekbar.getProgress());
     }
 
+    private void setProgressFromButton(int progress) {
+        mSetProgressFromButtonFlag = true;
+        mSeekbar.setProgress(progress);
+        updateIconViewIfNeeded(mSeekbar.getProgress());
+    }
+
+    private void onIconStartClicked() {
+        final int progress = mSeekbar.getProgress();
+        if (progress > 0) {
+            setProgressFromButton(progress - mSeekBarChangeMagnitude);
+        }
+    }
+
+    private void onIconEndClicked() {
+        final int progress = mSeekbar.getProgress();
+        if (progress < mSeekbar.getMax()) {
+            setProgressFromButton(progress + mSeekBarChangeMagnitude);
+        }
+    }
+
+    /**
+     * Get current seekbar progress
+     *
+     * @return
+     */
     @VisibleForTesting
     public int getProgress() {
         return mSeekbar.getProgress();
     }
 
+    /**
+     * Extended from {@link SeekBar.OnSeekBarChangeListener} to add callback to notify the listeners
+     * the user interaction with the SeekBarWithIconButtonsView is finalized.
+     */
+    public interface OnSeekBarWithIconButtonsChangeListener
+            extends SeekBar.OnSeekBarChangeListener {
+
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                ControlUnitType.SLIDER,
+                ControlUnitType.BUTTON
+        })
+        /** Denotes the Last user interacted control unit type. */
+        @interface ControlUnitType {
+            int SLIDER = 0;
+            int BUTTON = 1;
+        }
+
+        /**
+         * Notification that the user interaction with SeekBarWithIconButtonsView is finalized. This
+         * would be triggered after user ends dragging on the slider or clicks icon buttons.
+         *
+         * @param seekBar The SeekBar in which the user ends interaction with
+         * @param control The last user interacted control unit. It would be
+         *                {@link ControlUnitType#SLIDER} if the user was changing the seekbar
+         *                progress through dragging the slider, or {@link ControlUnitType#BUTTON}
+         *                is the user was clicking button to change the progress.
+         */
+        void onUserInteractionFinalized(SeekBar seekBar, @ControlUnitType int control);
+    }
+
     private class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
-        private SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener = null;
+        private OnSeekBarWithIconButtonsChangeListener mOnSeekBarChangeListener = null;
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -233,7 +282,17 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
                 setSeekbarStateDescription();
             }
             if (mOnSeekBarChangeListener != null) {
-                mOnSeekBarChangeListener.onProgressChanged(seekBar, progress, fromUser);
+                if (mSetProgressFromButtonFlag) {
+                    mSetProgressFromButtonFlag = false;
+                    mOnSeekBarChangeListener.onProgressChanged(
+                            seekBar, progress, /* fromUser= */ true);
+                    // Directly trigger onUserInteractionFinalized since the interaction
+                    // (click button) is ended.
+                    mOnSeekBarChangeListener.onUserInteractionFinalized(
+                            seekBar, OnSeekBarWithIconButtonsChangeListener.ControlUnitType.BUTTON);
+                } else {
+                    mOnSeekBarChangeListener.onProgressChanged(seekBar, progress, fromUser);
+                }
             }
             updateIconViewIfNeeded(progress);
         }
@@ -249,10 +308,13 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
         public void onStopTrackingTouch(SeekBar seekBar) {
             if (mOnSeekBarChangeListener != null) {
                 mOnSeekBarChangeListener.onStopTrackingTouch(seekBar);
+                mOnSeekBarChangeListener.onUserInteractionFinalized(
+                        seekBar, OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER);
             }
         }
 
-        void setOnSeekBarChangeListener(SeekBar.OnSeekBarChangeListener listener) {
+        void setOnSeekBarWithIconButtonsChangeListener(
+                OnSeekBarWithIconButtonsChangeListener listener) {
             mOnSeekBarChangeListener = listener;
         }
     }
