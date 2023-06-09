@@ -38,6 +38,7 @@ import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_STATE_CANCELL
 import static com.android.keyguard.KeyguardUpdateMonitor.DEFAULT_CANCEL_SIGNAL_TIMEOUT;
 import static com.android.keyguard.KeyguardUpdateMonitor.HAL_POWER_PRESS_TIMEOUT;
 import static com.android.keyguard.KeyguardUpdateMonitor.getCurrentUser;
+import static com.android.systemui.flags.Flags.FP_LISTEN_OCCLUDING_APPS;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_CLOSED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
@@ -134,6 +135,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
@@ -277,6 +279,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private final Executor mBackgroundExecutor = Runnable::run;
     private final Executor mMainExecutor = Runnable::run;
     private TestableLooper mTestableLooper;
+    private FakeFeatureFlags mFeatureFlags;
     private Handler mHandler;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private MockitoSession mMockitoSession;
@@ -325,6 +328,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
+        mFeatureFlags = new FakeFeatureFlags();
+        mFeatureFlags.set(FP_LISTEN_OCCLUDING_APPS, false);
 
         when(mSecureSettings.getUriFor(anyString())).thenReturn(mURI);
 
@@ -1426,6 +1431,23 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
         // THEN we should listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(true);
+    }
+
+    @Test
+    public void testOccludingAppFingerprintListeningState_featureFlagEnabled() {
+        mFeatureFlags.set(FP_LISTEN_OCCLUDING_APPS, true);
+
+        // GIVEN keyguard isn't visible (app occluding)
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // THEN we SHOULD listen for non-UDFPS fingerprint
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isEqualTo(true);
+
+        // THEN we should listen for udfps (hiding of mechanism to actually auth is
+        // controlled by UdfpsKeyguardViewController)
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(true);
     }
 
@@ -3126,7 +3148,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mDreamManager, mDevicePolicyManager, mSensorPrivacyManager, mTelephonyManager,
                     mPackageManager, mFaceManager, mFingerprintManager, mBiometricManager,
                     mFaceWakeUpTriggersConfig, mDevicePostureController,
-                    Optional.of(mInteractiveToAuthProvider));
+                    Optional.of(mInteractiveToAuthProvider), mFeatureFlags);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 
