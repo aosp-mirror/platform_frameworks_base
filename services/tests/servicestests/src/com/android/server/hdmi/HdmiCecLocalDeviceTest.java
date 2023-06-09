@@ -504,6 +504,19 @@ public class HdmiCecLocalDeviceTest {
     }
 
     @Test
+    public void handleUserControlPressed_ignoreAdditionalParameters() {
+        byte[] params = new byte[] {
+                (byte) (HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION & 0xFF), (byte) 0xFF};
+        mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
+        @Constants.HandleMessageResult int result = mHdmiLocalDevice.handleUserControlPressed(
+                HdmiCecMessageBuilder.buildUserControlPressed(ADDR_TV, ADDR_PLAYBACK_1, params));
+
+        assertEquals(Constants.HANDLED, result);
+        assertThat(mWakeupMessageReceived).isTrue();
+        assertThat(mStandbyMessageReceived).isFalse();
+    }
+
+    @Test
     public void handleVendorCommand_notHandled() {
         HdmiCecMessage vendorCommand = HdmiCecMessageBuilder.buildVendorCommand(ADDR_TV,
                 ADDR_PLAYBACK_1, new byte[]{0});
