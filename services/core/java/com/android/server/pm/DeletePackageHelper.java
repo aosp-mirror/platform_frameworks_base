@@ -343,6 +343,20 @@ final class DeletePackageHelper {
         return res ? DELETE_SUCCEEDED : PackageManager.DELETE_FAILED_INTERNAL_ERROR;
     }
 
+    /** Deletes dexopt artifacts for the given package*/
+    private void deleteArtDexoptArtifacts(String packageName) {
+        try (PackageManagerLocal.FilteredSnapshot filteredSnapshot =
+                     PackageManagerServiceUtils.getPackageManagerLocal()
+                             .withFilteredSnapshot()) {
+            try {
+                DexOptHelper.getArtManagerLocal().deleteDexoptArtifacts(
+                        filteredSnapshot, packageName);
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                Slog.w(TAG, e.toString());
+            }
+        }
+    }
+
     /*
      * This method handles package deletion in general
      */
@@ -484,6 +498,11 @@ final class DeletePackageHelper {
                     action, allUserHandles, writeSettings);
         } else {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.getPackageName());
+            if (ps.isIncremental()) {
+                // Explicitly delete dexopt artifacts for incremental app because the
+                // artifacts are not stored in the same directory as the APKs
+                deleteArtDexoptArtifacts(packageName);
+            }
             deleteInstalledPackageLIF(ps, deleteCodeAndResources, flags, allUserHandles,
                     outInfo, writeSettings);
         }
