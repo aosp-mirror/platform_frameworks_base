@@ -217,6 +217,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock
     private SecureSettings mSecureSettings;
+    @Mock
+    private UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
 
     // Capture listeners so that they can be used to send events
     @Captor
@@ -315,7 +317,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mActivityLaunchAnimator, alternateTouchProvider, mBiometricExecutor,
                 mPrimaryBouncerInteractor, mSinglePointerTouchProcessor, mSessionTracker,
                 mAlternateBouncerInteractor, mSecureSettings, mInputManager, mUdfpsUtils,
-                mock(KeyguardFaceAuthInteractor.class));
+                mock(KeyguardFaceAuthInteractor.class),
+                mUdfpsKeyguardAccessibilityDelegate);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());

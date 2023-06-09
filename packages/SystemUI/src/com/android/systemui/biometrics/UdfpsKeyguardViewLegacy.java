@@ -79,6 +79,7 @@ public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
     private float mInterpolatedDarkAmount;
     private int mAnimationType = ANIMATION_NONE;
     private boolean mFullyInflated;
+    private Runnable mOnFinishInflateRunnable;
 
     public UdfpsKeyguardViewLegacy(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -90,7 +91,12 @@ public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
             .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
     }
 
-    public void startIconAsyncInflate() {
+    /**
+     * Inflate internal udfps view on a background thread and call the onFinishRunnable
+     * when inflation is finished.
+     */
+    public void startIconAsyncInflate(Runnable onFinishInflate) {
+        mOnFinishInflateRunnable = onFinishInflate;
         // inflate Lottie views on a background thread in case it takes a while to inflate
         AsyncLayoutInflater inflater = new AsyncLayoutInflater(mContext);
         inflater.inflate(R.layout.udfps_keyguard_view_internal, this,
@@ -330,6 +336,7 @@ public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
                     frameInfo -> new PorterDuffColorFilter(mTextColorPrimary,
                             PorterDuff.Mode.SRC_ATOP)
             );
+            mOnFinishInflateRunnable.run();
         }
     };
 }
