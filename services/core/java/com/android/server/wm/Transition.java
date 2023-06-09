@@ -234,9 +234,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private @TransitionState int mState = STATE_PENDING;
     private final ReadyTracker mReadyTracker = new ReadyTracker();
 
-    // TODO(b/188595497): remove when not needed.
-    /** @see RecentsAnimationController#mNavigationBarAttachedToApp */
-    private boolean mNavBarAttachedToApp = false;
     private int mRecentsDisplayId = INVALID_DISPLAY;
 
     /** The delay for light bar appearance animation. */
@@ -1781,7 +1778,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (navWindow == null || navWindow.mToken == null) {
             return;
         }
-        mNavBarAttachedToApp = true;
+        mController.mNavigationBarAttachedToApp = true;
         navWindow.mToken.cancelAnimation();
         final SurfaceControl.Transaction t = navWindow.mToken.getPendingTransaction();
         final SurfaceControl navSurfaceControl = navWindow.mToken.getSurfaceControl();
@@ -1803,8 +1800,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     /** @see RecentsAnimationController#restoreNavigationBarFromApp */
     void legacyRestoreNavigationBarFromApp() {
-        if (!mNavBarAttachedToApp) return;
-        mNavBarAttachedToApp = false;
+        if (!mController.mNavigationBarAttachedToApp) {
+            return;
+        }
+        mController.mNavigationBarAttachedToApp = false;
 
         if (mRecentsDisplayId == INVALID_DISPLAY) {
             Slog.e(TAG, "Reparented navigation bar without a valid display");
@@ -1837,6 +1836,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             break;
         }
 
+        final AsyncRotationController asyncRotationController = dc.getAsyncRotationController();
+        if (asyncRotationController != null) {
+            asyncRotationController.accept(navWindow);
+        }
+
         if (animate) {
             final NavBarFadeAnimationController controller =
                     new NavBarFadeAnimationController(dc);
@@ -1845,6 +1849,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Reparent the SurfaceControl of nav bar token back.
             t.reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         }
+
+        // To apply transactions.
+        dc.mWmService.scheduleAnimationLocked();
     }
 
     private void reportStartReasonsToLogger() {
