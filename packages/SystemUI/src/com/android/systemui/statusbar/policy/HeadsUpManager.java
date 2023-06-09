@@ -393,6 +393,31 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
     }
 
+    /**
+     * Notes that the user took an action on an entry that might indirectly cause the system or the
+     * app to remove the notification.
+     *
+     * @param entry the entry that might be indirectly removed by the user's action
+     *
+     * @see com.android.systemui.statusbar.notification.collection.coordinator.HeadsUpCoordinator#mActionPressListener
+     * @see #canRemoveImmediately(String)
+     */
+    public void setUserActionMayIndirectlyRemove(@NonNull NotificationEntry entry) {
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
+        if (headsUpEntry != null) {
+            headsUpEntry.userActionMayIndirectlyRemove = true;
+        }
+    }
+
+    @Override
+    public boolean canRemoveImmediately(@NonNull String key) {
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
+        if (headsUpEntry != null && headsUpEntry.userActionMayIndirectlyRemove) {
+            return true;
+        }
+        return super.canRemoveImmediately(key);
+    }
+
     @NonNull
     @Override
     protected HeadsUpEntry createAlertEntry() {
@@ -421,6 +446,8 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      */
     protected class HeadsUpEntry extends AlertEntry {
         public boolean remoteInputActive;
+        public boolean userActionMayIndirectlyRemove;
+
         protected boolean expanded;
         protected boolean wasUnpinned;
 

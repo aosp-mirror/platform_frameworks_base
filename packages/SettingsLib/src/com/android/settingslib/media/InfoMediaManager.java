@@ -116,10 +116,7 @@ public class InfoMediaManager extends MediaManager {
                 && !TextUtils.isEmpty(mPackageName)) {
             RouteListingPreference routeListingPreference =
                     mRouterManager.getRouteListingPreference(mPackageName);
-            if (routeListingPreference != null) {
-                Api34Impl.onRouteListingPreferenceUpdated(null, routeListingPreference,
-                        mPreferenceItemMap);
-            }
+            Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference, mPreferenceItemMap);
         }
         refreshDevices();
     }
@@ -631,7 +628,7 @@ public class InfoMediaManager extends MediaManager {
         }
 
         /**
-         * Ignore callback here since we'll also receive {@link onRequestFailed} with reason code.
+         * Ignore callback here since we'll also receive {@link #onRequestFailed} with reason code.
          */
         @Override
         public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
@@ -656,9 +653,9 @@ public class InfoMediaManager extends MediaManager {
         public void onRouteListingPreferenceUpdated(
                 String packageName,
                 RouteListingPreference routeListingPreference) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                Api34Impl.onRouteListingPreferenceUpdated(packageName, routeListingPreference,
-                        mPreferenceItemMap);
+            if (TextUtils.equals(mPackageName, packageName)) {
+                Api34Impl.onRouteListingPreferenceUpdated(
+                        routeListingPreference, mPreferenceItemMap);
                 refreshDevices();
             }
         }
@@ -746,7 +743,6 @@ public class InfoMediaManager extends MediaManager {
 
         @DoNotInline
         static void onRouteListingPreferenceUpdated(
-                String packageName,
                 RouteListingPreference routeListingPreference,
                 Map<String, RouteListingPreference.Item> preferenceItemMap) {
             preferenceItemMap.clear();

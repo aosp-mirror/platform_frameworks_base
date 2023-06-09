@@ -633,12 +633,17 @@ class HeadsUpCoordinator @Inject constructor(
         mFSIUpdateCandidates.removeAll(toRemoveForFSI)
     }
 
-    /** When an action is pressed on a notification, end HeadsUp lifetime extension. */
+    /**
+     * When an action is pressed on a notification, make sure we don't lifetime-extend it in the
+     * future by informing the HeadsUpManager, and make sure we don't keep lifetime-extending it if
+     * we already are.
+     *
+     * @see HeadsUpManager.setUserActionMayIndirectlyRemove
+     * @see HeadsUpManager.canRemoveImmediately
+     */
     private val mActionPressListener = Consumer<NotificationEntry> { entry ->
-        if (mNotifsExtendingLifetime.contains(entry)) {
-            val removeInMillis = mHeadsUpManager.getEarliestRemovalTime(entry.key)
-            mExecutor.executeDelayed({ endNotifLifetimeExtensionIfExtended(entry) }, removeInMillis)
-        }
+        mHeadsUpManager.setUserActionMayIndirectlyRemove(entry)
+        mExecutor.execute { endNotifLifetimeExtensionIfExtended(entry) }
     }
 
     private val mLifetimeExtender = object : NotifLifetimeExtender {

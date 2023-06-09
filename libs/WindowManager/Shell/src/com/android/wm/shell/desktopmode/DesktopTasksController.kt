@@ -38,7 +38,6 @@ import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
-import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -184,7 +183,7 @@ class DesktopTasksController(
         )
         // Bring other apps to front first
         bringDesktopAppsToFront(task.displayId, wct)
-        addMoveToDesktopChanges(wct, task.token)
+        addMoveToDesktopChanges(wct, task)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
@@ -205,7 +204,7 @@ class DesktopTasksController(
         )
         val wct = WindowContainerTransaction()
         moveHomeTaskToFront(wct)
-        addMoveToDesktopChanges(wct, taskInfo.getToken())
+        addMoveToDesktopChanges(wct, taskInfo)
         wct.setBounds(taskInfo.token, startBounds)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -225,7 +224,7 @@ class DesktopTasksController(
         )
         val wct = WindowContainerTransaction()
         bringDesktopAppsToFront(taskInfo.displayId, wct)
-        addMoveToDesktopChanges(wct, taskInfo.getToken())
+        addMoveToDesktopChanges(wct, taskInfo)
         wct.setBounds(taskInfo.token, freeformBounds)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -251,7 +250,7 @@ class DesktopTasksController(
         )
 
         val wct = WindowContainerTransaction()
-        addMoveToFullscreenChanges(wct, task.token)
+        addMoveToFullscreenChanges(wct, task)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
@@ -270,7 +269,7 @@ class DesktopTasksController(
                 task.taskId
         )
         val wct = WindowContainerTransaction()
-        addMoveToFullscreenChanges(wct, task.token)
+        addMoveToFullscreenChanges(wct, task)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             enterDesktopTaskTransitionHandler.startCancelMoveToDesktopMode(wct, position,
                     mOnAnimationFinishedCallback)
@@ -287,7 +286,7 @@ class DesktopTasksController(
                 task.taskId
         )
         val wct = WindowContainerTransaction()
-        addMoveToFullscreenChanges(wct, task.token)
+        addMoveToFullscreenChanges(wct, task)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             exitDesktopTaskTransitionHandler.startTransition(
@@ -516,7 +515,7 @@ class DesktopTasksController(
                     task.taskId
             )
             return WindowContainerTransaction().also { wct ->
-                addMoveToFullscreenChanges(wct, task.token)
+                addMoveToFullscreenChanges(wct, task)
             }
         }
         return null
@@ -532,7 +531,7 @@ class DesktopTasksController(
                     task.taskId
             )
             return WindowContainerTransaction().also { wct ->
-                addMoveToDesktopChanges(wct, task.token)
+                addMoveToDesktopChanges(wct, task)
             }
         }
         return null
@@ -546,30 +545,44 @@ class DesktopTasksController(
         )
         val wct = WindowContainerTransaction()
         bringDesktopAppsToFront(task.displayId, wct)
-        addMoveToDesktopChanges(wct, task.token)
+        addMoveToDesktopChanges(wct, task)
         desktopModeTaskRepository.setStashed(task.displayId, false)
         return wct
     }
 
     private fun addMoveToDesktopChanges(
         wct: WindowContainerTransaction,
-        token: WindowContainerToken
+        taskInfo: RunningTaskInfo
     ) {
-        wct.setWindowingMode(token, WINDOWING_MODE_FREEFORM)
-        wct.reorder(token, true /* onTop */)
+        val displayWindowingMode = taskInfo.configuration.windowConfiguration.displayWindowingMode
+        val targetWindowingMode = if (displayWindowingMode == WINDOWING_MODE_FREEFORM) {
+            // Display windowing is freeform, set to undefined and inherit it
+            WINDOWING_MODE_UNDEFINED
+        } else {
+            WINDOWING_MODE_FREEFORM
+        }
+        wct.setWindowingMode(taskInfo.token, targetWindowingMode)
+        wct.reorder(taskInfo.token, true /* onTop */)
         if (isDesktopDensityOverrideSet()) {
-            wct.setDensityDpi(token, getDesktopDensityDpi())
+            wct.setDensityDpi(taskInfo.token, getDesktopDensityDpi())
         }
     }
 
     private fun addMoveToFullscreenChanges(
         wct: WindowContainerTransaction,
-        token: WindowContainerToken
+        taskInfo: RunningTaskInfo
     ) {
-        wct.setWindowingMode(token, WINDOWING_MODE_FULLSCREEN)
-        wct.setBounds(token, null)
+        val displayWindowingMode = taskInfo.configuration.windowConfiguration.displayWindowingMode
+        val targetWindowingMode = if (displayWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+            // Display windowing is fullscreen, set to undefined and inherit it
+            WINDOWING_MODE_UNDEFINED
+        } else {
+            WINDOWING_MODE_FULLSCREEN
+        }
+        wct.setWindowingMode(taskInfo.token, targetWindowingMode)
+        wct.setBounds(taskInfo.token, null)
         if (isDesktopDensityOverrideSet()) {
-            wct.setDensityDpi(token, getFullscreenDensityDpi())
+            wct.setDensityDpi(taskInfo.token, getFullscreenDensityDpi())
         }
     }
 

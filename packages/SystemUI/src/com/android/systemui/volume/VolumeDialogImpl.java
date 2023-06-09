@@ -930,7 +930,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 showRingerDrawer();
             }
         });
-        updateSelectedRingerContainerDescription(mIsRingerDrawerOpen);
 
         mRingerDrawerVibrate.setOnClickListener(
                 new RingerDrawerItemClickListener(RINGER_MODE_VIBRATE));
@@ -991,18 +990,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 : mode == RINGER_MODE_SILENT
                         ? -mRingerDrawerItemSize
                         : 0;
-    }
-
-    @VisibleForTesting String getSelectedRingerContainerDescription() {
-        return mSelectedRingerContainer.getContentDescription().toString();
-    }
-
-    @VisibleForTesting void toggleRingerDrawer(boolean show) {
-        if (show) {
-            showRingerDrawer();
-        } else {
-            hideRingerDrawer();
-        }
     }
 
     /** Animates in the ringer drawer. */
@@ -1082,7 +1069,12 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     .start();
         }
 
-        updateSelectedRingerContainerDescription(true);
+        // When the ringer drawer is open, tapping the currently selected ringer will set the ringer
+        // to the current ringer mode. Change the content description to that, instead of the 'tap
+        // to change ringer mode' default.
+        mSelectedRingerContainer.setContentDescription(
+                mContext.getString(getStringDescriptionResourceForRingerMode(
+                        mState.ringerModeInternal)));
 
         mIsRingerDrawerOpen = true;
     }
@@ -1128,36 +1120,12 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 .translationY(0f)
                 .start();
 
-        updateSelectedRingerContainerDescription(false);
+        // When the drawer is closed, tapping the selected ringer drawer will open it, allowing the
+        // user to change the ringer.
+        mSelectedRingerContainer.setContentDescription(
+                mContext.getString(R.string.volume_ringer_change));
 
         mIsRingerDrawerOpen = false;
-    }
-
-
-    /**
-     * @param open false to set the description when drawer is closed
-     */
-    private void updateSelectedRingerContainerDescription(boolean open) {
-        if (mState == null) return;
-
-        String currentMode = mContext.getString(getStringDescriptionResourceForRingerMode(
-                mState.ringerModeInternal));
-        String tapToSelect;
-
-        if (open) {
-            // When the ringer drawer is open, tapping the currently selected ringer will set the
-            // ringer to the current ringer mode. Change the content description to that, instead of
-            // the 'tap to change ringer mode' default.
-            tapToSelect = "";
-
-        } else {
-            // When the drawer is closed, tapping the selected ringer drawer will open it, allowing
-            // the user to change the ringer. The user needs to know that, and also the current mode
-            currentMode += ", ";
-            tapToSelect = mContext.getString(R.string.volume_ringer_change);
-        }
-
-        mSelectedRingerContainer.setContentDescription(currentMode + tapToSelect);
     }
 
     private void initSettingsH(int lockTaskModeState) {
@@ -1735,7 +1703,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         });
     }
 
-    @VisibleForTesting int getStringDescriptionResourceForRingerMode(int mode) {
+    private int getStringDescriptionResourceForRingerMode(int mode) {
         switch (mode) {
             case RINGER_MODE_SILENT:
                 return R.string.volume_ringer_status_silent;
@@ -1817,7 +1785,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             updateVolumeRowH(row);
         }
         updateRingerH();
-        updateSelectedRingerContainerDescription(mIsRingerDrawerOpen);
         mWindow.setTitle(composeWindowTitle());
     }
 
