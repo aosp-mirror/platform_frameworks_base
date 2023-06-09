@@ -37,7 +37,7 @@ class FontInterpolatorTest : SysuiTestCase() {
     private fun assertSameAxes(expect: Font, actual: Font) {
         val expectAxes = expect.axes?.also { it.sortBy { axis -> axis.tag } }
         val actualAxes = actual.axes?.also { it.sortBy { axis -> axis.tag } }
-        assertThat(expectAxes).isEqualTo(actualAxes)
+        assertThat(actualAxes).isEqualTo(expectAxes)
     }
 
     private fun assertSameAxes(expectVarSettings: String, actual: Font) {
@@ -46,7 +46,7 @@ class FontInterpolatorTest : SysuiTestCase() {
             it.sortBy { axis -> axis.tag }
         }
         val actualAxes = actual.axes?.also { it.sortBy { axis -> axis.tag } }
-        assertThat(expectAxes).isEqualTo(actualAxes)
+        assertThat(actualAxes).isEqualTo(expectAxes)
     }
 
     @Test
@@ -61,7 +61,7 @@ class FontInterpolatorTest : SysuiTestCase() {
         val interp = FontInterpolator()
         assertSameAxes(startFont, interp.lerp(startFont, endFont, 0f))
         assertSameAxes(endFont, interp.lerp(startFont, endFont, 1f))
-        assertSameAxes("'wght' 496, 'ital' 0.5, 'GRAD' 450", interp.lerp(startFont, endFont, 0.5f))
+        assertSameAxes("'wght' 500, 'ital' 0.5, 'GRAD' 450", interp.lerp(startFont, endFont, 0.5f))
     }
 
     @Test
@@ -74,7 +74,7 @@ class FontInterpolatorTest : SysuiTestCase() {
                 .build()
 
         val interp = FontInterpolator()
-        assertSameAxes("'wght' 249, 'ital' 0.5", interp.lerp(startFont, endFont, 0.5f))
+        assertSameAxes("'wght' 250, 'ital' 0.5", interp.lerp(startFont, endFont, 0.5f))
     }
 
     @Test
@@ -118,7 +118,7 @@ class FontInterpolatorTest : SysuiTestCase() {
                 .setFontVariationSettings("'wght' 1")
                 .build()
         val resultFont = interp.lerp(startFont, endFont, 0.5f)
-        for (i in 0..FONT_CACHE_MAX_ENTRIES + 1) {
+        for (i in 0..interp.cacheMaxEntries + 1) {
             val f1 = Font.Builder(sFont)
                     .setFontVariationSettings("'wght' ${i * 100}")
                     .build()
