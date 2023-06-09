@@ -375,7 +375,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                             int scoAudioMode, boolean isPrivileged, String eventSource) {
 
         if (AudioService.DEBUG_COMM_RTE) {
-            Log.v(TAG, "setCommunicationRouteForClient: device: " + device);
+            Log.v(TAG, "setCommunicationRouteForClient: device: " + device
+                    + ", eventSource: " + eventSource);
         }
         AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
                                         "setCommunicationRouteForClient for uid: " + uid
@@ -497,14 +498,48 @@ import java.util.concurrent.atomic.AtomicBoolean;
     };
 
     /*package */ static boolean isValidCommunicationDevice(AudioDeviceInfo device) {
+        return isValidCommunicationDeviceType(device.getType());
+    }
+
+    private static boolean isValidCommunicationDeviceType(int deviceType) {
         for (int type : VALID_COMMUNICATION_DEVICE_TYPES) {
-            if (device.getType() == type) {
+            if (deviceType == type) {
                 return true;
             }
         }
         return false;
     }
 
+    /*package */
+    void postCheckCommunicationDeviceRemoval(@NonNull AudioDeviceAttributes device) {
+        if (!isValidCommunicationDeviceType(
+                AudioDeviceInfo.convertInternalDeviceToDeviceType(device.getInternalType()))) {
+            return;
+        }
+        sendLMsgNoDelay(MSG_L_CHECK_COMMUNICATION_DEVICE_REMOVAL, SENDMSG_QUEUE, device);
+    }
+
+    @GuardedBy("mDeviceStateLock")
+    void onCheckCommunicationDeviceRemoval(@NonNull AudioDeviceAttributes device) {
+        if (AudioService.DEBUG_COMM_RTE) {
+            Log.v(TAG, "onCheckCommunicationDeviceRemoval device: " + device.toString());
+        }
+        for (CommunicationRouteClient crc : mCommunicationRouteClients) {
+            if (device.equals(crc.getDevice())) {
+                if (AudioService.DEBUG_COMM_RTE) {
+                    Log.v(TAG, "onCheckCommunicationDeviceRemoval removing client: "
+                            + crc.toString());
+                }
+                // Cancelling the route for this client will remove it from the stack and update
+                // the communication route.
+                CommunicationDeviceInfo deviceInfo = new CommunicationDeviceInfo(
+                        crc.getBinder(), crc.getUid(), device, false,
+                        BtHelper.SCO_MODE_UNDEFINED, "onCheckCommunicationDeviceRemoval",
+                        false, crc.isPrivileged());
+                postSetCommunicationDeviceForClient(deviceInfo);
+            }
+        }
+    }
     /* package */ static List<AudioDeviceInfo> getAvailableCommunicationDevices() {
         ArrayList<AudioDeviceInfo> commDevices = new ArrayList<>();
         AudioDeviceInfo[] allDevices =
@@ -1449,7 +1484,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ boolean handleDeviceConnection(AudioDeviceAttributes attributes,
+    /*package*/ boolean handleDeviceConnection(@NonNull AudioDeviceAttributes attributes,
                                 boolean connect, @Nullable BluetoothDevice btDevice) {
         synchronized (mDeviceStateLock) {
             return mDeviceInventory.handleDeviceConnection(
@@ -1858,6 +1893,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     final BluetoothDevice btDevice = (BluetoothDevice) msg.obj;
                     BtHelper.onNotifyPreferredAudioProfileApplied(btDevice);
                 } break;
+
+                case MSG_L_CHECK_COMMUNICATION_DEVICE_REMOVAL: {
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            onCheckCommunicationDeviceRemoval((AudioDeviceAttributes) msg.obj);
+                        }
+                    }
+                } break;
+
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
@@ -1934,6 +1978,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
     private static final int MSG_IL_BTLEAUDIO_TIMEOUT = 49;
 
     private static final int MSG_L_NOTIFY_PREFERRED_AUDIOPROFILE_APPLIED = 52;
+    private static final int MSG_L_CHECK_COMMUNICATION_DEVICE_REMOVAL = 53;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {
@@ -2308,6 +2353,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         dispatchCommunicationDevice();
     }
 
+    @GuardedBy("mDeviceStateLock")
     private CommunicationRouteClient removeCommunicationRouteClient(
                     IBinder cb, boolean unregister) {
         for (CommunicationRouteClient cl : mCommunicationRouteClients) {
