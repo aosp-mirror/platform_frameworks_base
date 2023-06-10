@@ -173,6 +173,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final SecureSettings mSecureSettings;
     @NonNull private final UdfpsUtils mUdfpsUtils;
     @NonNull private final InputManager mInputManager;
+    @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     private final boolean mIgnoreRefreshRate;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
@@ -272,7 +273,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                             mUdfpsDisplayMode, mSecureSettings, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
                                     fromUdfpsView), mActivityLaunchAnimator, mFeatureFlags,
-                            mPrimaryBouncerInteractor, mAlternateBouncerInteractor, mUdfpsUtils)));
+                            mPrimaryBouncerInteractor, mAlternateBouncerInteractor, mUdfpsUtils,
+                            mUdfpsKeyguardAccessibilityDelegate)));
         }
 
         @Override
@@ -825,7 +827,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull SecureSettings secureSettings,
             @NonNull InputManager inputManager,
             @NonNull UdfpsUtils udfpsUtils,
-            @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor) {
+            @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
+            @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -871,6 +874,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mSecureSettings = secureSettings;
         mUdfpsUtils = udfpsUtils;
         mInputManager = inputManager;
+        mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;
 
         mTouchProcessor = mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
                 ? singlePointerTouchProcessor : null;

@@ -57,7 +57,6 @@ import android.window.SurfaceSyncGroup;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
@@ -411,15 +410,17 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(additionalWindowSurfaceBuilder).build();
         verify(mMockSurfaceControlAddWindowT).setPosition(additionalWindowSurface, 0, 0);
         final int width = WindowDecoration.loadDimensionPixelSize(
-                mContext.getResources(), mCaptionMenuWidthId);
+                windowDecor.mDecorWindowContext.getResources(), mCaptionMenuWidthId);
         final int height = WindowDecoration.loadDimensionPixelSize(
-                mContext.getResources(), mRelayoutParams.mCaptionHeightId);
+                windowDecor.mDecorWindowContext.getResources(), mRelayoutParams.mCaptionHeightId);
         verify(mMockSurfaceControlAddWindowT).setWindowCrop(additionalWindowSurface, width, height);
-        final int shadowRadius = WindowDecoration.loadDimensionPixelSize(mContext.getResources(),
+        final int shadowRadius = WindowDecoration.loadDimensionPixelSize(
+                windowDecor.mDecorWindowContext.getResources(),
                 mCaptionMenuShadowRadiusId);
         verify(mMockSurfaceControlAddWindowT)
                 .setShadowRadius(additionalWindowSurface, shadowRadius);
-        final int cornerRadius = WindowDecoration.loadDimensionPixelSize(mContext.getResources(),
+        final int cornerRadius = WindowDecoration.loadDimensionPixelSize(
+                windowDecor.mDecorWindowContext.getResources(),
                 mCaptionMenuCornerRadiusId);
         verify(mMockSurfaceControlAddWindowT)
                 .setCornerRadius(additionalWindowSurface, cornerRadius);
@@ -514,8 +515,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
     private TestWindowDecoration createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo, SurfaceControl testSurface) {
-        return new TestWindowDecoration(InstrumentationRegistry.getInstrumentation().getContext(),
-                mMockDisplayController, mMockShellTaskOrganizer,
+        return new TestWindowDecoration(mContext, mMockDisplayController, mMockShellTaskOrganizer,
                 taskInfo, testSurface,
                 new MockObjectSupplier<>(mMockSurfaceControlBuilders,
                         () -> createMockSurfaceControlBuilder(mock(SurfaceControl.class))),

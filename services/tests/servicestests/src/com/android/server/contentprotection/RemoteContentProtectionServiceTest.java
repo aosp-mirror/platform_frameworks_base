@@ -16,8 +16,6 @@
 
 package com.android.server.contentprotection;
 
-import static android.view.contentcapture.ContentCaptureSession.FLUSH_REASON_LOGIN_DETECTED;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
@@ -29,8 +27,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.UserHandle;
+import android.service.contentcapture.IContentProtectionService;
 import android.view.contentcapture.ContentCaptureEvent;
-import android.view.contentcapture.IContentCaptureDirectManager;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -63,7 +61,7 @@ public class RemoteContentProtectionServiceTest {
 
     @Rule public final MockitoRule mMockitoRule = MockitoJUnit.rule();
 
-    @Mock private IContentCaptureDirectManager mMockContentCaptureDirectManager;
+    @Mock private IContentProtectionService mMockContentProtectionService;
 
     private RemoteContentProtectionService mRemoteContentProtectionService;
 
@@ -79,7 +77,7 @@ public class RemoteContentProtectionServiceTest {
     @Test
     public void doesNotAutoConnect() {
         assertThat(mConnectCallCount).isEqualTo(0);
-        verifyZeroInteractions(mMockContentCaptureDirectManager);
+        verifyZeroInteractions(mMockContentProtectionService);
     }
 
     @Test
@@ -98,8 +96,7 @@ public class RemoteContentProtectionServiceTest {
 
         mRemoteContentProtectionService.onLoginDetected(events);
 
-        verify(mMockContentCaptureDirectManager)
-                .sendEvents(events, FLUSH_REASON_LOGIN_DETECTED, /* options= */ null);
+        verify(mMockContentProtectionService).onLoginDetected(events);
     }
 
     private final class TestRemoteContentProtectionService extends RemoteContentProtectionService {
@@ -109,15 +106,15 @@ public class RemoteContentProtectionServiceTest {
         }
 
         @Override // from ServiceConnector
-        public synchronized AndroidFuture<IContentCaptureDirectManager> connect() {
+        public synchronized AndroidFuture<IContentProtectionService> connect() {
             mConnectCallCount++;
-            return AndroidFuture.completedFuture(mMockContentCaptureDirectManager);
+            return AndroidFuture.completedFuture(mMockContentProtectionService);
         }
 
         @Override // from ServiceConnector
-        public boolean run(@NonNull ServiceConnector.VoidJob<IContentCaptureDirectManager> job) {
+        public boolean run(@NonNull ServiceConnector.VoidJob<IContentProtectionService> job) {
             try {
-                job.run(mMockContentCaptureDirectManager);
+                job.run(mMockContentProtectionService);
             } catch (Exception ex) {
                 fail("Unexpected exception: " + ex);
             }

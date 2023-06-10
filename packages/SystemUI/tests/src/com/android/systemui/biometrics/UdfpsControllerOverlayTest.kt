@@ -114,6 +114,8 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     @Mock private lateinit var udfpsUtils: UdfpsUtils
+    @Mock private lateinit var udfpsKeyguardAccessibilityDelegate:
+            UdfpsKeyguardAccessibilityDelegate
     @Captor private lateinit var layoutParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
     private val onTouch = { _: View, _: MotionEvent, _: Boolean -> true }
@@ -144,7 +146,8 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             configurationController, keyguardStateController, unlockedScreenOffAnimationController,
             udfpsDisplayMode, secureSettings, REQUEST_ID, reason,
             controllerCallback, onTouch, activityLaunchAnimator, featureFlags,
-            primaryBouncerInteractor, alternateBouncerInteractor, isDebuggable, udfpsUtils
+            primaryBouncerInteractor, alternateBouncerInteractor, isDebuggable, udfpsUtils,
+            udfpsKeyguardAccessibilityDelegate,
         )
         block()
     }
