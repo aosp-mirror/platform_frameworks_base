@@ -631,7 +631,6 @@ private fun PromptSelectorInteractor.initializePrompt(
         }
     useBiometricsForAuthentication(
         info,
-        requireConfirmation,
         USER_ID,
         CHALLENGE,
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
