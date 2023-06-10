@@ -1065,13 +1065,20 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             boolean isRestricted = false;
             synchronized (mLock) {
                 final Vcn vcn = mVcns.get(subGrp);
+                final VcnConfig vcnConfig = mConfigs.get(subGrp);
                 if (vcn != null) {
+                    if (vcnConfig == null) {
+                        // TODO: b/284381334 Investigate for the root cause of this issue
+                        // and handle it properly
+                        logWtf("Vcn instance exists but VcnConfig does not for " + subGrp);
+                    }
+
                     if (vcn.getStatus() == VCN_STATUS_CODE_ACTIVE) {
                         isVcnManagedNetwork = true;
                     }
 
                     final Set<Integer> restrictedTransports = mDeps.getRestrictedTransports(
-                            subGrp, mLastSnapshot, mConfigs.get(subGrp));
+                            subGrp, mLastSnapshot, vcnConfig);
                     for (int restrictedTransport : restrictedTransports) {
                         if (ncCopy.hasTransport(restrictedTransport)) {
                             if (restrictedTransport == TRANSPORT_CELLULAR
