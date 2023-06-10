@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FINISH_RECEIVER;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
 import static android.os.UserHandle.USER_SYSTEM;
@@ -611,7 +612,7 @@ public class BroadcastQueueTest {
                 callerApp.getPid(), callerApp.info.uid, false, null, null, null, null,
                 AppOpsManager.OP_NONE, options, receivers, callerApp, resultTo,
                 Activity.RESULT_OK, null, resultExtras, ordered, false, false, userId,
-                BackgroundStartPrivileges.NONE, false, null);
+                BackgroundStartPrivileges.NONE, false, null, PROCESS_STATE_UNKNOWN);
     }
 
     private void assertHealth() {
@@ -1599,7 +1600,7 @@ public class BroadcastQueueTest {
                 null, null, null, null, AppOpsManager.OP_NONE, BroadcastOptions.makeBasic(),
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), null, null,
                 Activity.RESULT_OK, null, null, false, false, false, UserHandle.USER_SYSTEM,
-                backgroundStartPrivileges, false, null);
+                backgroundStartPrivileges, false, null, PROCESS_STATE_UNKNOWN);
         enqueueBroadcast(r);
 
         waitForIdle();

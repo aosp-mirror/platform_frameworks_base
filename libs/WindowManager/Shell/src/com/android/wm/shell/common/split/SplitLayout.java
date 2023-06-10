@@ -63,8 +63,10 @@ import com.android.internal.policy.DockedDividerUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 
@@ -104,6 +106,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private final Rect mWinBounds2 = new Rect();
     private final SplitLayoutHandler mSplitLayoutHandler;
     private final SplitWindowManager mSplitWindowManager;
+    private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
     private final ImePositionProcessor mImePositionProcessor;
     private final ResizingEffectPolicy mSurfaceEffectPolicy;
@@ -128,13 +131,14 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public SplitLayout(String windowName, Context context, Configuration configuration,
             SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
-            DisplayImeController displayImeController, ShellTaskOrganizer taskOrganizer,
-            int parallaxType) {
+            DisplayController displayController, DisplayImeController displayImeController,
+            ShellTaskOrganizer taskOrganizer, int parallaxType) {
         mContext = context.createConfigurationContext(configuration);
         mOrientation = configuration.orientation;
         mRotation = configuration.windowConfiguration.getRotation();
         mDensity = configuration.densityDpi;
         mSplitLayoutHandler = splitLayoutHandler;
+        mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mSplitWindowManager = new SplitWindowManager(windowName, mContext, configuration,
                 parentContainerCallbacks);
@@ -145,7 +149,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         updateDividerConfig(mContext);
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
+        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
         resetDividerPosition();
 
         mDimNonImeSide = mContext.getResources().getBoolean(R.bool.config_dimNonImeAttachedSide);
@@ -314,7 +318,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mRotation = rotation;
         mDensity = density;
         mUiMode = uiMode;
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
+        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
         updateDividerConfig(mContext);
         initDividerPosition(mTempRect);
         updateInvisibleRect();
@@ -324,7 +328,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     /** Rotate the layout to specific rotation and calculate new bounds. The stable insets value
      *  should be calculated by display layout. */
-    public void rotateTo(int newRotation, Rect stableInsets) {
+    public void rotateTo(int newRotation) {
         final int rotationDelta = (newRotation - mRotation + 4) % 4;
         final boolean changeOrient = (rotationDelta % 2) != 0;
 
@@ -337,7 +341,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         // We only need new bounds here, other configuration should be update later.
         mTempRect.set(mRootBounds);
         mRootBounds.set(tmpRect);
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, stableInsets);
+        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
         initDividerPosition(mTempRect);
     }
 
@@ -548,10 +552,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity, hardDismiss);
     }
 
-    private DividerSnapAlgorithm getSnapAlgorithm(Context context, Rect rootBounds,
-            @Nullable Rect stableInsets) {
+    private DividerSnapAlgorithm getSnapAlgorithm(Context context, Rect rootBounds) {
         final boolean isLandscape = isLandscape(rootBounds);
-        final Rect insets = stableInsets != null ? stableInsets : getDisplayInsets(context);
+        final Rect insets = getDisplayStableInsets(context);
 
         // Make split axis insets value same as the larger one to avoid bounds1 and bounds2
         // have difference for avoiding size-compat mode when switching unresizable apps in
@@ -634,7 +637,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public void splitSwitching(SurfaceControl.Transaction t, SurfaceControl leash1,
             SurfaceControl leash2, Consumer<Rect> finishCallback) {
         final boolean isLandscape = isLandscape();
-        final Rect insets = getDisplayInsets(mContext);
+        final Rect insets = getDisplayStableInsets(mContext);
         insets.set(isLandscape ? insets.left : 0, isLandscape ? 0 : insets.top,
                 isLandscape ? insets.right : 0, isLandscape ? 0 : insets.bottom);
 
@@ -705,13 +708,17 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return animator;
     }
 
-    private static Rect getDisplayInsets(Context context) {
-        return context.getSystemService(WindowManager.class)
-                .getMaximumWindowMetrics()
-                .getWindowInsets()
-                .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()
-                        | WindowInsets.Type.displayCutout())
-                .toRect();
+    private Rect getDisplayStableInsets(Context context) {
+        final DisplayLayout displayLayout =
+                mDisplayController.getDisplayLayout(context.getDisplayId());
+        return displayLayout != null
+                ? displayLayout.stableInsets()
+                : context.getSystemService(WindowManager.class)
+                        .getMaximumWindowMetrics()
+                        .getWindowInsets()
+                        .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()
+                                | WindowInsets.Type.displayCutout())
+                        .toRect();
     }
 
     private static boolean isLandscape(Rect bounds) {
@@ -784,7 +791,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     private int getSmallestWidthDp(Rect bounds) {
         mTempRect.set(bounds);
-        mTempRect.inset(getDisplayInsets(mContext));
+        mTempRect.inset(getDisplayStableInsets(mContext));
         final int minWidth = Math.min(mTempRect.width(), mTempRect.height());
         final float density = mContext.getResources().getDisplayMetrics().density;
         return (int) (minWidth / density);

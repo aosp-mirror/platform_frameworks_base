@@ -33,6 +33,7 @@ class PromptAuthStateTest : SysuiTestCase() {
         with(PromptAuthState(isAuthenticated = false)) {
             assertThat(isNotAuthenticated).isTrue()
             assertThat(isAuthenticatedAndConfirmed).isFalse()
+            assertThat(isAuthenticatedAndExplicitlyConfirmed).isFalse()
             assertThat(isAuthenticatedByFace).isFalse()
             assertThat(isAuthenticatedByFingerprint).isFalse()
         }
@@ -43,6 +44,7 @@ class PromptAuthStateTest : SysuiTestCase() {
         with(PromptAuthState(isAuthenticated = true)) {
             assertThat(isNotAuthenticated).isFalse()
             assertThat(isAuthenticatedAndConfirmed).isTrue()
+            assertThat(isAuthenticatedAndExplicitlyConfirmed).isFalse()
             assertThat(isAuthenticatedByFace).isFalse()
             assertThat(isAuthenticatedByFingerprint).isFalse()
         }
@@ -50,10 +52,12 @@ class PromptAuthStateTest : SysuiTestCase() {
         with(PromptAuthState(isAuthenticated = true, needsUserConfirmation = true)) {
             assertThat(isNotAuthenticated).isFalse()
             assertThat(isAuthenticatedAndConfirmed).isFalse()
+            assertThat(isAuthenticatedAndExplicitlyConfirmed).isFalse()
             assertThat(isAuthenticatedByFace).isFalse()
             assertThat(isAuthenticatedByFingerprint).isFalse()
 
-            assertThat(asConfirmed().isAuthenticatedAndConfirmed).isTrue()
+            assertThat(asExplicitlyConfirmed().isAuthenticatedAndConfirmed).isTrue()
+            assertThat(asExplicitlyConfirmed().isAuthenticatedAndExplicitlyConfirmed).isTrue()
         }
     }
 
@@ -64,6 +68,7 @@ class PromptAuthStateTest : SysuiTestCase() {
         ) {
             assertThat(isNotAuthenticated).isFalse()
             assertThat(isAuthenticatedAndConfirmed).isTrue()
+            assertThat(isAuthenticatedAndExplicitlyConfirmed).isFalse()
             assertThat(isAuthenticatedByFace).isTrue()
             assertThat(isAuthenticatedByFingerprint).isFalse()
         }
@@ -79,6 +84,7 @@ class PromptAuthStateTest : SysuiTestCase() {
         ) {
             assertThat(isNotAuthenticated).isFalse()
             assertThat(isAuthenticatedAndConfirmed).isTrue()
+            assertThat(isAuthenticatedAndExplicitlyConfirmed).isFalse()
             assertThat(isAuthenticatedByFace).isFalse()
             assertThat(isAuthenticatedByFingerprint).isTrue()
         }
