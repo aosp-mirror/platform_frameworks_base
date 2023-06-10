@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
@@ -244,6 +245,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      */
     long mRestartSchedulingTime;
 
+    /**
+     * The snapshot process state when the service is requested (either start or bind).
+     */
+    int mProcessStateOnRequest;
+
     static class StartItem {
         final ServiceRecord sr;
         final boolean taskRemoved;
@@ -253,6 +259,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         final Intent intent;
         final NeededUriGrants neededGrants;
         final @Nullable String mCallingPackageName;
+        final int mCallingProcessState;
         long deliveredTime;
         int deliveryCount;
         int doneExecutingCount;
@@ -262,7 +269,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id,
                 Intent _intent, NeededUriGrants _neededGrants, int _callingId,
-                String callingProcessName, @Nullable String callingPackageName) {
+                String callingProcessName, @Nullable String callingPackageName,
+                int callingProcessState) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
@@ -271,6 +279,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             callingId = _callingId;
             mCallingProcessName = callingProcessName;
             mCallingPackageName = callingPackageName;
+            mCallingProcessState = callingProcessState;
         }
 
         UriPermissionOwner getUriPermissionsLocked() {
@@ -873,6 +882,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             app.mServices.updateHostingComonentTypeForBindingsLocked();
         }
         app = proc;
+        updateProcessStateOnRequest();
         if (pendingConnectionGroup > 0 && proc != null) {
             final ProcessServiceRecord psr = proc.mServices;
             psr.setConnectionService(this);
@@ -897,6 +907,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             proc.mServices.updateBoundClientUids();
             proc.mServices.updateHostingComonentTypeForBindingsLocked();
         }
+    }
+
+    void updateProcessStateOnRequest() {
+        mProcessStateOnRequest = app != null && app.getThread() != null && !app.isKilled()
+                ? app.mState.getCurProcState() : PROCESS_STATE_NONEXISTENT;
     }
 
     @NonNull
@@ -1061,12 +1076,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (app == null) {
             return;
         }
-        if (mBackgroundStartPrivilegesByStartMerged.allowsAny()
-                || mIsAllowedBgActivityStartsByBinding) {
+        BackgroundStartPrivileges backgroundStartPrivileges =
+                getBackgroundStartPrivilegesWithExclusiveToken();
+        if (backgroundStartPrivileges.allowsAny()) {
             // if the token is already there it's safe to "re-add it" - we're dealing with
             // a set of Binder objects
             app.addOrUpdateBackgroundStartPrivileges(this,
-                    getBackgroundStartPrivilegesWithExclusiveToken());
+                    backgroundStartPrivileges);
         } else {
             app.removeBackgroundStartPrivileges(this);
         }
