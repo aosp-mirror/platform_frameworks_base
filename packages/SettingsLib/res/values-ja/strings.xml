@@ -546,7 +546,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"たった今"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"このデバイス"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"このタブレット"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"このスマートフォン"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"このデバイス"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"接続エラーです。デバイスを OFF にしてから ON に戻してください"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線オーディオ デバイス"</string>
     <string name="help_label" msgid="3528360748637781274">"ヘルプとフィードバック"</string>

@@ -313,7 +313,7 @@
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Пры выбары сеткі Wi-Fi указваць у журнале RSSI для кожнага SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зніжае расход зараду акумулятара і павышае прадукцыйнасць мабільных сетак"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Калі ўключаны гэты рэжым, MAC-адрас гэтай прылады можа змяняцца падчас кожнага падключэння да сеткі з актыўнай рандамізацыяй MAC-адрасоў."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з улікам трафіка"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з падлікам трафіка"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сетка без уліку трафіка"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Памеры буфера журнала"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Выберыце памеры сродку вядзення журнала для буфераў журнала"</string>

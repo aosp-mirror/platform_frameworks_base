@@ -49,7 +49,7 @@
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"ಯಾವುದೂ ಇಲ್ಲ/Enhanced Open"</string>
     <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-ಎಂಟರ್‌ಪ್ರೈಸ್ 192-ಬಿಟ್"</string>
-    <string name="wifi_remembered" msgid="3266709779723179188">"ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="wifi_remembered" msgid="3266709779723179188">"ಸೇವ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP ಕಾನ್ಫಿಗರೇಶನ್ ವಿಫಲತೆ"</string>
