@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
@@ -246,7 +248,7 @@ public final class BroadcastQueueModernImplTest {
         return new BroadcastRecord(mImpl, intent, mProcess, PACKAGE_RED, null, 21, 42, false, null,
                 null, null, null, AppOpsManager.OP_NONE, options, receivers, null, resultTo,
                 Activity.RESULT_OK, null, null, ordered, false, false, UserHandle.USER_SYSTEM,
-                BackgroundStartPrivileges.NONE, false, null);
+                BackgroundStartPrivileges.NONE, false, null, PROCESS_STATE_UNKNOWN);
     }
 
     private void enqueueOrReplaceBroadcast(BroadcastProcessQueue queue,
@@ -1407,7 +1409,7 @@ public final class BroadcastQueueModernImplTest {
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST),
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD),
                 anyLong(), anyLong(), anyLong(), anyInt(), nullable(String.class),
-                anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()),
+                anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()),
                 times(1));
     }
 

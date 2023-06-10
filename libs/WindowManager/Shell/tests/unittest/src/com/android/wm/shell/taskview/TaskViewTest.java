@@ -128,8 +128,8 @@ public class TaskViewTest extends ShellTestCase {
             doReturn(true).when(mTransitions).isRegistered();
         }
         mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions));
-        mTaskViewTaskController = new TaskViewTaskController(mContext, mOrganizer,
-                mTaskViewTransitions, mSyncQueue);
+        mTaskViewTaskController = spy(new TaskViewTaskController(mContext, mOrganizer,
+                mTaskViewTransitions, mSyncQueue));
         mTaskView = new TaskView(mContext, mTaskViewTaskController);
         mTaskView.setListener(mExecutor, mViewListener);
     }
@@ -543,5 +543,24 @@ public class TaskViewTest extends ShellTestCase {
 
         mTaskView.removeTask();
         verify(mTaskViewTransitions).closeTaskView(any(), eq(mTaskViewTaskController));
+    }
+
+    @Test
+    public void testOnTaskAppearedWithTaskNotFound() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskViewTaskController.setTaskNotFound();
+        mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
+
+        verify(mTaskViewTaskController).cleanUpPendingTask();
+        verify(mTaskViewTransitions).closeTaskView(any(), eq(mTaskViewTaskController));
+    }
+
+    @Test
+    public void testOnTaskAppeared_withoutTaskNotFound() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
+        verify(mTaskViewTaskController, never()).cleanUpPendingTask();
     }
 }
