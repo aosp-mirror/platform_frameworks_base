@@ -2572,9 +2572,14 @@ public final class ProcessList {
             // and did the cleanup before the actual death notification. Check the dying processes.
             predecessor = mDyingProcesses.get(processName, info.uid);
             if (predecessor != null) {
-                if (app != null) {
+                // The process record could have existed but its pid is set to 0. In this case,
+                // the 'app' and 'predecessor' could end up pointing to the same instance;
+                // so make sure we check this case here.
+                if (app != null && app != predecessor) {
                     app.mPredecessor = predecessor;
                     predecessor.mSuccessor = app;
+                } else {
+                    app = null;
                 }
                 Slog.w(TAG_PROCESSES, predecessor.toString() + " is attached to a previous process "
                         + predecessor.getDyingPid());
@@ -5195,6 +5200,8 @@ public final class ProcessList {
             mDyingProcesses.remove(app.processName, app.uid);
             app.setDyingPid(0);
             handlePrecedingAppDiedLocked(app);
+            // Remove from the LRU list if it's still there.
+            removeLruProcessLocked(app);
             return true;
         }
         return false;
