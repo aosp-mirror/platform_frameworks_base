@@ -15,8 +15,8 @@
  */
 
 plugins {
-    id(libs.plugins.android.library.get().pluginId)
-    id(libs.plugins.kotlin.android.get().pluginId)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
     jacoco
 }
 
@@ -70,6 +70,7 @@ dependencies {
 
     androidTestImplementation(project(":testutils"))
     androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing")
+    androidTestImplementation(libs.dexmaker.mockito)
 }
 
 tasks.register<JacocoReport>("coverageReport") {
