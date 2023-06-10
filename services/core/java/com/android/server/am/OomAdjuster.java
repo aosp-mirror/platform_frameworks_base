@@ -1471,7 +1471,8 @@ public class OomAdjuster {
                         if (!ActivityManager.isProcStateBackground(uidRec.getSetProcState())
                                 || uidRec.isSetAllowListed()) {
                             uidRec.setLastBackgroundTime(nowElapsed);
-                            if (!mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
+                            if (mService.mDeterministicUidIdle
+                                    || !mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
                                 // Note: the background settle time is in elapsed realtime, while
                                 // the handler time base is uptime.  All this means is that we may
                                 // stop background uids later than we had intended, but that only
@@ -3227,7 +3228,8 @@ public class OomAdjuster {
                 // (for states debouncing to avoid from thrashing).
                 state.setLastCanKillOnBgRestrictedAndIdleTime(nowElapsed);
                 // Kick off the delayed checkup message if needed.
-                if (!mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
+                if (mService.mDeterministicUidIdle
+                        || !mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
                     mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
                             mConstants.mKillBgRestrictedAndCachedIdleSettleTimeMs);
                 }
@@ -3346,6 +3348,7 @@ public class OomAdjuster {
     @GuardedBy("mService")
     void idleUidsLocked() {
         final int N = mActiveUids.size();
+        mService.mHandler.removeMessages(IDLE_UIDS_MSG);
         if (N <= 0) {
             return;
         }
@@ -3391,7 +3394,6 @@ public class OomAdjuster {
             }
         }
         if (nextTime > 0) {
-            mService.mHandler.removeMessages(IDLE_UIDS_MSG);
             mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
                     nextTime + mConstants.BACKGROUND_SETTLE_TIME - nowElapsed);
         }
