@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-buildscript {
-    ext {
-        BUILD_TOOLS_VERSION = "30.0.3"
-        MIN_SDK = 21
-        TARGET_SDK = 33
-        jetpack_compose_version = '1.4.0-beta01'
-        jetpack_compose_compiler_version = '1.4.4'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
-plugins {
-    id 'com.android.application' version '8.0.0' apply false
-    id 'com.android.library' version '8.0.0' apply false
-    id 'org.jetbrains.kotlin.android' version '1.8.10' apply false
-}
-subprojects {
-    tasks.withType(KotlinCompile).configureEach {
-        kotlinOptions {
-            jvmTarget = "17"
-            freeCompilerArgs = ["-Xjvm-default=all"]
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    rulesMode.set(RulesMode.FAIL_ON_PROJECT_RULES)
+
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://jitpack.io")
+            content {
+                includeGroup("com.github.PhilJay")
+            }
         }
     }
 }
+rootProject.name = "SpaLib"
+include(":spa")
+include(":gallery")
+include(":testutils")

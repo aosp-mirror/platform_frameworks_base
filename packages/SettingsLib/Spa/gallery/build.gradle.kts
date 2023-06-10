@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace = "com.android.settingslib.spa.gallery"
+
+    defaultConfig {
+        applicationId = "com.android.settingslib.spa.gallery"
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    sourceSets {
+        sourceSets.getByName("main") {
+            java.setSrcDirs(listOf("src"))
+            res.setSrcDirs(listOf("res"))
+            manifest.srcFile("AndroidManifest.xml")
+        }
+    }
+    buildFeatures {
+        compose = true
     }
 }
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        maven { url "https://jitpack.io"}
-    }
+
+dependencies {
+    implementation(project(":spa"))
 }
-rootProject.name = "SpaLib"
-include ':spa'
-include ':gallery'
-include ':testutils'
