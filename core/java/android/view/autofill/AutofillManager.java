@@ -2090,7 +2090,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get enabled autofill services status.");
+            throw new RuntimeException("Fail to get enabled autofill services status. " + e);
         }
     }
 
@@ -2109,7 +2109,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get autofill services component name.");
+            throw new RuntimeException("Fail to get autofill services component name. " + e);
         }
     }
 
@@ -2136,7 +2136,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get user data id for field classification.");
+            throw new RuntimeException("Fail to get user data id for field classification. " + e);
         }
     }
 
@@ -2159,7 +2159,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get user data for field classification.");
+            throw new RuntimeException("Fail to get user data for field classification. " + e);
         }
     }
 
@@ -2199,7 +2199,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get field classification enabled status.");
+            throw new RuntimeException("Fail to get field classification enabled status. " + e);
         }
     }
 
@@ -2223,7 +2223,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get default field classification algorithm.");
+            throw new RuntimeException("Fail to get default field classification algorithm. " + e);
         }
     }
 
@@ -2245,7 +2245,8 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get available field classification algorithms.");
+            throw new
+                RuntimeException("Fail to get available field classification algorithms. " + e);
         }
     }
 
@@ -2269,7 +2270,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get autofill supported status.");
+            throw new RuntimeException("Fail to get autofill supported status. " + e);
         }
     }
 
