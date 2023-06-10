@@ -247,7 +247,7 @@ object Flags {
     /** Whether to delay showing bouncer UI when face auth or active unlock are enrolled. */
     // TODO(b/279794160): Tracking bug.
     @JvmField
-    val DELAY_BOUNCER = unreleasedFlag(235, "delay_bouncer")
+    val DELAY_BOUNCER = unreleasedFlag(235, "delay_bouncer", teamfood = true)
 
     /** Migrate the indication area to the new keyguard root view. */
     // TODO(b/280067944): Tracking bug.
@@ -437,9 +437,6 @@ object Flags {
 
     // TODO(b/254512758): Tracking Bug
     @JvmField val ROUNDED_BOX_RIPPLE = releasedFlag(1002, "rounded_box_ripple")
-
-    // TODO(b/265045965): Tracking Bug
-    val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
 
     // TODO(b/273509374): Tracking Bug
     @JvmField

@@ -31,6 +31,7 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.IBinder
 import android.os.SystemProperties
+import android.util.DisplayMetrics.DENSITY_DEFAULT
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
@@ -78,6 +79,8 @@ class DesktopTasksController(
         private val transitions: Transitions,
         private val enterDesktopTaskTransitionHandler: EnterDesktopTaskTransitionHandler,
         private val exitDesktopTaskTransitionHandler: ExitDesktopTaskTransitionHandler,
+        private val toggleResizeDesktopTaskTransitionHandler:
+        ToggleResizeDesktopTaskTransitionHandler,
         private val desktopModeTaskRepository: DesktopModeTaskRepository,
         private val launchAdjacentController: LaunchAdjacentController,
         @ShellMainThread private val mainExecutor: ShellExecutor
@@ -380,6 +383,49 @@ class DesktopTasksController(
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }
+    }
+
+    /** Quick-resizes a desktop task, toggling between the stable bounds and the default bounds. */
+    fun toggleDesktopTaskSize(taskInfo: RunningTaskInfo, windowDecor: DesktopModeWindowDecoration) {
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+
+        val stableBounds = Rect()
+        displayLayout.getStableBounds(stableBounds)
+        val destinationBounds = Rect()
+        if (taskInfo.configuration.windowConfiguration.bounds == stableBounds) {
+            // The desktop task is currently occupying the whole stable bounds, toggle to the
+            // default bounds.
+            getDefaultDesktopTaskBounds(
+                density = taskInfo.configuration.densityDpi.toFloat() / DENSITY_DEFAULT,
+                stableBounds = stableBounds,
+                outBounds = destinationBounds
+            )
+        } else {
+            // Toggle to the stable bounds.
+            destinationBounds.set(stableBounds)
+        }
+
+        val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            toggleResizeDesktopTaskTransitionHandler.startTransition(
+                wct,
+                taskInfo.taskId,
+                windowDecor
+            )
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    private fun getDefaultDesktopTaskBounds(density: Float, stableBounds: Rect, outBounds: Rect) {
+        val width = (DESKTOP_MODE_DEFAULT_WIDTH_DP * density + 0.5f).toInt()
+        val height = (DESKTOP_MODE_DEFAULT_HEIGHT_DP * density + 0.5f).toInt()
+        outBounds.set(0, 0, width, height)
+        // Center the task in stable bounds
+        outBounds.offset(
+            stableBounds.centerX() - outBounds.centerX(),
+            stableBounds.centerY() - outBounds.centerY()
+        )
     }
 
     /**
@@ -882,6 +928,14 @@ class DesktopTasksController(
         private val DESKTOP_DENSITY_OVERRIDE =
             SystemProperties.getInt("persist.wm.debug.desktop_mode_density", 0)
         private val DESKTOP_DENSITY_ALLOWED_RANGE = (100..1000)
+
+        // Override default freeform task width when desktop mode is enabled. In dips.
+        private val DESKTOP_MODE_DEFAULT_WIDTH_DP =
+            SystemProperties.getInt("persist.wm.debug.desktop_mode.default_width", 840)
+
+        // Override default freeform task height when desktop mode is enabled. In dips.
+        private val DESKTOP_MODE_DEFAULT_HEIGHT_DP =
+            SystemProperties.getInt("persist.wm.debug.desktop_mode.default_height", 630)
 
         /**
          * Check if desktop density override is enabled

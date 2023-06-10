@@ -2141,7 +2141,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     void postBrightnessChangeRunnable() {
-        mHandler.post(mOnBrightnessChangeRunnable);
+        if (!mHandler.hasCallbacks(mOnBrightnessChangeRunnable)) {
+            mHandler.post(mOnBrightnessChangeRunnable);
+        }
     }
 
     private HighBrightnessModeController createHbmControllerLocked(

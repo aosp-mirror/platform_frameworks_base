@@ -93,62 +93,34 @@
     <style name="RestartDialogTitleText">
         <item name="android:textSize">24sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:lineSpacingExtra">2sp</item>
-        <item name="android:textAppearance">
-            @*android:style/TextAppearance.DeviceDefault.Headline
-        </item>
-        <item name="android:fontFamily">
-            @*android:string/config_bodyFontFamilyMedium
-        </item>
+        <item name="android:lineSpacingExtra">8sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
     </style>
 
-    <style name="RestartDialogBodyText">
+    <style name="RestartDialogBodyStyle">
         <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+    </style>
+
+    <style name="RestartDialogBodyText" parent="RestartDialogBodyStyle">
         <item name="android:letterSpacing">0.02</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:lineSpacingExtra">2sp</item>
-        <item name="android:textAppearance">
-            @*android:style/TextAppearance.DeviceDefault.Body2
-        </item>
-        <item name="android:fontFamily">
-            @*android:string/config_bodyFontFamily
-        </item>
+        <item name="android:lineSpacingExtra">6sp</item>
     </style>
 
-    <style name="RestartDialogCheckboxText">
-        <item name="android:textSize">16sp</item>
+    <style name="RestartDialogCheckboxText" parent="RestartDialogBodyStyle">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:lineSpacingExtra">4sp</item>
-        <item name="android:textAppearance">
-            @*android:style/TextAppearance.DeviceDefault.Headline
-        </item>
-        <item name="android:fontFamily">
-            @*android:string/config_bodyFontFamilyMedium
-        </item>
+        <item name="android:lineSpacingExtra">6sp</item>
     </style>
 
-    <style name="RestartDialogDismissButton">
+    <style name="RestartDialogDismissButton" parent="RestartDialogBodyStyle">
         <item name="android:lineSpacingExtra">2sp</item>
-        <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textAppearance">
-            @*android:style/TextAppearance.DeviceDefault.Body2
-        </item>
-        <item name="android:fontFamily">
-            @*android:string/config_bodyFontFamily
-        </item>
     </style>
 
-    <style name="RestartDialogConfirmButton">
+    <style name="RestartDialogConfirmButton" parent="RestartDialogBodyStyle">
         <item name="android:lineSpacingExtra">2sp</item>
-        <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
-        <item name="android:textAppearance">
-            @*android:style/TextAppearance.DeviceDefault.Body2
-        </item>
-        <item name="android:fontFamily">
-            @*android:string/config_bodyFontFamily
-        </item>
     </style>
 
     <style name="ReachabilityEduHandLayout" parent="Theme.AppCompat.Light">

@@ -103,7 +103,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val primaryBouncerInteractor: PrimaryBouncerInteractor,
         private val alternateBouncerInteractor: AlternateBouncerInteractor,
         private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
-        private val udfpsUtils: UdfpsUtils
+        private val udfpsUtils: UdfpsUtils,
+        private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
@@ -261,6 +262,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     featureFlags,
                     primaryBouncerInteractor,
                     alternateBouncerInteractor,
+                    udfpsKeyguardAccessibilityDelegate,
                 )
             }
             REASON_AUTH_BP -> {

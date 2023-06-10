@@ -65,6 +65,7 @@ import android.hardware.display.DisplayManagerInternal;
 import android.media.AudioManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
@@ -344,6 +345,10 @@ class TestPhoneWindowManager {
         doReturn(canDream).when(mDreamManagerInternal).canStartDreaming(anyBoolean());
     }
 
+    void overrideIsDreaming(boolean isDreaming) {
+        doReturn(isDreaming).when(mDreamManagerInternal).isDreaming();
+    }
+
     void overrideDisplayState(int state) {
         doReturn(state).when(mDisplay).getState();
         doReturn(state == STATE_ON).when(mDisplayPolicy).isAwake();
@@ -520,17 +525,24 @@ class TestPhoneWindowManager {
         verify(mInputManagerInternal).toggleCapsLock(anyInt());
     }
 
-    void assertWillNotLockAfterAppTransitionFinished() {
-        Assert.assertFalse(mPhoneWindowManager.mLockAfterAppTransitionFinished);
-    }
-
     void assertLockedAfterAppTransitionFinished() {
         ArgumentCaptor<AppTransitionListener> transitionCaptor =
                 ArgumentCaptor.forClass(AppTransitionListener.class);
         verify(mWindowManagerInternal).registerAppTransitionListener(
                 transitionCaptor.capture());
-        transitionCaptor.getValue().onAppTransitionFinishedLocked(any());
+        final IBinder token = mock(IBinder.class);
+        transitionCaptor.getValue().onAppTransitionFinishedLocked(token);
         verify(mPhoneWindowManager).lockNow(null);
+    }
+
+    void assertDidNotLockAfterAppTransitionFinished() {
+        ArgumentCaptor<AppTransitionListener> transitionCaptor =
+                ArgumentCaptor.forClass(AppTransitionListener.class);
+        verify(mWindowManagerInternal).registerAppTransitionListener(
+                transitionCaptor.capture());
+        final IBinder token = mock(IBinder.class);
+        transitionCaptor.getValue().onAppTransitionFinishedLocked(token);
+        verify(mPhoneWindowManager, never()).lockNow(null);
     }
 
     void assertGoToHomescreen() {

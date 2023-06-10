@@ -2899,6 +2899,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Call this when the recents animation canceled during split-screen. */
     public void onRecentsInSplitAnimationCanceled() {
         mPausingTasks.clear();
+        setSplitsVisible(false);
+
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                true /* reparentLeafTaskIfRelaunch */);
+        mTaskOrganizer.applyTransaction(wct);
     }
 
     /** Call this when the recents animation during split-screen finishes. */
@@ -2925,7 +2931,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setSplitsVisible(false);
         finishWct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
                 true /* reparentLeafTaskIfRelaunch */);
-        logExit(EXIT_REASON_UNKNOWN);
     }
 
     /** Call this when the recents animation finishes by doing pair-to-pair switch. */
