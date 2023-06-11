@@ -640,7 +640,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"ఫోన్‌ను కాస్త దూరంగా పట్టుకోండి."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"ఫోన్‌ను దగ్గరగా పట్టుకోండి"</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"ఫోన్‌ను పైకి పట్టుకోండి."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ఫోన్‌ను కిందికి దించండి."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"ఫోన్‌ను కిందికి జరపండి."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"ఫోన్‌ను ఎడమవైపునకు జరపండి."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"ఫోన్‌ను కుడివైపునకు జరపండి."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"దయచేసి మీ పరికరం వైపు మరింత నేరుగా చూడండి."</string>
