@@ -18,7 +18,10 @@ package com.android.systemui.classifier;
 
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.util.DisplayMetrics;
+import android.view.InputDevice;
 import android.view.MotionEvent;
+
+import androidx.test.uiautomator.Configurator;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManagerFake;
@@ -80,6 +83,10 @@ public class ClassifierTest extends SysuiTestCase {
         mDataProvider.onSessionEnd();
     }
 
+    protected static int getPointerAction(int actionType, int index) {
+        return actionType + (index << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+    }
+
     protected MotionEvent appendDownEvent(float x, float y) {
         return appendMotionEvent(MotionEvent.ACTION_DOWN, x, y);
     }
@@ -123,5 +130,56 @@ public class ClassifierTest extends SysuiTestCase {
         mDataProvider.onMotionEvent(motionEvent);
 
         return motionEvent;
+    }
+
+    protected MotionEvent appendTrackpadDownEvent(float x, float y) {
+        return appendTrackpadMotionEvent(MotionEvent.ACTION_DOWN, x, y, 1);
+    }
+
+    protected MotionEvent appendTrackpadMoveEvent(float x, float y, int pointerCount) {
+        return appendTrackpadMotionEvent(MotionEvent.ACTION_MOVE, x, y, pointerCount);
+    }
+
+    protected MotionEvent appendTrackpadPointerDownEvent(int actionType, float x, float y,
+            int pointerCount) {
+        return appendTrackpadMotionEvent(actionType, x, y, pointerCount);
+    }
+
+    private MotionEvent appendTrackpadMotionEvent(int actionType, float x, float y,
+            int pointerCount) {
+        long eventTime = mMotionEvents.isEmpty() ? 1 : mMotionEvents.get(
+                mMotionEvents.size() - 1).getEventTime() + 1;
+        return appendTrackpadMotionEvent(actionType, x, y, pointerCount, eventTime);
+    }
+
+    private MotionEvent appendTrackpadMotionEvent(int actionType, float x, float y,
+            int pointerCount, long eventTime) {
+        MotionEvent.PointerProperties[] pointerProperties =
+                new MotionEvent.PointerProperties[pointerCount];
+        MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[pointerCount];
+        for (int i = 0; i < pointerCount; i++) {
+            pointerProperties[i] = getPointerProperties(i);
+            pointerCoords[i] = getPointerCoords(x, y);
+        }
+        return MotionEvent.obtain(1, eventTime, actionType, pointerCount, pointerProperties,
+                pointerCoords, 0, 0, 1.0f, 1.0f, 0, 0,
+                InputDevice.SOURCE_TOUCHPAD | InputDevice.SOURCE_MOUSE, 0, 0,
+                MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE);
+    }
+
+    private static MotionEvent.PointerProperties getPointerProperties(int pointerId) {
+        MotionEvent.PointerProperties properties = new MotionEvent.PointerProperties();
+        properties.id = pointerId;
+        properties.toolType = Configurator.getInstance().getToolType();
+        return properties;
+    }
+
+    private static MotionEvent.PointerCoords getPointerCoords(float x, float y) {
+        MotionEvent.PointerCoords coords = new MotionEvent.PointerCoords();
+        coords.pressure = 1;
+        coords.size = 1;
+        coords.x = x;
+        coords.y = y;
+        return coords;
     }
 }
