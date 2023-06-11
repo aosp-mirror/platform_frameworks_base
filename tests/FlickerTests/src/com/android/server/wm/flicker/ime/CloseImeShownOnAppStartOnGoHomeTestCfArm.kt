@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -26,5 +26,5 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseImeShownOnAppStartOnGoHomeTestCfArm(flicker: FlickerTest) :
+open class CloseImeShownOnAppStartOnGoHomeTestCfArm(flicker: LegacyFlickerTest) :
     CloseImeShownOnAppStartOnGoHomeTest(flicker)

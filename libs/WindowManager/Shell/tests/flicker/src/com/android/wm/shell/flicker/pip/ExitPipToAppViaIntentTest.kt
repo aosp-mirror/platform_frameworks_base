@@ -18,7 +18,7 @@ package com.android.wm.shell.flicker.pip
 
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import androidx.test.filters.RequiresDevice
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
@@ -51,7 +51,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ExitPipToAppViaIntentTest(flicker: FlickerTest) : ExitPipToAppTransition(flicker) {
+open class ExitPipToAppViaIntentTest(flicker: LegacyFlickerTest) : ExitPipToAppTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = {
         setup {
             // launch an app behind the pip one
