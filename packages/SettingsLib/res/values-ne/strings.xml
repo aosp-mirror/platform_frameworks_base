@@ -93,7 +93,7 @@
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"विच्छेदन गरियो"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"जडान हटाइँदै ..."</string>
-    <string name="bluetooth_connecting" msgid="5871702668260192755">"जडान हुँदै..."</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"कनेक्ट गरिँदै छ..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> सँग कनेक्ट भएको छ"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"कनेक्ट गरिँदै छ..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"जडान गरियो (फोनबाहेेक) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -109,7 +109,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"ब्याट्रीको स्तर: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ब्याट्री, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ब्याट्री"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"सक्रिय"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"सक्रिय, बायाँ मात्र"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"बायाँ मात्र अन छ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"सक्रिय, दायाँ मात्र"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"सक्रिय, बायाँ र दायाँ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"मिडिया अडियो"</string>

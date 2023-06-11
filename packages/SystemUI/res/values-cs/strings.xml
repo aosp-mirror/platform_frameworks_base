@@ -476,7 +476,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odemknout a použít"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Při načítání karet došlo k problému, zkuste to později"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Nastavení obrazovky uzamčení"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Naskenovat QR kód"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Sken QR kódu"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Pracovní profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Režim Letadlo"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Svůj další budík <xliff:g id="WHEN">%1$s</xliff:g> neuslyšíte"</string>
