@@ -260,6 +260,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         // This is the only way to get display-id currently, so check display capabilities here.
         final DisplayLayout displayLayout = displayController.getDisplayLayout(
                 topTaskInfo.displayId);
+        // This condition should be true when using gesture navigation or the screen size is large
+        // (>600dp) because the bar is small relative to screen.
+        if (displayLayout.allowSeamlessRotationDespiteNavBarMoving()) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  nav bar allows seamless.");
+            return ROTATION_ANIMATION_SEAMLESS;
+        }
         // For the upside down rotation we don't rotate seamlessly as the navigation bar moves
         // position. Note most apps (using orientation:sensor or user as opposed to fullSensor)
         // will not enter the reverse portrait orientation, so actually the orientation won't
@@ -272,13 +278,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             return animationHint;
         }
 
-        // If the navigation bar can't change sides, then it will jump when we change orientations
-        // and we don't rotate seamlessly - unless that is allowed, e.g. with gesture navigation
-        // where the navbar is low-profile enough that this isn't very noticeable.
-        if (!displayLayout.allowSeamlessRotationDespiteNavBarMoving()
-                && (!(displayLayout.navigationBarCanMove()
-                        && (displayChange.getStartAbsBounds().width()
-                                != displayChange.getStartAbsBounds().height())))) {
+        // If the navigation bar cannot change sides, then it will jump when changing orientation
+        // so do not use seamless rotation.
+        if (!displayLayout.navigationBarCanMove()) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                     "  nav bar changes sides, so not seamless.");
             return animationHint;
