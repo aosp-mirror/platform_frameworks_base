@@ -143,6 +143,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                     mHandler,
                     mChoreographer,
                     mDisplay.getDisplayId(),
+                    0 /* taskCornerRadius */,
                     mDecorationContainerSurface,
                     mDragPositioningCallback);
         }
