@@ -812,8 +812,7 @@ public final class PlaybackActivityMonitor
             return false;
         }
         final int reqUsage = requester.getAudioAttributes().getUsage();
-        if ((reqUsage == AudioAttributes.USAGE_ASSISTANT)
-                || (reqUsage == AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)) {
+        if (reqUsage == AudioAttributes.USAGE_ASSISTANT) {
             return true;
         }
         return false;
