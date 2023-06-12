@@ -49,7 +49,7 @@ public enum ShellProtoLogGroup implements IProtoLogGroup {
             Consts.TAG_WM_SPLIT_SCREEN),
     WM_SHELL_SYSUI_EVENTS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM_SHELL),
-    WM_SHELL_DESKTOP_MODE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+    WM_SHELL_DESKTOP_MODE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
             Consts.TAG_WM_SHELL),
     WM_SHELL_FLOATING_APPS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM_SHELL),
