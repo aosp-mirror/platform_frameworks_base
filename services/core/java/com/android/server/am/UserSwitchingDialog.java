@@ -88,8 +88,6 @@ class UserSwitchingDialog extends Dialog {
     UserSwitchingDialog(Context context, UserInfo oldUser, UserInfo newUser,
             String switchingFromSystemUserMessage, String switchingToSystemUserMessage,
             WindowManagerService windowManager) {
-        // TODO(b/278857848): Make full screen user switcher cover top part of the screen as well.
-        //                    This problem is seen only on phones, it works fine on tablets.
         super(context, R.style.Theme_Material_NoActionBar_Fullscreen);
 
         mContext = context;
@@ -112,9 +110,12 @@ class UserSwitchingDialog extends Dialog {
         final WindowManager.LayoutParams attrs = window.getAttributes();
         attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR |
                 WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+        attrs.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         window.setAttributes(attrs);
         window.setBackgroundDrawableResource(android.R.color.transparent);
         window.setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+        window.setDecorFitsSystemWindows(false);
     }
 
     void inflateContent() {
