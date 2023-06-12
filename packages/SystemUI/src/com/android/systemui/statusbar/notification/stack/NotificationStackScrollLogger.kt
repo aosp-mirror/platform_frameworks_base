@@ -1,9 +1,11 @@
 package com.android.systemui.statusbar.notification.stack
 
+import android.view.ViewGroup
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.LogLevel.ERROR
 import com.android.systemui.log.dagger.NotificationRenderLog
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
@@ -86,6 +88,42 @@ class NotificationStackScrollLogger @Inject constructor(
             str2 = reason
         }, {
             "transientNotificationRowTraversalCleaned: key: $str1 reason: $str2"
+        })
+    }
+
+    fun addTransientChildNotificationToChildContainer(
+            childEntry: NotificationEntry,
+            containerEntry: NotificationEntry,
+    ) {
+        notificationRenderBuffer.log(TAG, INFO, {
+            str1 = childEntry.logKey
+            str2 = containerEntry.logKey
+        }, {
+            "addTransientChildToContainer from onViewRemovedInternal: childKey: $str1 " +
+                    "-- containerKey: $str2"
+        })
+    }
+
+    fun addTransientChildNotificationToNssl(
+            childEntry: NotificationEntry,
+    ) {
+        notificationRenderBuffer.log(TAG, INFO, {
+            str1 = childEntry.logKey
+        }, {
+            "addTransientRowToNssl from onViewRemovedInternal: childKey: $str1"
+        })
+    }
+
+    fun addTransientChildNotificationToViewGroup(
+            childEntry: NotificationEntry,
+            container: ViewGroup
+    ) {
+        notificationRenderBuffer.log(TAG, ERROR, {
+            str1 = childEntry.logKey
+            str2 = container.toString()
+        }, {
+            "addTransientRowTo unhandled ViewGroup from onViewRemovedInternal: childKey: $str1 " +
+                    "-- ViewGroup: $str2"
         })
     }
 }

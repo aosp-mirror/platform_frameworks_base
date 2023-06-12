@@ -2759,6 +2759,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         boolean animationGenerated = container != null && generateRemoveAnimation(child);
         if (animationGenerated) {
             if (!mSwipedOutViews.contains(child) || !isFullySwipedOut(child)) {
+                logAddTransientChild(child, container);
                 container.addTransientView(child, 0);
                 child.setTransientContainer(container);
             }
@@ -2772,6 +2773,30 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateAnimationState(false, child);
 
         focusNextViewIfFocused(child);
+    }
+
+    private void logAddTransientChild(ExpandableView child, ViewGroup container) {
+        if (mLogger == null) {
+            return;
+        }
+        if (child instanceof ExpandableNotificationRow) {
+            if (container instanceof NotificationChildrenContainer) {
+                mLogger.addTransientChildNotificationToChildContainer(
+                        ((ExpandableNotificationRow) child).getEntry(),
+                        ((NotificationChildrenContainer) container)
+                                .getContainingNotification().getEntry()
+                );
+            } else if (container instanceof NotificationStackScrollLayout) {
+                mLogger.addTransientChildNotificationToNssl(
+                        ((ExpandableNotificationRow) child).getEntry()
+                );
+            } else {
+                mLogger.addTransientChildNotificationToViewGroup(
+                        ((ExpandableNotificationRow) child).getEntry(),
+                        container
+                );
+            }
+        }
     }
 
     /**
