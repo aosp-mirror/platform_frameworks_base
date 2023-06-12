@@ -283,7 +283,7 @@ public final class PowerManagerService extends SystemService
     private static final long ENHANCED_DISCHARGE_PREDICTION_BROADCAST_MIN_DELAY_MS = 60 * 1000L;
 
     /**
-     * Apps targeting Android U and above need to define
+     * Apps targeting Android V and above need to define
      * {@link android.Manifest.permission#TURN_SCREEN_ON} in their manifest for
      * {@link android.os.PowerManager#ACQUIRE_CAUSES_WAKEUP} to have any effect.
      * Note that most applications should use {@link android.R.attr#turnScreenOn} or
@@ -291,7 +291,7 @@ public final class PowerManagerService extends SystemService
      * previous foreground app from being resumed first when the screen turns on.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
     public static final long REQUIRE_TURN_SCREEN_ON_PERMISSION = 216114297L;
 
     /** Reason ID for holding display suspend blocker. */
