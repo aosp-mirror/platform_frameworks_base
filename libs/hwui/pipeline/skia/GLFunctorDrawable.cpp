@@ -21,6 +21,8 @@
 #include "GrBackendSurface.h"
 #include "RenderNode.h"
 #include "SkAndroidFrameworkUtils.h"
+#include "SkCanvas.h"
+#include "SkCanvasAndroid.h"
 #include "SkClipStack.h"
 #include "SkRect.h"
 #include "SkM44.h"
@@ -35,7 +37,7 @@ namespace uirenderer {
 namespace skiapipeline {
 
 static void setScissor(int viewportHeight, const SkIRect& clip) {
-    SkASSERT(!clip.isEmpty());
+    LOG_FATAL_IF(clip.isEmpty(), "empty scissor clip");
     // transform to Y-flipped GL space, and prevent negatives
     GLint y = viewportHeight - clip.fBottom;
     GLint height = (viewportHeight - clip.fTop) - y;
@@ -43,7 +45,7 @@ static void setScissor(int viewportHeight, const SkIRect& clip) {
 }
 
 static void GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSize) {
-    GrBackendRenderTarget renderTarget = canvas->topLayerBackendRenderTarget();
+    GrBackendRenderTarget renderTarget = skgpu::ganesh::TopLayerBackendRenderTarget(canvas);
     GrGLFramebufferInfo fboInfo;
     LOG_ALWAYS_FATAL_IF(!renderTarget.getGLFramebufferInfo(&fboInfo),
         "getGLFrameBufferInfo failed");
@@ -83,7 +85,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     SkISize fboSize;
     GetFboDetails(canvas, &fboID, &fboSize);
 
-    SkIRect surfaceBounds = canvas->topLayerBounds();
+    SkIRect surfaceBounds = skgpu::ganesh::TopLayerBounds(canvas);
     SkIRect clipBounds = canvas->getDeviceClipBounds();
     SkM44 mat4(canvas->getLocalToDevice());
     SkRegion clipRegion;
