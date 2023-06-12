@@ -88,6 +88,7 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -332,6 +333,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mStageCoordinator.getStageOfTask(taskId) != STAGE_TYPE_UNDEFINED;
     }
 
+    /** Get the split stage of task is under it. */
+    public @StageType int getStageOfTask(int taskId) {
+        return mStageCoordinator.getStageOfTask(taskId);
+    }
+
     /** Check split is foreground and task is under split or not by taskId. */
     public boolean isTaskInSplitScreenForeground(int taskId) {
         return isTaskInSplitScreen(taskId) && isSplitScreenVisible();
@@ -378,17 +384,35 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.setSideStagePosition(sideStagePosition, null /* wct */);
     }
 
-    public void enterSplitScreen(int taskId, boolean leftOrTop) {
-        enterSplitScreen(taskId, leftOrTop, new WindowContainerTransaction());
-    }
-
+    /**
+     * Doing necessary window transaction for other transition handler need to enter split in
+     * transition.
+     */
     public void prepareEnterSplitScreen(WindowContainerTransaction wct,
             ActivityManager.RunningTaskInfo taskInfo, int startPosition) {
-        mStageCoordinator.prepareEnterSplitScreen(wct, taskInfo, startPosition);
+        mStageCoordinator.prepareEnterSplitScreen(wct, taskInfo, startPosition,
+                false /* resizeAnim */);
     }
 
-    public void finishEnterSplitScreen(SurfaceControl.Transaction t) {
-        mStageCoordinator.finishEnterSplitScreen(t);
+    /**
+     * Doing necessary surface transaction for other transition handler need to enter split in
+     * transition when finished.
+     */
+    public void finishEnterSplitScreen(SurfaceControl.Transaction finishT) {
+        mStageCoordinator.finishEnterSplitScreen(finishT);
+    }
+
+    /**
+     * Doing necessary window transaction for other transition handler need to exit split in
+     * transition.
+     */
+    public void prepareExitSplitScreen(WindowContainerTransaction wct,
+            @StageType int stageToTop) {
+        mStageCoordinator.prepareExitSplitScreen(stageToTop, wct);
+    }
+
+    public void enterSplitScreen(int taskId, boolean leftOrTop) {
+        enterSplitScreen(taskId, leftOrTop, new WindowContainerTransaction());
     }
 
     public void enterSplitScreen(int taskId, boolean leftOrTop, WindowContainerTransaction wct) {

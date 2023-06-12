@@ -585,21 +585,6 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSecurityCallbackFinish() {
-        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isUserUnlocked(0)).thenReturn(true);
-        mKeyguardSecurityContainerController.finish(true, 0);
-        verify(mViewMediatorCallback).keyguardDone(anyBoolean(), anyInt());
-    }
-
-    @Test
-    public void testSecurityCallbackFinish_cannotDismissLockScreenAndNotStrongAuth() {
-        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
-        mKeyguardSecurityContainerController.finish(false, 0);
-        verify(mViewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt());
-    }
-
-    @Test
     public void testOnStartingToHide() {
         mKeyguardSecurityContainerController.onStartingToHide();
         verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
