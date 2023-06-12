@@ -334,6 +334,12 @@ public class TaskInfo {
     public boolean isVisible;
 
     /**
+     * Whether this task is request visible.
+     * @hide
+     */
+    public boolean isVisibleRequested;
+
+    /**
      * Whether this task is sleeping due to sleeping display.
      * @hide
      */
@@ -518,6 +524,7 @@ public class TaskInfo {
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused
                 && isVisible == that.isVisible
+                && isVisibleRequested == that.isVisibleRequested
                 && isSleeping == that.isSleeping
                 && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
                 && parentTaskId == that.parentTaskId
@@ -591,6 +598,7 @@ public class TaskInfo {
         parentTaskId = source.readInt();
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
+        isVisibleRequested = source.readBoolean();
         isSleeping = source.readBoolean();
         topActivityInSizeCompat = source.readBoolean();
         topActivityEligibleForLetterboxEducation = source.readBoolean();
@@ -644,6 +652,7 @@ public class TaskInfo {
         dest.writeInt(parentTaskId);
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
+        dest.writeBoolean(isVisibleRequested);
         dest.writeBoolean(isSleeping);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeBoolean(topActivityEligibleForLetterboxEducation);
@@ -687,6 +696,7 @@ public class TaskInfo {
                 + " parentTaskId=" + parentTaskId
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
+                + " isVisibleRequested=" + isVisibleRequested
                 + " isSleeping=" + isSleeping
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " topActivityEligibleForLetterboxEducation= "
