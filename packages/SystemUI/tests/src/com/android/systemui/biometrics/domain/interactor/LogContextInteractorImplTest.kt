@@ -56,6 +56,7 @@ class LogContextInteractorImplTest : SysuiTestCase() {
                 foldProvider,
                 KeyguardTransitionInteractor(
                     keyguardTransitionRepository,
+                    testScope.backgroundScope
                 ),
             )
     }
