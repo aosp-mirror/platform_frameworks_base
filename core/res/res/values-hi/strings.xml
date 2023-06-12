@@ -1715,7 +1715,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"रंग में सुधार करने की सुविधा"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"वन-हैंडेड मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"स्क्रीन की रोशनी को सामान्य लेवल से और कम करने की सुविधा"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"सुनने में मदद करने वाले डिवाइस"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"कान की मशीन"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू कर दिया गया."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद कर दिया गया."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"आवाज़ बटन को छोड़ें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> की सुविधा चालू करने के लिए, आवाज़ वाले दोनों बटन तीन सेकंड तक दबाकर रखें."</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहर निकलने के लिए, ऊपर से नीचे स्वा‍इप करें."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ठीक है"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"बेहतर व्यू पाने के लिए, डिवाइस की स्क्रीन को घुमाएं"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"बेहतर व्यू पाने के लिए, स्प्लिट स्क्रीन मोड बंद करें"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"बेहतर व्यू पाने के लिए <xliff:g id="NAME">%s</xliff:g> को फ़ुल स्क्रीन में खोलें"</string>
     <string name="done_label" msgid="7283767013231718521">"हो गया"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"घंटो का चक्राकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनटों का चक्राकार स्लाइडर"</string>
