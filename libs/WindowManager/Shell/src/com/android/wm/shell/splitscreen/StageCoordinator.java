@@ -2503,6 +2503,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             if (mMixedHandler.animatePendingSplitWithDisplayChange(transition, info,
                     startTransaction, finishTransaction, finishCallback)) {
                 mSplitLayout.update(startTransaction);
+                startTransaction.apply();
                 return true;
             }
         }
