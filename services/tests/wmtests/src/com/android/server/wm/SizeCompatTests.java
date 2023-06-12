@@ -406,7 +406,6 @@ public class SizeCompatTests extends WindowTestsBase {
         clearInvocations(translucentActivity.mLetterboxUiController);
 
         // We destroy the first opaque activity
-        mActivity.setState(DESTROYED, "testing");
         mActivity.removeImmediately();
 
         // Check that updateInheritedLetterbox() is invoked again
@@ -4652,14 +4651,6 @@ public class SizeCompatTests extends WindowTestsBase {
         display.computeScreenConfiguration(c);
         display.onRequestedOverrideConfigurationChanged(c);
         return c;
-    }
-
-    private static void resizeDisplay(DisplayContent displayContent, int width, int height) {
-        displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity,
-                displayContent.mBaseDisplayPhysicalXDpi, displayContent.mBaseDisplayPhysicalYDpi);
-        final Configuration c = new Configuration();
-        displayContent.computeScreenConfiguration(c);
-        displayContent.onRequestedOverrideConfigurationChanged(c);
     }
 
     private static void setNeverConstrainDisplayApisFlag(@Nullable String value,

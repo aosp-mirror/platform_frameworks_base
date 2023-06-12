@@ -350,6 +350,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // For the Shade to animate during the Back gesture, we must enable the animation flag.
         mFeatureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true);
         mFeatureFlags.set(Flags.LIGHT_REVEAL_MIGRATION, true);
+        mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -1103,8 +1104,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         clearInvocations(mNotificationPanelViewController);
 
         mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
-        verify(mDozeServiceHost).stopDozing();
+        verify(mDozeServiceHost, never()).stopDozing();
         verify(mNotificationPanelViewController).expand(eq(false));
+        mCentralSurfaces.mWakefulnessObserver.onFinishedWakingUp();
+        verify(mDozeServiceHost).stopDozing();
     }
 
     @Test
@@ -1118,6 +1121,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.setBouncerShowing(true);
         mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
         verify(mNotificationPanelViewController, never()).expand(anyBoolean());
+        mCentralSurfaces.mWakefulnessObserver.onFinishedWakingUp();
+        verify(mDozeServiceHost).stopDozing();
     }
 
     @Test

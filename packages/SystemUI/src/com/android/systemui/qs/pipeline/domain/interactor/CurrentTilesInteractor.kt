@@ -36,6 +36,7 @@ import com.android.systemui.qs.external.CustomTileStatePersister
 import com.android.systemui.qs.external.TileLifecycleManager
 import com.android.systemui.qs.external.TileServiceKey
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository
+import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.domain.model.TileModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -52,6 +53,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -117,11 +120,13 @@ interface CurrentTilesInteractor : ProtoDumpable {
  * * Platform tiles will be kept between users, with a call to [QSTile.userSwitch]
  * * [CustomTile]s will only be destroyed if the user changes.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CurrentTilesInteractorImpl
 @Inject
 constructor(
     private val tileSpecRepository: TileSpecRepository,
+    private val installedTilesComponentRepository: InstalledTilesComponentRepository,
     private val userRepository: UserRepository,
     private val customTileStatePersister: CustomTileStatePersister,
     private val tileFactory: QSFactory,
@@ -141,13 +146,27 @@ constructor(
     override val currentTiles: StateFlow<List<TileModel>> = _currentSpecsAndTiles.asStateFlow()
 
     // This variable should only be accessed inside the collect of `startTileCollection`.
-    private val specsToTiles = mutableMapOf<TileSpec, QSTile>()
+    private val specsToTiles = mutableMapOf<TileSpec, TileOrNotInstalled>()
 
     private val currentUser = MutableStateFlow(userTracker.userId)
     override val userId = currentUser.asStateFlow()
 
     private val _userContext = MutableStateFlow(userTracker.userContext)
     override val userContext = _userContext.asStateFlow()
+
+    private val userAndTiles =
+        currentUser
+            .flatMapLatest { userId ->
+                tileSpecRepository.tilesSpecs(userId).map { UserAndTiles(userId, it) }
+            }
+            .distinctUntilChanged()
+            .pairwise(UserAndTiles(-1, emptyList()))
+            .flowOn(backgroundDispatcher)
+
+    private val installedPackagesWithTiles =
+        currentUser.flatMapLatest {
+            installedTilesComponentRepository.getInstalledTilesComponents(it)
+        }
 
     init {
         if (featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
@@ -158,68 +177,98 @@ constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun startTileCollection() {
         scope.launch {
-            userRepository.selectedUserInfo
-                .flatMapLatest { user ->
+            launch {
+                userRepository.selectedUserInfo.collect { user ->
                     currentUser.value = user.id
                     _userContext.value = userTracker.userContext
-                    tileSpecRepository.tilesSpecs(user.id).map { user.id to it }
                 }
-                .distinctUntilChanged()
-                .pairwise(-1 to emptyList())
-                .flowOn(backgroundDispatcher)
-                .collect { (old, new) ->
-                    val newTileList = new.second
-                    val userChanged = old.first != new.first
-                    val newUser = new.first
+            }
 
-                    // Destroy all tiles that are not in the new set
-                    specsToTiles
-                        .filter { it.key !in newTileList }
-                        .forEach { entry ->
-                            logger.logTileDestroyed(
-                                entry.key,
-                                if (userChanged) {
-                                    QSPipelineLogger.TileDestroyedReason
-                                        .TILE_NOT_PRESENT_IN_NEW_USER
-                                } else {
-                                    QSPipelineLogger.TileDestroyedReason.TILE_REMOVED
-                                }
-                            )
-                            entry.value.destroy()
-                        }
-                    // MutableMap will keep the insertion order
-                    val newTileMap = mutableMapOf<TileSpec, QSTile>()
+            launch(backgroundDispatcher) {
+                userAndTiles
+                    .combine(installedPackagesWithTiles) { usersAndTiles, packages ->
+                        Data(
+                            usersAndTiles.previousValue,
+                            usersAndTiles.newValue,
+                            packages,
+                        )
+                    }
+                    .collectLatest {
+                        val newTileList = it.newData.tiles
+                        val userChanged = it.oldData.userId != it.newData.userId
+                        val newUser = it.newData.userId
+                        val components = it.installedComponents
 
-                    newTileList.forEach { tileSpec ->
-                        if (tileSpec !in newTileMap) {
-                            val newTile =
-                                if (tileSpec in specsToTiles) {
-                                    processExistingTile(
-                                        tileSpec,
-                                        specsToTiles.getValue(tileSpec),
-                                        userChanged,
-                                        newUser
-                                    )
-                                        ?: createTile(tileSpec)
+                        // Destroy all tiles that are not in the new set
+                        specsToTiles
+                            .filter {
+                                it.key !in newTileList && it.value is TileOrNotInstalled.Tile
+                            }
+                            .forEach { entry ->
+                                logger.logTileDestroyed(
+                                    entry.key,
+                                    if (userChanged) {
+                                        QSPipelineLogger.TileDestroyedReason
+                                            .TILE_NOT_PRESENT_IN_NEW_USER
+                                    } else {
+                                        QSPipelineLogger.TileDestroyedReason.TILE_REMOVED
+                                    }
+                                )
+                                (entry.value as TileOrNotInstalled.Tile).tile.destroy()
+                            }
+                        // MutableMap will keep the insertion order
+                        val newTileMap = mutableMapOf<TileSpec, TileOrNotInstalled>()
+
+                        newTileList.forEach { tileSpec ->
+                            if (tileSpec !in newTileMap) {
+                                if (
+                                    tileSpec is TileSpec.CustomTileSpec &&
+                                        tileSpec.componentName !in components
+                                ) {
+                                    newTileMap[tileSpec] = TileOrNotInstalled.NotInstalled
                                 } else {
-                                    createTile(tileSpec)
+                                    // Create tile here will never try to create a CustomTile that
+                                    // is not installed
+                                    val newTile =
+                                        if (tileSpec in specsToTiles) {
+                                            processExistingTile(
+                                                tileSpec,
+                                                specsToTiles.getValue(tileSpec),
+                                                userChanged,
+                                                newUser
+                                            )
+                                                ?: createTile(tileSpec)
+                                        } else {
+                                            createTile(tileSpec)
+                                        }
+                                    if (newTile != null) {
+                                        newTileMap[tileSpec] = TileOrNotInstalled.Tile(newTile)
+                                    }
                                 }
-                            if (newTile != null) {
-                                newTileMap[tileSpec] = newTile
                             }
                         }
-                    }
 
-                    val resolvedSpecs = newTileMap.keys.toList()
-                    specsToTiles.clear()
-                    specsToTiles.putAll(newTileMap)
-                    _currentSpecsAndTiles.value = newTileMap.map { TileModel(it.key, it.value) }
-                    if (resolvedSpecs != newTileList) {
-                        // There were some tiles that couldn't be created. Change the value in the
-                        // repository
-                        launch { tileSpecRepository.setTiles(currentUser.value, resolvedSpecs) }
+                        val resolvedSpecs = newTileMap.keys.toList()
+                        specsToTiles.clear()
+                        specsToTiles.putAll(newTileMap)
+                        _currentSpecsAndTiles.value =
+                            newTileMap
+                                .filter { it.value is TileOrNotInstalled.Tile }
+                                .map {
+                                    TileModel(it.key, (it.value as TileOrNotInstalled.Tile).tile)
+                                }
+                        logger.logTilesNotInstalled(
+                            newTileMap.filter { it.value is TileOrNotInstalled.NotInstalled }.keys,
+                            newUser
+                        )
+                        if (resolvedSpecs != newTileList) {
+                            // There were some tiles that couldn't be created. Change the value in
+                            // the
+                            // repository
+                            launch { tileSpecRepository.setTiles(currentUser.value, resolvedSpecs) }
+                        }
                     }
-                }
+            }
         }
     }
 
@@ -301,42 +350,66 @@ constructor(
 
     private fun processExistingTile(
         tileSpec: TileSpec,
-        qsTile: QSTile,
+        tileOrNotInstalled: TileOrNotInstalled,
         userChanged: Boolean,
         user: Int,
     ): QSTile? {
-        return when {
-            !qsTile.isAvailable -> {
-                logger.logTileDestroyed(
-                    tileSpec,
-                    QSPipelineLogger.TileDestroyedReason.EXISTING_TILE_NOT_AVAILABLE
-                )
-                qsTile.destroy()
-                null
-            }
-            // Tile is in the current list of tiles and available.
-            // We have a handful of different cases
-            qsTile !is CustomTile -> {
-                // The tile is not a custom tile. Make sure they are reset to the correct user
-                if (userChanged) {
-                    qsTile.userSwitch(user)
-                    logger.logTileUserChanged(tileSpec, user)
+        return when (tileOrNotInstalled) {
+            is TileOrNotInstalled.NotInstalled -> null
+            is TileOrNotInstalled.Tile -> {
+                val qsTile = tileOrNotInstalled.tile
+                when {
+                    !qsTile.isAvailable -> {
+                        logger.logTileDestroyed(
+                            tileSpec,
+                            QSPipelineLogger.TileDestroyedReason.EXISTING_TILE_NOT_AVAILABLE
+                        )
+                        qsTile.destroy()
+                        null
+                    }
+                    // Tile is in the current list of tiles and available.
+                    // We have a handful of different cases
+                    qsTile !is CustomTile -> {
+                        // The tile is not a custom tile. Make sure they are reset to the correct
+                        // user
+                        if (userChanged) {
+                            qsTile.userSwitch(user)
+                            logger.logTileUserChanged(tileSpec, user)
+                        }
+                        qsTile
+                    }
+                    qsTile.user == user -> {
+                        // The tile is a custom tile for the same user, just return it
+                        qsTile
+                    }
+                    else -> {
+                        // The tile is a custom tile and the user has changed. Destroy it
+                        qsTile.destroy()
+                        logger.logTileDestroyed(
+                            tileSpec,
+                            QSPipelineLogger.TileDestroyedReason.CUSTOM_TILE_USER_CHANGED
+                        )
+                        null
+                    }
                 }
-                qsTile
-            }
-            qsTile.user == user -> {
-                // The tile is a custom tile for the same user, just return it
-                qsTile
-            }
-            else -> {
-                // The tile is a custom tile and the user has changed. Destroy it
-                qsTile.destroy()
-                logger.logTileDestroyed(
-                    tileSpec,
-                    QSPipelineLogger.TileDestroyedReason.CUSTOM_TILE_USER_CHANGED
-                )
-                null
             }
         }
     }
+
+    private sealed interface TileOrNotInstalled {
+        object NotInstalled : TileOrNotInstalled
+
+        @JvmInline value class Tile(val tile: QSTile) : TileOrNotInstalled
+    }
+
+    private data class UserAndTiles(
+        val userId: Int,
+        val tiles: List<TileSpec>,
+    )
+
+    private data class Data(
+        val oldData: UserAndTiles,
+        val newData: UserAndTiles,
+        val installedComponents: Set<ComponentName>,
+    )
 }

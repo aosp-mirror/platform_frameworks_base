@@ -2012,7 +2012,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRootWindowContainer.getDisplayContent(displayId);
                 if (dc == null) return;
-                final Task task = dc.getTask((t) -> t.isLeafTask() && t.isFocusable(),
+                final Task task = dc.getTask((t) -> t.isLeafTask() && t.isTopActivityFocusable(),
                         true /*  traverseTopToBottom */);
                 if (task == null) return;
                 setFocusedTask(task.mTaskId, null /* touchedActivity */);
@@ -4505,8 +4505,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // to set debug system properties. To ensure that system properties are set
         // only when allowed, we check the current UID.
         if (Process.myUid() == Process.SYSTEM_UID) {
-            SystemProperties.set("debug.tracing.mcc", Integer.toString(values.mcc));
-            SystemProperties.set("debug.tracing.mnc", Integer.toString(values.mnc));
+            if (values.mcc != 0) {
+                SystemProperties.set("debug.tracing.mcc", Integer.toString(values.mcc));
+            }
+            if (values.mnc != 0) {
+                SystemProperties.set("debug.tracing.mnc", Integer.toString(values.mnc));
+            }
         }
 
         if (!initLocale && !values.getLocales().isEmpty() && values.userSetLocale) {

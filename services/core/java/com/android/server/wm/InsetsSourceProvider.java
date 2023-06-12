@@ -454,7 +454,7 @@ class InsetsSourceProvider {
         if (mSource.getType() == WindowInsets.Type.ime()) {
             setClientVisible(target.isRequestedVisible(WindowInsets.Type.ime()));
         }
-        final Transaction t = mDisplayContent.getSyncTransaction();
+        final Transaction t = mWindowContainer.getSyncTransaction();
         mWindowContainer.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
                 ANIMATION_TYPE_INSETS_CONTROL);
 

@@ -76,7 +76,6 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
-import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.InsetsFrameProvider;
@@ -1730,9 +1729,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             tappableElementProvider.setInsetsSize(Insets.NONE);
         }
 
-        final DisplayCutout cutout = userContext.getDisplay().getCutout();
-        final int safeInsetsLeft = cutout != null ? cutout.getSafeInsetLeft() : 0;
-        final int safeInsetsRight = cutout != null ? cutout.getSafeInsetRight() : 0;
         final int gestureHeight = userContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.navigation_bar_gesture_height);
         final boolean handlingGesture = mEdgeBackGestureHandler.isHandlingGestures();
@@ -1742,19 +1738,23 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             mandatoryGestureProvider.setInsetsSize(Insets.of(0, 0, 0, gestureHeight));
         }
         final int gestureInsetsLeft = handlingGesture
-                ? mEdgeBackGestureHandler.getEdgeWidthLeft() + safeInsetsLeft : 0;
+                ? mEdgeBackGestureHandler.getEdgeWidthLeft() : 0;
         final int gestureInsetsRight = handlingGesture
-                ? mEdgeBackGestureHandler.getEdgeWidthRight() + safeInsetsRight : 0;
+                ? mEdgeBackGestureHandler.getEdgeWidthRight() : 0;
         return new InsetsFrameProvider[] {
                 navBarProvider,
                 tappableElementProvider,
                 mandatoryGestureProvider,
                 new InsetsFrameProvider(mInsetsSourceOwner, 0, WindowInsets.Type.systemGestures())
                         .setSource(InsetsFrameProvider.SOURCE_DISPLAY)
-                        .setInsetsSize(Insets.of(gestureInsetsLeft, 0, 0, 0)),
+                        .setInsetsSize(Insets.of(gestureInsetsLeft, 0, 0, 0))
+                        .setMinimalInsetsSizeInDisplayCutoutSafe(
+                                Insets.of(gestureInsetsLeft, 0, 0, 0)),
                 new InsetsFrameProvider(mInsetsSourceOwner, 1, WindowInsets.Type.systemGestures())
                         .setSource(InsetsFrameProvider.SOURCE_DISPLAY)
                         .setInsetsSize(Insets.of(0, 0, gestureInsetsRight, 0))
+                        .setMinimalInsetsSizeInDisplayCutoutSafe(
+                                Insets.of(0, 0, gestureInsetsRight, 0))
         };
     }
 

@@ -49,7 +49,7 @@
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"ಯಾವುದೂ ಇಲ್ಲ/Enhanced Open"</string>
     <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-ಎಂಟರ್‌ಪ್ರೈಸ್ 192-ಬಿಟ್"</string>
-    <string name="wifi_remembered" msgid="3266709779723179188">"ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="wifi_remembered" msgid="3266709779723179188">"ಸೇವ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP ಕಾನ್ಫಿಗರೇಶನ್ ವಿಫಲತೆ"</string>
@@ -545,12 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ಇದೀಗ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ಈ ಫೋನ್"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ಈ ಟ್ಯಾಬ್ಲೆಟ್"</string>
-    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
-    <skip />
-    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
-    <skip />
-    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
-    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ಡಾಕ್ ಸ್ಪೀಕರ್"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ಬಾಹ್ಯ ಸಾಧನ"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ಕನೆಕ್ಟ್ ಮಾಡಿರುವ ಸಾಧನ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ಈ ಫೋನ್"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ಈ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ಬದಲಾಯಿಸಲು ಖಾತೆಯನ್ನು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ"</string>

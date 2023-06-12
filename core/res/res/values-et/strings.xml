@@ -2172,7 +2172,7 @@
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Teie organisatsioon lubab sõnumeid saata ainult töörakendustest."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kasuta isiklikku brauserit"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Kasuta tööbrauserit"</string>
-    <string name="miniresolver_call" msgid="6386870060423480765">"Helistage"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Helista"</string>
     <string name="miniresolver_switch" msgid="8011924662117617451">"Lülitu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kaardi võrgu avamise PIN-kood"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM-kaardi võrgu alamhulga avamise PIN-kood"</string>

@@ -31,6 +31,7 @@ import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
+import android.util.Log;
 import android.util.Pair;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -566,11 +567,18 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        boolean consumed = mKeyguardHandler.startAnimation(
-                mixed.mTransition, info, startTransaction, finishTransaction, finishCallback);
-        if (!consumed) {
+        final Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+            mixed.mInFlightSubAnimations--;
+            if (mixed.mInFlightSubAnimations == 0) {
+                mActiveTransitions.remove(mixed);
+                finishCallback.onTransitionFinished(wct, wctCB);
+            }
+        };
+        if (!mKeyguardHandler.startAnimation(
+                mixed.mTransition, info, startTransaction, finishTransaction, finishCB)) {
             return false;
         }
+        mixed.mInFlightSubAnimations++;
         // Sync pip state.
         if (mPipHandler != null) {
             // We don't know when to apply `startTransaction` so use a separate transaction here.

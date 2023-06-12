@@ -574,6 +574,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     @Override
                     public void onActivityPinned(String packageName, int userId, int taskId,
                             int stackId) {
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "onActivityPinned: %s", packageName);
                         mTouchHandler.onActivityPinned();
                         mMediaController.onActivityPinned();
                         mAppOpsListener.onActivityPinned(packageName);
@@ -585,6 +587,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         final Pair<ComponentName, Integer> topPipActivityInfo =
                                 PipUtils.getTopPipActivity(mContext);
                         final ComponentName topActivity = topPipActivityInfo.first;
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "onActivityUnpinned: %s", topActivity);
                         mTouchHandler.onActivityUnpinned(topActivity);
                         mAppOpsListener.onActivityUnpinned();
                         mPipInputConsumer.unregisterInputConsumer();
@@ -593,6 +597,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     @Override
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                             boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "onActivityRestartAttempt: %s", task.topActivity);
                         if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
                             return;
                         }

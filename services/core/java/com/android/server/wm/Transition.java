@@ -52,7 +52,6 @@ import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
-import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TASK_LAUNCHING_BEHIND;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
@@ -691,6 +690,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (!wc.mDisplayContent.getDisplayPolicy().isScreenOnFully()
                 || wc.mDisplayContent.getDisplayInfo().state == Display.STATE_OFF) {
             mFlags |= WindowManager.TRANSIT_FLAG_INVISIBLE;
+            return;
         }
 
         if (mContainerFreezer == null) {
@@ -1191,7 +1191,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // processed all the participants first (in particular, we want to trigger pip-enter first)
         for (int i = 0; i < mParticipants.size(); ++i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
-            if (ar != null) {
+            // If the activity was just inserted to an invisible task, it will keep INITIALIZING
+            // state. Then no need to notify the callback to avoid clearing some states
+            // unexpectedly, e.g. launch-task-behind.
+            if (ar != null && (ar.isVisibleRequested()
+                    || !ar.isState(ActivityRecord.State.INITIALIZING))) {
                 mController.dispatchLegacyAppTransitionFinished(ar);
             }
         }
@@ -2245,11 +2249,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             WindowContainer<?> ancestor = findCommonAncestor(sortedTargets, wc);
 
             // Make leash based on highest (z-order) direct child of ancestor with a participant.
+            // Check whether the ancestor is belonged to last parent, shouldn't happen.
+            final boolean hasReparent = !wc.isDescendantOf(ancestor);
             WindowContainer leashReference = wc;
-            while (leashReference.getParent() != ancestor) {
-                leashReference = leashReference.getParent();
+            if (hasReparent) {
+                Slog.e(TAG, "Did not find common ancestor! Ancestor= " + ancestor
+                        + " target= " + wc);
+            } else {
+                while (leashReference.getParent() != ancestor) {
+                    leashReference = leashReference.getParent();
+                }
             }
-
             final SurfaceControl rootLeash = leashReference.makeAnimationLeash().setName(
                     "Transition Root: " + leashReference.getName()).build();
             rootLeash.setUnreleasedWarningCallSite("Transition.calculateTransitionRoots");
@@ -2308,23 +2318,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 task.fillTaskInfo(tinfo);
                 change.setTaskInfo(tinfo);
                 change.setRotationAnimation(getTaskRotationAnimation(task));
-                final ActivityRecord topMostActivity = task.getTopMostActivity();
-                change.setAllowEnterPip(topMostActivity != null
-                        && topMostActivity.checkEnterPictureInPictureAppOpsState());
                 final ActivityRecord topRunningActivity = task.topRunningActivity();
-                if (topRunningActivity != null && task.mDisplayContent != null
-                        // Display won't be rotated for multi window Task, so the fixed rotation
-                        // won't be applied. This can happen when the windowing mode is changed
-                        // before the previous fixed rotation is applied.
-                        && (!task.inMultiWindowMode() || !topRunningActivity.inMultiWindowMode())) {
-                    // If Activity is in fixed rotation, its will be applied with the next rotation,
-                    // when the Task is still in the previous rotation.
-                    final int taskRotation = task.getWindowConfiguration().getDisplayRotation();
-                    final int activityRotation = topRunningActivity.getWindowConfiguration()
-                            .getDisplayRotation();
-                    if (taskRotation != activityRotation) {
-                        change.setEndFixedRotation(activityRotation);
+                if (topRunningActivity != null) {
+                    if (topRunningActivity.info.supportsPictureInPicture()) {
+                        change.setAllowEnterPip(
+                                topRunningActivity.checkEnterPictureInPictureAppOpsState());
                     }
+                    setEndFixedRotationIfNeeded(change, task, topRunningActivity);
                 }
             } else if ((info.mFlags & ChangeInfo.FLAG_SEAMLESS_ROTATION) != 0) {
                 change.setRotationAnimation(ROTATION_ANIMATION_SEAMLESS);
@@ -2432,6 +2432,48 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         return animOptions;
     }
+
+    private static void setEndFixedRotationIfNeeded(@NonNull TransitionInfo.Change change,
+            @NonNull Task task, @NonNull ActivityRecord taskTopRunning) {
+        if (!taskTopRunning.isVisibleRequested()) {
+            // Fixed rotation only applies to opening or changing activity.
+            return;
+        }
+        if (task.inMultiWindowMode() && taskTopRunning.inMultiWindowMode()) {
+            // Display won't be rotated for multi window Task, so the fixed rotation won't be
+            // applied. This can happen when the windowing mode is changed before the previous
+            // fixed rotation is applied. Check both task and activity because the activity keeps
+            // fullscreen mode when the task is entering PiP.
+            return;
+        }
+        final int taskRotation = task.getWindowConfiguration().getDisplayRotation();
+        final int activityRotation = taskTopRunning.getWindowConfiguration()
+                .getDisplayRotation();
+        // If the Activity uses fixed rotation, its rotation will be applied to display after
+        // the current transition is done, while the Task is still in the previous rotation.
+        if (taskRotation != activityRotation) {
+            change.setEndFixedRotation(activityRotation);
+            return;
+        }
+
+        // For example, the task is entering PiP so it no longer decides orientation. If the next
+        // orientation source (it could be an activity which was behind the PiP or launching to top)
+        // will change display rotation, then set the fixed rotation hint as well so the animation
+        // can consider the rotated position.
+        if (!task.inPinnedWindowingMode() || taskTopRunning.mDisplayContent.inTransition()) {
+            return;
+        }
+        final WindowContainer<?> orientationSource =
+                taskTopRunning.mDisplayContent.getLastOrientationSource();
+        if (orientationSource == null) {
+            return;
+        }
+        final int nextRotation = orientationSource.getWindowConfiguration().getDisplayRotation();
+        if (taskRotation != nextRotation) {
+            change.setEndFixedRotation(nextRotation);
+        }
+    }
+
     /**
      * Finds the top-most common ancestor of app targets.
      *
@@ -2453,6 +2495,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (isWallpaper(wc) || getDisplayId(wc) != displayId) {
                 // Skip the non-app window or windows on a different display
                 continue;
+            }
+            // Re-initiate the last parent as the initial ancestor instead of the top target.
+            // When move a leaf task from organized task to display area, try to keep the transition
+            // root be the original organized task for close transition animation.
+            // Otherwise, shell will use wrong root layer to play animation.
+            // Note: Since the target is sorted, so only need to do this at the lowest target.
+            if (change.mStartParent != null && wc.getParent() != null
+                    && change.mStartParent.isAttached() && wc.getParent() != change.mStartParent
+                    && i == targets.size() - 1) {
+                final int transitionMode = change.getTransitMode(wc);
+                if (transitionMode == TRANSIT_CLOSE || transitionMode == TRANSIT_TO_BACK) {
+                    ancestor = change.mStartParent;
+                    continue;
+                }
             }
             while (!wc.isDescendantOf(ancestor)) {
                 ancestor = ancestor.getParent();
@@ -2819,9 +2875,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         flags |= TransitionInfo.FLAG_IS_SYSTEM_WINDOW;
                     }
                 }
-            }
-            if (occludesKeyguard(wc)) {
-                flags |= FLAG_OCCLUDES_KEYGUARD;
             }
             if ((mFlags & FLAG_CHANGE_NO_ANIMATION) != 0
                     && (mFlags & FLAG_CHANGE_YES_ANIMATION) == 0) {

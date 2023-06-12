@@ -1346,6 +1346,16 @@ public class TransitionTests extends WindowTestsBase {
         activity1.setVisible(false);
         abortTransition.abort();
         assertTrue(activity1.isVisible());
+
+        // The mLaunchTaskBehind flag of an invisible initializing activity should not be cleared.
+        final Transition noChangeTransition = controller.createTransition(TRANSIT_OPEN);
+        noChangeTransition.collect(activity1);
+        activity1.setVisibleRequested(false);
+        activity1.setState(ActivityRecord.State.INITIALIZING, "test");
+        activity1.mLaunchTaskBehind = true;
+        mWm.mSyncEngine.abort(noChangeTransition.getSyncId());
+        noChangeTransition.finishTransition();
+        assertTrue(activity1.mLaunchTaskBehind);
     }
 
     @Test

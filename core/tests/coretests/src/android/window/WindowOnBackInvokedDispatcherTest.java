@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -339,5 +340,43 @@ public class WindowOnBackInvokedDispatcherTest {
         waitForIdle();
         verify(mCallback1).onBackCancelled();
         verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), isNull());
+    }
+
+    @Test
+    public void onBackInvoked_calledAfterOnBackStarted() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
+        OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
+
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+
+        waitForIdle();
+        verify(mCallback1).onBackStarted(any(BackEvent.class));
+
+        callbackInfo.getCallback().onBackInvoked();
+
+        waitForIdle();
+        verify(mCallback1).onBackInvoked();
+        verify(mCallback1, never()).onBackCancelled();
+    }
+
+    @Test
+    public void onDetachFromWindow_cancelCallbackAndIgnoreOnBackInvoked() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
+
+        OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
+
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+
+        waitForIdle();
+        verify(mCallback1).onBackStarted(any(BackEvent.class));
+
+        // This should trigger mCallback1.onBackCancelled()
+        mDispatcher.detachFromWindow();
+        // This should be ignored by mCallback1
+        callbackInfo.getCallback().onBackInvoked();
+
+        waitForIdle();
+        verify(mCallback1, never()).onBackInvoked();
+        verify(mCallback1).onBackCancelled();
     }
 }

@@ -269,7 +269,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                                 Activity.RESULT_CANCELED, null, null,
                                 false, false, oldRecord.shareIdentity, oldRecord.userId,
                                 oldRecord.callingUid, r.callingUid, r.callerPackage,
-                                SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0);
+                                SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0, 0);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failure ["
                                 + mQueueName + "] sending broadcast result of "
@@ -339,7 +339,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     private BroadcastRecord replaceBroadcastLocked(ArrayList<BroadcastRecord> queue,
             BroadcastRecord r, String typeForLogging) {
         final Intent intent = r.intent;
-        for (int i = queue.size() - 1; i > 0; i--) {
+        for (int i = queue.size() - 1; i >= 0; i--) {
             final BroadcastRecord old = queue.get(i);
             if (old.userId == r.userId && intent.filterEquals(old.intent)) {
                 if (DEBUG_BROADCAST) {
@@ -617,7 +617,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     r.curApp.info.packageName,
                     r.callerPackage,
                     r.calculateTypeForLogging(),
-                    r.getDeliveryGroupPolicy());
+                    r.getDeliveryGroupPolicy(),
+                    r.intent.getFlags(),
+                    BroadcastRecord.getReceiverPriority(curReceiver),
+                    r.callerProcState);
         }
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG_BROADCAST, "finishReceiver [" + mQueueName + "] called but state is IDLE");
@@ -748,7 +751,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             Intent intent, int resultCode, String data, Bundle extras,
             boolean ordered, boolean sticky, boolean shareIdentity, int sendingUser,
             int receiverUid, int callingUid, String callingPackage,
-            long dispatchDelay, long receiveDelay) throws RemoteException {
+            long dispatchDelay, long receiveDelay, int priority) throws RemoteException {
         // If the broadcaster opted-in to sharing their identity, then expose package visibility for
         // the receiver.
         if (shareIdentity) {
@@ -798,7 +801,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     dispatchDelay, receiveDelay, 0 /* finish_delay */,
                     SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
                     app != null ? app.info.packageName : null, callingPackage,
-                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy());
+                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy(), r.intent.getFlags(),
+                    priority, r.callerProcState);
         }
     }
 
@@ -879,7 +883,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                         r.resultExtras, r.ordered, r.initialSticky, r.shareIdentity, r.userId,
                         filter.receiverList.uid, r.callingUid, r.callerPackage,
                         r.dispatchTime - r.enqueueTime,
-                        r.receiverTime - r.dispatchTime);
+                        r.receiverTime - r.dispatchTime, filter.getPriority());
                 // parallel broadcasts are fire-and-forget, not bookended by a call to
                 // finishReceiverLocked(), so we manage their activity-start token here
                 if (filter.receiverList.app != null
@@ -1170,7 +1174,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                                     r.resultData, r.resultExtras, false, false, r.shareIdentity,
                                     r.userId, r.callingUid, r.callingUid, r.callerPackage,
                                     r.dispatchTime - r.enqueueTime,
-                                    now - r.dispatchTime);
+                                    now - r.dispatchTime, 0);
                             logBootCompletedBroadcastCompletionLatencyIfPossible(r);
                             // Set this to null so that the reference
                             // (local and remote) isn't kept in the mBroadcastHistory.

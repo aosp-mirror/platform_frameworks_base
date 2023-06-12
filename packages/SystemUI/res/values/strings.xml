@@ -2724,8 +2724,8 @@
     <string name="media_output_broadcast_last_update_error">Can\u2019t save.</string>
     <!-- The hint message when Broadcast code is less than 4 characters [CHAR LIMIT=60] -->
     <string name="media_output_broadcast_code_hint_no_less_than_min">Use at least 4 characters</string>
-    <!-- The hint message when Broadcast code is more than 16 characters [CHAR LIMIT=60] -->
-    <string name="media_output_broadcast_code_hint_no_more_than_max">Use fewer than 16 characters</string>
+    <!-- The hint message when Broadcast edit is more than 16/254 characters [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_edit_hint_no_more_than_max">Use fewer than <xliff:g id="length" example="16">%1$d</xliff:g> characters</string>
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>
@@ -3016,52 +3016,54 @@
     -->
     <string name="keyguard_affordance_enablement_dialog_action_template">Open <xliff:g id="appName" example="Wallet">%1$s</xliff:g></string>
 
-    <!--
-    Requirement for the wallet app to be available for the user to use. This is shown as part of a
-    bulleted list of requirements. When all requirements are met, the app can be accessed through a
-    shortcut button on the lock screen. [CHAR LIMIT=NONE].
+    <!---
+    Explains that the wallet app is not available because it is not installed. This is shown as part
+    of a dialog that explains to the user why they cannot select this shortcut for their lock screen
+    right now.
+    [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1">&#8226; The app is set up</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app">To add the Wallet app as a shortcut, make sure the app is installed</string>
 
-    <!--
-    Requirement for the wallet app to be available for the user to use. This is shown as part of a
-    bulleted list of requirements. When all requirements are met, the app can be accessed through a
-    shortcut button on the lock screen. [CHAR LIMIT=NONE].
+    <!---
+    Explains that the wallet app is not available because it is not installed. This is shown as part
+    of a dialog that explains to the user why they cannot select this shortcut for their lock screen
+    right now.
+    [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2">&#8226; At least one card has been added to Wallet</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app">To add the Wallet app as a shortcut, make sure at least one card has been added</string>
 
     <!--
     Requirement for the QR code scanner functionality to be available for the user to use. This is
     shown as part of a bulleted list of requirements. When all requirements are met, the piece of
     functionality can be accessed through a shortcut button on the lock screen. [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction">&#8226; Install a camera app</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation">To add the QR code scanner as a shortcut, make sure a camera app is installed</string>
 
     <!--
-    Requirement for the home app to be available for the user to use. This is shown as part of a
-    bulleted list of requirements. When all requirements are met, the app can be accessed through a
-    shortcut button on the lock screen. [CHAR LIMIT=NONE].
+    Explains that the lock screen shortcut for the "home" app is not available because the app isn't
+    installed. This is shown as part of a dialog that explains to the user why they cannot select
+    this shortcut for their lock screen right now. [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1">&#8226; The app is set up</string>
+    <string name="home_quick_affordance_unavailable_install_the_app">To add the Home app as a shortcut, make sure the app is installed</string>
 
     <!--
-    Requirement for the home app to be available for the user to use. This is shown as part of a
-    bulleted list of requirements. When all requirements are met, the app can be accessed through a
-    shortcut button on the lock screen. [CHAR LIMIT=NONE].
+    Explains that the lock screen shortcut for the "home" app is not available because the app isn't
+    configured. This is shown as part of a dialog that explains to the user why they cannot select
+    this shortcut for their lock screen right now. [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2">&#8226; At least one device is available</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app">&#8226; At least one device is available</string>
 
     <!---
-    Requirement for the notes app to be available for the user to use. This is shown as part of a
-    bulleted list of requirements. When all requirements are met, the app can be accessed through a
-    shortcut button on the lock screen. [CHAR LIMIT=NONE] -->
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction">Select a default notes app to use the notetaking shortcut</string>
+    Explains that the notes app is not available. This is shown as part of a dialog that explains to
+    the user why they cannot select this shortcut for their lock screen right now.
+    [CHAR LIMIT=NONE].
+    -->
+    <string name="notes_app_quick_affordance_unavailable_explanation">Select a default notes app to use the notetaking shortcut</string>
 
     <!---
     The action to make the lock screen shortcut for the notes app to be available for the user to
-    use. This is shown as the action button in the dialog listing the requirements. When all
-    requirements are met, the app can be accessed through a shortcut button on the lock screen.
-    [CHAR LIMIT=NONE] -->
+    use. This is shown as the action button in the dialog explaining why the shortcut isn't
+    available. [CHAR LIMIT=NONE] -->
     <string name="keyguard_affordance_enablement_dialog_notes_app_action">Select app</string>
 
     <!--
@@ -3153,4 +3155,11 @@
 
     <!--- Content of toast triggered when the notes app entry point is triggered without setting a default notes app. [CHAR LIMIT=NONE] -->
     <string name="set_default_notes_app_toast_content">Set default notes app in Settings</string>
+
+    <!--
+    Label for a button that, when clicked, sends the user to the app store to install an app.
+
+    [CHAR LIMIT=64].
+    -->
+    <string name="install_app">Install app</string>
 </resources>

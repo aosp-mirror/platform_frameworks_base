@@ -62,7 +62,7 @@ abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker)
      */
     @Presubmit
     @Test
-    fun pipWindowRemainInsideVisibleBounds() {
+    open fun pipWindowRemainInsideVisibleBounds() {
         flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 

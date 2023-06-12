@@ -1616,6 +1616,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SERVICE_SHORT_FGS_PROCSTATE_TIMEOUT_MSG = 77;
     static final int SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG = 78;
     static final int UPDATE_CACHED_APP_HIGH_WATERMARK = 79;
+    static final int ADD_UID_TO_OBSERVER_MSG = 80;
+    static final int REMOVE_UID_FROM_OBSERVER_MSG = 81;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1773,6 +1775,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } break;
                 case PUSH_TEMP_ALLOWLIST_UI_MSG: {
                     pushTempAllowlist();
+                } break;
+                case ADD_UID_TO_OBSERVER_MSG: {
+                    mUidObserverController.addUidToObserverImpl((IBinder) msg.obj, msg.arg1);
+                } break;
+                case REMOVE_UID_FROM_OBSERVER_MSG: {
+                    mUidObserverController.removeUidFromObserverImpl((IBinder) msg.obj, msg.arg1);
                 } break;
             }
         }
@@ -13785,7 +13793,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (action.startsWith("android.intent.action.USER_")
                                 || action.startsWith("android.intent.action.PACKAGE_")
                                 || action.startsWith("android.intent.action.UID_")
-                                || action.startsWith("android.intent.action.EXTERNAL_")) {
+                                || action.startsWith("android.intent.action.EXTERNAL_")
+                                || action.startsWith("android.bluetooth.")) {
                             if (DEBUG_BROADCAST) {
                                 Slog.wtf(TAG,
                                         "System internals registering for " + filter.toLongString()

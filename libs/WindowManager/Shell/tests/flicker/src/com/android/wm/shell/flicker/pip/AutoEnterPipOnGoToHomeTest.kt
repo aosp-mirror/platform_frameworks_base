@@ -53,7 +53,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipViaAppUiButtonTest(flicker) {
+open class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipViaAppUiButtonTest(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = {
         transitions { tapl.goHome() }
     }

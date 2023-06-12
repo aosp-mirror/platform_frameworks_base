@@ -361,23 +361,34 @@ public class AudioDeviceInventory {
                         AudioSystem.DEVICE_STATE_AVAILABLE,
                         di.mDeviceCodecFormat);
             }
-            mAppliedStrategyRoles.clear();
             mAppliedStrategyRolesInt.clear();
-            mAppliedPresetRoles.clear();
             mAppliedPresetRolesInt.clear();
             applyConnectedDevicesRoles_l();
         }
+        reapplyExternalDevicesRoles();
+    }
+
+    /*package*/ void reapplyExternalDevicesRoles() {
+        synchronized (mDevicesLock) {
+            mAppliedStrategyRoles.clear();
+            mAppliedPresetRoles.clear();
+        }
         synchronized (mPreferredDevices) {
             mPreferredDevices.forEach((strategy, devices) -> {
-                setPreferredDevicesForStrategy(strategy, devices); });
+                setPreferredDevicesForStrategy(strategy, devices);
+            });
         }
         synchronized (mNonDefaultDevices) {
             mNonDefaultDevices.forEach((strategy, devices) -> {
                 addDevicesRoleForStrategy(strategy, AudioSystem.DEVICE_ROLE_DISABLED,
-                        devices, false /* internal */); });
+                        devices, false /* internal */);
+            });
         }
         synchronized (mPreferredDevicesForCapturePreset) {
-            // TODO: call audiosystem to restore
+            mPreferredDevicesForCapturePreset.forEach((capturePreset, devices) -> {
+                setDevicesRoleForCapturePreset(
+                        capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
+            });
         }
     }
 
@@ -1163,6 +1174,7 @@ public class AudioDeviceInventory {
             return mAudioSystem.removeDevicesRoleForStrategy(s, r, d); });
         purgeRoles(mAppliedPresetRolesInt, (p, r, d) -> {
             return mAudioSystem.removeDevicesRoleForCapturePreset(p, r, d); });
+        reapplyExternalDevicesRoles();
     }
 
     @GuardedBy("mDevicesLock")

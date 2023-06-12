@@ -111,9 +111,13 @@ final class DeviceStateController {
     }
 
     /**
-     * @return true if the rotation direction on the Z axis should be reversed.
+     * @return true if the rotation direction on the Z axis should be reversed for the default
+     * display.
      */
-    boolean shouldReverseRotationDirectionAroundZAxis() {
+    boolean shouldReverseRotationDirectionAroundZAxis(@NonNull DisplayContent displayContent) {
+        if (!displayContent.isDefaultDisplay) {
+            return false;
+        }
         return ArrayUtils.contains(mReverseRotationAroundZAxisStates, mCurrentState);
     }
 

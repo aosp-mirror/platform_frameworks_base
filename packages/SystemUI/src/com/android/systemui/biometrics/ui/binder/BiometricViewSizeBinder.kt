@@ -19,8 +19,11 @@ package com.android.systemui.biometrics.ui.binder
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
 import androidx.core.animation.addListener
@@ -52,7 +55,9 @@ object BiometricViewSizeBinder {
         panelViewController: AuthPanelController,
         jankListener: BiometricJankListener,
     ) {
-        val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
+        val windowManager = requireNotNull(view.context.getSystemService(WindowManager::class.java))
+        val accessibilityManager =
+            requireNotNull(view.context.getSystemService(AccessibilityManager::class.java))
         fun notifyAccessibilityChanged() {
             Utils.notifyAccessibilityContentChanged(accessibilityManager, view)
         }
@@ -102,15 +107,26 @@ object BiometricViewSizeBinder {
                             when {
                                 size.isSmall -> {
                                     iconHolderView.alpha = 1f
+                                    val bottomInset =
+                                        windowManager.maximumWindowMetrics.windowInsets
+                                            .getInsets(WindowInsets.Type.navigationBars())
+                                            .bottom
                                     iconHolderView.y =
-                                        view.height - iconHolderView.height - iconPadding
+                                        if (view.isLandscape()) {
+                                            (view.height - iconHolderView.height - bottomInset) / 2f
+                                        } else {
+                                            view.height -
+                                                iconHolderView.height -
+                                                iconPadding -
+                                                bottomInset
+                                        }
                                     val newHeight =
-                                        iconHolderView.height + 2 * iconPadding.toInt() -
+                                        iconHolderView.height + (2 * iconPadding.toInt()) -
                                             iconHolderView.paddingTop -
                                             iconHolderView.paddingBottom
                                     panelViewController.updateForContentDimensions(
                                         width,
-                                        newHeight,
+                                        newHeight + bottomInset,
                                         0, /* animateDurationMs */
                                     )
                                 }
@@ -179,6 +195,11 @@ object BiometricViewSizeBinder {
             }
         }
     }
+}
+
+private fun View.isLandscape(): Boolean {
+    val r = context.display.rotation
+    return r == Surface.ROTATION_90 || r == Surface.ROTATION_270
 }
 
 private fun TextView.showTextOrHide(forceHide: Boolean = false) {

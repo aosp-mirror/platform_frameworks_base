@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menü für Bedienungshilfen"</string>
-    <string name="accessibility_menu_intro" msgid="3164193281544042394">"Über das Menü „Bedienungshilfen“ lässt sich ein großes Menü zur Bedienung deines Geräts auf dem Bildschirm öffnen. Du kannst beispielsweise das Gerät sperren, die Lautstärke und Helligkeit anpassen und Screenshots machen."</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"Über das Menü für Bedienungshilfen lässt sich ein großes Menü zur Bedienung deines Geräts auf dem Bildschirm öffnen. Du kannst beispielsweise das Gerät sperren, die Lautstärke und Helligkeit anpassen und Screenshots machen."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Einstellungen für Bedienungshilfen"</string>
@@ -20,9 +20,9 @@
     <string name="brightness_down_label" msgid="7115662941913272072">"Helligkeit verringern"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Zum vorherigen Bildschirm"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Zum nächsten Bildschirm"</string>
-    <string name="accessibility_menu_description" msgid="4458354794093858297">"Über das Menü „Bedienungshilfen“ lässt sich ein großes Menü zur Bedienung deines Geräts auf dem Bildschirm öffnen. Du kannst beispielsweise das Gerät sperren, die Lautstärke und Helligkeit anpassen und Screenshots machen."</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"Über das Menü für Bedienungshilfen lässt sich ein großes Menü zur Bedienung deines Geräts auf dem Bildschirm öffnen. Du kannst beispielsweise das Gerät sperren, die Lautstärke und Helligkeit anpassen und Screenshots machen."</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"Gerät mit großem Menü steuern"</string>
-    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Menüeinstellungen f. Bedienungshilfen"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Einstellungen für das Menü „Bedienungshilfen“"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Große Schaltflächen"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Schaltflächen für das Menü „Bedienungshilfen“ vergrößern"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"Hilfe"</string>

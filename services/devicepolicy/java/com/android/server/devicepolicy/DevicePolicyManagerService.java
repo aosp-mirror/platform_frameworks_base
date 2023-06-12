@@ -2093,7 +2093,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mUserData = new SparseArray<>();
         mOwners = makeOwners(injector, pathProvider);
 
-        mDevicePolicyEngine = new DevicePolicyEngine(mContext, mDeviceAdminServiceController);
+        mDevicePolicyEngine = new DevicePolicyEngine(
+                mContext, mDeviceAdminServiceController, getLockObject());
 
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -7840,27 +7841,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new SecurityException("Cannot wipe data. " + restriction
                         + " restriction is set for user " + userId);
             }
+        });
 
-            boolean isSystemUser = userId == UserHandle.USER_SYSTEM;
-            boolean wipeDevice;
-            if (factoryReset == null || !mInjector.isChangeEnabled(EXPLICIT_WIPE_BEHAVIOUR,
-                    adminPackage,
-                    userId)) {
-                // Legacy mode
-                wipeDevice = isSystemUser;
+        boolean isSystemUser = userId == UserHandle.USER_SYSTEM;
+        boolean wipeDevice;
+        if (factoryReset == null || !mInjector.isChangeEnabled(EXPLICIT_WIPE_BEHAVIOUR,
+                adminPackage,
+                userId)) {
+            // Legacy mode
+            wipeDevice = isSystemUser;
+        } else {
+            // Explicit behaviour
+            if (factoryReset) {
+                EnforcingAdmin enforcingAdmin = enforcePermissionsAndGetEnforcingAdmin(
+                        /*admin=*/ null,
+                        /*permission=*/ new String[]{MANAGE_DEVICE_POLICY_WIPE_DATA,
+                                MASTER_CLEAR},
+                        USES_POLICY_WIPE_DATA,
+                        adminPackage,
+                        factoryReset ? UserHandle.USER_ALL :
+                                getAffectedUser(calledOnParentInstance));
+                wipeDevice = true;
             } else {
-                // Explicit behaviour
-                if (factoryReset) {
-                    EnforcingAdmin enforcingAdmin = enforcePermissionsAndGetEnforcingAdmin(
-                            /*admin=*/ null,
-                            /*permission=*/ new String[]{MANAGE_DEVICE_POLICY_WIPE_DATA,
-                                    MASTER_CLEAR},
-                            USES_POLICY_WIPE_DATA,
-                            adminPackage,
-                            factoryReset ? UserHandle.USER_ALL :
-                                    getAffectedUser(calledOnParentInstance));
-                    wipeDevice = true;
-                } else {
+                mInjector.binderWithCleanCallingIdentity(() -> {
                     Preconditions.checkCallAuthorization(!isSystemUser,
                             "User %s is a system user and cannot be removed", userId);
                     boolean isLastNonHeadlessUser = getUserInfo(userId).isFull()
@@ -7871,9 +7874,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             "Removing user %s would leave the device without any active users. "
                                     + "Consider factory resetting the device instead.",
                             userId);
-                    wipeDevice = false;
-                }
+                });
+                wipeDevice = false;
             }
+        }
+        mInjector.binderWithCleanCallingIdentity(() -> {
             if (wipeDevice) {
                 forceWipeDeviceNoLock(
                         (flags & WIPE_EXTERNAL_STORAGE) != 0,

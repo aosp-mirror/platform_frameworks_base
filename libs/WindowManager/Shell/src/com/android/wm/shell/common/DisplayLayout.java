@@ -375,16 +375,15 @@ public class DisplayLayout {
                     insetsState.getDisplayFrame(),
                     WindowInsets.Type.navigationBars(),
                     false /* ignoreVisibility */);
-            outInsets.set(insets.left, insets.top, insets.right, insets.bottom);
             int position = navigationBarPosition(res, displayWidth, displayHeight, displayRotation);
             int navBarSize =
                     getNavigationBarSize(res, position, displayWidth > displayHeight, uiMode);
             if (position == NAV_BAR_BOTTOM) {
-                outInsets.bottom = Math.max(outInsets.bottom , navBarSize);
+                outInsets.bottom = Math.max(insets.bottom , navBarSize);
             } else if (position == NAV_BAR_RIGHT) {
-                outInsets.right = Math.max(outInsets.right , navBarSize);
+                outInsets.right = Math.max(insets.right , navBarSize);
             } else if (position == NAV_BAR_LEFT) {
-                outInsets.left = Math.max(outInsets.left , navBarSize);
+                outInsets.left = Math.max(insets.left , navBarSize);
             }
         }
 

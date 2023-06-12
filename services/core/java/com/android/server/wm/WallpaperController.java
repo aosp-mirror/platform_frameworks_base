@@ -339,12 +339,12 @@ class WallpaperController {
     }
 
     /**
-     * Change the visibility if wallpaper is home screen only.
+     * Make one wallpaper visible, according to {@attr showHome}.
      * This is called during the keyguard unlocking transition
-     * (see {@link KeyguardController#keyguardGoingAway(int, int)}) and thus assumes that if the
-     * system wallpaper is shared with lock, then it needs no animation.
+     * (see {@link KeyguardController#keyguardGoingAway(int, int)}),
+     * or when a keyguard unlock is cancelled (see {@link KeyguardController})
      */
-    public void showHomeWallpaperInTransition() {
+    public void showWallpaperInTransition(boolean showHome) {
         updateWallpaperWindowsTarget(mFindResults);
 
         if (!mFindResults.hasTopShowWhenLockedWallpaper()) {
@@ -357,9 +357,9 @@ class WallpaperController {
             // Shared wallpaper, ensure its visibility
             showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindows(true);
         } else {
-            // Separate lock and home wallpapers: show home wallpaper and hide lock
-            hideWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(true);
-            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(false);
+            // Separate lock and home wallpapers: show the correct wallpaper in transition
+            hideWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(showHome);
+            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(!showHome);
         }
     }
 
@@ -401,6 +401,19 @@ class WallpaperController {
         // swiping through Launcher pages).
         final Rect wallpaperFrame = wallpaperWin.getFrame();
 
+        final int diffWidth = wallpaperFrame.width() - lastWallpaperBounds.width();
+        final int diffHeight = wallpaperFrame.height() - lastWallpaperBounds.height();
+        if ((wallpaperWin.mAttrs.flags & WindowManager.LayoutParams.FLAG_SCALED) != 0
+                && Math.abs(diffWidth) > 1 && Math.abs(diffHeight) > 1) {
+            Slog.d(TAG, "Skip wallpaper offset with inconsistent orientation, bounds="
+                    + lastWallpaperBounds + " frame=" + wallpaperFrame);
+            // With FLAG_SCALED, the requested size should at least make the frame match one of
+            // side. If both sides contain differences, the client side may not have updated the
+            // latest size according to the current orientation. So skip calculating the offset to
+            // avoid the wallpaper not filling the screen.
+            return false;
+        }
+
         int newXOffset = 0;
         int newYOffset = 0;
         boolean rawChanged = false;
@@ -417,7 +430,7 @@ class WallpaperController {
         float wpxs = mLastWallpaperXStep >= 0 ? mLastWallpaperXStep : -1.0f;
         // Difference between width of wallpaper image, and the last size of the wallpaper.
         // This is the horizontal surplus from the prior configuration.
-        int availw = wallpaperFrame.width() - lastWallpaperBounds.width();
+        int availw = diffWidth;
 
         int displayOffset = getDisplayWidthOffset(availw, lastWallpaperBounds,
                 wallpaperWin.isRtl());
@@ -442,9 +455,7 @@ class WallpaperController {
 
         float wpy = mLastWallpaperY >= 0 ? mLastWallpaperY : 0.5f;
         float wpys = mLastWallpaperYStep >= 0 ? mLastWallpaperYStep : -1.0f;
-        int availh = wallpaperWin.getFrame().bottom - wallpaperWin.getFrame().top
-                - lastWallpaperBounds.height();
-        offset = availh > 0 ? -(int)(availh * wpy + .5f) : 0;
+        offset = diffHeight > 0 ? -(int) (diffHeight * wpy + .5f) : 0;
         if (mLastWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
             offset += mLastWallpaperDisplayOffsetY;
         }

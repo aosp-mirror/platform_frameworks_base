@@ -135,14 +135,14 @@ public class PipSizeSpecHandler {
                 maxWidth = (int) (mOptimizedAspectRatio * shorterLength
                         + shorterLength * (aspectRatio - mOptimizedAspectRatio) / (1
                         + aspectRatio));
-                maxHeight = (int) (maxWidth / aspectRatio);
+                maxHeight = Math.round(maxWidth / aspectRatio);
             } else {
                 if (aspectRatio > 1f) {
                     maxWidth = shorterLength;
-                    maxHeight = (int) (maxWidth / aspectRatio);
+                    maxHeight = Math.round(maxWidth / aspectRatio);
                 } else {
                     maxHeight = shorterLength;
-                    maxWidth = (int) (maxHeight * aspectRatio);
+                    maxWidth = Math.round(maxHeight * aspectRatio);
                 }
             }
 
@@ -165,10 +165,9 @@ public class PipSizeSpecHandler {
 
             Size maxSize = this.getMaxSize(aspectRatio);
 
-            int defaultWidth = Math.max((int) (maxSize.getWidth() * mDefaultSizePercent),
+            int defaultWidth = Math.max(Math.round(maxSize.getWidth() * mDefaultSizePercent),
                     minSize.getWidth());
-            int defaultHeight = Math.max((int) (maxSize.getHeight() * mDefaultSizePercent),
-                    minSize.getHeight());
+            int defaultHeight = Math.round(defaultWidth / aspectRatio);
 
             return new Size(defaultWidth, defaultHeight);
         }
@@ -188,16 +187,16 @@ public class PipSizeSpecHandler {
 
             Size maxSize = this.getMaxSize(aspectRatio);
 
-            int minWidth = (int) (maxSize.getWidth() * mMinimumSizePercent);
-            int minHeight = (int) (maxSize.getHeight() * mMinimumSizePercent);
+            int minWidth = Math.round(maxSize.getWidth() * mMinimumSizePercent);
+            int minHeight = Math.round(maxSize.getHeight() * mMinimumSizePercent);
 
             // make sure the calculated min size is not smaller than the allowed default min size
             if (aspectRatio > 1f) {
-                minHeight = (int) Math.max(minHeight, mDefaultMinSize);
-                minWidth = (int) (minHeight * aspectRatio);
+                minHeight = Math.max(minHeight, mDefaultMinSize);
+                minWidth = Math.round(minHeight * aspectRatio);
             } else {
-                minWidth = (int) Math.max(minWidth, mDefaultMinSize);
-                minHeight = (int) (minWidth / aspectRatio);
+                minWidth = Math.max(minWidth, mDefaultMinSize);
+                minHeight = Math.round(minWidth / aspectRatio);
             }
             return new Size(minWidth, minHeight);
         }

@@ -20,6 +20,7 @@ package com.android.systemui.keyguard
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.content.UriMatcher
 import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
@@ -282,11 +283,11 @@ class CustomizationProvider :
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns.ICON,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns.IS_ENABLED,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
-                        .ENABLEMENT_INSTRUCTIONS,
+                        .ENABLEMENT_EXPLANATION,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
                         .ENABLEMENT_ACTION_TEXT,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
-                        .ENABLEMENT_COMPONENT_NAME,
+                        .ENABLEMENT_ACTION_INTENT,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns.CONFIGURE_INTENT,
                 )
             )
@@ -298,13 +299,10 @@ class CustomizationProvider :
                             representation.name,
                             representation.iconResourceId,
                             if (representation.isEnabled) 1 else 0,
-                            representation.instructions?.joinToString(
-                                Contract.LockScreenQuickAffordances.AffordanceTable
-                                    .ENABLEMENT_INSTRUCTIONS_DELIMITER
-                            ),
+                            representation.explanation,
                             representation.actionText,
-                            representation.actionComponentName,
-                            representation.configureIntent?.toUri(0),
+                            representation.actionIntent?.toUri(Intent.URI_INTENT_SCHEME),
+                            representation.configureIntent?.toUri(Intent.URI_INTENT_SCHEME),
                         )
                     )
                 }

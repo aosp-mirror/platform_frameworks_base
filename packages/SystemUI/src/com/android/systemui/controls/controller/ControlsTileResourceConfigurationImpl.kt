@@ -20,12 +20,14 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
-/**
- * Default Instance for ControlsTileResourceConfiguration.
- */
+/** Default Instance for ControlsTileResourceConfiguration. */
 @SysUISingleton
-class ControlsTileResourceConfigurationImpl @Inject constructor()
-    : ControlsTileResourceConfiguration {
+class ControlsTileResourceConfigurationImpl @Inject constructor() :
+    ControlsTileResourceConfiguration {
+    override fun getPackageName(): String? {
+        return null
+    }
+
     override fun getTileTitleId(): Int {
         return R.string.quick_controls_title
     }

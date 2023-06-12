@@ -74,7 +74,8 @@ class AnimatableClockView @JvmOverloads constructor(
     private var onTextAnimatorInitialized: Runnable? = null
 
     @VisibleForTesting var textAnimatorFactory: (Layout, () -> Unit) -> TextAnimator =
-        { layout, invalidateCb -> TextAnimator(layout, invalidateCb) }
+        { layout, invalidateCb ->
+            TextAnimator(layout, NUM_CLOCK_FONT_ANIMATION_STEPS, invalidateCb) }
     @VisibleForTesting var isAnimationEnabled: Boolean = true
     @VisibleForTesting var timeOverrideInMillis: Long? = null
 
@@ -567,6 +568,7 @@ class AnimatableClockView @JvmOverloads constructor(
         private const val CHARGE_ANIM_DURATION_PHASE_0: Long = 500
         private const val CHARGE_ANIM_DURATION_PHASE_1: Long = 1000
         private const val COLOR_ANIM_DURATION: Long = 400
+        private const val NUM_CLOCK_FONT_ANIMATION_STEPS = 30
 
         // Constants for the animation
         private val MOVE_INTERPOLATOR = Interpolators.EMPHASIZED

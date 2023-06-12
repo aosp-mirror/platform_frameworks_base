@@ -37,7 +37,7 @@ public class PipTouchState {
     private static final boolean DEBUG = false;
 
     @VisibleForTesting
-    public static final long DOUBLE_TAP_TIMEOUT = 200;
+    public static final long DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
     static final long HOVER_EXIT_TIMEOUT = 50;
 
     private final ShellExecutor mMainExecutor;

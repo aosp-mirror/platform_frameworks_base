@@ -1099,21 +1099,25 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         // TODO: Support a ResultReceiver for IME.
         // TODO(b/123718661): Make show() work for multi-session IME.
         int typesReady = 0;
+        final boolean imeVisible = mState.isSourceOrDefaultVisible(
+                mImeSourceConsumer.getId(), ime());
         for (int type = FIRST; type <= LAST; type = type << 1) {
             if ((types & type) == 0) {
                 continue;
             }
             @AnimationType final int animationType = getAnimationType(type);
             final boolean requestedVisible = (type & mRequestedVisibleTypes) != 0;
-            final boolean isImeAnimation = type == ime();
-            if (requestedVisible && animationType == ANIMATION_TYPE_NONE
-                    || animationType == ANIMATION_TYPE_SHOW) {
+            final boolean isIme = type == ime();
+            var alreadyVisible = requestedVisible && (!isIme || imeVisible)
+                    && animationType == ANIMATION_TYPE_NONE;
+            var alreadyAnimatingShow = animationType == ANIMATION_TYPE_SHOW;
+            if (alreadyVisible || alreadyAnimatingShow) {
                 // no-op: already shown or animating in (because window visibility is
                 // applied before starting animation).
                 if (DEBUG) Log.d(TAG, String.format(
                         "show ignored for type: %d animType: %d requestedVisible: %s",
                         type, animationType, requestedVisible));
-                if (isImeAnimation) {
+                if (isIme) {
                     ImeTracker.forLogging().onCancelled(statsToken,
                             ImeTracker.PHASE_CLIENT_APPLY_ANIMATION);
                 }
@@ -1121,13 +1125,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
             if (fromIme && animationType == ANIMATION_TYPE_USER) {
                 // App is already controlling the IME, don't cancel it.
-                if (isImeAnimation) {
+                if (isIme) {
                     ImeTracker.forLogging().onFailed(
                             statsToken, ImeTracker.PHASE_CLIENT_APPLY_ANIMATION);
                 }
                 continue;
             }
-            if (isImeAnimation) {
+            if (isIme) {
                 ImeTracker.forLogging().onProgress(
                         statsToken, ImeTracker.PHASE_CLIENT_APPLY_ANIMATION);
             }

@@ -719,11 +719,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void skipAndCancelReplacedBroadcasts(ArraySet<BroadcastRecord> replacedBroadcasts) {
         for (int i = 0; i < replacedBroadcasts.size(); ++i) {
             final BroadcastRecord r = replacedBroadcasts.valueAt(i);
-            r.resultCode = Activity.RESULT_CANCELED;
-            r.resultData = null;
-            r.resultExtras = null;
-            scheduleResultTo(r);
-            notifyFinishBroadcast(r);
+            // Skip all the receivers in the replaced broadcast
+            for (int rcvrIdx = 0; rcvrIdx < r.receivers.size(); ++rcvrIdx) {
+                if (!isDeliveryStateTerminal(r.getDeliveryState(rcvrIdx))) {
+                    mBroadcastConsumerSkipAndCanceled.accept(r, rcvrIdx);
+                }
+            }
         }
     }
 
@@ -1932,7 +1933,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, uid, senderUid, actionName,
                     receiverType, type, dispatchDelay, receiveDelay, finishDelay, packageState,
                     app != null ? app.info.packageName : null, r.callerPackage,
-                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy());
+                    r.calculateTypeForLogging(), r.getDeliveryGroupPolicy(), r.intent.getFlags(),
+                    BroadcastRecord.getReceiverPriority(receiver), r.callerProcState);
         }
     }
 

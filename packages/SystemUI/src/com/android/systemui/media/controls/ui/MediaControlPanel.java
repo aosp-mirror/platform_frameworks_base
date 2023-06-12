@@ -76,7 +76,6 @@ import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.widget.CachingIconView;
@@ -1211,24 +1210,24 @@ public class MediaControlPanel {
 
     private TurbulenceNoiseAnimationConfig createTurbulenceNoiseAnimation() {
         return new TurbulenceNoiseAnimationConfig(
-                TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_GRID_COUNT,
+                /* gridCount= */ 2.14f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_LUMINOSITY_MULTIPLIER,
-                /* noiseMoveSpeedX= */ 0f,
+                /* noiseMoveSpeedX= */ 0.42f,
                 /* noiseMoveSpeedY= */ 0f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_SPEED_Z,
                 /* color= */ mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
-                // We want to add (BlendMode.PLUS) the turbulence noise on top of the album art.
-                // Thus, set the background color with alpha 0.
-                /* backgroundColor= */ ColorUtils.setAlphaComponent(Color.BLACK, 0),
-                TurbulenceNoiseAnimationConfig.DEFAULT_OPACITY,
+                /* backgroundColor= */ Color.BLACK,
+                /* opacity= */ 51,
                 /* width= */ mMediaViewHolder.getMultiRippleView().getWidth(),
                 /* height= */ mMediaViewHolder.getMultiRippleView().getHeight(),
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,
-                /* easeInDuration= */ 2500f,
-                /* easeOutDuration= */ 2500f,
+                /* easeInDuration= */ 1350f,
+                /* easeOutDuration= */ 1350f,
                 this.getContext().getResources().getDisplayMetrics().density,
-                BlendMode.PLUS,
-                /* onAnimationEnd= */ null
+                BlendMode.SCREEN,
+                /* onAnimationEnd= */ null,
+                /* lumaMatteBlendFactor= */ 0.26f,
+                /* lumaMatteOverallBrightness= */ 0.09f
         );
     }
     private void clearButton(final ImageButton button) {

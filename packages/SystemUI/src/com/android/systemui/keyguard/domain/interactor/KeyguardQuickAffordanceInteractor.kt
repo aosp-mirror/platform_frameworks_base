@@ -35,6 +35,7 @@ import com.android.systemui.dock.retrieveIsDocked
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceRegistry
@@ -77,6 +78,7 @@ constructor(
     private val logger: KeyguardQuickAffordancesMetricsLogger,
     private val devicePolicyManager: DevicePolicyManager,
     private val dockManager: DockManager,
+    private val biometricSettingsRepository: BiometricSettingsRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Application private val appContext: Context,
 ) {
@@ -107,9 +109,10 @@ constructor(
             quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
             keyguardInteractor.isKeyguardShowing,
-            keyguardInteractor.isQuickSettingsVisible
-        ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible ->
-            if (!isDozing && isKeyguardShowing && !isQuickSettingsVisible) {
+            keyguardInteractor.isQuickSettingsVisible,
+            biometricSettingsRepository.isCurrentUserInLockdown,
+        ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible, isUserInLockdown ->
+            if (!isDozing && isKeyguardShowing && !isQuickSettingsVisible && !isUserInLockdown) {
                 affordance
             } else {
                 KeyguardQuickAffordanceModel.Hidden

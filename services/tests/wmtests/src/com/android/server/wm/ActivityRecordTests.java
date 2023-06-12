@@ -1996,7 +1996,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertTrue(activity.isSnapshotCompatible(snapshot));
 
-        setRotatedScreenOrientationSilently(activity);
+        doReturn(task.getWindowConfiguration().getRotation() + 1).when(mDisplayContent)
+                .rotationForActivityInDifferentOrientation(activity);
 
         assertFalse(activity.isSnapshotCompatible(snapshot));
     }

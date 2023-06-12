@@ -99,9 +99,6 @@ public final class TransitionInfo implements Parcelable {
     /** The container is the display. */
     public static final int FLAG_IS_DISPLAY = 1 << 5;
 
-    /** The container can show on top of lock screen. */
-    public static final int FLAG_OCCLUDES_KEYGUARD = 1 << 6;
-
     /**
      * Only for IS_DISPLAY containers. Is set if the display has system alert windows. This is
      * used to prevent seamless rotation.
@@ -175,7 +172,6 @@ public final class TransitionInfo implements Parcelable {
             FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT,
             FLAG_IS_VOICE_INTERACTION,
             FLAG_IS_DISPLAY,
-            FLAG_OCCLUDES_KEYGUARD,
             FLAG_DISPLAY_HAS_ALERT_WINDOWS,
             FLAG_IS_INPUT_METHOD,
             FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY,
@@ -457,9 +453,6 @@ public final class TransitionInfo implements Parcelable {
         if ((flags & FLAG_IS_DISPLAY) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("IS_DISPLAY");
         }
-        if ((flags & FLAG_OCCLUDES_KEYGUARD) != 0) {
-            sb.append(sb.length() == 0 ? "" : "|").append("OCCLUDES_KEYGUARD");
-        }
         if ((flags & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("DISPLAY_HAS_ALERT_WINDOWS");
         }
@@ -553,6 +546,16 @@ public final class TransitionInfo implements Parcelable {
         releaseAnimSurfaces();
         for (int i = mChanges.size() - 1; i >= 0; --i) {
             mChanges.get(i).getLeash().release();
+        }
+    }
+
+    /**
+     * Updates the callsites of all the surfaces in this transition, which aids in the debugging of
+     * lingering surfaces.
+     */
+    public void setUnreleasedWarningCallSiteForAllSurfaces(String callsite) {
+        for (int i = mChanges.size() - 1; i >= 0; --i) {
+            mChanges.get(i).getLeash().setUnreleasedWarningCallSite(callsite);
         }
     }
 

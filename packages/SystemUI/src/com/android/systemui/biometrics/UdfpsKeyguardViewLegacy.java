@@ -103,6 +103,13 @@ public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
     }
 
     @Override
+    void onSensorRectUpdated(RectF bounds) {
+        super.onSensorRectUpdated(bounds);
+        bounds.round(this.mSensorBounds);
+        postInvalidate();
+    }
+
+    @Override
     void onDisplayConfiguring() {
     }
 

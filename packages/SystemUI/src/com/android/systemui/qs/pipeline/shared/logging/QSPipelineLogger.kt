@@ -124,6 +124,18 @@ constructor(
         tileListLogBuffer.log(TILE_LIST_TAG, LogLevel.DEBUG, {}, { "Using retail tiles" })
     }
 
+    fun logTilesNotInstalled(tiles: Collection<TileSpec>, user: Int) {
+        tileListLogBuffer.log(
+            TILE_LIST_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = tiles.toString()
+                int1 = user
+            },
+            { "Tiles kept for not installed packages for user $int1: $str1" }
+        )
+    }
+
     /** Reasons for destroying an existing tile. */
     enum class TileDestroyedReason(val readable: String) {
         TILE_REMOVED("Tile removed from  current set"),

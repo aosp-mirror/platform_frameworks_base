@@ -142,7 +142,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"अनुहार प्रमाणीकरण गरियो"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"पुष्टि भयो"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"पूरा गर्नका लागि पुष्टि गर्नुहोस् नामक विकल्पमा ट्याप गर्नुहोस्"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="3783056044917913453">"अनुहार प्रयोग गरी अनलक गरियो।"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
+    <skip />
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"अनुहार प्रयोग गरी अनलक गरियो। जारी राख्न थिच्नुहोस्।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"अनुहार पहिचान गरियो। जारी राख्न थिच्नुहोस्।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"अनुहार पहिचान गरियो। जारी राख्न अनलक आइकनमा थिच्नुहोस्।"</string>
@@ -1003,7 +1004,8 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"सेभ गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"सेभ गर्न सकिएन।"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"कम्तीमा ४ वटा वर्ण प्रयोग गर्नुहोस्"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"१६ वटाभन्दा कम वर्ण प्रयोग गर्नुहोस्"</string>
+    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नम्बर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नम्बर कपी गरी क्लिपबोर्डमा सारियो।"</string>
     <string name="basic_status" msgid="2315371112182658176">"वार्तालाप खोल्नुहोस्"</string>
@@ -1144,7 +1146,7 @@
     <string name="stylus_battery_low" msgid="7134370101603167096">"स्टाइलसको ब्याट्री लो छ"</string>
     <string name="video_camera" msgid="7654002575156149298">"भिडियो क्यामेरा"</string>
     <string name="call_from_work_profile_title" msgid="5418253516453177114">"व्यक्तिगत एपमार्फत कल गर्न मिल्दैन"</string>
-    <string name="call_from_work_profile_text" msgid="2856337395968118274">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र कल गर्ने अनुमति दिन्छ"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र कल गर्ने अनुमति दिएको छ"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"कार्य प्रोफाइल प्रयोग गर्नुहोस्"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"कामसम्बन्धी फोन एप इन्स्टल गर्नुहोस्"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"रद्द गर्नुहोस्"</string>

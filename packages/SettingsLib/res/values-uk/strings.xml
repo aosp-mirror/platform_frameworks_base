@@ -107,7 +107,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Передавання файлів"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Пристрій введення"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ до Інтернету"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Доступ до контактів та історії дзвінків"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Доступ до контактів і історії викликів"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Використовуйте, щоб надсилати контакти й історію викликів"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Надання доступу до Інтернету"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Текстові повідомлення"</string>
@@ -545,12 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Щойно"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Цей телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Цей планшет"</string>
-    <!-- no translation found for media_transfer_dock_speaker_device_name (2856219597113881950) -->
-    <skip />
-    <!-- no translation found for media_transfer_external_device_name (2588672258721846418) -->
-    <skip />
-    <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
-    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Динамік док-станції"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Зовнішній пристрій"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Підключений пристрій"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Цей телефон"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не можна відтворювати тут"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Потрібний платний обліковий запис"</string>

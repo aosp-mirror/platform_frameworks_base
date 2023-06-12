@@ -950,7 +950,7 @@ public class DisplayRotation {
     }
 
     void freezeRotation(int rotation) {
-        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis()) {
+        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
             rotation = RotationUtils.reverseRotationDirectionAroundZAxis(rotation);
         }
 
@@ -1225,7 +1225,7 @@ public class DisplayRotation {
         if (mFoldController != null && mFoldController.shouldIgnoreSensorRotation()) {
             sensorRotation = -1;
         }
-        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis()) {
+        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
             sensorRotation = RotationUtils.reverseRotationDirectionAroundZAxis(sensorRotation);
         }
         mLastSensorRotation = sensorRotation;

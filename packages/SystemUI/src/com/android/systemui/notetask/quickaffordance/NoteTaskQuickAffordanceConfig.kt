@@ -19,6 +19,7 @@ package com.android.systemui.notetask.quickaffordance
 import android.app.role.OnRoleHoldersChangedListener
 import android.app.role.RoleManager
 import android.content.Context
+import android.content.Intent
 import android.hardware.input.InputSettings
 import android.os.Build
 import android.os.UserHandle
@@ -42,7 +43,6 @@ import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEnabledKey
 import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
 import com.android.systemui.notetask.NoteTaskInfoResolver
-import com.android.systemui.shared.customization.data.content.CustomizationProviderContract.LockScreenQuickAffordances.AffordanceTable.COMPONENT_NAME_SEPARATOR
 import com.android.systemui.stylus.StylusManager
 import dagger.Lazy
 import java.util.concurrent.Executor
@@ -122,16 +122,18 @@ constructor(
             isEnabled && isDefaultNotesAppSet -> PickerScreenState.Default()
             isEnabled -> {
                 PickerScreenState.Disabled(
-                    listOf(
+                    explanation =
                         context.getString(
-                            R.string.keyguard_affordance_enablement_dialog_notes_app_instruction
-                        )
-                    ),
-                    context.getString(
-                        R.string.keyguard_affordance_enablement_dialog_notes_app_action
-                    ),
-                    "${context.packageName}$COMPONENT_NAME_SEPARATOR" +
-                        "$ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE",
+                            R.string.notes_app_quick_affordance_unavailable_explanation
+                        ),
+                    actionText =
+                        context.getString(
+                            R.string.keyguard_affordance_enablement_dialog_notes_app_action
+                        ),
+                    actionIntent =
+                        Intent(ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE).apply {
+                            setPackage(context.packageName)
+                        },
                 )
             }
             else -> PickerScreenState.UnavailableOnDevice

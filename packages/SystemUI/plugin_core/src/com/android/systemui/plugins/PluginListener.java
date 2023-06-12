@@ -60,13 +60,18 @@ public interface PluginListener<T extends Plugin> {
 
     /**
      * Called when the plugin is first attached to the host application. {@link #onPluginLoaded}
-     * will be automatically called as well when first attached. This may be called multiple times
-     * if multiple plugins are allowed. It may also be called in the future if the plugin package
-     * changes and needs to be reloaded. Each call to {@link #onPluginAttached} will provide a new
-     * or different {@link PluginLifecycleManager}.
+     * will be automatically called as well when first attached if true is returned. This may be
+     * called multiple times if multiple plugins are allowed. It may also be called in the future
+     * if the plugin package changes and needs to be reloaded. Each call to
+     * {@link #onPluginAttached} will provide a new or different {@link PluginLifecycleManager}.
+     *
+     * @return returning true will immediately load the plugin and call onPluginLoaded with the
+     *   created object. false will skip loading, but the listener can load it at any time using the
+     *   provided PluginLifecycleManager. Loading plugins immediately is the default behavior.
      */
-    default void onPluginAttached(PluginLifecycleManager<T> manager) {
+    default boolean onPluginAttached(PluginLifecycleManager<T> manager) {
         // Optional
+        return true;
     }
 
     /**

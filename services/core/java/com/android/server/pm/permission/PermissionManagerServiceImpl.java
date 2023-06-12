@@ -141,6 +141,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedPermissionGroup;
@@ -4538,8 +4539,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             final int appId = ps.getAppId();
             final LegacyPermissionState legacyState;
             if (ps.hasSharedUser()) {
-                legacyState = mPackageManagerInt.getSharedUserApi(
-                        ps.getSharedUserAppId()).getSharedUserLegacyPermissionState();
+                final int sharedUserId = ps.getSharedUserAppId();
+                SharedUserApi sharedUserApi = mPackageManagerInt.getSharedUserApi(sharedUserId);
+                if (sharedUserApi == null) {
+                    Slog.wtf(TAG, "Missing shared user Api for " + sharedUserId);
+                    return;
+                }
+                legacyState = sharedUserApi.getSharedUserLegacyPermissionState();
             } else {
                 legacyState = ps.getLegacyPermissionState();
             }
@@ -4584,8 +4590,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             ps.setInstallPermissionsFixed(false);
             final LegacyPermissionState legacyState;
             if (ps.hasSharedUser()) {
-                legacyState = mPackageManagerInt.getSharedUserApi(
-                        ps.getSharedUserAppId()).getSharedUserLegacyPermissionState();
+                final int sharedUserId = ps.getSharedUserAppId();
+                SharedUserApi sharedUserApi = mPackageManagerInt.getSharedUserApi(sharedUserId);
+                if (sharedUserApi == null) {
+                    Slog.wtf(TAG, "Missing shared user Api for " + sharedUserId);
+                    return;
+                }
+                legacyState = sharedUserApi.getSharedUserLegacyPermissionState();
             } else {
                 legacyState = ps.getLegacyPermissionState();
             }

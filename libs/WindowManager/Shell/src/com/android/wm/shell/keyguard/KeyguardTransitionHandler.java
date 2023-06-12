@@ -17,31 +17,25 @@
 package com.android.wm.shell.keyguard;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
-import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
-import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.view.WindowManager.TRANSIT_SLEEP;
-import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
+import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
+import static android.view.WindowManager.TRANSIT_SLEEP;
 
 import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
-import static com.android.wm.shell.util.TransitionUtil.isClosingType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.RemoteException;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionInfo;
@@ -56,8 +50,6 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
 
-import java.util.Map;
-
 /**
  * The handler for Keyguard enter/exit and occlude/unocclude animations.
  *
@@ -70,7 +62,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
     private final Handler mMainHandler;
     private final ShellExecutor mMainExecutor;
 
-    private final Map<IBinder, IRemoteTransition> mStartedTransitions = new ArrayMap<>();
+    private final ArrayMap<IBinder, StartedTransition> mStartedTransitions = new ArrayMap<>();
 
     /**
      * Local IRemoteTransition implementations registered by the keyguard service.
@@ -81,6 +73,18 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
     private IRemoteTransition mOccludeByDreamTransition = null;
     private IRemoteTransition mUnoccludeTransition = null;
 
+    private final class StartedTransition {
+        final TransitionInfo mInfo;
+        final SurfaceControl.Transaction mFinishT;
+        final IRemoteTransition mPlayer;
+
+        public StartedTransition(TransitionInfo info,
+                SurfaceControl.Transaction finishT, IRemoteTransition player) {
+            mInfo = info;
+            mFinishT = finishT;
+            mPlayer = player;
+        }
+    }
     public KeyguardTransitionHandler(
             @NonNull ShellInit shellInit,
             @NonNull Transitions transitions,
@@ -105,10 +109,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
     }
 
     public static boolean handles(TransitionInfo info) {
-        return (info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0
-                || (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0
-                || info.getType() == TRANSIT_KEYGUARD_OCCLUDE
-                || info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE;
+        return (info.getFlags() & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0;
     }
 
     @Override
@@ -120,39 +121,14 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
             return false;
         }
 
-        boolean hasOpeningOcclude = false;
-        boolean hasClosingOcclude = false;
-        boolean hasOpeningDream = false;
-        boolean hasClosingApp = false;
-
-        // Check for occluding/dream/closing apps
-        for (int i = info.getChanges().size() - 1; i >= 0; i--) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-            if ((change.getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0) {
-                continue;
-            } else if (isOpeningType(change.getMode())) {
-                hasOpeningOcclude |= change.hasFlags(FLAG_OCCLUDES_KEYGUARD);
-                hasOpeningDream |= (change.getTaskInfo() != null
-                        && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_DREAM);
-            } else if (isClosingType(change.getMode())) {
-                hasClosingOcclude |= change.hasFlags(FLAG_OCCLUDES_KEYGUARD);
-                hasClosingApp = true;
-            }
-        }
-
         // Choose a transition applicable for the changes and keyguard state.
         if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
             return startAnimation(mExitTransition,
                     "going-away",
                     transition, info, startTransaction, finishTransaction, finishCallback);
         }
-        if (hasOpeningOcclude || info.getType() == TRANSIT_KEYGUARD_OCCLUDE) {
-            if (hasClosingOcclude) {
-                // Transitions between apps on top of the keyguard can use the default handler.
-                // WM sends a final occlude status update after the transition is finished.
-                return false;
-            }
-            if (hasOpeningDream) {
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0) {
+            if (hasOpeningDream(info)) {
                 return startAnimation(mOccludeByDreamTransition,
                         "occlude-by-dream",
                         transition, info, startTransaction, finishTransaction, finishCallback);
@@ -161,12 +137,12 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                         "occlude",
                         transition, info, startTransaction, finishTransaction, finishCallback);
             }
-        } else if (hasClosingApp || info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE) {
+        } else if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0) {
              return startAnimation(mUnoccludeTransition,
                     "unocclude",
                     transition, info, startTransaction, finishTransaction, finishCallback);
         } else {
-            Log.w(TAG, "Failed to play: " + info);
+            Log.i(TAG, "Refused to play keyguard transition: " + info);
             return false;
         }
     }
@@ -194,7 +170,8 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                             });
                         }
                     });
-            mStartedTransitions.put(transition, remoteHandler);
+            mStartedTransitions.put(transition,
+                    new StartedTransition(info, finishTransaction, remoteHandler));
         } catch (RemoteException e) {
             Log.wtf(TAG, "RemoteException thrown from local IRemoteTransition", e);
             return false;
@@ -207,20 +184,35 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
     public void mergeAnimation(@NonNull IBinder nextTransition, @NonNull TransitionInfo nextInfo,
             @NonNull SurfaceControl.Transaction nextT, @NonNull IBinder currentTransition,
             @NonNull TransitionFinishCallback nextFinishCallback) {
-        final IRemoteTransition playing = mStartedTransitions.get(currentTransition);
-
+        final StartedTransition playing = mStartedTransitions.get(currentTransition);
         if (playing == null) {
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                     "unknown keyguard transition %s", currentTransition);
             return;
         }
-
-        if (nextInfo.getType() == TRANSIT_SLEEP) {
+        if ((nextInfo.getFlags() & WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING) != 0
+                && (playing.mInfo.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
+            // Keyguard unlocking has been canceled. Merge the unlock and re-lock transitions to
+            // avoid a flicker where we flash one frame with the screen fully unlocked.
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "canceling keyguard exit transition %s", currentTransition);
+            playing.mFinishT.merge(nextT);
+            try {
+                playing.mPlayer.mergeAnimation(nextTransition, nextInfo, nextT, currentTransition,
+                        new FakeFinishCallback());
+            } catch (RemoteException e) {
+                // There is no good reason for this to happen because the player is a local object
+                // implementing an AIDL interface.
+                Log.wtf(TAG, "RemoteException thrown from KeyguardService transition", e);
+            }
+            nextFinishCallback.onTransitionFinished(null, null);
+        } else if (nextInfo.getType() == TRANSIT_SLEEP) {
             // An empty SLEEP transition comes in as a signal to abort transitions whenever a sleep
             // token is held. In cases where keyguard is showing, we are running the animation for
             // the device sleeping/waking, so it's best to ignore this and keep playing anyway.
             return;
-        } else {
+        } else if (handles(nextInfo)) {
+            // In all other cases, fast-forward to let the next queued transition start playing.
             finishAnimationImmediately(currentTransition, playing);
         }
     }
@@ -228,7 +220,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
     @Override
     public void onTransitionConsumed(IBinder transition, boolean aborted,
             SurfaceControl.Transaction finishTransaction) {
-        final IRemoteTransition playing = mStartedTransitions.remove(transition);
+        final StartedTransition playing = mStartedTransitions.remove(transition);
         if (playing != null) {
             finishAnimationImmediately(transition, playing);
         }
@@ -241,13 +233,26 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
         return null;
     }
 
-    private void finishAnimationImmediately(IBinder transition, IRemoteTransition playing) {
+    private static boolean hasOpeningDream(@NonNull TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; i--) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (isOpeningType(change.getMode())
+                    && change.getTaskInfo() != null
+                    && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_DREAM) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void finishAnimationImmediately(IBinder transition, StartedTransition playing) {
         final IBinder fakeTransition = new Binder();
         final TransitionInfo fakeInfo = new TransitionInfo(TRANSIT_SLEEP, 0x0);
         final SurfaceControl.Transaction fakeT = new SurfaceControl.Transaction();
         final FakeFinishCallback fakeFinishCb = new FakeFinishCallback();
         try {
-            playing.mergeAnimation(fakeTransition, fakeInfo, fakeT, transition, fakeFinishCb);
+            playing.mPlayer.mergeAnimation(
+                    fakeTransition, fakeInfo, fakeT, transition, fakeFinishCb);
         } catch (RemoteException e) {
             // There is no good reason for this to happen because the player is a local object
             // implementing an AIDL interface.

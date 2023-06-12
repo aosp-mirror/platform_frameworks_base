@@ -4406,6 +4406,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         boolean nowHiddenAtAll = mAmbientState.isHiddenAtAll();
         if (nowFullyHidden != wasFullyHidden) {
             updateVisibility();
+            mSwipeHelper.resetTouchState();
         }
         if (!wasHiddenAtAll && nowHiddenAtAll) {
             resetExposedMenuView(true /* animate */, true /* animate */);
@@ -5866,7 +5867,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void cancelActiveSwipe() {
-        mSwipeHelper.resetSwipeState();
+        mSwipeHelper.resetTouchState();
         updateContinuousShadowDrawing();
     }
 

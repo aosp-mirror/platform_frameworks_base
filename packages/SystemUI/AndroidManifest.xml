@@ -913,8 +913,9 @@
                   android:excludeFromRecents="true"
                   android:launchMode="singleInstance"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                  android:visibleToInstantApps="true">
-        </activity>
+                  android:visibleToInstantApps="true"
+                  android:exported="true"
+                  />
 
         <activity android:name=".controls.management.ControlsEditingActivity"
                   android:label="@string/controls_menu_edit"
@@ -947,8 +948,9 @@
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|orientation"
-                  android:visibleToInstantApps="true">
-        </activity>
+                  android:visibleToInstantApps="true"
+                  android:exported="true"
+                  />
 
         <activity android:name=".wallet.ui.WalletActivity"
                   android:label="@string/wallet_title"
@@ -994,7 +996,6 @@
             android:name=".notetask.shortcut.LaunchNoteTaskActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" >
 
             <intent-filter>
@@ -1010,7 +1011,6 @@
             android:exported="false"
             android:enabled="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" />
 
         <activity

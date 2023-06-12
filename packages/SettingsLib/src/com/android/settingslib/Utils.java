@@ -688,8 +688,12 @@ public class Utils {
                 continue;
             }
             for (int complianceWarningType : complianceWarnings) {
-                if (complianceWarningType != 0) {
-                    return true;
+                switch (complianceWarningType) {
+                    case UsbPortStatus.COMPLIANCE_WARNING_OTHER:
+                    case UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY:
+                        return true;
+                    default:
+                        break;
                 }
             }
         }

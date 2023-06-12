@@ -5459,7 +5459,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void updateRenderHdrSdrRatio() {
-        mRenderHdrSdrRatio = mDisplay.getHdrSdrRatio();
+        mRenderHdrSdrRatio = Math.min(mDesiredHdrSdrRatio, mDisplay.getHdrSdrRatio());
         mUpdateHdrSdrRatioInfo = true;
     }
 
@@ -5487,19 +5487,11 @@ public final class ViewRootImpl implements ViewParent,
                 mHdrSdrRatioChangedListener = null;
             } else {
                 mHdrSdrRatioChangedListener = display -> {
-                    setTargetHdrSdrRatio(display.getHdrSdrRatio());
+                    updateRenderHdrSdrRatio();
+                    invalidate();
                 };
                 mDisplay.registerHdrSdrRatioChangedListener(mExecutor, mHdrSdrRatioChangedListener);
             }
-        }
-    }
-
-    /** happylint */
-    public void setTargetHdrSdrRatio(float ratio) {
-        if (mRenderHdrSdrRatio != ratio) {
-            mRenderHdrSdrRatio = ratio;
-            mUpdateHdrSdrRatioInfo = true;
-            invalidate();
         }
     }
 

@@ -53,8 +53,6 @@ import android.view.Surface;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 
-import libcore.util.EmptyArray;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -667,7 +665,7 @@ public final class DisplayManager {
         } else if (category == null || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
             return getDisplays(displayIds, Objects::nonNull);
         }
-        return (Display[]) EmptyArray.OBJECT;
+        return new Display[0];
     }
 
     private Display[] getDisplays(int[] displayIds, Predicate<Display> predicate) {

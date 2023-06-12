@@ -16,12 +16,20 @@
 
 package com.android.systemui.plugins;
 
+import android.content.ComponentName;
+
 /**
  * Provides the ability for consumers to control plugin lifecycle.
  *
  * @param <T> is the target plugin type
  */
 public interface PluginLifecycleManager<T extends Plugin> {
+    /** Returns the ComponentName of the target plugin. Maybe be called when not loaded. */
+    ComponentName getComponentName();
+
+    /** Returns the package name of the target plugin. May be called when not loaded. */
+    String getPackage();
+
     /** Returns the currently loaded plugin instance (if plugin is loaded) */
     T getPlugin();
 

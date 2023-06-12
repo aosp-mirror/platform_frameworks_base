@@ -58,7 +58,6 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_OPEN;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_OPEN;
-import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
@@ -76,6 +75,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -103,6 +103,7 @@ import com.android.internal.policy.AttributeCache;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -137,6 +138,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private final Rect mInsets = new Rect(0, 0, 0, 0);
     private float mTransitionAnimationScaleSetting = 1.0f;
 
+    private final RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     private final int mCurrentUserId;
 
     private Drawable mEnterpriseThumbnailDrawable;
@@ -157,7 +159,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             @NonNull DisplayController displayController,
             @NonNull TransactionPool transactionPool,
             @NonNull ShellExecutor mainExecutor, @NonNull Handler mainHandler,
-            @NonNull ShellExecutor animExecutor) {
+            @NonNull ShellExecutor animExecutor,
+            @NonNull RootTaskDisplayAreaOrganizer rootTDAOrganizer) {
         mDisplayController = displayController;
         mTransactionPool = transactionPool;
         mContext = context;
@@ -168,6 +171,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         mCurrentUserId = UserHandle.myUserId();
         mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
         shellInit.addInitCallback(this::onInit, this);
+        mRootTDAOrganizer = rootTDAOrganizer;
     }
 
     private void onInit() {
@@ -510,10 +514,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
 
         if (backgroundColorForTransition != 0) {
-            for (int i = 0; i < info.getRootCount(); ++i) {
-                addBackgroundToTransition(info.getRoot(i).getLeash(), backgroundColorForTransition,
-                        startTransaction, finishTransaction);
-            }
+            addBackgroundColorOnTDA(info, backgroundColorForTransition, startTransaction,
+                    finishTransaction);
         }
 
         if (postStartTransactionCallbacks.size() > 0) {
@@ -541,6 +543,28 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         // run finish now in-case there are no animations
         onAnimFinish.run();
         return true;
+    }
+
+    private void addBackgroundColorOnTDA(@NonNull TransitionInfo info,
+            @ColorInt int color, @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction) {
+        final Color bgColor = Color.valueOf(color);
+        final float[] colorArray = new float[] { bgColor.red(), bgColor.green(), bgColor.blue() };
+
+        for (int i = 0; i < info.getRootCount(); ++i) {
+            final int displayId = info.getRoot(i).getDisplayId();
+            final SurfaceControl.Builder colorLayerBuilder = new SurfaceControl.Builder()
+                    .setName("animation-background")
+                    .setCallsite("DefaultTransitionHandler")
+                    .setColorLayer();
+
+            mRootTDAOrganizer.attachToDisplayArea(displayId, colorLayerBuilder);
+            final SurfaceControl backgroundSurface = colorLayerBuilder.build();
+            startTransaction.setColor(backgroundSurface, colorArray)
+                    .setLayer(backgroundSurface, -1)
+                    .show(backgroundSurface);
+            finishTransaction.remove(backgroundSurface);
+        }
     }
 
     private static boolean isDreamTransition(@NonNull TransitionInfo info) {
@@ -696,9 +720,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
         if (a != null) {
             if (!a.isInitialized()) {
-                final int width = endBounds.width();
-                final int height = endBounds.height();
-                a.initialize(width, height, width, height);
+                final Rect animationRange = TransitionUtil.isClosingType(changeMode)
+                        ? change.getStartAbsBounds() : change.getEndAbsBounds();
+                a.initialize(animationRange.width(), animationRange.height(),
+                        endBounds.width(), endBounds.height());
             }
             a.restrictDuration(MAX_ANIMATION_DURATION);
             a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
@@ -873,18 +898,31 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
     }
 
+    /**
+     * Returns {@code true} if the default transition handler can run the override animation.
+     * @see #loadAnimation(TransitionInfo, TransitionInfo.Change, int, boolean)
+     */
+    public static boolean isSupportedOverrideAnimation(
+            @NonNull TransitionInfo.AnimationOptions options) {
+        final int animType = options.getType();
+        return animType == ANIM_CUSTOM || animType == ANIM_SCALE_UP
+                || animType == ANIM_THUMBNAIL_SCALE_UP || animType == ANIM_THUMBNAIL_SCALE_DOWN
+                || animType == ANIM_CLIP_REVEAL || animType == ANIM_OPEN_CROSS_PROFILE_APPS;
+    }
+
     private static void applyTransformation(long time, SurfaceControl.Transaction t,
-            SurfaceControl leash, Animation anim, Transformation transformation, float[] matrix,
+            SurfaceControl leash, Animation anim, Transformation tmpTransformation, float[] matrix,
             Point position, float cornerRadius, @Nullable Rect immutableClipRect) {
-        anim.getTransformation(time, transformation);
+        tmpTransformation.clear();
+        anim.getTransformation(time, tmpTransformation);
         if (position != null) {
-            transformation.getMatrix().postTranslate(position.x, position.y);
+            tmpTransformation.getMatrix().postTranslate(position.x, position.y);
         }
-        t.setMatrix(leash, transformation.getMatrix(), matrix);
-        t.setAlpha(leash, transformation.getAlpha());
+        t.setMatrix(leash, tmpTransformation.getMatrix(), matrix);
+        t.setAlpha(leash, tmpTransformation.getAlpha());
 
         final Rect clipRect = immutableClipRect == null ? null : new Rect(immutableClipRect);
-        Insets extensionInsets = Insets.min(transformation.getInsets(), Insets.NONE);
+        Insets extensionInsets = Insets.min(tmpTransformation.getInsets(), Insets.NONE);
         if (!extensionInsets.equals(Insets.NONE) && clipRect != null && !clipRect.isEmpty()) {
             // Clip out any overflowing edge extension
             clipRect.inset(extensionInsets);

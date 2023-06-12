@@ -929,7 +929,7 @@
     <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=100] -->
     <string name="show_all_anrs_summary">Display App Not Responding dialog for background apps</string>
 
-    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=25] -->
+    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=30] -->
     <string name="show_notification_channel_warnings">Show notification channel warnings</string>
     <!-- UI debug setting: show missing channel toasts summary [CHAR LIMIT=50] -->
     <string name="show_notification_channel_warnings_summary">Displays on-screen warning when an app posts a notification without a valid channel</string>

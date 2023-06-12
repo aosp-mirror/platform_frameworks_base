@@ -1368,6 +1368,7 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
         intentFilter.addAction(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
         intentFilter.addAction(ACTION_CHECK_MUSIC_ACTIVE);
+        intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null,
                 Context.RECEIVER_EXPORTED);
@@ -3277,6 +3278,7 @@ public class AudioService extends IAudioService.Stub
             if (mUserSelectedVolumeControlStream) { // implies mVolumeControlStream != -1
                 streamType = mVolumeControlStream;
             } else {
+                // TODO discard activity on a muted stream?
                 final int maybeActiveStreamType = getActiveStreamType(suggestedStreamType);
                 final boolean activeForReal;
                 if (maybeActiveStreamType == AudioSystem.STREAM_RING
@@ -3480,9 +3482,10 @@ public class AudioService extends IAudioService.Stub
             }
         } else if (isStreamMutedByRingerOrZenMode(streamTypeAlias) && streamState.mIsMuted) {
             // if the stream is currently muted streams by ringer/zen mode
-            // then it cannot be unmuted (without FLAG_ALLOW_RINGER_MODES)
+            // then it cannot be unmuted (without FLAG_ALLOW_RINGER_MODES) with an unmute or raise
             if (direction == AudioManager.ADJUST_TOGGLE_MUTE
-                    || direction == AudioManager.ADJUST_UNMUTE) {
+                    || direction == AudioManager.ADJUST_UNMUTE
+                    || direction == AudioManager.ADJUST_RAISE) {
                 adjustVolume = false;
             }
         }

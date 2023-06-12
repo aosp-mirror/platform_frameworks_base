@@ -41,6 +41,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.graphics.drawable.IconCompat;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.qrcode.QrCodeGenerator;
@@ -58,6 +59,17 @@ import com.google.zxing.WriterException;
 public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     private static final String TAG = "MediaOutputBroadcastDialog";
 
+    static final int METADATA_BROADCAST_NAME = 0;
+    static final int METADATA_BROADCAST_CODE = 1;
+
+    private static final int MAX_BROADCAST_INFO_UPDATE = 3;
+    @VisibleForTesting
+    static final int BROADCAST_CODE_MAX_LENGTH = 16;
+    @VisibleForTesting
+    static final int BROADCAST_CODE_MIN_LENGTH = 4;
+    @VisibleForTesting
+    static final int BROADCAST_NAME_MAX_LENGTH = 254;
+
     private ViewStub mBroadcastInfoArea;
     private ImageView mBroadcastQrCodeView;
     private ImageView mBroadcastNotify;
@@ -67,14 +79,16 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     private ImageView mBroadcastCodeEye;
     private Boolean mIsPasswordHide = true;
     private ImageView mBroadcastCodeEdit;
-    private AlertDialog mAlertDialog;
+    @VisibleForTesting
+    AlertDialog mAlertDialog;
     private TextView mBroadcastErrorMessage;
     private int mRetryCount = 0;
     private String mCurrentBroadcastName;
     private String mCurrentBroadcastCode;
     private boolean mIsStopbyUpdateBroadcastCode = false;
+    private boolean mIsLeBroadcastAssistantCallbackRegistered;
 
-    private TextWatcher mTextWatcher = new TextWatcher() {
+    private TextWatcher mBroadcastCodeTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             // Do nothing
@@ -102,7 +116,9 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
                         R.string.media_output_broadcast_code_hint_no_less_than_min);
             } else if (breakBroadcastCodeRuleTextLengthMoreThanMax) {
                 mBroadcastErrorMessage.setText(
-                        R.string.media_output_broadcast_code_hint_no_more_than_max);
+                        mContext.getResources().getString(
+                                R.string.media_output_broadcast_edit_hint_no_more_than_max,
+                                BROADCAST_CODE_MAX_LENGTH));
             }
 
             mBroadcastErrorMessage.setVisibility(breakRule ? View.VISIBLE : View.INVISIBLE);
@@ -113,7 +129,40 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         }
     };
 
-    private boolean mIsLeBroadcastAssistantCallbackRegistered;
+    private TextWatcher mBroadcastNameTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            // Do nothing
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // Do nothing
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (mAlertDialog == null || mBroadcastErrorMessage == null) {
+                return;
+            }
+            boolean breakBroadcastNameRuleTextLengthMoreThanMax =
+                    s.length() > BROADCAST_NAME_MAX_LENGTH;
+            boolean breakRule = breakBroadcastNameRuleTextLengthMoreThanMax || (s.length() == 0);
+
+            if (breakBroadcastNameRuleTextLengthMoreThanMax) {
+                mBroadcastErrorMessage.setText(
+                        mContext.getResources().getString(
+                                R.string.media_output_broadcast_edit_hint_no_more_than_max,
+                                BROADCAST_NAME_MAX_LENGTH));
+            }
+            mBroadcastErrorMessage.setVisibility(
+                    breakBroadcastNameRuleTextLengthMoreThanMax ? View.VISIBLE : View.INVISIBLE);
+            Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            if (positiveBtn != null) {
+                positiveBtn.setEnabled(breakRule ? false : true);
+            }
+        }
+    };
 
     private BluetoothLeBroadcastAssistant.Callback mBroadcastAssistantCallback =
             new BluetoothLeBroadcastAssistant.Callback() {
@@ -185,13 +234,6 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
                     Log.d(TAG, "Assistant-onReceiveStateChanged:");
                 }
             };
-
-    static final int METADATA_BROADCAST_NAME = 0;
-    static final int METADATA_BROADCAST_CODE = 1;
-
-    private static final int MAX_BROADCAST_INFO_UPDATE = 3;
-    private static final int BROADCAST_CODE_MAX_LENGTH = 16;
-    private static final int BROADCAST_CODE_MIN_LENGTH = 4;
 
     MediaOutputBroadcastDialog(Context context, boolean aboveStatusbar,
             BroadcastSender broadcastSender, MediaOutputController mediaOutputController) {
@@ -391,13 +433,12 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
                 R.layout.media_output_broadcast_update_dialog, null);
         final EditText editText = layout.requireViewById(R.id.broadcast_edit_text);
         editText.setText(editString);
-        if (isBroadcastCode) {
-            editText.addTextChangedListener(mTextWatcher);
-        }
+        editText.addTextChangedListener(
+                isBroadcastCode ? mBroadcastCodeTextWatcher : mBroadcastNameTextWatcher);
         mBroadcastErrorMessage = layout.requireViewById(R.id.broadcast_error_message);
         mAlertDialog = new Builder(mContext)
                 .setTitle(isBroadcastCode ? R.string.media_output_broadcast_code
-                    : R.string.media_output_broadcast_name)
+                        : R.string.media_output_broadcast_name)
                 .setView(layout)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.media_output_broadcast_dialog_save,
@@ -420,7 +461,8 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         return mMediaOutputController.getBroadcastMetadata();
     }
 
-    private void updateBroadcastInfo(boolean isBroadcastCode, String updatedString) {
+    @VisibleForTesting
+    void updateBroadcastInfo(boolean isBroadcastCode, String updatedString) {
         Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
         if (positiveBtn != null) {
             positiveBtn.setEnabled(false);
@@ -523,16 +565,33 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     }
 
     private void handleUpdateFailedUi() {
-        final Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        mBroadcastErrorMessage.setVisibility(View.VISIBLE);
+        if (mAlertDialog == null) {
+            Log.d(TAG, "handleUpdateFailedUi: mAlertDialog is null");
+            return;
+        }
+        int errorMessageStringId = -1;
+        boolean enablePositiveBtn = false;
         if (mRetryCount < MAX_BROADCAST_INFO_UPDATE) {
-            if (positiveBtn != null) {
-                positiveBtn.setEnabled(true);
-            }
-            mBroadcastErrorMessage.setText(R.string.media_output_broadcast_update_error);
+            enablePositiveBtn = true;
+            errorMessageStringId = R.string.media_output_broadcast_update_error;
         } else {
             mRetryCount = 0;
-            mBroadcastErrorMessage.setText(R.string.media_output_broadcast_last_update_error);
+            errorMessageStringId = R.string.media_output_broadcast_last_update_error;
         }
+
+        // update UI
+        final Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positiveBtn != null && enablePositiveBtn) {
+            positiveBtn.setEnabled(true);
+        }
+        if (mBroadcastErrorMessage != null) {
+            mBroadcastErrorMessage.setVisibility(View.VISIBLE);
+            mBroadcastErrorMessage.setText(errorMessageStringId);
+        }
+    }
+
+    @VisibleForTesting
+    int getRetryCount() {
+        return mRetryCount;
     }
 }

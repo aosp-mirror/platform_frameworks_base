@@ -641,6 +641,31 @@ public class RootTaskTests extends WindowTestsBase {
         // Home split secondary and home task should be invisible.
         assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                 splitSecondary.getVisibility(null /* starting */));
+
+        // Put another task on top of primary split.
+        final Task topSplitPrimary = new TaskBuilder(mSupervisor).setParentTask(organizer.mPrimary)
+                .setCreateActivity(true).build();
+        doReturn(false).when(topSplitPrimary).isTranslucent(any());
+        // Convert the fullscreen translucent task to opaque.
+        doReturn(false).when(translucentRootTask).isTranslucent(any());
+        translucentRootTask.moveToFront("test");
+        // The tasks of primary split are occluded by the fullscreen opaque task.
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
+                organizer.mPrimary.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
+                topSplitPrimary.getVisibility(null /* starting */));
+        // Make primary split root transient-hide.
+        spyOn(splitPrimary.mTransitionController);
+        doReturn(true).when(splitPrimary.mTransitionController).isTransientHide(
+                organizer.mPrimary);
+        // The split root and its top become visible.
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
+                organizer.mPrimary.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
+                topSplitPrimary.getVisibility(null /* starting */));
+        // The bottom of primary split becomes invisible because it is occluded by topSplitPrimary.
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
+                splitPrimary.getVisibility(null /* starting */));
     }
 
     @Test

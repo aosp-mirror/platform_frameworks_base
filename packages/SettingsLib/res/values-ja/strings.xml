@@ -551,7 +551,7 @@
     <skip />
     <!-- no translation found for media_transfer_default_device_name (4315604017399871828) -->
     <skip />
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"このスマートフォン"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"このデバイス"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"このデバイスでは再生できません"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"アカウントを更新して切り替えてください"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"再生不可: ダウンロードしたコンテンツ"</string>

@@ -42,6 +42,7 @@ import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffor
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
@@ -98,6 +99,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
     private lateinit var dockManager: DockManagerFake
+    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
 
     private lateinit var underTest: CustomizationProvider
     private lateinit var testScope: TestScope
@@ -111,6 +113,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         whenever(backgroundHandler.looper).thenReturn(TestableLooper.get(this).looper)
 
         dockManager = DockManagerFake()
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
 
         underTest = CustomizationProvider()
         val testDispatcher = UnconfinedTestDispatcher()
@@ -197,6 +200,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                 logger = logger,
                 devicePolicyManager = devicePolicyManager,
                 dockManager = dockManager,
+                biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
                 appContext = mContext,
             )

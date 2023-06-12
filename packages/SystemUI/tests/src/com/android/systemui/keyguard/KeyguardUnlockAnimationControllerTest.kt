@@ -22,6 +22,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argThat
 import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertEquals
@@ -33,6 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -175,6 +177,46 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         // Since the animation is running, we should not have finished the remote animation.
         verify(keyguardViewMediator, times(0)).exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
             false /* cancelled */)
+    }
+
+    @Test
+    fun onWakeAndUnlock_notifiesListenerWithTrue() {
+        whenever(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
+        whenever(biometricUnlockController.mode).thenReturn(
+            BiometricUnlockController.MODE_WAKE_AND_UNLOCK)
+
+        val listener = mock(
+            KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener::class.java)
+        keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(listener)
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+            remoteAnimationTargets,
+            wallpaperTargets,
+            0 /* startTime */,
+            false /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        verify(listener).onUnlockAnimationStarted(any(), eq(true), any(), any())
+    }
+
+    @Test
+    fun onWakeAndUnlockFromDream_notifiesListenerWithFalse() {
+        whenever(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
+        whenever(biometricUnlockController.mode).thenReturn(
+            BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM)
+
+        val listener = mock(
+            KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener::class.java)
+        keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(listener)
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+            remoteAnimationTargets,
+            wallpaperTargets,
+            0 /* startTime */,
+            false /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        verify(listener).onUnlockAnimationStarted(any(), eq(false), any(), any())
     }
 
     /**

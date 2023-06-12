@@ -902,4 +902,16 @@
     <!-- Time (in ms) to delay the bouncer views from showing when passive auth may be used for
     device entry. -->
     <integer name="primary_bouncer_passive_auth_delay">500</integer>
+
+    <!--
+    The package name of the app store app. If empty, features using this should be gracefully
+    disabled.
+    -->
+    <string name="config_appStorePackageName" translatable="false"></string>
+
+    <!-- Template for a link that leads to an app page in the relevant app store. If empty,
+    features using this should be gracefully disabled. If not empty, it must include a
+    "$packageName" part that will be replaced by the code with the package name of the target app.
+    -->
+    <string name="config_appStoreAppLinkTemplate" translatable="false"></string>
 </resources>

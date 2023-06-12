@@ -73,6 +73,7 @@ import java.util.Set;
 public class InfoMediaManagerTest {
 
     private static final String TEST_PACKAGE_NAME = "com.test.packagename";
+    private static final String TEST_PACKAGE_NAME_2 = "com.test.packagename2";
     private static final String TEST_ID = "test_id";
     private static final String TEST_ID_1 = "test_id_1";
     private static final String TEST_ID_2 = "test_id_2";
@@ -308,7 +309,54 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void onRouteChanged_getAvailableRoutesWithPrefernceListExit_ordersRoutes() {
+    public void onRouteChanged_getAvailableRoutesWithPreferenceListExit_ordersRoutes() {
+        RouteListingPreference routeListingPreference = setUpPreferenceList(TEST_PACKAGE_NAME);
+        setUpSelectedRoutes(TEST_PACKAGE_NAME);
+
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo);
+
+        when(mRouterManager.getRoutingSessions(TEST_PACKAGE_NAME)).thenReturn(routingSessionInfos);
+        when(sessionInfo.getSelectedRoutes()).thenReturn(ImmutableList.of(TEST_ID));
+
+        setAvailableRoutesList(TEST_PACKAGE_NAME);
+
+        mInfoMediaManager.mRouterManager = mRouterManager;
+        mInfoMediaManager.mMediaRouterCallback.onRouteListingPreferenceUpdated(TEST_PACKAGE_NAME,
+                routeListingPreference);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
+
+        assertThat(mInfoMediaManager.mMediaDevices).hasSize(3);
+        assertThat(mInfoMediaManager.mMediaDevices.get(0).getId()).isEqualTo(TEST_ID);
+        assertThat(mInfoMediaManager.mMediaDevices.get(1).getId()).isEqualTo(TEST_ID_4);
+        assertThat(mInfoMediaManager.mMediaDevices.get(1).isSuggestedDevice()).isTrue();
+        assertThat(mInfoMediaManager.mMediaDevices.get(2).getId()).isEqualTo(TEST_ID_3);
+    }
+
+    @Test
+    public void onRouteChanged_preferenceListUpdateWithDifferentPkg_notOrdersRoutes() {
+        RouteListingPreference routeListingPreference = setUpPreferenceList(TEST_PACKAGE_NAME_2);
+        setUpSelectedRoutes(TEST_PACKAGE_NAME);
+
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo);
+
+        when(mRouterManager.getRoutingSessions(TEST_PACKAGE_NAME)).thenReturn(routingSessionInfos);
+        when(sessionInfo.getSelectedRoutes()).thenReturn(ImmutableList.of(TEST_ID));
+
+        setAvailableRoutesList(TEST_PACKAGE_NAME);
+        mInfoMediaManager.mRouterManager = mRouterManager;
+        mInfoMediaManager.mMediaRouterCallback.onRouteListingPreferenceUpdated(TEST_PACKAGE_NAME_2,
+                routeListingPreference);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
+
+        assertThat(mInfoMediaManager.mMediaDevices).hasSize(1);
+        assertThat(mInfoMediaManager.mMediaDevices.get(0).getId()).isEqualTo(TEST_ID);
+    }
+
+    private RouteListingPreference setUpPreferenceList(String packageName) {
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT",
                 Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
         final List<RouteListingPreference.Item> preferenceItemList = new ArrayList<>();
@@ -324,57 +372,40 @@ public class InfoMediaManagerTest {
         RouteListingPreference routeListingPreference =
                 new RouteListingPreference.Builder().setItems(
                         preferenceItemList).setUseSystemOrdering(false).build();
-        when(mRouterManager.getRouteListingPreference(TEST_PACKAGE_NAME))
+        when(mRouterManager.getRouteListingPreference(packageName))
                 .thenReturn(routeListingPreference);
+        return routeListingPreference;
+    }
 
+    private void setUpSelectedRoutes(String packageName) {
         final List<MediaRoute2Info> selectedRoutes = new ArrayList<>();
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         when(info.getId()).thenReturn(TEST_ID);
-        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.getClientPackageName()).thenReturn(packageName);
         when(info.isSystemRoute()).thenReturn(true);
         selectedRoutes.add(info);
         when(mRouterManager.getSelectedRoutes(any())).thenReturn(selectedRoutes);
-
-        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
-        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
-        routingSessionInfos.add(sessionInfo);
-
-        when(mRouterManager.getRoutingSessions(TEST_PACKAGE_NAME)).thenReturn(routingSessionInfos);
-        when(sessionInfo.getSelectedRoutes()).thenReturn(ImmutableList.of(TEST_ID));
-
-        setAvailableRoutesList();
-
-        mInfoMediaManager.mRouterManager = mRouterManager;
-        mInfoMediaManager.mMediaRouterCallback.onRouteListingPreferenceUpdated(TEST_PACKAGE_NAME,
-                routeListingPreference);
-        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
-
-        assertThat(mInfoMediaManager.mMediaDevices).hasSize(3);
-        assertThat(mInfoMediaManager.mMediaDevices.get(0).getId()).isEqualTo(TEST_ID);
-        assertThat(mInfoMediaManager.mMediaDevices.get(1).getId()).isEqualTo(TEST_ID_4);
-        assertThat(mInfoMediaManager.mMediaDevices.get(1).isSuggestedDevice()).isTrue();
-        assertThat(mInfoMediaManager.mMediaDevices.get(2).getId()).isEqualTo(TEST_ID_3);
     }
 
-    private List<MediaRoute2Info> setAvailableRoutesList() {
+    private List<MediaRoute2Info> setAvailableRoutesList(String packageName) {
         final List<MediaRoute2Info> availableRoutes = new ArrayList<>();
         final MediaRoute2Info availableInfo1 = mock(MediaRoute2Info.class);
         when(availableInfo1.getId()).thenReturn(TEST_ID_2);
-        when(availableInfo1.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(availableInfo1.getClientPackageName()).thenReturn(packageName);
         when(availableInfo1.getType()).thenReturn(TYPE_REMOTE_TV);
         availableRoutes.add(availableInfo1);
 
         final MediaRoute2Info availableInfo2 = mock(MediaRoute2Info.class);
         when(availableInfo2.getId()).thenReturn(TEST_ID_3);
-        when(availableInfo2.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(availableInfo2.getClientPackageName()).thenReturn(packageName);
         availableRoutes.add(availableInfo2);
 
         final MediaRoute2Info availableInfo3 = mock(MediaRoute2Info.class);
         when(availableInfo3.getId()).thenReturn(TEST_ID_4);
-        when(availableInfo3.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(availableInfo3.getClientPackageName()).thenReturn(packageName);
         availableRoutes.add(availableInfo3);
 
-        when(mRouterManager.getAvailableRoutes(TEST_PACKAGE_NAME)).thenReturn(
+        when(mRouterManager.getAvailableRoutes(packageName)).thenReturn(
                 availableRoutes);
 
         return availableRoutes;

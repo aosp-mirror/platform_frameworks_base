@@ -230,7 +230,9 @@ final class ResilientAtomicFile implements Closeable {
                             + Log.getStackTraceString(e));
         }
 
-        mCurrentFile.delete();
+        if (!mCurrentFile.delete()) {
+            throw new IllegalStateException("Failed to remove " + mCurrentFile);
+        }
         mCurrentFile = null;
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -1058,5 +1059,19 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     public void testUnregisterActivityStartInterceptor_IdNotExist() {
         assertEquals(0, mAtm.getActivityInterceptorCallbacks().size());
         mAtm.mInternal.unregisterActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID);
+    }
+
+    @Test
+    public void testFocusTopTask() {
+        final ActivityRecord homeActivity = new ActivityBuilder(mAtm)
+                .setTask(mRootWindowContainer.getDefaultTaskDisplayArea().getOrCreateRootHomeTask())
+                .build();
+        final Task pinnedTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_PINNED)
+                .build();
+        mAtm.focusTopTask(mDisplayContent.mDisplayId);
+
+        assertTrue(homeActivity.getTask().isFocused());
+        assertFalse(pinnedTask.isFocused());
     }
 }

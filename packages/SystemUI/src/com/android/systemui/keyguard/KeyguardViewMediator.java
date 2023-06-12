@@ -94,7 +94,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.window.IRemoteTransition;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -162,7 +161,6 @@ import dagger.Lazy;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
@@ -1352,12 +1350,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             setShowingLocked(false /* showing */, true /* forceCallbacks */);
         }
 
-        boolean isLockscreenLwpEnabled = getWallpaperManager().isLockscreenLiveWallpaperEnabled();
+        boolean isLLwpEnabled = getWallpaperManager().isLockscreenLiveWallpaperEnabled();
         mKeyguardTransitions.register(
-                KeyguardService.wrap(getExitAnimationRunner(), isLockscreenLwpEnabled),
-                KeyguardService.wrap(getOccludeAnimationRunner(), isLockscreenLwpEnabled),
-                KeyguardService.wrap(getOccludeByDreamAnimationRunner(), isLockscreenLwpEnabled),
-                KeyguardService.wrap(getUnoccludeAnimationRunner(), isLockscreenLwpEnabled));
+                KeyguardService.wrap(this, getExitAnimationRunner(), isLLwpEnabled),
+                KeyguardService.wrap(this, getOccludeAnimationRunner(), isLLwpEnabled),
+                KeyguardService.wrap(this, getOccludeByDreamAnimationRunner(), isLLwpEnabled),
+                KeyguardService.wrap(this, getUnoccludeAnimationRunner(), isLLwpEnabled));
 
         final ContentResolver cr = mContext.getContentResolver();
 
@@ -1913,19 +1911,19 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     public IRemoteAnimationRunner getExitAnimationRunner() {
-        return mExitAnimationRunner;
+        return validatingRemoteAnimationRunner(mExitAnimationRunner);
     }
 
     public IRemoteAnimationRunner getOccludeAnimationRunner() {
-        return mOccludeAnimationRunner;
+        return validatingRemoteAnimationRunner(mOccludeAnimationRunner);
     }
 
     public IRemoteAnimationRunner getOccludeByDreamAnimationRunner() {
-        return mOccludeByDreamAnimationRunner;
+        return validatingRemoteAnimationRunner(mOccludeByDreamAnimationRunner);
     }
 
     public IRemoteAnimationRunner getUnoccludeAnimationRunner() {
-        return mUnoccludeAnimationRunner;
+        return validatingRemoteAnimationRunner(mUnoccludeAnimationRunner);
     }
 
     public boolean isHiding() {
@@ -2906,6 +2904,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             // re-locking. We should just end the surface-behind animation without exiting the
             // keyguard. The pending lock will be handled by onFinishedGoingToSleep().
             finishSurfaceBehindRemoteAnimation(true);
+            maybeHandlePendingLock();
         } else {
             Log.d(TAG, "#handleCancelKeyguardExitAnimation: keyguard exit animation cancelled. "
                     + "No pending lock, we should end up unlocked with the app/launcher visible.");
@@ -3261,8 +3260,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     /**
      * Cancel the keyguard exit animation, usually because we were swiping to unlock but WM starts
      * a new remote animation before finishing the keyguard exit animation.
-     *
-     * This will dismiss the keyguard.
      */
     public void cancelKeyguardExitAnimation() {
         Trace.beginSection("KeyguardViewMediator#cancelKeyguardExitAnimation");
@@ -3435,9 +3432,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
     }
 
-    private void setPendingLock(boolean hasPendingLock) {
+    public void setPendingLock(boolean hasPendingLock) {
         mPendingLock = hasPendingLock;
         Trace.traceCounter(Trace.TRACE_TAG_APP, "pendingLock", mPendingLock ? 1 : 0);
+    }
+
+    private boolean isViewRootReady() {
+        return mKeyguardViewControllerLazy.get().getViewRootImpl() != null;
     }
 
     public void addStateMonitorCallback(IKeyguardStateCallback callback) {
@@ -3541,5 +3542,28 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             Log.d(TAG, "Occlude animation cancelled by WM.");
             mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_OCCLUSION);
         }
+    }
+
+    private IRemoteAnimationRunner validatingRemoteAnimationRunner(IRemoteAnimationRunner wrapped) {
+        return new IRemoteAnimationRunner.Stub() {
+            @Override
+            public void onAnimationCancelled() throws RemoteException {
+                wrapped.onAnimationCancelled();
+            }
+
+            @Override
+            public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                                         RemoteAnimationTarget[] wallpapers,
+                                         RemoteAnimationTarget[] nonApps,
+                                         IRemoteAnimationFinishedCallback finishedCallback)
+                    throws RemoteException {
+                if (!isViewRootReady()) {
+                    Log.w(TAG, "Skipping remote animation - view root not ready");
+                    return;
+                }
+
+                wrapped.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
+            }
+        };
     }
 }

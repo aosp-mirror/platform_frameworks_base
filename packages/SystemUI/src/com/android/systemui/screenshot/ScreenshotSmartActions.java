@@ -30,7 +30,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 
@@ -61,7 +60,6 @@ public class ScreenshotSmartActions {
                 screenshotNotificationSmartActionsProviderProvider;
     }
 
-    @VisibleForTesting
     CompletableFuture<List<Notification.Action>> getSmartActionsFuture(
             String screenshotId, Uri screenshotUri, Bitmap image,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,
@@ -83,7 +81,7 @@ public class ScreenshotSmartActions {
         if (image.getConfig() != Bitmap.Config.HARDWARE) {
             if (DEBUG_ACTIONS) {
                 Log.d(TAG, String.format("Bitmap expected: Hardware, Bitmap found: %s. "
-                                + "Returning empty list.", image.getConfig()));
+                        + "Returning empty list.", image.getConfig()));
             }
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
@@ -112,7 +110,6 @@ public class ScreenshotSmartActions {
         return smartActionsFuture;
     }
 
-    @VisibleForTesting
     List<Notification.Action> getSmartActions(String screenshotId,
             CompletableFuture<List<Notification.Action>> smartActionsFuture, int timeoutMs,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,

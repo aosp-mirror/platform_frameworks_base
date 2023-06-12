@@ -2836,7 +2836,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     private void updateDozingState() {
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, "Dozing", 0);
+            Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, "Dozing", String.valueOf(mDozing),
+                    0);
+        }
         Trace.beginSection("CentralSurfaces#updateDozingState");
 
         boolean keyguardVisible = mKeyguardStateController.isVisible();
@@ -3190,6 +3194,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         @Override
         public void onStartedWakingUp() {
+            // Between onStartedWakingUp() and onFinishedWakingUp(), the system is changing the
+            // display power mode. To avoid jank, animations should NOT run during these power
+            // mode transitions, which means that whenever possible, animations should
+            // start running during the onFinishedWakingUp() callback instead of this callback.
             String tag = "CentralSurfaces#onStartedWakingUp";
             DejankUtils.startDetectingBlockingIpcs(tag);
             mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
@@ -3234,26 +3242,41 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                 updateVisibleToUser();
                 updateIsKeyguard();
-                mDozeServiceHost.stopDozing();
-                // This is intentionally below the stopDozing call above, since it avoids that we're
-                // unnecessarily animating the wakeUp transition. Animations should only be enabled
-                // once we fully woke up.
-                updateRevealEffect(true /* wakingUp */);
-                updateNotificationPanelTouchState();
-                mStatusBarTouchableRegionManager.updateTouchableRegion();
-
-                // If we are waking up during the screen off animation, we should undo making the
-                // expanded visible (we did that so the LightRevealScrim would be visible).
-                if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
-                    mShadeController.makeExpandedInvisible();
+                if (!mFeatureFlags.isEnabled(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD)) {
+                    startLockscreenTransitionFromAod();
                 }
-
             });
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 
+        /**
+         * Private helper for starting the LOCKSCREEN_TRANSITION_FROM_AOD animation - only necessary
+         * so we can start it from either onFinishedWakingUp() or onFinishedWakingUp() depending
+         * on a flag value.
+         */
+        private void startLockscreenTransitionFromAod() {
+            // stopDozing() starts the LOCKSCREEN_TRANSITION_FROM_AOD animation.
+            mDozeServiceHost.stopDozing();
+            // This is intentionally below the stopDozing call above, since it avoids that we're
+            // unnecessarily animating the wakeUp transition. Animations should only be enabled
+            // once we fully woke up.
+            updateRevealEffect(true /* wakingUp */);
+            updateNotificationPanelTouchState();
+            mStatusBarTouchableRegionManager.updateTouchableRegion();
+
+            // If we are waking up during the screen off animation, we should undo making the
+            // expanded visible (we did that so the LightRevealScrim would be visible).
+            if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
+                mShadeController.makeExpandedInvisible();
+            }
+        }
+
         @Override
         public void onFinishedWakingUp() {
+            if (mFeatureFlags.isEnabled(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD)) {
+                mNotificationShadeWindowController.batchApplyWindowLayoutParams(
+                        this::startLockscreenTransitionFromAod);
+            }
             mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false, false);
             if (mKeyguardStateController.isOccluded()

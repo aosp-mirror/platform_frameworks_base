@@ -40,7 +40,6 @@ import com.android.systemui.notetask.LaunchNotesRoleSettingsTrampolineActivity.C
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
 import com.android.systemui.notetask.NoteTaskInfoResolver
-import com.android.systemui.shared.customization.data.content.CustomizationProviderContract.LockScreenQuickAffordances.AffordanceTable.COMPONENT_NAME_SEPARATOR
 import com.android.systemui.stylus.StylusManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -283,7 +282,7 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun getPickerScreenState_nodefaultNoteAppSet_shouldReturnDisable() = runTest {
+    fun getPickerScreenState_noDefaultNoteAppSet_shouldReturnDisabled() = runTest {
         val underTest = createUnderTest(isEnabled = true)
         whenever(
                 roleManager.getRoleHoldersAsUser(
@@ -293,16 +292,16 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
             )
             .thenReturn(emptyList())
 
-        assertThat(underTest.getPickerScreenState())
-            .isEqualTo(
-                KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
-                    listOf("Select a default notes app to use the notetaking shortcut"),
-                    actionText = "Select app",
-                    actionComponentName =
-                        "${context.packageName}$COMPONENT_NAME_SEPARATOR" +
-                            "$ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE"
-                )
-            )
+        val pickerScreenState = underTest.getPickerScreenState()
+        assertThat(pickerScreenState is KeyguardQuickAffordanceConfig.PickerScreenState.Disabled)
+            .isTrue()
+        val disabled = pickerScreenState as KeyguardQuickAffordanceConfig.PickerScreenState.Disabled
+        assertThat(disabled.explanation)
+            .isEqualTo("Select a default notes app to use the notetaking shortcut")
+        assertThat(disabled.actionText).isEqualTo("Select app")
+        assertThat(disabled.actionIntent?.action)
+            .isEqualTo(ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE)
+        assertThat(disabled.actionIntent?.`package`).isEqualTo(context.packageName)
     }
     // endregion
 

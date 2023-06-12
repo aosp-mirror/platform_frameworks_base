@@ -3290,6 +3290,12 @@ class Task extends TaskFragment {
             scheduleAnimation();
         }
 
+        // Let organizer manage task visibility for shell transition. So don't change it's
+        // visibility during collecting.
+        if (mTransitionController.isCollecting() && mCreatedByOrganizer) {
+            return;
+        }
+
         // We intend to let organizer manage task visibility but it doesn't
         // have enough information until we finish shell transitions.
         // In the mean time we do an easy fix here.
@@ -5687,17 +5693,28 @@ class Task extends TaskFragment {
     }
 
     private boolean moveTaskToBackInner(@NonNull Task task) {
-        moveToBack("moveTaskToBackInner", task);
-
-        if (inPinnedWindowingMode()) {
-            mTaskSupervisor.removeRootTask(this);
-            return true;
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            // Preventing from update surface position for WindowState if configuration changed,
+            // because the position is depends on WindowFrame, so update the position before
+            // relayout will only update it to "old" position.
+            mAtmService.deferWindowLayout();
         }
+        try {
+            moveToBack("moveTaskToBackInner", task);
 
-        mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                mDisplayContent.mDisplayId, false /* markFrozenIfConfigChanged */,
-                false /* deferResume */);
+            if (inPinnedWindowingMode()) {
+                mTaskSupervisor.removeRootTask(this);
+                return true;
+            }
 
+            mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
+                    mDisplayContent.mDisplayId, false /* markFrozenIfConfigChanged */,
+                    false /* deferResume */);
+        } finally {
+            if (mTransitionController.isShellTransitionsEnabled()) {
+                mAtmService.continueWindowLayout();
+            }
+        }
         ActivityRecord topActivity = getDisplayArea().topRunningActivity();
         Task topRootTask = topActivity.getRootTask();
         if (topRootTask != null && topRootTask != this && topActivity.isState(RESUMED)) {

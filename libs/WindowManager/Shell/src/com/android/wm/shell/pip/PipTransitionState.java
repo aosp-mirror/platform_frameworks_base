@@ -140,6 +140,24 @@ public class PipTransitionState {
         return state == ENTERING_PIP;
     }
 
+    private String stateToString() {
+        switch (mState) {
+            case UNDEFINED: return "undefined";
+            case TASK_APPEARED: return "task-appeared";
+            case ENTRY_SCHEDULED: return "entry-scheduled";
+            case ENTERING_PIP: return "entering-pip";
+            case ENTERED_PIP: return "entered-pip";
+            case EXITING_PIP: return "exiting-pip";
+        }
+        throw new IllegalStateException("Unknown state: " + mState);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("PipTransitionState(mState=%s, mInSwipePipToHomeTransition=%b)",
+                stateToString(), mInSwipePipToHomeTransition);
+    }
+
     public interface OnPipTransitionStateChangedListener {
         void onPipTransitionStateChanged(@TransitionState int oldState,
                 @TransitionState int newState);

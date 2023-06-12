@@ -66,8 +66,9 @@ class CredentialManagerRepo(
         )
 
         val originName: String? = when (requestInfo?.type) {
-            RequestInfo.TYPE_CREATE -> requestInfo.createCredentialRequest?.origin
-            RequestInfo.TYPE_GET -> requestInfo.getCredentialRequest?.origin
+            RequestInfo.TYPE_CREATE -> processHttpsOrigin(
+                requestInfo.createCredentialRequest?.origin)
+            RequestInfo.TYPE_GET -> processHttpsOrigin(requestInfo.getCredentialRequest?.origin)
             else -> null
         }
 
@@ -247,6 +248,9 @@ class CredentialManagerRepo(
     }
 
     companion object {
+        private const val HTTPS = "https://"
+        private const val FORWARD_SLASH = "/"
+
         fun sendCancellationCode(
             cancelCode: Int,
             requestToken: IBinder?,
@@ -265,6 +269,18 @@ class CredentialManagerRepo(
                 CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
                 CancelUiRequest::class.java
             )
+        }
+
+        /** Removes "https://", and the trailing slash if present for an https request. */
+        private fun processHttpsOrigin(origin: String?): String? {
+            var processed = origin
+            if (processed?.startsWith(HTTPS) == true) { // Removes "https://"
+                processed = processed.substring(HTTPS.length)
+                if (processed?.endsWith(FORWARD_SLASH) == true) { // Removes the trailing slash
+                    processed = processed.substring(0, processed.length - 1)
+                }
+            }
+            return processed
         }
     }
 }

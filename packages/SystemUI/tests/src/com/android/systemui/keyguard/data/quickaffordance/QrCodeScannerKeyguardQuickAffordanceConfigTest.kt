@@ -53,7 +53,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(controller.intent).thenReturn(INTENT_1)
 
-        underTest = QrCodeScannerKeyguardQuickAffordanceConfig(mock(), controller)
+        underTest = QrCodeScannerKeyguardQuickAffordanceConfig(context, controller)
     }
 
     @Test
@@ -77,22 +77,21 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun affordance_scannerActivityChanged_deliversModelWithUpdatedIntent() =
-        runBlockingTest {
-            whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
-            var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
-            val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
-            val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
-            verify(controller).addCallback(callbackCaptor.capture())
+    fun affordance_scannerActivityChanged_deliversModelWithUpdatedIntent() = runBlockingTest {
+        whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
+        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
+        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+        val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
+        verify(controller).addCallback(callbackCaptor.capture())
 
-            whenever(controller.intent).thenReturn(INTENT_2)
-            callbackCaptor.value.onQRCodeScannerActivityChanged()
+        whenever(controller.intent).thenReturn(INTENT_2)
+        callbackCaptor.value.onQRCodeScannerActivityChanged()
 
-            assertVisibleState(latest)
+        assertVisibleState(latest)
 
-            job.cancel()
-            verify(controller).removeCallback(callbackCaptor.value)
-        }
+        job.cancel()
+        verify(controller).removeCallback(callbackCaptor.value)
+    }
 
     @Test
     fun affordance_scannerPreferenceChanged_deliversVisibleModel() = runBlockingTest {

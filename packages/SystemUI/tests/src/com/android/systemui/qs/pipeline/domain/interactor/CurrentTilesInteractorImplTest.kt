@@ -38,6 +38,7 @@ import com.android.systemui.qs.external.TileLifecycleManager
 import com.android.systemui.qs.external.TileServiceKey
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository
 import com.android.systemui.qs.pipeline.data.repository.FakeCustomTileAddedRepository
+import com.android.systemui.qs.pipeline.data.repository.FakeInstalledTilesComponentRepository
 import com.android.systemui.qs.pipeline.data.repository.FakeTileSpecRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.domain.model.TileModel
@@ -73,6 +74,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
     private val tileSpecRepository: TileSpecRepository = FakeTileSpecRepository()
     private val userRepository = FakeUserRepository()
+    private val installedTilesPackageRepository = FakeInstalledTilesComponentRepository()
     private val tileFactory = FakeQSFactory(::tileCreator)
     private val customTileAddedRepository: CustomTileAddedRepository =
         FakeCustomTileAddedRepository()
@@ -100,11 +102,13 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
         featureFlags.set(Flags.QS_PIPELINE_NEW_HOST, true)
 
         userRepository.setUserInfos(listOf(USER_INFO_0, USER_INFO_1))
+
         setUserTracker(0)
 
         underTest =
             CurrentTilesInteractorImpl(
                 tileSpecRepository = tileSpecRepository,
+                installedTilesComponentRepository = installedTilesPackageRepository,
                 userRepository = userRepository,
                 customTileStatePersister = customTileStatePersister,
                 tileFactory = tileFactory,
@@ -609,6 +613,40 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             assertThat((tileA as FakeQSTile).callbacks).containsExactly(callback)
         }
 
+    @Test
+    fun packageNotInstalled_customTileNotVisible() =
+        testScope.runTest(USER_INFO_0) {
+            installedTilesPackageRepository.setInstalledPackagesForUser(USER_INFO_0.id, emptySet())
+
+            val tiles by collectLastValue(underTest.currentTiles)
+
+            val specs = listOf(TileSpec.create("a"), CUSTOM_TILE_SPEC)
+            tileSpecRepository.setTiles(USER_INFO_0.id, specs)
+
+            assertThat(tiles!!.size).isEqualTo(1)
+            assertThat(tiles!![0].spec).isEqualTo(specs[0])
+        }
+
+    @Test
+    fun packageInstalledLater_customTileAdded() =
+        testScope.runTest(USER_INFO_0) {
+            installedTilesPackageRepository.setInstalledPackagesForUser(USER_INFO_0.id, emptySet())
+
+            val tiles by collectLastValue(underTest.currentTiles)
+            val specs = listOf(TileSpec.create("a"), CUSTOM_TILE_SPEC, TileSpec.create("b"))
+            tileSpecRepository.setTiles(USER_INFO_0.id, specs)
+
+            assertThat(tiles!!.size).isEqualTo(2)
+
+            installedTilesPackageRepository.setInstalledPackagesForUser(
+                USER_INFO_0.id,
+                setOf(TEST_COMPONENT)
+            )
+
+            assertThat(tiles!!.size).isEqualTo(3)
+            assertThat(tiles!![1].spec).isEqualTo(CUSTOM_TILE_SPEC)
+        }
+
     private fun QSTile.State.fillIn(state: Int, label: CharSequence, secondaryLabel: CharSequence) {
         this.state = state
         this.label = label
@@ -654,6 +692,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
     private suspend fun switchUser(user: UserInfo) {
         setUserTracker(user.id)
+        installedTilesPackageRepository.setInstalledPackagesForUser(user.id, setOf(TEST_COMPONENT))
         userRepository.setSelectedUserInfo(user)
     }
 
