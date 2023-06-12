@@ -24,7 +24,7 @@
     <string name="battery_low_description" msgid="3282977755476423966">"আপোনাৰ <xliff:g id="PERCENTAGE">%s</xliff:g> বেটাৰী বাকী আছে। বেটাৰী সঞ্চয়কাৰীয়ে গাঢ় ৰঙৰ থীম অন কৰে, নেপথ্যৰ কাৰ্যকলাপ সীমাবদ্ধ কৰে আৰু জাননী পলম কৰে।"</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"বেটাৰী সঞ্চয়কাৰীয়ে গাঢ় ৰঙৰ থীম অন কৰে, নেপথ্যৰ কাৰ্যকলাপ সীমাবদ্ধ কৰে আৰু জাননী পলম কৰে।"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে"</string>
-    <string name="invalid_charger_title" msgid="938685362320735167">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি"</string>
+    <string name="invalid_charger_title" msgid="938685362320735167">"ইউএছবি জৰিয়তে চাৰ্জ কৰিব নোৱাৰি"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰী সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰী সঞ্চয়কাৰীৰ বিষয়ে"</string>
@@ -71,14 +71,14 @@
     <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্ৰীনশ্বট"</string>
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock অক্ষম কৰা হৈছে"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"এখন প্ৰতিচ্ছবি পঠিয়াইছে"</string>
-    <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
+    <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্ৰীনশ্বট ছেভ কৰি থকা হৈছে…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"কৰ্মস্থানৰ প্ৰ’ফাইলত স্ক্ৰীনশ্বট ছেভ কৰি থকা হৈছে…"</string>
-    <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্ৰীণশ্বট ছেভ কৰা হ’ল"</string>
-    <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্ৰীণশ্বট ছেভ কৰিব পৰা নগ\'ল"</string>
+    <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্ৰীনশ্বট ছেভ কৰা হ’ল"</string>
+    <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্ৰীনশ্বট ছেভ কৰিব পৰা নগ\'ল"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"স্ক্ৰীনশ্বট ছেভ কৰিবলৈ ডিভাইচটো আনলক কৰিবই লাগিব"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"স্ক্ৰীণশ্বট আকৌ ল\'বলৈ চেষ্টা কৰক"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"স্ক্ৰীনশ্বট আকৌ ল\'বলৈ চেষ্টা কৰক"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"স্ক্ৰীনশ্বট ছেভ কৰিব নোৱাৰি"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এপটোৱে বা আপোনাৰ প্ৰতিষ্ঠানে স্ক্ৰীণশ্বট ল\'বলৈ অনুমতি নিদিয়ে"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এপটোৱে বা আপোনাৰ প্ৰতিষ্ঠানে স্ক্ৰীনশ্বট ল\'বলৈ অনুমতি নিদিয়ে"</string>
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"স্ক্ৰীনশ্বট লোৱাটো আপোনাৰ আইটি প্ৰশাসকে অৱৰোধ কৰিছে"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"সম্পাদনা কৰক"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"স্ক্ৰীনশ্বট সম্পাদনা কৰক"</string>
@@ -197,7 +197,7 @@
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"কৰ্মস্থানৰ প্ৰ\'ফাইলৰ লক স্ক্ৰীন"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"বন্ধ কৰক"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"সম্পূৰ্ণ নিৰৱতা"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"কেৱল এলাৰ্মবোৰৰ বাবে"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"কেৱল এলাৰ্ম"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"অসুবিধা নিদিব"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ব্লুটুথ।"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ব্লুটুথ অন হৈ আছে।"</string>
@@ -661,7 +661,7 @@
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"সদায় শতাংশত দেখুৱাব"</item>
-    <item msgid="3805744470661798712">"চ্চাৰ্জ কৰি থকাৰ সময়ত শতাংশ দেখুৱাওক (ডিফ\'ল্ট)"</item>
+    <item msgid="3805744470661798712">"চাৰ্জ কৰি থকাৰ সময়ত শতাংশ দেখুৱাওক (ডিফ\'ল্ট)"</item>
     <item msgid="8619482474544321778">"এই আইকনটো নেদেখুৱাব"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"কম গুৰুত্বপূৰ্ণ জাননীৰ আইকনসমূহ দেখুৱাওক"</string>
@@ -690,7 +690,7 @@
     <string name="tuner_lock_screen" msgid="2267383813241144544">"লক স্ক্ৰীন"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"আপোনাৰ ফ\'নটো গৰম হোৱাৰ কাৰণে অফ কৰা হৈছিল"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"আপোনাৰ ফ’নটো এতিয়া স্বাভাৱিকভাৱে চলি আছে।\nঅধিক তথ্যৰ বাবে টিপক"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"আপোনাৰ ফ\'নটো অত্যধিক গৰম হোৱাৰ বাবে ইয়াক ঠাণ্ডা কৰিবলৈ অফ কৰা হৈছিল। আপোনাৰ ফ\'নটো এতিয়া স্বাভাৱিকভাৱে চলি আছে।\n\nআপোনাৰ ফ\'নটো গৰম হ\'ব পাৰে, যদিহে আপুনি:\n	• ফ\'নটোৰ হাৰ্ডৱেৰ অত্যধিক মাত্ৰাত ব্যৱহাৰ কৰা এপসমূহ চলালে (যেনে, ভিডিঅ\' গেইম, ভিডিঅ\', দিক্-নিৰ্দেশনা এপসমূহ)\n	• খুউব ডাঙৰ আকাৰৰ ফাইল আপল\'ড বা ডাউনল’ড কৰিলে\n	• আপোনাৰ ফ\'নটো উচ্চ তাপমাত্ৰাৰ পৰিৱেশত ব্যৱহাৰ কৰিলে"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"আপোনাৰ ফ\'নটো অত্যধিক গৰম হোৱাৰ বাবে ইয়াক ঠাণ্ডা কৰিবলৈ অফ কৰা হৈছিল। আপোনাৰ ফ\'নটো এতিয়া স্বাভাৱিকভাৱে চলি আছে।\n\nআপোনাৰ ফ\'নটো গৰম হ\'ব পাৰে, যদিহে আপুনি:\n	• ফ\'নটোৰ হাৰ্ডৱেৰ অত্যধিক মাত্ৰাত ব্যৱহাৰ কৰা এপ্‌সমূহ চলালে (যেনে, ভিডিঅ\' গেইম, ভিডিঅ\', দিক্-নিৰ্দেশনা এপ্‌সমূহ)\n	• খুউব ডাঙৰ আকাৰৰ ফাইল আপল\'ড বা ডাউনল’ড কৰিলে\n	• আপোনাৰ ফ\'নটো উচ্চ তাপমাত্ৰাৰ পৰিৱেশত ব্যৱহাৰ কৰিলে"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ফ\'নটো গৰম হ\'বলৈ ধৰিছে"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ফ’নটো ঠাণ্ডা হৈ থকাৰ সময়ত কিছুমান সুবিধা উপলব্ধ নহয়।\nঅধিক তথ্যৰ বাবে টিপক"</string>
@@ -705,7 +705,7 @@
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"সোঁ শ্বৰ্টকাটটোৱেও আনলক কৰিব"</string>
     <string name="lockscreen_none" msgid="4710862479308909198">"একো বাছনি কৰা হোৱা নাই"</string>
     <string name="tuner_launch_app" msgid="3906265365971743305">"<xliff:g id="APP">%1$s</xliff:g>ক লঞ্চ কৰক"</string>
-    <string name="tuner_other_apps" msgid="7767462881742291204">"অন্যান্য এপসমূহ"</string>
+    <string name="tuner_other_apps" msgid="7767462881742291204">"অন্যান্য এপ্‌সমূহ"</string>
     <string name="tuner_circle" msgid="5270591778160525693">"পৰিচিত মানুহৰ গোট"</string>
     <string name="tuner_plus" msgid="4130366441154416484">"যোগ চিহ্ন"</string>
     <string name="tuner_minus" msgid="5258518368944598545">"বিয়োগ চিহ্ন"</string>
@@ -736,7 +736,7 @@
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"অসুবিধা নিদিব-ক এটা স্বয়ংক্ৰিয় নিয়ম (<xliff:g id="ID_1">%s</xliff:g>)এ অন কৰিলে।"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"অসুবিধা নিদিব-ক কোনো এপ্ (<xliff:g id="ID_1">%s</xliff:g>)এ অন কৰিলে।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"অসুবিধা নিদিব-ক এটা স্বয়ংক্ৰিয় নিয়ম বা এপে অন কৰিলে।"</string>
-    <string name="running_foreground_services_title" msgid="5137313173431186685">"নেপথ্যত চলি থকা এপসমূহ"</string>
+    <string name="running_foreground_services_title" msgid="5137313173431186685">"নেপথ্যত চলি থকা এপ্‌সমূহ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"বেটাৰী আৰু ডেটাৰ ব্যৱহাৰৰ বিষয়ে সবিশেষ জানিবলৈ টিপক"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"ম’বাইল ডেটা অফ কৰিবনে?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"আপুনি <xliff:g id="CARRIER">%s</xliff:g>ৰ জৰিয়তে ডেটা সংযোগ বা ইণ্টাৰনেট সংযোগ নাপাব। কেৱল ৱাই-ফাইৰ যোগেৰে ইণ্টাৰনেট উপলব্ধ হ\'ব।"</string>
@@ -963,7 +963,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# টা এপ্‌ সক্ৰিয় হৈ আছে}one{# টা এপ্‌ সক্ৰিয় হৈ আছে}other{# টা এপ্‌ সক্ৰিয় হৈ আছে}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"নতুন তথ্য"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"সক্ৰিয় এপ্‌"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"এই এপ্‌সমূহ সক্ৰিয় আৰু আনকি আপুনি এইসমূহ ব্যৱহাৰ নকৰাৰ সময়তো চলি থাকে। ই সেইসমূহৰ কাৰ্য্যক্ষমতা উন্নত কৰে, কিন্তু ই বেটাৰীৰ জীৱনকালতো প্ৰভাৱ পেলাব পাৰে।"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"আপুনি এপ্‌সমূহ ব্যৱহাৰ নকৰাৰ সময়তো এইসমূহ সক্ৰিয় হৈ থাকে আৰু চলি থাকে। ই সেইসমূহৰ কাৰ্যক্ষমতা উন্নত কৰে, কিন্তু ই বেটাৰীৰ জীৱনকালতো প্ৰভাৱ পেলাব পাৰে।"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"বন্ধ কৰক"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"বন্ধ হ’ল"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"হ’ল"</string>

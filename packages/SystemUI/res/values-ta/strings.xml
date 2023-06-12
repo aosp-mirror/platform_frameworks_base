@@ -83,7 +83,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"திருத்து"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ஸ்கிரீன்ஷாட்டைத் திருத்தும்"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"ஸ்கிரீன்ஷாட்டைப் பகிர்"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"கூடுதலாகப் படமெடு"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"கூடுதலாக படமெடு"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ஸ்கிரீன்ஷாட்டை நிராகரிக்கும்"</string>
     <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"பணிக் கணக்கு மெசேஜை மூடும்"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ஸ்கிரீன்ஷாட்டின் மாதிரிக்காட்சி"</string>
@@ -296,9 +296,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"சாதனத்தின் மைக்ரோஃபோனுக்கான தடுப்பை நீக்கவா?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"சாதனத்தின் கேமராவுக்கான தடுப்பை நீக்கவா?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"சாதனத்தின் கேமராவுக்கும் மைக்ரோஃபோனுக்குமான தடுப்பை நீக்கவா?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"உங்கள் மைக்ரோஃபோனைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"உங்கள் கேமராவையோ மைக்ரோஃபோனையோ பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"உங்கள் மைக்ரோஃபோனைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும் தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும் தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"உங்கள் கேமராவையோ மைக்ரோஃபோனையோ பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும் தடுப்பை இது நீக்கும்."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"மைக்ரோஃபோன் அணுகல் முடக்கப்பட்டுள்ளது"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"கேமரா அணுகல் முடக்கப்பட்டுள்ளது"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"மைக்ரோஃபோன் &amp; கேமரா அணுகல் முடக்கப்பட்டுள்ளது"</string>
@@ -862,7 +862,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"நிலையைக் காட்ட முடியவில்லை"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"பிழை, மீண்டும் முயலவும்"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"கட்டுப்பாடுகளைச் சேர்த்தல்"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"கட்டுப்பாடுகளை மாற்றுதல்"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"கட்டுப்பாடுகளை மாற்றுக"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"அவுட்புட்களைச் சேர்த்தல்"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"குழு"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 சாதனம் தேர்ந்தெடுக்கப்பட்டுள்ளது"</string>
@@ -947,7 +947,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"வேறு நெட்வொர்க்குகள் எதுவும் கிடைக்கவில்லை"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"நெட்வொர்க்குகள் எதுவும் கிடைக்கவில்லை"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"வைஃபை"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"இணைய நெட்வொர்க்கைத் தட்டுங்கள்"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"இணைக்க நெட்வொர்க்கைத் தட்டுங்கள்"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"நெட்வொர்க்குகளைப் பார்க்க அன்லாக் செய்யுங்கள்"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"நெட்வொர்க்குகளைத் தேடுகிறது…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>

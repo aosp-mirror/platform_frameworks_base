@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී නැත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"සේවාවන් සපයා නැත."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"අමතන්නාගේ ID සැකසීම ඔබට වෙනස්කල නොහැක."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"දත්ත <xliff:g id="CARRIERDISPLAY">%s</xliff:g> වෙත මාරු කරන ලදි"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"ඔබට සැකසීම් තුළ මෙය ඕනෑම වේලාවක වෙනස් කළ හැක"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ජංගම දත්ත සේවාව නැත"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"හදිසි ඇමතුම් ලබා ගත නොහැකිය"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"හඬ සේවාව නැත"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ලියාපදිංචි කළ ආධාර සහ ගමන් මාර්ග ගමනාන්ත වැනි කැමති nfc ගෙවීම් සේවා තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ආසන්න ක්ෂේත්‍ර සන්නිවේදනය පාලනය කරන්න"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ආසන්න ක්ෂේත්‍ර සන්නිවේදන (NFC) ටැග්, පත්, සහ කියවන්නන් සමඟ සන්නිවේදනය කිරීමට යෙදුමට අවසර දෙන්න."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"සුරක්ෂිත මූලද්‍රව්‍ය ගනුදෙනු සිදුවීම"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"සුරක්ෂිත මූලද්‍රව්‍යයක සිදු වන ගනුදෙනු පිළිබඳ තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ඔබගේ තිරයේ අගුල අබල කරන්න"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"යතුරු අගුල සහ ඕනෑම සම්බන්ධිත මුරපද ආරක්ෂාවක් අබල කිරීමට යෙදුමට අවසර දෙන්න. මෙහි උදාහරණයක් වන්නේ පැමිණෙන ඇමතුමක් ලැබෙද්දී, දුරකථනය අක්‍රිය වන අතර ඇමතුම අවසාන වන විට යතුරු අගුල නැවත සක්‍රිය වෙයි."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"තිර අඟුලු සංකීර්ණතාව ඉල්ලන්න"</string>
@@ -658,7 +662,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ඔබගේ මුහුණු ආකෘතිය තැනිය නොහැකිය. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"අඳුරු කණ්ණාඩි අනාවරණය කර ගන්නා ලදි. ඔබගේ මුහුණ සම්පූර්ණයෙන් දෘශ්‍යමාන විය යුතුය."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"මුහුණු ආවරණය අනාවරණය කර ගන්නා ලදි. ඔබගේ මුහුණ සම්පූර්ණයෙන් දෘශ්‍යමාන විය යුතුය."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"මුහුණු වැසීමක් හමු විය. මුහුණ සම්පූර්ණයෙන්ම පෙනිය යුතුය."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"මුහුණ සත්‍යාපනය කළ නොහැක. දෘඩාංගය නොමැත."</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් ටැබ්ලටයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ප්‍රවාහය කරන අතරේ මෙයට ප්‍රවේශ විය නොහැක. ඒ වෙනුවට ඔබේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
     <string name="system_locale_title" msgid="711882686834677268">"පද්ධති පෙරනිමිය"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"කාඩ්පත <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

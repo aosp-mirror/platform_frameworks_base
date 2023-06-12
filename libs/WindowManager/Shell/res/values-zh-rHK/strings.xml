@@ -23,7 +23,7 @@
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"進入分割螢幕"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"選單"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"「<xliff:g id="NAME">%s</xliff:g>」目前在畫中畫模式"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"如果您不想「<xliff:g id="NAME">%s</xliff:g>」使用此功能，請輕按以開啟設定，然後停用此功能。"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"如果你不想「<xliff:g id="NAME">%s</xliff:g>」使用此功能，請輕按以開啟設定，然後停用此功能。"</string>
     <string name="pip_play" msgid="3496151081459417097">"播放"</string>
     <string name="pip_pause" msgid="690688849510295232">"暫停"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"跳到下一個"</string>

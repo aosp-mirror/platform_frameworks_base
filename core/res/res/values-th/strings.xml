@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นไม่จำกัด การโทรครั้งต่อไป: ไม่จำกัด"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ไม่มีการนำเสนอบริการ"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"คุณไม่สามารถเปลี่ยนการตั้งค่าหมายเลขผู้โทร"</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"เปลี่ยนไปใช้อินเทอร์เน็ตมือถือของ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> แล้ว"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"คุณเปลี่ยนตัวเลือกนี้ได้ทุกเมื่อในการตั้งค่า"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ไม่มีบริการเน็ตมือถือ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"หมายเลขฉุกเฉินไม่พร้อมใช้งาน"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ไม่มีบริการเสียง"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"อนุญาตให้แอปรับข้อมูลบริการชำระเงิน NFC ที่ต้องการ เช่น รหัสแอป (AID) ที่ลงทะเบียนและปลายทางของเส้นทาง"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ควบคุม Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"อนุญาตให้แอปพลิเคชันสื่อสารกับแท็ก Near Field Communication (NFC) การ์ด และโปรแกรมอ่าน"</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"เหตุการณ์เกี่ยวกับธุรกรรมในองค์ประกอบความปลอดภัย"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"อนุญาตให้แอปรับข้อมูลเกี่ยวกับธุรกรรมที่เกิดขึ้นในองค์ประกอบความปลอดภัย"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ปิดใช้งานการล็อกหน้าจอของคุณ"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"อนุญาตให้แอปพลิเคชันปิดใช้งานการล็อกปุ่มกดและการรักษาความปลอดภัยด้วยรหัสผ่านใดๆ ที่เกี่ยวข้อง ตัวอย่างเช่น โทรศัพท์ปิดใช้งานการล็อกปุ่มกดเมื่อรับสายเรียกเข้า จากนั้นจึงเปิดใช้งานการล็อกปุ่มกดใหม่หลังจากวางสาย"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ขอความซับซ้อนของการล็อกหน้าจอ"</string>
@@ -1275,13 +1279,13 @@
     <string name="volume_call" msgid="7625321655265747433">"ระดับเสียงขณะโทร"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ระดับเสียงบลูทูธขณะโทร"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"ระดับเสียงปลุก"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"ระดับเสียงของการแจ้งเตือน"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"ระดับเสียงการแจ้งเตือน"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"ระดับเสียง"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ระดับบลูทูธ"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ระดับเสียงเรียกเข้า"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"ระดับเสียงการโทร"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"ระดับเสียงของสื่อ"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"ระดับเสียงของการแจ้งเตือน"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"ระดับเสียงการแจ้งเตือน"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"เสียงเรียกเข้าเริ่มต้น"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ค่าเริ่มต้น (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ไม่มี"</string>
@@ -1920,7 +1924,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> ไหม"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"เพิ่มผู้ใช้ภายใต้การควบคุมดูแล"</string>
     <string name="language_selection_title" msgid="52674936078683285">"เพิ่มภาษา"</string>
-    <string name="country_selection_title" msgid="5221495687299014379">"ค่ากำหนดภูมิภาค"</string>
+    <string name="country_selection_title" msgid="5221495687299014379">"ค่ากำหนดตามพื้นที่"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"พิมพ์ชื่อภาษา"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"แนะนำ"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"แนะนำ"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"เข้าถึงกล้องของแท็บเล็ตจาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"เข้าถึงเนื้อหานี้ไม่ได้ขณะที่สตรีมมิง โปรดลองเข้าถึงในโทรศัพท์แทน"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ค่าเริ่มต้นของระบบ"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"ซิมการ์ด <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

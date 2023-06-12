@@ -4,7 +4,7 @@
     <string name="app_label" msgid="8016145283189546017">"Dispositivos de introducción de datos"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Teclado de Android"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Inglés (Reino Unido)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Inglés (EE.UU.)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Inglés (EE. UU.)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Inglés (EE.UU.), estilo internacional"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Inglés (EE.UU.), estilo Colemak"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Inglés (EE.UU.), estilo Dvorak"</string>
@@ -27,7 +27,7 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"Finlandés"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"Croata"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"Checo"</string>
-    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"Estilo QWERTY checo"</string>
+    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"Checo (estilo QWERTY)"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"Estonio"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Húngaro"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"Islandés"</string>

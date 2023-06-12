@@ -17,8 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"連線要求"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> 要求設定 VPN 連線以監控網絡流量。除非您信任要求來源，否則請勿隨意接受要求。&lt;br /&gt; &lt;br /&gt;VPN 啟用時，畫面頂端會顯示 &lt;img src=vpn_icon /&gt;。"</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"「<xliff:g id="APP">%s</xliff:g>」要求設定 VPN 連線以監控網絡流量。除非您信任要求來源，否則請勿隨意接受要求。VPN 啟用時，畫面會顯示 &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;。"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> 要求設定 VPN 連線以監控網絡流量。除非你信任要求來源，否則請勿隨意接受要求。&lt;br /&gt; &lt;br /&gt;VPN 啟用時，畫面頂端會顯示 &lt;img src=vpn_icon /&gt;。"</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"「<xliff:g id="APP">%s</xliff:g>」要求設定 VPN 連線以監控網絡流量。除非你信任要求來源，否則請勿隨意接受要求。VPN 啟用時，畫面會顯示 &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;。"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN 已連線"</string>
     <string name="session" msgid="6470628549473641030">"時段："</string>
     <string name="duration" msgid="3584782459928719435">"持續時間︰"</string>
@@ -26,8 +26,8 @@
     <string name="data_received" msgid="4062776929376067820">"已接收："</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> 位元組 / <xliff:g id="NUMBER_1">%2$s</xliff:g> 封包"</string>
     <string name="always_on_disconnected_title" msgid="1906740176262776166">"無法連線至保持開啟的 VPN"</string>
-    <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> 已設定為隨時保持連線，但目前無法連線。在重新連線至 <xliff:g id="VPN_APP_1">%1$s</xliff:g> 前，您的手機將會使用公共網絡。"</string>
-    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> 已設定為隨時保持連線，但目前無法連線。在重新連線至 VPN 前，您將無法連線至網絡。"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> 已設定為隨時保持連線，但目前無法連線。在重新連線至 <xliff:g id="VPN_APP_1">%1$s</xliff:g> 前，你的手機將會使用公共網絡。"</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> 已設定為隨時保持連線，但目前無法連線。在重新連線至 VPN 前，你將無法連線至網絡。"</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"變更 VPN 設定"</string>
     <string name="configure" msgid="4905518375574791375">"設定"</string>

@@ -75,6 +75,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Идентификация абонента по умолчанию не запрещена. След. вызов: разрешена"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услуга не предоставляется."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Невозможно изменить параметр идентификатора вызывающего абонента."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Используется мобильный интернет <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Этот параметр можно в любой момент изменить в настройках."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Мобильный Интернет недоступен"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Экстренные вызовы недоступны"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Голосовые вызовы недоступны"</string>
@@ -550,6 +552,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Приложение сможет получать сведения о предпочтительном платежном сервисе NFC (например, зарегистрированные идентификаторы AID и конечный пункт маршрута)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Управление NFC-модулем"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Приложение сможет обмениваться данными с NFC-метками, картами и устройствами считывания, используя NFC."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Транзакции, обрабатываемые в защитном элементе"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Позволяет приложению получать информацию о транзакциях, обрабатываемых в защитном элементе."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"Отключение функции блокировки экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Запрос данных об уровне сложности блокировки экрана"</string>
@@ -1281,7 +1285,7 @@
     <string name="volume_unknown" msgid="4041914008166576293">"Громкость"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Громкость Bluetooth-устройства"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Громкость рингтона"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Громкости мелодии вызова"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Громкость разговора"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Громкость мультимедиа"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Громкость уведомлений"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Мелодия по умолчанию"</string>
@@ -1350,14 +1354,14 @@
     <string name="no_permissions" msgid="5729199278862516390">"Не требуется разрешений"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"это может стоить вам денег!"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ОК"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Зарядка устройства через USB…"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Зарядка устройства через USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Зарядка устройства через USB…"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Передача файлов через USB включена"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Режим PTP включен"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Режим USB-модема включен"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Режим MIDI включен"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-устройство подключено"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Нажмите, чтобы показать дополнительные параметры."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Нажмите, чтобы посмотреть дополнительные параметры"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Подключенное устройство заряжается. Нажмите, чтобы увидеть другие настройки."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Обнаружено аналоговое аудиоустройство"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Подсоединенное устройство несовместимо с этим телефоном. Нажмите, чтобы узнать подробности."</string>
@@ -1855,8 +1859,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Обновлено администратором"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Удалено администратором"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"В режиме энергосбережения включается тёмная тема, ограничиваются или отключаются фоновые процессы, а также некоторые визуальные эффекты, функции и сетевые подключения."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"В режиме энергосбережения включается тёмная тема, ограничиваются или отключаются фоновые процессы, а также некоторые визуальные эффекты, функции и сетевые подключения."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"В режиме энергосбережения включается тёмная тема, ограничиваются или отключаются фоновые процессы, а также некоторые визуальные эффекты, часть функций и сетевых подключений."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"В режиме энергосбережения включается тёмная тема, ограничиваются или отключаются фоновые процессы, а также некоторые визуальные эффекты, часть функций и сетевых подключений."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"В режиме экономии трафика фоновая передача данных для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Включить экономию трафика?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включить"</string>
@@ -2292,4 +2296,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере планшета."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Этот контент недоступен во время трансляции. Используйте телефон."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Системные настройки по умолчанию"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"КАРТА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

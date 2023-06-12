@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të pakufizuar. Telefonata e radhës: e pakufizuar!"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Shërbimi nuk është përgatitur."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nuk mund ta ndryshosh cilësimin e ID-së së telefonuesit."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Të dhënat u kaluan te <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Mund ta ndryshosh këtë në çdo kohë te \"Cilësimet\""</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nuk ka shërbim të të dhënave celulare"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Telefonatat e urgjencës nuk ofrohen"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Nuk ka shërbim zanor"</string>
@@ -152,7 +154,7 @@
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nuk u transferua"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kodi i funksionit është i plotë."</string>
     <string name="fcError" msgid="5325116502080221346">"Problem me lidhjen ose kod është i pavlefshëm."</string>
-    <string name="httpErrorOk" msgid="6206751415788256357">"Në rregull!"</string>
+    <string name="httpErrorOk" msgid="6206751415788256357">"Në rregull"</string>
     <string name="httpError" msgid="3406003584150566720">"Pati një gabim në rrjet."</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"Nuk mundi ta gjente URL-në."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Skema e vërtetimit nuk mbështetet."</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lejon aplikacionin të marrë informacione për shërbimin e preferuar të pagesës me NFC si p.sh. ndihmat e regjistruara dhe destinacionin e itinerarit."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollo \"Komunikimin e fushës në afërsi\" NFC"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Lejon aplikacionin të komunikojë me etiketimet e \"Komunikimit të fushës së afërt (NFC)\", kartat dhe lexuesit."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Ngjarje transaksioni me elementin e sigurt"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Lejon që aplikacioni të marrë informacione për transaksionet që kryhen në një element të sigurt."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"çaktivizo kyçjen e ekranit"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Lejon aplikacionin të çaktivizojë kyçjen e tasteve dhe çdo mbrojtje të lidhur me fjalëkalimin. Për shembull, telefoni çaktivizon kyçjen e tasteve kur merr një telefonatë hyrëse, pastaj riaktivizon kyçjen e tasteve kur mbaron telefonata."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"kërko kompleksitetin e kyçjes së ekranit"</string>
@@ -637,12 +641,12 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nuk ka dritë të mjaftueshme"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Lëvize telefonin më larg"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Lëvize telefonin më afër"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Lëvize telefonin më lart"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Lëvize telefonin më poshtë"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Ngrije telefonin më lart"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Ule telefonin më poshtë"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Lëvize telefonin në të majtën tënde"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Lëvize telefonin në të djathtën tënde"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Shiko më drejt në pajisjen tënde."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Fytyra jote nuk mund të shihet. Mbaje telefonin në nivelin e syve."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Fytyra s\'mund të shihet. Mbaje telefonin në nivelin e syve."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Ka shumë lëvizje. Mbaje telefonin të palëvizur."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Regjistroje përsëri fytyrën tënde."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Fytyra nuk mund të njihet. Provo sërish."</string>
@@ -658,7 +662,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Modeli i fytyrës nuk krijohet. Provo sërish."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"U zbuluan syze të errëta. Fytyra jote duhet të jetë plotësisht e dukshme."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"U zbulua mbulim i fytyrës. Fytyra jote duhet të jetë plotësisht e dukshme."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Fytyra është e mbuluar. Duhet të jetë plotësisht e dukshme."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>
@@ -1247,7 +1251,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Aplikacionet e fillimit."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Po përfundon nisjen."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Shtype butonin e energjisë — zakonisht, kjo e fik ekranin.\n\nProvo të trokasësh lehtë ndërkohë që konfiguron gjurmën e gishtit."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Përfundo konfigurimin; fik ekranin"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Përfundo konfigurimin duke fikur ekranin"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Çaktivizo"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Të vazhdohet verifikimi i gjurmës?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Shtype butonin e energjisë — zakonisht, kjo e fik ekranin.\n\nProvo të trokasësh lehtë për të verifikuar gjurmën e gishtit."</string>
@@ -1685,9 +1689,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Do të lejosh që <xliff:g id="SERVICE">%1$s</xliff:g> të ketë kontroll të plotë të pajisjes sate?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrolli i plotë është i përshtatshëm për aplikacionet që të ndihmojnë me nevojat e qasshmërisë, por jo për shumicën e aplikacioneve."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Shiko dhe kontrollo ekranin"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ai mund të lexojë të gjithë përmbajtjen në ekran dhe të shfaqë përmbajtjen mbi aplikacione të tjera."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Mund të lexojë të gjithë përmbajtjen në ekran dhe të shfaqë përmbajtjen mbi aplikacione të tjera."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Shiko dhe kryej veprimet"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ai mund të monitorojë ndërveprimet me një aplikacion ose një sensor hardueri dhe të ndërveprojë me aplikacionet në emrin tënd."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Mund të monitorojë ndërveprimet me një aplikacion ose një sensor hardueri dhe të ndërveprojë me aplikacionet në emrin tënd."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Lejo"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuzo"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Trokit te një veçori për të filluar ta përdorësh atë:"</string>
@@ -1704,7 +1708,7 @@
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Shumë më i zbehtë"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Shtyp dhe mbaj shtypur të dy butonat e volumit për tre sekonda për të përdorur <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Shtyp dhe mbaj shtypur të dyja tastet e volumit për tri sekonda për të përdorur <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Zgjidh një funksion për ta përdorur kur troket butonin e qasshmërisë:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Zgjidh një veçori për ta përdorur me gjestin e qasshmërisë (rrëshqit shpejt lart nga fundi i ekranit me dy gishta):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Zgjidh një veçori për ta përdorur me gjestin e qasshmërisë (rrëshqit shpejt lart nga fundi i ekranit me tre gishta):"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nuk mund të qasesh në kamerën e tabletit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Nuk mund të kesh qasje në të gjatë transmetimit. Provoje në telefon më mirë."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Parazgjedhja e sistemit"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"KARTA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

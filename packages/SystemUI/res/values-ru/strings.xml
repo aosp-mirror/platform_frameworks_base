@@ -805,7 +805,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"удалить из избранного"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Переместить на позицию <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Элементы управления"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Выберите виджеты управления, которые будут доступны в меню \"Быстрые настройки\"."</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Какие виджеты показывать в Быстрых настройках?"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Чтобы изменить порядок виджетов, перетащите их."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Все виджеты управления удалены."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Изменения не сохранены."</string>
@@ -820,7 +820,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Разрешить показывать устройства и управлять ими на заблокированном экране?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Вы можете добавить элементы управления внешними устройствами на заблокированный экран.\n\nПриложение на вашем устройстве может разрешать управление некоторыми устройствами с заблокированного экрана.\n\nИзменить параметры можно в любое время в настройках."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Управлять устройствами на заблокированном экране?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Вы можете управлять некоторыми устройствами с заблокированного телефона или планшета.\n\nКакими именно устройствами можно управлять, зависит от приложения на вашем устройстве."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Некоторыми устройствами можно управлять без разблокировки экрана телефона или планшета.\n\nИх список зависит от того, какое у вас сопутствующее приложение."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Не сейчас"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Да"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-код содержит буквы или символы"</string>
@@ -862,7 +862,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Не удалось загрузить статус."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Ошибка. Повторите попытку."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Добавить виджеты"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Изменить виджеты"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Изменить настройки"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Добавление устройств вывода"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Группа"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Выбрано 1 устройство"</string>

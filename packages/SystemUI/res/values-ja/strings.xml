@@ -98,8 +98,8 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"録画中に機密情報が画面に表示されたりデバイスで再生されたりした場合、Android システムでキャプチャされることがあります。これには、パスワード、お支払い情報、写真、メッセージ、音声などが含まれます。"</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"画面全体を録画する"</string>
     <string name="screenrecord_option_single_app" msgid="5954863081500035825">"1 つのアプリを録画する"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"録画中は、画面に表示されている内容やデバイスで再生されている内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"アプリの録画中は、そのアプリで表示されている内容や再生されている内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"録画中は、表示や再生されている内容に Android がアクセスできます。パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"アプリの録画中は、そのアプリで表示されている内容や再生されている内容に Android がアクセスできます。パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
     <string name="screenrecord_start_recording" msgid="348286842544768740">"録画を開始"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"録音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"デバイスの音声"</string>
@@ -241,8 +241,8 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ユーザー"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"インターネット"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"ネットワークが利用できます"</string>
-    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ネットワークは利用できません"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"利用できるネットワークがあります"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"利用できるネットワークがありません"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Wi-Fiネットワークを利用できません"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"ON にしています…"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"画面のキャスト"</string>
@@ -367,7 +367,7 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"ユーザーを削除しますか？"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"このユーザーのアプリとデータがすべて削除されます。"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"削除"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面上で表示または再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示される情報、またはキャスト先に転送される情報すべてにアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
@@ -742,7 +742,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g>でデータやインターネットにアクセスできなくなります。インターネットには Wi-Fi からのみ接続できます。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"携帯通信会社"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> に戻しますか？"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"利用可能な場合でも、モバイルデータを利用するよう自動的に切り替わることはありません"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"利用可能な場合でも、モバイルデータ通信に自動的に切り替わることはありません"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"キャンセル"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"切り替える"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"アプリが許可リクエストを隠しているため、設定側でユーザーの応答を確認できません。"</string>
@@ -954,7 +954,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi に自動接続しません"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"すべて表示"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ネットワークを変更するにはイーサネット接続を解除してください"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"デバイスの機能向上のため、アプリやサービスは、Wi-Fi が OFF の場合でも、いつでも Wi-Fi ネットワークをスキャンできます。この設定は Wi-Fi スキャンの設定で変更できます。"<annotation id="link">"変更"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"デバイスの利便性向上のため、アプリやサービスは、Wi-Fi が OFF の場合でもいつでも Wi-Fi ネットワークをスキャンすることができます。この動作は Wi-Fi スキャンの設定で変更できます。"<annotation id="link">"変更"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"機内モードを OFF にする"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> が以下のタイルをクイック設定に追加しようとしています"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"タイルを追加"</string>

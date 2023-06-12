@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Caller ID defaults to not restricted. Next call: Not restricted"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Service not provisioned."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"You can\'t change the caller ID setting."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Switched data to <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"You can change this at any time in Settings"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"No mobile data service"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Emergency calling unavailable"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"No voice service"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Allows the app to get preferred NFC payment service information, such as registered aids and route destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"control Near-Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Allows the app to communicate with Near Field Communication (NFC) tags, cards and readers."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element transaction event"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Allows the app to receive information about transactions happening on a Secure Element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"disable your screen lock"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Allows the app to disable the keylock and any associated password security. For example, the phone disables the keylock when receiving an incoming phone call, then re-enables the keylock when the call is finished."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"request screen lock complexity"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Can’t access the tablet’s camera from your <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"This can’t be accessed while streaming. Try on your phone instead."</string>
     <string name="system_locale_title" msgid="711882686834677268">"System default"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"CARD <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

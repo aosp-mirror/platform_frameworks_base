@@ -230,7 +230,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Naslouchátka"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Zapínání…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatické otáčení"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otočení obrazovky"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otáčení obrazovky"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Poloha"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Spořič obrazovky"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Přístup k fotoaparátu"</string>
@@ -253,7 +253,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Jas"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Převrácení barev"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Korekce barev"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Správa uživatelů"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Spravovat uživatele"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hotovo"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Zavřít"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Připojeno"</string>
@@ -364,7 +364,7 @@
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Přidáním nového uživatele ukončíte režim hosta a smažete všechny aplikace a data z aktuální relace hosta."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Bylo dosaženo limitu uživatelů"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Lze vytvořit jen jednoho uživatele.}few{Přidat můžete maximálně # uživatele.}many{Přidat můžete maximálně # uživatele.}other{Přidat můžete maximálně # uživatelů.}}"</string>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"Odstranit uživatele?"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"Odebrat uživatele?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Veškeré aplikace a data tohoto uživatele budou smazána."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Odstranit"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mít přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze za řízení při nahrávání nebo odesílání. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
@@ -897,7 +897,7 @@
     <string name="select_conversation_text" msgid="3376048251434956013">"Klepnutím na konverzaci ji přidáte na plochu"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Tady se zobrazí vaše nedávné konverzace"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritní konverzace"</string>
-    <string name="recent_conversations" msgid="8531874684782574622">"Poslední konverzace"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Nedávné konverzace"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"Před <xliff:g id="DURATION">%1$s</xliff:g> dny"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"Před týdnem"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"Před 2 týdny"</string>
@@ -917,11 +917,11 @@
     <string name="audio_status" msgid="4237055636967709208">"Poslouchá"</string>
     <string name="game_status" msgid="1340694320630973259">"Hraji hru"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Přátelé"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Pojďme chatovat!"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Proberem to večer?"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah se brzy zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Zobrazit poslední zprávy, zmeškané hovory a aktualizace stavu"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Zobrazte si poslední zprávy, zmeškané hovory a aktualizace stavu"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konverzace"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Pozastaveno funkcí Nerušit"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> posílá zprávu: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
@@ -982,7 +982,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Náhled obrázku"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"upravit"</string>
     <string name="add" msgid="81036585205287996">"Přidat"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Správa uživatelů"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Spravovat uživatele"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Toto oznámení nepodporuje přetažení na rozdělenou obrazovku."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Síť Wi‑Fi není k dispozici"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritní režim"</string>

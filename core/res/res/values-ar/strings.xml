@@ -77,6 +77,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: غير محظور"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"لا يمكنك تغيير إعداد معرّف المتصل."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"تم تبديل البيانات إلى <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"يمكنك تغيير هذه الميزة في أي وقت في الإعدادات."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"لا تتوفّر خدمة بيانات جوّال."</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"لا تتوفّر مكالمات طوارئ."</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"لا تتوفر خدمة صوتية"</string>
@@ -552,6 +554,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏يسمح هذا الإذن للتطبيق بالحصول على معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل، مثلاً المساعدات المسجّلة ووجهة المسار."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"التحكم في اتصال الحقل القريب"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏للسماح للتطبيق بالاتصال بعلامات الاتصال قريب المدى (NFC)، والبطاقات وبرامج القراءة."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"حدث معاملة \"عنصر آمن\""</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"يسمح هذا الإذن للتطبيق بتلقّي معلومات حول المعاملات التي تتم على \"عنصر آمن\"."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"إيقاف قفل الشاشة"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"للسماح للتطبيق بإيقاف تأمين المفاتيح وأي أمان لكلمة مرور مرتبطة. على سبيل المثال، يعطل الهاتف تأمين المفاتيح عند استقبال مكالمة هاتفية واردة، ثم يعيد تفعيل تأمين المفاتيح عند انتهاء المكالمة."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"طلب معرفة مستوى صعوبة قفل الشاشة"</string>
@@ -585,17 +589,17 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"خطأ في المصادقة"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"استخدام قفل الشاشة"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"أدخِل قفل الشاشة للمتابعة"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على المستشعر"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على أداة الاستشعار"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"يتعذّر التعرّف على بصمة الإصبع. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"يُرجى تنظيف مستشعر بصمات الإصبع ثم إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"تنظيف المستشعر ثم إعادة المحاولة"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على المستشعر"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على أداة الاستشعار"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"تم تحريك الإصبع ببطء شديد. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"يمكنك تجربة بصمة إصبع أخرى."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"الصورة ساطعة للغاية."</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"تم رصد الضغط على زر التشغيل."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"حاوِل تعديل بصمة الإصبع."</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"غيِّر موضع إصبعك قليلاً في كل مرة."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"غيِّر موضع إصبعك قليلاً في كل مرة"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"لم يتمّ التعرّف على البصمة."</string>
@@ -637,24 +641,24 @@
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"لا يمكن استخدام مستشعر بصمات الإصبع"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"يُرجى التواصل مع مقدِّم خدمات إصلاح."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"يتعذّر إنشاء نموذج الوجه. يُرجى إعادة المحاولة."</string>
-    <string name="face_acquired_too_bright" msgid="8070756048978079164">"ساطع للغاية. تجربة مستوى سطوع أقلّ."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"الإضاءة غير كافية."</string>
+    <string name="face_acquired_too_bright" msgid="8070756048978079164">"ساطع للغاية. يُرجى تجربة مستوى سطوع أقلّ"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"الإضاءة غير كافية"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"يُرجى إبعاد الهاتف عنك."</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"يُرجى تقريب الهاتف منك."</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"يُرجى رفع الهاتف للأعلى."</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"يُرجى خفض الهاتف للأسفل."</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"يُرجى تحريك الهاتف جهة اليسار."</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"يُرجى تحريك الهاتف جهة اليمين."</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"يُرجى تقريب الهاتف منك"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"يُرجى رفع الهاتف للأعلى"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"يُرجى خفض الهاتف للأسفل"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"يُرجى تحريك الهاتف لجهة اليسار"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"يُرجى تحريك الهاتف لجهة اليمين"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"يُرجى النظر إلى جهازك مباشرة أكثر."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"تتعذّر رؤية وجهك. ارفع هاتفك إلى مستوى العينَين."</string>
-    <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حركة أكثر من اللازم يُرجى حمل بدون حركة."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"ارفع هاتفك إلى مستوى العينَين لأنّه تتعذّر رؤية وجهك"</string>
+    <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حركة أكثر من اللازم. يُرجى حمل الهاتف بثبات."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"يُرجى إعادة تسجيل وجهك."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"يتعذّر التعرّف على الوجه. يُرجى إعادة المحاولة."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"غيِّر موضع رأسك قليلاً."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"يُرجى النظر إلى هاتفك مباشرةً."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"يُرجى النظر إلى هاتفك مباشرةً."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"يُرجى النظر إلى هاتفك مباشرةً."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"عليك بإزالة أي شيء يُخفي وجهك."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"يُرجى النظر إلى هاتفك مباشرةً"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"يُرجى النظر إلى هاتفك مباشرةً"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"يُرجى النظر إلى هاتفك مباشرةً"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"يجب إزالة أي شيء يُخفي وجهك"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"يُرجى تنظيف الجزء العلوي من الشاشة، بما في ذلك الشريط الأسود."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -662,7 +666,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"يتعذّر إنشاء نموذج الوجه. يُرجى إعادة المحاولة."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"تمّ رصد نظارة شمسية. يجب أن يكون وجهك ظاهرًا بالكامل."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"تمّ رصد قناع على الوجه. يجب أن يكون وجهك ظاهرًا بالكامل."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"تمّ رصد قناع على الوجه في حين يجب ظهور وجهك بالكامل"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"يتعذّر التحقُّق من الوجه. الجهاز غير مُتاح."</string>
@@ -1251,7 +1255,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"جارٍ إعادة التشغيل."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة أثناء إعداد بصمتك."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"لإنهاء عملية الإعداد، أوقِف الشاشة."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"لإيقاف عملية الإعداد، أغلِق الشاشة."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"إيقاف"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"هل تريد مواصلة تأكيد بصمة إصبعك؟"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة لتأكيد بصمة إصبعك."</string>
@@ -1386,7 +1390,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"مشاركة"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"رفض"</string>
     <string name="select_input_method" msgid="3971267998568587025">"اختيار أسلوب الإدخال"</string>
-    <string name="show_ime" msgid="6406112007347443383">"استمرار عرضها على الشاشة أثناء نشاط لوحة المفاتيح الفعلية"</string>
+    <string name="show_ime" msgid="6406112007347443383">"استمرار عرضها على الشاشة عندما تكون لوحة المفاتيح الخارجية متصلة"</string>
     <string name="hardware" msgid="1800597768237606953">"إظهار لوحة المفاتيح الافتراضية"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"إعداد لوحة المفاتيح الفعلية"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"انقر لاختيار لغة وتنسيق"</string>
@@ -1686,12 +1690,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"عدم التفعيل"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"مفعّل"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"غير مفعّل"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"هل تريد السماح لخدمة <xliff:g id="SERVICE">%1$s</xliff:g> بالتحكّم الكامل في جهازك؟"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"إنّ التحكّم الكامل ليس ملائمًا لمعظم التطبيقات، باستثناء التطبيقات المعنية بسهولة الاستخدام."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"هل تريد السماح لـ \"<xliff:g id="SERVICE">%1$s</xliff:g>\" بالتحكّم الكامل في جهازك؟"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"إنّ التحكّم الكامل ليس ملائمًا لمعظم التطبيقات، باستثناء التطبيقات المعنية بتسهيل الاستخدام."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"قراءة محتوى الشاشة والتحكم به"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"يمكنها قراءة كل المحتوى على الشاشة وعرض المحتوى فوق تطبيقات أخرى."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"عرض الإجراءات وتنفيذها"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"يمكنها تتبّع تفاعلاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"قد يؤدي ذلك إلى السماح للميزة بتتبّع تفاعلاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"سماح"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رفض"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>
@@ -2294,4 +2298,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"يتعذّر الوصول إلى كاميرا الجهاز اللوحي من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"لا يمكن الوصول إلى هذا المحتوى أثناء البث. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
     <string name="system_locale_title" msgid="711882686834677268">"الإعداد التلقائي للنظام"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"‏رقم البطاقة ‎<xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

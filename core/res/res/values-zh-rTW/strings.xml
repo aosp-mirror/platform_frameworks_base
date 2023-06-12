@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"預設顯示本機號碼，下一通電話也繼續顯示。"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"無法提供此服務。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"你無法變更來電顯示設定。"</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"行動數據已切換至「<xliff:g id="CARRIERDISPLAY">%s</xliff:g>」"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"你隨時可以前往「設定」變更這項設定"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"沒有行動數據傳輸服務"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"無法撥打緊急電話"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"無法使用語音通話服務"</string>
@@ -421,10 +423,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"允許應用程式修改平板電腦的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允許應用程式修改 Android TV 裝置的通話記錄，包括來電和撥出電話相關資料。惡意應用程式可能會藉此清除或修改你的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
-    <string name="permlab_bodySensors" msgid="662918578601619569">"在使用期間可存取人體感應器資料，例如心跳速率"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心跳速率"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"在使用期間可存取人體感應器資料，例如心率"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心率、體溫和血氧比例。"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心率"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心率、體溫和血氧比例。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳細資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"這個應用程式可讀取所有儲存在 Android TV 裝置上的日曆活動，以及共用或儲存日曆資料。"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得首選 NFC 付費服務資訊，例如已註冊的輔助工具和路線目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"允許應用程式與近距離無線通訊 (NFC) 電子感應標籤、卡片及感應器進行通訊。"</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"安全元件交易事件"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"允許應用程式接收在安全元件上發生的交易相關資訊。"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"停用螢幕鎖定"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性功能。例如：手機收到來電時停用按鍵鎖定，通話結束後重新啟用按鍵鎖定。"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"要求螢幕鎖定的複雜度"</string>
@@ -1672,7 +1676,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量，比建議的音量更大聲嗎？\n\n長時間聆聽高分貝音量可能會使你的聽力受損。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙捷徑嗎？"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量按鈕 3 秒，就能啟動無障礙功能。"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量鍵 3 秒，就能啟動無障礙功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要開啟無障礙功能快速鍵嗎？"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按住音量調高鍵和調低鍵數秒，即可開啟無障礙功能。這麼做可能會改變裝置的運作方式。\n\n目前的功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n你可以在 [設定] &gt; [無障礙設定] 中變更選取的功能。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
@@ -1683,7 +1687,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要將裝置的完整控制權授予「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，可以將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，建議可將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看及控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容及在其他應用程式上顯示內容。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看及執行動作"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取平板電腦的相機"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"串流播放時無法存取這項內容，請改用手機。"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"SIM 卡 <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

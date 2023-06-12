@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="3701846017049540910">"အခွံ"</string>
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"ချွတ်ယွင်းမှု အစီရင်ခံစာများ"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"ချွတ်ယွင်းမှုအစီရင်ခံချက် <xliff:g id="ID">#%d</xliff:g> ကိုထုတ်နေပါသည်"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"ချွတ်ယွင်းမှုအစီရင်ခံချက် <xliff:g id="ID">#%d</xliff:g> ကိုရယူထားပြီးပါပြီ"</string>

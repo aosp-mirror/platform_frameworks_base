@@ -243,7 +243,7 @@
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internett"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Tilgjengelige nettverk"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nettverk er utilgjengelige"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Ingen tilgjengelige Wifi-nettverk"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Ingen tilgjengelige wifi-nettverk"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Slår på …"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"Skjermcasting"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Casting"</string>
@@ -296,9 +296,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vil du oppheve blokkeringen av enhetsmikrofonen?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Vil du oppheve blokkeringen av enhetskameraet?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Vil du oppheve blokkeringen av enhetskameraet og -mikrofonen?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Dette opphever blokkeringen av tilgang for alle apper og tjenester som har tillatelse til å bruke mikrofonen."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Dette opphever blokkeringen av tilgang for alle apper og tjenester som har tillatelse til å bruke kameraet."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Dette opphever blokkeringen av tilgang for alle apper og tjenester som har tillatelse til å bruke kameraet eller mikrofonen."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Dette gjenoppretter tilgangen for alle apper og tjenester som har tillatelse til å bruke mikrofonen."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Dette gjenoppretter tilgangen for alle apper og tjenester som har tillatelse til å bruke kameraet."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Dette gjenoppretter tilgangen for alle apper og tjenester som har tillatelse til å bruke kameraet eller mikrofonen."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofonen er blokkert"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kameraet er blokkert"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Mikrofonen og kameraet er blokkert"</string>
@@ -742,7 +742,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du får ikke tilgang til data eller internett via <xliff:g id="CARRIER">%s</xliff:g>. Internett er bare tilgjengelig via Wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"operatøren din"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Vil du bytte tilbake til <xliff:g id="CARRIER">%s</xliff:g>?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Det byttes ikke mobildataoperatør automatisk basert på tilgjengelighet"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobildataoperatør byttes ikke automatisk basert på tilgjengelighet"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Nei takk"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ja, bytt"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Fordi en app skjuler tillatelsesforespørselen, kan ikke Innstillinger bekrefte svaret ditt."</string>
@@ -954,7 +954,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wifi kobles ikke til automatisk inntil videre"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Se alle"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"For å bytte nettverk, koble fra Ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter Wifi-nettverk når som helst – også når Wifi er slått av. Du kan endre dette i innstillingene for wifi-skanning. "<annotation id="link">"Endre"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter wifi-nettverk når som helst – også når wifi er slått av. Du kan endre dette i innstillingene for wifi-skanning. "<annotation id="link">"Endre"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Slå av flymodus"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vil legge til denne brikken i Hurtiginnstillinger"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Legg til brikke"</string>

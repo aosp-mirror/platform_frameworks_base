@@ -75,6 +75,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Налады ідэнтыфікатару АВН па змаўчанні: не абмяжавана. Наступны выклік: не абмежавана"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Служба не прадастаўляецца."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Вы не можаце змяніць налады ідэнтыфікатара абанента, якi тэлефануе."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Мабільны трафік пераключаны на аператара \"<xliff:g id="CARRIERDISPLAY">%s</xliff:g>\""</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Вы можаце змяніць гэта ў любы час у Наладах"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Мабільная перадача даных недаступная"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Экстранныя выклікі недаступныя"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Няма сэрвісу галасавых выклікаў"</string>
@@ -550,6 +552,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дазваляе праграме атрымаць доступ да інфармацыі пра прыярытэтны сэрвіс аплаты NFC, напрыклад зарэгістраваныя ідэнтыфікатары праграм і маршруты адпраўкі даных."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"кантроль Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дазваляе прыкладаннzv спалучацца з тэгамі, картамі і счытваючымі прыладамі Near Field Communication (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Трасанкцыі з выкарыстаннем ахоўнага элемента"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Праграма зможа атрымліваць інфармацыю пра трансакцыі, якія адбываюцца з выкарыстаннем ахоўнага элемента."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"адключэнне блакiроўкi экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дазваляе прыкладанням адключаць блакiроўку клавіятуры і любыя сродкі абароны, звязаныя з паролем. Прыкладам гэтага з\'яўляецца адключэнне тэлефонам блакiроўкi клавіятуры пры атрыманні ўваходнага выкліку і паўторнае ўключэнне блакiроўкi клавіятуры, калі выклік завершаны."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запытваць узровень складанасці блакіроўкі экрана"</string>
@@ -631,7 +635,7 @@
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Каб выкарыстоўваць распазнаванне твару, уключыце "<b>"доступ да камеры"</b>" праз раздзел \"Налады &gt; Прыватнасць\""</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Наладзьце дадатковыя спосабы разблакіроўкі"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Націсніце, каб дадаць адбітак пальца"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Разблакіраванне адбіткам пальца"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Разблакіроўка адбіткам пальца"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не ўдалося скарыстаць сканер адбіткаў пальцаў"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Звярніцеся ў сэрвісны цэнтр."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Не ўдалося стварыць мадэль твару. Паўтарыце."</string>
@@ -1855,8 +1859,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Абноўлены вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Выдалены вашым адміністратарам"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"У рэжыме эканоміі зараду ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"У рэжыме эканоміі зараду ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"У рэжыме энергазберажэння ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"У рэжыме энергазберажэння ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"У рэжыме \"Эканомія трафіка\" фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Уключыць"</string>
@@ -2292,4 +2296,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не ўдалося атрымаць доступ да камеры планшэта з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Не ўдаецца атрымаць доступ у час перадачы плынню. Паспрабуйце скарыстаць тэлефон."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Стандартная сістэмная налада"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"КАРТА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

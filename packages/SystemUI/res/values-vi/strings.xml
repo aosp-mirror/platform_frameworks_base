@@ -234,7 +234,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Vị trí"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Trình bảo vệ màn hình"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Truy cập máy ảnh"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Truy cập micrô"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Quyền truy cập micrô"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Được phép"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bị chặn"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Thiết bị phương tiện"</string>
@@ -296,8 +296,8 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Bỏ chặn micrô của thiết bị?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Bỏ chặn máy ảnh của thiết bị?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Bỏ chặn máy ảnh và micrô của thiết bị?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng micrô của bạn."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh của bạn."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng micrô của bạn."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng máy ảnh của bạn."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh hoặc micrô của bạn."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Micrô bị chặn"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Máy ảnh bị chặn"</string>
@@ -503,7 +503,7 @@
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"Trình quét mã QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Đang cập nhật"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ máy bay"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ trên máy bay"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
     <string name="alarm_template" msgid="2234991538018805736">"lúc <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"vào <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -805,9 +805,9 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"bỏ yêu thích"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Di chuyển tới vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn các tuỳ chọn điều khiển để truy cập từ trình đơn Cài đặt nhanh"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các tùy chọn điều khiển"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Đã xóa tất cả tùy chọn điều khiển"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn những tuỳ chọn điều khiển bạn muốn thêm vào trình đơn Cài đặt nhanh"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các chế độ điều khiển"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Đã xóa tất cả chế độ điều khiển"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Chưa lưu các thay đổi"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Xem ứng dụng khác"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Không tải được các chức năng điều khiển. Hãy kiểm tra ứng dụng <xliff:g id="APP">%s</xliff:g> để đảm bảo rằng thông tin cài đặt của ứng dụng chưa thay đổi."</string>
@@ -832,7 +832,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Vuốt để xem thêm"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Đang tải các đề xuất"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Nội dung nghe nhìn"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Ẩn chế độ điều khiển nội dung nghe nhìn này cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Ẩn tính năng điều khiển này cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Không thể ẩn phiên phát nội dung nghe nhìn hiện tại."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ẩn"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Tiếp tục"</string>
@@ -861,8 +861,8 @@
     <string name="controls_open_app" msgid="483650971094300141">"Mở ứng dụng"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Không tải được trạng thái"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Lỗi, hãy thử lại"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Thêm các tùy chọn điều khiển"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Chỉnh sửa tùy chọn điều khiển"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Thêm tuỳ chọn điều khiển"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Chỉnh sửa chế độ điều khiển"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Thêm thiết bị đầu ra"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Nhóm"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Đã chọn 1 thiết bị"</string>
@@ -960,10 +960,10 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Thêm ô"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Không thêm ô"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Chọn người dùng"</string>
-    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{Ứng dụng # đang hoạt động}other{Ứng dụng # đang hoạt động}}"</string>
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# ứng dụng đang hoạt động}other{# ứng dụng đang hoạt động}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Thông tin mới"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ứng dụng đang hoạt động"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Các ứng dụng này vẫn hoạt động và đang chạy ngay cả khi bạn không sử dụng chúng. Việc này giúp cải thiện các chức năng nhưng đồng thời cũng có thể ảnh hưởng đến thời lượng pin."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Những ứng dụng sau vẫn hoạt động và chạy ngay cả khi bạn không sử dụng chúng. Việc này giúp cải thiện các chức năng nhưng đồng thời cũng có thể ảnh hưởng đến thời lượng pin."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Dừng"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Đã dừng"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Xong"</string>

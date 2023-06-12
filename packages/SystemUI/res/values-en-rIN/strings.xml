@@ -227,7 +227,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Input"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hearing Aids"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hearing aids"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Turning on…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Auto-rotate"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Auto-rotate screen"</string>
@@ -743,7 +743,7 @@
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"your operator"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Switch back to <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobile data won\'t automatically switch based on availability"</string>
-    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"No thanks"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"No, thanks"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Yes, switch"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Because an app is obscuring a permission request, Settings can’t verify your response."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Allow <xliff:g id="APP_0">%1$s</xliff:g> to show <xliff:g id="APP_2">%2$s</xliff:g> slices?"</string>
@@ -876,7 +876,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Available devices for audio output."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers &amp; displays"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers and displays"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"How broadcasting works"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"People near you with compatible Bluetooth devices can listen to the media that you\'re broadcasting"</string>
@@ -895,7 +895,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Open conversation"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Conversation widgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tap a conversation to add it to your home screen"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Your recent conversations will show up here"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Your recent conversations will show here"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Priority conversations"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Recent conversations"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> days ago"</string>

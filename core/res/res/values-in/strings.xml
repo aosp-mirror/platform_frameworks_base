@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID penelepon diatur default ke tidak dibatasi. Panggilan selanjutnya: Tidak dibatasi"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Layanan tidak diperlengkapi."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Anda tidak dapat mengubah setelan ID penelepon."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Mengalihkan data seluler ke <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Anda dapat mengubahnya kapan saja di Setelan"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Tidak ada layanan data seluler"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Panggilan darurat tidak tersedia"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Tidak ada layanan panggilan suara"</string>
@@ -435,7 +437,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Aplikasi ini dapat menambahkan, menghapus, atau mengubah acara kalender di ponsel. Aplikasi ini dapat mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa memberi tahu pemilik."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"akses perintah penyedia lokasi ekstra"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi akurat hanya saat di latar depan"</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi presisi hanya saat di latar depan"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aplikasi ini bisa mendapatkan lokasi pasti Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi. Ini dapat meningkatkan penggunaan baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"akses perkiraan lokasi hanya saat berada di latar depan"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aplikasi ini bisa mendapatkan perkiraan lokasi Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi."</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Mengizinkan aplikasi untuk mendapatkan informasi layanan pembayaran NFC pilihan seperti bantuan terdaftar dan tujuan rute."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrol NFC"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Mengizinkan apl berkomunikasi dengan tag, kartu, dan alat pembaca Komunikasi Nirkabel Jarak Dekat (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Peristiwa transaksi Elemen Pengaman"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Mengizinkan aplikasi menerima informasi tentang transaksi yang dilakukan pada Elemen Pengaman."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"nonaktifkan kunci layar Anda"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Memungkinkan aplikasi menonaktifkan kunci tombol dan keamanan sandi apa pun yang terkait. Misalnya, ponsel menonaktifkan kunci tombol saat menerima panggilan telepon masuk, kemudian mengaktifkan kembali kunci tombol ketika panggilan selesai."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"meminta kompleksitas kunci layar"</string>
@@ -637,12 +641,12 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Cahaya tidak cukup"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Jauhkan ponsel"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Dekatkan ponsel"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Gerakkan ponsel ke atas"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Gerakkan ponsel ke bawah"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Gerakkan ponsel ke kiri Anda"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Gerakkan ponsel ke kanan Anda"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Geser ponsel ke atas"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Geser ponsel ke bawah"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Geser ponsel ke kiri"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Geser ponsel ke kanan"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lihat langsung ke perangkat."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Tidak dapat melihat wajah Anda. Pegang ponsel sejajar dengan mata."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Wajah tidak terlihat. Pegang ponsel sejajar mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Terlalu banyak gerakan. Stabilkan ponsel."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Daftarkan ulang wajah Anda."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Tidak dapat mengenali wajah. Coba lagi."</string>
@@ -650,15 +654,15 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Lihat lebih lurus ke arah ponsel"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Lihat lebih lurus ke arah ponsel"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Lihat lebih lurus ke arah ponsel"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Singkirkan apa saja yang menutupi wajah Anda."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Singkirkan semua yang menutupi wajah."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Bersihkan bagian atas layar, termasuk kotak hitam"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
     <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Tidak dapat membuat model wajah Anda. Coba lagi."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Kacamata hitam terdeteksi. Wajah Anda harus terlihat sepenuhnya."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Penutup wajah terdeteksi. Wajah Anda harus terlihat sepenuhnya."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Kacamata hitam terdeteksi. Wajah harus terlihat sepenuhnya."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Penutup wajah terdeteksi. Wajah harus terlihat sepenuhnya."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tidak dapat memverifikasi wajah. Hardware tidak tersedia."</string>
@@ -1608,7 +1612,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Ponsel"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Pengeras suara dok"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Speaker dok"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Perangkat Eksternal"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Headphone"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1682,7 +1686,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Jangan aktifkan"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AKTIF"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"NONAKTIF"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> memiliki kontrol penuh atas perangkat Anda?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> mengontrol perangkat Anda secara penuh?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang mendukung kebutuhan aksesibilitas Anda, tetapi tidak untuk sebagian besar aplikasi."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengontrol layar"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Voice Access dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
@@ -1855,7 +1859,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Oke"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Penghemat Baterai akan mengaktifkan Tema gelap dan membatasi atau menonaktifkan aktivitas latar belakang, beberapa efek visual, fitur tertentu, dan beberapa koneksi jaringan."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Penghemat Baterai akan mengaktifkan Tema gelap dan membatasi atau menonaktifkan aktivitas latar belakang, beberapa efek visual, fitur tertentu, dan beberapa koneksi jaringan."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah diketuk."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya, gambar hanya akan ditampilkan setelah diketuk."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Aktifkan Penghemat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktifkan"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Selama 1 menit (hingga {formattedTime})}other{Selama # menit (hingga {formattedTime})}}"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet dari <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Konten ini tidak dapat diakses saat melakukan streaming. Coba di ponsel."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Default sistem"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"KARTU <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

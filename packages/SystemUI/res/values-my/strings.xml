@@ -119,7 +119,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"နောက်သို့"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ပင်မစာမျက်နှာ"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"မီနူး"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"အများသုံးစွဲနိုင်မှု"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"အများသုံးနိုင်မှု"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"မျက်နှာပြင် လှည့်ရန်"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ခြုံကြည့်မှု။"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ကင်မရာ"</string>
@@ -218,7 +218,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"ဖန်သားပြင် အနေအထားက အလျားလိုက်အဖြစ် ပုံသေ လုပ်ထားပါသည်"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"ဖန်သားပြင် အနေအထားက ဒေါင်လိုက်အဖြစ် ပုံသေ လုပ်ထားပါသည်"</string>
     <string name="dessert_case" msgid="9104973640704357717">"မုန့်ထည့်သော ပုံး"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"စခရင်နားချိန်"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"စခရင်နားချိန်ပုံ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"အီသာနက်"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"မနှောင့်ယှက်ရ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ဘလူးတုသ်"</string>
@@ -232,7 +232,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"အော်တို-လည်"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"မျက်နှာပြင်အား အလိုအလျောက်လှည့်ခြင်း"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"တည်နေရာ"</string>
-    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"စကရင်နားချိန်"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"စခရင်နားချိန်ပုံ"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"ကင်မရာသုံးခွင့်"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"မိုက်သုံးခွင့်"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ရနိုင်သည်"</string>
@@ -289,7 +289,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ကို ဖွင့်ထားသည်"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"စကရင် ရိုက်ကူးရန်"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"စခရင် ရိုက်ကူးရန်"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"စတင်ရန်"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ရပ်ရန်"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"လက်တစ်ဖက်သုံးမုဒ်"</string>
@@ -470,13 +470,13 @@
     <string name="stream_notification" msgid="7930294049046243939">"အကြောင်းကြားချက်"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"ဘလူးတုသ်"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"နှစ်လိုင်းပေါင်း အသံပေါင်းစုံ ကြိမ်နှုန်း"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"အများသုံးစွဲနိုင်မှု"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"အများသုံးနိုင်မှု"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"အသံမြည်သည်"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"တုန်ခါသည်"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"အသံတိတ်သည်"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s။ အသံပြန်ဖွင့်ရန် တို့ပါ။"</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
-    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
+    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s။ တုန်ခါခြင်းသို့ သတ်မှတ်ရန်တို့ပါ။"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s။ အသံပိတ်ရန် တို့ပါ။"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ဖုန်းခေါ်သံမုဒ်သို့ ပြောင်းရန် တို့ပါ"</string>
@@ -652,7 +652,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"အကွက်ငယ်များ ပြန်စီစဉ်ရန် ဖိပြီးဆွဲပါ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ဖယ်ရှားရန် ဤနေရာသို့ဖိဆွဲပါ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"အနည်းဆုံး <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ကွက် ရှိရမည်"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"တည်းဖြတ်ပါ"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"တည်းဖြတ်ရန်"</string>
     <string name="tuner_time" msgid="2450785840990529997">"အချိန်"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"နာရီ၊ မိနစ်နှင့် စက္ကန့်ကိုပြပါ"</item>
@@ -822,7 +822,7 @@
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"လော့ခ်မျက်နှာပြင်တွင် စက်ပစ္စည်းများ ထိန်းချုပ်မလား။"</string>
     <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"အချို့စက်များကို ဖုန်း (သို့) တက်ဘလက် လော့ခ်ဖွင့်ရန်မလိုဘဲ ထိန်းချုပ်နိုင်သည်။\n\nဤနည်းလမ်းအတိုင်း ထိန်းချုပ်နိုင်မည့်စက်များကို သင့်စက်ပစ္စည်းအက်ပ်က ဆုံးဖြတ်သည်။"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"မလိုပါ"</string>
-    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Yes"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"လုပ်ပါမည်"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ပင်နံပါတ်တွင် စာလုံး သို့မဟုတ် သင်္ကေတများပါဝင်သည်"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ကို အတည်ပြုခြင်း"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"ပင်နံပါတ် မှားနေသည်"</string>
@@ -902,7 +902,7 @@
     <string name="one_week_timestamp" msgid="4925600765473875590">"ပြီးခဲ့သော 1 ပတ်"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"ပြီးခဲ့သော 2 ပတ်"</string>
     <string name="over_one_week_timestamp" msgid="3770560704420807142">"ပြီးခဲ့သော 1 ပတ်ကျော်"</string>
-    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"ပြီးခဲ့သော 2 ပတ်ကျော်"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"ပြီးခဲ့သော ၂ ပတ်ကျော်က"</string>
     <string name="birthday_status" msgid="2596961629465396761">"မွေးနေ့"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> ၏ မွေးနေ့ ဖြစ်ပါသည်"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"မကြာမီလာမည့် မွေးနေ့"</string>
@@ -954,7 +954,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi က လောလောဆယ် အလိုအလျောက် ချိတ်ဆက်မည်မဟုတ်ပါ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"အားလုံးကြည့်ရန်"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ကွန်ရက်ပြောင်းရန် အီသာနက်ကို ချိတ်ဆက်မှုဖြုတ်ပါ"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"စက်ပစ္စည်းကို ပိုမိုကောင်းမွန်စွာ အသုံးပြုနိုင်ရန် Wi-Fi ပိတ်ထားသည့်တိုင် အက်ပ်နှင့် ဝန်ဆောင်မှုများက Wi-Fi ကွန်ရက်များကို အချိန်မရွေး စကင်ဖတ်နိုင်သည်။ ၎င်းကို Wi-Fi ရှာဖွေခြင်း ဆက်တင်များတွင် ပြောင်းနိုင်သည်။ "<annotation id="link">"ပြောင်းရန်"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Wi-Fi ပိတ်ထားသည့်တိုင် စက်ပစ္စည်းကို ပိုမိုကောင်းမွန်စွာ အသုံးပြုနိုင်ရန်အတွက် အက်ပ်နှင့် ဝန်ဆောင်မှုများက Wi-Fi ကွန်ရက်များကို အချိန်မရွေး စကင်ဖတ်နိုင်သည်။ ၎င်းကို Wi-Fi ရှာဖွေခြင်း ဆက်တင်များတွင် ပြောင်းနိုင်သည်။ "<annotation id="link">"ပြောင်းရန်"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"လေယာဉ်ပျံမုဒ်ကို ပိတ်ရန်"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> က ‘အမြန် ဆက်တင်များ’ တွင် အောက်ပါအကွက်ငယ်ကို ထည့်လိုသည်"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"အကွက်ငယ် ထည့်ရန်"</string>

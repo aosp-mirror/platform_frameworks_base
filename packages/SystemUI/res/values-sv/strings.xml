@@ -820,7 +820,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Vill du se och styra enheter på låsskärmen?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Du kan lägga till reglage att styra externa enheter med på låsskärmen.\n\nVissa enheter kan gå att styra med appen på enheten utan att du behöver låsa upp telefonen eller surfplattan.\n\nDu kan när som helst ändra detta i inställningarna."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Vill du styra enheter på låsskärmen?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Du kan styra vissa enheter utan att låsa upp telefonen eller surfplattan.\n\nVilka enheter som går att styra på det här sättet beror på appen på enheten."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Du kan styra vissa enheter utan att låsa upp telefonen eller surfplattan.\n\nVilka enheter som går att styra på det här sättet beror på enhetsappen."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Nej tack"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Ja"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Pinkoden innehåller bokstäver eller symboler"</string>
@@ -832,7 +832,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Svep om du vill se mer"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Rekommendationer läses in"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Vill du dölja detta uppspelningsreglage för <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Vill du dölja denna mediastyrning för <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Den aktuella mediesessionen kan inte döljas."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Dölj"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Återuppta"</string>
@@ -862,7 +862,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Status otillgänglig"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Fel, försök igen"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Lägg till snabbkontroller"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Redigera snabbkontroller"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Redigera kontroller"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Lägg till utgångar"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupp"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 enhet har valts"</string>

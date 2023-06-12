@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"Б"</string>
+    <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Без заглавие&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Няма телефонен номер)"</string>
@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Стандартната идентификация на повикванията е „разрешено“. За следващото обаждане тя е разрешена."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услугата не е обезпечена."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Не можете да променяте настройката за идентификация на обажданията."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Преминахте към мобилни данни от <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Можете да промените това по всяко време в „Настройки“"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Няма достъп до мобилната услуга за данни"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Няма достъп до спешните обаждания"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Няма услуга за гласови обаждания"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дава възможност на приложението да получава информация за предпочитаната услуга за плащане чрез NFC, като например регистрирани помощни средства и местоназначение."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролиране на комуникацията в близкото поле"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Събитие за транзакции в защитен елемент"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Разрешава на приложението да получава информация за транзакциите, които се осъществяват в защитен елемент."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"деактивиране на заключването на екрана ви"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"заявяване на сложност на опцията за заключване на екрана"</string>
@@ -642,7 +646,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Преместете телефона наляво"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Преместете телефона надясно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Моля, гледайте точно към устройството си."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Лицето ви не се вижда. Дръжте телефона на нивото на очите си."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Лицето не се вижда. Задръжте на нивото на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Твърде много движение. Дръжте телефона неподвижно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Моля, регистрирайте лицето си отново."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Лицето не е разпознато. Опитайте отново."</string>
@@ -1608,7 +1612,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Таблет"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевизор"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Докинг станц.: Високогов."</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Високоговорители докинг станция"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Външно устройство"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Слушалки"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1701,7 +1705,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инвертиране на цветовете"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Коригиране на цветовете"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Работа с една ръка"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Доп. затъмн."</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Допълнително затъмняване"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е изключена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"За да използвате <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, натиснете двата бутона за силата на звука и ги задръжте за 3 секунди"</string>
@@ -2050,7 +2054,7 @@
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"В регистрационните файлове за устройството се записва какво се извършва на него. Приложенията могат да използват тези регистрационни файлове, за да откриват и отстраняват проблеми.\n\nНякои регистрационни файлове за устройството може да съдържат поверителна информация, затова разрешавайте достъп до всички тях само на приложения, на които имате доверие. \n\nАко не разрешите на това приложение достъп до всички регистрационни файлове за устройството, то пак може да осъществява достъп до собствените си регистрационни файлове. Производителят на устройството може да има достъп до някои регистрационни файлове или информация на устройството ви.\n\nНаучете повече на адрес g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Да не се показва пак"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> иска да показва части от <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Редактиране"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Редакти­ране"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"При обаждания и известия устройството ще вибрира"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Обажданията и известията ще бъдат заглушени"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Промени в системата"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Няма достъп до камерата на таблета от вашия <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"До това съдържание не може да се осъществи достъп при поточно предаване. Вместо това опитайте от телефона си."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Стандартно за системата"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"КАРТА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -75,6 +75,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Skambintojo ID pagal numatytuosius nustatymus yra neapribotas. Kitas skambutis: neapribotas"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Paslauga neteikiama."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Negalima pakeisti skambinančiojo ID nustatymo."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Duomenys perjungti į „<xliff:g id="CARRIERDISPLAY">%s</xliff:g>“"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Galite tai bet kada pakeisti nustatymuose"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Duomenų paslaugos mobiliesiems nėra"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Skambučių pagalbos numeriu paslaugos nėra"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Balso skambučių paslauga neteikiama"</string>
@@ -550,6 +552,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Programai leidžiama gauti pageidaujamą ARL mokamos paslaugos informaciją, pvz., užregistruotą pagalbą ir maršrutų tikslus."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"valdyti artimo lauko perdavimą (angl. „Near Field Communication“)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Leidžiama programai perduoti artimojo lauko ryšių technologijos (ALR) žymas, korteles ir skaitymo programas."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Saugos elemento operacijos įvykis"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Leidžiama programai gauti informaciją apie operacijas, vykstančias saugos elemente."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"išjungti ekrano užraktą"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Leidžiama programai neleisti klavišo užrakto ir visos susijusios slaptažodžio apsaugos. Pvz., telefonas neleidžia klavišo užrakto priimant gaunamąjį skambutį ir pakartotinai jį įgalina, kai skambutis baigiamas."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"pateikti ekrano užrakto sudėtingumo užklausą"</string>
@@ -583,7 +587,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Autentifikuojant įvyko klaida"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Naudoti ekrano užraktą"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jei norite tęsti, įveskite ekrano užraktą"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tvirtai paspauskite jutiklį"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Stipriai paspauskite jutiklį"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Nepavyko atpažinti kontrolinio kodo. Bandykite dar kartą."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nuvalykite kontrolinio kodo jutiklį ir bandykite dar kartą"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nuvalykite jutiklį ir bandykite dar kartą"</string>
@@ -603,7 +607,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Veidas autentifikuotas, paspauskite patvirtinimo mygtuką"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Piršto antspaudo aparatinė įranga nepasiekiama."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nepavyko nustatyti kontrolinio kodo"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Baigėsi kontrolinio kodo sąrankos skirtasis laikas. Bandykite dar kartą."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Baigėsi piršto atspaudo sąrankos skirtasis laikas. Bandykite dar kartą."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Piršto antspaudo operacija atšaukta."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Piršto antspaudo operaciją atšaukė naudotojas."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Per daug bandymų. Naudokite ekrano užraktą."</string>
@@ -636,7 +640,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Apsilankykite pas taisymo paslaugos teikėją."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nepavyko sukurti veido modelio. Band. dar kartą."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Per šviesu. Išbandykite mažesnį apšvietimą."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nepakanka apšvietimo"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Per tamsu"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Laikykite telefoną toliau"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Laikykite telefoną arčiau"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Laikykite telefoną aukščiau"</string>
@@ -2292,4 +2296,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nepavyko pasiekti planšetinio kompiuterio fotoaparato iš „<xliff:g id="DEVICE">%1$s</xliff:g>“"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Nepavyksta pasiekti perduodant srautu. Pabandykite naudoti telefoną."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Numatytoji sistemos vertė"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"KORTELĖ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
