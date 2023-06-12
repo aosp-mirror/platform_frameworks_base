@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ili kuondoka, telezesha kidole kutoka juu hadi chini."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Nimeelewa"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zungusha ili upate mwonekano bora"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Funga skrini iliyogawanywa ili upate mwonekano bora"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Fungua <xliff:g id="NAME">%s</xliff:g> kwenye skrini nzima ili uone maudhui kwa urahisi"</string>
     <string name="done_label" msgid="7283767013231718521">"Imekamilika"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kitelezi cha mviringo wa saa"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kitelezi cha mviringo wa dakika"</string>

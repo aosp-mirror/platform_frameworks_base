@@ -635,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"전원 누름이 감지되었습니다."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"조정 시도"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문이 인식될 때마다 손가락을 조금씩 이동하세요"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문이 인식될 때마다 손가락의 위치를 조금씩 바꾸세요"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않았습니다."</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"종료하려면 위에서 아래로 스와이프합니다."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"확인"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"카메라 미리보기 화면이 잘 보이도록 회전하세요."</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"카메라 미리보기 화면이 잘 보이도록 화면 분할을 종료하세요."</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"화면이 더 잘 보이도록 <xliff:g id="NAME">%s</xliff:g>을(를) 전체 화면에서 여세요."</string>
     <string name="done_label" msgid="7283767013231718521">"완료"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"시간 원형 슬라이더"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"분 원형 슬라이더"</string>

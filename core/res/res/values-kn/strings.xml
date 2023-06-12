@@ -1351,7 +1351,7 @@
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"ಸಮಯವನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"ದಿನಾಂಕವನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="date_time_set" msgid="4603445265164486816">"ಹೊಂದಿಸು"</string>
-    <string name="date_time_done" msgid="8363155889402873463">"ಮುಗಿದಿದೆ"</string>
+    <string name="date_time_done" msgid="8363155889402873463">"ಆಯಿತು"</string>
     <string name="perms_new_perm_prefix" msgid="6984556020395757087"><font size="12" fgcolor="#ff33b5e5">"ಹೊಸ: "</font></string>
     <string name="perms_description_app" msgid="2747752389870161996">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಮೂಲಕ ಒದಗಿಸಲಾಗಿದೆ."</string>
     <string name="no_permissions" msgid="5729199278862516390">"ಯಾವುದೇ ಅನುಮತಿಗಳ ಅಗತ್ಯವಿಲ್ಲ"</string>
@@ -1850,8 +1850,8 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"ನಿರ್ಗಮಿಸಲು, ಮೇಲಿನಿಂದ ಕೆಳಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ತಿಳಿಯಿತು"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ಅತ್ಯುತ್ತಮ ವೀಕ್ಷಣೆಗಾಗಿ ತಿರುಗಿಸಿ"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ಅತ್ಯುತ್ತಮ ವೀಕ್ಷಣೆಗಾಗಿ ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
-    <string name="done_label" msgid="7283767013231718521">"ಮುಗಿದಿದೆ"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ಅತ್ಯುತ್ತಮ ವೀಕ್ಷಣೆಗಾಗಿ <xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ತೆರೆಯಿರಿ"</string>
+    <string name="done_label" msgid="7283767013231718521">"ಆಯಿತು"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ಗಂಟೆಗಳ ವೃತ್ತಾಕಾರ ಸ್ಲೈಡರ್"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ನಿಮಿಷಗಳ ವೃತ್ತಾಕಾರ ಸ್ಲೈಡರ್"</string>
     <string name="select_hours" msgid="5982889657313147347">"ಗಂಟೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>

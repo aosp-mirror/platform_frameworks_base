@@ -627,7 +627,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Koristi zaključavanje ekrana"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Unesite zaključavanje ekrana da nastavite"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Čvrsto pritisnite senzor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Nije moguće prepoznati otisak prsta. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Otisak prsta nije prepoznat. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Očistite senzor za otisak prsta i pokušajte ponovo"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Očistite senzor i pokušajte ponovo"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Čvrsto pritisnite senzor"</string>
@@ -1851,7 +1851,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Da izađete, prevucite odozgo nadolje."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Razumijem"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotirajte za bolji prikaz"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Izađite iz podijeljenog ekrana za bolji prikaz"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otvorite aplikaciju <xliff:g id="NAME">%s</xliff:g> preko cijelog ekrana radi boljeg pregleda"</string>
     <string name="done_label" msgid="7283767013231718521">"Gotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kružni klizač za odabir sata"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kružni klizač za minute"</string>

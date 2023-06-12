@@ -191,7 +191,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ਐਪਾਂ ਤੁਹਾਡੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"ਹੋਰ ਜਾਣਨ ਲਈ ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"ਹੋਰ ਜਾਣਨ ਲਈ ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ਭੂਗੋਲਿਕ-ਘੇਰੇ ਸੰਬੰਧੀ ਸੇਵਾ"</string>
     <string name="country_detector" msgid="7023275114706088854">"ਦੇਸ਼ ਦਾ ਪਤਾ ਲਗਾਉਣ ਦੀ ਸੁਵਿਧਾ"</string>
     <string name="location_service" msgid="2439187616018455546">"ਟਿਕਾਣਾ ਸੇਵਾ"</string>
@@ -635,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਚਮਕ"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"ਪਾਵਰ ਬਟਨ ਦਬਾਏ ਜਾਣ ਦਾ ਪਤਾ ਲੱਗਿਆ ਹੈ"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ਵਿਵਸਥਿਤ ਕਰਕੇ ਦੇਖੋ"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ਹਰ ਵਾਰ ਆਪਣੀ ਉਂਗਲ ਨੂੰ ਥੋੜ੍ਹਾ ਹਿਲਾਓ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ਹਰ ਵਾਰ ਆਪਣੀ ਉਂਗਲੀ ਦੀ ਸਥਿਤੀ ਨੂੰ ਥੋੜਾ ਜਿਹਾ ਬਦਲੋ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"ਬਾਹਰ ਜਾਣ ਲਈ, ਉਪਰੋਂ ਹੇਠਾਂ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ਸਮਝ ਲਿਆ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਘੁਮਾਓ"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਤੋਂ ਬਾਹਰ ਆਓ"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ <xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਪੂਰੀ-ਸਕ੍ਰੀਨ ਵਿੱਚ ਖੋਲ੍ਹੋ"</string>
     <string name="done_label" msgid="7283767013231718521">"ਹੋ ਗਿਆ"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ਘੰਟੇ ਸਰਕੁਲਰ ਸਲਾਈਡਰ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ਮਿੰਟ ਸਰਕੁਲਰ ਸਲਾਈਡਰ"</string>
