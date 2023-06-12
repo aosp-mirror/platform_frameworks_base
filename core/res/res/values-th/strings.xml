@@ -618,7 +618,7 @@
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ปิดใช้เซ็นเซอร์ชั่วคราวแล้ว"</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ใช้เซ็นเซอร์ลายนิ้วมือไม่ได้ โปรดติดต่อผู้ให้บริการซ่อม"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"กดปุ่มเปิด/ปิดแล้ว"</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"นิ้ว <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"นิ้วมือ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ใช้ลายนิ้วมือ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ใช้ลายนิ้วมือหรือการล็อกหน้าจอ"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ใช้ลายนิ้วมือของคุณเพื่อดำเนินการต่อ"</string>

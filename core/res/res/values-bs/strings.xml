@@ -589,7 +589,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Koristi zaključavanje ekrana"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Unesite zaključavanje ekrana da nastavite"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Čvrsto pritisnite senzor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Nije moguće prepoznati otisak prsta. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Otisak prsta nije prepoznat. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Očistite senzor za otisak prsta i pokušajte ponovo"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Očistite senzor i pokušajte ponovo"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Čvrsto pritisnite senzor"</string>

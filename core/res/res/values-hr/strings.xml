@@ -163,7 +163,7 @@
     <string name="httpErrorLookup" msgid="3099834738227549349">"URL nije moguće pronaći."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Shema autentifikacije web-lokacije nije podržana."</string>
     <string name="httpErrorAuth" msgid="469553140922938968">"Autentifikacija nije moguća."</string>
-    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"Provjera autentičnosti preko proxy poslužitelja nije bila uspješna."</string>
+    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"Autentifikacija preko proxy poslužitelja nije bila uspješna."</string>
     <string name="httpErrorConnect" msgid="3295081579893205617">"Povezivanje s poslužiteljem nije moguće."</string>
     <string name="httpErrorIO" msgid="3860318696166314490">"Komunikacija s poslužiteljem nije moguća. Pokušajte ponovno kasnije."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"Veza s poslužiteljem privremeno je zaustavljena."</string>
