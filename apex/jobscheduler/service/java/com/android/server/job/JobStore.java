@@ -1304,8 +1304,8 @@ public final class JobStore {
             }
 
             String sourcePackageName = parser.getAttributeValue(null, "sourcePackageName");
-            final String namespace = parser.getAttributeValue(null, "namespace");
-            final String sourceTag = parser.getAttributeValue(null, "sourceTag");
+            final String namespace = intern(parser.getAttributeValue(null, "namespace"));
+            final String sourceTag = intern(parser.getAttributeValue(null, "sourceTag"));
 
             int eventType;
             // Read out constraints tag.
@@ -1467,7 +1467,7 @@ public final class JobStore {
             final int appBucket = JobSchedulerService.standbyBucketForPackage(sourcePackageName,
                     sourceUserId, nowElapsed);
             JobStatus js = new JobStatus(
-                    builtJob, uid, sourcePackageName, sourceUserId,
+                    builtJob, uid, intern(sourcePackageName), sourceUserId,
                     appBucket, namespace, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTime,
