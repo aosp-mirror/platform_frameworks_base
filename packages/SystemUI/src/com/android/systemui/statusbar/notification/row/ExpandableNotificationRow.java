@@ -53,6 +53,7 @@ import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -103,6 +104,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -1626,6 +1628,32 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         void logSkipAttachingKeepInParentChild(
                 NotificationEntry child,
                 NotificationEntry newParent
+        );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is removed from the
+         * NotificationChildrenContainer
+         */
+        void logRemoveTransientFromContainer(
+                NotificationEntry childEntry,
+                NotificationEntry containerEntry
+        );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is removed from the
+         * NotificationStackScrollLayout
+         */
+        void logRemoveTransientFromNssl(
+                NotificationEntry childEntry
+        );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is removed from a ViewGroup that
+         * is not NotificationChildrenContainer or NotificationStackScrollLayout
+         */
+        void logRemoveTransientFromViewGroup(
+                NotificationEntry childEntry,
+                ViewGroup containerView
         );
     }
 
@@ -3713,5 +3741,44 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /** Whether this notification may show a snooze action. */
     public boolean getShowSnooze() {
         return mShowSnooze;
+    }
+
+    @Override
+    public void removeFromTransientContainer() {
+        final ViewGroup transientContainer = getTransientContainer();
+        final ViewParent parent = getParent();
+        // Only log when there is real removal of transient views
+        if (transientContainer == null || transientContainer != parent) {
+            super.removeFromTransientContainer();
+            return;
+        }
+        logRemoveFromTransientContainer(transientContainer);
+        super.removeFromTransientContainer();
+    }
+
+    /**
+     * Log calls to removeFromTransientContainer when the container is NotificationChildrenContainer
+     * or NotificationStackScrollLayout.
+     */
+    public void logRemoveFromTransientContainer(ViewGroup transientContainer) {
+        if (mLogger == null) {
+            return;
+        }
+        if (transientContainer instanceof NotificationChildrenContainer) {
+            mLogger.logRemoveTransientFromContainer(
+                    /* childEntry = */ getEntry(),
+                    /* containerEntry = */ ((NotificationChildrenContainer) transientContainer)
+                            .getContainingNotification().getEntry()
+            );
+        } else if (transientContainer instanceof NotificationStackScrollLayout) {
+            mLogger.logRemoveTransientFromNssl(
+                    /* childEntry = */ getEntry()
+            );
+        } else {
+            mLogger.logRemoveTransientFromViewGroup(
+                    /* childEntry = */ getEntry(),
+                    /* containerView = */ transientContainer
+            );
+        }
     }
 }

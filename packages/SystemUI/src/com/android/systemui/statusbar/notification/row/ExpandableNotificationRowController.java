@@ -125,6 +125,29 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 ) {
                     mLogBufferLogger.logSkipAttachingKeepInParentChild(child, newParent);
                 }
+
+                @Override
+                public void logRemoveTransientFromContainer(
+                        NotificationEntry childEntry,
+                        NotificationEntry containerEntry
+                ) {
+                    mLogBufferLogger.logRemoveTransientFromContainer(childEntry, containerEntry);
+                }
+
+                @Override
+                public void logRemoveTransientFromNssl(
+                        NotificationEntry childEntry
+                ) {
+                    mLogBufferLogger.logRemoveTransientFromNssl(childEntry);
+                }
+
+                @Override
+                public void logRemoveTransientFromViewGroup(
+                        NotificationEntry childEntry,
+                        ViewGroup containerView
+                ) {
+                    mLogBufferLogger.logRemoveTransientFromViewGroup(childEntry, containerView);
+                }
             };
 
 
