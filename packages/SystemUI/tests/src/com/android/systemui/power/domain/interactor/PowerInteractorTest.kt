@@ -17,9 +17,14 @@
 
 package com.android.systemui.power.domain.interactor
 
+import android.os.PowerManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -29,6 +34,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.Mock
+import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(JUnit4::class)
@@ -36,14 +44,25 @@ class PowerInteractorTest : SysuiTestCase() {
 
     private lateinit var underTest: PowerInteractor
     private lateinit var repository: FakePowerRepository
+    @Mock private lateinit var falsingCollector: FalsingCollector
+    @Mock private lateinit var screenOffAnimationController: ScreenOffAnimationController
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
 
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
+
         repository =
             FakePowerRepository(
                 initialInteractive = true,
             )
-        underTest = PowerInteractor(repository = repository)
+        underTest =
+            PowerInteractor(
+                repository,
+                falsingCollector,
+                screenOffAnimationController,
+                statusBarStateController,
+            )
     }
 
     @Test
@@ -71,6 +90,40 @@ class PowerInteractorTest : SysuiTestCase() {
             assertThat(value).isTrue()
             job.cancel()
         }
+
+    @Test
+    fun wakeUpIfDozing_notDozing_notWoken() {
+        whenever(statusBarStateController.isDozing).thenReturn(false)
+        whenever(screenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true)
+
+        underTest.wakeUpIfDozing("why", PowerManager.WAKE_REASON_TAP)
+
+        assertThat(repository.lastWakeWhy).isNull()
+        assertThat(repository.lastWakeReason).isNull()
+    }
+
+    @Test
+    fun wakeUpIfDozing_notAllowed_notWoken() {
+        whenever(screenOffAnimationController.allowWakeUpIfDozing()).thenReturn(false)
+        whenever(statusBarStateController.isDozing).thenReturn(true)
+
+        underTest.wakeUpIfDozing("why", PowerManager.WAKE_REASON_TAP)
+
+        assertThat(repository.lastWakeWhy).isNull()
+        assertThat(repository.lastWakeReason).isNull()
+    }
+
+    @Test
+    fun wakeUpIfDozing_dozingAndAllowed_wokenAndFalsingNotified() {
+        whenever(statusBarStateController.isDozing).thenReturn(true)
+        whenever(screenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true)
+
+        underTest.wakeUpIfDozing("testReason", PowerManager.WAKE_REASON_GESTURE)
+
+        assertThat(repository.lastWakeWhy).isEqualTo("testReason")
+        assertThat(repository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_GESTURE)
+        verify(falsingCollector).onScreenOnFromTouch()
+    }
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate

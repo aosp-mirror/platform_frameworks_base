@@ -18,7 +18,6 @@ package com.android.systemui.shade
 
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.PowerManager
-import android.os.SystemClock
 import android.provider.Settings
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -28,8 +27,8 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.tuner.TunerService.Tunable
@@ -50,7 +49,7 @@ class PulsingGestureListener @Inject constructor(
         private val notificationShadeWindowView: NotificationShadeWindowView,
         private val falsingManager: FalsingManager,
         private val dockManager: DockManager,
-        private val centralSurfaces: CentralSurfaces,
+        private val powerInteractor: PowerInteractor,
         private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
         private val statusBarStateController: StatusBarStateController,
         private val shadeLogger: ShadeLogger,
@@ -88,11 +87,7 @@ class PulsingGestureListener @Inject constructor(
             shadeLogger.logSingleTapUpFalsingState(proximityIsNotNear, isNotAFalseTap)
             if (proximityIsNotNear && isNotAFalseTap) {
                 shadeLogger.d("Single tap handled, requesting centralSurfaces.wakeUpIfDozing")
-                centralSurfaces.wakeUpIfDozing(
-                    SystemClock.uptimeMillis(),
-                    "PULSING_SINGLE_TAP",
-                    PowerManager.WAKE_REASON_TAP
-                )
+                powerInteractor.wakeUpIfDozing("PULSING_SINGLE_TAP", PowerManager.WAKE_REASON_TAP)
             }
             return true
         }
@@ -113,11 +108,7 @@ class PulsingGestureListener @Inject constructor(
                 !falsingManager.isProximityNear &&
                 !falsingManager.isFalseDoubleTap
         ) {
-            centralSurfaces.wakeUpIfDozing(
-                    SystemClock.uptimeMillis(),
-                    "PULSING_DOUBLE_TAP",
-                    PowerManager.WAKE_REASON_TAP
-            )
+            powerInteractor.wakeUpIfDozing("PULSING_DOUBLE_TAP", PowerManager.WAKE_REASON_TAP)
             return true
         }
         return false
