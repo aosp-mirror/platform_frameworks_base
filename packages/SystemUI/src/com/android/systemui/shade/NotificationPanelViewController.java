@@ -1659,10 +1659,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding));
         mKeyguardNotificationBottomPadding = bottomPadding;
 
-        float staticTopPadding = mClockPositionAlgorithm.getLockscreenMinStackScrollerPadding()
-                // getMinStackScrollerPadding is from the top of the screen,
-                // but we need it from the top of the NSSL.
-                - mNotificationStackScrollLayoutController.getTop();
+        float staticTopPadding = mClockPositionAlgorithm.getLockscreenNotifPadding(
+                mNotificationStackScrollLayoutController.getTop());
+
         mKeyguardNotificationTopPadding = staticTopPadding;
 
         // To debug the available space, enable debug lines in this class. If you change how the
@@ -1676,8 +1675,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             Log.i(TAG, "\n");
             Log.i(TAG, "staticTopPadding[" + staticTopPadding
                     + "] = Clock.padding["
-                    + mClockPositionAlgorithm.getLockscreenMinStackScrollerPadding()
-                    + "] - NSSLC.top[" + mNotificationStackScrollLayoutController.getTop()
+                    + mClockPositionAlgorithm.getLockscreenNotifPadding(
+                            mNotificationStackScrollLayoutController.getTop())
                     + "]"
             );
             Log.i(TAG, "bottomPadding[" + bottomPadding
