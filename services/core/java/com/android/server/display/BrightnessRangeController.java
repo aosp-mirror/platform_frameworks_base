@@ -18,29 +18,42 @@ package com.android.server.display;
 
 import android.hardware.display.BrightnessInfo;
 import android.os.IBinder;
+import android.provider.DeviceConfigInterface;
+
+import com.android.server.display.feature.DeviceConfigParameterProvider;
 
 import java.io.PrintWriter;
 import java.util.function.BooleanSupplier;
 
 class BrightnessRangeController {
 
-    private static final boolean NBM_FEATURE_FLAG = false;
-
     private final HighBrightnessModeController mHbmController;
     private final NormalBrightnessModeController mNormalBrightnessModeController =
             new NormalBrightnessModeController();
 
     private final Runnable mModeChangeCallback;
+    private final boolean mUseNbmController;
+
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
             Runnable modeChangeCallback) {
-        mHbmController = hbmController;
-        mModeChangeCallback = modeChangeCallback;
+        this(hbmController, modeChangeCallback,
+                new DeviceConfigParameterProvider(DeviceConfigInterface.REAL));
     }
 
+    BrightnessRangeController(HighBrightnessModeController hbmController,
+            Runnable modeChangeCallback, DeviceConfigParameterProvider configParameterProvider) {
+        mHbmController = hbmController;
+        mModeChangeCallback = modeChangeCallback;
+        mUseNbmController = configParameterProvider.isNormalBrightnessControllerFeatureEnabled();
+    }
 
     void dump(PrintWriter pw) {
+        pw.println("BrightnessRangeController:");
+        pw.println("  mUseNormalBrightnessController=" + mUseNbmController);
         mHbmController.dump(pw);
+        mNormalBrightnessModeController.dump(pw);
+
     }
 
     void onAmbientLuxChange(float ambientLux) {
@@ -90,7 +103,7 @@ class BrightnessRangeController {
 
 
     float getCurrentBrightnessMax() {
-        if (NBM_FEATURE_FLAG && mHbmController.getHighBrightnessMode()
+        if (mUseNbmController && mHbmController.getHighBrightnessMode()
                 == BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF) {
             return Math.min(mHbmController.getCurrentBrightnessMax(),
                     mNormalBrightnessModeController.getCurrentBrightnessMax());
@@ -111,7 +124,7 @@ class BrightnessRangeController {
     }
 
     private void applyChanges(BooleanSupplier nbmChangesFunc, Runnable hbmChangesFunc) {
-        if (NBM_FEATURE_FLAG) {
+        if (mUseNbmController) {
             boolean nbmTransitionChanged = nbmChangesFunc.getAsBoolean();
             hbmChangesFunc.run();
             // if nbm transition changed - trigger callback
