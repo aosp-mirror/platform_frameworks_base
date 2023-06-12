@@ -409,9 +409,6 @@ please see themes_device_defaults.xml.
         <!-- Tooltip popup properties -->
         <item name="tooltipForegroundColor">@color/foreground_material_light</item>
         <item name="tooltipBackgroundColor">@color/tooltip_background_light</item>
-
-        <!-- Display cutout properties -->
-        <item name="android:windowLayoutInDisplayCutoutMode">default</item>
     </style>
 
     <!-- Material theme (light version). -->
@@ -788,9 +785,6 @@ please see themes_device_defaults.xml.
         <!-- Tooltip popup properties -->
         <item name="tooltipForegroundColor">@color/foreground_material_dark</item>
         <item name="tooltipBackgroundColor">@color/tooltip_background_dark</item>
-
-        <!-- Display cutout properties -->
-        <item name="android:windowLayoutInDisplayCutoutMode">default</item>
     </style>
 
     <!-- Variant of the material (light) theme that has a solid (opaque) action bar
