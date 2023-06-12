@@ -16,8 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="748293919008814871">"బాహ్య నిల్వ"</string>
-    <string name="storage_description" msgid="9176081505553938524">"స్థానిక నిల్వ"</string>
-    <string name="root_internal_storage" msgid="4980477711224234931">"అంతర్గత నిల్వ"</string>
-    <string name="root_documents" msgid="5695037589229175941">"పత్రాలు"</string>
+    <string name="app_label" msgid="748293919008814871">"బాహ్య స్టోరేజ్‌"</string>
+    <string name="storage_description" msgid="9176081505553938524">"స్థానిక స్టోరేజ్‌"</string>
+    <string name="root_internal_storage" msgid="4980477711224234931">"అంతర్గత స్టోరేజ్‌"</string>
+    <string name="root_documents" msgid="5695037589229175941">"డాక్యుమెంట్లు"</string>
 </resources>
