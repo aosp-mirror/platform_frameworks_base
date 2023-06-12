@@ -4,6 +4,7 @@ import com.android.systemui.log.dagger.NotificationHeadsUpLog
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.dagger.NotificationRenderLog
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD
@@ -15,7 +16,8 @@ import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
 class NotificationStackScrollLogger @Inject constructor(
-    @NotificationHeadsUpLog private val buffer: LogBuffer
+    @NotificationHeadsUpLog private val buffer: LogBuffer,
+    @NotificationRenderLog private val notificationRenderBuffer: LogBuffer
 ) {
     fun hunAnimationSkipped(entry: NotificationEntry, reason: String) {
         buffer.log(TAG, INFO, {
@@ -75,6 +77,15 @@ class NotificationStackScrollLogger @Inject constructor(
         }, {
             "handleEmptySpaceClick: statusBarState: $int1 isTouchAClick: $bool1 " +
                     "isTouchBelowNotification: $bool2 motionEvent: $str1"
+        })
+    }
+
+    fun transientNotificationRowTraversalCleaned(entry: NotificationEntry, reason: String) {
+        notificationRenderBuffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            str2 = reason
+        }, {
+            "transientNotificationRowTraversalCleaned: key: $str1 reason: $str2"
         })
     }
 }
