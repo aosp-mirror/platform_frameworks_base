@@ -127,16 +127,17 @@ static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, job
     }
 }
 
-static void throwReadRE(JNIEnv *env, binder_status_t status) {
+static void throwReadException(JNIEnv *env, binder_status_t status) {
     ALOGE("Could not read LongArrayMultiStateCounter from Parcel, status = %d", status);
-    jniThrowRuntimeException(env, "Could not read LongArrayMultiStateCounter from Parcel");
+    jniThrowException(env, "android.os.BadParcelableException",
+                      "Could not read LongArrayMultiStateCounter from Parcel");
 }
 
 #define THROW_AND_RETURN_ON_READ_ERROR(expr) \
     {                                        \
         binder_status_t status = expr;       \
         if (status != STATUS_OK) {           \
-            throwReadRE(env, status);        \
+            throwReadException(env, status); \
             return 0L;                       \
         }                                    \
     }
@@ -146,6 +147,11 @@ static jlong native_initFromParcel(JNIEnv *env, jclass theClass, jobject jParcel
 
     int32_t stateCount;
     THROW_AND_RETURN_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &stateCount));
+
+    if (stateCount < 0 || stateCount > 0xEFFF) {
+        throwReadException(env, STATUS_INVALID_OPERATION);
+        return 0L;
+    }
 
     int32_t arrayLength;
     THROW_AND_RETURN_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &arrayLength));
