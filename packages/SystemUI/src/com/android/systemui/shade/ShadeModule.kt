@@ -157,6 +157,15 @@ abstract class ShadeModule {
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
         @Provides
         @SysUISingleton
+        fun providesNotificationsQuickSettingsContainer(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): NotificationsQuickSettingsContainer {
+            return notificationShadeWindowView.findViewById(R.id.notification_container_parent)
+        }
+
+        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
+        @Provides
+        @SysUISingleton
         @Named(SHADE_HEADER)
         fun providesShadeHeaderView(
             notificationShadeWindowView: NotificationShadeWindowView,
