@@ -80,7 +80,7 @@ public class LatencyTester implements CoreStartable {
 
     @Override
     public void start() {
-        registerForBroadcasts(mEnabled);
+        updateEnabled();
     }
 
     private void fakeWakeAndUnlock(BiometricSourceType type) {
