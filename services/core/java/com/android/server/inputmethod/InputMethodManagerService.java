@@ -48,6 +48,7 @@ import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
 import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeStateVisibleAllowed;
 
@@ -2360,6 +2361,28 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    /**
+     * Called when {@link #resetCurrentMethodAndClientLocked(int)} invoked for clean-up states
+     * before unbinding the current method.
+     */
+    @GuardedBy("ImfLock.class")
+    void onUnbindCurrentMethodByReset() {
+        final ImeTargetWindowState winState = mVisibilityStateComputer.getWindowStateOrNull(
+                mCurFocusedWindow);
+        if (winState != null && !winState.isRequestedImeVisible()
+                && !mVisibilityStateComputer.isInputShown()) {
+            // Normally, the focus window will apply the IME visibility state to
+            // WindowManager when the IME has applied it. But it would be too late when
+            // switching IMEs in between different users. (Since the focused IME will
+            // first unbind the service to switch to bind the next user of the IME
+            // service, that wouldn't make the attached IME token validity check in time)
+            // As a result, we have to notify WM to apply IME visibility before clearing the
+            // binding states in the first place.
+            mVisibilityApplier.applyImeVisibility(mCurFocusedWindow, mCurStatsToken,
+                    STATE_HIDE_IME);
+        }
+    }
+
     /** {@code true} when a {@link ClientState} has attached from starting the input connection. */
     @GuardedBy("ImfLock.class")
     boolean hasAttachedClient() {
@@ -2831,6 +2854,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     void resetCurrentMethodAndClientLocked(@UnbindReason int unbindClientReason) {
         setSelectedMethodIdLocked(null);
+        // Callback before clean-up binding states.
+        onUnbindCurrentMethodByReset();
         mBindingController.unbindCurrentMethod();
         unbindCurrentClientLocked(unbindClientReason);
     }
