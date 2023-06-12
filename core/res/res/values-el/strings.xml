@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"μη περιορισμένη\". Επόμενη κλήση: Μη περιορισμένη"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Η υπηρεσία δεν προβλέπεται."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Δεν μπορείτε να αλλάξετε τη ρύθμιση του αναγνωριστικού καλούντος."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Έγινε εναλλαγή των δεδομένων σε <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Μπορείτε να αλλάξετε αυτήν την επιλογή ανά πάσα στιγμή στις Ρυθμίσεις"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Δεν υπάρχει υπηρεσία δεδομένων κινητής τηλεφωνίας"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Οι κλήσεις έκτακτης ανάγκης δεν είναι διαθέσιμες"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Δεν υπάρχει φωνητική υπηρεσία"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Επιτρέπει στην εφαρμογή να λαμβάνει πληροφορίες προτιμώμενης υπηρεσίας πληρωμής NFC, όπως καταχωρημένα βοηθήματα και προορισμό διαδρομής."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ελέγχει την Επικοινωνία κοντινού πεδίου (FNC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Επιτρέπει στην εφαρμογή την επικοινωνία με ετικέτες, κάρτες και αναγνώστες της Επικοινωνίας κοντινού πεδίου (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Συμβάν συναλλαγής ασφαλούς στοιχείου"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Επιτρέπει στην εφαρμογή να λαμβάνει πληροφορίες σχετικά με συναλλαγές που πραγματοποιούνται σε ένα ασφαλές στοιχείο."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"απενεργοποιεί το κλείδωμα οθόνης"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Επιτρέπει στην εφαρμογή την απενεργοποίηση του κλειδώματος πληκτρολογίου και άλλης σχετικής ασφάλειας με κωδικό πρόσβασης. Για παράδειγμα, το κλείδωμα πληκτρολογίου στο τηλέφωνο απενεργοποιείται όταν λαμβάνεται εισερχόμενη τηλεφωνική κλήση και ενεργοποιείται ξανά όταν η κλήση τερματιστεί."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"υποβολή αιτήματος για πολυπλοκότητα οθόνης κλειδώματος"</string>
@@ -591,7 +595,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Υπερβολικά έντονος φωτισμός"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Εντοπίστηκε πάτημα του κουμπιού λειτουργίας"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Δοκιμάστε να το προσαρμόσετε"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Αλλάζετε ελαφρώς τη θέση του δακτύλου σας κάθε φορά."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Αλλάζετε ελαφρώς τη θέση του δακτύλου σας κάθε φορά"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Δεν είναι δυνατή η αναγνώριση του δακτυλικού αποτυπώματος"</string>
@@ -642,7 +646,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Μετακινήστε το τηλέφωνο προς τα αριστερά"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Μετακινήστε το τηλέφωνο προς τα δεξιά"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Κοιτάξτε απευθείας τη συσκευή σας."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Δεν εντοπίστηκε το πρόσωπό σας. Κρατήστε το τηλέφωνο στο ύψος των ματιών."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Κρατήστε το τηλέφωνο στο ύψος των ματιών σας."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Πάρα πολλή κίνηση. Κρατήστε σταθερό το τηλέφωνο."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Καταχωρίστε ξανά το πρόσωπό σας."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Το πρόσωπο δεν αναγνωρίζεται. Δοκιμάστε ξανά."</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του tablet από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο κατά τη ροή. Δοκιμάστε στο τηλέφωνό σας."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Προεπιλογή συστήματος"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"ΚΑΡΤΑ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -341,7 +341,7 @@ java_defaults {
 }
 
 java_library {
-    name: "android_stubs_current",
+    name: "android_stubs_current.from-source",
     static_libs: [
         "all-modules-public-stubs",
         "android-non-updatable.stubs",
@@ -351,7 +351,7 @@ java_library {
 }
 
 java_library {
-    name: "android_system_stubs_current",
+    name: "android_system_stubs_current.from-source",
     static_libs: [
         "all-modules-system-stubs",
         "android-non-updatable.stubs.system",
@@ -375,7 +375,7 @@ java_library {
 }
 
 java_library {
-    name: "android_test_stubs_current",
+    name: "android_test_stubs_current.from-source",
     static_libs: [
         // Updatable modules do not have test APIs, but we want to include their SystemApis, like we
         // include the SystemApi of framework-non-updatable-sources.
@@ -395,7 +395,7 @@ java_library {
 }
 
 java_library {
-    name: "android_module_lib_stubs_current",
+    name: "android_module_lib_stubs_current.from-source",
     defaults: [
         "android.jar_defaults",
         "android_stubs_dists_default",
@@ -411,7 +411,7 @@ java_library {
 }
 
 java_library {
-    name: "android_system_server_stubs_current",
+    name: "android_system_server_stubs_current.from-source",
     defaults: [
         "android.jar_defaults",
         "android_stubs_dists_default",
@@ -419,7 +419,7 @@ java_library {
     srcs: [":services-non-updatable-stubs"],
     installable: false,
     static_libs: [
-        "android_module_lib_stubs_current",
+        "android_module_lib_stubs_current.from-source",
     ],
     dist: {
         dir: "apistubs/android/system-server",

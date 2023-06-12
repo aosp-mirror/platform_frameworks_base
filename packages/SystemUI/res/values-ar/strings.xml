@@ -263,7 +263,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"جارٍ التفعيل…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"توفير البيانات مفعّل"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{جهاز واحد}zero{# جهاز}two{جهازان}few{# أجهزة}many{# جهازًا}other{# جهاز}}"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"الفلاش"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"ضوء الفلاش"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"الكاميرا قيد الاستخدام"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"بيانات الجوّال"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"استخدام البيانات"</string>
@@ -760,8 +760,8 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"يجري الاستخدام الآن من قِبل <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"تم الاستخدام مؤخرًا من قِبل <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"يجري الاستخدام الآن من قِبل \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\"."</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"تم الاستخدام مؤخرًا من قِبل \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\"."</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(العمل)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"المكالمات الهاتفية"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(من خلال <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
@@ -893,7 +893,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"رقم الإصدار"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"تم نسخ رقم الإصدار إلى الحافظة."</string>
     <string name="basic_status" msgid="2315371112182658176">"محادثة مفتوحة"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"أدوات المحادثة"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"التطبيقات المصغّرة للمحادثات"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"انقر على محادثة لإضافتها إلى \"الشاشة الرئيسية\"."</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"ستظهر هنا المحادثات الحديثة."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"المحادثات ذات الأولوية"</string>

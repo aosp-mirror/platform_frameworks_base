@@ -1,5 +1,7 @@
 # Bug component: 36137
 include /core/java/android/content/pm/OWNERS
 
+per-file FileSystemProvider.java = file:/core/java/android/os/storage/OWNERS
+
 per-file ReferrerIntent.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file ReferrerIntent.java = file:/services/core/java/com/android/server/am/OWNERS

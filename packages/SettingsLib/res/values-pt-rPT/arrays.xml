@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"Nunca utilizar a verificação HDCP"</item>
-    <item msgid="8254225038262324761">"Utilizar a verificação HDCP para conteúdo DRM apenas"</item>
+    <item msgid="8254225038262324761">"Usar a verificação HDCP para conteúdo DRM apenas"</item>
     <item msgid="6421717003037072581">"Usar sempre a verificação HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
@@ -63,13 +63,17 @@
     <item msgid="6336372935919715515">"Filtrado ativado"</item>
     <item msgid="2779123106632690576">"Ativado"</item>
   </string-array>
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:0 (195768089203590086) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:1 (2776218217644557831) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:2 (8163235976612675092) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:0 (3961868665260627524) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:1 (2505973306504851132) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:2 (5883011000629613855) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:3 (1051534112762023603) -->
+  <string-array name="bt_hci_snoop_log_filters_entries">
+    <item msgid="195768089203590086">"Deixe apenas cabeçalhos de LCA (Lista de controlo de acesso)"</item>
+    <item msgid="2776218217644557831">"Filtre pacotes de multimédia A2DP"</item>
+    <item msgid="8163235976612675092">"Filtre o canal RFCOMM"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_profile_filter_entries">
+    <item msgid="3961868665260627524">"Desativar"</item>
+    <item msgid="2505973306504851132">"Preencha com uma string de carateres"</item>
+    <item msgid="5883011000629613855">"Deixe apenas o cabeçalho"</item>
+    <item msgid="1051534112762023603">"Remova totalmente"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (predefinição)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
@@ -93,7 +97,7 @@
     <item msgid="8147982633566548515">"map14"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="2494959071796102843">"Utilizar seleção do sistema (predefinido)"</item>
+    <item msgid="2494959071796102843">"Usar seleção do sistema (predefinido)"</item>
     <item msgid="4055460186095649420">"SBC"</item>
     <item msgid="720249083677397051">"AAC"</item>
     <item msgid="1049450003868150455">"Áudio <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -103,7 +107,7 @@
     <item msgid="506175145534048710">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="8868109554557331312">"Utilizar seleção do sistema (predefinido)"</item>
+    <item msgid="8868109554557331312">"Usar seleção do sistema (predefinido)"</item>
     <item msgid="9024885861221697796">"SBC"</item>
     <item msgid="4688890470703790013">"AAC"</item>
     <item msgid="8627333814413492563">"Áudio <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -113,38 +117,38 @@
     <item msgid="7940970833006181407">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="926809261293414607">"Utilizar seleção do sistema (predefinido)"</item>
+    <item msgid="926809261293414607">"Usar seleção do sistema (predefinido)"</item>
     <item msgid="8003118270854840095">"44,1 kHz"</item>
     <item msgid="3208896645474529394">"48,0 kHz"</item>
     <item msgid="8420261949134022577">"88,2 kHz"</item>
     <item msgid="8887519571067543785">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="2284090879080331090">"Utilizar seleção do sistema (predefinido)"</item>
+    <item msgid="2284090879080331090">"Usar seleção do sistema (predefinido)"</item>
     <item msgid="1872276250541651186">"44,1 kHz"</item>
     <item msgid="8736780630001704004">"48,0 kHz"</item>
     <item msgid="7698585706868856888">"88,2 kHz"</item>
     <item msgid="8946330945963372966">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2574107108483219051">"Utilizar seleção do sistema (predefinido)"</item>
+    <item msgid="2574107108483219051">"Usar seleção do sistema (predefinido)"</item>
     <item msgid="4671992321419011165">"16 bits/amostra"</item>
     <item msgid="1933898806184763940">"24 bits/amostra"</item>
     <item msgid="1212577207279552119">"32 bits/amostra"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="9196208128729063711">"Utilizar seleção do sistema (predefinido)"</item>
+    <item msgid="9196208128729063711">"Usar seleção do sistema (predefinido)"</item>
     <item msgid="1084497364516370912">"16 bits/amostra"</item>
     <item msgid="2077889391457961734">"24 bits/amostra"</item>
     <item msgid="3836844909491316925">"32 bits/amostra"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="3014194562841654656">"Utilizar seleção do sistema (predefinido)"</item>
+    <item msgid="3014194562841654656">"Usar seleção do sistema (predefinido)"</item>
     <item msgid="5982952342181788248">"Mono"</item>
     <item msgid="927546067692441494">"Estéreo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"Utilizar seleção do sistema (predefinido)"</item>
+    <item msgid="1997302811102880485">"Usar seleção do sistema (predefinido)"</item>
     <item msgid="8005696114958453588">"Mono"</item>
     <item msgid="1333279807604675720">"Estéreo"</item>
   </string-array>

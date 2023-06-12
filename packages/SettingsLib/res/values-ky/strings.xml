@@ -109,7 +109,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Сол: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, оң: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Жигердүү"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Жигердүү, сол кулакчын гана"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Иштеп жатат, сол кулак гана"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Жигердүү, оң кулакчын гана"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Жигердүү, сол жана оң кулакчын"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аудио"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Жок"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Жупташканда байланыштарыңыз менен чалуу таржымалыңызды пайдалана аласыз."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> түзмөгүнө туташуу мүмкүн болгон жок."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN-код же сырсөз туура эмес болгондуктан, \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" түзмөгүнө туташуу мүмкүн болгон жок."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"\"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" туташкан жок: PIN код же сырсөз туура эмес."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен байланышуу мүмкүн эмес."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Жупташтырууну <xliff:g id="DEVICE_NAME">%1$s</xliff:g> четке какты."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -205,7 +205,7 @@
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> желеге туташууну талап кылат"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> колдоого алынган эмес"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"Текшерилүүдө…"</string>
-    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> жөндөөлөрдү"</string>
+    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> параметрлерди"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Жарак тууралоолорун ачуу"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Тандалган жарак"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Жалпы"</string>
@@ -240,7 +240,7 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Ката"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн мүчүлүштүктөрдү Wi-Fi аркылуу аныктоону күйгүзүңүз"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Түзмөктү QR коду аркылуу жупташтыруу"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Түзмөктү QR код аркылуу жупташтыруу"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR кодунун сканерин колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Түзмөктү атайын код аркылуу жупташтыруу"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Жаңы түзмөктөрдү алты сандан турган код аркылуу жупташтырасыз"</string>
@@ -255,12 +255,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi аркылуу байланыштыруу коду"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Туташкан жок"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Түзмөк бир тармакка туташып турушу керек."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR кодун скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR кодду скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Түзмөк жупташтырылууда…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Түзмөк жупташтырылган жок. QR коду туура эмес же түзмөк бир тармакка туташпай турат."</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Түзмөк жупташтырылган жок. QR код туура эмес же түзмөк бир тармакка туташпай турат."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP дарек жана порт"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR кодун скандоо"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR кодун скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR кодду скандоо"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR кодду скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi тармагына туташыңыз"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, мүчүлүштүктөрдү оңдоо, иштеп чыгуу"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Ката жөнүндө кабарлоо"</string>
@@ -495,7 +495,7 @@
     <string name="external_source_trusted" msgid="1146522036773132905">"Уруксат берилген"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Тыюу салынган"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Белгисиз колдонмолорду орнотуу"</string>
-    <string name="home" msgid="973834627243661438">"Жөндөөлөрдүн башкы бети"</string>
+    <string name="home" msgid="973834627243661438">"Параметрлердин башкы бети"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
     <item msgid="8894873528875953317">"50%"</item>

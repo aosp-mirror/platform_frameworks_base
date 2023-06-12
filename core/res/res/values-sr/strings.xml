@@ -74,6 +74,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ИД позиваоца подразумевано није ограничен. Следећи позив: Није ограничен."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услуга није добављена."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Не можете да промените подешавање ИД-а корисника."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Мобилни подаци су пребачени на оператера <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Ово можете у сваком тренутку да промените у Подешавањима"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Нема услуге мобилних података"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Хитни позиви нису доступни"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Нема гласовне услуге"</string>
@@ -84,7 +86,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Пробајте да промените жељену мрежу. Додирните да бисте променили."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Хитни позиви нису доступни"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не можете да упућујете хитне позиве преко Wi‑Fi-ја"</string>
-    <string name="notification_channel_network_alert" msgid="4788053066033851841">"Обавештења"</string>
+    <string name="notification_channel_network_alert" msgid="4788053066033851841">"Упозорења"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Преусмеравање позива"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим за хитан повратни позив"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Статус мобилних података"</string>
@@ -242,10 +244,10 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"Напајање"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Рестартуј"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Хитан позив"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Извештај о грешци"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Јави грешку"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Заврши сесију"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Снимак екрана"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Извештај о грешци"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Јави грешку"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Овим ће се прикупити информације о тренутном стању уређаја како би биле послате у поруци е-поште. Од започињања извештаја о грешци до тренутка за његово слање проћи ће неко време; будите стрпљиви."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Интерактив. извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Користите ово у већини случајева. То вам омогућава да пратите напредак извештаја, да уносите додатне детаље о проблему и да снимате снимке екрана. Вероватно ће изоставити неке мање коришћене одељке за које прављење извештаја дуго траје."</string>
@@ -279,7 +281,7 @@
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Мрежа је доступна"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Статус VPN-а"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Обавештења од ИТ администратора"</string>
-    <string name="notification_channel_alerts" msgid="5070241039583668427">"Обавештења"</string>
+    <string name="notification_channel_alerts" msgid="5070241039583668427">"Упозорења"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Режим демонстрације за малопродајне објекте"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB веза"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Активна апликација"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозвољава апликацији да преузима информације о жељеној NFC услузи за плаћање, попут регистрованих идентификатора апликација и одредишта преусмеравања."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрола комуникације у ужем пољу (Near Field Communication)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозвољава апликацији да комуницира са ознакама, картицама и читачима комуникације кратког домета (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Трансакција у оквиру безбедносног елемента"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Омогућава апликацији да добија информације о транскацијама које се извршавају у оквиру безбедносног елемента."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"онемогућавање закључавања екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозвољава апликацији да онемогући закључавање тастатуре и све повезане безбедносне мере са лозинкама. На пример, телефон онемогућава закључавање тастатуре при пријему долазног телефонског позива, а затим га поново омогућава по завршетку позива."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"тражење сложености закључавања екрана"</string>
@@ -659,7 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Прављење модела лица није успело. Пробајте поново."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Откривене су тамне наочари. Лице мора да буде потпуно видљиво."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Откривено је прекривање лица. Лице мора да буде потпуно видљиво."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Лице је прекривено. Мора да буде сасвим видљиво."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Провера лица није успела. Хардвер није доступан."</string>
@@ -1248,7 +1252,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Покретање апликација."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Завршавање покретања."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Притиснули сте дугме за укључивање – тиме обично искључујете екран.\n\nПробајте лагано да додирнете док подешавате отисак прста."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Завршите подешавање искључивањем екрана"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Искључите екран и напустите подешавање"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Искључи"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Настављате верификацију отиска прста?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Притиснули сте дугме за укључивање – тиме обично искључујете екран.\n\nПробајте лагано да додирнете да бисте верификовали отисак прста."</string>
@@ -1702,7 +1706,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија боја"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Корекција боја"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим једном руком"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додатно затамњено"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додатно затамни"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Држали сте тастере за јачину звука. Услуга <xliff:g id="SERVICE_NAME">%1$s</xliff:g> је укључена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Држали сте тастере за јачину звука. Услуга <xliff:g id="SERVICE_NAME">%1$s</xliff:g> је искључена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Притисните и задржите оба тастера за јачину звука три секунде да бисте користили <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1831,7 +1835,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Потврдите нови PIN"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Направите PIN за измену ограничења"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-ови се не подударају. Пробајте поново."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN је прекратак. Мора да садржи најмање 4 цифре."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN је прекратак. Мора да има бар 4 цифре."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Пробајте поново касније"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Приказује се цео екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Да бисте изашли, превуците надоле одозго."</string>
@@ -2291,4 +2295,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не може да се приступи камери таблета са <xliff:g id="DEVICE">%1$s</xliff:g> уређаја"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Овом не можете да приступате током стримовања. Пробајте на телефону."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Подразумевани системски"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"КАРТИЦА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

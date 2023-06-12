@@ -46,7 +46,7 @@
     <string name="print_button" msgid="645164566271246268">"Печати"</string>
     <string name="savetopdf_button" msgid="2976186791686924743">"Зачувај во PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"Опциите на печатачот се прикажани"</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"Опциите на печатачот се сокриени"</string>
+    <string name="print_options_collapsed" msgid="7455930445670414332">"Опциите на печатачот се скриени"</string>
     <string name="search" msgid="5421724265322228497">"Пребарај"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Сите печатачи"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Додајте услуга"</string>

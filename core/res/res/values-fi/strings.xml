@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Soittajan tunnukseksi muutetaan rajoittamaton. Seuraava puhelu: ei rajoitettu"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Palvelua ei tarjota."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Et voi muuttaa soittajan tunnuksen asetusta."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Data vaihdettu: <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Voit vaihtaa valintasi milloin tahansa asetuksista."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ei mobiilidatapalvelua"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hätäpuhelut eivät ole käytettävissä"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ei äänipuheluja"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Sallii sovelluksen noutaa tietoja rekisteröidyistä sovellustunnuksista, maksureitin kohteesta ja muita ensisijaisia NFC-maksupalvelutietoja."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"hallitse Near Field Communication -tunnistusta"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Antaa sovelluksen kommunikoida NFC (Near Field Communication) -tagien, -korttien ja -lukijoiden kanssa."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element ‑maksutapahtuma"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Sallii sovelluksen vastaanottaa tietoa Secure Elementissä tapahtuvista maksutapahtumista."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"poista näytön lukitus käytöstä"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Antaa sovelluksen ottaa näppäinlukon ja siihen liittyvän salasanasuojauksen pois käytöstä. Esimerkki: puhelin poistaa näppäinlukon käytöstä puhelun saapuessa ja asettaa lukon takaisin käyttöön puhelun päättyessä."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"pyytää näytön lukituksen monimutkaisuutta"</string>
@@ -585,7 +589,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Sormenjälkeä ei voi tunnistaa. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhdista sormenjälkitunnistin ja yritä uudelleen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhdista anturi ja yritä uudelleen"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina anturia voimakkaasti"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina tunnistinta voimakkaasti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Kokeile toista sormenjälkeä"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liian kirkas"</string>
@@ -650,7 +654,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Katso suoremmin puhelimeen"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Katso suoremmin puhelimeen"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Katso suoremmin puhelimeen"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Poista esteet kasvojesi edestä."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Poista esteet kasvojesi edestä"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Puhdista näytön yläreuna, mukaan lukien musta palkki"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -658,7 +662,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kasvomallia ei voi luoda. Yritä uudelleen."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Tummat lasit havaittu. Kasvojen täytyy näkyä kokonaan."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kasvot peittävä asia havaittu. Kasvojen täytyy näkyä kokonaan."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Jokin peittää kasvot. Kasvojen täytyy näkyä kokonaan."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kasvoja ei voi vahvistaa. Laitteisto ei käytettäv."</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tabletin kameraan"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Sisältöön ei saa pääsyä striimauksen aikana. Kokeile striimausta puhelimella."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Järjestelmän oletusarvo"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"Kortti: <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -349,7 +349,7 @@
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Somente\nalarmes"</string>
     <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregando sem fio • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregando • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga rápida • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregamento rápido • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga lenta • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregando • Conclusão em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Trocar usuário"</string>
@@ -383,7 +383,7 @@
     <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Quando você compartilha, grava ou transmite a tela, este app tem acesso a todas as informações visíveis nela ou reproduzidas no dispositivo. Tenha cuidado com senhas, detalhes de pagamento, mensagens e outras informações sensíveis."</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Ação bloqueada pelo administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"A captura de tela foi desativada pela política do dispositivo"</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"Limpar tudo"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"Remover tudo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gerenciar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Histórico"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Novas"</string>
@@ -395,7 +395,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Iniciar agora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Sem notificações"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nenhuma notificação nova"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueie para conferir as notificações antigas"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueie p/ acessar notificações antigas"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Este dispositivo é gerenciado pelo seu familiar responsável"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Sua organização é dona deste dispositivo e pode monitorar o tráfego de rede"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"A organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> é dona deste dispositivo e pode monitorar o tráfego de rede"</string>
@@ -473,7 +473,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"Acessibilidade"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Tocar"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibrar"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Ignorar"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Desativar som"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Toque para ativar o som."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Toque para configurar para vibrar. É possível que os serviços de acessibilidade sejam silenciados."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Toque para silenciar. É possível que os serviços de acessibilidade sejam silenciados."</string>
@@ -805,8 +805,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"remover dos favoritos"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover para a posição <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Escolha os controles disponíveis nas Configurações rápidas"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque no controle, mantenha-o pressionado e arraste para reorganizar as posições."</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Escolha quais controles incluir nas Configurações rápidas"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque e pressione, depois arraste para reorganizar as posições."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controles foram removidos"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"As mudanças não foram salvas"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver outros apps"</string>
@@ -820,7 +820,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Mostrar e controlar dispositivos na tela de bloqueio?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Você pode adicionar à tela de bloqueio controles para dispositivos externos.\n\nO app do dispositivo pode permitir que você controle alguns dispositivos sem desbloquear o smartphone ou tablet.\n\nÉ possível fazer mudanças a qualquer momento nas Configurações."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Controlar dispositivos na tela de bloqueio?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"É possível controle alguns dispositivos sem desbloquear o smartphone ou tablet.\n\nO app do dispositivo determina quais dispositivos podem ser controlados dessa maneira."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"É possível controlar alguns dispositivos sem desbloquear o smartphone ou tablet.\n\nO app do dispositivo determina quais dispositivos podem ser controlados dessa maneira."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Agora não"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Sim"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"O PIN contém letras ou símbolos"</string>
@@ -917,7 +917,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Ouvindo"</string>
     <string name="game_status" msgid="1340694320630973259">"Jogando"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Amigos"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Vamos conversar hoje à noite."</string>
+    <string name="empty_status" msgid="5938893404951307749">"Nos falamos à noite."</string>
     <string name="status_before_loading" msgid="1500477307859631381">"O conteúdo será exibido em breve"</string>
     <string name="missed_call" msgid="4228016077700161689">"Ligação perdida"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

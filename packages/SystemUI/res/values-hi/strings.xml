@@ -109,7 +109,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"शुरू करें"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रीन को रिकॉर्ड किया जा रहा है"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"स्क्रीन और ऑडियो, दोनों रिकॉर्ड हो रहे हैं"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रीन को कहां छुआ गया, ये दिखाएं"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रीन को कहां-कहां छुआ गया, यह दिखाएं"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"रोकें"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"शेयर करें"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"स्क्रीन रिकॉर्डिंग सेव की गई"</string>
@@ -231,7 +231,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ब्लूटूथ चालू हो रहा है…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ऑटो-रोटेट"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"स्क्रीन का अपने-आप दिशा बदलना (ऑटो-रोटेट)"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"जगह"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"जगह की जानकारी"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"स्क्रीन सेवर"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"कैमरे का ऐक्सेस"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"माइक्रोफ़ोन का ऐक्सेस"</string>
@@ -272,7 +272,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> उपयोग किया गया"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी"</string>
-    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन"</string>
+    <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"वर्क ऐप्लिकेशन"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"नाइट लाइट"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"शाम को चालू की जाएगी"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सुबह तक चालू रहेगी"</string>
@@ -296,9 +296,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"क्या आपको डिवाइस का माइक्रोफ़ोन अनब्लॉक करना है?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"क्या आपको डिवाइस का कैमरा अनब्लॉक करना है?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"क्या आप डिवाइस का कैमरा और माइक्रोफ़ोन अनब्लॉक करना चाहते हैं?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ऐसा करने से, माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें माइक्रोफ़ोन का इस्तेमाल करने की अनुमति दी गई है."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ऐसा करने से, कैमरे का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें कैमरे का इस्तेमाल करने की अनुमति दी गई है."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ऐसा करने से, कैमरा या माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें ये इस्तेमाल करने की अनुमति है."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ऐसा करने से, सभी ऐप्लिकेशन और सेवाओं के लिए माइक्रोफ़ोन का ऐक्सेस अनब्लॉक हो जाएगा और वे इसका इस्तेमाल कर पाएंगी."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ऐसा करने से, सभी ऐप्लिकेशन और सेवाओं के लिए कैमरे का ऐक्सेस अनब्लॉक हो जाएगा और वे इसका इस्तेमाल कर पाएंगी."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ऐसा करने से, सभी ऐप्लिकेशन और सेवाओं के लिए कैमरे या माइक्रोफ़ोन का ऐक्सेस अनब्लॉक हो जाएगा और वे इनका इस्तेमाल कर पाएंगी."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"माइक्रोफ़ोन को ब्लॉक किया गया है"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"कैमरे को ब्लॉक किया गया है"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"माइक्रोफ़ोन और कैमरे को ब्लॉक किया गया है"</string>
@@ -317,7 +317,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी आवाज़ और कंपन (वाइब्रेशन) रोक दिए जाते हैं."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"खोलने के लिए फिर से टैप करें"</string>
     <string name="tap_again" msgid="1315420114387908655">"फिर से टैप करें"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"खोलने के लिए ऊपर स्वाइप करें"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"खोलने के लिए ऊपर की ओर स्वाइप करें"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"डिवाइस अनलॉक करने के लिए, अनलॉक आइकॉन को दबाएं"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"चेहरे से अनलॉक किया गया. खोलने के लिए ऊपर की ओर स्वाइप करें."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"चेहरे से अनलॉक किया. डिवाइस अनलॉक करने के लिए, अनलॉक आइकॉन को दबाएं."</string>
@@ -368,13 +368,13 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"इस उपयोगकर्ता के सभी ऐप और डेटा को हटा दिया जाएगा."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"हटाएं"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपकी स्क्रीन पर दिख रही या आपके डिवाइस पर चलाई जा रही जानकारी ऐक्सेस कर सकता है. इसमें पासवर्ड, पैसे चुकाने का ब्यौरा, फ़ोटो, मैसेज, और चलाए गए ऑडियो जैसी जानकारी शामिल है."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"इस फ़ंक्शन को उपलब्ध कराने वाली सेवा, रिकॉर्ड या कास्ट करते समय, आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली जानकारी को ऐक्सेस कर सकती है. इसमें पासवर्ड, पैसे चुकाने से जुड़ी जानकारी, फ़ोटो, मैसेज, और चलाए जाने वाले ऑडियो शामिल हैं."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"इस फ़ंक्शन को उपलब्ध कराने वाली सेवा, रिकॉर्ड या कास्ट करते समय, आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली जानकारी को ऐक्सेस कर सकती है. इसमें पासवर्ड, पेमेंट के तरीके की जानकारी, फ़ोटो, मैसेज, और चलाए जाने वाले ऑडियो शामिल हैं."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रिकॉर्डिंग या कास्ट करना शुरू करें?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> का इस्तेमाल करके रिकॉर्ड और कास्ट करना शुरू करें?"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"क्या आपको शेयर या रिकॉर्ड करने की <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> को अनुमति देनी है?"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"पूरी स्क्रीन"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"सिर्फ़ एक ऐप्लिकेशन"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"शेयर, रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> के पास स्क्रीन पर दिख रही हर चीज़ या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, शेयर, रिकॉर्ड या कास्ट करते समय, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज या किसी और संवेदनशील जानकारी को लेकर खास सावधानी बरतें."</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"शेयर, रिकॉर्ड या कास्ट करते समय <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> के पास स्क्रीन पर दिख रही हर चीज़ या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज या किसी और संवेदनशील जानकारी को लेकर खास सावधानी बरतें."</string>
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"शेयर, रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> के पास उस ऐप्लिकेशन पर दिख रही हर चीज़ या उस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज या किसी और संवेदनशील जानकारी को लेकर खास सावधानी बरतें."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"जारी रखें"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"ऐप्लिकेशन शेयर करें या उसकी रिकॉर्डिंग करें"</string>
@@ -528,7 +528,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"बिना आवाज़ के सूचनाएं दिखाएं"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"डिफ़ॉल्ट"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"अपने-आप"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"किसी तरह की आवाज़ या वाइब्रेशन न हो"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"आवाज़ या वाइब्रेशन न हो"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"इससे किसी तरह की आवाज़ या वाइब्रेशन नहीं होता और बातचीत, सेक्शन में सबसे नीचे दिखती है"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है. <xliff:g id="APP_NAME">%1$s</xliff:g> में होने वाली बातचीत, डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>
@@ -582,7 +582,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Stop"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"रोकें"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Next"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Previous"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rewind"</string>
@@ -743,7 +743,7 @@
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"आपको मोबाइल और इंटरनेट सेवा देने वाली कंपनी"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"क्या आपको मोबाइल डेटा, <xliff:g id="CARRIER">%s</xliff:g> पर वापस से स्विच करना है?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"उपलब्ध होने पर, मोबाइल डेटा अपने-आप स्विच नहीं होगा"</string>
-    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"स्विच न करें"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"नहीं, रहने दें"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"स्विच करें"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"ऐप की वजह से मंज़ूरी के अनुरोध को समझने में दिक्कत हो रही है, इसलिए सेटिंग से आपके जवाब की पुष्टि नहीं हो पा रही है."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> को <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाने की मंज़ूरी दें?"</string>
@@ -771,7 +771,7 @@
     <string name="privacy_type_location" msgid="7991481648444066703">"जगह"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"माइक्रोफ़ोन"</string>
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"स्क्रीन रिकॉर्डिंग"</string>
-    <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
+    <string name="music_controls_no_title" msgid="4166497066552290938">"कोई टाइटल नहीं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"स्क्रीन को बड़ा करके दिखाने वाली विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"स्क्रीन को बड़ा करके दिखाने वाली विंडो के नियंत्रण"</string>
@@ -805,7 +805,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"पसंदीदा से हटाएं"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"इसे <xliff:g id="NUMBER">%d</xliff:g> नंबर पर ले जाएं"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"कंट्राेल"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"उन कंट्रोल को चुनें जिन्हें फटाफट सेटिंग से ऐक्सेस करना है"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"उन कंट्रोल को चुनें जिन्हें क्विक सेटिंग से ऐक्सेस करना है"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"कंट्रोल का क्रम बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सभी कंट्रोल हटा दिए गए"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदलाव सेव नहीं किए गए"</string>
@@ -872,7 +872,7 @@
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"किसी डिवाइस को कनेक्ट करें"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"इस सेशन को कास्ट करने के लिए, कृपया ऐप्लिकेशन खोलें."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अनजान ऐप्लिकेशन"</string>
-    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्टिंग करना रोकें"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्ट करना बंद करें"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ऑडियो आउटपुट के लिए उपलब्ध डिवाइस."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"वॉल्यूम"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>

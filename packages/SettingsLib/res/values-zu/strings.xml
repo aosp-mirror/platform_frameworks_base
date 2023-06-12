@@ -346,7 +346,7 @@
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Ihlola i-HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Hlela ukuhlola ukuziphatha kwe-HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Ilungisa inkinga"</string>
-    <string name="debug_app" msgid="8903350241392391766">"Khetha uhlelo lokusebenza lokulungisa inkinga"</string>
+    <string name="debug_app" msgid="8903350241392391766">"Khetha i-app yokulungisa inkinga"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Alukho uhlelo lokusebenza lokulungisa inkinga olusethiwe"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Uhlelo lokusebenza lokulungisa inkinga: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Khetha uhlelo lokusebenza"</string>
@@ -384,7 +384,7 @@
     <string name="window_blurs" msgid="6831008984828425106">"Vumela ukufiphala kweleveli yewindi"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Phoqelela i-4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Nika amandla i-4x MSAA ezinhlelweni zokusebenza ze-OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"Susa iphutha ekusebenzeniokungekhona unxantathu kwesiqeshana"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"Susa iphutha ekusebenzeni okungekhona unxantathu kwesiqeshana"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Inikezela iphrofayela ye-HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Nika amandla izendlalelo zokususa amaphutha ze-GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Vumela izendlalelo zokususa amaphutha ze-GPU ngezinhlelo zokusebenza zokususa amaphutha"</string>
@@ -402,7 +402,7 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Uhlelo lokusebenza lwesibonisi aluphenduli kungxoxo yezinhlelo zokusebenza zangemuva"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Bonisa izexwayiso zesiteshi sesaziso"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Ibonisa isexwayiso esikusikrini uma uhlelo lokusebenza luthumela isaziso ngaphandle kwesiteshi esivumelekile"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"Phoqelela ukuvumela izinhlelo zokusebenza ngaphandle"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"Phoqelela ukuvumela ama-app kokwangaphandle"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Yenza noma uluphi uhlelo lokusebenza lifaneleke ukuthi libhalwe kusitoreji sangaphandle, ngaphandle kwamavelu we-manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Imisebenzi yamandla izonikezwa usayizi omusha"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Yenza yonke imisebenzi ibe nosayizi abasha kumawindi amaningi, ngokunganaki amavelu e-manifest."</string>
@@ -426,7 +426,7 @@
     <item msgid="4548987861791236754">"Imibala yemvelo njengoba ibonwa yilihlo"</item>
     <item msgid="1282170165150762976">"Imibala elungiselelwe yokuqukethwe kwedijithali"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="5372523625297212320">"Izinhlelo zokusebenza zokulinda"</string>
+    <string name="inactive_apps_title" msgid="5372523625297212320">"Ama-apps alindile"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Akusebenzi. Thepha ukuze ushintshe."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Kuyasebenza. Thepha ukuze ushintshe."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Isimo sokulinda kohlelo lokusebenza:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
@@ -572,7 +572,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Umsebenzisi"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Iphrofayela evinjelwe"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Engeza umsebenzisi omusha?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Manje ungabelana ngale divayisi nabanye abantu ngokudala abasebenzisi abangeziwe. Umsebenzisi ngamunye unesikhala sakhe, angakwazi ukusenza ngendlela ayifisayo ngezinhlelo zokusebenza, isithombe sangemuva, njalo njalo. Abasebenzisi bangalungisa izilungiselelo zedivayisi ezifana ne-Wi-Fi ezithinta wonke umuntu.\n\nUma ungeza umsebenzisi omusha, loyo muntu kumele asethe isikhala sakhe.\n\nNoma imuphi umsebenzisi angabuyekeza izinhlelo zokusebenza kubo bonke abanye abasebenzisi. Izilungiselelo zokufinyelela kungenzeka zingadluliselwa kumsebenzisi omusha."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Manje ungabelana ngale divayisi nabanye abantu ngokudala abasebenzisi abangeziwe. Umsebenzisi ngamunye unesikhala sakhe, angakwazi ukusenza ngendlela ayifisayo nge-app, isithombe sangemuva, njalo njalo. Abasebenzisi bangalungisa izilungiselelo zedivayisi ezifana ne-Wi-Fi ezithinta wonke umuntu.\n\nUma ungeza umsebenzisi omusha, loyo muntu kumele asethe isikhala sakhe.\n\nNoma imuphi umsebenzisi angabuyekeza izinhlelo zokusebenza kubo bonke abanye abasebenzisi. Izilungiselelo zokufinyelela kungenzeka zingadluliselwa kumsebenzisi omusha."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Uma ungeza umsebenzisi omusha, loyo muntu udinga ukusetha isikhala sakhe.\n\nNoma yimuphi umsebenzisi angabuyekeza izinhlelo zokusebenza kubo bonke abasebenzisi."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Setha umsebenzisi manje?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Qinisekisa ukuthi umuntu uyatholakala ukuze athathe idivayisi futhi asethe isikhala sakhe"</string>

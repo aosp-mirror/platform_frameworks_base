@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"서비스가 준비되지 않았습니다."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"발신자 번호 설정을 변경할 수 없습니다."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> 이동통신사로 데이터가 변경됨"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"언제든지 설정에서 변경할 수 있습니다."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"모바일 데이터 서비스가 차단됨"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"긴급 전화를 사용할 수 없음"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"음성 서비스를 이용할 수 없음"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"앱이 NFC(근거리 무선 통신) 태그, 카드 및 리더와 통신할 수 있도록 허용합니다."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"보안 요소 트랜잭션 이벤트"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"앱이 보안 요소에서 발생하는 트랜잭션에 관한 정보를 받도록 허용합니다."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"화면 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"화면 잠금 복잡도 요청"</string>
@@ -581,11 +585,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"인증 오류"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서 위에 손가락을 좀 더 오래 올려놓으세요"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서 위에 손가락을 좀 더 오래 올려놓으세요"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
@@ -634,23 +638,23 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"수리업체에 방문하세요."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"얼굴 모델을 만들 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"너무 밝습니다. 조명 밝기를 조금 낮춰보세요."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"조명이 부족합니다."</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"조명이 부족합니다"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"휴대전화를 얼굴에서 더 멀리 떨어뜨려 주세요."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"휴대전화를 얼굴에 더 가까이 가져와 주세요."</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"휴대전화를 위로 이동하세요"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"휴대전화를 아래로 이동하세요"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"휴대전화를 왼쪽으로 이동하세요"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"휴대전화를 오른쪽으로 이동하세요"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"휴대전화를 위쪽으로 움직이세요"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"휴대전화를 아래쪽으로 움직이세요"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"휴대전화를 왼쪽으로 움직이세요"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"휴대전화를 오른쪽으로 움직이세요"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"기기에서 더 똑바로 바라보세요."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"얼굴이 보이지 않습니다. 눈높이에 맞춰 휴대전화를 들어 주세요."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"너무 많이 움직였습니다. 휴대전화를 흔들리지 않게 잡으세요."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"얼굴을 다시 등록해 주세요."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"얼굴을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"얼굴의 위치를 조금 변경해 주세요."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"얼굴이 가려지지 않도록 해 주세요."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더 정면으로 바라보세요"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더 정면으로 바라보세요"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더 정면으로 바라보세요"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"얼굴이 가려지지 않도록 해 주세요"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"검은색 바를 포함한 화면 상단을 청소하세요."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -658,7 +662,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"얼굴 모델을 만들 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"선글라스가 감지되었습니다. 전체 얼굴이 보여야 합니다."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"마스크가 감지되었습니다. 전체 얼굴이 보여야 합니다."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"마스크가 감지되었습니다. 얼굴 전체가 보여야 합니다"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"얼굴을 확인할 수 없습니다. 하드웨어를 사용할 수 없습니다."</string>
@@ -1348,7 +1352,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"권한 필요 없음"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"비용이 부과될 수 있습니다."</string>
     <string name="dlg_ok" msgid="5103447663504839312">"확인"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중."</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB를 통해 연결된 기기 충전"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB 파일 전송 사용 설정됨"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB를 통해 PTP 사용 설정됨"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 태블릿 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"스트리밍 중에는 액세스할 수 없습니다. 대신 휴대전화에서 시도해 보세요."</string>
     <string name="system_locale_title" msgid="711882686834677268">"시스템 기본값"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> 카드"</string>
 </resources>

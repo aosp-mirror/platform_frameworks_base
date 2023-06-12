@@ -218,7 +218,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Ecranul este blocat în orientarea de tip peisaj."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Ecranul este blocat în orientarea de tip portret."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Vitrina cu dulciuri"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Economizor de ecran"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Screensaver"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Nu deranja"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
@@ -876,7 +876,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispozitive disponibile pentru ieșire audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volum"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Difuzoare și afișaje"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Difuzoare și ecrane"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cum funcționează transmisia"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmite"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Persoanele din apropiere cu dispozitive Bluetooth compatibile pot asculta conținutul pe care îl transmiți"</string>

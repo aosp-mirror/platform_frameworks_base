@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Nummerpresentatörens standardinställning är inte blockerad. Nästa samtal: Inte blockerad"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Tjänsten är inte etablerad."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Det går inte att ändra inställningen för nummerpresentatör."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Du har bytt mobildata till <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Du kan ändra det här när som helst i inställningarna"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ingen mobildatatjänst"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Det går inte att ringa nödsamtal"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Tjänsten för röstsamtal har blockerats"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillåter att appen hämtar information kopplad till standardtjänsten för NFC-betalning, till exempel registrerade hjälpmedel och ruttdestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollera närfältskommunikationen"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Tillåter att appen kommunicerar med etiketter, kort och läsare för närfältskommunikation (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Transaktionshändelse i ett säkert element"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Tillåter att appen tar emot information om transaktioner som sker i ett säkert element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"inaktivera skärmlåset"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Tillåter att appen inaktiverar tangentlåset och tillhörande lösenordsskydd. Ett exempel kan vara att tangentlåset inaktiveras vid inkommande samtal och aktiveras igen när samtalet är avslutat."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"begär komplexitetsnivå för skärmlåset"</string>
@@ -658,7 +662,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Ansiktsmodellen kunde inte skapas. Försök igen."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mörka glasögon identifierades. Hela ansiktet måste synas."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något som täcker ansiktet identifierades. Hela ansiktet måste synas."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något täcker ansiktet. Hela ansiktet måste synas."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig maskinvara."</string>
@@ -2272,7 +2276,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Återaktivera enhetens mikrofon"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Återaktivera enhetens kamera"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"För &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; och alla appar och tjänster"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Avblockera"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Återaktivera"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorintegritet"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Appikon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Appens varumärkesbild"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Surfplattans kamera kan inte användas från <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Det går inte att komma åt innehållet när du streamar. Testa med telefonen i stället."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systemets standardinställning"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"KORT <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

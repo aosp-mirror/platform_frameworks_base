@@ -388,7 +388,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"Rendering ng Profile HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"I-enable ang GPU debug layer"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Payagang i-load ang GPU debug layer sa debug app"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Enable verbose vendor logging"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"I-enable ang verbose vendor logging"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Magsama sa mga ulat ng bug ng mga karagdagang log ng vendor na partikular sa device, na posibleng may pribadong impormasyon, gumamit ng mas maraming baterya, at/o gumamit ng mas malaking storage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Scale ng window animation"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Scale ng transition animation"</string>
@@ -487,7 +487,7 @@
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Nagcha-charge"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Hindi nagcha-charge"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Nakakonekta, hindi nagcha-charge"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"Nasingil"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Charged"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Puno ang Baterya"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Pinapamahalaan ng admin"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kinokontrol ng Pinaghihigpitang Setting"</string>

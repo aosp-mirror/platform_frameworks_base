@@ -74,6 +74,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Prikaz ID-a pozivaoca u zadanim postavkama nije zabranjen. Sljedeći poziv: nije zabranjen"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Uslugu nije moguće koristiti."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne možete promijeniti postavke ID-a pozivaoca."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Prijenos podataka usmjeravanjem na <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Ove postavke možete uvijek promijeniti u Postavkama"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema usluge prijenosa podataka na mobilnoj mreži"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hitni pozivi su nedostupni"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Nema usluge govornih poziva"</string>
@@ -241,7 +243,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"Isključi"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Napajanje"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Ponovo pokreni"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Hitno"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Hitni poziv"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Izvještaj o greškama"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Završi sesiju"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snimak ekrana"</string>
@@ -263,7 +265,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Postavke"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Pomoć"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Glasovna pomoć"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Zaključavanje"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Zaključaj"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Novo obavještenje"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtuelna tastatura"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Dozvoljava aplikaciji da dobije informacije o preferiranoj usluzi plaćanja putem NFC-a kao što su registrirana pomagala i odredište rute."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"upravljanje NFC-om"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Dozvoljava aplikaciji komuniciranje sa NFC (komunikacija bliskog polja) oznakama, karticama i čitačima."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Događaj transakcije na sigurnom elementu"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Dozvoljava aplikaciji da prima informacije o transakcijama koje se događaju na sigurnom elementu"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktivacija zaključavanja ekrana"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Omogućava aplikaciji deaktivaciju zaključane tastature i svih povezanih zaštita. Naprimjer, telefon deaktivira zaključavanje tastature kod dolaznog telefonskog poziva, a zatim ponovo aktivira zaključavanje tastature kada je poziv završen."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"zahtjev za kompleksnost zaključavanja ekrana"</string>
@@ -602,7 +606,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Lice je provjereno, pritisnite dugme za potvrdu"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardver za otisak prsta nije dostupan."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nije moguće postaviti otisak prsta"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Vrijeme za postavljanje otiska prsta je isteklo. Pokušajte ponovo."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Postavljanje otiska prsta je isteklo. Pokušajte ponovo."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Radnja s otiskom prsta je otkazana."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Korisnik je otkazao radnju s otiskom prsta."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Previše pokušaja. Umjesto toga koristite zaključavanje ekrana."</string>
@@ -643,7 +647,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Pomjerite telefon ulijevo"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Pomjerite telefon udesno"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Gledajte direktno u uređaj."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Ne vidi se lice. Držite telefon u visini očiju."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Lice se ne vidi. Držite telefon u visini očiju."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Previše pokreta. Držite telefon mirno."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ponovo registrirajte lice."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Nije moguće prepoznati lice. Pokušajte ponovo."</string>
@@ -659,7 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nije moguće kreirati model lica. Pokušajte ponovo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Otkrivene su tamne naočale. Lice se mora u potpunosti vidjeti."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Otkriveno je pokrivalo preko lica. Lice se mora u potpunosti vidjeti."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Lice je pokriveno. Lice se mora potpuno vidjeti."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nije moguće potvrditi lice. Hardver nije dostupan."</string>
@@ -918,7 +922,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Pritisnite dugme Meni kako biste otključali uređaj ili obavili hitni poziv."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Pritisnite dugme Meni za otključavanje uređaja."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Nacrtajte uzorak za otključavanje"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Hitno"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Hitni poziv"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Povratak na poziv"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Ispravno!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Pokušajte ponovo"</string>
@@ -947,8 +951,8 @@
     <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM je zaključan."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Otključavanje SIM-a…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Pogrešno ste nacrtali svoj uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Pogrešno ste unijeli svoju lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Pogrešno ste unijeli svoj PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Pogrešno ste napisali svoju lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Pogrešno ste napisali svoj PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Pogrešno ste unijeli uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Možete pokušati još <xliff:g id="NUMBER_1">%2$d</xliff:g> puta. Nakon toga ćete morati otključati tablet prijavom na svoj Google račun.\n\n Broj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_2">%3$d</xliff:g>"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Pogrešno ste unijeli uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> put(a). U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, morat ćete otključati Android TV uređaj prijavom na svoj Google račun.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Pogrešno ste unijeli uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Možete pokušati još <xliff:g id="NUMBER_1">%2$d</xliff:g> puta. Nakon toga ćete morati otključati telefon prijavom na svoj Google račun.\n\n Broj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_2">%3$d</xliff:g>"</string>
@@ -1276,13 +1280,13 @@
     <string name="volume_call" msgid="7625321655265747433">"Jačina zvuka poziva"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Jačina zvuka poziva putem Bluetootha"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Jačina zvuka alarma"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Jačina zvuka za obavještenja"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Jačina zvuka obavještenja"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Jačina zvuka"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Jačina zvuka za Bluetooth vezu"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Jačina zvuka melodije"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Jačina zvuka poziva"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Jačina zvuka medija"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Jačina zvuka za obavještenja"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Jačina zvuka obavještenja"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Zadana melodija zvona"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Zadano (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Bez zvuka"</string>
@@ -1360,7 +1364,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Punjenje povezanog uređaja. Dodirnite za više opcija."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Otkriven je analogni periferni uređaj"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Priključeni uređaj nije kompatibilan s ovim telefonom. Dodirnite da saznate više."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Otklanjanje grešaka putem USB-a je uspostavljeno"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Otklanjanje grešaka putem USB-a je povezano"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Dodirnite da isključite otklanjanje grešaka putem USB-a"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Odaberite da onemogućite otklanjanje grešaka putem USB-a"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Bežično otklanjanje grešaka je povezano"</string>
@@ -1386,7 +1390,7 @@
     <string name="show_ime" msgid="6406112007347443383">"Prikaži na ekranu dok je fizička tastatura aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaz virtuelne tastature"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurirajte fizičku tastaturu"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dodirnite za odabir jezika i rasporeda"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dodirnite da odaberete jezik i raspored"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Prikazivanje preko drugih aplikacija"</string>
@@ -1595,8 +1599,8 @@
     <string name="expires_on" msgid="1623640879705103121">"Ističe:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Serijski broj:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Otisci prstiju:"</string>
-    <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 otisak prsta:"</string>
-    <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 otisak prsta:"</string>
+    <string name="sha256_fingerprint" msgid="7103976380961964600">"Digitalni otisak SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="2339915142825390774">"Digitalni otisak SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Prikaži sve"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Odaberite aktivnost"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Podijeliti sa"</string>
@@ -1657,8 +1661,8 @@
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Pogrešno korisničko ime ili lozinka."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Zaboravili ste korisničko ime ili lozinku?\nPosjetite "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Provjeravanje računa…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Pogrešno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Pogrešno ste unijeli lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Pogrešno ste napisali PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Pogrešno ste napisali lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"Pogrešno ste nacrtali uzorak <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"Pokušali ste otključati tablet na pogrešan način <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, tablet će biti vraćen na fabričke postavke i svi korisnički podaci će biti izgubljeni."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"Pokušali ste neispravno otključati Android TV uređaj <xliff:g id="NUMBER_0">%1$d</xliff:g> put(a). U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, vaš Android TV će se vratiti na fabričke postavke i svi korisnički podaci će biti izgubljeni."</string>
@@ -1856,7 +1860,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Uredu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupati podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Traje jednu minutu (do {formattedTime})}one{Traje # min (do {formattedTime})}few{Traje # min (do {formattedTime})}other{Traje # min (do {formattedTime})}}"</string>
@@ -1892,7 +1896,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS zahtjev je promijenjen u USSD zahtjev"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Promijenjeno u novi SS zahtjev"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Upozorenje o krađi identiteta"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profil za posao"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Radni profil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Upozoreni"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Potvrđeno"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Proširi"</string>
@@ -2047,7 +2051,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Dozvoliti aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim zapisnicima uređaja?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dozvoli jednokratni pristup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nemoj dozvoliti"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, zato pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, zato pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju."</string>
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke. Zbog toga pristup svim zapisnicima uređaja dozvolite samo aplikacijama koje smatrate pouzdanima. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje moći pristupiti nekim zapisnicima ili podacima na uređaju.\n\nSaznajte više na g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
@@ -2291,4 +2295,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nije moguće pristupiti kameri tableta s uređaja <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Ovom ne možete pristupiti tokom prijenosa. Umjesto toga pokušajte na telefonu."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sistemski zadano"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"KARTICA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

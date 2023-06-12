@@ -806,7 +806,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Zhvendose te pozicioni <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrollet"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Zgjidh kontrollet për t\'u qasur nga \"Cilësimet e shpejta\""</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mbaje të shtypur dhe zvarrit për të risistemuar kontrollet"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mbaje shtypur dhe zvarrit për të riorganizuar kontrollet"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Të gjitha kontrollet u hoqën"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ndryshimet nuk u ruajtën"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Shiko aplikacionet e tjera"</string>

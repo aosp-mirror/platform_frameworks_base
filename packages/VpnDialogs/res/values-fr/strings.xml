@@ -32,6 +32,6 @@
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Modifier les paramètres VPN"</string>
     <string name="configure" msgid="4905518375574791375">"Configurer"</string>
     <string name="disconnect" msgid="971412338304200056">"Déconnecter"</string>
-    <string name="open_app" msgid="3717639178595958667">"Ouvrir l\'application"</string>
+    <string name="open_app" msgid="3717639178595958667">"Ouvrir l\'appli"</string>
     <string name="dismiss" msgid="6192859333764711227">"Ignorer"</string>
 </resources>

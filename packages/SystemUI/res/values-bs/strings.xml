@@ -48,7 +48,7 @@
     <string name="always_use_device" msgid="210535878779644679">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Omogućiti otklanjanje grešaka putem USB-a?"</string>
-    <string name="usb_debugging_message" msgid="5794616114463921773">"RSA otisak prsta za otključavanje računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="5794616114463921773">"Digitalni otisak RSA ključa računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Uvijek dozvoli sa ovog računara"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dozvoli"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka putem USB-a nije dozvoljeno"</string>
@@ -502,13 +502,13 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Postavke zaključavanja ekrana"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"Skener QR koda"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Ažuriranje"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Profil za posao"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Radni profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Način rada u avionu"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nećete čuti sljedeći alarm u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Pristupna tačka"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil za posao"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Radni profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zabava za neke, ali ne za sve"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Podešavač za korisnički interfejs sistema vam omogućava dodatne načine da podesite i prilagodite Androidov interfejs. Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
@@ -687,7 +687,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Urediti raspored postavki."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meni napajanja"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključavanje ekrana"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključani ekran"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog pregrijavanja"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Vaš telefon sada radi normalno.\nDodirnite za više informacija"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Vaš telefon se pregrijao, pa se isključio da se ohladi. Telefon sada radi normalno.\n\nTelefon se može pregrijati ako:\n	• Koristite aplikacije koje troše puno resursa (kao što su aplikacije za igranje, videozapise ili navigaciju)\n	• Preuzimate ili otpremate velike fajlove\n	• Koristite telefon na visokim temperaturama"</string>
@@ -699,10 +699,10 @@
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Iskopčajte uređaj"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Uređaj se zagrijava u blizini priključka za punjenje. Ako je povezan s punjačem ili USB dodatkom, iskopčajte ga i vodite računa jer i kabl može biti topao."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Prikaz koraka za zaštitu"</string>
-    <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Prečica lijevo"</string>
-    <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Prečica desno"</string>
-    <string name="lockscreen_unlock_left" msgid="1417801334370269374">"Prečica lijevo također otključava"</string>
-    <string name="lockscreen_unlock_right" msgid="4658008735541075346">"Prečica desno također otključava"</string>
+    <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Lijeva prečica"</string>
+    <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Desna prečica"</string>
+    <string name="lockscreen_unlock_left" msgid="1417801334370269374">"Lijeva prečica također otključava"</string>
+    <string name="lockscreen_unlock_right" msgid="4658008735541075346">"Desna prečica također otključava"</string>
     <string name="lockscreen_none" msgid="4710862479308909198">"Ništa"</string>
     <string name="tuner_launch_app" msgid="3906265365971743305">"Pokrenite aplikaciju <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="tuner_other_apps" msgid="7767462881742291204">"Ostale aplikacije"</string>
@@ -954,7 +954,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi se trenutno ne može automatski povezati"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da promijenite mrežu, isključite ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu bilo kada skenirati WiFi mreže, čak i kada je WiFi isključen. Ovo možete promijeniti u Postavkama skeniranja WiFi mreže. "<annotation id="link">"Promijeni"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu tražiti WiFi mreže bilo kada, čak i kada je WiFi isključen. Ovo možete promijeniti u Postavkama traženja WiFi mreže. "<annotation id="link">"Promijeni"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključi način rada u avionu"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi dodati sljedeću karticu u Brze postavke"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj karticu"</string>

@@ -75,6 +75,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Ідентиф. абонента за умовч. не обмеж. Наст. дзвінок: не обмежений"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Службу не ініціалізовано."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ви не можете змінювати налаштування ідентифікатора абонента."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Мобільний Інтернет переключено на <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Цей параметр можна будь-коли змінити в налаштуваннях"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Службу передавання мобільних даних заблоковано"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Екстрені виклики недоступні"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Немає голосової служби"</string>
@@ -222,9 +224,9 @@
     <string name="reboot_to_update_title" msgid="2125818841916373708">"Оновлення системи Android"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Підготовка до оновлення…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Обробка пакета оновлення…"</string>
-    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезавантаження…"</string>
+    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезапуск…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Скидання налаштувань"</string>
-    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезавантаження…"</string>
+    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезапуск…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Вимкнення..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Ваш пристрій буде вимкнено."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Пристрій Android TV буде вимкнено."</string>
@@ -550,6 +552,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Подія, пов’язана з транcакцією в Компоненті захисту"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Надає додатку доступ до інформації про транcакції, що відбуваються в Компоненті захисту."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"вимикати блокування екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запитувати рівень складності блокування екрана"</string>
@@ -623,10 +627,10 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Сталася помилка. Повторіть спробу."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок відбитка пальця"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейсконтроль"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейс-контроль"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Сталася помилка з фейсконтролем"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Натисніть, щоб видалити свою модель обличчя, а потім знову додайте її"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Налаштування фейсконтролю"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Налаштування фейс-контролю"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ви зможете розблоковувати телефон, подивившись на нього"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Щоб використовувати фейсконтроль, увімкніть "<b>"Доступ до камери"</b>" в розділі \"Налаштування\" &gt; \"Конфіденційність\""</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Налаштуйте більше способів розблокування"</string>
@@ -660,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Не вдається створити модель обличчя. Повторіть спробу."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Виявлено темні окуляри. Обличчя має бути видно повністю."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Виявлено аксесуар, який закриває обличчя. Обличчя має бути видно повністю."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Обличчя не видно повністю, бо його закриває аксесуар."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
@@ -995,7 +999,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Розгорнути область розблокування."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Розблокування повзунком."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Розблокування ключем."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Фейсконтроль."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Фейс-контроль."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Розблокування PIN-кодом."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Розблокування SIM-карти PIN-кодом."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Розблокування SIM-карти PUK-кодом."</string>
@@ -1480,7 +1484,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Ви використовуєте цей додаток у своєму робочому профілі"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Метод введення"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Синхр."</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Спеціальні можливості"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Доступність"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Змінити фоновий малюнок"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Сервіс читання сповіщень"</string>
@@ -1684,8 +1688,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вмикати"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"УВІМК."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ВИМК."</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу <xliff:g id="SERVICE">%1$s</xliff:g> повний доступ до вашого пристрою?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу \"<xliff:g id="SERVICE">%1$s</xliff:g>\" повний доступ до вашого пристрою?"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ потрібен додаткам, які підтримують функції доступності, але його не варто відкривати для більшості інших додатків."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати контент поверх інших додатків."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Перегляд і виконання дій"</string>
@@ -1984,7 +1988,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Новини та журнали"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Карти й навігація"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Продуктивність"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Спеціальні можливості"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Доступність"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Пам’ять пристрою"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Налагодження USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"години"</string>
@@ -2274,7 +2278,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Розблокуйте мікрофон пристрою"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Розблокуйте камеру пристрою"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Для &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; та всіх додатків і сервісів"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Розблокувати"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Надати"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Конфіденційність датчиків"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок додатка"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Зображення фірмової символіки додатка"</string>
@@ -2292,4 +2296,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не вдається отримати доступ до камери планшета з пристрою <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Цей контент недоступний під час потокового передавання. Спробуйте натомість скористатися телефоном."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Налаштування системи за умовчанням"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"КАРТКА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

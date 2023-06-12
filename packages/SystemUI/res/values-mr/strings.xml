@@ -140,10 +140,10 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"निश्चित केले"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"पूर्ण करण्यासाठी खात्री करा वर टॅप करा"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"चेहऱ्याने अनलॉक केले. सुरू ठेवण्यासाठी अनलॉक करा आयकन दाबा."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"चेहऱ्याने अनलॉक केले आहे. पुढे सुरू ठेवण्यासाठी दाबा."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"चेहरा ओळखला आहे. पुढे सुरू ठेवण्यासाठी दाबा."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"चेहरा ओळखला आहे. पुढे सुरू ठेवण्यासाठी अनलॉक करा आयकन दाबा."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"चेहऱ्याने अनलॉक केले. सुरू ठेवण्यासाठी अनलॉक करा आयकन प्रेस करा."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"चेहऱ्याने अनलॉक केले आहे. पुढे सुरू ठेवण्यासाठी प्रेस करा."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"चेहरा ओळखला आहे. पुढे सुरू ठेवण्यासाठी प्रेस करा."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"चेहरा ओळखला आहे. पुढे सुरू ठेवण्यासाठी अनलॉक करा आयकन प्रेस करा."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ऑथेंटिकेशन केलेले"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"पिन वापरा"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"पॅटर्न वापरा"</string>
@@ -245,7 +245,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"नेटवर्क उपलब्ध नाहीत"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"वाय-फाय नेटवर्क उपलब्‍ध नाहीत"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"सुरू करत आहे…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"स्क्रीन कास्ट करा"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"स्क्रीन कास्ट"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"कास्ट करत आहे"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"निनावी डिव्हाइस"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"कोणतेही डिव्हाइसेस उपलब्ध नाहीत"</string>
@@ -318,12 +318,12 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"उघडण्यासाठी पुन्हा टॅप करा"</string>
     <string name="tap_again" msgid="1315420114387908655">"पुन्हा टॅप करा"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"उघडण्यासाठी वर स्वाइप करा"</string>
-    <string name="keyguard_unlock_press" msgid="9140109453735019209">"उघडण्यासाठी अनलॉक करा आयकन दाबा"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"उघडण्यासाठी अनलॉक करा आयकन प्रेस करा"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"चेहऱ्याने अनलॉक केले आहे. उघडण्यासाठी वर स्वाइप करा."</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"चेहऱ्याने अनलॉक केले. उघडण्यासाठी अनलॉक करा आयकन दाबा."</string>
-    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"चेहऱ्याने अनलॉक केले आहे. उघडण्यासाठी दाबा."</string>
-    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"चेहरा ओळखला आहे. उघडण्यासाठी दाबा."</string>
-    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"चेहरा ओळखला आहे. उघडण्यासाठी अनलॉक करा आयकन दाबा."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"चेहऱ्याने अनलॉक केले. उघडण्यासाठी अनलॉक करा आयकन प्रेस करा."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"चेहऱ्याने अनलॉक केले आहे. उघडण्यासाठी प्रेस करा."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"चेहरा ओळखला आहे. उघडण्यासाठी प्रेस करा."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"चेहरा ओळखला आहे. उघडण्यासाठी अनलॉक करा आयकन प्रेस करा."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"चेहऱ्याने अनलॉक केले आहे"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"चेहरा ओळखला आहे"</string>
   <string-array name="udfps_accessibility_touch_hints">
@@ -395,7 +395,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"आता सुरू करा"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"सूचना नाहीत"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"नवीन सूचना नाहीत"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"जुन्या सूचना पहाण्यासाठी अनलॉक करा"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"जुन्या सूचना पाहण्यासाठी अनलॉक करा"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"हे डिव्हाइस तुमच्या पालकाने व्यवस्थापित केले आहे"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"तुमच्‍या संस्‍थेकडे या डिव्हाइसची मालकी आहे आणि ती नेटवर्क ट्रॅफिकचे परीक्षण करू शकते"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> च्या मालकीचे आहे आणि ती नेटवर्क ट्रॅफिकचे परीक्षण करू शकते"</string>
@@ -648,8 +648,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"उजवा कीकोड"</string>
     <string name="left_icon" msgid="5036278531966897006">"डावे आयकन"</string>
     <string name="right_icon" msgid="1103955040645237425">"उजवे आयकन"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"टाइल जोडण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"टाइलची पुनर्रचना करण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"टाइल जोडण्यासाठी धरून ठेवून ड्रॅग करा"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"टाइलची पुनर्रचना करण्यासाठी धरून ठेवून ड्रॅग करा"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"काढण्यासाठी येथे ड्रॅग करा"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"तुम्हाला किमान <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> टाइलची गरज आहे"</string>
     <string name="qs_edit" msgid="5583565172803472437">"संपादित करा"</string>
@@ -686,7 +686,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> सेटिंग्ज उघडा."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिंग्जचा क्रम संपादित करा."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पॉवर मेनू"</string>
-    <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"पृष्ठ <xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g>"</string>
+    <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g> पेज"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"तापल्‍यामुळे फोन बंद झाला"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"तुमचा फोन आता नेहमीप्रमाणे काम करत आहे.\nअधिक माहितीसाठी टॅप करा"</string>
@@ -806,7 +806,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> स्थानावर हलवा"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियंत्रणे"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"क्विक सेटिंग्ज मधून अ‍ॅक्सेस करण्यासाठी नियंत्रणे निवडा"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियंत्रणांची पुनर्रचना करण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियंत्रणांची पुनर्रचना करण्यासाठी धरून ठेवून ड्रॅग करा"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सर्व नियंत्रणे काढून टाकली आहेत"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदल सेव्ह केले गेले नाहीत"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"इतर अ‍ॅप्स पहा"</string>
@@ -820,7 +820,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"लॉक स्क्रीनवरून डिव्हाइस दाखवायचे आणि नियंत्रित करायचे का?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"तुम्ही तुमच्या बाह्य डिव्हाइससाठी लॉक स्क्रीनवर नियंत्रणे जोडू शकता.\n\nतुमचे डिव्हाइस अ‍ॅप तुम्हाला तुमचा फोन किंवा टॅबलेट अनलॉक न करता काही डिव्हाइस नियंत्रित करण्याची अनुमती देऊ शकते.\n\nतुम्ही सेटिंग्ज मध्ये कधीही बदल करू शकता."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"लॉक स्क्रीनवरून डिव्हाइस नियंत्रित करायची का?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"तुमचा फोन किंवा टॅबलेट अनलॉक न करता तुम्ही काही डिव्हाइस नियंत्रित करू शकता.\n\nतुमचे डिव्हाइस अ‍ॅप अशा प्रकारे कोणते डिव्हाइस नियंत्रित केले जाऊ शकतात हे निर्धारित करते."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"तुमचा फोन किंवा टॅबलेट अनलॉक न करता तुम्ही काही डिव्हाइस नियंत्रित करू शकता.\n\nअशाप्रकारे कोणती डिव्हाइस नियंत्रित केली जाऊ शकतात, हे तुमचे डिव्हाइस अ‍ॅप निर्धारित करते."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"नाही, नको"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"होय"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"पिनमध्ये अक्षरे किंवा चिन्हे आहेत"</string>

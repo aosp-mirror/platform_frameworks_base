@@ -251,7 +251,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Ez dago gailurik erabilgarri"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Ez zaude konektatuta wifi-sarera"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Distira"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Kolore-alderantzikatzea"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Koloreen alderantzikatzea"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Koloreen zuzenketa"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Kudeatu erabiltzaileak"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Eginda"</string>
@@ -502,13 +502,13 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Pantaila blokeatuaren ezarpenak"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR kodeen eskanerra"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Eguneratzen"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Work profila"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Laneko profila"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Hegaldi modua"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="2234991538018805736">"ordua: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wifi-gunea"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Work profila"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Laneko profila"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistemaren erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
@@ -820,7 +820,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Gailuak pantaila blokeatuan ikusi eta kontrolatu nahi dituzu?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Kanpoko gailuak kontrolatzeko aukerak gehi ditzakezu pantaila blokeatuan.\n\nBaliteke telefonoa edo tableta desblokeatu gabe gailu batzuk kontrolatzeko baimena ematea gailuaren aplikazioak.\n\nAldaketak egiteko, joan Ezarpenak atalera."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Gailuak pantaila blokeatuan kontrolatu nahi dituzu?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Gailu batzuk telefonoa edo tableta desblokeatu gabe kontrola ditzakezu.\n\nGailuaren aplikazioak zehaztuko du zer gailu kontrola daitezkeen modu horretan."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Gailu batzuk telefonoa edo tableta desblokeatu gabe kontrola ditzakezu.\n\nGailuaren aplikazioak zehaztuko du zein gailu kontrola daitezkeen modu horretan."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ez, eskerrik asko"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Bai"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN kodeak hizkiak edo ikurrak ditu"</string>
@@ -832,7 +832,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pasatu hatza aukera gehiago ikusteko"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Gomendioak kargatzen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia-edukia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren multimedia kontr. aukerak ezkutatu?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Multimedia kontrolatzeko aukerak (<xliff:g id="APP_NAME">%1$s</xliff:g>) ezkutatu?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Ezin da ezkutatu multimedia-saioa."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ezkutatu"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Berrekin"</string>
@@ -963,7 +963,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplikazio aktibo dago}other{# aplikazio aktibo daude}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informazio berria"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktibo dauden aplikazioak"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Aplikazio hauek aktibo daude eta funtzionatzen ari dira, nahiz eta zu haiek erabiltzen ez aritu. Aukera honek haien funtzioa hobetzen du, baina baliteke bateriaren iraupenari ere eragitea."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Aplikazio hauek aktibo daude eta funtzionatzen ari dira, nahiz eta zu haiek erabiltzen ez aritu. Aukera honek haien funtzionamendua hobetzen du, baina baliteke bateriaren iraupenari ere eragitea."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Gelditu"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Geldituta"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Eginda"</string>

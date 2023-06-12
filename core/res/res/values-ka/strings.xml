@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ნაგულისხმებად დაყენებულია ნომრის დაფარვის გამორთვა. შემდეგი ზარი: არ არის დაფარული."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"სერვისი არ არის მიწოდებული."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"არ შეგიძლიათ აბონენტის ID პარამეტრების შეცვლა."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"მონაცემები გადართულია <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-ზე"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"ამის შეცვლა ნებისმიერ დროს შეგიძლიათ პარამეტრებში"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"მობილური ინტერნეტის სერვისი არ არის"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"გადაუდებელი ზარი მიუწვდომელია"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ხმოვანი ზარების სერვისი არ არის"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"საშუალებას აძლევს აპს, მიიღოს უპირატესი NFC გადახდის სერვისის ინფორმაცია, მაგალითად, რეგისტრირებული დახმარება და დანიშნულება."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ახლო მოქმედების რადიოკავშირი (NFC) მართვა"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"აპს შეეძლება ახლო მოქმედების რადიოკავშირის (NFC) მეშვეობით ტეგების, ბარათებისა და წამკითხველების შემცველი მონაცემების მიმოცვლა."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"უსაფრთხო ელემენტის ტრანზაქციის ღონისძიება"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"საშუალებს აძლევს აპს, მიიღოს ინფორმაცია უსაფრთხო ელემენტზე განხორციელებული ტრანზაქციების შესახებ."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"თქვენი ეკრანის ბლოკის გათიშვა"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"შეეძლება კლავიატურის დაბლოკვისა და პაროლით უზრუნველყოფილი ნებისმიერი უსაფრთხოების ფუნქციის დეაქტივაცია. მაგალითად, ტელეფონი შემომავალი ზარის დროს აუქმებს კლავიატურის დაბლოკვას და კვლავ ააქტიურებს მას, როგორც კი ზარი დასრულდება."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ეკრანის დაბლოკვის მეთოდის სირთულის შესახებ ინფორმაციის მოთხოვნა"</string>
@@ -591,7 +595,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ზედმეტად ნათელია"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"აღმოჩენილია Ძლიერი დაჭერა"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ცადეთ დარეგულირება"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ თითის დაჭერის ადგილი ყოველ ჯერზე"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ დაჭერის ადგილი ყოველ ჯერზე"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
@@ -642,7 +646,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"გაწიეთ ტელეფონი თქვენგან მარცხნივ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"გაწიეთ ტელეფონი თქვენგან მარჯვნივ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"გთხოვთ, უფრო პირდაპირ შეხედოთ თქვენს მოწყობილობას."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"თქვენი სახე არ ჩანს. დაიჭირეთ ტელეფონი თვალის დონეზე."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"სახე არ ჩანს. დაიჭირეთ ტელ. თვალის დონეზე."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"მეტისმეტად მოძრაობთ. მყარად დაიჭირეთ ტელეფონი."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"გთხოვთ, ხელახლა დაარეგისტრიროთ თქვენი სახე."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"სახის ამოცნობა ვერ ხერხდება. ცადეთ ხელახლა."</string>
@@ -658,7 +662,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"თქვენი სახის მოდელი ვერ იქმნება. ცადეთ ხელახლა."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"აღმოჩენილია მუქი სათვალე. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"აღმოჩენილია სახის დაფარვა. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"სახე დაფარულია. ის მთლიანად უნდა ჩანდეს."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"სახე ვერ დასტურდება. აპარატი მიუწვდომელია."</string>
@@ -939,7 +943,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"შეწყვეტა"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"უკან გადახვევა"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"წინ გადახვევა"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი დახმარების ზარები"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი ზარები"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ქსელი ჩაკეტილია"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM დაბლოკილია PUK-ით."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"იხილეთ მომხმარებლის სახელმძღვანელო ან დაუკავშირდით კლიენტების მომსახურებას."</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ტაბლეტის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"მასზე წვდომის მიᲦება შეუძლებელია სტრიმინგის დროს. ცადეთ ტელეფონიდან."</string>
     <string name="system_locale_title" msgid="711882686834677268">"სისტემის ნაგულისხმევი"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"ბარათი <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

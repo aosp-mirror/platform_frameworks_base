@@ -869,7 +869,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Выбрана прылад: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(адключана)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Не ўдалося пераключыцца. Дакраніцеся, каб паўтарыць спробу."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Падключыце прыладу"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Падключыць прыладу"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Для трансляцыі гэтага сеанса адкрыйце праграму."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Невядомая праграма"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Спыніць трансляцыю"</string>

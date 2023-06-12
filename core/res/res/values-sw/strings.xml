@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Huduma haitathminiwi."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Hauwezi kubadilisha mpangilio wa kitambulisho cha anayepiga."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Sasa unatumia data ya mtandao wa <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Unaweza kubadilisha hali hii wakati wowote kwenye Mipangilio"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Hakuna huduma ya data kwa vifaa vya mkononi"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Huduma ya kupiga simu za dharura haipatikani"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Hakuna huduma za simu za sauti"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Huruhusu programu kupata maelezo ya huduma inayopendelewa ya malipo ya nfc kama vile huduma zilizosajiliwa na njia."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Muamala kupitia Kipengele Salama"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Huruhusu programu kupokea maelezo kuhusu miamala inayofanyika kupitia Kipengele Salama."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"zima kufuli la skrini yako"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Inaruhusu programu kulemaza ufunguo wa vitufe na usalama mwingine ambata wa nenosiri. Kwa mfano, simu inalemaza ufunguo wa viitufe inapopokea simu inayoingia, kisha inawezesha upya ufunguo wa vitufe wakati simu inapokamilika."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"iombe kiwango cha uchangamano wa kufunga skrini"</string>
@@ -642,7 +646,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Sogeza simu upande wako wa kushoto"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Sogeza simu upande wako wa kulia"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Tafadhali angalia kifaa chako moja kwa moja."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Imeshindwa kuona uso wako. Shikilia simu yako ikilingana na macho."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Imeshindwa kuona uso wako. Shikilia simu ikilingana na macho."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Inatikisika sana. Ishike simu iwe thabiti."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Tafadhali sajili uso wako tena."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Imeshindwa kutambua uso. Jaribu tena."</string>
@@ -658,7 +662,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Imeshindwa kuunda muundo wa uso wako. Jaribu tena."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Vioo vyeusi vimetambuliwa. Ni lazima uso wako wote uonekane."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kifuniko cha uso kimetambuliwa. Ni lazima uso wako wote uonekane."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Uso umefunikwa. Lazima uso wako wote uonekane."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imeshindwa kuthibitisha uso. Maunzi hayapatikani."</string>
@@ -791,7 +795,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Ya nyumbani"</item>
     <item msgid="7740243458912727194">"Simu ya mkononi"</item>
-    <item msgid="8526146065496663766">"Ya kazini"</item>
+    <item msgid="8526146065496663766">"Kazini"</item>
     <item msgid="8150904584178569699">"Pepesi ya Kazini"</item>
     <item msgid="4537253139152229577">"Pepesi ya Nyumbani"</item>
     <item msgid="6751245029698664340">"Kurasa anwani"</item>
@@ -834,7 +838,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Maalum"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Ya nyumbani"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"Simu ya mkononi"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"Ya kazini"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"Kazini"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Pepesi ya Kazini"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Pepesi ya Nyumbani"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"Peja"</string>
@@ -1855,7 +1859,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Sawa"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozigusa."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Washa"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Kwa dakika moja (hadi {formattedTime})}other{Kwa dakika # (hadi {formattedTime})}}"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Haiwezi kufikia kamera ya kompyuta kibao kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Huwezi kufikia maudhui haya unapotiririsha. Badala yake jaribu kwenye simu yako."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Chaguomsingi la mfumo"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"SIM KADI <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

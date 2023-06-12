@@ -500,7 +500,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Déverrouiller pour utiliser"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Un problème est survenu lors de la récupération de vos cartes, veuillez réessayer plus tard"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Paramètres de l\'écran de verrouillage"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"lecteur de code QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Lecteur de code QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Mise à jour en cours…"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil professionnel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode Avion"</string>
@@ -563,7 +563,7 @@
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"paramètres des notifications"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"options de répétition des notifications"</string>
-    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Me rappeler"</string>
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Me le rappeler"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Annuler"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Reporté pour <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# heure}=2{# heures}one{# heure}many{# d\'heures}other{# heures}}"</string>
@@ -650,7 +650,7 @@
     <string name="right_icon" msgid="1103955040645237425">"Icône droite"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Sélectionnez et faites glisser les tuiles pour les ajouter"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Faites glisser les tuiles pour les réorganiser"</string>
-    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les tuiles ici pour les supprimer"</string>
+    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les tuiles ici pour les retirer"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Vous avez besoin d\'au moins <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tuiles"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Modifier"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Heure"</string>
@@ -806,8 +806,8 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Déplacer l\'élément à la position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Choisissez les commandes à inclure dans le menu Paramètres rapides"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Maintenez le doigt sur l\'écran, puis glissez-le pour réorganiser les commandes"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été supprimées"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Faites glisser les commandes pour les réorganiser"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été retirées"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modifications non enregistrées"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Afficher autres applications"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Impossible de charger les commandes. Vérifiez l\'application <xliff:g id="APP">%s</xliff:g> pour vous assurer que les paramètres de l\'application n\'ont pas changé."</string>

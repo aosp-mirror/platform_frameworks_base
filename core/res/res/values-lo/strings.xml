@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ໝາຍເລກຜູ່ໂທ ໄດ້ຮັບການຕັ້ງຄ່າເລີ່ມຕົ້ນເປັນ ບໍ່ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ບໍ່ຖືກຈຳກັດ."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ບໍ່ໄດ້ເປີດໃຊ້ບໍລິການ."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ທ່ານບໍ່ສາມາດປ່ຽນແປງການຕັ້ງຄ່າ Caller ID"</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"ປ່ຽນໄປໃຊ້ອິນເຕີເນັດມືຖືຂອງ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> ແລ້ວ"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"ທ່ານສາມາດປ່ຽນສິ່ງນີ້ຕອນໃດກໍໄດ້ໃນການຕັ້ງຄ່າ"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ບໍ່ມີບໍລິການອິນເຕີເນັດມືຖື"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ບໍ່ສາມາດໃຊ້ການໂທສຸກເສີນໄດ້"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ບໍ່ມີບໍລິການໂທສຽງ"</string>
@@ -256,7 +258,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ໂໝດປິດສຽງ"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ປິດສຽງແລ້ວ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ເປິດສຽງແລ້ວ"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ໂໝດໃນຍົນ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ໂໝດຢູ່ໃນຍົນ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"ເປີດໂໝດຢູ່ໃນຍົນແລ້ວ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"ປິດໂໝດໃນຍົນແລ້ວ"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"​ການ​ຕັ້ງ​ຄ່າ"</string>
@@ -548,6 +550,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການໄດ້ ເຊັ່ນ: ການຊ່ວຍເຫຼືອແບບລົງທະບຽນ ແລະ ປາຍທາງເສັ້ນທາງ."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ຄວບຄຸມ Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ອະນຸຍາດໃຫ້ແອັບຯຕິດຕໍ່ສື່ສານກັບປ້າຍກຳກັບ, ບັດ ແລະໂຕອ່ານຂອງການສື່ສານໄລຍະສັ້ນ (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"ເຫດການທຸລະກໍາອົງປະກອບຄວາມປອດໄພ"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນກ່ຽວກັບທຸລະກໍາທີ່ເກີດຂຶ້ນຢູ່ໃນອົງປະກອບທີ່ປອດໄພ."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ປິດການລັອກໜ້າຈໍ"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງປຸ່ມລັອກ ແລະລະບົບຄວາມປອດໄພຂອງລະຫັດຜ່ານທີ່ເຊື່ອມໂຍງກັນ. ໂຕຢ່າງ: ໂທລະສັບຈະປິດການເຮັດວຽກຂອງປຸ່ມລັອກເມື່ອມີສາຍໂທເຂົ້າ ຈາກນັ້ນຈຶ່ງເປີດໃຊ້ໄດ້ອີກເມື່ອວາງສາຍແລ້ວ."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ຮ້ອງຂໍຄວາມຊັບຊ້ອນການລັອກໜ້າຈໍ"</string>
@@ -2290,4 +2294,5 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງແທັບເລັດຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ບໍ່ສາມາດເຂົ້າເຖິງເນື້ອຫານີ້ໄດ້ໃນຂະນະທີ່ຍັງສະຕຣີມຢູ່. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
     <string name="system_locale_title" msgid="711882686834677268">"ຄ່າເລີ່ມຕົ້ນຂອງລະບົບ"</string>
+    <string name="default_card_name" msgid="9198284935962911468">"ບັດ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
