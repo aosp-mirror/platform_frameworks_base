@@ -235,6 +235,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mHandler,
                     mChoreographer,
                     mDisplay.getDisplayId(),
+                    mRelayoutParams.mCornerRadius,
                     mDecorationContainerSurface,
                     mDragPositioningCallback);
         }

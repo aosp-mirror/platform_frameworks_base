@@ -416,7 +416,7 @@
     <!-- The radius of the caption menu shadow. -->
     <dimen name="desktop_mode_handle_menu_shadow_radius">2dp</dimen>
 
-    <dimen name="freeform_resize_handle">30dp</dimen>
+    <dimen name="freeform_resize_handle">15dp</dimen>
 
     <dimen name="freeform_resize_corner">44dp</dimen>
 </resources>
