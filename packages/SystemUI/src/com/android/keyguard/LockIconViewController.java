@@ -326,7 +326,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
 
         if (!Objects.equals(prevContentDescription, mView.getContentDescription())
-                && mView.getContentDescription() != null) {
+                && mView.getContentDescription() != null && mView.isVisibleToUser()) {
             mView.announceForAccessibility(mView.getContentDescription());
         }
     }
