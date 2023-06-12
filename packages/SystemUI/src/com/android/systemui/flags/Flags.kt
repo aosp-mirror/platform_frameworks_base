@@ -259,6 +259,11 @@ object Flags {
     @JvmField
     val FP_LISTEN_OCCLUDING_APPS = unreleasedFlag(237, "fp_listen_occluding_apps")
 
+    /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
+    // TODO(b/286563884): Tracking bug
+    @JvmField
+    val KEYGUARD_TALKBACK_FIX = unreleasedFlag(238, "keyguard_talkback_fix")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
