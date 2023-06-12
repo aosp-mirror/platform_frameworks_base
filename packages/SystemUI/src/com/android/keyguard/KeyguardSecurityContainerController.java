@@ -264,13 +264,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
          */
         @Override
         public void finish(boolean fromPrimaryAuth, int targetUserId) {
-            if (!mKeyguardStateController.canDismissLockScreen() && !fromPrimaryAuth) {
-                Log.e(TAG,
-                        "Tried to dismiss keyguard when lockscreen is not dismissible and user "
-                                + "was not authenticated with a primary security method "
-                                + "(pin/password/pattern).");
-                return;
-            }
             // If there's a pending runnable because the user interacted with a widget
             // and we're leaving keyguard, then run it.
             boolean deferKeyguardDone = false;
