@@ -183,12 +183,12 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             final int taskId = taskInfo.taskId;
             mChildrenLeashes.put(taskId, leash);
             mChildrenTaskInfo.put(taskId, taskInfo);
-            updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
             mCallbacks.onChildTaskStatusChanged(taskId, true /* present */, taskInfo.isVisible);
             if (ENABLE_SHELL_TRANSITIONS) {
                 // Status is managed/synchronized by the transition lifecycle.
                 return;
             }
+            updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
             mCallbacks.onChildTaskAppeared(taskId);
             sendStatusChanged();
         } else {
@@ -417,7 +417,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             }
             t.setCrop(leash, null);
             t.setPosition(leash, taskPositionInParent.x, taskPositionInParent.y);
-            if (firstAppeared && !ENABLE_SHELL_TRANSITIONS) {
+            if (firstAppeared) {
                 t.setAlpha(leash, 1f);
                 t.setMatrix(leash, 1, 0, 0, 1);
                 t.show(leash);
