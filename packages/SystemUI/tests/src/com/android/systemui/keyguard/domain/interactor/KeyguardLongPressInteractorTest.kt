@@ -292,7 +292,8 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
                 scope = testScope.backgroundScope,
                 transitionInteractor =
                     KeyguardTransitionInteractor(
-                        repository = keyguardTransitionRepository,
+                        keyguardTransitionRepository,
+                        testScope.backgroundScope
                     ),
                 repository = keyguardRepository,
                 logger = logger,

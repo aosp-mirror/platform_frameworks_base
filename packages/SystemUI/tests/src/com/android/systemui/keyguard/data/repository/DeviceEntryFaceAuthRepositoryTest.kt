@@ -216,7 +216,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             )
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
         val keyguardTransitionInteractor =
-            KeyguardTransitionInteractor(keyguardTransitionRepository)
+            KeyguardTransitionInteractor(keyguardTransitionRepository, testScope.backgroundScope)
         return DeviceEntryFaceAuthRepositoryImpl(
             mContext,
             fmOverride,

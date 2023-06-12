@@ -47,7 +47,8 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
         testScope = TestScope(UnconfinedTestDispatcher())
 
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-        val interactor = KeyguardTransitionInteractor(keyguardTransitionRepository)
+        val interactor =
+            KeyguardTransitionInteractor(keyguardTransitionRepository, testScope.backgroundScope)
         underTest = CollapsedStatusBarViewModelImpl(interactor, testScope.backgroundScope)
     }
 
