@@ -989,12 +989,7 @@ public class PipTransition extends PipTransitionController {
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull TaskInfo taskInfo) {
-        final int changeSize = info.getChanges().size();
-        if (changeSize < 4) {
-            throw new RuntimeException(
-                    "Got an exit-pip-to-split transition with unexpected change-list");
-        }
-        for (int i = changeSize - 1; i >= 0; i--) {
+        for (int i = info.getChanges().size() - 1; i >= 0; i--) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final int mode = change.getMode();
 
