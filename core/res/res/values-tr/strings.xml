@@ -620,6 +620,7 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biyometrik donanım kullanılamıyor"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Kimlik doğrulama iptal edildi"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Tanınmadı"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"Yüz tanınmadı"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Kimlik doğrulama iptal edildi"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN, desen veya şifre seti yok"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Kimlik doğrulama sırasında hata oluştu"</string>
@@ -1850,7 +1851,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Çıkmak için yukarıdan aşağıya doğru hızlıca kaydırın."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Anladım"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Daha iyi bir görünüm elde etmek için ekranı döndürün"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Daha iyi bir görünüm elde etmek için bölünmüş ekrandan çıkın"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Daha iyi görünüm için <xliff:g id="NAME">%s</xliff:g> uygulamasını açın"</string>
     <string name="done_label" msgid="7283767013231718521">"Bitti"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Saat kaydırma çemberi"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Dakika kaydırma çemberi"</string>
