@@ -199,19 +199,7 @@ class SplitScreenTransitions {
             boolean isOpening = TransitionUtil.isOpeningType(info.getType());
             if (!isOpening && (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK)) {
                 // fade out
-                if (change.getSnapshot() != null) {
-                    // This case is happened if task is going to reparent to TDA, the origin leash
-                    // doesn't rendor so we use snapshot to replace it animating.
-                    t.reparent(change.getSnapshot(), info.getRoot(rootIdx).getLeash());
-                    // Use origin leash layer.
-                    t.setLayer(change.getSnapshot(), info.getChanges().size() - i);
-                    t.setPosition(change.getSnapshot(), change.getStartAbsBounds().left,
-                            change.getStartAbsBounds().top);
-                    t.show(change.getSnapshot());
-                    startFadeAnimation(change.getSnapshot(), false /* show */);
-                } else {
-                    startFadeAnimation(leash, false /* show */);
-                }
+                startFadeAnimation(leash, false /* show */);
             } else if (mode == TRANSIT_CHANGE && change.getSnapshot() != null) {
                 t.reparent(change.getSnapshot(), info.getRoot(rootIdx).getLeash());
                 // Ensure snapshot it on the top of all transition surfaces
