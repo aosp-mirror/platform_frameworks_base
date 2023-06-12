@@ -45,18 +45,22 @@ constructor(
      * based on the split pair rule.
      */
     fun launchSecondaryActivity(wmHelper: WindowManagerStateHelper) {
-        val launchButton =
-            uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "launch_secondary_activity_button")),
-                FIND_TIMEOUT
-            )
-        require(launchButton != null) { "Can't find launch secondary activity button on screen." }
-        launchButton.click()
-        wmHelper
-            .StateSyncBuilder()
-            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-            .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-            .waitForAndVerify()
+        launchSecondaryActivityFromButton(wmHelper, "launch_secondary_activity_button")
+    }
+
+    /**
+     * Clicks the button to launch the secondary activity in RTL, which should split with the main
+     * activity based on the split pair rule.
+     */
+    fun launchSecondaryActivityRTL(wmHelper: WindowManagerStateHelper) {
+        launchSecondaryActivityFromButton(wmHelper, "launch_secondary_activity_rtl_button")
+    }
+
+    /**
+     * Clicks the button to launch the secondary activity in a horizontal split.
+     */
+    fun launchSecondaryActivityHorizontally(wmHelper: WindowManagerStateHelper) {
+        launchSecondaryActivityFromButton(wmHelper, "launch_secondary_activity_horizontally_button")
     }
 
     /** Clicks the button to launch a third activity over a secondary activity. */
@@ -101,16 +105,38 @@ constructor(
      */
     fun finishSecondaryActivity(wmHelper: WindowManagerStateHelper) {
         val finishButton =
-            uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "finish_secondary_activity_button")),
-                FIND_TIMEOUT
-            )
+                uiDevice.wait(
+                        Until.findObject(By.res(getPackage(), "finish_secondary_activity_button")),
+                        FIND_TIMEOUT
+                )
         require(finishButton != null) { "Can't find finish secondary activity button on screen." }
         finishButton.click()
         wmHelper
-            .StateSyncBuilder()
-            .withActivityRemoved(SECONDARY_ACTIVITY_COMPONENT)
-            .waitForAndVerify()
+                .StateSyncBuilder()
+                .withActivityRemoved(SECONDARY_ACTIVITY_COMPONENT)
+                .waitForAndVerify()
+     }
+
+    /**
+     * Clicks the button to toggle the split ratio of secondary activity.
+     */
+    fun changeSecondaryActivityRatio(wmHelper: WindowManagerStateHelper) {
+        val launchButton =
+                uiDevice.wait(
+                        Until.findObject(
+                                By.res(getPackage(),
+                                        "toggle_split_ratio_button")),
+                        FIND_TIMEOUT
+                )
+        require(launchButton != null) {
+            "Can't find toggle ratio for secondary activity button on screen."
+        }
+        launchButton.click()
+        wmHelper
+                .StateSyncBuilder()
+                .withAppTransitionIdle()
+                .withTransitionSnapshotGone()
+                .waitForAndVerify()
     }
 
     fun secondaryActivityEnterPip(wmHelper: WindowManagerStateHelper) {
@@ -149,25 +175,19 @@ constructor(
             .waitForAndVerify()
     }
 
-    /**
-     * Clicks the button to launch the secondary activity in RTL, which should split with the main
-     * activity based on the split pair rule.
-     */
-    fun launchSecondaryActivityRTL(wmHelper: WindowManagerStateHelper) {
+    private fun launchSecondaryActivityFromButton(
+            wmHelper: WindowManagerStateHelper, buttonName: String) {
         val launchButton =
-            uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "launch_secondary_activity_rtl_button")),
-                FIND_TIMEOUT
-            )
+                uiDevice.wait(Until.findObject(By.res(getPackage(), buttonName)), FIND_TIMEOUT)
         require(launchButton != null) {
-            "Can't find launch secondary activity rtl button on screen."
+            "Can't find launch secondary activity button : " + buttonName + "on screen."
         }
         launchButton.click()
         wmHelper
-            .StateSyncBuilder()
-            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-            .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-            .waitForAndVerify()
+                .StateSyncBuilder()
+                .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .waitForAndVerify()
     }
 
     /**
