@@ -623,6 +623,7 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Maquinari biomètric no disponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"S\'ha cancel·lat l\'autenticació"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No s\'ha reconegut"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"No s\'ha reconegut la cara"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"S\'ha cancel·lat l\'autenticació"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No s\'ha definit cap PIN, patró o contrasenya"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Error en l\'autenticació"</string>
@@ -1853,7 +1854,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Per sortir, llisca cap avall des de la part superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entesos"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira per a una millor visualització"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Surt de la pantalla dividida per a una millor visualització"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Obre <xliff:g id="NAME">%s</xliff:g> en pantalla completa per a una millor visualització"</string>
     <string name="done_label" msgid="7283767013231718521">"Fet"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Control circular de les hores"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Control circular dels minuts"</string>
