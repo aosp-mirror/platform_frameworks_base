@@ -2958,6 +2958,10 @@ package android.service.notification {
     method @Deprecated public boolean isBound();
   }
 
+  public class NotificationRankingUpdate implements android.os.Parcelable {
+    method public final boolean isFdNotNullAndClosed();
+  }
+
 }
 
 package android.service.quickaccesswallet {
