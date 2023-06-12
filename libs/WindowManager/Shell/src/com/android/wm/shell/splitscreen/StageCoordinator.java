@@ -1650,7 +1650,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mLogger.logSideStageAppChange(getSideStagePosition(), mSideStage.getTopChildTaskUid(),
                     mSplitLayout.isLandscape());
         }
-        if (present && visible) {
+        if (present) {
             updateRecentTasksSplitPair();
         }
 
