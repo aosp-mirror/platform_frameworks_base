@@ -392,11 +392,9 @@ public class StackTracesDumpHelper {
             if (TEMP_DUMP_TIME_LIMIT <= timeTaken) {
                 Slog.e(TAG, "Aborted stack trace dump (current primary pid=" + pid
                         + "); deadline exceeded.");
-                tmpTracesFile.delete();
                 if (latencyTracker != null) {
                     latencyTracker.dumpStackTracesTempFileTimedOut();
                 }
-                return null;
             }
             if (DEBUG_ANR) {
                 Slog.d(TAG, "Done with primary pid " + pid + " in " + timeTaken + "ms"
