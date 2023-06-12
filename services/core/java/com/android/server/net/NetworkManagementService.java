@@ -41,7 +41,6 @@ import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.INetdUnsolicitedEventListener;
 import android.net.INetworkManagementEventObserver;
-import android.net.ITetheringStatsProvider;
 import android.net.InetAddresses;
 import android.net.InterfaceConfiguration;
 import android.net.InterfaceConfigurationParcel;
@@ -135,10 +134,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     private final RemoteCallbackList<INetworkManagementEventObserver> mObservers =
             new RemoteCallbackList<>();
 
-    @GuardedBy("mTetheringStatsProviders")
-    private final HashMap<ITetheringStatsProvider, String>
-            mTetheringStatsProviders = Maps.newHashMap();
-
     /**
      * If both locks need to be held, then they should be obtained in the order:
      * first {@link #mQuotaLock} and then {@link #mRulesLock}.
@@ -218,10 +213,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         mNetdUnsolicitedEventListener = new NetdUnsolicitedEventListener();
 
         mDeps.registerLocalService(new LocalService());
-
-        synchronized (mTetheringStatsProviders) {
-            mTetheringStatsProviders.put(new NetdTetheringStatsProvider(), "netd");
-        }
     }
 
     static NetworkManagementService create(Context context, Dependencies deps)
@@ -912,17 +903,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             } catch (RemoteException | ServiceSpecificException e) {
                 throw new IllegalStateException(e);
             }
-
-            synchronized (mTetheringStatsProviders) {
-                for (ITetheringStatsProvider provider : mTetheringStatsProviders.keySet()) {
-                    try {
-                        provider.setInterfaceQuota(iface, quotaBytes);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Problem setting tethering data limit on provider " +
-                                mTetheringStatsProviders.get(provider) + ": " + e);
-                    }
-                }
-            }
         }
     }
 
@@ -944,17 +924,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 mNetdService.bandwidthRemoveInterfaceQuota(iface);
             } catch (RemoteException | ServiceSpecificException e) {
                 throw new IllegalStateException(e);
-            }
-
-            synchronized (mTetheringStatsProviders) {
-                for (ITetheringStatsProvider provider : mTetheringStatsProviders.keySet()) {
-                    try {
-                        provider.setInterfaceQuota(iface, ITetheringStatsProvider.QUOTA_UNLIMITED);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Problem removing tethering data limit on provider " +
-                                mTetheringStatsProviders.get(provider) + ": " + e);
-                    }
-                }
             }
         }
     }
@@ -1151,13 +1120,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public boolean isBandwidthControlEnabled() {
         return true;
-    }
-
-    private class NetdTetheringStatsProvider extends ITetheringStatsProvider.Stub {
-        @Override
-        public void setInterfaceQuota(String iface, long quotaBytes) {
-            // Do nothing. netd is already informed of quota changes in setInterfaceQuota.
-        }
     }
 
     @Override
