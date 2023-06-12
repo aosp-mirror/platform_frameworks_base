@@ -287,8 +287,6 @@ public class AutomaticBrightnessStrategy {
         mAutoBrightnessAdjustmentReasonsFlags = isTemporaryAutoBrightnessAdjustmentApplied()
                 ? BrightnessReason.ADJUSTMENT_AUTO_TEMP
                 : BrightnessReason.ADJUSTMENT_AUTO;
-        mAppliedAutoBrightness = BrightnessUtils.isValidBrightnessValue(brightnessState)
-                || brightnessState == PowerManager.BRIGHTNESS_OFF_FLOAT;
         float newAutoBrightnessAdjustment =
                 (mAutomaticBrightnessController != null)
                         ? mAutomaticBrightnessController.getAutomaticScreenBrightnessAdjustment()
@@ -345,8 +343,7 @@ public class AutomaticBrightnessStrategy {
     /**
      * Sets if the auto-brightness is applied on the latest brightness change.
      */
-    @VisibleForTesting
-    void setAutoBrightnessApplied(boolean autoBrightnessApplied) {
+    public void setAutoBrightnessApplied(boolean autoBrightnessApplied) {
         mAppliedAutoBrightness = autoBrightnessApplied;
     }
 
