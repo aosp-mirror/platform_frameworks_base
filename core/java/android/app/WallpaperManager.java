@@ -2475,19 +2475,38 @@ public class WallpaperManager {
     }
 
     /**
-     * Reset all wallpaper to the factory default.
+     * Reset all wallpaper to the factory default. As opposed to {@link #clear()}, if the device
+     * is configured to have a live wallpaper by default, apply it.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      */
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public void clearWallpaper() {
+        if (isLockscreenLiveWallpaperEnabled()) {
+            clearWallpaper(FLAG_LOCK | FLAG_SYSTEM, mContext.getUserId());
+            return;
+        }
         clearWallpaper(FLAG_LOCK, mContext.getUserId());
         clearWallpaper(FLAG_SYSTEM, mContext.getUserId());
     }
 
     /**
-     * Clear the wallpaper for a specific user.  The caller must hold the
+     * Clear the wallpaper for a specific user.
+     * <ul>
+     *     <li> When called with {@code which=}{@link #FLAG_LOCK}, clear the lockscreen wallpaper.
+     *     The home screen wallpaper will become visible on the lock screen. </li>
+     *
+     *     <li> When called with {@code which=}{@link #FLAG_SYSTEM}, revert the home screen
+     *     wallpaper to default. The lockscreen wallpaper will be unchanged: if the previous
+     *     wallpaper was shared between home and lock screen, it will become lock screen only. </li>
+     *
+     *     <li> When called with {@code which=}({@link #FLAG_LOCK} | {@link #FLAG_SYSTEM}), put the
+     *     default wallpaper on both home and lock screen, removing any user defined wallpaper.</li>
+     * </ul>
+     * </p>
+     *
+     * The caller must hold the
      * INTERACT_ACROSS_USERS_FULL permission to clear another user's
      * wallpaper, and must hold the SET_WALLPAPER permission in all
      * circumstances.
@@ -2792,8 +2811,9 @@ public class WallpaperManager {
 
     /**
      * Remove any currently set system wallpaper, reverting to the system's built-in
-     * wallpaper. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
-     * is broadcast.
+     * wallpaper. As opposed to {@link #clearWallpaper()}, this method always set a static wallpaper
+     * with the default image, even if the device is configured to have a live wallpaper by default.
+     * On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
@@ -2808,9 +2828,14 @@ public class WallpaperManager {
 
     /**
      * Remove one or more currently set wallpapers, reverting to the system default
-     * display for each one.  If {@link #FLAG_SYSTEM} is set in the {@code which}
-     * parameter, the intent {@link Intent#ACTION_WALLPAPER_CHANGED} will be broadcast
-     * upon success.
+     * display for each one. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
+     * is broadcast.
+     * <ul>
+     *     <li> If {@link #FLAG_SYSTEM} is set in the {@code which} parameter, put the default
+     *     wallpaper on both home and lock screen, removing any user defined wallpaper. </li>
+     *     <li> When called with {@code which=}{@link #FLAG_LOCK}, clear the lockscreen wallpaper.
+     *     The home screen wallpaper will become visible on the lock screen. </li>
+     * </ul>
      *
      * @param which A bitwise combination of {@link #FLAG_SYSTEM} or
      *   {@link #FLAG_LOCK}
@@ -2820,6 +2845,7 @@ public class WallpaperManager {
     public void clear(@SetWallpaperFlags int which) throws IOException {
         if ((which & FLAG_SYSTEM) != 0) {
             clear();
+            if (isLockscreenLiveWallpaperEnabled()) return;
         }
         if ((which & FLAG_LOCK) != 0) {
             clearWallpaper(FLAG_LOCK, mContext.getUserId());
