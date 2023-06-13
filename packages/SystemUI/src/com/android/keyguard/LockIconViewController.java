@@ -24,6 +24,7 @@ import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.content.res.Configuration;
@@ -124,6 +125,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private int mActivePointerId = -1;
 
     private boolean mIsDozing;
+    private boolean mIsActiveDreamLockscreenHosted;
     private boolean mIsBouncerShowing;
     private boolean mRunningFPS;
     private boolean mCanDismissLockScreen;
@@ -164,6 +166,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         updateBurnInOffsets();
         updateVisibility();
     };
+
+    @VisibleForTesting
+    final Consumer<Boolean> mIsActiveDreamLockscreenHostedCallback =
+            (Boolean isLockscreenHosted) -> {
+                mIsActiveDreamLockscreenHosted = isLockscreenHosted;
+                updateVisibility();
+            };
 
     @Inject
     public LockIconViewController(
@@ -223,6 +232,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             collectFlow(mView, mTransitionInteractor.getDozeAmountTransition(),
                     mDozeTransitionCallback);
             collectFlow(mView, mKeyguardInteractor.isDozing(), mIsDozingCallback);
+        }
+
+        if (mFeatureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
+            collectFlow(mView, mKeyguardInteractor.isActiveDreamLockscreenHosted(),
+                    mIsActiveDreamLockscreenHostedCallback);
         }
     }
 
@@ -285,6 +299,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private void updateVisibility() {
         if (!mIsKeyguardShowing && !mIsDozing) {
+            mView.setVisibility(View.INVISIBLE);
+            return;
+        }
+
+        if (mIsKeyguardShowing && mIsActiveDreamLockscreenHosted) {
             mView.setVisibility(View.INVISIBLE);
             return;
         }
@@ -436,6 +455,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println(" mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
         pw.println(" mSensorTouchLocation: " + mSensorTouchLocation);
         pw.println(" mDefaultPaddingPx: " + mDefaultPaddingPx);
+        pw.println(" mIsActiveDreamLockscreenHosted: " + mIsActiveDreamLockscreenHosted);
 
         if (mView != null) {
             mView.dump(pw, args);

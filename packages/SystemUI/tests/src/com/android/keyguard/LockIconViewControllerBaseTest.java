@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
 import static com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.flags.Flags.MIGRATE_LOCK_ICON;
 
 import static org.mockito.Mockito.any;
@@ -147,6 +148,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(FACE_AUTH_REFACTOR, false);
         mFeatureFlags.set(MIGRATE_LOCK_ICON, false);
+        mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
         mUnderTest = new LockIconViewController(
                 mLockIconView,
                 mStatusBarStateController,
