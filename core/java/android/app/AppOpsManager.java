@@ -2252,7 +2252,8 @@ public class AppOpsManager {
     public static final String OPSTR_USE_FULL_SCREEN_INTENT = "android:use_full_screen_intent";
 
     /**
-     * Allows the assistant app to receive the PCC-validated hotword and be voice-triggered.
+     * Allows the assistant app to be voice-triggered by detected hotwords from a trusted detection
+     * service.
      *
      * @hide
      */
@@ -2379,7 +2380,8 @@ public class AppOpsManager {
             OP_RUN_USER_INITIATED_JOBS,
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
-            OP_USE_FULL_SCREEN_INTENT
+            OP_USE_FULL_SCREEN_INTENT,
+            OP_RECEIVE_SANDBOX_TRIGGER_AUDIO
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2810,7 +2812,8 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
                 OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
                 "RECEIVE_SANDBOX_TRIGGER_AUDIO")
-                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+                .setPermission(Manifest.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO)
+                .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
         new AppOpInfo.Builder(OP_RECEIVE_TRUSTED_PROCESS_TRAINING_DATA,
                 OPSTR_RECEIVE_TRUSTED_PROCESS_TRAINING_DATA,
                 "RECEIVE_TRUSTED_PROCESS_TRAINING_DATA").build()
