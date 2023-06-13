@@ -1477,9 +1477,26 @@ public class AppOpsManager {
     public static final int OP_RECORD_AUDIO_SANDBOXED =
             AppProtoEnums.APP_OP_RECORD_AUDIO_SANDBOXED;
 
+    /**
+     * Allows the assistant app to receive the PCC-validated hotword and be voice-triggered.
+     *
+     * @hide
+     */
+    public static final int OP_RECEIVE_SANDBOX_TRIGGER_AUDIO =
+            AppProtoEnums.APP_OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
+
+    /**
+     * Allows the assistant app to get the negative trigger data from the PCC sandbox to improve the
+     * hotword training model.
+     *
+     * @hide
+     */
+    public static final int OP_RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO =
+            AppProtoEnums.APP_OP_RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 136;
+    public static final int _NUM_OP = 138;
 
     /**
      * All app ops represented as strings.
@@ -1621,7 +1638,9 @@ public class AppOpsManager {
             OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
             OPSTR_USE_FULL_SCREEN_INTENT,
             OPSTR_CAMERA_SANDBOXED,
-            OPSTR_RECORD_AUDIO_SANDBOXED
+            OPSTR_RECORD_AUDIO_SANDBOXED,
+            OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
+            OPSTR_RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO
     })
     public @interface AppOpString {}
 
@@ -2232,6 +2251,23 @@ public class AppOpsManager {
      */
     public static final String OPSTR_USE_FULL_SCREEN_INTENT = "android:use_full_screen_intent";
 
+    /**
+     * Allows the assistant app to receive the PCC-validated hotword and be voice-triggered.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO =
+            "android:receive_sandbox_trigger_audio";
+
+    /**
+     * Allows the assistant app to get the negative trigger data from the PCC sandbox to improve
+     * the hotword training model.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO =
+            "android:receive_sandbox_negative_data_audio";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2769,7 +2805,13 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_CAMERA_SANDBOXED, OPSTR_CAMERA_SANDBOXED,
             "CAMERA_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_RECORD_AUDIO_SANDBOXED, OPSTR_RECORD_AUDIO_SANDBOXED,
-                "RECORD_AUDIO_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
+                "RECORD_AUDIO_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
+                OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
+                "RECEIVE_SANDBOX_TRIGGER_AUDIO").build(),
+        new AppOpInfo.Builder(OP_RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO,
+                OPSTR_RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO,
+                "RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO").build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
