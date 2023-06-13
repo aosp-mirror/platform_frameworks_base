@@ -50,7 +50,6 @@ class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
         val actualString = stringWriter.toString()
         val expectedLogString =
             disableFlagsLogger.getDisableFlagsString(
-                old = null,
                 new = state,
                 newAfterLocalModification = null,
             )

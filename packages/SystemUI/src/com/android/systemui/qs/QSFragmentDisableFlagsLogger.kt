@@ -34,7 +34,6 @@ class QSFragmentDisableFlagsLogger @Inject constructor(
             },
             {
                 disableFlagsLogger.getDisableFlagsString(
-                    old = null,
                     new = DisableFlagsLogger.DisableState(int1, int2),
                     newAfterLocalModification =
                         DisableFlagsLogger.DisableState(long1.toInt(), long2.toInt())

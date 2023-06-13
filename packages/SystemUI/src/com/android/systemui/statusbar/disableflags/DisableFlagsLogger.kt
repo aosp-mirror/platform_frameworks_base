@@ -71,15 +71,14 @@ class DisableFlagsLogger constructor(
     }
 
     /**
-     * Returns a string representing the, old, new, and new-after-modification disable flag states,
-     * as well as the differences between each of the states.
+     * Returns a string representing the new and new-after-modification disable flag states,
+     * as well as the differences between them (if there are any).
      *
-     * Example if [old], [new], and [newAfterLocalModification] are all different:
-     *   Old: EnaiHbcRso.qINgr | New: EnaihBcRso.qiNGR (changed: hB.iGR) | New after local
-     *   modification: EnaihBcRso.qInGR (changed: .n)
+     * Example if [new] and [newAfterLocalModification] are different:
+     *   New: EnaihBcRso.qiNGR | New after local modification: EnaihBCRso.qInGR (changed: C.In)
      *
-     * Example if [old] and [new] are the same:
-     *   EnaihBcRso.qiNGR (unchanged)
+     * Example if [new] and [newAfterLocalModification] are the same:
+     *   New: EnaihBcRso.qiNGR
      *
      * A capital character signifies the flag is set and a lowercase character signifies that the
      * flag isn't set. The flag states will be logged in the same order as the passed-in lists.
@@ -88,37 +87,17 @@ class DisableFlagsLogger constructor(
      * is no difference. the new-after-modification state also won't be included if there's no
      * difference from the new state.
      *
-     * @param old the disable state that had been previously sent. Null if we don't need to log the
-     *   previously sent state.
      * @param new the new disable state that has just been sent.
      * @param newAfterLocalModification the new disable states after a class has locally modified
      *   them. Null if the class does not locally modify.
      */
     fun getDisableFlagsString(
-        old: DisableState? = null,
         new: DisableState,
         newAfterLocalModification: DisableState? = null
     ): String {
         val builder = StringBuilder("Received new disable state: ")
 
-        // This if/else has slightly repetitive code but is easier to read.
-        if (old != null && old != new) {
-            builder.append("Old: ")
-            builder.append(getFlagsString(old))
-            builder.append(" | ")
-            builder.append("New: ")
-            builder.append(getFlagsString(new))
-            builder.append(" ")
-            builder.append(getDiffString(old, new))
-        } else if (old != null && old == new) {
-            // If old and new are the same, we only need to print one of them.
-            builder.append(getFlagsString(new))
-            builder.append(" ")
-            builder.append(getDiffString(old, new))
-        } else { // old == null
-            builder.append(getFlagsString(new))
-            // Don't get a diff string because we have no [old] to compare with.
-        }
+        builder.append(getFlagsString(new))
 
         if (newAfterLocalModification != null && new != newAfterLocalModification) {
             builder.append(" | New after local modification: ")

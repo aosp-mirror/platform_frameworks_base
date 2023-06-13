@@ -255,8 +255,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
         Log.d(CentralSurfaces.TAG,
                 mDisableFlagsLogger.getDisableFlagsString(
-                        /* old= */ new DisableFlagsLogger.DisableState(
-                                mCentralSurfaces.getDisabled1(), mCentralSurfaces.getDisabled2()),
                         /* new= */ new DisableFlagsLogger.DisableState(
                                 state1, state2BeforeAdjustment),
                         /* newStateAfterLocalModification= */ new DisableFlagsLogger.DisableState(
