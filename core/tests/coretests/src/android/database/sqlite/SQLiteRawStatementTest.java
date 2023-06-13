@@ -118,6 +118,41 @@ public class SQLiteRawStatementTest {
         return "INSERT INTO t1 (i, d, t) VALUES (?1, ?2, ?3)";
     }
 
+    /**
+     * Create a database with one table with 12 columns.
+     */
+    private void createWideDatabase() {
+        StringBuilder sp = new StringBuilder();
+        sp.append(String.format("i%d int", 0));
+        for (int i = 1; i < 12; i++) {
+            sp.append(String.format(", i%d int", i));
+        }
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (" + sp.toString() + ")");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
+    /**
+     * A 12-value insert for the wide database.
+     */
+    private String createWideInsert() {
+        StringBuilder sp = new StringBuilder();
+        sp.append("INSERT INTO t1 (i0");
+        for (int i = 1; i < 12; i++) {
+            sp.append(String.format(", i%d", i));
+        }
+        sp.append(") VALUES (?");
+        for (int i = 1; i < 12; i++) {
+            sp.append(", ?");
+        }
+        sp.append(")");
+        return sp.toString();
+    }
+
     @Test
     public void testSingleTransaction() {
         createSimpleDatabase();
@@ -701,6 +736,76 @@ public class SQLiteRawStatementTest {
         }
     }
 
+    private int wideVal(int i, int j) {
+        return i + j;
+    }
+
+    @Test
+    public void testSpeedWideQuery() {
+        final int size = 100000;
+
+        createWideDatabase();
+
+        // Populate the database.
+        mDatabase.beginTransaction();
+        try {
+            try (var s = mDatabase.createRawStatement(createWideInsert())) {
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < 12; j++) {
+                        s.bindInt(j+1, wideVal(i, j));
+                    }
+                    boolean r = s.step();
+                    // No row is returned by this query.
+                    assertFalse(r);
+                    s.reset();
+                }
+            }
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        final String query = "SELECT * FROM t1";
+
+        // Iterate over the database.
+        mDatabase.beginTransactionReadOnly();
+        try {
+            long start = SystemClock.uptimeMillis();
+            try (var s = mDatabase.createRawStatement(query)) {
+                for (int i = 0; i < size; i++) {
+                    assertTrue(s.step());
+                    for (int j = 0; j < 12; j++) {
+                        assertEquals(s.getInt(j), wideVal(i, j));
+                    }
+                }
+            }
+            long elapsed = SystemClock.uptimeMillis() - start;
+            Log.i(TAG, "timing statement wide: " + elapsed + "ms");
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        // Iterate over the database using cursors.
+        mDatabase.beginTransactionReadOnly();
+        try {
+            long start = SystemClock.uptimeMillis();
+            try (Cursor c = mDatabase.rawQuery(query, null)) {
+                c.moveToFirst();
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < 12; j++) {
+                        assertEquals(c.getInt(j), wideVal(i, j));
+                    }
+                    c.moveToNext();
+                }
+            }
+            long elapsed = SystemClock.uptimeMillis() - start;
+            mDatabase.setTransactionSuccessful();
+            Log.i(TAG, "timing cursor wide: " + elapsed + "ms");
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
 
     @Test
     public void testSpeedRecursive() {
@@ -719,7 +824,7 @@ public class SQLiteRawStatementTest {
                 }
             }
             long elapsed = SystemClock.uptimeMillis() - start;
-            Log.i(TAG, "timing statement recursive = " + elapsed + "ms");
+            Log.i(TAG, "timing statement recursive: " + elapsed + "ms");
         } finally {
             mDatabase.endTransaction();
         }
@@ -734,7 +839,7 @@ public class SQLiteRawStatementTest {
                 }
             }
             long elapsed = SystemClock.uptimeMillis() - start;
-            Log.i(TAG, "timing cursor recursive = " + elapsed + "ms");
+            Log.i(TAG, "timing cursor recursive: " + elapsed + "ms");
         } finally {
             mDatabase.endTransaction();
         }
