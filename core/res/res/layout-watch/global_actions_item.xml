@@ -36,7 +36,7 @@
             android:textSize="15sp"
             android:letterSpacing="0.013"
             android:fadingEdgeLength="12dp"
-            android:textColor="@android:color/white"
+            android:textColor="?attr/textColorPrimary"
             android:layout_weight="1"
             android:fontFamily="google-sans-text-medium"
             android:layout_width="wrap_content"
