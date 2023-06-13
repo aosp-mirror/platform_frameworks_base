@@ -2046,6 +2046,72 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDefaultLetterboxAspectRatioForMultiWindowMode_fixedOrientationApp() {
+        // Set-up display in portrait.
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+        final int screenWidth = 1100;
+        final int screenHeight = 2100;
+        setUpDisplaySizeWithApp(screenWidth, screenHeight);
+
+        mActivity.mDisplayContent.getWindowConfiguration()
+                .setAppBounds(/* left */ 0, /* top */ 0, screenWidth, screenHeight);
+
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
+        // Move activity to multi-window which takes half of the screen.
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        organizer.mPrimary.setBounds(0, 0, screenWidth, getExpectedSplitSize(screenHeight));
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
+
+        // Unresizable portrait-only activity.
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Activity should be letterboxed with an aspect ratio of 1.01.
+        final Rect afterBounds = mActivity.getBounds();
+        final float actualAspectRatio = 1f * afterBounds.height() / afterBounds.width();
+        assertEquals(LetterboxConfiguration.DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW,
+                actualAspectRatio, 0.001f);
+        assertTrue(mActivity.areBoundsLetterboxed());
+    }
+
+    @Test
+    public void
+            testDefaultLetterboxAspectRatioForMultiWindowMode_fixedOrientationAppWithMinRatio() {
+        // Set-up display in portrait.
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+        final int screenWidth = 1100;
+        final int screenHeight = 2100;
+        setUpDisplaySizeWithApp(screenWidth, screenHeight);
+
+        mActivity.mDisplayContent.getWindowConfiguration()
+                .setAppBounds(/* left */ 0, /* top */ 0, screenWidth, screenHeight);
+
+        // Set min aspect ratio to value greater than the default letterbox aspect ratio for
+        // multi-window mode.
+        final float minAspectRatio = 1.2f;
+        mActivity.info.setMinAspectRatio(minAspectRatio);
+
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
+        // Move activity to multi-window which takes half of the screen.
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        organizer.mPrimary.setBounds(0, 0, screenWidth, getExpectedSplitSize(screenHeight));
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
+
+        // Unresizable portrait-only activity.
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Activity should be letterboxed with the min aspect ratio requested by the app NOT the
+        // default letterbox aspect ratio for multi-window.
+        final Rect afterBounds = mActivity.getBounds();
+        final float actualAspectRatio = 1f * afterBounds.height() / afterBounds.width();
+        assertEquals(minAspectRatio, actualAspectRatio, 0.001f);
+        assertTrue(mActivity.areBoundsLetterboxed());
+    }
+
+    @Test
     public void testDisplayIgnoreOrientationRequest_unresizableWithCorrespondingMinAspectRatio() {
         // Set up a display in landscape and ignoring orientation request.
         setUpDisplaySizeWithApp(2800, 1400);
