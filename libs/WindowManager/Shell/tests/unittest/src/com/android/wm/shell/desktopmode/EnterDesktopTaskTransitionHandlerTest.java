@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
@@ -41,6 +42,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.MoveToDesktopAnimator;
 
 import junit.framework.AssertionFailedError;
 
@@ -73,6 +75,10 @@ public class EnterDesktopTaskTransitionHandlerTest {
     ShellExecutor mExecutor;
     @Mock
     SurfaceControl mSurfaceControl;
+    @Mock
+    MoveToDesktopAnimator mMoveToDesktopAnimator;
+    @Mock
+    PointF mPosition;
 
     private EnterDesktopTaskTransitionHandler mEnterDesktopTaskTransitionHandler;
 
@@ -82,6 +88,7 @@ public class EnterDesktopTaskTransitionHandlerTest {
 
         doReturn(mExecutor).when(mTransitions).getMainExecutor();
         doReturn(mAnimationT).when(mTransactionFactory).get();
+        doReturn(mPosition).when(mMoveToDesktopAnimator).getPosition();
 
         mEnterDesktopTaskTransitionHandler = new EnterDesktopTaskTransitionHandler(mTransitions,
                 mTransactionFactory);
@@ -89,12 +96,15 @@ public class EnterDesktopTaskTransitionHandlerTest {
 
     @Test
     public void testEnterFreeformAnimation() {
-        final int transitionType = Transitions.TRANSIT_ENTER_FREEFORM;
         final int taskId = 1;
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
-                .startTransition(transitionType, wct, mEnterDesktopTaskTransitionHandler);
-        mEnterDesktopTaskTransitionHandler.startTransition(transitionType, wct, null);
+                .startTransition(Transitions.TRANSIT_ENTER_FREEFORM, wct,
+                        mEnterDesktopTaskTransitionHandler);
+        doReturn(taskId).when(mMoveToDesktopAnimator).getTaskId();
+
+        mEnterDesktopTaskTransitionHandler.startMoveToFreeformAnimation(wct,
+                mMoveToDesktopAnimator, null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FREEFORM);
