@@ -261,6 +261,7 @@ public class BroadcastQueueTest {
                     // Create a different process that will be linked to the
                     // returned process via a predecessor/successor relationship
                     mActiveProcesses.remove(res);
+                    res.setKilled(true);
                     deliverRes = makeActiveProcessRecord(ai, processName,
                           ProcessBehavior.NORMAL, UnaryOperator.identity());
                     deliverRes.mPredecessor = res;
@@ -1314,6 +1315,53 @@ public class BroadcastQueueTest {
         verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
         verifyScheduleReceiver(times(1), receiverYellowApp, airplane);
         verifyScheduleReceiver(times(1), receiverOrangeApp, timezone);
+    }
+
+    /**
+     * Verify that a broadcast sent to a frozen app, which gets killed as part of unfreezing
+     * process due to pending sync binder transactions, is delivered as expected.
+     */
+    @Test
+    public void testDeliveryToFrozenApp_killedWhileUnfreeze() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+
+        // Mark the app as killed while unfreezing it, which can happen either when we directly
+        // try to unfreeze it or when it is done as part of OomAdjust computation.
+        doAnswer(invocation -> {
+            final ProcessRecord app = invocation.getArgument(0);
+            if (app == receiverBlueApp) {
+                app.setKilled(true);
+                mActiveProcesses.remove(app);
+            }
+            return null;
+        }).when(mAms.mOomAdjuster).unfreezeTemporarily(eq(receiverBlueApp), anyInt());
+        doAnswer(invocation -> {
+            final ProcessRecord app = invocation.getArgument(0);
+            if (app == receiverBlueApp) {
+                app.setKilled(true);
+                mActiveProcesses.remove(app);
+            }
+            return null;
+        }).when(mAms).enqueueOomAdjTargetLocked(eq(receiverBlueApp));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+
+        waitForIdle();
+        final ProcessRecord restartedReceiverBlueApp = mAms.getProcessRecordLocked(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        assertNotEquals(receiverBlueApp, restartedReceiverBlueApp);
+        // Legacy queue will always try delivering the broadcast even if the process
+        // has been killed.
+        if (mImpl == Impl.MODERN) {
+            verifyScheduleReceiver(never(), receiverBlueApp, airplane);
+        } else {
+            verifyScheduleReceiver(times(1), receiverBlueApp, airplane);
+        }
+        // Verify that the new process receives the broadcast.
+        verifyScheduleReceiver(times(1), restartedReceiverBlueApp, airplane);
     }
 
     @Test
