@@ -1677,7 +1677,7 @@ class SyntheticPasswordManager {
     /** Destroy all weak token-based SP protectors for the given user. */
     public void destroyAllWeakTokenBasedProtectors(int userId) {
         List<Long> protectorIds =
-            mStorage.listSyntheticPasswordProtectorsForUser(SECDISCARDABLE_NAME, userId);
+            mStorage.listSyntheticPasswordProtectorsForUser(SP_BLOB_NAME, userId);
         for (long protectorId : protectorIds) {
             SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME,
                     protectorId, userId));
