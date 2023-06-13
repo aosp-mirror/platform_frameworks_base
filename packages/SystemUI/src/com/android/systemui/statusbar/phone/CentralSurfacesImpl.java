@@ -173,6 +173,7 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
@@ -634,6 +635,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final SysuiColorExtractor mColorExtractor;
     private final ScreenLifecycle mScreenLifecycle;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    protected final PowerInteractor mPowerInteractor;
 
     private boolean mNoAnimationOnNextBarModeChange;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -737,6 +739,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             SysuiColorExtractor colorExtractor,
             ScreenLifecycle screenLifecycle,
             WakefulnessLifecycle wakefulnessLifecycle,
+            PowerInteractor powerInteractor,
             SysuiStatusBarStateController statusBarStateController,
             Optional<Bubbles> bubblesOptional,
             Lazy<NoteTaskController> noteTaskControllerLazy,
@@ -834,6 +837,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mColorExtractor = colorExtractor;
         mScreenLifecycle = screenLifecycle;
         mWakefulnessLifecycle = wakefulnessLifecycle;
+        mPowerInteractor = powerInteractor;
         mStatusBarStateController = statusBarStateController;
         mBubblesOptional = bubblesOptional;
         mNoteTaskControllerLazy = noteTaskControllerLazy;
