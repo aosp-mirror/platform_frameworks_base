@@ -2784,8 +2784,12 @@ public class ActivityRecordTests extends WindowTestsBase {
             testLegacySplashScreen(Build.VERSION_CODES.S, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
             testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU,
                     TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
-            // Above T
-            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU + 1, 0);
+            testLegacySplashScreen(Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+                    TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            testLegacySplashScreen(Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 1,
+                    TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            // Above V
+            testLegacySplashScreen(Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 2, 0);
         } finally {
             try {
                 DeviceConfig.setProperties(properties);
