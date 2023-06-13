@@ -149,7 +149,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -612,15 +611,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        AtomicReference<String> mimeType = new AtomicReference<>(intent.getType());
-
-        if (mimeType.get() == null && intent.getData() != null
-                && "content".equals(intent.getData().getScheme())) {
-            mInterface.getMimeTypeFilterAsync(intent.getData(), mUserId,
-                    new RemoteCallback(result -> {
-                        mimeType.set(result.getPairValue());
-                    }));
-        }
+        final String mimeType = intent.resolveType(mInternal.mContext);
 
         do {
             if (mStopOption) {
@@ -632,7 +623,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     int userIdForQuery = mInternal.mUserController.handleIncomingUser(
                             Binder.getCallingPid(), Binder.getCallingUid(), mUserId, false,
                             ALLOW_NON_FULL, "ActivityManagerShellCommand", null);
-                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType.get(),
+                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType,
                             0, userIdForQuery).getList();
                     if (activities == null || activities.size() <= 0) {
                         getErrPrintWriter().println("Error: Intent does not match any activities: "
@@ -729,12 +720,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
-                        mimeType.get(), null, null, 0, mStartFlags, profilerInfo,
+                        mimeType, null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
                 res = mInternal.startActivityAsUserWithFeature(null, SHELL_PACKAGE_NAME, null,
-                        intent, mimeType.get(), null, null, 0, mStartFlags, profilerInfo,
+                        intent, mimeType, null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
             }
             final long endTime = SystemClock.uptimeMillis();
