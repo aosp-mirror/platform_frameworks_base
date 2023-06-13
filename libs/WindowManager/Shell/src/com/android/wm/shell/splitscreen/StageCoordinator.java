@@ -1520,6 +1520,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Legacy transition we need to create divider here, shell transition case we will
             // create it on #finishEnterSplitScreen
             mSplitLayout.init();
+        } else {
+            // We handle split visibility itself on shell transition, but sometimes we didn't
+            // reset it correctly after dismiss by some reason, so just set invisible before active.
+            setSplitsVisible(false);
         }
         if (taskInfo != null) {
             setSideStagePosition(startPosition, wct);
@@ -2661,11 +2665,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         if (mSplitTransitions.mPendingEnter.mExtraTransitType
                 == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE) {
+            // Open to side should only be used when split already active and foregorund.
             if (mainChild == null && sideChild == null) {
                 Log.w(TAG, "Launched a task in split, but didn't receive any task in transition.");
-                mSplitTransitions.mPendingEnter.cancel((cancelWct, cancelT)
-                        -> prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, cancelWct));
-                mSplitUnsupportedToast.show();
+                // This should happen when the target app is already on front, so just cancel.
+                mSplitTransitions.mPendingEnter.cancel(null);
                 return true;
             }
         } else {
