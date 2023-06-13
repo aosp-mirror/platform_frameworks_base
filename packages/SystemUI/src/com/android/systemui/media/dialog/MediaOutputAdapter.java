@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -175,9 +174,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCurrentActivePosition = position;
                     updateFullItemClickListener(v -> onItemClick(v, device));
                     setSingleLineLayout(getItemTitle(device));
-                    initMutingExpectedDevice();
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                        && device.hasSubtext()) {
+                    initFakeActiveDevice();
+                } else if (device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
                             (device.hasOngoingSession() && (currentlyConnected || isDeviceIncluded(
                                     mController.getSelectedMediaDevice(), device)));
@@ -267,6 +265,27 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         setUpDeviceIcon(device);
                         updateFullItemClickListener(v -> cancelMuteAwaitConnection());
                         setSingleLineLayout(getItemTitle(device));
+                    } else if (device.hasOngoingSession()) {
+                        mCurrentActivePosition = position;
+                        if (device.isHostForOngoingSession()) {
+                            updateTitleIcon(R.drawable.media_output_icon_volume,
+                                    mController.getColorItemContent());
+                            updateEndClickAreaAsSessionEditing(device);
+                            mEndClickIcon.setVisibility(View.VISIBLE);
+                            setSingleLineLayout(getItemTitle(device), true /* showSeekBar */,
+                                    false /* showProgressBar */, false /* showCheckBox */,
+                                    true /* showEndTouchArea */);
+                            initSeekbar(device, isCurrentSeekbarInvisible);
+                        } else {
+                            updateDeviceStatusIcon(mContext.getDrawable(
+                                    R.drawable.ic_sound_bars_anim));
+                            mStatusIcon.setVisibility(View.VISIBLE);
+                            updateSingleLineLayoutContentAlpha(
+                                    updateClickActionBasedOnSelectionBehavior(device)
+                                            ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
+                            setSingleLineLayout(getItemTitle(device));
+                            initFakeActiveDevice();
+                        }
                     } else if (mController.isCurrentConnectedDeviceRemote()
                             && !mController.getSelectableMediaDevice().isEmpty()) {
                         //If device is connected and there's other selectable devices, layout as
@@ -351,7 +370,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     ColorStateList.valueOf(mController.getColorItemContent()));
             mEndClickIcon.setOnClickListener(
                     v -> mController.tryToLaunchInAppRoutingIntent(device.getId(), v));
-            mEndTouchArea.setOnClickListener(v -> mCheckBox.performClick());
+            mEndTouchArea.setOnClickListener(v -> mEndClickIcon.performClick());
         }
 
         public void updateEndClickAreaColor(int color) {
