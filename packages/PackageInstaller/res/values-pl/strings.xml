@@ -26,11 +26,12 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikacja została zainstalowana."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Zainstalować tę aplikację?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Zaktualizować tę aplikację?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (738046584021528374) -->
+    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
     <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3056133099508550163) -->
+    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
     <skip />
-    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="3750986542284587290">"Zastosować do aplikacji aktualizację pochodzącą z tego źródła (<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>)?\n\nAktualizacje dla tej aplikacji zwykle dostarcza <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Jeśli zastosujesz aplikację pochodzącą z innego źródła, możesz w przyszłości otrzymywać na telefonie aktualizacje z dowolnych źródeł. Funkcje aplikacji mogą się zmienić."</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Aplikacja nie została zainstalowana."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instalacja pakietu została zablokowana."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikacja nie została zainstalowana, bo powoduje konflikt z istniejącym pakietem."</string>
