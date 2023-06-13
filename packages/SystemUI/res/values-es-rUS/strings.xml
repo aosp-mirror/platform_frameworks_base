@@ -472,7 +472,7 @@
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Actualizando"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocurrió un problema al obtener las tarjetas; vuelve a intentarlo más tarde"</string>
-    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Configuración de pantalla de bloqueo"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Configuración de la pantalla de bloqueo"</string>
     <string name="qr_code_scanner_title" msgid="5290201053875420785">"Escanear QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabajo"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo de avión"</string>

@@ -91,7 +91,7 @@
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Bordo dereito: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravadora da pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando gravación pantalla"</string>
-    <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación en curso sobre unha sesión de gravación de pantalla"</string>
+    <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación de actividade en curso sobre unha sesión de gravación de pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Queres iniciar a gravación?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Durante a gravación, o sistema Android pode captar información confidencial que apareza na pantalla ou se reproduza no dispositivo, como contrasinais, información de pago, fotos, mensaxes e audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Gravar audio"</string>

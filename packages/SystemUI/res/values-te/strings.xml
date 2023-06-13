@@ -123,7 +123,7 @@
     <string name="accessibility_unlock_button" msgid="122785427241471085">"అన్‌లాక్ చేయి"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"పరికరం లాక్ చేయబడింది"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ముఖాన్ని స్కాన్ చేస్తోంది"</string>
-    <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"పంపు"</string>
+    <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"పంపండి"</string>
     <string name="phone_label" msgid="5715229948920451352">"ఫోన్‌ను తెరువు"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"వాయిస్ అసిస్టెంట్‌ను తెరువు"</string>
     <string name="camera_label" msgid="8253821920931143699">"కెమెరాను తెరవండి"</string>
