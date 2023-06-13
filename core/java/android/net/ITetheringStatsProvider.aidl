@@ -29,12 +29,6 @@ import android.net.NetworkStats;
  * @hide
  */
 interface ITetheringStatsProvider {
-    // Returns cumulative statistics for all tethering sessions since boot, on all upstreams.
-    // @code {how} is one of the NetworkStats.STATS_PER_* constants. If {@code how} is
-    // {@code STATS_PER_IFACE}, the provider should not include any traffic that is already
-    // counted by kernel interface counters.
-    NetworkStats getTetherStats(int how);
-
     // Sets the interface quota for the specified upstream interface. This is defined as the number
     // of bytes, starting from zero and counting from now, after which data should stop being
     // forwarded to/from the specified upstream. A value of QUOTA_UNLIMITED means there is no limit.
