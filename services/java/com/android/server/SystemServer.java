@@ -1938,10 +1938,11 @@ public final class SystemServer implements Dumpable {
             }
 
             // Search UI manager service
-            // TODO: add deviceHasConfigString(context, R.string.config_defaultSearchUiService)
-            t.traceBegin("StartSearchUiService");
-            mSystemServiceManager.startService(SEARCH_UI_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
+            if (deviceHasConfigString(context, R.string.config_defaultSearchUiService)) {
+                t.traceBegin("StartSearchUiService");
+                mSystemServiceManager.startService(SEARCH_UI_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+            }
 
             // Smartspace manager service
             // TODO: add deviceHasConfigString(context, R.string.config_defaultSmartspaceService)
