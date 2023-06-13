@@ -29,7 +29,6 @@ import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutListContainerModule;
@@ -133,8 +132,6 @@ public interface CentralSurfacesComponent {
     NotificationActivityStarter getNotificationActivityStarter();
 
     NotificationPresenter getNotificationPresenter();
-
-    NotificationRowBinderImpl.BindRowCallback getBindRowCallback();
 
     NotificationListContainer getNotificationListContainer();
 }
