@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Gailu osagarriaren kudeatzailea"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; erabiltzeko baimena eman nahi diozu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; gailua erabiltzeko baimena eman nahi diozu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"erlojua"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Aukeratu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioak kudeatu behar duen gailua"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Aukeratu konfiguratu nahi duzun <xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
