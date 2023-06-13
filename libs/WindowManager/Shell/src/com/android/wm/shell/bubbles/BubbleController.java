@@ -80,8 +80,7 @@ import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.ScreenCapture;
-import android.window.ScreenCapture.ScreenCaptureListener;
-import android.window.ScreenCapture.ScreenshotSync;
+import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
@@ -1222,10 +1221,11 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /**
      * Performs a screenshot that may exclude the bubble layer, if one is present. The screenshot
-     * can be access via the supplied {@link ScreenshotSync#get()} asynchronously.
+     * can be access via the supplied {@link SynchronousScreenCaptureListener#getBuffer()}
+     * asynchronously.
      */
     public void getScreenshotExcludingBubble(int displayId,
-            Pair<ScreenCaptureListener, ScreenshotSync> screenCaptureListener) {
+            SynchronousScreenCaptureListener screenCaptureListener) {
         try {
             ScreenCapture.CaptureArgs args = null;
             if (mStackView != null) {
@@ -1240,7 +1240,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 }
             }
 
-            mWmService.captureDisplay(displayId, args, screenCaptureListener.first);
+            mWmService.captureDisplay(displayId, args, screenCaptureListener);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to capture screenshot");
         }
@@ -2211,15 +2211,15 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         @Nullable
-        public ScreenshotSync getScreenshotExcludingBubble(int displayId) {
-            Pair<ScreenCaptureListener, ScreenshotSync> screenCaptureListener =
+        public SynchronousScreenCaptureListener getScreenshotExcludingBubble(int displayId) {
+            SynchronousScreenCaptureListener screenCaptureListener =
                     ScreenCapture.createSyncCaptureListener();
 
             mMainExecutor.execute(
                     () -> BubbleController.this.getScreenshotExcludingBubble(displayId,
                             screenCaptureListener));
 
-            return screenCaptureListener.second;
+            return screenCaptureListener;
         }
 
         @Override
