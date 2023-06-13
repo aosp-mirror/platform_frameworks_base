@@ -1085,9 +1085,8 @@ public class Transitions implements RemoteCallable<Transitions>,
                     if (wct == null) {
                         wct = new WindowContainerTransaction();
                     }
-                    mDisplayController.getChangeController().dispatchOnDisplayChange(wct,
-                            change.getDisplayId(), change.getStartRotation(),
-                            change.getEndRotation(), null /* newDisplayAreaInfo */);
+                    mDisplayController.onDisplayRotateRequested(wct, change.getDisplayId(),
+                            change.getStartRotation(), change.getEndRotation());
                 }
             }
         }
