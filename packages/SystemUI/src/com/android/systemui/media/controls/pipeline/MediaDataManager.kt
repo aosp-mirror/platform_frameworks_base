@@ -786,11 +786,15 @@ class MediaDataManager(
 
         // Song name
         var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
-        if (song == null) {
+        if (song.isNullOrBlank()) {
             song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
         }
-        if (song == null) {
+        if (song.isNullOrBlank()) {
             song = HybridGroupManager.resolveTitle(notif)
+        }
+        if (song.isNullOrBlank()) {
+            // For apps that don't include a title, add a placeholder
+            song = context.getString(R.string.controls_media_empty_title, appName)
         }
 
         // Explicit Indicator
