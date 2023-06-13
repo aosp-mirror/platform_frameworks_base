@@ -43,16 +43,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ServiceManager;
 import android.platform.test.annotations.Presubmit;
-import android.util.Pair;
 import android.view.IWindowManager;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
 import android.view.cts.surfacevalidator.BitmapPixelChecker;
 import android.view.cts.surfacevalidator.SaveBitmapHelper;
 import android.window.ScreenCapture;
-import android.window.ScreenCapture.ScreenCaptureListener;
 import android.window.ScreenCapture.ScreenshotHardwareBuffer;
-import android.window.ScreenCapture.ScreenshotSync;
+import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
@@ -169,10 +167,10 @@ public class ScreenshotTests {
                 .setPosition(sc, point.x, point.y)
                 .apply(true);
 
-        Pair<ScreenCaptureListener, ScreenshotSync> syncScreenCapture =
+        SynchronousScreenCaptureListener syncScreenCapture =
                 ScreenCapture.createSyncCaptureListener();
-        windowManager.captureDisplay(DEFAULT_DISPLAY, null, syncScreenCapture.first);
-        ScreenshotHardwareBuffer hardwareBuffer = syncScreenCapture.second.get();
+        windowManager.captureDisplay(DEFAULT_DISPLAY, null, syncScreenCapture);
+        ScreenshotHardwareBuffer hardwareBuffer = syncScreenCapture.getBuffer();
         assertNotNull(hardwareBuffer);
 
         Bitmap screenshot = hardwareBuffer.asBitmap();
