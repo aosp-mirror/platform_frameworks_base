@@ -1747,6 +1747,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
         final String packageName = pkg.getPackageName();
         for (final String permName : pkg.getRequestedPermissions()) {
+            if (mIsLeanback && NOTIFICATION_PERMISSIONS.contains(permName)) {
+                // Do not reset the Notification permissions on TV
+                continue;
+            }
             final boolean isRuntimePermission;
             synchronized (mLock) {
                 final Permission permission = mRegistry.getPermission(permName);
