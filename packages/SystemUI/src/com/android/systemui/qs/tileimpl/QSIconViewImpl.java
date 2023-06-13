@@ -130,6 +130,11 @@ public class QSIconViewImpl extends QSIconView {
                 d.setLayoutDirection(getLayoutDirection());
             }
 
+            final Drawable lastDrawable = iv.getDrawable();
+            if (lastDrawable instanceof Animatable2) {
+                ((Animatable2) lastDrawable).clearAnimationCallbacks();
+            }
+
             if (iv instanceof SlashImageView) {
                 ((SlashImageView) iv).setAnimationEnabled(shouldAnimate);
                 ((SlashImageView) iv).setState(null, d);
