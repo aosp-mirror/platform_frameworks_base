@@ -2030,7 +2030,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // from doing work and changing the activity visuals while animating
             // TODO(task-org): Figure-out more structured way to do this long term.
             r.setWindowingMode(r.getWindowingMode());
-            r.mWaitForEnteringPinnedMode = true;
 
             final TaskFragment organizedTf = r.getOrganizedTaskFragment();
             final boolean singleActivity = task.getNonFinishingActivityCount() == 1;
@@ -2157,6 +2156,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
             rootTask.setDeferTaskAppear(false);
 
+            // After setting this, it is not expected to change activity configuration until the
+            // transition animation is finished. So the activity can keep consistent appearance
+            // when animating.
+            r.mWaitForEnteringPinnedMode = true;
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the root pinned task
             r.supportsEnterPipOnTaskSwitch = false;
