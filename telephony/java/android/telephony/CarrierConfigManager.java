@@ -570,6 +570,13 @@ public class CarrierConfigManager {
             "editable_voicemail_number_bool";
 
     /**
+     * Determine whether the voicemail number in Settings is hidden.
+     * @hide
+     */
+    public static final String KEY_HIDE_VOICEMAIL_NUMBER_SETTING_BOOL =
+            "hide_voicemail_number_setting_bool";
+
+    /**
      * Determine whether the voicemail notification is persistent in the notification bar. If true,
      * the voicemail notifications cannot be dismissed from the notification bar.
      */
@@ -9834,6 +9841,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_HFA_FOR_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_EDITABLE_VOICEMAIL_NUMBER_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_VOICEMAIL_NUMBER_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_VOICEMAIL_NUMBER_SETTING_BOOL, false);
         sDefaults.putBoolean(KEY_USE_OTASP_FOR_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_VOICEMAIL_NOTIFICATION_PERSISTENT_BOOL, false);
         sDefaults.putBoolean(KEY_VOICE_PRIVACY_DISABLE_UI_BOOL, false);
