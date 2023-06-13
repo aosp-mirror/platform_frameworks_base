@@ -280,6 +280,50 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBindViewHolder_bindConnectedRemoteDeviceWithOnGoingSession_verifyView() {
+        when(mMediaDevice1.hasOngoingSession()).thenReturn(true);
+        when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(
+                ImmutableList.of());
+        when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(true);
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_1);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mEndTouchArea.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void onBindViewHolder_bindConnectedRemoteDeviceWithHostOnGoingSession_verifyView() {
+        when(mMediaDevice1.hasOngoingSession()).thenReturn(true);
+        when(mMediaDevice1.isHostForOngoingSession()).thenReturn(true);
+        when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(
+                ImmutableList.of());
+        when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(true);
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_1);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mEndClickIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mEndTouchArea.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
     public void onBindViewHolder_bindConnectedDeviceWithMutingExpectedDeviceExist_verifyView() {
         when(mMediaOutputController.hasMutingExpectedDevice()).thenReturn(true);
         when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(false);
