@@ -145,6 +145,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -273,6 +274,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
+    @Mock private NotificationShelfController mNotificationShelfController;
     @Mock private DozeParameters mDozeParameters;
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     @Mock private LockscreenWallpaper mLockscreenWallpaper;
@@ -499,6 +501,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 () -> mAssistManager,
                 configurationController,
                 mNotificationShadeWindowController,
+                mNotificationShelfController,
                 mDozeParameters,
                 mScrimController,
                 mLockscreenWallpaperLazy,
