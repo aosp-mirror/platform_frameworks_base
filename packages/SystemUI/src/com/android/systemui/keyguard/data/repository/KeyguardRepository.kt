@@ -121,6 +121,9 @@ interface KeyguardRepository {
     /** Observable for whether the device is dreaming with an overlay, see [DreamOverlayService] */
     val isDreamingWithOverlay: Flow<Boolean>
 
+    /** Observable for device dreaming state and the active dream is hosted in lockscreen */
+    val isActiveDreamLockscreenHosted: StateFlow<Boolean>
+
     /**
      * Observable for the amount of doze we are currently in.
      *
@@ -190,6 +193,8 @@ interface KeyguardRepository {
     fun setLastDozeTapToWakePosition(position: Point)
 
     fun setIsDozing(isDozing: Boolean)
+
+    fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -610,6 +615,9 @@ constructor(
     private val _isQuickSettingsVisible = MutableStateFlow(false)
     override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
 
+    private val _isActiveDreamLockscreenHosted = MutableStateFlow(false)
+    override val isActiveDreamLockscreenHosted = _isActiveDreamLockscreenHosted.asStateFlow()
+
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.value = animate
     }
@@ -626,6 +634,10 @@ constructor(
 
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
+    }
+
+    override fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
+        _isActiveDreamLockscreenHosted.value = isLockscreenHosted
     }
 
     private fun statusBarStateIntToObject(value: Int): StatusBarState {

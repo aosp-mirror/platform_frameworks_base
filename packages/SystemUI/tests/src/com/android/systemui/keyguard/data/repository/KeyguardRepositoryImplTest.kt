@@ -299,6 +299,16 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun isActiveDreamLockscreenHosted() =
+        testScope.runTest {
+            underTest.setIsActiveDreamLockscreenHosted(true)
+            assertThat(underTest.isActiveDreamLockscreenHosted.value).isEqualTo(true)
+
+            underTest.setIsActiveDreamLockscreenHosted(false)
+            assertThat(underTest.isActiveDreamLockscreenHosted.value).isEqualTo(false)
+        }
+
+    @Test
     fun wakefulness() =
         testScope.runTest {
             val values = mutableListOf<WakefulnessModel>()
