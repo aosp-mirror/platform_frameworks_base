@@ -106,17 +106,11 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         val currentPrompt by collectLastValue(interactor.prompt)
         val credentialKind by collectLastValue(interactor.credentialKind)
         val isCredentialAllowed by collectLastValue(interactor.isCredentialAllowed)
-        val isExplicitConfirmationRequired by collectLastValue(interactor.isConfirmationRequested)
+        val isExplicitConfirmationRequired by collectLastValue(interactor.isConfirmationRequired)
 
         assertThat(currentPrompt).isNull()
 
-        interactor.useBiometricsForAuthentication(
-            info,
-            confirmationRequired,
-            USER_ID,
-            CHALLENGE,
-            modalities
-        )
+        interactor.useBiometricsForAuthentication(info, USER_ID, CHALLENGE, modalities)
 
         assertThat(currentPrompt).isNotNull()
         assertThat(currentPrompt?.title).isEqualTo(TITLE)
