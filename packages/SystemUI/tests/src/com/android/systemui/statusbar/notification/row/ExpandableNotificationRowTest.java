@@ -733,6 +733,36 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         verify(lowPriVectorDrawable, times(1)).start();
     }
 
+    @Test
+    public void isExpanded_hideSensitive_sensitiveNotExpanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setUserExpanded(true);
+        row.setOnKeyguard(false);
+        row.setSensitive(/* sensitive= */true, /* hideSensitive= */false);
+        row.setHideSensitive(/* hideSensitive= */true, /* animated= */false,
+                /* delay= */0L, /* duration= */0L);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    public void isExpanded_hideSensitive_nonSensitiveExpanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setUserExpanded(true);
+        row.setOnKeyguard(false);
+        row.setSensitive(/* sensitive= */true, /* hideSensitive= */false);
+        row.setHideSensitive(/* hideSensitive= */false, /* animated= */false,
+                /* delay= */0L, /* duration= */0L);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
     private void setDrawableIconsInImageView(CachingIconView icon, Drawable iconDrawable,
             Drawable rightIconDrawable) {
         ImageView iconView = mock(ImageView.class);
