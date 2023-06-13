@@ -3105,12 +3105,17 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     /**
-     * Ports are highly platform-specific, so only allow these to be specified in the vendor
+     * Ports are highly platform-specific, so allow these to be specified in the odm/vendor
      * directory.
      */
     private static Map<String, Integer> loadStaticInputPortAssociations() {
-        final File baseDir = Environment.getVendorDirectory();
-        final File confFile = new File(baseDir, PORT_ASSOCIATIONS_PATH);
+        File baseDir = Environment.getOdmDirectory();
+        File confFile = new File(baseDir, PORT_ASSOCIATIONS_PATH);
+
+        if (!confFile.exists()) {
+            baseDir = Environment.getVendorDirectory();
+            confFile = new File(baseDir, PORT_ASSOCIATIONS_PATH);
+        }
 
         try (final InputStream stream = new FileInputStream(confFile)) {
             return ConfigurationProcessor.processInputPortAssociations(stream);
