@@ -44,10 +44,12 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
@@ -122,6 +124,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private SysuiStatusBarStateController mSysuiStatusBarStateController;
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private KeyguardInteractor mKeyguardInteractor;
+    @Mock private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private DumpManager mDumpManager;
@@ -145,7 +148,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private StackStateLogger mStackLogger;
     @Mock private NotificationStackScrollLogger mLogger;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
-    @Mock private FeatureFlags mFeatureFlags;
+    private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
     @Mock private SecureSettings mSecureSettings;
     @Mock private NotificationIconAreaController mIconAreaController;
@@ -162,6 +165,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, false);
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
     }
@@ -262,28 +267,84 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateEmptyShadeView_bouncerShowing_hideEmptyView() {
+    public void testUpdateEmptyShadeView_bouncerShowing_flagOff_hideEmptyView() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
 
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+        // WHEN the flag is off and *only* CentralSurfaces has bouncer as showing
+        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, false);
+        mController.setBouncerShowingFromCentralSurfaces(true);
+        when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(false);
+
         setupShowEmptyShadeViewState(true);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
+
+        // THEN the CentralSurfaces value is used. Since the bouncer is showing, we hide the empty
+        // view.
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ false,
                 /* areNotificationsHiddenInShade= */ false);
     }
 
     @Test
-    public void testUpdateEmptyShadeView_bouncerNotShowing_showEmptyView() {
+    public void testUpdateEmptyShadeView_bouncerShowing_flagOn_hideEmptyView() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
 
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
+        // WHEN the flag is on and *only* PrimaryBouncerInteractor has bouncer as showing
+        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, true);
+        when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(true);
+        mController.setBouncerShowingFromCentralSurfaces(false);
+
         setupShowEmptyShadeViewState(true);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
+
+        // THEN the PrimaryBouncerInteractor value is used. Since the bouncer is showing, we
+        // hide the empty view.
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ false,
+                /* areNotificationsHiddenInShade= */ false);
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_bouncerNotShowing_flagOff_showEmptyView() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        initController(/* viewIsAttached= */ true);
+
+        // WHEN the flag is off and *only* CentralSurfaces has bouncer as not showing
+        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, false);
+        mController.setBouncerShowingFromCentralSurfaces(false);
+        when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(true);
+
+        setupShowEmptyShadeViewState(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+
+        // THEN the CentralSurfaces value is used. Since the bouncer isn't showing, we can show the
+        // empty view.
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ true,
+                /* areNotificationsHiddenInShade= */ false);
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_bouncerNotShowing_flagOn_showEmptyView() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        initController(/* viewIsAttached= */ true);
+
+        // WHEN the flag is on and *only* PrimaryBouncerInteractor has bouncer as not showing
+        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, true);
+        when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(false);
+        mController.setBouncerShowingFromCentralSurfaces(true);
+
+        setupShowEmptyShadeViewState(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+
+        // THEN the PrimaryBouncerInteractor value is used. Since the bouncer isn't showing, we
+        // can show the empty view.
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
                 /* areNotificationsHiddenInShade= */ false);
@@ -548,6 +609,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mKeyguardMediaController,
                 mKeyguardBypassController,
                 mKeyguardInteractor,
+                mPrimaryBouncerInteractor,
                 mZenModeController,
                 mNotificationLockscreenUserManager,
                 Optional.<NotificationListViewModel>empty(),

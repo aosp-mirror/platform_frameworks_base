@@ -739,4 +739,10 @@ object Flags {
     @JvmField
     val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
             unreleasedFlag(283447257, "bigpicture_notification_lazy_loading")
+
+    // 2900 - CentralSurfaces-related flags
+
+    // TODO(b/285174336): Tracking Bug
+    @JvmField
+    val USE_REPOS_FOR_BOUNCER_SHOWING = unreleasedFlag(2900, "use_repos_for_bouncer_showing")
 }
