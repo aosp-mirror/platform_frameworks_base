@@ -646,14 +646,16 @@ public final class DisplayPowerController2Test {
 
     @Test
     public void testSetScreenOffBrightnessSensorEnabled_DisplayIsInDoze() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, false);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_DOZE;
-        mContext.getOrCreateTestableResources().addOverride(
-                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, true);
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
