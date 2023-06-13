@@ -37,6 +37,10 @@ import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.statusbar.NotificationShelf
+import com.android.systemui.statusbar.NotificationShelfController
+import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent
+import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.TapAgainView
@@ -49,6 +53,7 @@ import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import javax.inject.Named
+import javax.inject.Provider
 
 /** Module for classes related to the notification shade. */
 @Module
@@ -100,6 +105,32 @@ abstract class ShadeModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): NotificationStackScrollLayout {
             return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesNotificationShelfController(
+            featureFlags: FeatureFlags,
+            newImpl: Provider<NotificationShelfViewBinderWrapperControllerImpl>,
+            notificationShelfComponentBuilder: NotificationShelfComponent.Builder,
+            layoutInflater: LayoutInflater,
+            notificationStackScrollLayout: NotificationStackScrollLayout,
+        ): NotificationShelfController {
+            return if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+                newImpl.get()
+            } else {
+                val shelfView =
+                    layoutInflater.inflate(
+                        R.layout.status_bar_notification_shelf,
+                        notificationStackScrollLayout,
+                        false
+                    ) as NotificationShelf
+                val component =
+                    notificationShelfComponentBuilder.notificationShelf(shelfView).build()
+                val notificationShelfController = component.notificationShelfController
+                notificationShelfController.init()
+                notificationShelfController
+            }
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
