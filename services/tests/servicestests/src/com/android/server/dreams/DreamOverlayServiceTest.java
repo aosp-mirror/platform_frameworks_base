@@ -101,12 +101,6 @@ public class DreamOverlayServiceTest {
             mMonitor.onEndDream();
             super.onEndDream();
         }
-
-        @Override
-        public void onWakeUp(@NonNull Runnable onCompleteCallback) {
-            mMonitor.onWakeUp();
-            super.onWakeUp(onCompleteCallback);
-        }
     }
 
     /**

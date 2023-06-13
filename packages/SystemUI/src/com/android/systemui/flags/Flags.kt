@@ -89,7 +89,7 @@ object Flags {
     // TODO(b/277338665): Tracking Bug
     @JvmField
     val NOTIFICATION_SHELF_REFACTOR =
-        unreleasedFlag(271161129, "notification_shelf_refactor", teamfood = true)
+        unreleasedFlag(271161129, "notification_shelf_refactor")
 
     @JvmField
     val ANIMATED_NOTIFICATION_SHADE_INSETS =
@@ -259,6 +259,11 @@ object Flags {
     @JvmField
     val FP_LISTEN_OCCLUDING_APPS = unreleasedFlag(237, "fp_listen_occluding_apps")
 
+    /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
+    // TODO(b/286563884): Tracking bug
+    @JvmField
+    val KEYGUARD_TALKBACK_FIX = unreleasedFlag(238, "keyguard_talkback_fix")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -355,8 +360,7 @@ object Flags {
 
     // TODO(b/280426085): Tracking Bug
     @JvmField
-    val NEW_BLUETOOTH_REPOSITORY =
-            unreleasedFlag(612, "new_bluetooth_repository", teamfood = true)
+    val NEW_BLUETOOTH_REPOSITORY = releasedFlag(612, "new_bluetooth_repository")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug

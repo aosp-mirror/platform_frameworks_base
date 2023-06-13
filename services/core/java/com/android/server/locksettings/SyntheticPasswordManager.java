@@ -1114,6 +1114,57 @@ class SyntheticPasswordManager {
         }
     }
 
+    /**
+     * Writes the user's synthetic password data to the repair mode file.
+     *
+     * @param protectorId current LSKF based protectorId
+     * @param userId user id of the user
+     */
+    public boolean writeRepairModeCredentialLocked(long protectorId, int userId) {
+        if (!shouldWriteRepairModeCredential(userId)) {
+            return false;
+        }
+        final byte[] data = loadState(PASSWORD_DATA_NAME, protectorId, userId);
+        if (data == null) {
+            Slogf.w(TAG, "Password data not found for user %d", userId);
+            return false;
+        }
+        final PasswordData pwd = PasswordData.fromBytes(data);
+        if (isNoneCredential(pwd)) {
+            Slogf.w(TAG, "User %d has NONE credential", userId);
+            return false;
+        }
+        Slogf.d(TAG, "Writing repair mode credential tied to user %d", userId);
+        final int weaverSlot = loadWeaverSlot(protectorId, userId);
+        if (weaverSlot != INVALID_WEAVER_SLOT) {
+            // write weaver password
+            mStorage.writeRepairModePersistentData(
+                    PersistentData.TYPE_SP_WEAVER, weaverSlot, pwd.toBytes());
+        } else {
+            // write gatekeeper password
+            mStorage.writeRepairModePersistentData(
+                    PersistentData.TYPE_SP_GATEKEEPER, userId, pwd.toBytes());
+        }
+        return true;
+    }
+
+    private boolean shouldWriteRepairModeCredential(int userId) {
+        final UserInfo userInfo = mUserManager.getUserInfo(userId);
+        if (!LockPatternUtils.canUserEnterRepairMode(mContext, userInfo)) {
+            Slogf.w(TAG, "User %d can't enter repair mode", userId);
+            return false;
+        }
+        if (LockPatternUtils.isRepairModeActive(mContext)) {
+            Slog.w(TAG, "Can't write repair mode credential while repair mode is already active");
+            return false;
+        }
+        if (LockPatternUtils.isGsiRunning()) {
+            Slog.w(TAG, "Can't write repair mode credential while GSI is running");
+            return false;
+        }
+        return true;
+    }
+
     private ArrayMap<Integer, ArrayMap<Long, TokenData>> tokenMap = new ArrayMap<>();
 
     /**

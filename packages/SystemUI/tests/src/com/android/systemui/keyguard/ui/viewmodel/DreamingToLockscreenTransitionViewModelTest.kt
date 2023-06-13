@@ -25,11 +25,12 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.util.mockito.mock
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -42,13 +43,12 @@ import org.junit.runner.RunWith
 class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
     private lateinit var underTest: DreamingToLockscreenTransitionViewModel
     private lateinit var repository: FakeKeyguardTransitionRepository
-    private lateinit var transitionAnimation: KeyguardTransitionAnimationFlow
 
     @Before
     fun setUp() {
         repository = FakeKeyguardTransitionRepository()
-        val interactor = KeyguardTransitionInteractor(repository)
-        underTest = DreamingToLockscreenTransitionViewModel(interactor)
+        val interactor = KeyguardTransitionInteractor(repository, TestScope().backgroundScope)
+        underTest = DreamingToLockscreenTransitionViewModel(interactor, mock())
     }
 
     @Test
@@ -60,17 +60,15 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
             val job =
                 underTest.dreamOverlayTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
 
-            // Should start running here...
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             repository.sendTransitionStep(step(0f))
             repository.sendTransitionStep(step(0.3f))
             repository.sendTransitionStep(step(0.5f))
             repository.sendTransitionStep(step(0.6f))
-            // ...up to here
             repository.sendTransitionStep(step(0.8f))
             repository.sendTransitionStep(step(1f))
 
-            assertThat(values.size).isEqualTo(5)
+            assertThat(values.size).isEqualTo(7)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 100f)) }
 
             job.cancel()

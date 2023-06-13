@@ -27,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.R
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.fragments.FragmentService
 import com.android.systemui.navigationbar.NavigationModeController
@@ -45,6 +46,7 @@ import kotlin.reflect.KMutableProperty0
 @VisibleForTesting
 internal const val INSET_DEBOUNCE_MILLIS = 500L
 
+@SysUISingleton
 class NotificationsQSContainerController @Inject constructor(
         view: NotificationsQuickSettingsContainer,
         private val navigationModeController: NavigationModeController,
