@@ -580,6 +580,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.mPresenter = mNotificationPresenter;
         mCentralSurfaces.mKeyguardIndicationController = mKeyguardIndicationController;
         mCentralSurfaces.mBarService = mBarService;
+        mCentralSurfaces.mStackScrollerController = mStackScrollerController;
         mCentralSurfaces.mStackScroller = mStackScroller;
         mCentralSurfaces.mGestureWakeLock = mPowerManager.newWakeLock(
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "sysui:GestureWakeLock");
