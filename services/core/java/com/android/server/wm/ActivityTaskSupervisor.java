@@ -1891,7 +1891,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // DestroyActivityItem may be called first.
         final ActivityRecord top = task.getTopMostActivity();
         if (top != null && top.finishing && !top.mAppStopped && top.lastVisibleTime > 0
-                && !task.mKillProcessesOnDestroyed) {
+                && !task.mKillProcessesOnDestroyed && top.hasProcess()) {
             task.mKillProcessesOnDestroyed = true;
             mHandler.sendMessageDelayed(
                     mHandler.obtainMessage(KILL_TASK_PROCESSES_TIMEOUT_MSG, task),

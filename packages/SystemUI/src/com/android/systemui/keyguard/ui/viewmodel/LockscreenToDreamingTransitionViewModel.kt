@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.Flow
 class LockscreenToDreamingTransitionViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardTransitionInteractor,
+    interactor: KeyguardTransitionInteractor,
 ) {
     private val transitionAnimation =
         KeyguardTransitionAnimationFlow(
