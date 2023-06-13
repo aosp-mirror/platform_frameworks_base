@@ -56,11 +56,13 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
@@ -175,6 +177,7 @@ public class NotificationStackScrollLayoutController {
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardInteractor mKeyguardInteractor;
+    private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     // TODO: CentralSurfaces should be encapsulated behind a Controller
     private final CentralSurfaces mCentralSurfaces;
@@ -195,6 +198,7 @@ public class NotificationStackScrollLayoutController {
     @Nullable
     private Boolean mHistoryEnabled;
     private int mBarState;
+    private boolean mIsBouncerShowingFromCentralSurfaces;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final FeatureFlags mFeatureFlags;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
@@ -631,6 +635,7 @@ public class NotificationStackScrollLayoutController {
             KeyguardMediaController keyguardMediaController,
             KeyguardBypassController keyguardBypassController,
             KeyguardInteractor keyguardInteractor,
+            PrimaryBouncerInteractor primaryBouncerInteractor,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager lockscreenUserManager,
             Optional<NotificationListViewModel> nsslViewModel,
@@ -680,6 +685,7 @@ public class NotificationStackScrollLayoutController {
         mKeyguardMediaController = keyguardMediaController;
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardInteractor = keyguardInteractor;
+        mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mZenModeController = zenModeController;
         mLockscreenUserManager = lockscreenUserManager;
         mViewModel = nsslViewModel;
@@ -1206,6 +1212,14 @@ public class NotificationStackScrollLayoutController {
     }
 
     /**
+     * Sets whether the bouncer is currently showing. Should only be called from
+     * {@link CentralSurfaces}.
+     */
+    public void setBouncerShowingFromCentralSurfaces(boolean bouncerShowing) {
+        mIsBouncerShowingFromCentralSurfaces = bouncerShowing;
+    }
+
+    /**
      * Set the visibility of the view, and propagate it to specific children.
      *
      * @param visible either the view is visible or not.
@@ -1236,11 +1250,30 @@ public class NotificationStackScrollLayoutController {
                 // That avoids "No Notifications" to blink when transitioning to AOD.
                 // For more details, see: b/228790482
                 && !isInTransitionToKeyguard()
-                && !mCentralSurfaces.isBouncerShowing();
+                // Don't show any notification content if the bouncer is showing. See b/267060171.
+                && !isBouncerShowing();
 
         mView.updateEmptyShadeView(shouldShow, mZenModeController.areNotificationsHiddenInShade());
 
         Trace.endSection();
+    }
+
+    /**
+     * Returns whether the bouncer is currently showing.
+     *
+     * There's a possible timing difference between when CentralSurfaces marks the bouncer as not
+     * showing and when PrimaryBouncerInteractor marks the bouncer as not showing. (CentralSurfaces
+     * appears to mark the bouncer as showing for 10-200ms longer than PrimaryBouncerInteractor.)
+     *
+     * This timing difference could be load bearing, which is why we have a feature flag protecting
+     * where we fetch the value from. This flag is intended to be short-lived.
+     */
+    private boolean isBouncerShowing() {
+        if (mFeatureFlags.isEnabled(Flags.USE_REPOS_FOR_BOUNCER_SHOWING)) {
+            return mPrimaryBouncerInteractor.isBouncerShowing();
+        } else {
+            return mIsBouncerShowingFromCentralSurfaces;
+        }
     }
 
     /**
