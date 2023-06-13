@@ -160,6 +160,17 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull BiometricContext biometricContext) {
+        this(context, biometricStateCallback, props, halInstanceName, lockoutResetDispatcher,
+                gestureAvailabilityDispatcher, biometricContext, null /* daemon */);
+    }
+
+    @VisibleForTesting FingerprintProvider(@NonNull Context context,
+            @NonNull BiometricStateCallback biometricStateCallback,
+            @NonNull SensorProps[] props, @NonNull String halInstanceName,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull BiometricContext biometricContext,
+            IFingerprint daemon) {
         mContext = context;
         mBiometricStateCallback = biometricStateCallback;
         mHalInstanceName = halInstanceName;
@@ -170,6 +181,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mTaskStackListener = new BiometricTaskStackListener();
         mBiometricContext = biometricContext;
         mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
+        mDaemon = daemon;
 
         final List<SensorLocationInternal> workaroundLocations = getWorkaroundSensorProps(context);
 
