@@ -25,7 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 
 import com.android.systemui.R;
-import com.android.wm.shell.bubbles.DismissView;
+import com.android.wm.shell.common.bubbles.DismissView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 /**

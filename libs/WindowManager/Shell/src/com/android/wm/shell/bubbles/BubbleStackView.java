@@ -88,6 +88,8 @@ import com.android.wm.shell.bubbles.animation.PhysicsAnimationLayout;
 import com.android.wm.shell.bubbles.animation.StackAnimationController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.bubbles.DismissView;
+import com.android.wm.shell.common.bubbles.RelativeTouchListener;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 import java.io.PrintWriter;
@@ -1179,6 +1181,7 @@ public class BubbleStackView extends FrameLayout
             removeView(mDismissView);
         }
         mDismissView = new DismissView(getContext());
+        DismissViewUtils.setup(mDismissView);
         int elevation = getResources().getDimensionPixelSize(R.dimen.bubble_elevation);
 
         addView(mDismissView);

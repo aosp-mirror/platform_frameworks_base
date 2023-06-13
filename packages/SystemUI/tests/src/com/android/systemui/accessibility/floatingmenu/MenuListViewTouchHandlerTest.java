@@ -40,7 +40,8 @@ import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.MotionEventHelper;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.wm.shell.bubbles.DismissView;
+import com.android.wm.shell.bubbles.DismissViewUtils;
+import com.android.wm.shell.common.bubbles.DismissView;
 
 import org.junit.After;
 import org.junit.Before;
@@ -88,6 +89,7 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
         mStubMenuView.setTranslationY(0);
         mMenuAnimationController = spy(new MenuAnimationController(mStubMenuView));
         mDismissView = spy(new DismissView(mContext));
+        DismissViewUtils.setup(mDismissView);
         mDismissAnimationController =
                 spy(new DismissAnimationController(mDismissView, mStubMenuView));
         mTouchHandler = new MenuListViewTouchHandler(mMenuAnimationController,
