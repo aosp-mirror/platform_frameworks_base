@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"កម្មវិធី​គ្រប់​គ្រង​ឧបករណ៍ដៃគូ"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលប្រើ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"អនុញ្ញាតឱ្យកម្មវិធី &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលប្រើ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"នាឡិកា"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"ជ្រើសរើសឧបករណ៍ ដើម្បីដាក់ក្រោម​ការគ្រប់គ្រងរបស់ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"ជ្រើសរើស <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ដើម្បីរៀបចំ"</string>
