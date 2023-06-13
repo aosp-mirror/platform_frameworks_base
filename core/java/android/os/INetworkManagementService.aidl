@@ -19,7 +19,6 @@ package android.os;
 
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
-import android.net.ITetheringStatsProvider;
 import android.net.Network;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
