@@ -114,11 +114,9 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM картаны пайдалануу мүмкүнчүлүгү"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD форматындагы аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD форматындагы аудио"</string>
-    <!-- no translation found for bluetooth_profile_hearing_aid (2607867572569689732) -->
-    <skip />
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Угуу аппараттары"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (5757754050938807276) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Угуу аппараттарына туташып турат"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE аудио менен туташты"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Медиа аудиого туташты"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Телефон аудиосуна туташты"</string>
@@ -136,8 +134,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Телефон аудиосу үчүн колдонулсун"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Файл өткөрүү үчүн колдонулсун"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Киргизүү үчүн колдонулсун"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (3374057355721486932) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Угуу аппараттары үчүн колдонуу"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO үчүн колдонуу"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Байланыштыруу"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ЖУПТАШТЫРУУ"</string>
@@ -262,7 +259,7 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"Ойгоо туруу"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Түзмөк кубатталып жатканда экран өчпөйт"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI журналын иштетүү"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth таңгактарын алуу. (Бул жөндөөнү өзгөрткөндөн кийин Bluetooth\'ду өчүрүп / күйгүзүңүз)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth таңгактарын алуу. (Бул параметрди өзгөрткөндөн кийин Bluetooth\'ду өчүрүп / күйгүзүңүз)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM бөгөттөн чыгаруу"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Кайра жүктөгүчтү бөгөттөн чыгарууга уруксат берүү"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM бөгөттөн чыгарууга уруксатпы?"</string>
@@ -358,10 +355,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Басылган жерлер жана жаңсоолор экранда көрүнүп турат"</string>
     <string name="show_touches" msgid="8437666942161289025">"Басылган жерлерди көрсөтүү"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Экранда басылган жерлер көрүнүп турат"</string>
-    <!-- no translation found for show_key_presses (6360141722735900214) -->
-    <skip />
-    <!-- no translation found for show_key_presses_summary (725387457373015024) -->
-    <skip />
+    <string name="show_key_presses" msgid="6360141722735900214">"Баскычтардын басылганын көрсөтүү"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"Баскычтар басылганда визуалдык сигнал көрүнөт"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Экран жаңыруусун көрсөтүү"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Экран жаңырганда анын үстү жарык болот"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Жаңыртууларды көрсөтүү"</string>
