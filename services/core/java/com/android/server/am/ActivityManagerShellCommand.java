@@ -928,8 +928,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final int result = mInterface.broadcastIntentWithFeature(null, null, intent, null,
                 receiver, 0, null, null, requiredPermissions, null, null,
                 android.app.AppOpsManager.OP_NONE, bundle, true, false, mUserId);
-        Slogf.i(TAG, "Broadcasted %s: " + result, intent);
-        if (!mAsync) {
+        Slogf.i(TAG, "Enqueued broadcast %s: " + result, intent);
+        if (result == ActivityManager.BROADCAST_SUCCESS && !mAsync) {
             receiver.waitForFinish();
         }
         return 0;
