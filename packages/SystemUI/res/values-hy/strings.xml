@@ -339,7 +339,7 @@
   </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Սահեցրեք վերև՝ նորից փորձելու համար"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ապակողպեք՝ NFC-ն օգտագործելու համար"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր ընկերությանը"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>» կազմակերպությանը"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Այս սարքը տրամադրվել է «<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>» կազմակերպության կողմից"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Սահահարվածեք հեռախոսի պատկերակից"</string>
@@ -405,11 +405,11 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ձեր կազմակերպությունը այս սարքի սեփականատերն է և կարող է վերահսկել ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"«<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությունը այս սարքի սեփականատերն է և կարող է վերահսկել ցանցային թրաֆիկը"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Այս սարքը տրամադրվել է <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> կազմակերպության կողմից"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Այս սարքը պատկանում է ձեր կազմակերպությանը և համացանցին միացած է <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Այս սարքը պատկանում է ձեր ընկերությանը և համացանցին միացած է <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Այս սարքը պատկանում է <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությանը և համացանցին միացած է <xliff:g id="VPN_APP">%2$s</xliff:g>-ի միջոցով"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Այս սարքը պատկանում է ձեր ընկերությանը"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Այս սարքը պատկանում է ձեր կազմակերպությանը և համացանցին միացած է VPN-ների միջոցով"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Այս սարքը պատկանում է ձեր ընկերությանը և համացանցին միացած է VPN-ների միջոցով"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Այս սարքը պատկանում է <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությանը և համացանցին միացած է VPN-ների միջոցով"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ձեր կազմակերպությունը կարող է վերահսկել ձեր աշխատանքային պրոֆիլի ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությունը կարող է վերահսկել ձեր աշխատանքային պրոֆիլի ցանցային թրաֆիկը"</string>
@@ -428,7 +428,7 @@
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Դիտել կառավարման տարրերը"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը։\n\nՁեր ՏՏ ադմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ ռեսուրսներից օգտվելու թույլտվությունները, հավելվածները, սարքի հետ կապված տվյալները և սարքի տեղադրության տվյալները։\n\nԼրացուցիչ տեղեկությունների համար դիմեք ձեր ՏՏ ադմինիստրատորին։"</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> կազմակերպությունը կարող է ստանալ այս սարքի հետ կապված տվյալների օգտագործման թույլտվություն, փոփոխել դրա կարգավորումներն ու կառավարել հավելվածները։\n\nԱվելին իմանալու համար դիմեք <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> ընկերությանը։"</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Այս սարքը պատկանում է ձեր կազմակերպությանը։\n\nՁեր ՏՏ ադմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ ռեսուրսներից օգտվելու թույլտվությունները, հավելվածները, սարքի հետ կապված տվյալները և սարքի տեղադրության տվյալները։\n\nԼրացուցիչ տեղեկությունների համար դիմեք ձեր ՏՏ ադմինիստրատորին։"</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Այս սարքը պատկանում է ձեր ընկերությանը։\n\nՁեր ՏՏ ադմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ ռեսուրսներից օգտվելու թույլտվությունները, հավելվածները, սարքի հետ կապված տվյալները և սարքի տեղադրության տվյալները։\n\nԼրացուցիչ տեղեկությունների համար դիմեք ձեր ՏՏ ադմինիստրատորին։"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Ձեր կազմակերպությունը այս սարքում տեղադրել է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ձեր կազմակերպությունը ձեր աշխատանքային պրոֆիլում տեղադրել է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Այս սարքում տեղադրված է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
