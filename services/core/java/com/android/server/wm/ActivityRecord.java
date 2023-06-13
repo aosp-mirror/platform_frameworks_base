@@ -8301,6 +8301,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         mIsAspectRatioApplied = false;
+        mIsEligibleForFixedOrientationLetterbox = false;
+        mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
 
         // Can't use resolvedConfig.windowConfiguration.getWindowingMode() because it can be
         // different from windowing mode of the task (PiP) during transition from fullscreen to PiP
@@ -8310,8 +8312,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean isFixedOrientationLetterboxAllowed =
                 parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
-                        // Switching from PiP to fullscreen.
-                        || (parentWindowingMode == WINDOWING_MODE_PINNED
+                        // When starting to switch between PiP and fullscreen, the task is pinned
+                        // and the activity is fullscreen. But only allow to apply letterbox if the
+                        // activity is exiting PiP because an entered PiP should fill the task.
+                        || (!mWaitForEnteringPinnedMode
+                                && parentWindowingMode == WINDOWING_MODE_PINNED
                                 && resolvedConfig.windowConfiguration.getWindowingMode()
                                         == WINDOWING_MODE_FULLSCREEN);
         // TODO(b/181207944): Consider removing the if condition and always run
@@ -8705,8 +8710,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * in this method.
      */
     private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig) {
-        mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
-        mIsEligibleForFixedOrientationLetterbox = false;
         final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
         final Rect stableBounds = new Rect();
         // If orientation is respected when insets are applied, then stableBounds will be empty.
