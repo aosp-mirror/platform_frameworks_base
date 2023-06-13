@@ -112,7 +112,6 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -179,8 +178,6 @@ public class NotificationStackScrollLayoutController {
     private final KeyguardInteractor mKeyguardInteractor;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
-    // TODO: CentralSurfaces should be encapsulated behind a Controller
-    private final CentralSurfaces mCentralSurfaces;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final InteractionJankMonitor mJankMonitor;
@@ -645,7 +642,6 @@ public class NotificationStackScrollLayoutController {
             FalsingManager falsingManager,
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
-            CentralSurfaces centralSurfaces,
             ScrimController scrimController,
             GroupExpansionManager groupManager,
             @SilentHeader SectionHeaderController silentHeaderController,
@@ -696,7 +692,6 @@ public class NotificationStackScrollLayoutController {
         mFalsingManager = falsingManager;
         mResources = resources;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
-        mCentralSurfaces = centralSurfaces;
         mScrimController = scrimController;
         mJankMonitor = jankMonitor;
         mNotificationStackSizeCalculator = notificationStackSizeCalculator;

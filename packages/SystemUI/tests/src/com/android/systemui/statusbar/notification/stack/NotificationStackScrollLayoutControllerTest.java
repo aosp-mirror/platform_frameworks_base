@@ -79,7 +79,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -132,7 +131,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock(answer = Answers.RETURNS_SELF)
     private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
-    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private ScrimController mScrimController;
     @Mock private GroupExpansionManager mGroupExpansionManager;
     @Mock private SectionHeaderController mSilentHeaderController;
@@ -619,7 +617,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 new FalsingManagerFake(),
                 mResources,
                 mNotificationSwipeHelperBuilder,
-                mCentralSurfaces,
                 mScrimController,
                 mGroupExpansionManager,
                 mSilentHeaderController,
