@@ -1678,4 +1678,13 @@
 
     <!-- Formatting states for the scale of font size, in percent. Double "%" is required to represent the symbol "%". [CHAR LIMIT=20] -->
     <string name="font_scale_percentage"> <xliff:g id="percentage">%1$d</xliff:g> %%</string>
+
+    <!-- List entry in developer settings to set the grammatical gender to Not specified [CHAR LIMIT=30]-->
+    <string name="not_specified">Not specified</string>
+    <!-- List entry in developer settings to set the grammatical gender to Neuter [CHAR LIMIT=30]-->
+    <string name="neuter">Neuter</string>
+    <!-- List entry in developer settings to set the grammatical gender to Feminine [CHAR LIMIT=30]-->
+    <string name="feminine">Feminine</string>
+    <!-- List entry in developer settings to set the grammatical gender to Masculine [CHAR LIMIT=30]-->
+    <string name="masculine">Masculine</string>
 </resources>
