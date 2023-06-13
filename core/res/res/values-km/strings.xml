@@ -683,7 +683,7 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ដាក់​ទូរសព្ទ​ឱ្យជិត​ជាងមុន"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"រំកិល​ទូរសព្ទឡើងលើ"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"រំកិល​ទូរសព្ទចុះក្រោម"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"ដាក់​ទូរសព្ទ​ទៅខាងឆ្វេងអ្នក"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"រំកិលទូរសព្ទ​ទៅខាងឆ្វេង"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"រំកិលទូរសព្ទ​ទៅខាងស្ដាំ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"សូមមើល​ឱ្យចំ​ឧបករណ៍​របស់អ្នក​ជាងមុន។"</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"មើលមិនឃើញ​មុខរបស់អ្នកទេ។ កាន់ទូរសព្ទរបស់អ្នក​ដាក់ត្រឹមភ្នែក។"</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"ដើម្បីចាកចេញ សូមអូសពីលើចុះក្រោម។"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"យល់ហើយ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"បង្វិលដើម្បីមើលបានកាន់តែច្បាស់"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ចេញពីមុខងារ​បំបែកអេក្រង់ដើម្បីមើលបានកាន់តែច្បាស់"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"បើក <xliff:g id="NAME">%s</xliff:g> នៅក្នុងអេក្រង់ពេញ ដើម្បីមើលបានកាន់តែច្បាស់"</string>
     <string name="done_label" msgid="7283767013231718521">"រួចរាល់"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"គ្រាប់​រំកិល​រង្វង់​ម៉ោង"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"គ្រាប់​រំកិល​រង្វង់​នាទី"</string>
