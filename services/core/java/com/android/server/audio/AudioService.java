@@ -355,7 +355,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_SET_ALL_VOLUMES = 10;
     private static final int MSG_UNLOAD_SOUND_EFFECTS = 15;
     private static final int MSG_SYSTEM_READY = 16;
-    private static final int MSG_UNMUTE_STREAM = 18;
+    private static final int MSG_UNMUTE_STREAM_ON_SINGLE_VOL_DEVICE = 18;
     private static final int MSG_DYN_POLICY_MIX_STATE_UPDATE = 19;
     private static final int MSG_INDICATE_SYSTEM_READY = 20;
     private static final int MSG_ACCESSORY_PLUG_MEDIA_UNMUTE = 21;
@@ -3506,7 +3506,7 @@ public class AudioService extends IAudioService.Stub
 
         if (adjustVolume && (direction != AudioManager.ADJUST_SAME)
                 && (keyEventMode != AudioDeviceVolumeManager.ADJUST_MODE_END)) {
-            mAudioHandler.removeMessages(MSG_UNMUTE_STREAM);
+            mAudioHandler.removeMessages(MSG_UNMUTE_STREAM_ON_SINGLE_VOL_DEVICE);
 
             if (isMuteAdjust && !mFullVolumeDevices.contains(device)) {
                 boolean state;
@@ -3533,8 +3533,9 @@ public class AudioService extends IAudioService.Stub
                         muteAliasStreams(streamTypeAlias, false);
                     } else if (direction == AudioManager.ADJUST_LOWER) {
                         if (mIsSingleVolume) {
-                            sendMsg(mAudioHandler, MSG_UNMUTE_STREAM, SENDMSG_QUEUE,
-                                    streamTypeAlias, flags, null, UNMUTE_STREAM_DELAY);
+                            sendMsg(mAudioHandler, MSG_UNMUTE_STREAM_ON_SINGLE_VOL_DEVICE,
+                                    SENDMSG_QUEUE, streamTypeAlias, flags, null,
+                                    UNMUTE_STREAM_DELAY);
                         }
                     }
                 }
@@ -3693,18 +3694,21 @@ public class AudioService extends IAudioService.Stub
     }
 
     // Called after a delay when volume down is pressed while muted
-    private void onUnmuteStream(int stream, int flags) {
+    private void onUnmuteStreamOnSingleVolDevice(int streamAlias, int flags) {
         boolean wasMuted;
         synchronized (VolumeStreamState.class) {
-            final VolumeStreamState streamState = mStreamStates[stream];
+            final VolumeStreamState streamState = mStreamStates[streamAlias];
             // if unmuting causes a change, it was muted
-            wasMuted = streamState.mute(false, "onUnmuteStream");
-
-            final int device = getDeviceForStream(stream);
+            wasMuted = streamState.mute(false, "onUnmuteStreamOnSingleVolDevice");
+            if (wasMuted) {
+                // Unmute all aliasted streams
+                muteAliasStreams(streamAlias, false);
+            }
+            final int device = getDeviceForStream(streamAlias);
             final int index = streamState.getIndex(device);
-            sendVolumeUpdate(stream, index, index, flags, device);
+            sendVolumeUpdate(streamAlias, index, index, flags, device);
         }
-        if (stream == AudioSystem.STREAM_MUSIC && wasMuted) {
+        if (streamAlias == AudioSystem.STREAM_MUSIC && wasMuted) {
             synchronized (mHdmiClientLock) {
                 maybeSendSystemAudioStatusCommand(true);
             }
@@ -9191,8 +9195,8 @@ public class AudioService extends IAudioService.Stub
                     onAccessoryPlugMediaUnmute(msg.arg1);
                     break;
 
-                case MSG_UNMUTE_STREAM:
-                    onUnmuteStream(msg.arg1, msg.arg2);
+                case MSG_UNMUTE_STREAM_ON_SINGLE_VOL_DEVICE:
+                    onUnmuteStreamOnSingleVolDevice(msg.arg1, msg.arg2);
                     break;
 
                 case MSG_DYN_POLICY_MIX_STATE_UPDATE:
