@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Царайг баталгаажууллаа"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Баталгаажсан"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Дуусгахын тулд баталгаажуулахыг товших"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Царайгаар түгжээг тайлсан"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Царайгаар түгжээг тайлсан. Үргэлжлүүлэхийн тулд дарна уу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Царайг таньсан. Үргэлжлүүлэхийн тулд дарна уу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Царайг таньсан. Үргэлжлүүлэх бол түгжээг тайлах дүрсийг дар."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Хадгалах боломжгүй. Дахин оролдоно уу."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Хадгалах боломжгүй."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Дор хаяж 4 тэмдэгт ашиглана уу."</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g>-с цөөн тэмдэгт ашиглана уу"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Хийцийн дугаар"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Хийцийн дугаарыг түр санах ойд хуулсан."</string>
     <string name="basic_status" msgid="2315371112182658176">"Харилцан яриаг нээх"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Нэмэлт мэдээлэл авах"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g>-с нэмэлт мэдээлэл авна уу"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g>-г нээх"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Аппыг тохируулсан"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Дор хаяж нэг картыг Wallet-д нэмсэн"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Камер аппыг суулгах"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Аппыг тохируулсан"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Дор хаяж нэг төхөөрөмж боломжтой"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Тэмдэглэл хөтлөх товчлолыг ашиглахын тулд тэмдэглэлийн өгөгдмөл аппыг сонгоно уу"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Апп сонгох"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Товчлолд хүрээд удаан дарна уу"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Цуцлах"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Чухал горим асаалттай байна"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Туслах анхаарлаа хандуулж байна"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Тохиргоонд тэмдэглэлийн өгөгдмөл апп тохируулна уу"</string>
+    <string name="install_app" msgid="5066668100199613936">"Аппыг суулгах"</string>
 </resources>

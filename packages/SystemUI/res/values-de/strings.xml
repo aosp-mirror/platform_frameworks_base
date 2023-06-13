@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Gesicht authentifiziert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bestätigt"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Zum Abschließen auf \"Bestätigen\" tippen"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Mit Gesicht entsperrt"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Gerät mit dem Gesicht entsperrt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gesicht erkannt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gesicht erkannt. Tippe zum Fortfahren auf das Symbol „Entsperren“."</string>
@@ -453,9 +452,9 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA-Zertifikate"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Richtlinien ansehen"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Jugendschutzeinstellungen"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Dieses Gerät gehört <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nDein IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten deines Geräts sehen und verwalten.\n\nWeitere Informationen erhältst du von deinem IT-Administrator."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Dieses Gerät gehört <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nIhr IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten Ihres Geräts sehen und verwalten.\n\nWeitere Informationen erhalten Sie von Ihrem IT-Administrator."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> kann möglicherweise auf die Daten zugreifen, die mit diesem Gerät verknüpft sind, Apps verwalten und die Geräteeinstellungen ändern.\n\nFalls du Fragen hast, wende dich an <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Dieses Gerät gehört deiner Organisation.\n\nDein IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten deines Geräts sehen und verwalten.\n\nWeitere Informationen erhältst du von deinem IT-Administrator."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Dieses Gerät gehört Ihrer Organisation.\n\nIhr IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten Ihres Geräts sehen und verwalten.\n\nWeitere Informationen erhalten Sie von Ihrem IT-Administrator."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Deine Organisation hat ein Zertifikat einer Zertifizierungsstelle auf deinem Gerät installiert. Eventuell wird dein sicherer Netzwerkverkehr überwacht oder bearbeitet."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Deine Organisation hat ein Zertifikat einer Zertifizierungsstelle in deinem Arbeitsprofil installiert. Eventuell wird dein sicherer Netzwerkverkehr überwacht oder bearbeitet."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Auf dem Gerät ist das Zertifikat einer Zertifizierungsstelle installiert. Eventuell wird dein sicherer Netzwerkverkehr überwacht oder bearbeitet."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Speichern nicht möglich. Versuche es noch einmal."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Speichern nicht möglich."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Gib mindestens vier Zeichen ein"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Maximal <xliff:g id="LENGTH">%1$d</xliff:g> Zeichen möglich"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build-Nummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build-Nummer in Zwischenablage kopiert."</string>
     <string name="basic_status" msgid="2315371112182658176">"Offene Unterhaltung"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Weitere Informationen"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Weitere Informationen unter <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> öffnen"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Die App ist eingerichtet"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet wurde mindestens eine Karte hinzugefügt"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera-App ist installiert"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Die App ist eingerichtet"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Mindestens ein Gerät ist verfügbar"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Wähle eine Standard-App für Notizen aus, die du für die Verknüpfung verwenden möchtest"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"App wählen"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Verknüpfung berühren &amp; halten"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Abbrechen"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioritätsmodus an"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant-Aktivierung an"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standard-Notizen-App in den Einstellungen einrichten"</string>
+    <string name="install_app" msgid="5066668100199613936">"App installieren"</string>
 </resources>
