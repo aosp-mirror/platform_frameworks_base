@@ -277,7 +277,7 @@ public:
     base::Result<std::unique_ptr<InputChannel>> createInputChannel(const std::string& name);
     base::Result<std::unique_ptr<InputChannel>> createInputMonitor(int32_t displayId,
                                                                    const std::string& name,
-                                                                   int32_t pid);
+                                                                   gui::Pid pid);
     status_t removeInputChannel(const sp<IBinder>& connectionToken);
     status_t pilferPointers(const sp<IBinder>& token);
 
@@ -328,9 +328,9 @@ public:
     void notifyConfigurationChanged(nsecs_t when) override;
     // ANR-related callbacks -- start
     void notifyNoFocusedWindowAnr(const std::shared_ptr<InputApplicationHandle>& handle) override;
-    void notifyWindowUnresponsive(const sp<IBinder>& token, std::optional<int32_t> pid,
+    void notifyWindowUnresponsive(const sp<IBinder>& token, std::optional<gui::Pid> pid,
                                   const std::string& reason) override;
-    void notifyWindowResponsive(const sp<IBinder>& token, std::optional<int32_t> pid) override;
+    void notifyWindowResponsive(const sp<IBinder>& token, std::optional<gui::Pid> pid) override;
     // ANR-related callbacks -- end
     void notifyInputChannelBroken(const sp<IBinder>& token) override;
     void notifyFocusChanged(const sp<IBinder>& oldToken, const sp<IBinder>& newToken) override;
@@ -538,7 +538,7 @@ base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChann
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputMonitor(
-        int32_t displayId, const std::string& name, int32_t pid) {
+        int32_t displayId, const std::string& name, gui::Pid pid) {
     ATRACE_CALL();
     return mInputManager->getDispatcher().createInputMonitor(displayId, name, pid);
 }
@@ -882,7 +882,7 @@ void NativeInputManager::notifyNoFocusedWindowAnr(
 }
 
 void NativeInputManager::notifyWindowUnresponsive(const sp<IBinder>& token,
-                                                  std::optional<int32_t> pid,
+                                                  std::optional<gui::Pid> pid,
                                                   const std::string& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyWindowUnresponsive");
@@ -896,12 +896,12 @@ void NativeInputManager::notifyWindowUnresponsive(const sp<IBinder>& token,
     ScopedLocalRef<jstring> reasonObj(env, env->NewStringUTF(reason.c_str()));
 
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyWindowUnresponsive, tokenObj,
-                        pid.value_or(0), pid.has_value(), reasonObj.get());
+                        pid.value_or(gui::Pid{0}).val(), pid.has_value(), reasonObj.get());
     checkAndClearExceptionFromCallback(env, "notifyWindowUnresponsive");
 }
 
 void NativeInputManager::notifyWindowResponsive(const sp<IBinder>& token,
-                                                std::optional<int32_t> pid) {
+                                                std::optional<gui::Pid> pid) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyWindowResponsive");
 #endif
@@ -913,7 +913,7 @@ void NativeInputManager::notifyWindowResponsive(const sp<IBinder>& token,
     jobject tokenObj = javaObjectForIBinder(env, token);
 
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyWindowResponsive, tokenObj,
-                        pid.value_or(0), pid.has_value());
+                        pid.value_or(gui::Pid{0}).val(), pid.has_value());
     checkAndClearExceptionFromCallback(env, "notifyWindowResponsive");
 }
 
@@ -1804,7 +1804,7 @@ static jobject nativeCreateInputMonitor(JNIEnv* env, jobject nativeImplObj, jint
     std::string name = nameChars.c_str();
 
     base::Result<std::unique_ptr<InputChannel>> inputChannel =
-            im->createInputMonitor(displayId, name, pid);
+            im->createInputMonitor(displayId, name, gui::Pid{pid});
 
     if (!inputChannel.ok()) {
         std::string message = inputChannel.error().message();
@@ -1849,7 +1849,7 @@ static jboolean nativeSetInTouchMode(JNIEnv* env, jobject nativeImplObj, jboolea
                                      jint pid, jint uid, jboolean hasPermission, jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    return im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode, pid,
+    return im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode, gui::Pid{pid},
                                                                  gui::Uid{static_cast<uid_t>(uid)},
                                                                  hasPermission, displayId);
 }
