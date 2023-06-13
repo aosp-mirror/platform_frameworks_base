@@ -41,7 +41,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
@@ -131,7 +130,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
     };
 
-    private boolean mAlwaysScaleIcon;
     private int mStatusBarIconDrawingSizeIncreased = 1;
     private int mStatusBarIconDrawingSize = 1;
     private int mStatusBarIconSize = 1;
@@ -207,21 +205,11 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         maybeUpdateIconScaleDimens();
     }
 
-    public StatusBarIconView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        mDozer = new NotificationIconDozeHelper(context);
-        mBlocked = false;
-        mAlwaysScaleIcon = true;
-        reloadDimens();
-        maybeUpdateIconScaleDimens();
-        mDensity = context.getResources().getDisplayMetrics().densityDpi;
-    }
-
     /** Should always be preceded by {@link #reloadDimens()} */
     private void maybeUpdateIconScaleDimens() {
         // We do not resize and scale system icons (on the right), only notification icons (on the
         // left).
-        if (mNotification != null || mAlwaysScaleIcon) {
+        if (isNotification()) {
             updateIconScaleForNotifications();
         } else {
             updateIconScaleForSystemIcons();
@@ -307,6 +295,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             setContentDescription(notification.getNotification());
         }
         maybeUpdateIconScaleDimens();
+    }
+
+    private boolean isNotification() {
+        return mNotification != null;
     }
 
     private static boolean streq(String a, String b) {
@@ -416,7 +408,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
 
     Drawable getIcon(StatusBarIcon icon) {
         Context notifContext = getContext();
-        if (mNotification != null) {
+        if (isNotification()) {
             notifContext = mNotification.getPackageContext(getContext());
         }
         return getIcon(getContext(), notifContext != null ? notifContext : getContext(), icon);
@@ -471,7 +463,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
-        if (mNotification != null) {
+        if (isNotification()) {
             event.setParcelableData(mNotification.getNotification());
         }
     }
@@ -624,7 +616,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     private void initializeDecorColor() {
-        if (mNotification != null) {
+        if (isNotification()) {
             setDecorColor(getContext().getColor(mNightMode
                     ? com.android.internal.R.color.notification_default_color_dark
                     : com.android.internal.R.color.notification_default_color_light));
