@@ -244,6 +244,7 @@ import android.view.inputmethod.ImeTracker;
 import android.window.DisplayWindowPolicyController;
 import android.window.IDisplayAreaOrganizer;
 import android.window.ScreenCapture;
+import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 import android.window.TransitionRequestInfo;
 
 import com.android.internal.R;
@@ -5088,7 +5089,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return null;
         }
 
-        Pair<ScreenCapture.ScreenCaptureListener, ScreenCapture.ScreenshotSync> syncScreenCapture =
+        SynchronousScreenCaptureListener syncScreenCapture =
                 ScreenCapture.createSyncCaptureListener();
 
         getBounds(mTmpRect);
@@ -5097,10 +5098,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 new ScreenCapture.LayerCaptureArgs.Builder(getSurfaceControl())
                         .setSourceCrop(mTmpRect).build();
 
-        ScreenCapture.captureLayers(args, syncScreenCapture.first);
+        ScreenCapture.captureLayers(args, syncScreenCapture);
 
         final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                syncScreenCapture.second.get();
+                syncScreenCapture.getBuffer();
         final Bitmap bitmap = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         if (bitmap == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");

@@ -809,6 +809,9 @@ public class Transitions implements RemoteCallable<Transitions>,
             track.mReadyTransitions.remove(0);
             track.mActiveTransition = ready;
             if (ready.mAborted) {
+                if (ready.mStartT != null) {
+                    ready.mStartT.apply();
+                }
                 // finish now since there's nothing to animate. Calls back into processReadyQueue
                 onFinish(ready, null, null);
                 return;
@@ -936,10 +939,6 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Aborts a transition. This will still queue it up to maintain order. */
     private void onAbort(ActiveTransition transition) {
         final Track track = mTracks.get(transition.getTrack());
-        // apply immediately since they may be "parallel" operations: We currently we use abort for
-        // thing which are independent to other transitions (like starting-window transfer).
-        transition.mStartT.apply();
-        transition.mFinishT.apply();
         transition.mAborted = true;
 
         mTracer.logAborted(transition.mInfo.getDebugId());
@@ -1086,9 +1085,8 @@ public class Transitions implements RemoteCallable<Transitions>,
                     if (wct == null) {
                         wct = new WindowContainerTransaction();
                     }
-                    mDisplayController.getChangeController().dispatchOnDisplayChange(wct,
-                            change.getDisplayId(), change.getStartRotation(),
-                            change.getEndRotation(), null /* newDisplayAreaInfo */);
+                    mDisplayController.onDisplayRotateRequested(wct, change.getDisplayId(),
+                            change.getStartRotation(), change.getEndRotation());
                 }
             }
         }

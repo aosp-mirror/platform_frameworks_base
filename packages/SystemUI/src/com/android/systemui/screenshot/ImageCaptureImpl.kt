@@ -42,8 +42,8 @@ open class ImageCaptureImpl @Inject constructor(
             .setSourceCrop(crop)
             .build()
         val syncScreenCapture = ScreenCapture.createSyncCaptureListener()
-        windowManager.captureDisplay(displayId, captureArgs, syncScreenCapture.first)
-        val buffer = syncScreenCapture.second.get()
+        windowManager.captureDisplay(displayId, captureArgs, syncScreenCapture)
+        val buffer = syncScreenCapture.getBuffer()
         return buffer?.asBitmap()
     }
 
