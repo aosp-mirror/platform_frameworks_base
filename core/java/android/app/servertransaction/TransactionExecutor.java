@@ -184,9 +184,12 @@ public class TransactionExecutor {
         }
 
         if (configUpdatedDisplays != null) {
+            final ClientTransactionListenerController controller =
+                    ClientTransactionListenerController.getInstance();
             final int displayCount = configUpdatedDisplays.size();
             for (int i = 0; i < displayCount; i++) {
-                // TODO(b/260873529): trigger onDisplayChanged.
+                final int displayId = configUpdatedDisplays.valueAt(i);
+                controller.onDisplayChanged(displayId);
             }
         }
     }
