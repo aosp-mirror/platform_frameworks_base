@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"სახის ამოცნობილია"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"დადასტურებული"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"დასასრულებლად შეეხეთ „დადასტურებას“"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"განიბლოკა სახით"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"განიბლოკა სახით. დააჭირეთ გასაგრძელებლად."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ამოცნობილია სახით. დააჭირეთ გასაგრძელებლად."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ამოცნობილია სახით. გასაგრძელებლად დააჭირეთ განბლოკვის ხატულას."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"შენახვა ვერ ხერხდება. ცადეთ ხელახლა."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"შენახვა ვერ ხერხდება."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"გამოიყენეთ მინიმუმ 4 სიმბოლო."</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"გამოიყენეთ <xliff:g id="LENGTH">%1$d</xliff:g>-ზე ნაკლები სიმბოლო"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ანაწყობის ნომერი"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ანაწყობის ნომერი დაკოპირებულია გაცვლის ბუფერში."</string>
     <string name="basic_status" msgid="2315371112182658176">"მიმოწერის გახსნა"</string>
@@ -1125,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"შეიტყვეთ მეტი"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"შეიტყვეთ მეტი აქ: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> აპის გახსნა"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• აპი დაყენებულია"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• საფულეში დამატებულია მინიმუმ ერთი ბარათი"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• დააინსტალირეთ კამერის აპი"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• აპი დაყენებულია"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ხელმისაწვდომია მინიმუმ ერთი მოწყობილობა"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"აირჩიეთ ნაგულისხმევი ჩანიშვნების აპი, რათა ჩანიშვნების შექმნის მალსახმობი გამოიყენოთ"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"საფულის აპის მალსახმობის დასამატებლად დარწმუნდით, რომ აპი დაინსტალირებულია"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"საფულის აპის მალსახმობის დასამატებლად დარწმუნდით, რომ დამატებულია მინიმუმ ერთი ბარათი"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR კოდის სკანერის მალსახმობის დასამატებლად დარწმუნდით, რომ დაინსტალირებულია კამერის აპი"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"მთავარი აპის მალსახმობის დასამატებლად დარწმუნდით, რომ აპი დაინსტალირებულია"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ხელმისაწვდომია მინიმუმ ერთი მოწყობილობა"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"აირჩიეთ ჩანიშვნების ნაგულისხმევი აპი, რათა ჩანიშვნების შექმნის მალსახმობი გამოიყენოთ"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"აირჩიეთ აპი"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"შეხების დაamp; მოცდის მალსახმობი"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"გაუქმება"</string>
@@ -1159,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"პრიორიტეტული რეჟიმი ჩართულია"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"ასისტენტის ყურადღების ფუნქცია ჩართულია"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"დააყენეთ ნაგულისხმევი შენიშვნების აპი პარამეტრებში"</string>
+    <string name="install_app" msgid="5066668100199613936">"აპის ინსტალაცია"</string>
 </resources>

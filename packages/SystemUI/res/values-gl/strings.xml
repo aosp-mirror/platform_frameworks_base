@@ -98,7 +98,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Engadir a unha nota"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Gravadora da pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando gravación pantalla"</string>
-    <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación en curso sobre unha sesión de gravación de pantalla"</string>
+    <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación de actividade en curso sobre unha sesión de gravación de pantalla"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Queres iniciar a gravación?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Durante a gravación, Android ten acceso a todo o que se vexa na pantalla ou se reproduza no teu dispositivo. Polo tanto, debes ter coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como o contido de audio e de vídeo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Durante a gravación dunha aplicación, Android ten acceso a todo o que se vexa ou se reproduza nela. Polo tanto, debes ter coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como o contido de audio e de vídeo."</string>
@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Autenticouse a cara"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmada"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toca Confirmar para completar o proceso"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Usouse o desbloqueo facial"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Usouse o desbloqueo facial. Preme para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Recoñeceuse a cara. Preme para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Recoñeceuse a cara. Preme a icona de desbloquear."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Non se puido gardar a información. Téntao de novo."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Non se pode gardar a información."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Utiliza como mínimo 4 caracteres"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Utiliza menos de <xliff:g id="LENGTH">%1$d</xliff:g> caracteres"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilación"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Copiouse o número de compilación no portapapeis."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversa aberta"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Máis información"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Máis información en <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Abrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• A aplicación debe estar configurada"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Ten que haber polo menos unha tarxeta engadida a Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Debes instalar a aplicación de cámara"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• A aplicación debe estar configurada"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ten que haber polo menos un dispositivo dispoñible"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Selecciona unha aplicación de notas predeterminada para usar o atallo de tomar notas"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Seleccionar aplicación"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantén premido o atallo"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"O modo de prioridade está activado"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"A atención do Asistente está activada"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Establece a aplicación de notas predeterminada en Configuración"</string>
+    <string name="install_app" msgid="5066668100199613936">"Instalar aplicación"</string>
 </resources>
