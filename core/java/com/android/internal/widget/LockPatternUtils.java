@@ -47,6 +47,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -160,9 +161,17 @@ public class LockPatternUtils {
      */
     public static final int VERIFY_FLAG_REQUEST_GK_PW_HANDLE = 1 << 0;
 
+    /**
+     * Flag provided to {@link #verifyCredential(LockscreenCredential, int, int)} . If set, the
+     * method writes the password data to the repair mode file after the credential is verified
+     * successfully.
+     */
+    public static final int VERIFY_FLAG_WRITE_REPAIR_MODE_PW = 1 << 1;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
-            VERIFY_FLAG_REQUEST_GK_PW_HANDLE
+            VERIFY_FLAG_REQUEST_GK_PW_HANDLE,
+            VERIFY_FLAG_WRITE_REPAIR_MODE_PW
     })
     public @interface VerifyFlag {}
 
@@ -200,6 +209,8 @@ public class LockPatternUtils {
 
     public static final String CURRENT_LSKF_BASED_PROTECTOR_ID_KEY = "sp-handle";
     public static final String PASSWORD_HISTORY_DELIMITER = ",";
+
+    private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
 
     /**
      * drives the pin auto confirmation feature availability in code logic.
@@ -1844,6 +1855,37 @@ public class LockPatternUtils {
     public static boolean frpCredentialEnabled(Context context) {
         return FRP_CREDENTIAL_ENABLED && context.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableCredentialFactoryResetProtection);
+    }
+
+    /**
+     * Return {@code true} if repair mode is supported by the device.
+     */
+    public static boolean isRepairModeSupported(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_repairModeSupported);
+    }
+
+    /**
+     * Return {@code true} if repair mode is active on the device.
+     */
+    public static boolean isRepairModeActive(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.REPAIR_MODE_ACTIVE, /* def= */ 0) > 0;
+    }
+
+    /**
+     * Return {@code true} if repair mode is supported by the device and the user has been granted
+     * admin privileges.
+     */
+    public static boolean canUserEnterRepairMode(Context context, UserInfo info) {
+        return info != null && info.isAdmin() && isRepairModeSupported(context);
+    }
+
+    /**
+     * Return {@code true} if GSI is running on the device.
+     */
+    public static boolean isGsiRunning() {
+        return SystemProperties.getInt(GSI_RUNNING_PROP, 0) > 0;
     }
 
     /**
