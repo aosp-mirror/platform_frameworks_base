@@ -79,7 +79,7 @@ public class DisplayChangeController {
     }
 
     /** Query all listeners for changes that should happen on display change. */
-    public void dispatchOnDisplayChange(WindowContainerTransaction outWct, int displayId,
+    void dispatchOnDisplayChange(WindowContainerTransaction outWct, int displayId,
             int fromRotation, int toRotation, DisplayAreaInfo newDisplayAreaInfo) {
         for (OnDisplayChangingListener c : mDisplayChangeListener) {
             c.onDisplayChange(displayId, fromRotation, toRotation, newDisplayAreaInfo, outWct);

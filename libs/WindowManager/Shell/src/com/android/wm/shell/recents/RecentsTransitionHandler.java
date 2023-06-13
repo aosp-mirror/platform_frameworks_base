@@ -313,7 +313,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         private Pair<int[], TaskSnapshot[]> getSnapshotsForPausingTasks() {
             int[] taskIds = null;
             TaskSnapshot[] snapshots = null;
-            if (mPausingTasks.size() > 0) {
+            if (mPausingTasks != null && mPausingTasks.size() > 0) {
                 taskIds = new int[mPausingTasks.size()];
                 snapshots = new TaskSnapshot[mPausingTasks.size()];
                 try {

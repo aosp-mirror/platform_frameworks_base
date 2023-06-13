@@ -126,6 +126,7 @@ public final class DreamManagerService extends SystemService {
     private final boolean mDreamsActivatedOnChargeByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
     private final boolean mKeepDreamingWhenUnpluggingDefault;
+    private final boolean mDreamsDisabledByAmbientModeSuppressionConfig;
 
     private final CopyOnWriteArrayList<DreamManagerInternal.DreamManagerStateListener>
             mDreamManagerStateListeners = new CopyOnWriteArrayList<>();
@@ -239,6 +240,9 @@ public final class DreamManagerService extends SystemService {
         mSettingsObserver = new SettingsObserver(mHandler);
         mKeepDreamingWhenUnpluggingDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_keepDreamingWhenUnplugging);
+        mDreamsDisabledByAmbientModeSuppressionConfig = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_dreamsDisabledByAmbientModeSuppressionConfig);
+
     }
 
     @Override
@@ -403,6 +407,13 @@ public final class DreamManagerService extends SystemService {
             }
 
             if (!mUserManager.isUserUnlocked()) {
+                return false;
+            }
+
+            if (mDreamsDisabledByAmbientModeSuppressionConfig
+                    && mPowerManagerInternal.isAmbientDisplaySuppressed()) {
+                // Don't dream if Bedtime (or something else) is suppressing ambient.
+                Slog.i(TAG, "Can't start dreaming because ambient is suppressed.");
                 return false;
             }
 
