@@ -63,6 +63,15 @@ public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithmInterfac
         if (pipBoundsState.isImeShowing()) {
             insets.bottom -= pipBoundsState.getImeHeight();
         }
+        // if PiP is stashed we only adjust the vertical position if it's outside of insets and
+        // ignore all keep clear areas, since it's already on the side
+        if (pipBoundsState.isStashed()) {
+            if (startingBounds.bottom > insets.bottom || startingBounds.top < insets.top) {
+                // bring PiP back to be aligned by bottom inset
+                startingBounds.offset(0, insets.bottom - startingBounds.bottom);
+            }
+            return startingBounds;
+        }
         Rect pipBounds = new Rect(startingBounds);
 
         boolean shouldApplyGravity = false;
