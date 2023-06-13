@@ -327,6 +327,12 @@ public class PhysicsAnimationLayout extends FrameLayout {
         addViewInternal(child, index, params, false /* isReorder */);
     }
 
+    /** Removes the child view immediately. */
+    public void removeViewNoAnimation(View view) {
+        super.removeView(view);
+        view.setTag(R.id.physics_animator_tag, null);
+    }
+
     @Override
     public void removeView(View view) {
         if (mController != null) {
