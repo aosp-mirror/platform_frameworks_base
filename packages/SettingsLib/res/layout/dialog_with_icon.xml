@@ -64,7 +64,6 @@
                 android:id="@+id/button_cancel"
                 style="@style/DialogButtonNegative"
                 android:layout_width="wrap_content"
-                android:buttonCornerRadius="28dp"
                 android:layout_height="wrap_content"
                 android:visibility="gone"/>
 
@@ -79,7 +78,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/DialogButtonNegative"
-                android:buttonCornerRadius="40dp"
                 android:visibility="gone"/>
 
             <Space
@@ -93,8 +91,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/DialogButtonPositive"
-                android:visibility="gone"
-            />
+                android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
