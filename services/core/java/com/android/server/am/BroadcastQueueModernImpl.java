@@ -33,6 +33,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
+import static com.android.server.am.BroadcastRecord.DELIVERY_DEFERRED;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.getReceiverClassName;
 import static com.android.server.am.BroadcastRecord.getReceiverPackageName;
@@ -68,6 +69,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
@@ -210,6 +212,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     @GuardedBy("mService")
     private final AtomicReference<ArraySet<BroadcastRecord>> mReplacedBroadcastsCache =
+            new AtomicReference<>();
+
+    /**
+     * Container for holding the set of broadcast records that satisfied a certain criteria.
+     */
+    @GuardedBy("mService")
+    private final AtomicReference<ArrayMap<BroadcastRecord, Boolean>> mRecordsLookupCache =
             new AtomicReference<>();
 
     /**
@@ -742,13 +751,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 broadcastConsumer = mBroadcastConsumerSkipAndCanceled;
                 break;
             case BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED:
+                // TODO: Allow applying MERGED policy for broadcasts with more than one receiver.
+                if (r.receivers.size() > 1) {
+                    return;
+                }
                 final BundleMerger extrasMerger = r.options.getDeliveryGroupExtrasMerger();
                 if (extrasMerger == null) {
                     // Extras merger is required to be able to merge the extras. So, if it's not
                     // supplied, then ignore the delivery group policy.
                     return;
                 }
-                // TODO: Don't merge with the same BroadcastRecord more than once.
                 broadcastConsumer = (record, recordIndex) -> {
                     r.intent.mergeExtras(record.intent, extrasMerger);
                     mBroadcastConsumerSkipAndCanceled.accept(record, recordIndex);
@@ -758,6 +770,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 logw("Unknown delivery group policy: " + policy);
                 return;
         }
+        final ArrayMap<BroadcastRecord, Boolean> recordsLookupCache = getRecordsLookupCache();
         forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
             // If the receiver is already in a terminal state, then ignore it.
             if (isDeliveryStateTerminal(testRecord.getDeliveryState(testIndex))) {
@@ -769,22 +782,44 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     || !r.matchesDeliveryGroup(testRecord)) {
                 return false;
             }
-            // TODO: If a process is in a deferred state, we can always apply the policy as long
-            // as it is one of the receivers for the new broadcast.
 
             // For ordered broadcast, check if the receivers for the new broadcast is a superset
             // of those for the previous one as skipping and removing only one of them could result
             // in an inconsistent state.
-            if (testRecord.ordered || testRecord.resultTo != null) {
-                // TODO: Cache this result in some way so that we don't have to perform the
-                // same check for all the broadcast receivers.
-                return r.containsAllReceivers(testRecord.receivers);
-            } else if (testRecord.prioritized) {
-                return r.containsAllReceivers(testRecord.receivers);
+            if (testRecord.ordered || testRecord.prioritized) {
+                return containsAllReceivers(r, testRecord, recordsLookupCache);
+            } else if (testRecord.resultTo != null) {
+                return testRecord.getDeliveryState(testIndex) == DELIVERY_DEFERRED
+                        ? r.containsReceiver(testRecord.receivers.get(testIndex))
+                        : containsAllReceivers(r, testRecord, recordsLookupCache);
             } else {
                 return r.containsReceiver(testRecord.receivers.get(testIndex));
             }
         }, broadcastConsumer, true);
+        recordsLookupCache.clear();
+        mRecordsLookupCache.compareAndSet(null, recordsLookupCache);
+    }
+
+    @NonNull
+    private ArrayMap<BroadcastRecord, Boolean> getRecordsLookupCache() {
+        ArrayMap<BroadcastRecord, Boolean> recordsLookupCache =
+                mRecordsLookupCache.getAndSet(null);
+        if (recordsLookupCache == null) {
+            recordsLookupCache = new ArrayMap<>();
+        }
+        return recordsLookupCache;
+    }
+
+    private boolean containsAllReceivers(@NonNull BroadcastRecord record,
+            @NonNull BroadcastRecord testRecord,
+            @NonNull ArrayMap<BroadcastRecord, Boolean> recordsLookupCache) {
+        final int idx = recordsLookupCache.indexOfKey(testRecord);
+        if (idx > 0) {
+            return recordsLookupCache.valueAt(idx);
+        }
+        final boolean containsAll = record.containsAllReceivers(testRecord.receivers);
+        recordsLookupCache.put(testRecord, containsAll);
+        return containsAll;
     }
 
     /**
@@ -1002,6 +1037,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     mService.mPackageManagerInt.grantImplicitAccess(r.userId, r.intent,
                             UserHandle.getAppId(app.uid), r.callingUid, true);
                 }
+                queue.lastProcessState = app.mState.getCurProcState();
                 if (receiver instanceof BroadcastFilter) {
                     notifyScheduleRegisteredReceiver(app, r, (BroadcastFilter) receiver);
                     thread.scheduleRegisteredReceiver(
@@ -1914,12 +1950,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 ? BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME
                 : BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
         final int type;
+        final int receiverProcessState;
         if (queue == null) {
             type = BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_UNKNOWN;
+            receiverProcessState = ActivityManager.PROCESS_STATE_UNKNOWN;
         } else if (queue.getActiveViaColdStart()) {
             type = BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
+            receiverProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
         } else {
             type = BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
+            receiverProcessState = queue.lastProcessState;
         }
         // With the new per-process queues, there's no delay between being
         // "dispatched" and "scheduled", so we report no "receive delay"
@@ -1934,7 +1974,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     receiverType, type, dispatchDelay, receiveDelay, finishDelay, packageState,
                     app != null ? app.info.packageName : null, r.callerPackage,
                     r.calculateTypeForLogging(), r.getDeliveryGroupPolicy(), r.intent.getFlags(),
-                    BroadcastRecord.getReceiverPriority(receiver), r.callerProcState);
+                    BroadcastRecord.getReceiverPriority(receiver), r.callerProcState,
+                    receiverProcessState);
         }
     }
 
