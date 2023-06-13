@@ -2282,8 +2282,8 @@ public class DisplayPolicy {
                 && Arrays.equals(mLastLetterboxDetails, letterboxDetails)) {
             return;
         }
-        if (mDisplayContent.isDefaultDisplay && mLastFocusIsFullscreen != isFullscreen
-                && ((mLastAppearance ^ appearance) & APPEARANCE_LOW_PROFILE_BARS) != 0) {
+        if (mDisplayContent.isDefaultDisplay && (mLastFocusIsFullscreen != isFullscreen
+                || ((mLastAppearance ^ appearance) & APPEARANCE_LOW_PROFILE_BARS) != 0)) {
             mService.mInputManager.setSystemUiLightsOut(
                     isFullscreen || (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0);
         }
