@@ -254,8 +254,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private boolean mDeferSetIsOnLeftEdge;
 
     private boolean mIsAttached;
-    private boolean mIsGesturalModeEnabled;
+    private boolean mIsGestureHandlingEnabled;
     private boolean mIsTrackpadConnected;
+    private boolean mInGestureNavMode;
     private boolean mUsingThreeButtonNav;
     private boolean mIsEnabled;
     private boolean mIsNavBarShownTransiently;
@@ -562,9 +563,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mInputManager.registerInputDeviceListener(mInputDeviceListener, mMainHandler);
             int [] inputDevices = mInputManager.getInputDeviceIds();
             for (int inputDeviceId : inputDevices) {
-                if (isTrackpadDevice(inputDeviceId)) {
-                    mIsTrackpadConnected = true;
-                }
+                mInputDeviceListener.onInputDeviceAdded(inputDeviceId);
             }
         }
         updateIsEnabled();
@@ -589,8 +588,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
      */
     public void onNavigationModeChanged(int mode) {
         mUsingThreeButtonNav = QuickStepContract.isLegacyMode(mode);
-        mIsGesturalModeEnabled = QuickStepContract.isGesturalMode(mode) || (
-                mIsTrackpadGestureFeaturesEnabled && mUsingThreeButtonNav && mIsTrackpadConnected);
+        mInGestureNavMode = QuickStepContract.isGesturalMode(mode);
         updateIsEnabled();
         updateCurrentUserResources();
     }
@@ -613,79 +611,81 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private void updateIsEnabled() {
         try {
             Trace.beginSection("EdgeBackGestureHandler#updateIsEnabled");
-            updateIsEnabledTraced();
+
+            mIsGestureHandlingEnabled =
+                    mInGestureNavMode || (mIsTrackpadGestureFeaturesEnabled && mUsingThreeButtonNav
+                            && mIsTrackpadConnected);
+            boolean isEnabled = mIsAttached && mIsGestureHandlingEnabled;
+            if (isEnabled == mIsEnabled) {
+                return;
+            }
+            mIsEnabled = isEnabled;
+            disposeInputChannel();
+
+            if (mEdgeBackPlugin != null) {
+                mEdgeBackPlugin.onDestroy();
+                mEdgeBackPlugin = null;
+            }
+
+            if (!mIsEnabled) {
+                mGestureNavigationSettingsObserver.unregister();
+                if (DEBUG_MISSING_GESTURE) {
+                    Log.d(DEBUG_MISSING_GESTURE_TAG, "Unregister display listener");
+                }
+                mPluginManager.removePluginListener(this);
+                TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
+                        mTaskStackListener);
+                DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
+                mPipOptional.ifPresent(pip -> pip.setOnIsInPipStateChangedListener(null));
+
+                try {
+                    mWindowManagerService.unregisterSystemGestureExclusionListener(
+                            mGestureExclusionListener, mDisplayId);
+                } catch (RemoteException | IllegalArgumentException e) {
+                    Log.e(TAG, "Failed to unregister window manager callbacks", e);
+                }
+
+            } else {
+                mGestureNavigationSettingsObserver.register();
+                updateDisplaySize();
+                if (DEBUG_MISSING_GESTURE) {
+                    Log.d(DEBUG_MISSING_GESTURE_TAG, "Register display listener");
+                }
+                TaskStackChangeListeners.getInstance().registerTaskStackListener(
+                        mTaskStackListener);
+                DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+                        mMainExecutor::execute, mOnPropertiesChangedListener);
+                mPipOptional.ifPresent(pip -> pip.setOnIsInPipStateChangedListener(
+                        mOnIsInPipStateChangedListener));
+                mDesktopModeOptional.ifPresent(
+                        dm -> dm.addDesktopGestureExclusionRegionListener(
+                                mDesktopCornersChangedListener, mMainExecutor));
+
+                try {
+                    mWindowManagerService.registerSystemGestureExclusionListener(
+                            mGestureExclusionListener, mDisplayId);
+                } catch (RemoteException | IllegalArgumentException e) {
+                    Log.e(TAG, "Failed to register window manager callbacks", e);
+                }
+
+                // Register input event receiver
+                mInputMonitor = mContext.getSystemService(InputManager.class).monitorGestureInput(
+                        "edge-swipe", mDisplayId);
+                mInputEventReceiver = new InputChannelCompat.InputEventReceiver(
+                        mInputMonitor.getInputChannel(), Looper.getMainLooper(),
+                        Choreographer.getInstance(), this::onInputEvent);
+
+                // Add a nav bar panel window
+                mIsNewBackAffordanceEnabled = mFeatureFlags.isEnabled(Flags.NEW_BACK_AFFORDANCE);
+                resetEdgeBackPlugin();
+                mPluginManager.addPluginListener(
+                        this, NavigationEdgeBackPlugin.class, /*allowMultiple=*/ false);
+            }
+            // Update the ML model resources.
+            updateMLModelState();
         } finally {
             Trace.endSection();
         }
-    }
-
-    private void updateIsEnabledTraced() {
-        boolean isEnabled = mIsAttached && mIsGesturalModeEnabled;
-        if (isEnabled == mIsEnabled) {
-            return;
-        }
-        mIsEnabled = isEnabled;
-        disposeInputChannel();
-
-        if (mEdgeBackPlugin != null) {
-            mEdgeBackPlugin.onDestroy();
-            mEdgeBackPlugin = null;
-        }
-
-        if (!mIsEnabled) {
-            mGestureNavigationSettingsObserver.unregister();
-            if (DEBUG_MISSING_GESTURE) {
-                Log.d(DEBUG_MISSING_GESTURE_TAG, "Unregister display listener");
-            }
-            mPluginManager.removePluginListener(this);
-            TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
-            DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
-            mPipOptional.ifPresent(pip -> pip.setOnIsInPipStateChangedListener(null));
-
-            try {
-                mWindowManagerService.unregisterSystemGestureExclusionListener(
-                        mGestureExclusionListener, mDisplayId);
-            } catch (RemoteException | IllegalArgumentException e) {
-                Log.e(TAG, "Failed to unregister window manager callbacks", e);
-            }
-
-        } else {
-            mGestureNavigationSettingsObserver.register();
-            updateDisplaySize();
-            if (DEBUG_MISSING_GESTURE) {
-                Log.d(DEBUG_MISSING_GESTURE_TAG, "Register display listener");
-            }
-            TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
-            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
-                    mMainExecutor::execute, mOnPropertiesChangedListener);
-            mPipOptional.ifPresent(
-                    pip -> pip.setOnIsInPipStateChangedListener(mOnIsInPipStateChangedListener));
-            mDesktopModeOptional.ifPresent(
-                    dm -> dm.addDesktopGestureExclusionRegionListener(
-                            mDesktopCornersChangedListener, mMainExecutor));
-
-            try {
-                mWindowManagerService.registerSystemGestureExclusionListener(
-                        mGestureExclusionListener, mDisplayId);
-            } catch (RemoteException | IllegalArgumentException e) {
-                Log.e(TAG, "Failed to register window manager callbacks", e);
-            }
-
-            // Register input event receiver
-            mInputMonitor = mContext.getSystemService(InputManager.class).monitorGestureInput(
-                    "edge-swipe", mDisplayId);
-            mInputEventReceiver = new InputChannelCompat.InputEventReceiver(
-                    mInputMonitor.getInputChannel(), Looper.getMainLooper(),
-                    Choreographer.getInstance(), this::onInputEvent);
-
-            // Add a nav bar panel window
-            mIsNewBackAffordanceEnabled = mFeatureFlags.isEnabled(Flags.NEW_BACK_AFFORDANCE);
-            resetEdgeBackPlugin();
-            mPluginManager.addPluginListener(
-                    this, NavigationEdgeBackPlugin.class, /*allowMultiple=*/ false);
-        }
-        // Update the ML model resources.
-        updateMLModelState();
     }
 
     @Override
@@ -762,9 +762,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void updateMLModelState() {
-        boolean newState =
-                mIsGesturalModeEnabled && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                        SystemUiDeviceConfigFlags.USE_BACK_GESTURE_ML_MODEL, false);
+        boolean newState = mIsGestureHandlingEnabled && DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.USE_BACK_GESTURE_ML_MODEL, false);
 
         if (newState == mUseMLModel) {
             return;
@@ -1234,7 +1234,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         pw.println("  mIsEnabled=" + mIsEnabled);
         pw.println("  mIsAttached=" + mIsAttached);
         pw.println("  mIsBackGestureAllowed=" + mIsBackGestureAllowed);
-        pw.println("  mIsGesturalModeEnabled=" + mIsGesturalModeEnabled);
+        pw.println("  mIsGestureHandlingEnabled=" + mIsGestureHandlingEnabled);
         pw.println("  mIsNavBarShownTransiently=" + mIsNavBarShownTransiently);
         pw.println("  mGestureBlockingActivityRunning=" + mGestureBlockingActivityRunning);
         pw.println("  mAllowGesture=" + mAllowGesture);
