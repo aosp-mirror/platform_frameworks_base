@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"面孔已經驗證"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"已確認"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"輕按 [確定] 以完成"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"已使用面孔解鎖"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"已使用面孔解鎖。按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"已識別面孔。按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"已識別面孔。按解鎖圖示即可繼續。"</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"無法儲存，請再試一次。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"無法儲存。"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"請至少使用 4 個字元"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"請使用少於 <xliff:g id="LENGTH">%1$d</xliff:g> 個字元"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"版本號碼已複製到剪貼簿。"</string>
     <string name="basic_status" msgid="2315371112182658176">"開啟對話"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"瞭解詳情"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"詳情請瀏覽 <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"開啟「<xliff:g id="APPNAME">%1$s</xliff:g>」"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• 應用程式已完成設定"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• 已新增至少一張卡至「錢包」"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• 安裝相機應用程式"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• 應用程式已完成設定"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 至少一部裝置可用"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"選取筆記快速鍵所用的預設筆記應用程式"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"選取應用程式"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"輕觸並按住快速鍵"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"取消"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"優先模式已開啟"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"「Google 助理」感應功能已開啟"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在「設定」中指定預設筆記應用程式"</string>
+    <string name="install_app" msgid="5066668100199613936">"安裝應用程式"</string>
 </resources>
