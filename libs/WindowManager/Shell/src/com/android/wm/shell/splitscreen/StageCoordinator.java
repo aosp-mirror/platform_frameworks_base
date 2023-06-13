@@ -2320,7 +2320,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 } else if (!isSplitScreenVisible() && isOpening) {
                     // If split is running in the background and the trigger task is appearing into
                     // split, prepare to enter split screen.
-                    setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, out);
                     prepareEnterSplitScreen(out);
                     mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                             TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
@@ -2346,7 +2345,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             if (isOpening && getStageOfTask(triggerTask) != null) {
                 // One task is appearing into split, prepare to enter split screen.
                 out = new WindowContainerTransaction();
-                setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, out);
                 prepareEnterSplitScreen(out);
                 mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                         TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
