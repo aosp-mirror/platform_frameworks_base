@@ -926,7 +926,7 @@ class DesktopTasksController(
 
     companion object {
         private val DESKTOP_DENSITY_OVERRIDE =
-            SystemProperties.getInt("persist.wm.debug.desktop_mode_density", 0)
+            SystemProperties.getInt("persist.wm.debug.desktop_mode_density", 284)
         private val DESKTOP_DENSITY_ALLOWED_RANGE = (100..1000)
 
         // Override default freeform task width when desktop mode is enabled. In dips.
