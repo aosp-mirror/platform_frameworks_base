@@ -96,6 +96,19 @@
             android:theme="@style/WhiteBackgroundTheme"
             android:exported="true"/>
 
+        <activity android:name="com.android.server.wm.TrustedPresentationCallbackTest$TestActivity"
+            android:exported="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
+
+        <activity
+            android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
         <service android:name="android.view.cts.surfacevalidator.LocalMediaProjectionService"
             android:foregroundServiceType="mediaProjection"
             android:enabled="true">
