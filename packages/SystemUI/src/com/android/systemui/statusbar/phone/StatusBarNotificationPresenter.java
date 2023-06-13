@@ -52,7 +52,6 @@ import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
@@ -68,9 +67,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import javax.inject.Inject;
 
 @CentralSurfacesComponent.CentralSurfacesScope
-class StatusBarNotificationPresenter implements NotificationPresenter,
-        NotificationRowBinderImpl.BindRowCallback,
-        CommandQueue.Callbacks {
+class StatusBarNotificationPresenter implements NotificationPresenter, CommandQueue.Callbacks {
     private static final String TAG = "StatusBarNotificationPresenter";
 
     private final ActivityStarter mActivityStarter;

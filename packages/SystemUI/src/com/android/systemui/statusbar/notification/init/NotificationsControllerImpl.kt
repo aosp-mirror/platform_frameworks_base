@@ -83,7 +83,6 @@ class NotificationsControllerImpl @Inject constructor(
         listContainer: NotificationListContainer,
         stackController: NotifStackController,
         notificationActivityStarter: NotificationActivityStarter,
-        bindRowCallback: NotificationRowBinderImpl.BindRowCallback
     ) {
         notificationListener.registerAsSystemService()
 
@@ -97,10 +96,7 @@ class NotificationsControllerImpl @Inject constructor(
                 clickerBuilder.build(
                     Optional.ofNullable(centralSurfaces), bubblesOptional,
                         notificationActivityStarter))
-        notificationRowBinder.setUpWithPresenter(
-                presenter,
-                listContainer,
-                bindRowCallback)
+        notificationRowBinder.setUpWithPresenter(presenter, listContainer)
         headsUpViewBinder.setPresenter(presenter)
         notifBindPipelineInitializer.initialize()
         animatedImageNotificationManager.bind()

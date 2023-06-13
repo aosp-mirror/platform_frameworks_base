@@ -1571,8 +1571,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mPresenter,
                 mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),
-                mNotificationActivityStarter,
-                mCentralSurfacesComponent.getBindRowCallback());
+                mNotificationActivityStarter);
     }
 
     /**
