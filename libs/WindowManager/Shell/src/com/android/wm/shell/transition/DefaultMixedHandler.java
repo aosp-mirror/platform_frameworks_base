@@ -24,12 +24,14 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
 import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.Pair;
@@ -41,6 +43,7 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
@@ -158,7 +161,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        if (mPipHandler.requestHasPipEnter(request) && mSplitHandler.isSplitActive()) {
+        if (mPipHandler.requestHasPipEnter(request) && mSplitHandler.isSplitActive()
+                && request.getTriggerTask() != null && mSplitHandler.getSplitItemPosition(
+                        request.getTriggerTask().token) != SPLIT_POSITION_UNDEFINED) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a PiP-enter request while "
                     + "Split-Screen is active, so treat it as Mixed.");
             if (request.getRemoteTransition() != null) {
@@ -588,6 +593,17 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             t.apply();
         }
         return true;
+    }
+
+    /** Use to when split use intent to enter, check if this enter transition should be mixed or
+     * not.*/
+    public boolean shouldSplitEnterMixed(PendingIntent intent) {
+        // Check if this intent package is same as pip one or not, if true we want let the pip
+        // task enter split.
+        if (mPipHandler != null) {
+            return mPipHandler.isInPipPackage(SplitScreenUtils.getPackageName(intent.getIntent()));
+        }
+        return false;
     }
 
     @Override
