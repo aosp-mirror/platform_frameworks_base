@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Твар распазнаны"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Пацверджана"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Націсніце \"Пацвердзіць\", каб завяршыць"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Разблакіравана распазнаваннем твару"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Разблакіравана распазнаваннем твару. Націсніце для працягу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Твар распазнаны. Націсніце для працягу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Твар распазнаны. Для працягу націсніце значок разблакіроўкі."</string>
@@ -244,8 +243,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Гук"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнітура"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Увод"</string>
-    <!-- no translation found for quick_settings_bluetooth_secondary_label_hearing_aids (5553051568867097111) -->
-    <skip />
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Слыхавыя апараты"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Уключэнне…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Аўтапаварот"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Аўтаматычны паварот экрана"</string>
@@ -1006,8 +1004,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Не ўдалося захаваць. Паўтарыце спробу."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Не ўдалося захаваць."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Скарыстайце не менш як 4 сімвалы"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Колькасць сімвалаў павінна быць меншай за <xliff:g id="LENGTH">%1$d</xliff:g>"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Нумар зборкі"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Нумар зборкі скапіраваны ў буфер абмену."</string>
     <string name="basic_status" msgid="2315371112182658176">"Адкрытая размова"</string>
@@ -1049,6 +1046,8 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Праблема з чытаннем індыкатара зараду акумулятара"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Націсніце, каб убачыць больш"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Няма будзільнікаў"</string>
+    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
+    <skip />
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сканер адбіткаў пальцаў"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"правесці аўтэнтыфікацыю"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"адкрыць галоўны экран прылады"</string>
@@ -1111,10 +1110,8 @@
     <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Памочнік слухае"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# апавяшчэнне}one{# апавяшчэнне}few{# апавяшчэнні}many{# апавяшчэнняў}other{# апавяшчэння}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (230135078402003532) -->
-    <skip />
-    <!-- no translation found for note_task_shortcut_long_label (7729325091147319409) -->
-    <skip />
+    <string name="note_task_button_label" msgid="230135078402003532">"Стварэнне нататак"</string>
+    <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"Стварэнне нататак, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Перадача даных"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Спыніць трансляцыю праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Пры пераключэнні на праграму \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\" ці змяненні вываду бягучая трансляцыя спыняецца"</string>
@@ -1130,12 +1127,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Даведацца больш"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Даведайцеся больш на старонцы <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Адкрыць праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Праграма наладжана."</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• У Кашалёк дададзена хаця б адна картка."</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Усталявана праграма \"Камера\"."</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Праграма наладжана."</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Даступная хаця б адна прылада."</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Выберыце стандартную праграму для нататак, каб карыстацца хуткай камандай для нататак"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Выберыце праграму"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Дакраніцеся і ўтрымлівайце ярлык"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасаваць"</string>
@@ -1164,4 +1167,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Прыярытэтны рэжым уключаны"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Памочнік гатовы выконваць каманды"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Задайце ў Наладах стандартную праграму для нататак"</string>
+    <string name="install_app" msgid="5066668100199613936">"Усталяваць праграму"</string>
 </resources>
