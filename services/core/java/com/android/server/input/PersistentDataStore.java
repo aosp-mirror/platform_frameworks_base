@@ -101,6 +101,10 @@ final class PersistentDataStore {
         }
     }
 
+    public boolean hasInputDeviceEntry(String inputDeviceDescriptor) {
+        return getInputDeviceState(inputDeviceDescriptor) != null;
+    }
+
     public TouchCalibration getTouchCalibration(String inputDeviceDescriptor, int surfaceRotation) {
         InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
         if (state == null) {
