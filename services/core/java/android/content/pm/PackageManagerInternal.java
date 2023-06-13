@@ -1383,4 +1383,17 @@ public abstract class PackageManagerInternal {
     @Deprecated
     public abstract void legacyReconcileSecondaryDexFiles(String packageName)
             throws LegacyDexoptDisabledException;
+
+    /**
+     * Gets {@link PackageManager.DistractionRestriction restrictions} of the given
+     * packages of the given user.
+     *
+     * The corresponding element of the resulting array will be -1 if a given package doesn't exist.
+     *
+     * @param packageNames The packages under which to check.
+     * @param userId The user under which to check.
+     * @return an array of distracting restriction state in order of the given packages
+     */
+    public abstract int[] getDistractingPackageRestrictionsAsUser(
+            @NonNull String[] packageNames, int userId);
 }

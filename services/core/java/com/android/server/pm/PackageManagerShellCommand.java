@@ -23,6 +23,9 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
+import static android.content.pm.PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+import static android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
+import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -290,6 +293,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSuspend(false);
                 case "set-distracting-restriction":
                     return runSetDistractingRestriction();
+                case "get-distracting-restriction":
+                    return runGetDistractingRestriction();
                 case "grant":
                     return runGrantRevokePermission(true);
                 case "revoke":
@@ -2585,6 +2590,58 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int runGetDistractingRestriction() {
+        final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_SYSTEM;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        final List<String> packageNames = getRemainingArgs();
+        if (packageNames.isEmpty()) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+        pw.println("Distracting restrictions state for user " + userId);
+
+        final int translatedUserId = translateUserId(userId, UserHandle.USER_NULL,
+                "get-distracting");
+        final String[] packages = packageNames.toArray(new String[]{});
+        int[] res = mPm.getDistractingPackageRestrictionsAsUser(packages, translatedUserId);
+
+        for (int i = 0; i < res.length; i++) {
+            final int state = res[i];
+            if (state == -1) {
+                pw.println(packages[i] + " not found ...");
+            } else {
+                pw.println(packages[i] + "  state: " + stateToString(state));
+            }
+        }
+
+        return 0;
+    }
+
+    private static String stateToString(@PackageManager.DistractionRestriction int flag) {
+        switch (flag) {
+            case RESTRICTION_NONE:
+                return "NONE";
+            case RESTRICTION_HIDE_FROM_SUGGESTIONS:
+                return "HIDE_FROM_SUGGESTIONS";
+            case RESTRICTION_HIDE_NOTIFICATIONS:
+                return "HIDE_NOTIFICATIONS";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     private int runSuspend(boolean suspendedState) {
         final PrintWriter pw = getOutPrintWriter();
         int userId = UserHandle.USER_SYSTEM;
@@ -4395,6 +4452,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("        (by the launcher, etc.)");
         pw.println("    Any existing flags are overwritten, which also means that if no flags are");
         pw.println("    specified then all existing flags will be cleared.");
+        pw.println("");
+        pw.println("  get-distracting-restriction [--user USER_ID] PACKAGE [PACKAGE...]");
+        pw.println("    Gets the specified restriction flags of given package(s) (of the user).");
         pw.println("");
         pw.println("  grant [--user USER_ID] PACKAGE PERMISSION");
         pw.println("  revoke [--user USER_ID] PACKAGE PERMISSION");
