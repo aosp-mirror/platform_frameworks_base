@@ -136,7 +136,10 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
-        mMediaOutputBroadcastDialog.dismissDialog();
+        if (mMediaOutputBroadcastDialog.mAlertDialog != null){
+            mMediaOutputBroadcastDialog.mAlertDialog.dismiss();
+        }
+        mMediaOutputBroadcastDialog.dismiss();
     }
 
     @Test
