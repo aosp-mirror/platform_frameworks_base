@@ -29,6 +29,8 @@ data class WakefulnessModel(
 
     fun isStartingToSleepOrAsleep() = isStartingToSleep() || state == WakefulnessState.ASLEEP
 
+    fun isStartingToWakeOrAwake() = isStartingToWake() || state == WakefulnessState.AWAKE
+
     fun isStartingToSleepFromPowerButton() =
         isStartingToSleep() && lastWakeReason == WakeSleepReason.POWER_BUTTON
 

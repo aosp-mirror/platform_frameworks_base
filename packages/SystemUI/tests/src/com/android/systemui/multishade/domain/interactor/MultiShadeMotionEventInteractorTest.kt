@@ -99,6 +99,7 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
                 keyguardTransitionInteractor =
                     KeyguardTransitionInteractor(
                         repository = keyguardTransitionRepository,
+                        scope = testScope.backgroundScope
                     ),
                 falsingManager = falsingManager,
                 shadeController = shadeController,
