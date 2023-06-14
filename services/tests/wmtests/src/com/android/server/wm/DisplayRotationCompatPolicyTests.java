@@ -103,8 +103,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void setUp() throws Exception {
         mLetterboxConfiguration = mDisplayContent.mWmService.mLetterboxConfiguration;
         spyOn(mLetterboxConfiguration);
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                    /* checkDeviceConfig */ anyBoolean()))
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(true);
         when(mLetterboxConfiguration.isCameraCompatRefreshEnabled())
                 .thenReturn(true);
@@ -177,8 +176,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOnScreenRotationAnimationFinished_treatmentNotEnabled_doNotShowToast() {
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                    /* checkDeviceConfig */ anyBoolean()))
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
         spyOn(mDisplayRotationCompatPolicy);
 
@@ -238,8 +236,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testTreatmentNotEnabled_noForceRotationOrRefresh() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                    /* checkDeviceConfig */ anyBoolean()))
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -253,8 +250,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testTreatmentDisabledViaDeviceConfig_noForceRotationOrRefresh() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                    /* checkDeviceConfig */ true))
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
