@@ -547,10 +547,11 @@ public abstract class WMShellModule {
             KeyguardTransitionHandler keyguardTransitionHandler,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
+            Optional<UnfoldTransitionHandler> unfoldHandler,
             Transitions transitions) {
         return new DefaultMixedHandler(shellInit, transitions, splitScreenOptional,
                 pipTouchHandlerOptional, recentsTransitionHandler, keyguardTransitionHandler,
-                desktopModeController, desktopTasksController);
+                desktopModeController, desktopTasksController, unfoldHandler);
     }
 
     @WMSingleton
