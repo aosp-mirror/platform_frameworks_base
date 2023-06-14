@@ -1111,8 +1111,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     : controller.getSystemBarsAppearance();
 
             if (insets != null) {
-                final boolean clearsCompatInsets = clearsCompatInsets(attrs.type, attrs.flags,
-                        getResources().getConfiguration().windowConfiguration.getWindowingMode());
+                mLastShouldAlwaysConsumeSystemBars = insets.shouldAlwaysConsumeSystemBars();
+
+                final boolean clearsCompatInsets =
+                        clearsCompatInsets(attrs.type, attrs.flags,
+                                getResources().getConfiguration().windowConfiguration
+                                        .getWindowingMode())
+                        && !mLastShouldAlwaysConsumeSystemBars;
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
                 final Insets systemInsets = clearsCompatInsets
@@ -1143,7 +1148,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 disallowAnimate |= (hasLeftStableInset != mLastHasLeftStableInset);
                 mLastHasLeftStableInset = hasLeftStableInset;
 
-                mLastShouldAlwaysConsumeSystemBars = insets.shouldAlwaysConsumeSystemBars();
                 mLastSuppressScrimTypes = insets.getSuppressScrimTypes();
             }
 
