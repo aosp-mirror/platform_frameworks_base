@@ -61,7 +61,6 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
@@ -5820,7 +5819,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean isNonToastOrStartingOrPrivatePresentation() {
         return mAttrs.type != TYPE_TOAST && mAttrs.type != TYPE_APPLICATION_STARTING
-                && mAttrs.type != TYPE_PRIVATE_PRESENTATION;
+                && mAttrs.type != TYPE_PRIVATE_PRESENTATION
+                && !(mAttrs.type == TYPE_PRESENTATION && isOnVirtualDisplay());
     }
 
     boolean isNonToastWindowVisibleForUid(int callingUid) {
@@ -5831,6 +5831,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isNonToastWindowVisibleForPid(int pid) {
         return mSession.mPid == pid && isNonToastOrStartingOrPrivatePresentation()
                 && isVisibleNow();
+    }
+
+    private boolean isOnVirtualDisplay() {
+        return getDisplayContent().mDisplay.getType() == Display.TYPE_VIRTUAL;
     }
 
     void setViewVisibility(int viewVisibility) {
