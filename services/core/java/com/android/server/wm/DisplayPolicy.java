@@ -2371,7 +2371,8 @@ public class DisplayPolicy {
         // We need to force the consumption of the system bars if they are force shown or if they
         // are controlled by a remote insets controller.
         mForceConsumeSystemBars = mForceShowSystemBars
-                || mDisplayContent.getInsetsPolicy().remoteInsetsControllerControlsSystemBars(win);
+                || getInsetsPolicy().remoteInsetsControllerControlsSystemBars(win)
+                || getInsetsPolicy().forcesShowingNavigationBars(win);
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
 
         final boolean topAppHidesStatusBar = topAppHidesSystemBar(Type.statusBars());
