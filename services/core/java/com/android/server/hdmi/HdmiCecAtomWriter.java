@@ -16,6 +16,11 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_ARC_PENDING;
+import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_EARC_CONNECTED;
+import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_EARC_PENDING;
+import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_IDLE;
+
 import android.stats.hdmi.HdmiStatsEnums;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -190,6 +195,46 @@ public class HdmiCecAtomWriter {
                 physicalAddress,
                 relationshipToActiveSource
         );
+    }
+
+    /**
+     * Writes a HdmiEarcStatusReported atom representing a eARC status change.
+     * @param isSupported         Whether the hardware supports eARC.
+     * @param isEnabled           Whether eARC is enabled.
+     * @param oldConnectionState  If enumLogReason == HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED,
+     *                            the state just before the change. Otherwise, the current state.
+     * @param newConnectionState  If enumLogReason == HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED,
+     *                            the state just after the change. Otherwise, the current state.
+     * @param enumLogReason       The event that triggered the log.
+     */
+    public void earcStatusChanged(boolean isSupported, boolean isEnabled, int oldConnectionState,
+            int newConnectionState, int enumLogReason) {
+        int enumOldConnectionState = earcStateToEnum(oldConnectionState);
+        int enumNewConnectionState = earcStateToEnum(newConnectionState);
+
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.HDMI_EARC_STATUS_REPORTED,
+                isSupported,
+                isEnabled,
+                enumOldConnectionState,
+                enumNewConnectionState,
+                enumLogReason
+        );
+    }
+
+    private int earcStateToEnum(int earcState) {
+        switch (earcState) {
+            case HDMI_EARC_STATUS_IDLE:
+                return HdmiStatsEnums.HDMI_EARC_STATUS_IDLE;
+            case HDMI_EARC_STATUS_EARC_PENDING:
+                return HdmiStatsEnums.HDMI_EARC_STATUS_EARC_PENDING;
+            case HDMI_EARC_STATUS_ARC_PENDING:
+                return HdmiStatsEnums.HDMI_EARC_STATUS_ARC_PENDING;
+            case HDMI_EARC_STATUS_EARC_CONNECTED:
+                return HdmiStatsEnums.HDMI_EARC_STATUS_EARC_CONNECTED;
+            default:
+                return HdmiStatsEnums.HDMI_EARC_STATUS_UNKNOWN;
+        }
     }
 
     /**

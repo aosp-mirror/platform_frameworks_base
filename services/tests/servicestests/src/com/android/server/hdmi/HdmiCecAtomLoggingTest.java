@@ -76,6 +76,8 @@ public class HdmiCecAtomLoggingTest {
     private TestLooper mTestLooper = new TestLooper();
     private int mPhysicalAddress = 0x1110;
     private HdmiPortInfo[] mHdmiPortInfo;
+    private HdmiEarcController mHdmiEarcController;
+    private FakeEarcNativeWrapper mEarcNativeWrapper;
 
     @Before
     public void setUp() throws RemoteException {
@@ -94,7 +96,6 @@ public class HdmiCecAtomLoggingTest {
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
         doReturn(mHdmiCecAtomWriterSpy).when(mHdmiControlServiceSpy).getAtomWriter();
-
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
         doReturn(hdmiCecConfig).when(mHdmiControlServiceSpy).getHdmiCecConfig();
 
@@ -117,6 +118,11 @@ public class HdmiCecAtomLoggingTest {
                 mHdmiCecController, mHdmiMhlControllerStub);
         mHdmiControlServiceSpy.setHdmiCecNetwork(mHdmiCecNetwork);
         mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
+
+        mEarcNativeWrapper = new FakeEarcNativeWrapper();
+        mHdmiEarcController = HdmiEarcController.createWithNativeWrapper(
+                mHdmiControlServiceSpy, mEarcNativeWrapper);
+        mHdmiControlServiceSpy.setEarcController(mHdmiEarcController);
 
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
