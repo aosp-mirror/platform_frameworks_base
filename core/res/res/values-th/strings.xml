@@ -656,7 +656,7 @@
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ปิดใช้เซ็นเซอร์ชั่วคราวแล้ว"</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ใช้เซ็นเซอร์ลายนิ้วมือไม่ได้ โปรดติดต่อผู้ให้บริการซ่อม"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"กดปุ่มเปิด/ปิดแล้ว"</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"นิ้ว <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"นิ้วมือ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ใช้ลายนิ้วมือ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ใช้ลายนิ้วมือหรือการล็อกหน้าจอ"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ใช้ลายนิ้วมือของคุณเพื่อดำเนินการต่อ"</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"หากต้องการออก ให้เลื่อนลงจากด้านบน"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"รับทราบ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"หมุนเพื่อรับมุมมองที่ดียิ่งขึ้น"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ออกจากโหมดแยกหน้าจอเพื่อรับมุมมองที่ดียิ่งขึ้น"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"เปิด <xliff:g id="NAME">%s</xliff:g> ในโหมดเต็มหน้าจอเพื่อรับมุมมองที่ดียิ่งขึ้น"</string>
     <string name="done_label" msgid="7283767013231718521">"เสร็จสิ้น"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ตัวเลื่อนหมุนระบุชั่วโมง"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ตัวเลื่อนหมุนระบุนาที"</string>

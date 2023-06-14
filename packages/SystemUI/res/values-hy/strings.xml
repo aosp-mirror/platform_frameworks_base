@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Դեմքը ճանաչվեց"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Հաստատվեց"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Ավարտելու համար հպեք «Հաստատել»"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Ապակողպվեց դեմքով"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ապակողպվել է դեմքով։ Սեղմեք շարունակելու համար։"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Դեմքը ճանաչվեց։ Սեղմեք շարունակելու համար։"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Դեմքը ճանաչվեց։ Սեղմեք ապակողպման պատկերակը։"</string>
@@ -361,7 +360,7 @@
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Դեմքը ճանաչվեց"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Սահեցրեք վերև՝ նորից փորձելու համար"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ապակողպեք՝ NFC-ն օգտագործելու համար"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր ընկերությանը"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>» կազմակերպությանը"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Այս սարքը տրամադրվել է «<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>» կազմակերպության կողմից"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Սահահարվածեք հեռախոսի պատկերակից"</string>
@@ -432,11 +431,11 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ձեր կազմակերպությունը այս սարքի սեփականատերն է և կարող է վերահսկել ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"«<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությունը այս սարքի սեփականատերն է և կարող է վերահսկել ցանցային թրաֆիկը"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Այս սարքը տրամադրվել է <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> կազմակերպության կողմից"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Այս սարքը պատկանում է ձեր կազմակերպությանը և համացանցին միացած է <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Այս սարքը պատկանում է ձեր ընկերությանը և համացանցին միացած է <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Այս սարքը պատկանում է <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությանը և համացանցին միացած է <xliff:g id="VPN_APP">%2$s</xliff:g>-ի միջոցով"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Այս սարքը պատկանում է ձեր ընկերությանը"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Այս սարքը պատկանում է ձեր կազմակերպությանը և համացանցին միացած է VPN-ների միջոցով"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Այս սարքը պատկանում է ձեր ընկերությանը և համացանցին միացած է VPN-ների միջոցով"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Այս սարքը պատկանում է <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությանը և համացանցին միացած է VPN-ների միջոցով"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ձեր կազմակերպությունը կարող է վերահսկել ձեր աշխատանքային պրոֆիլի ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությունը կարող է վերահսկել ձեր աշխատանքային պրոֆիլի ցանցային թրաֆիկը"</string>
@@ -455,7 +454,7 @@
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Դիտել կառավարման տարրերը"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը։\n\nՁեր ՏՏ ադմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ ռեսուրսներից օգտվելու թույլտվությունները, հավելվածները, սարքի հետ կապված տվյալները և սարքի տեղադրության տվյալները։\n\nԼրացուցիչ տեղեկությունների համար դիմեք ձեր ՏՏ ադմինիստրատորին։"</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> կազմակերպությունը կարող է ստանալ այս սարքի հետ կապված տվյալների օգտագործման թույլտվություն, փոփոխել դրա կարգավորումներն ու կառավարել հավելվածները։\n\nԱվելին իմանալու համար դիմեք <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> ընկերությանը։"</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Այս սարքը պատկանում է ձեր կազմակերպությանը։\n\nՁեր ՏՏ ադմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ ռեսուրսներից օգտվելու թույլտվությունները, հավելվածները, սարքի հետ կապված տվյալները և սարքի տեղադրության տվյալները։\n\nԼրացուցիչ տեղեկությունների համար դիմեք ձեր ՏՏ ադմինիստրատորին։"</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Այս սարքը պատկանում է ձեր ընկերությանը։\n\nՁեր ՏՏ ադմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ ռեսուրսներից օգտվելու թույլտվությունները, հավելվածները, սարքի հետ կապված տվյալները և սարքի տեղադրության տվյալները։\n\nԼրացուցիչ տեղեկությունների համար դիմեք ձեր ՏՏ ադմինիստրատորին։"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Ձեր կազմակերպությունը այս սարքում տեղադրել է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ձեր կազմակերպությունը ձեր աշխատանքային պրոֆիլում տեղադրել է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Այս սարքում տեղադրված է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Չհաջողվեց պահել։ Նորից փորձեք։"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Չհաջողվեց պահել։"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Օգտագործեք առնվազն 4 նիշ"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Օգտագործեք մինչև <xliff:g id="LENGTH">%1$d</xliff:g> նիշ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Կառուցման համարը"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Կառուցման համարը պատճենվեց սեղմատախտակին։"</string>
     <string name="basic_status" msgid="2315371112182658176">"Բաց զրույց"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Իմանալ ավելին"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Իմացեք ավելին <xliff:g id="URL">%s</xliff:g> էջում"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Բացել <xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Հավելվածը կարգավորված է"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Առնվազն մեկ քարտ ավելացված է Wallet-ում"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• «Տեսախցիկ» հավելվածը տեղադրված է"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Հավելվածը կարգավորված է"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Հասանելի է առնվազն մեկ սարք"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Ընտրեք նշումների կանխադրված հավելված՝ նշումների ստեղծման դյուրանցումն օգտագործելու համար"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Ընտրել հավելված"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Հպեք դյուրանցմանը և պահեք"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Չեղարկել"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Առաջնահերթության ռեժիմը միացված է"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Օգնականը լսում է"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Կարգավորեք նշումների կանխադրված հավելված Կարգավորումներում"</string>
+    <string name="install_app" msgid="5066668100199613936">"Տեղադրել հավելվածը"</string>
 </resources>

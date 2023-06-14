@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Seja autentificēta"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Apstiprināts"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Lai pabeigtu, pieskarieties Apstiprināt"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Ierīce atbloķēta ar seju"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ierīce atbloķēta ar seju. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Seja atpazīta. Nospiediet, lai turpinātu."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Seja atpazīta. Lai turpinātu, nospiediet atbloķēšanas ikonu."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Nevar saglabāt. Mēģiniet vēlreiz."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Nevar saglabāt."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Izmantojiet vismaz 4 rakstzīmes"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Izmantojiet mazāk nekā <xliff:g id="LENGTH">%1$d</xliff:g> rakstzīmes."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versijas numurs"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versijas numurs ir kopēts starpliktuvē."</string>
     <string name="basic_status" msgid="2315371112182658176">"Atvērt sarunu"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Uzzināt vairāk"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Uzziniet vairāk vietnē <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Atvērt lietotni <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Lietotne ir iestatīta."</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Makam ir pievienota vismaz viena karte."</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Ir instalēta kameras lietotne."</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Lietotne ir iestatīta."</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ir pieejama vismaz viena ierīce."</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Atlasiet noklusējuma piezīmju lietotni, lai izmantotu piezīmju pierakstīšanas saīsni."</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Atlasīt lietotni"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pieskarieties saīsnei un turiet."</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Atcelt"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioritātes režīms ir ieslēgts"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Asistents klausās"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Iestatījumos iestatiet noklusējuma piezīmju lietotni."</string>
+    <string name="install_app" msgid="5066668100199613936">"Instalēt lietotni"</string>
 </resources>

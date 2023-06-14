@@ -44,6 +44,7 @@ import android.app.WallpaperManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Bitmap;
@@ -189,6 +190,9 @@ public abstract class WallpaperService extends Service {
 
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
+
+    // TODO (b/287037772) remove this flag and the forceReport argument in reportVisibility
+    private boolean mIsWearOs;
 
     static final class WallpaperCommand {
         String action;
@@ -2282,7 +2286,8 @@ public abstract class WallpaperService extends Service {
                     @Override
                     public void onDisplayChanged(int displayId) {
                         if (mDisplay.getDisplayId() == displayId) {
-                            boolean forceReport = mDisplay.getState() != Display.STATE_DOZE_SUSPEND;
+                            boolean forceReport = mIsWearOs
+                                    && mDisplay.getState() != Display.STATE_DOZE_SUSPEND;
                             reportVisibility(forceReport);
                         }
                     }
@@ -2734,6 +2739,7 @@ public abstract class WallpaperService extends Service {
         mBackgroundThread = new HandlerThread("DefaultWallpaperLocalColorExtractor");
         mBackgroundThread.start();
         mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
+        mIsWearOs = getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
         super.onCreate();
         Trace.endSection();
     }

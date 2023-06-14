@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Sulje palkki pyyhkäisemällä alas ruudun ylälaidasta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Selvä"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Kierrä, niin saat paremman näkymän"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Poistu jaetulta näytöltä, niin saat paremman näkymän"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Avaa <xliff:g id="NAME">%s</xliff:g>, niin saat paremman näkymän"</string>
     <string name="done_label" msgid="7283767013231718521">"Valmis"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Tuntien ympyränmuotoinen liukusäädin"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Minuuttien ympyränmuotoinen liukusäädin"</string>
