@@ -117,6 +117,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
             return null;
         }).when(mMagnificationSettingsController).closeMagnificationSettings();
 
+        when(mWindowMagnificationController.isActivated()).thenReturn(true);
+
         mCommandQueue = new CommandQueue(getContext(), mDisplayTracker);
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
@@ -199,8 +201,10 @@ public class WindowMagnificationTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mMagnificationSettingsController).toggleSettingsPanelVisibility();
-        verify(mA11yLogger).log(
-                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED));
+        verify(mA11yLogger).logWithPosition(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED),
+                eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
+        );
     }
 
     @Test
@@ -211,8 +215,10 @@ public class WindowMagnificationTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mWindowMagnificationController).changeMagnificationSize(eq(index));
-        verify(mA11yLogger).log(
-                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_WINDOW_SIZE_SELECTED));
+        verify(mA11yLogger).logWithPosition(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_WINDOW_SIZE_SELECTED),
+                eq(index)
+        );
     }
 
     @Test
@@ -253,6 +259,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
                 TEST_DISPLAY, scale);
 
         verify(mConnectionCallback).onPerformScaleAction(eq(TEST_DISPLAY), eq(scale));
+        verify(mA11yLogger).logThrottled(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_ZOOM_SLIDER_CHANGED));
     }
 
     @Test

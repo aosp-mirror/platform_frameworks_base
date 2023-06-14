@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 
@@ -346,7 +347,10 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         @Override
         public void onSetMagnifierSize(int displayId, int index) {
             mHandler.post(() -> onSetMagnifierSizeInternal(displayId, index));
-            mA11yLogger.log(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_WINDOW_SIZE_SELECTED);
+            mA11yLogger.logWithPosition(
+                    MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_WINDOW_SIZE_SELECTED,
+                    index
+            );
         }
 
         @Override
@@ -367,6 +371,9 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
             if (mWindowMagnificationConnectionImpl != null) {
                 mWindowMagnificationConnectionImpl.onPerformScaleAction(displayId, scale);
             }
+            mA11yLogger.logThrottled(
+                    MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_ZOOM_SLIDER_CHANGED
+            );
         }
 
         @Override
@@ -377,9 +384,6 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         @Override
         public void onSettingsPanelVisibilityChanged(int displayId, boolean shown) {
             mHandler.post(() -> onSettingsPanelVisibilityChangedInternal(displayId, shown));
-            mA11yLogger.log(shown
-                    ? MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED
-                    : MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_CLOSED);
         }
     };
 
@@ -433,8 +437,22 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
     private void onSettingsPanelVisibilityChangedInternal(int displayId, boolean shown) {
         final WindowMagnificationController windowMagnificationController =
                 mMagnificationControllerSupplier.get(displayId);
-        if (windowMagnificationController != null && windowMagnificationController.isActivated()) {
-            windowMagnificationController.updateDragHandleResourcesIfNeeded(shown);
+        if (windowMagnificationController != null) {
+            boolean isWindowMagnifierActivated = windowMagnificationController.isActivated();
+            if (isWindowMagnifierActivated) {
+                windowMagnificationController.updateDragHandleResourcesIfNeeded(shown);
+            }
+
+            if (shown) {
+                mA11yLogger.logWithPosition(
+                        MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED,
+                        isWindowMagnifierActivated
+                                ? ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+                                : ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+                );
+            } else {
+                mA11yLogger.log(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_CLOSED);
+            }
         }
     }
 
