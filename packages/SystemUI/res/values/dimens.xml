@@ -734,8 +734,6 @@
     <dimen name="keyguard_clock_switch_y_shift">14dp</dimen>
     <!-- When large clock is showing, offset the smartspace by this amount -->
     <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
-    <!-- With the large clock, move up slightly from the center -->
-    <dimen name="keyguard_large_clock_top_margin">-60dp</dimen>
 
     <dimen name="notification_scrim_corner_radius">32dp</dimen>
 

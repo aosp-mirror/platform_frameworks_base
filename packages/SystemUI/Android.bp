@@ -123,6 +123,7 @@ android_library {
     ],
     static_libs: [
         "SystemUISharedLib",
+        "SystemUICustomizationLib",
         "SettingsLib",
         "androidx.leanback_leanback",
         "androidx.slice_slice-core",
