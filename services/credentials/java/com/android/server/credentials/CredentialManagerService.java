@@ -21,6 +21,7 @@ import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
 import static android.content.Context.CREDENTIAL_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -55,6 +56,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfoFactory;
+import android.service.credentials.PermissionUtils;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -546,11 +548,16 @@ public final class CredentialManagerService
 
             if (providerSessions.isEmpty()) {
                 try {
-                    // TODO: fix
                     prepareGetCredentialCallback.onResponse(
-                            new PrepareGetCredentialResponseInternal(
-                                    false, null,
-                                    false, false, null));
+                            new PrepareGetCredentialResponseInternal(PermissionUtils.hasPermission(
+                                    mContext,
+                                    callingPackage,
+                                    Manifest.permission
+                                            .CREDENTIAL_MANAGER_QUERY_CANDIDATE_CREDENTIALS),
+                                    /*credentialResultTypes=*/null,
+                                    /*hasAuthenticationResults=*/false,
+                                    /*hasRemoteResults=*/false,
+                                    /*pendingIntent=*/null));
                 } catch (RemoteException e) {
                     Slog.e(
                             TAG,
