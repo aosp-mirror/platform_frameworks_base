@@ -157,4 +157,11 @@ public interface ServiceProvider extends
      * @param sensorId sensor ID of the associated operation
      */
     default void scheduleWatchdog(int sensorId) {}
+
+    /**
+     * Simulate fingerprint down touch event for virtual HAL
+     * @param userId user ID
+     * @param sensorId sensor ID
+     */
+    default void simulateVhalFingerDown(int userId, int sensorId) {};
 }
