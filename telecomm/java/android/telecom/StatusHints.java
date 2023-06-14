@@ -16,14 +16,19 @@
 
 package android.telecom;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Objects;
 
@@ -33,7 +38,7 @@ import java.util.Objects;
 public final class StatusHints implements Parcelable {
 
     private final CharSequence mLabel;
-    private final Icon mIcon;
+    private Icon mIcon;
     private final Bundle mExtras;
 
     /**
@@ -48,8 +53,28 @@ public final class StatusHints implements Parcelable {
 
     public StatusHints(CharSequence label, Icon icon, Bundle extras) {
         mLabel = label;
-        mIcon = icon;
+        mIcon = validateAccountIconUserBoundary(icon, Binder.getCallingUserHandle());
         mExtras = extras;
+    }
+
+    /**
+     * @param icon
+     * @hide
+     */
+    @VisibleForTesting
+    public StatusHints(@Nullable Icon icon) {
+        mLabel = null;
+        mExtras = null;
+        mIcon = icon;
+    }
+
+    /**
+     *
+     * @param icon
+     * @hide
+     */
+    public void setIcon(@Nullable Icon icon) {
+        mIcon = icon;
     }
 
     /**
@@ -110,6 +135,30 @@ public final class StatusHints implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * Validates the StatusHints image icon to see if it's not in the calling user space.
+     * Invalidates the icon if so, otherwise returns back the original icon.
+     *
+     * @param icon
+     * @return icon (validated)
+     * @hide
+     */
+    public static Icon validateAccountIconUserBoundary(Icon icon, UserHandle callingUserHandle) {
+        // Refer to Icon#getUriString for context. The URI string is invalid for icons of
+        // incompatible types.
+        if (icon != null && (icon.getType() == Icon.TYPE_URI
+                || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP)) {
+            String encodedUser = icon.getUri().getEncodedUserInfo();
+            // If there is no encoded user, the URI is calling into the calling user space
+            if (encodedUser != null) {
+                int userId = Integer.parseInt(encodedUser);
+                // Do not try to save the icon if the user id isn't in the calling user space.
+                if (userId != callingUserHandle.getIdentifier()) return null;
+            }
+        }
+        return icon;
     }
 
     @Override
