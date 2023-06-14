@@ -90,19 +90,23 @@ public class SplashScreenExceptionListTest {
     public void packageFromDeviceConfigIgnored() {
         setExceptionListAndWaitForCallback("com.test.nosplashscreen1,com.test.nosplashscreen2");
 
-        // In list, up to T included
+        // In list, up to V included
         assertIsException("com.test.nosplashscreen1", VERSION_CODES.R);
         assertIsException("com.test.nosplashscreen1", VERSION_CODES.S);
         assertIsException("com.test.nosplashscreen1", VERSION_CODES.TIRAMISU);
+        assertIsException("com.test.nosplashscreen1", VERSION_CODES.UPSIDE_DOWN_CAKE);
+        assertIsException("com.test.nosplashscreen1", VERSION_CODES.UPSIDE_DOWN_CAKE + 1);
 
-        // In list, after T
-        assertIsNotException("com.test.nosplashscreen2", VERSION_CODES.TIRAMISU + 1);
+        // In list, after V
+        assertIsNotException("com.test.nosplashscreen2", VERSION_CODES.UPSIDE_DOWN_CAKE + 2);
         assertIsNotException("com.test.nosplashscreen2", VERSION_CODES.CUR_DEVELOPMENT);
 
-        // Not in list, up to T included
+        // Not in list, up to V included
         assertIsNotException("com.test.splashscreen", VERSION_CODES.S);
         assertIsNotException("com.test.splashscreen", VERSION_CODES.R);
         assertIsNotException("com.test.splashscreen", VERSION_CODES.TIRAMISU);
+        assertIsNotException("com.test.splashscreen", VERSION_CODES.UPSIDE_DOWN_CAKE);
+        assertIsNotException("com.test.splashscreen", VERSION_CODES.UPSIDE_DOWN_CAKE + 1);
     }
 
     @Test
@@ -119,15 +123,19 @@ public class SplashScreenExceptionListTest {
         assertIsNotException(packageName, VERSION_CODES.R, activityInfo);
         assertIsNotException(packageName, VERSION_CODES.S, activityInfo);
         assertIsNotException(packageName, VERSION_CODES.TIRAMISU, activityInfo);
+        assertIsNotException(packageName, VERSION_CODES.UPSIDE_DOWN_CAKE, activityInfo);
+        assertIsNotException(packageName, VERSION_CODES.UPSIDE_DOWN_CAKE + 1, activityInfo);
 
-        // Exception up to T
+        // Exception up to V
         metaData.putBoolean("android.splashscreen.exception_opt_out", false);
         assertIsException(packageName, VERSION_CODES.R, activityInfo);
         assertIsException(packageName, VERSION_CODES.S, activityInfo);
         assertIsException(packageName, VERSION_CODES.TIRAMISU, activityInfo);
+        assertIsException(packageName, VERSION_CODES.UPSIDE_DOWN_CAKE, activityInfo);
+        assertIsException(packageName, VERSION_CODES.UPSIDE_DOWN_CAKE + 1, activityInfo);
 
-        // No Exception after T
-        assertIsNotException(packageName, VERSION_CODES.TIRAMISU + 1, activityInfo);
+        // No Exception after V
+        assertIsNotException(packageName, VERSION_CODES.UPSIDE_DOWN_CAKE + 2, activityInfo);
         assertIsNotException(packageName, VERSION_CODES.CUR_DEVELOPMENT, activityInfo);
 
         // Edge Cases

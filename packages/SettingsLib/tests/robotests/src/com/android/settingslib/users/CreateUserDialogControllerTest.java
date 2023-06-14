@@ -111,13 +111,13 @@ public class CreateUserDialogControllerTest {
                 mActivityStarter, true, null,
                 cancelCallback);
         dialog.show();
-        assertThat(dialog.findViewById(R.id.user_info_scroll).getVisibility()).isEqualTo(View.GONE);
+        assertThat(dialog.findViewById(R.id.user_info_editor).getVisibility()).isEqualTo(View.GONE);
         Button next = dialog.findViewById(R.id.button_ok);
         next.performClick();
         ((RadioButton) dialog.findViewById(R.id.grant_admin_yes)).setChecked(true);
-        assertThat(dialog.findViewById(R.id.user_info_scroll).getVisibility()).isEqualTo(View.GONE);
+        assertThat(dialog.findViewById(R.id.user_info_editor).getVisibility()).isEqualTo(View.GONE);
         next.performClick();
-        assertThat(dialog.findViewById(R.id.user_info_scroll).getVisibility())
+        assertThat(dialog.findViewById(R.id.user_info_editor).getVisibility())
                 .isEqualTo(View.VISIBLE);
         dialog.dismiss();
     }

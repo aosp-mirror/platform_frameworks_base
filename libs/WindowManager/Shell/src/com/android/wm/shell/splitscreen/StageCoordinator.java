@@ -1516,6 +1516,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Legacy transition we need to create divider here, shell transition case we will
             // create it on #finishEnterSplitScreen
             mSplitLayout.init();
+        } else {
+            // We handle split visibility itself on shell transition, but sometimes we didn't
+            // reset it correctly after dismiss by some reason, so just set invisible before active.
+            setSplitsVisible(false);
         }
         if (taskInfo != null) {
             setSideStagePosition(startPosition, wct);
@@ -2332,7 +2336,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 } else if (!isSplitScreenVisible() && isOpening) {
                     // If split is running in the background and the trigger task is appearing into
                     // split, prepare to enter split screen.
-                    setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, out);
                     prepareEnterSplitScreen(out);
                     mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                             TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
@@ -2358,7 +2361,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             if (isOpening && getStageOfTask(triggerTask) != null) {
                 // One task is appearing into split, prepare to enter split screen.
                 out = new WindowContainerTransaction();
-                setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, out);
                 prepareEnterSplitScreen(out);
                 mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                         TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
@@ -2654,11 +2656,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         if (mSplitTransitions.mPendingEnter.mExtraTransitType
                 == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE) {
+            // Open to side should only be used when split already active and foregorund.
             if (mainChild == null && sideChild == null) {
                 Log.w(TAG, "Launched a task in split, but didn't receive any task in transition.");
-                mSplitTransitions.mPendingEnter.cancel((cancelWct, cancelT)
-                        -> prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, cancelWct));
-                mSplitUnsupportedToast.show();
+                // This should happen when the target app is already on front, so just cancel.
+                mSplitTransitions.mPendingEnter.cancel(null);
                 return true;
             }
         } else {

@@ -59,6 +59,7 @@ public class CreateUserDialogController {
     private static final String KEY_IS_ADMIN = "admin_status";
     private static final String KEY_ADD_USER_LONG_MESSAGE_DISPLAYED =
             "key_add_user_long_message_displayed";
+    public static final int MESSAGE_PADDING = 10;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({EXIT_DIALOG, INITIAL_DIALOG, GRANT_ADMIN_DIALOG,
@@ -191,6 +192,7 @@ public class CreateUserDialogController {
             cancelCallback.run();
             clear();
         });
+        mCustomDialogHelper.setMessagePadding(MESSAGE_PADDING);
         mUserCreationDialog.setCanceledOnTouchOutside(true);
         return mUserCreationDialog;
     }
@@ -212,7 +214,6 @@ public class CreateUserDialogController {
             }
             updateLayout();
         });
-        return;
     }
 
     private void updateLayout() {
@@ -234,7 +235,6 @@ public class CreateUserDialogController {
                 }
                 Drawable icon = mActivity.getDrawable(R.drawable.ic_person_add);
                 mCustomDialogHelper.setVisibility(mCustomDialogHelper.ICON, true)
-                        .setVisibility(mCustomDialogHelper.TITLE, true)
                         .setVisibility(mCustomDialogHelper.MESSAGE, true)
                         .setIcon(icon)
                         .setButtonEnabled(true)
@@ -248,7 +248,6 @@ public class CreateUserDialogController {
                 mGrantAdminView.setVisibility(View.VISIBLE);
                 mCustomDialogHelper
                         .setVisibility(mCustomDialogHelper.ICON, true)
-                        .setVisibility(mCustomDialogHelper.TITLE, true)
                         .setVisibility(mCustomDialogHelper.MESSAGE, true)
                         .setIcon(mActivity.getDrawable(R.drawable.ic_admin_panel_settings))
                         .setTitle(R.string.user_grant_admin_title)
@@ -262,8 +261,8 @@ public class CreateUserDialogController {
             case EDIT_NAME_DIALOG:
                 mCustomDialogHelper
                         .setVisibility(mCustomDialogHelper.ICON, false)
-                        .setVisibility(mCustomDialogHelper.TITLE, false)
                         .setVisibility(mCustomDialogHelper.MESSAGE, false)
+                        .setTitle(R.string.user_info_settings_title)
                         .setNegativeButtonText(R.string.back)
                         .setPositiveButtonText(R.string.done);
                 mEditUserInfoView.setVisibility(View.VISIBLE);

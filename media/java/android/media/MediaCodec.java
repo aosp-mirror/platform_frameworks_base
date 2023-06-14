@@ -4933,8 +4933,12 @@ final public class MediaCodec {
          * Called when an output frame has rendered on the output surface.
          * <p>
          * <strong>Note:</strong> This callback is for informational purposes only: to get precise
-         * render timing samples, and can be significantly delayed and batched. Some frames may have
-         * been rendered even if there was no callback generated.
+         * render timing samples, and can be significantly delayed and batched. Starting with
+         * Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, a callback will always
+         * be received for each rendered frame providing the MediaCodec is still in the executing
+         * state when the callback is dispatched. Prior to Android
+         * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, some frames may have been
+         * rendered even if there was no callback generated.
          *
          * @param codec the MediaCodec instance
          * @param presentationTimeUs the presentation time (media time) of the frame rendered.
