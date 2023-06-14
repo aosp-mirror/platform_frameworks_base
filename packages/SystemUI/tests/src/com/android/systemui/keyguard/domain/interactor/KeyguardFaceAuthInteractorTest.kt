@@ -82,7 +82,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         bouncerRepository = FakeKeyguardBouncerRepository()
         faceAuthRepository = FakeDeviceEntryFaceAuthRepository()
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-        keyguardTransitionInteractor = KeyguardTransitionInteractor(keyguardTransitionRepository)
+        keyguardTransitionInteractor =
+            KeyguardTransitionInteractor(keyguardTransitionRepository, testScope.backgroundScope)
 
         underTest =
             SystemUIKeyguardFaceAuthInteractor(

@@ -111,7 +111,7 @@ constructor(
                 isDreaming && isDozeOff(dozeTransitionModel.to)
             }
             .sample(wakefulnessModel) { isAbleToDream, wakefulnessModel ->
-                isAbleToDream && wakefulnessModel.isStartingToWake()
+                isAbleToDream && wakefulnessModel.isStartingToWakeOrAwake()
             }
             .flatMapLatest { isAbleToDream ->
                 flow {

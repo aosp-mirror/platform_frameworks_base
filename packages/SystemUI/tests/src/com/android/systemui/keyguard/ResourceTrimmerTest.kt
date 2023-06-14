@@ -70,7 +70,10 @@ class ResourceTrimmerTest : SysuiTestCase() {
         resourceTrimmer =
             ResourceTrimmer(
                 keyguardInteractor,
-                KeyguardTransitionInteractor(keyguardTransitionRepository),
+                KeyguardTransitionInteractor(
+                    keyguardTransitionRepository,
+                    testScope.backgroundScope
+                ),
                 globalWindowManager,
                 testScope.backgroundScope,
                 testDispatcher,
