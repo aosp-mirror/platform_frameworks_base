@@ -150,6 +150,23 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 ) {
                     mLogBufferLogger.logRemoveTransientFromViewGroup(childEntry, containerView);
                 }
+
+                @Override
+                public void logAddTransientRow(
+                        NotificationEntry childEntry,
+                        NotificationEntry containerEntry,
+                        int index
+                ) {
+                    mLogBufferLogger.logAddTransientRow(childEntry, containerEntry, index);
+                }
+
+                @Override
+                public void logRemoveTransientRow(
+                        NotificationEntry childEntry,
+                        NotificationEntry containerEntry
+                ) {
+                    mLogBufferLogger.logRemoveTransientRow(childEntry, containerEntry);
+                }
             };
 
 

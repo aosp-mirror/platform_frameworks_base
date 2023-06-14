@@ -1657,6 +1657,25 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 NotificationEntry childEntry,
                 ViewGroup containerView
         );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is added to this
+         * ExpandableNotificationRow
+         */
+        void logAddTransientRow(
+                NotificationEntry childEntry,
+                NotificationEntry containerEntry,
+                int index
+        );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is removed from this
+         * ExpandableNotificationRow
+         */
+        void logRemoveTransientRow(
+                NotificationEntry childEntry,
+                NotificationEntry containerEntry
+        );
     }
 
     /**
@@ -3785,5 +3804,35 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     /* containerView = */ transientContainer
             );
         }
+    }
+
+    @Override
+    public void addTransientView(View view, int index) {
+        if (view instanceof ExpandableNotificationRow) {
+            logAddTransientRow((ExpandableNotificationRow) view, index);
+        }
+        super.addTransientView(view, index);
+    }
+
+    private void logAddTransientRow(ExpandableNotificationRow row, int index) {
+        if (mLogger == null) {
+            return;
+        }
+        mLogger.logAddTransientRow(row.getEntry(), getEntry(), index);
+    }
+
+    @Override
+    public void removeTransientView(View view) {
+        if (view instanceof ExpandableNotificationRow) {
+            logRemoveTransientRow((ExpandableNotificationRow) view);
+        }
+        super.removeTransientView(view);
+    }
+
+    private void logRemoveTransientRow(ExpandableNotificationRow row) {
+        if (mLogger == null) {
+            return;
+        }
+        mLogger.logRemoveTransientRow(row.getEntry(), getEntry());
     }
 }

@@ -96,6 +96,38 @@ constructor(
             { "RemoveTransientRow from other ViewGroup: childKey: $str1 -- ViewGroup: $str2" }
         )
     }
+
+    fun logAddTransientRow(
+        childEntry: NotificationEntry,
+        containerEntry: NotificationEntry,
+        index: Int
+    ) {
+        notificationRenderBuffer.log(
+            TAG,
+            LogLevel.ERROR,
+            {
+                str1 = childEntry.logKey
+                str2 = containerEntry.logKey
+                int1 = index
+            },
+            { "addTransientRow to row: childKey: $str1 -- containerKey: $str2 -- index: $int1" }
+        )
+    }
+
+    fun logRemoveTransientRow(
+        childEntry: NotificationEntry,
+        containerEntry: NotificationEntry,
+    ) {
+        notificationRenderBuffer.log(
+            TAG,
+            LogLevel.ERROR,
+            {
+                str1 = childEntry.logKey
+                str2 = containerEntry.logKey
+            },
+            { "removeTransientRow from row: childKey: $str1 -- containerKey: $str2" }
+        )
+    }
 }
 
 private const val TAG = "NotifRow"
