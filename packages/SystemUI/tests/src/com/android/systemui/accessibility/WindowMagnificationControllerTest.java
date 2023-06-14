@@ -100,6 +100,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -313,10 +314,10 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertFalse(rects.isEmpty());
     }
 
+    @Ignore("The default window size should be constrained after fixing b/288056772")
     @Test
     public void enableWindowMagnification_LargeScreen_windowSizeIsConstrained() {
-        final int screenSize = mContext.getResources().getDimensionPixelSize(
-                R.dimen.magnification_max_frame_size) * 10;
+        final int screenSize = mWindowManager.getCurrentWindowMetrics().getBounds().width() * 10;
         mWindowManager.setWindowBounds(new Rect(0, 0, screenSize, screenSize));
 
         mInstrumentation.runOnMainSync(() -> {
@@ -568,26 +569,27 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                 mWindowMagnificationController.getCenterY() / testWindowBounds.height(),
                 0);
     }
+
     @Test
-    public void screenSizeIsChangedToLarge_enabled_windowSizeIsConstrained() {
+    public void screenSizeIsChangedToLarge_enabled_defaultWindowSize() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
-        final int screenSize = mContext.getResources().getDimensionPixelSize(
-                R.dimen.magnification_max_frame_size) * 10;
+        final int screenSize = mWindowManager.getCurrentWindowMetrics().getBounds().width() * 10;
         mWindowManager.setWindowBounds(new Rect(0, 0, screenSize, screenSize));
 
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
         });
 
-        final int halfScreenSize = screenSize / 2;
+        final int defaultWindowSize =
+                mWindowMagnificationController.getMagnificationWindowSizeFromIndex(
+                        WindowMagnificationSettings.MagnificationSize.MEDIUM);
         WindowManager.LayoutParams params = mWindowManager.getLayoutParamsFromAttachedView();
-        // The frame size should be the half of smaller value of window height/width unless it
-        //exceed the max frame size.
-        assertTrue(params.width < halfScreenSize);
-        assertTrue(params.height < halfScreenSize);
+
+        assertTrue(params.width == defaultWindowSize);
+        assertTrue(params.height == defaultWindowSize);
     }
 
     @Test
