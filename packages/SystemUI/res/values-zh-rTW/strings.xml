@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"臉孔驗證成功"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"確認完畢"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"輕觸 [確認] 完成驗證設定"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"裝置已透過你的臉解鎖"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"裝置已透過你的臉解鎖，按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"臉孔辨識完成，按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"臉孔辨識完成，按下「解鎖」圖示即可繼續操作。"</string>
@@ -361,7 +360,7 @@
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"臉孔辨識完成"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑動即可重試"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"如要使用 NFC，請先解鎖"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"這部裝置的擁有者為貴機構"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"此裝置屬於貴機構"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>」"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"這是「<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>」提供的裝置"</string>
     <string name="phone_hint" msgid="6682125338461375925">"滑動手機圖示即可啟用"</string>
@@ -434,7 +433,7 @@
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"這是「<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>」提供的裝置"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"這部裝置的擁有者為貴機構，並已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連線到網際網路"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並已透過「<xliff:g id="VPN_APP">%2$s</xliff:g>」連線到網際網路"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"這部裝置的擁有者為貴機構"</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"此裝置屬於貴機構"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"這部裝置的擁有者為貴機構，並已透過 VPN 連線到網際網路"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並已透過 VPN 連線到網際網路"</string>
@@ -455,7 +454,7 @@
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"查看監護功能相關資訊"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」。\n\n你的 IT 管理員可以監控及管理與裝置相關聯的設定、公司系統權限、應用程式和資料，以及裝置的位置資訊。\n\n如要瞭解詳情，請與你的 IT 管理員聯絡。"</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"「<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>」或許可以存取這部裝置的相關資料、管理應用程式及變更裝置設定。\n\n如有任何疑問，請與「<xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>」聯絡。"</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"這部裝置的擁有者為貴機構。\n\n你的 IT 管理員可以監控及管理與裝置相關聯的設定、公司系統權限、應用程式和資料，以及裝置的位置資訊。\n\n如要瞭解詳情，請與你的 IT 管理員聯絡。"</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"此裝置屬於貴機構。\n\n你的 IT 管理員可以監控及管理與裝置相關聯的設定、公司系統權限、應用程式和資料，以及裝置的位置資訊。\n\n如要瞭解詳情，請與你的 IT 管理員聯絡。"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"貴機構已為這個裝置安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"貴機構已為你的工作資料夾安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"這個裝置已安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"無法儲存，請再試一次。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"無法儲存。"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"至少要有 4 個半形字元"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"不得超過 <xliff:g id="LENGTH">%1$d</xliff:g> 個半形字元"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已將版本號碼複製到剪貼簿。"</string>
     <string name="basic_status" msgid="2315371112182658176">"開放式對話"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"瞭解詳情"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"如要瞭解詳情，請前往 <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"開啟「<xliff:g id="APPNAME">%1$s</xliff:g>」"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• 完成應用程式設定"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• 錢包中至少要有一張卡片"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• 安裝相機應用程式"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• 完成應用程式設定"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 至少要有一部可用裝置"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"如要使用筆記捷徑，請選取預設的記事應用程式"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"選取應用程式"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"按住快速鍵"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"取消"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"優先模式已開啟"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Google 助理感知功能已開啟"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在「設定」中指定預設記事應用程式"</string>
+    <string name="install_app" msgid="5066668100199613936">"安裝應用程式"</string>
 </resources>

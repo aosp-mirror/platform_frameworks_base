@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ຢືນຢັນແລ້ວ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ແຕະຢືນຢັນເພື່ອສຳເລັດ"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"ປົດລັອກດ້ວຍໃບໜ້າແລ້ວ"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ປົດລັອກດ້ວຍໜ້າແລ້ວ. ກົດເພື່ອສືບຕໍ່."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດເພື່ອສືບຕໍ່."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດໄອຄອນປົດລັອກເພື່ອສືບຕໍ່."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ບໍ່ສາມາດບັນທຶກໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ບໍ່ສາມາດບັນທຶກໄດ້."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"ໃຊ້ຢ່າງໜ້ອຍ 4 ຕົວອັກສອນ"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"ໃຊ້ໜ້ອຍກວ່າ <xliff:g id="LENGTH">%1$d</xliff:g> ຕົວອັກສອນ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ໝາຍເລກສ້າງ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ສຳເນົາໝາຍເລກສ້າງໄປໃສ່ຄລິບບອດແລ້ວ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"ສຶກສາເພີ່ມເຕີມຢູ່ <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"ເປີດ <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ມີການເພີ່ມຢ່າງໜ້ອຍ 1 ບັດໃສ່ໃນ Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ຕິດຕັ້ງແອັບກ້ອງຖ່າຍຮູບ"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ມີຢ່າງໜ້ອຍ 1 ອຸປະກອນພ້ອມໃຫ້ນຳໃຊ້"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"ເລືອກແອັບບັນທຶກເລີ່ມຕົ້ນເພື່ອໃຊ້ທາງລັດການຈົດບັນທຶກ"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ເລືອກແອັບ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ແຕະທາງລັດຄ້າງໄວ້"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ຍົກເລີກ"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ໂໝດຄວາມສຳຄັນເປີດຢູ່"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"ການເອີ້ນໃຊ້ຜູ້ຊ່ວຍເປີດຢູ່"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ຕັ້ງຄ່າແອັບຈົດບັນທຶກເລີ່ມຕົ້ນໃນການຕັ້ງຄ່າ"</string>
+    <string name="install_app" msgid="5066668100199613936">"ຕິດຕັ້ງແອັບ"</string>
 </resources>

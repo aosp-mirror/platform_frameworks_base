@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"启用 USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"了解详情"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"屏幕截图"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"已停用 Extend Unlock"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"已停用延长解锁"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"发送了一张图片"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在保存屏幕截图..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"正在将屏幕截图保存到工作资料…"</string>
@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"面孔身份验证成功"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"已确认"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"点按“确认”即可完成"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"已用面孔解锁"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"已通过面孔识别解锁。点按即可继续。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"识别出面孔。点按即可继续。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"识别出面孔。按下解锁图标即可继续。"</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"无法保存，请重试。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"无法保存。"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"必须至少 4 个字符"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"必须少于 <xliff:g id="LENGTH">%1$d</xliff:g> 个字符"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build 号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已将 Build 号复制到剪贴板。"</string>
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
@@ -1125,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"了解详情"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"如需了解详情，请前往 <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"打开<xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• 应用已设置完毕"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• 至少已将一张银行卡添加到钱包"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• 安装相机应用"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• 应用已设置完毕"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 至少有一台设备可用"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"选择默认记事应用即可使用记事快捷方式"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"若要将 Google 钱包应用添加为快捷方式，请确保已安装该应用"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"若要将 Google 钱包应用添加为快捷方式，请确保至少已添加一张银行卡"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"若要将二维码扫描器添加为快捷方式，请确保已安装相机应用"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"若要将 Home 应用添加为快捷方式，请确保已安装该应用"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• 至少有一台设备可用"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"选择默认记事应用即可使用记事快捷方式"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"选择应用"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"轻触并按住快捷方式"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"取消"</string>
@@ -1159,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"已开启优先模式"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"已开启 Google 助理感知功能"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在设置中设置默认记事应用"</string>
+    <string name="install_app" msgid="5066668100199613936">"安装应用"</string>
 </resources>
