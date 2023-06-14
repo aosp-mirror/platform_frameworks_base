@@ -29,6 +29,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.tiles.UserDetailItemView
 import com.android.systemui.user.data.source.UserRecord
+import com.android.systemui.util.mockito.whenever
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -67,6 +68,8 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        whenever(userSwitcherController.isUserSwitcherEnabled).thenReturn(true)
 
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, layoutInflater)
         `when`(layoutInflater.inflate(anyInt(), any(ViewGroup::class.java), anyBoolean()))
