@@ -172,7 +172,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private Executor mExecutor;
     private AccessPointController mAccessPointController;
     private IntentFilter mConnectionStateFilter;
-    private InternetDialogCallback mCallback;
+    @VisibleForTesting
+    InternetDialogCallback mCallback;
     private UiEventLogger mUiEventLogger;
     private BroadcastDispatcher mBroadcastDispatcher;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -215,12 +216,16 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onRefreshCarrierInfo() {
-                    mCallback.onRefreshCarrierInfo();
+                    if (mCallback != null) {
+                        mCallback.onRefreshCarrierInfo();
+                    }
                 }
 
                 @Override
                 public void onSimStateChanged(int subId, int slotId, int simState) {
-                    mCallback.onSimStateChanged();
+                    if (mCallback != null) {
+                        mCallback.onSimStateChanged();
+                    }
                 }
             };
 
@@ -331,6 +336,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
         mConnectivityManager.unregisterNetworkCallback(mConnectivityManagerNetworkCallback);
         mConnectedWifiInternetMonitor.unregisterCallback();
+        mCallback = null;
     }
 
     @VisibleForTesting
