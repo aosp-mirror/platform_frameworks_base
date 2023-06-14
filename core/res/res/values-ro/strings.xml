@@ -1851,7 +1851,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Pentru a ieși, glisează de sus în jos."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Am înțeles"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotește pentru o previzualizare mai bună"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Ieși din ecranul împărțit pentru o previzualizare mai bună"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Deschide <xliff:g id="NAME">%s</xliff:g> pe ecran complet pentru o imagine mai bună"</string>
     <string name="done_label" msgid="7283767013231718521">"Terminat"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Selector circular pentru ore"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Selector circular pentru minute"</string>

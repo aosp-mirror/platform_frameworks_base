@@ -627,11 +627,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Памылка аўтэнтыфікацыі"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ужываць блакіроўку экрана"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Каб працягнуць, скарыстайце свой сродак блакіроўкі экрана"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Моцна націсніце на сканер"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Шчыльна прыкладзіце палец да сканера"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Не ўдалося распазнаць адбітак пальца. Паўтарыце спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Ачысціце сканер адбіткаў пальцаў і паўтарыце спробу"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Ачысціце сканер і паўтарыце спробу"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Моцна націсніце на сканер"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Шчыльна прыкладзіце палец да сканера"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Палец рухаўся занадта павольна. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Паспрабуйце іншы адбітак пальца"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Занадта светла"</string>
@@ -1852,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Для выхаду правядзіце зверху ўніз."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Зразумела"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Павярнуць для лепшага прагляду"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Выйсці з рэжыму падзеленага экрана для лепшага прагляду"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Для больш зручнага прагляду адкрыйце праграму \"<xliff:g id="NAME">%s</xliff:g>\", выкарыстоўваючы поўнаэкранны рэжым"</string>
     <string name="done_label" msgid="7283767013231718521">"Гатова"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Кругавы паўзунок гадзін"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Кругавы паўзунок хвілін"</string>

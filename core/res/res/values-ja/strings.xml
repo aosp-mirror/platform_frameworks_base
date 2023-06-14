@@ -648,8 +648,8 @@
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"指紋の設定がタイムアウトしました。もう一度お試しください。"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋の操作をキャンセルしました。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"指紋の操作がユーザーによりキャンセルされました。"</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"試行回数が上限を超えました。代わりに PIN を入力してください。"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"試行回数が上限を超えました。代わりに PIN を入力してください。"</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"指紋を処理できません。もう一度お試しください。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"指紋が登録されていません。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"このデバイスには指紋認証センサーがありません。"</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"終了するには、上から下にスワイプします。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"画面を回転させて見やすくしましょう"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"分割画面を終了して見やすくしましょう"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"<xliff:g id="NAME">%s</xliff:g> を全画面表示で開いて見やすくしましょう"</string>
     <string name="done_label" msgid="7283767013231718521">"完了"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"円形スライダー（時）"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"円形スライダー（分）"</string>

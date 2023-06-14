@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"প্রস্থান করতে উপর থেকে নিচের দিকে সোয়াইপ করুন"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুঝেছি"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"আরও ভাল ক্যামেরা ভিউ পাওয়ার জন্য ঘোরান"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"আরও ভাল ক্যামেরা ভিউ পাওয়ার জন্য স্প্লিট স্ক্রিন থেকে বেরিয়ে আসুন"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"আরও ভাল ভিউয়ের জন্য ফুল স্ক্রিনে <xliff:g id="NAME">%s</xliff:g> খুলুন"</string>
     <string name="done_label" msgid="7283767013231718521">"সম্পন্ন হয়েছে"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"বৃত্তাকার ঘণ্টা নির্বাচকের স্লাইডার"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"বৃত্তাকার মিনিট নির্বাচকের স্লাইডার"</string>
