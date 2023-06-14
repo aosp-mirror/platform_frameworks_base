@@ -105,6 +105,8 @@ interface UserRepository {
     fun getSelectedUserInfo(): UserInfo
 
     fun isSimpleUserSwitcher(): Boolean
+
+    fun isUserSwitcherEnabled(): Boolean
 }
 
 @SysUISingleton
@@ -204,6 +206,10 @@ constructor(
 
     override fun isSimpleUserSwitcher(): Boolean {
         return _userSwitcherSettings.value.isSimpleUserSwitcher
+    }
+
+    override fun isUserSwitcherEnabled(): Boolean {
+        return _userSwitcherSettings.value.isUserSwitcherEnabled
     }
 
     private fun observeUserSwitching() {
