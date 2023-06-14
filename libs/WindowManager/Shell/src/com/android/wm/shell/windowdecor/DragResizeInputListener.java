@@ -130,12 +130,7 @@ class DragResizeInputListener implements AutoCloseable {
     }
 
     /**
-     * Updates geometry of this drag resize handler. Needs to be called every time there is a size
-     * change to notify the input event receiver it's ready to take the next input event. Otherwise
-     * it'll keep batching move events and the drag resize process is stalled.
-     *
-     * This is also used to update the touch regions of this handler every event dispatched here is
-     * a potential resize request.
+     * Updates the geometry (the touch region) of this drag resize handler.
      *
      * @param taskWidth The width of the task.
      * @param taskHeight The height of the task.
