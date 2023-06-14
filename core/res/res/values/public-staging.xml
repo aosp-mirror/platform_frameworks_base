@@ -119,6 +119,8 @@
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01ba0000">
+    <!-- @hide @SystemApi -->
+    <public name="config_defaultRetailDemo" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b90000">
