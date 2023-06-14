@@ -2987,10 +2987,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public boolean canShowWhenLocked() {
-        final boolean showBecauseOfActivity =
-                mActivityRecord != null && mActivityRecord.canShowWhenLocked();
-        final boolean showBecauseOfWindow = (getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0;
-        return showBecauseOfActivity || showBecauseOfWindow;
+        if (mActivityRecord != null) {
+            // It will also check if its windows contain FLAG_SHOW_WHEN_LOCKED.
+            return mActivityRecord.canShowWhenLocked();
+        }
+        return (mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
     }
 
     /**
