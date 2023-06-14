@@ -78,6 +78,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.ShadeRepository;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -101,6 +102,7 @@ import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.LargeScreenUtils;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Lazy;
 
@@ -153,6 +155,8 @@ public class QuickSettingsController implements Dumpable {
     private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final ShadeRepository mShadeRepository;
+    private final ShadeInteractor mShadeInteractor;
+    private final JavaAdapter mJavaAdapter;
     private final FalsingManager mFalsingManager;
     private final AccessibilityManager mAccessibilityManager;
     private final MetricsLogger mMetricsLogger;
@@ -342,6 +346,8 @@ public class QuickSettingsController implements Dumpable {
             DumpManager dumpManager,
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             ShadeRepository shadeRepository,
+            ShadeInteractor shadeInteractor,
+            JavaAdapter javaAdapter,
             CastController castController
     ) {
         mPanelViewControllerLazy = panelViewControllerLazy;
@@ -387,6 +393,8 @@ public class QuickSettingsController implements Dumpable {
         mFeatureFlags = featureFlags;
         mInteractionJankMonitor = interactionJankMonitor;
         mShadeRepository = shadeRepository;
+        mShadeInteractor = shadeInteractor;
+        mJavaAdapter = javaAdapter;
 
         mLockscreenShadeTransitionController.addCallback(new LockscreenShadeTransitionCallback());
         dumpManager.registerDumpable(this);
@@ -459,7 +467,13 @@ public class QuickSettingsController implements Dumpable {
     }
 
     // TODO (b/265054088): move this and others to a CoreStartable
-    void initNotificationStackScrollLayoutController() {
+    void init() {
+        initNotificationStackScrollLayoutController();
+        mJavaAdapter.alwaysCollectFlow(
+                mShadeInteractor.isExpandToQsEnabled(), this::setExpansionEnabledPolicy);
+    }
+
+    private void initNotificationStackScrollLayoutController() {
         mNotificationStackScrollLayoutController.setOverscrollTopChangedListener(
                 new NsslOverscrollTopChangedListener());
         mNotificationStackScrollLayoutController.setOnStackYChanged(this::onStackYChanged);
@@ -883,7 +897,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** */
-    public void setExpansionEnabledPolicy(boolean expansionEnabledPolicy) {
+    private void setExpansionEnabledPolicy(boolean expansionEnabledPolicy) {
         mExpansionEnabledPolicy = expansionEnabledPolicy;
         if (mQs != null) {
             mQs.setHeaderClickable(isExpansionEnabled());

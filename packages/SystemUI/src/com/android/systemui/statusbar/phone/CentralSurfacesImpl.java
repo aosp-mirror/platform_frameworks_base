@@ -1744,23 +1744,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mStatusBarWindowController.getStatusBarHeight();
     }
 
-    /**
-     * Disable QS if device not provisioned.
-     * If the user switcher is simple then disable QS during setup because
-     * the user intends to use the lock screen user switcher, QS in not needed.
-     */
-    @Override
-    public void updateQsExpansionEnabled() {
-        final boolean expandEnabled = mDeviceProvisionedController.isDeviceProvisioned()
-                && (mUserSetup || mUserSwitcherController == null
-                        || !mUserSwitcherController.isSimpleUserSwitcher())
-                && !isShadeDisabled()
-                && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0)
-                && !mDozing;
-        mQsController.setExpansionEnabledPolicy(expandEnabled);
-        Log.d(TAG, "updateQsExpansionEnabled - QS Expand enabled: " + expandEnabled);
-    }
-
     @Override
     public boolean isShadeDisabled() {
         return (mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0;
@@ -2723,7 +2706,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 || (mDozing && mDozeParameters.shouldControlScreenOff() && keyguardVisibleOrWillBe);
 
         mShadeSurface.setDozing(mDozing, animate);
-        updateQsExpansionEnabled();
         Trace.endSection();
     }
 
@@ -3631,7 +3613,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     mShadeSurface.collapse(true /* animate */, false  /* delayed */,
                             1.0f  /* speedUpFactor */);
                 }
-                updateQsExpansionEnabled();
             }
         }
     };
@@ -3766,7 +3747,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     // reset them again when we're waking up
                     mShadeSurface.resetViews(dozingAnimated && isDozing);
 
-                    updateQsExpansionEnabled();
                     mKeyguardViewMediator.setDozing(mDozing);
 
                     updateDozingState();
