@@ -197,12 +197,18 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
         }
     }
 
+    /** Whether `request` contains an unfold action. */
+    public boolean hasUnfold(@NonNull TransitionRequestInfo request) {
+        return (request.getType() == TRANSIT_CHANGE
+                && request.getDisplayChange() != null
+                && request.getDisplayChange().isPhysicalDisplayChanged());
+    }
+
     @Nullable
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        if (request.getType() == TRANSIT_CHANGE && request.getDisplayChange() != null
-                && request.getDisplayChange().isPhysicalDisplayChanged()) {
+        if (hasUnfold(request)) {
             mTransition = transition;
             return new WindowContainerTransaction();
         }
