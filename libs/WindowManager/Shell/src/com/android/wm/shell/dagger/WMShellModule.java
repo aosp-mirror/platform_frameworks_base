@@ -536,9 +536,11 @@ public abstract class WMShellModule {
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             Optional<RecentsTransitionHandler> recentsTransitionHandler,
             KeyguardTransitionHandler keyguardTransitionHandler,
+            Optional<UnfoldTransitionHandler> unfoldHandler,
             Transitions transitions) {
         return new DefaultMixedHandler(shellInit, transitions, splitScreenOptional,
-                pipTouchHandlerOptional, recentsTransitionHandler, keyguardTransitionHandler);
+                pipTouchHandlerOptional, recentsTransitionHandler, keyguardTransitionHandler,
+                unfoldHandler);
     }
 
     @WMSingleton
