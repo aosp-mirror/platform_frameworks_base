@@ -30,7 +30,6 @@ import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
 
-import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -43,8 +42,6 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     final IntentFilter mPackageFilt;
     final IntentFilter mNonDataFilt;
     final IntentFilter mExternalFilt;
-
-    final HashSet<String> mUpdatingPackages = new HashSet<String>();
     
     Context mRegisteredContext;
     Handler mRegisteredHandler;
@@ -137,13 +134,6 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         }
         mRegisteredContext.unregisterReceiver(this);
         mRegisteredContext = null;
-    }
-    
-    //not yet implemented
-    boolean isPackageUpdating(String packageName) {
-        synchronized (mUpdatingPackages) {
-            return mUpdatingPackages.contains(packageName);
-        }
     }
     
     public void onBeginPackageChanges() {
@@ -343,7 +333,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         mChangeUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                 UserHandle.USER_NULL);
         if (mChangeUserId == UserHandle.USER_NULL) {
-            Slog.w("PackageMonitor", "Intent broadcast does not contain user handle: " + intent);
+            Slog.w(TAG, "Intent broadcast does not contain user handle: " + intent);
             return;
         }
         onBeginPackageChanges();
@@ -373,11 +363,6 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                     onPackageAdded(pkg, uid);
                 }
                 onPackageAppeared(pkg, mChangeType);
-                if (mChangeType == PACKAGE_UPDATING) {
-                    synchronized (mUpdatingPackages) {
-                        mUpdatingPackages.remove(pkg);
-                    }
-                }
             }
         } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
             String pkg = getPackageName(intent);
@@ -387,10 +372,6 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 mTempArray[0] = pkg;
                 if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                     mChangeType = PACKAGE_UPDATING;
-                    synchronized (mUpdatingPackages) {
-                        //not used for now
-                        //mUpdatingPackages.add(pkg);
-                    }
                     onPackageUpdateStarted(pkg, uid);
                 } else {
                     mChangeType = PACKAGE_PERMANENT_CHANGE;
