@@ -201,8 +201,10 @@ public interface DisplayPowerControllerInterface {
      * @param nits The brightness value in nits if the device supports nits. Set to a negative
      *             number otherwise.
      * @param ambientLux The lux value that will be passed to {@link HighBrightnessModeController}
+     * @param slowChange Indicates whether we should slowly animate to the given brightness value.
      */
-    void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux);
+    void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux,
+            boolean slowChange);
 
     /**
      * Add an additional display that will copy the brightness value from this display. This is used
