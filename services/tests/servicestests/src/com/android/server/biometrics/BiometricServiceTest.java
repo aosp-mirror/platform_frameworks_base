@@ -18,7 +18,6 @@ package com.android.server.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
-import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTHENTICATED_PENDING_SYSUI;
@@ -898,6 +897,45 @@ public class BiometricServiceTest {
         waitForIdle();
 
         // Modality and error are sent
+        verify(mReceiver1).onError(eq(TYPE_FINGERPRINT),
+                eq(biometricPromptError), eq(0) /* vendorCode */);
+    }
+
+    @Test
+    public void testMultiBiometricAuth_whenLockoutTimed_sendsErrorAndModality()
+            throws Exception {
+        testMultiBiometricAuth_whenLockout(LockoutTracker.LOCKOUT_TIMED,
+                BiometricPrompt.BIOMETRIC_ERROR_LOCKOUT);
+    }
+
+    @Test
+    public void testMultiBiometricAuth_whenLockoutPermanent_sendsErrorAndModality()
+            throws Exception {
+        testMultiBiometricAuth_whenLockout(LockoutTracker.LOCKOUT_PERMANENT,
+                BiometricPrompt.BIOMETRIC_ERROR_LOCKOUT_PERMANENT);
+    }
+
+    private void testMultiBiometricAuth_whenLockout(@LockoutTracker.LockoutMode int lockoutMode,
+            int biometricPromptError) throws Exception {
+        final int[] modalities = new int[] {
+                TYPE_FINGERPRINT,
+                BiometricAuthenticator.TYPE_FACE,
+        };
+
+        final int[] strengths = new int[] {
+                Authenticators.BIOMETRIC_STRONG,
+                Authenticators.BIOMETRIC_STRONG,
+        };
+        setupAuthForMultiple(modalities, strengths);
+
+        when(mFingerprintAuthenticator.getLockoutModeForUser(anyInt()))
+                .thenReturn(lockoutMode);
+        when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(false);
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */, null /* authenticators */);
+        waitForIdle();
+
+        // The lockout error should be sent, instead of ERROR_NONE_ENROLLED. See b/286923477.
         verify(mReceiver1).onError(eq(TYPE_FINGERPRINT),
                 eq(biometricPromptError), eq(0) /* vendorCode */);
     }
