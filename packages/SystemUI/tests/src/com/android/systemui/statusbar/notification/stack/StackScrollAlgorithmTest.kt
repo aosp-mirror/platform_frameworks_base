@@ -815,6 +815,74 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         )
     }
 
+    // region shouldPinHunToBottomOfExpandedQs
+    @Test
+    fun shouldHunBeVisibleWhenScrolled_mustStayOnScreenFalse_false() {
+        assertThat(stackScrollAlgorithm.shouldHunBeVisibleWhenScrolled(
+            /* mustStayOnScreen= */false,
+            /* headsUpIsVisible= */false,
+            /* showingPulsing= */false,
+            /* isOnKeyguard=*/false,
+            /*headsUpOnKeyguard=*/false
+        )).isFalse()
+    }
+
+    @Test
+    fun shouldPinHunToBottomOfExpandedQs_headsUpIsVisible_false() {
+        assertThat(stackScrollAlgorithm.shouldHunBeVisibleWhenScrolled(
+            /* mustStayOnScreen= */true,
+            /* headsUpIsVisible= */true,
+            /* showingPulsing= */false,
+            /* isOnKeyguard=*/false,
+            /*headsUpOnKeyguard=*/false
+        )).isFalse()
+    }
+
+    @Test
+    fun shouldHunBeVisibleWhenScrolled_showingPulsing_false() {
+        assertThat(stackScrollAlgorithm.shouldHunBeVisibleWhenScrolled(
+            /* mustStayOnScreen= */true,
+            /* headsUpIsVisible= */false,
+            /* showingPulsing= */true,
+            /* isOnKeyguard=*/false,
+            /* headsUpOnKeyguard= */false
+        )).isFalse()
+    }
+
+    @Test
+    fun shouldHunBeVisibleWhenScrolled_isOnKeyguard_false() {
+        assertThat(stackScrollAlgorithm.shouldHunBeVisibleWhenScrolled(
+            /* mustStayOnScreen= */true,
+            /* headsUpIsVisible= */false,
+            /* showingPulsing= */false,
+            /* isOnKeyguard=*/true,
+            /* headsUpOnKeyguard= */false
+        )).isFalse()
+    }
+
+    @Test
+    fun shouldHunBeVisibleWhenScrolled_isNotOnKeyguard_true() {
+        assertThat(stackScrollAlgorithm.shouldHunBeVisibleWhenScrolled(
+            /* mustStayOnScreen= */true,
+            /* headsUpIsVisible= */false,
+            /* showingPulsing= */false,
+            /* isOnKeyguard=*/false,
+            /* headsUpOnKeyguard= */false
+        )).isTrue()
+    }
+
+    @Test
+    fun shouldHunBeVisibleWhenScrolled_headsUpOnKeyguard_true() {
+        assertThat(stackScrollAlgorithm.shouldHunBeVisibleWhenScrolled(
+            /* mustStayOnScreen= */true,
+            /* headsUpIsVisible= */false,
+            /* showingPulsing= */false,
+            /* isOnKeyguard=*/true,
+            /* headsUpOnKeyguard= */true
+        )).isTrue()
+    }
+    // endregion
+
     private fun createHunViewMock(
             isShadeOpen: Boolean,
             fullyVisible: Boolean,

@@ -114,6 +114,8 @@ import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -126,12 +128,10 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewConfigurator;
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.shared.model.WakefulnessModel;
@@ -224,8 +224,6 @@ import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
-import kotlin.Unit;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -235,6 +233,8 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
@@ -2475,7 +2475,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             alpha = getFadeoutAlpha();
         }
         if (mBarState == KEYGUARD && !mHintAnimationRunning
-                && !mKeyguardBypassController.getBypassEnabled()) {
+                && !mKeyguardBypassController.getBypassEnabled()
+                && !mQsController.getFullyExpanded()) {
             alpha *= mClockPositionResult.clockAlpha;
         }
         mNotificationStackScrollLayoutController.setAlpha(alpha);
