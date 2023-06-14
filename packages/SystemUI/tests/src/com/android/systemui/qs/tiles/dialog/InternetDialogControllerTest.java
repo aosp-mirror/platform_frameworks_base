@@ -968,6 +968,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         assertThat(mInternetDialogController.mSubIdTelephonyManagerMap.get(SUB_ID)).isEqualTo(
                 mTelephonyManager);
         assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.get(SUB_ID)).isNotNull();
+        assertThat(mInternetDialogController.mCallback).isNotNull();
 
         mInternetDialogController.onStop();
 
@@ -980,6 +981,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         verify(mAccessPointController).removeAccessPointCallback(mInternetDialogController);
         verify(mConnectivityManager).unregisterNetworkCallback(
                 any(ConnectivityManager.NetworkCallback.class));
+        assertThat(mInternetDialogController.mCallback).isNull();
     }
 
     private String getResourcesString(String name) {
