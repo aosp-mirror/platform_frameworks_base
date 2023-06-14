@@ -622,6 +622,7 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"O hardware biométrico non está dispoñible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Cancelouse a autenticación"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Non se recoñeceu"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"Non se recoñeceu a cara"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Cancelouse a autenticación"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Non se estableceu ningún PIN, padrón ou contrasinal"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Produciuse un erro ao realizar a autenticación"</string>
@@ -1852,7 +1853,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para saír, pasa o dedo cara abaixo desde a parte superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Xira a pantalla para que se vexa mellor"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Sae da pantalla dividida para que se vexa mellor"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Abre <xliff:g id="NAME">%s</xliff:g> en pantalla completa para unha mellor visualización"</string>
     <string name="done_label" msgid="7283767013231718521">"Feito"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Control desprazable circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Control desprazable circular dos minutos"</string>

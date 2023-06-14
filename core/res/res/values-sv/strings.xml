@@ -622,6 +622,7 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk maskinvara är inte tillgänglig"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentiseringen avbröts"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Identifierades inte"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"Ansiktet känns inte igen"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentiseringen avbröts"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Pinkod, mönster eller lösenord har inte angetts"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ett fel uppstod vid autentiseringen"</string>
@@ -1852,7 +1853,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Svep nedåt från skärmens överkant för att avsluta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotera för att få en bättre vy"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Stäng delad skärm för att få en bättre vy"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Öppna <xliff:g id="NAME">%s</xliff:g> i fullskärmsläget för att få en bättre vy"</string>
     <string name="done_label" msgid="7283767013231718521">"Klart"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkelreglage för timmar"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkelreglage för minuter"</string>
