@@ -116,6 +116,17 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 }
             };
 
+    private final DreamOverlayStateController.Callback mExitAnimationFinishedCallback =
+            new DreamOverlayStateController.Callback() {
+                @Override
+                public void onStateChanged() {
+                    if (!mStateController.areExitAnimationsRunning()) {
+                        mStateController.removeCallback(mExitAnimationFinishedCallback);
+                        resetCurrentDreamOverlayLocked();
+                    }
+                }
+            };
+
     private final DreamOverlayStateController mStateController;
 
     @VisibleForTesting
@@ -257,10 +268,10 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     }
 
     @Override
-    public void onWakeUp(@NonNull Runnable onCompletedCallback) {
+    public void onWakeUp() {
         if (mDreamOverlayContainerViewController != null) {
             mDreamOverlayCallbackController.onWakeUp();
-            mDreamOverlayContainerViewController.wakeUp(onCompletedCallback, mExecutor);
+            mDreamOverlayContainerViewController.wakeUp();
         }
     }
 
@@ -329,6 +340,11 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     }
 
     private void resetCurrentDreamOverlayLocked() {
+        if (mStateController.areExitAnimationsRunning()) {
+            mStateController.addCallback(mExitAnimationFinishedCallback);
+            return;
+        }
+
         if (mStarted && mWindow != null) {
             try {
                 mWindowManager.removeView(mWindow.getDecorView());
