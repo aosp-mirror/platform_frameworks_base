@@ -118,6 +118,11 @@ public class DeviceSelectActionFromPlaybackTest {
                     boolean isPowerStandbyOrTransient() {
                         return false;
                     }
+
+                    @Override
+                    boolean isPowerStandby() {
+                        return false;
+                    }
                 };
 
 

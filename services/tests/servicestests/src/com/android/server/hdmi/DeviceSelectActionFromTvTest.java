@@ -127,6 +127,11 @@ public class DeviceSelectActionFromTvTest {
                     boolean isPowerStandbyOrTransient() {
                         return false;
                     }
+
+                    @Override
+                    boolean isPowerStandby() {
+                        return false;
+                    }
                 };
 
 
