@@ -4734,6 +4734,7 @@ public class HdmiControlService extends SystemService {
         } else if (status == HDMI_EARC_STATUS_ARC_PENDING) {
             // If eARC is disabled, the local device is null. This is why we notify
             // AudioService here that the eARC connection is terminated.
+            HdmiLogger.debug("eARC state change [new: HDMI_EARC_STATUS_ARC_PENDING(2)]");
             notifyEarcStatusToAudioService(false, new ArrayList<>());
             startArcAction(true, null);
         }
