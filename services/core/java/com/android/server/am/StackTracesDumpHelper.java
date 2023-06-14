@@ -229,7 +229,7 @@ public class StackTracesDumpHelper {
                 firstPidEnd = new File(tracesFile).length();
             }
             // Append the Durations/latency comma separated array after the first PID.
-            if (latencyTracker != null) {
+            if (firstPidTempDumpCopied && latencyTracker != null) {
                 appendtoANRFile(tracesFile,
                         latencyTracker.dumpAsCommaSeparatedArrayWithHeader());
             }
