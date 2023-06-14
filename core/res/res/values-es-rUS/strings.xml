@@ -1254,7 +1254,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicaciones"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finalizando el inicio"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Presionaste el botón de encendido. Por lo general, esta acción apaga la pantalla.\n\nPresiona suavemente mientras configuras tu huella dactilar."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Para finalizar, apaga la pantalla"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Para salir, apaga la pantalla"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Apagar"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"¿Verificar huella dactilar?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Presionaste el botón de encendido. Por lo general, esta acción apaga la pantalla.\n\nPresiona suavemente para verificar tu huella dactilar."</string>

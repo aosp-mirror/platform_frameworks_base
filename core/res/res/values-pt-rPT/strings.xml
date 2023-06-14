@@ -589,7 +589,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar o bloqueio de ecrã"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduza o bloqueio de ecrã para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Prima firmemente o sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Não é possível reconhecer a impressão digital. Tente novamente."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Impossível reconhecer impressão digital. Volte a tentar."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpe o sensor de impressões digitais e tente novamente"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpe o sensor e tente novamente"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Prima firmemente o sensor"</string>

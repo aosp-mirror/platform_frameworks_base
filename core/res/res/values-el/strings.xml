@@ -588,7 +588,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Χρήση κλειδώματος οθόνης"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Χρησιμοποιήστε το κλείδωμα οθόνης για να συνεχίσετε"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Πιέστε σταθερά τον αισθητήρα"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Δεν είναι δυνατή η αναγνώριση του δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"To δακτ. αποτύπωμα δεν αναγνωρίστηκε. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Καθαρίστε τον αισθητήρα δακτυλικών αποτυπωμάτων και δοκιμάστε ξανά"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Καθαρίστε τον αισθητήρα και δοκιμάστε ξανά"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Πιέστε σταθερά τον αισθητήρα"</string>
