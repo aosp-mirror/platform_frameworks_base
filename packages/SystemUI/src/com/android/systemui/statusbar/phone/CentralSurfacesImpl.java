@@ -173,6 +173,7 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
@@ -634,6 +635,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final SysuiColorExtractor mColorExtractor;
     private final ScreenLifecycle mScreenLifecycle;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    protected final PowerInteractor mPowerInteractor;
 
     private boolean mNoAnimationOnNextBarModeChange;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -648,7 +650,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Optional<StartingSurface> mStartingSurfaceOptional;
 
     private final ActivityIntentHelper mActivityIntentHelper;
-    private NotificationStackScrollLayoutController mStackScrollerController;
+
+    @VisibleForTesting
+    protected NotificationStackScrollLayoutController mStackScrollerController;
 
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
@@ -735,6 +739,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             SysuiColorExtractor colorExtractor,
             ScreenLifecycle screenLifecycle,
             WakefulnessLifecycle wakefulnessLifecycle,
+            PowerInteractor powerInteractor,
             SysuiStatusBarStateController statusBarStateController,
             Optional<Bubbles> bubblesOptional,
             Lazy<NoteTaskController> noteTaskControllerLazy,
@@ -744,6 +749,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<AssistManager> assistManagerLazy,
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
+            NotificationShelfController notificationShelfController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
@@ -831,6 +837,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mColorExtractor = colorExtractor;
         mScreenLifecycle = screenLifecycle;
         mWakefulnessLifecycle = wakefulnessLifecycle;
+        mPowerInteractor = powerInteractor;
         mStatusBarStateController = statusBarStateController;
         mBubblesOptional = bubblesOptional;
         mNoteTaskControllerLazy = noteTaskControllerLazy;
@@ -840,6 +847,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mAssistManagerLazy = assistManagerLazy;
         mConfigurationController = configurationController;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mNotificationShelfController = notificationShelfController;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
@@ -1571,8 +1579,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mPresenter,
                 mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),
-                mNotificationActivityStarter,
-                mCentralSurfacesComponent.getBindRowCallback());
+                mNotificationActivityStarter);
     }
 
     /**
@@ -1651,7 +1658,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotifListContainer = mCentralSurfacesComponent.getNotificationListContainer();
         mPresenter = mCentralSurfacesComponent.getNotificationPresenter();
         mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
-        mNotificationShelfController = mCentralSurfacesComponent.getNotificationShelfController();
 
         mHeadsUpManager.addListener(mCentralSurfacesComponent.getStatusBarHeadsUpChangeListener());
 
@@ -2922,6 +2928,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mBouncerShowing = bouncerShowing;
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
         mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
+        mStackScrollerController.setBouncerShowingFromCentralSurfaces(bouncerShowing);
         setBouncerShowingForStatusBarComponents(bouncerShowing);
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
@@ -3408,7 +3415,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected Display mDisplay;
     private int mDisplayId;
 
-    protected NotificationShelfController mNotificationShelfController;
+    private final NotificationShelfController mNotificationShelfController;
 
     private final Lazy<AssistManager> mAssistManagerLazy;
 

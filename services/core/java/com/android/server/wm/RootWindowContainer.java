@@ -2013,7 +2013,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // from doing work and changing the activity visuals while animating
             // TODO(task-org): Figure-out more structured way to do this long term.
             r.setWindowingMode(r.getWindowingMode());
-            r.mWaitForEnteringPinnedMode = true;
 
             final TaskFragment organizedTf = r.getOrganizedTaskFragment();
             final boolean singleActivity = task.getNonFinishingActivityCount() == 1;
@@ -2140,6 +2139,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
             rootTask.setDeferTaskAppear(false);
 
+            // After setting this, it is not expected to change activity configuration until the
+            // transition animation is finished. So the activity can keep consistent appearance
+            // when animating.
+            r.mWaitForEnteringPinnedMode = true;
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the root pinned task
             r.supportsEnterPipOnTaskSwitch = false;
@@ -3310,9 +3313,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (aOptions != null) {
                 // Resolve the root task the task should be placed in now based on options
                 // and reparent if needed.
+                // TODO(b/229927851) For split-screen, setLaunchRootTask is no longer the "root"
+                // task, consider to rename methods like "parentTask" instead of "rootTask".
                 final Task targetRootTask =
                         getOrCreateRootTask(null, aOptions, task, onTop);
-                if (targetRootTask != null && task.getRootTask() != targetRootTask) {
+                // When launch with ActivityOptions#getLaunchRootTask, the "root task" just mean the
+                // parent of current launch, not the "root task" in hierarchy.
+                if (targetRootTask != null && task.getRootTask() != targetRootTask
+                        && task.getParent() != targetRootTask) {
                     final int reparentMode = onTop
                             ? REPARENT_MOVE_ROOT_TASK_TO_FRONT : REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
                     task.reparent(targetRootTask, onTop, reparentMode, ANIMATE, DEFER_RESUME,

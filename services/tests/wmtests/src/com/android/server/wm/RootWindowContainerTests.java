@@ -337,6 +337,17 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
         assertTrue(task.inPinnedWindowingMode());
+
+        // The activity with fixed orientation should not apply letterbox when entering PiP.
+        final int requestedOrientation = task.getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT
+                ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+        doReturn(requestedOrientation).when(activity).getRequestedConfigurationOrientation();
+        doReturn(false).when(activity).handlesOrientationChangeFromDescendant(anyInt());
+        final Rect bounds = new Rect(task.getBounds());
+        bounds.scale(0.5f);
+        task.setBounds(bounds);
+        assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     /**

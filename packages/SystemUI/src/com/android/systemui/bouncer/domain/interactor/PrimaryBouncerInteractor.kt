@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -86,7 +87,7 @@ constructor(
     }
 
     val keyguardAuthenticated: Flow<Boolean> = repository.keyguardAuthenticated.filterNotNull()
-    val isShowing: Flow<Boolean> = repository.primaryBouncerShow
+    val isShowing: StateFlow<Boolean> = repository.primaryBouncerShow
     val startingToHide: Flow<Unit> = repository.primaryBouncerStartingToHide.filter { it }.map {}
     val isBackButtonEnabled: Flow<Boolean> = repository.isBackButtonEnabled.filterNotNull()
     val showMessage: Flow<BouncerShowMessageModel> = repository.showMessage.filterNotNull()
@@ -383,8 +384,9 @@ constructor(
         mainHandler.removeCallbacks(showRunnable)
     }
 
-    private fun isBouncerShowing(): Boolean {
-        return repository.primaryBouncerShow.value
+    /** Returns whether the primary bouncer is currently showing. */
+    fun isBouncerShowing(): Boolean {
+        return isShowing.value
     }
 
     /** Whether we want to wait to show the bouncer in case passive auth succeeds. */
