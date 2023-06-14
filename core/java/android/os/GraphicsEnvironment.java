@@ -636,44 +636,33 @@ public class GraphicsEnvironment {
     }
 
     /**
-     * Determine if ANGLE will be used and setup the environment
-     */
-    private boolean setupAndUseAngle(Context context, String packageName) {
-        // Need to make sure we are evaluating ANGLE usage for the correct circumstances
-        if (!setupAngle(context, null, context.getPackageManager(), packageName)) {
-            Log.v(TAG, "Package '" + packageName + "' should not use ANGLE");
-            return false;
-        }
-
-        final boolean useAngle = getShouldUseAngle(packageName);
-        Log.v(TAG, "Package '" + packageName + "' should use ANGLE = '" + useAngle + "'");
-
-        return useAngle;
-    }
-
-    /**
      * Show the ANGLE in Use Dialog Box
      * @param context
      */
     public void showAngleInUseDialogBox(Context context) {
-        final String packageName = context.getPackageName();
-
-        if (shouldShowAngleInUseDialogBox(context) && setupAndUseAngle(context, packageName)) {
-            final Intent intent = new Intent(ACTION_ANGLE_FOR_ANDROID_TOAST_MESSAGE);
-            String anglePkg = getAnglePackageName(context.getPackageManager());
-            intent.setPackage(anglePkg);
-
-            context.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    Bundle results = getResultExtras(true);
-
-                    String toastMsg = results.getString(INTENT_KEY_A4A_TOAST_MESSAGE);
-                    final Toast toast = Toast.makeText(context, toastMsg, Toast.LENGTH_LONG);
-                    toast.show();
-                }
-            }, null, Activity.RESULT_OK, null, null);
+        if (!shouldShowAngleInUseDialogBox(context)) {
+            return;
         }
+
+        final String packageName = context.getPackageName();
+        if (!getShouldUseAngle(packageName)) {
+            return;
+        }
+
+        final Intent intent = new Intent(ACTION_ANGLE_FOR_ANDROID_TOAST_MESSAGE);
+        final String anglePkg = getAnglePackageName(context.getPackageManager());
+        intent.setPackage(anglePkg);
+
+        context.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final Bundle results = getResultExtras(true);
+
+                final String toastMsg = results.getString(INTENT_KEY_A4A_TOAST_MESSAGE);
+                final Toast toast = Toast.makeText(context, toastMsg, Toast.LENGTH_LONG);
+                toast.show();
+            }
+        }, null, Activity.RESULT_OK, null, null);
     }
 
     private String[] getAngleEglFeatures(Context context, Bundle coreSettings) {
