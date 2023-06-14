@@ -620,6 +620,7 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Կենսաչափական սարքը հասանելի չէ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Նույնականացումը չեղարկվեց"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Չհաջողվեց ճանաչել"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"Դեմքը չի ճանաչվել"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Նույնականացումը չեղարկվեց"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ավելացրեք PIN կոդ, նախշ կամ գաղտնաբառ։"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Չհաջողվեց նույնականացնել"</string>
@@ -1850,7 +1851,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Դուրս գալու համար վերևից սահահարվածեք դեպի ներքև:"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Պարզ է"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Պտտեք՝ դիտակերպը լավացնելու համար"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Դուրս եկեք կիսված էկրանի ռեժիմից՝ դիտակերպը լավացնելու համար"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Բացեք <xliff:g id="NAME">%s</xliff:g> հավելվածը լիաէկրան ռեժիմում՝ դիտակերպը լավացնելու համար"</string>
     <string name="done_label" msgid="7283767013231718521">"Պատրաստ է"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ժամերի ընտրություն թվատախտակից"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Րոպեների ընտրություն թվատախտակից"</string>
