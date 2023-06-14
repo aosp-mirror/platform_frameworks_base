@@ -81,22 +81,28 @@ class ScreenCaptureListenerWrapper : public gui::BnScreenCaptureListener {
 public:
     explicit ScreenCaptureListenerWrapper(JNIEnv* env, jobject jobject) {
         env->GetJavaVM(&mVm);
-        mConsumerObject = env->NewGlobalRef(jobject);
-        LOG_ALWAYS_FATAL_IF(!mConsumerObject, "Failed to make global ref");
+        mConsumerWeak = env->NewWeakGlobalRef(jobject);
     }
 
     ~ScreenCaptureListenerWrapper() {
-        if (mConsumerObject) {
-            getenv()->DeleteGlobalRef(mConsumerObject);
-            mConsumerObject = nullptr;
+        if (mConsumerWeak) {
+            getenv()->DeleteWeakGlobalRef(mConsumerWeak);
+            mConsumerWeak = nullptr;
         }
     }
 
     binder::Status onScreenCaptureCompleted(
             const gui::ScreenCaptureResults& captureResults) override {
         JNIEnv* env = getenv();
+
+        ScopedLocalRef<jobject> consumer{env, env->NewLocalRef(mConsumerWeak)};
+        if (consumer == nullptr) {
+            ALOGE("ScreenCaptureListenerWrapper consumer not alive.");
+            return binder::Status::ok();
+        }
+
         if (!captureResults.fenceResult.ok() || captureResults.buffer == nullptr) {
-            env->CallVoidMethod(mConsumerObject, gConsumerClassInfo.accept, nullptr);
+            env->CallVoidMethod(consumer.get(), gConsumerClassInfo.accept, nullptr);
             checkAndClearException(env, "accept");
             return binder::Status::ok();
         }
@@ -111,7 +117,7 @@ public:
                                             captureResults.capturedSecureLayers,
                                             captureResults.capturedHdrLayers);
         checkAndClearException(env, "builder");
-        env->CallVoidMethod(mConsumerObject, gConsumerClassInfo.accept, screenshotHardwareBuffer);
+        env->CallVoidMethod(consumer.get(), gConsumerClassInfo.accept, screenshotHardwareBuffer);
         checkAndClearException(env, "accept");
         env->DeleteLocalRef(jhardwareBuffer);
         env->DeleteLocalRef(screenshotHardwareBuffer);
@@ -119,7 +125,7 @@ public:
     }
 
 private:
-    jobject mConsumerObject;
+    jweak mConsumerWeak;
     JavaVM* mVm;
 
     JNIEnv* getenv() {
