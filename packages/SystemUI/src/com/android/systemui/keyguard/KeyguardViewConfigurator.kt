@@ -26,6 +26,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.view.layout.KeyguardLayoutManager
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.statusbar.KeyguardIndicationController
@@ -42,6 +43,7 @@ constructor(
     private val notificationShadeWindowView: NotificationShadeWindowView,
     private val featureFlags: FeatureFlags,
     private val indicationController: KeyguardIndicationController,
+    private val keyguardLayoutManager: KeyguardLayoutManager,
 ) : CoreStartable {
 
     private var indicationAreaHandle: DisposableHandle? = null
@@ -51,6 +53,7 @@ constructor(
             notificationShadeWindowView.requireViewById(R.id.notification_panel) as ViewGroup
         bindIndicationArea(notificationPanel)
         bindLockIconView(notificationPanel)
+        keyguardLayoutManager.layoutViews()
     }
 
     fun bindIndicationArea(legacyParent: ViewGroup) {
