@@ -101,13 +101,6 @@ public final class StepSegment extends VibrationEffectSegment {
 
     /** @hide */
     @Override
-    public boolean hasNonZeroAmplitude() {
-        // DEFAULT_AMPLITUDE == -1 is still a non-zero amplitude that will be resolved later.
-        return Float.compare(mAmplitude, 0) != 0;
-    }
-
-    /** @hide */
-    @Override
     public void validate() {
         VibrationEffectSegment.checkFrequencyArgument(mFrequencyHz, "frequencyHz");
         VibrationEffectSegment.checkDurationArgument(mDuration, "duration");

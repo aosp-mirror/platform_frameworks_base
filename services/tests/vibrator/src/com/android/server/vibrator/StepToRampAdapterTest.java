@@ -66,40 +66,10 @@ public class StepToRampAdapterTest {
         assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
         assertEquals(1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 1));
 
+        assertEquals(-1, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, -1));
+        assertEquals(1, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, 1));
+
         assertEquals(originalSegments, segments);
-    }
-
-    @Test
-    public void testRampSegments_withPwleDurationLimit_splitsLongRamps() {
-        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 10, /* duration= */ 10),
-                new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
-                        /* startFrequencyHz= */ 0, /* endFrequencyHz= */ 50, /* duration= */ 25),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude*/ 1,
-                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 20, /* duration= */ 5)));
-        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 10, /* duration= */ 10),
-                new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0.32f,
-                        /* startFrequencyHz= */ 150, /* endFrequencyHz= */ 118f, /* duration= */ 8),
-                new RampSegment(/* startAmplitude= */ 0.32f, /* endAmplitude= */ 0.64f,
-                        /* startFrequencyHz= */ 118f, /* endFrequencyHz= */ 86f,
-                        /* duration= */ 8),
-                new RampSegment(/* startAmplitude= */ 0.64f, /* endAmplitude= */ 1,
-                        /* startFrequencyHz= */ 86f, /* endFrequencyHz= */ 50f, /* duration= */ 9),
-                new RampSegment(/* startAmplitude= */ 1, /* endAmplitude*/ 1,
-                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 20, /* duration= */ 5));
-
-        VibratorInfo vibratorInfo = new VibratorInfo.Builder(0)
-                .setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)
-                .setPwlePrimitiveDurationMax(10)
-                .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
-                .build();
-
-        // Update repeat index to skip the ramp splits.
-        assertEquals(4, mAdapter.adaptToVibrator(vibratorInfo, segments, 2));
-        assertEquals(expectedSegments, segments);
     }
 
     @Test

@@ -30,7 +30,7 @@ import java.util.List;
  * each frequency.
  *
  * <p>The {@link VibratorInfo.FrequencyProfile} is only applicable to PWLE compositions. This
- * adapter is only applied to {@link RampSegment} and leaves all other segments unchanged.
+ * adapter is only applied to {@link RampSegment} and all other segments will remain unchanged.
  */
 final class ClippingAmplitudeAndFrequencyAdapter implements VibrationSegmentsAdapter {
 
@@ -41,13 +41,13 @@ final class ClippingAmplitudeAndFrequencyAdapter implements VibrationSegmentsAda
         for (int i = 0; i < segmentCount; i++) {
             VibrationEffectSegment segment = segments.get(i);
             if (segment instanceof RampSegment) {
-                segments.set(i, apply((RampSegment) segment, info));
+                segments.set(i, adaptToVibrator(info, (RampSegment) segment));
             }
         }
         return repeatIndex;
     }
 
-    private RampSegment apply(RampSegment segment, VibratorInfo info) {
+    private RampSegment adaptToVibrator(VibratorInfo info, RampSegment segment) {
         float clampedStartFrequency = clampFrequency(info, segment.getStartFrequencyHz());
         float clampedEndFrequency = clampFrequency(info, segment.getEndFrequencyHz());
         return new RampSegment(

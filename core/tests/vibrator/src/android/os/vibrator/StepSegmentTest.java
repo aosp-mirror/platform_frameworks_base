@@ -52,7 +52,6 @@ public class StepSegmentTest {
                 /* duration= */ 100);
 
         assertEquals(100, step.getDuration());
-        assertTrue(step.hasNonZeroAmplitude());
         assertEquals(1f, step.getAmplitude());
         assertEquals(1f, step.getFrequencyHz());
     }
@@ -84,14 +83,6 @@ public class StepSegmentTest {
                 () -> new StepSegment(/* amplitude= */ Float.NaN, 1f, 10).validate());
         assertThrows(IllegalArgumentException.class,
                 () -> new StepSegment(1, /* frequencyHz*/ Float.NaN, 10).validate());
-    }
-
-    @Test
-    public void testHasNonZeroAmplitude() {
-        assertTrue(new StepSegment(1f, 0, 0).hasNonZeroAmplitude());
-        assertTrue(new StepSegment(0.01f, 0, 0).hasNonZeroAmplitude());
-        assertTrue(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0, 0).hasNonZeroAmplitude());
-        assertFalse(new StepSegment(0, 0, 0).hasNonZeroAmplitude());
     }
 
     @Test

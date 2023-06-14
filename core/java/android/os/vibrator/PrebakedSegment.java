@@ -119,12 +119,6 @@ public final class PrebakedSegment extends VibrationEffectSegment {
     }
 
     /** @hide */
-    @Override
-    public boolean hasNonZeroAmplitude() {
-        return true;
-    }
-
-    /** @hide */
     @NonNull
     @Override
     public PrebakedSegment resolve(int defaultAmplitude) {

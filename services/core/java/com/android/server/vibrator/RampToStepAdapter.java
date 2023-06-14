@@ -28,9 +28,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Adapter that converts ramp segments that to a sequence of fixed step segments.
+ * Adapter that converts ramp segments to a sequence of fixed step segments.
  *
- * <p>This leaves the list unchanged if the device has compose PWLE capability.
+ * <p>This change preserves the frequency parameters by interpolating the ramp values.
+ *
+ * <p>The segments will not be changed if the device has {@link IVibrator#CAP_COMPOSE_PWLE_EFFECTS}.
  */
 final class RampToStepAdapter implements VibrationSegmentsAdapter {
 
@@ -53,7 +55,7 @@ final class RampToStepAdapter implements VibrationSegmentsAdapter {
             if (!(segment instanceof RampSegment)) {
                 continue;
             }
-            List<StepSegment> steps = apply(info, (RampSegment) segment);
+            List<StepSegment> steps = convertRampToSteps(info, (RampSegment) segment);
             segments.remove(i);
             segments.addAll(i, steps);
             int addedSegments = steps.size() - 1;
@@ -66,7 +68,7 @@ final class RampToStepAdapter implements VibrationSegmentsAdapter {
         return repeatIndex;
     }
 
-    private List<StepSegment> apply(VibratorInfo info, RampSegment ramp) {
+    private List<StepSegment> convertRampToSteps(VibratorInfo info, RampSegment ramp) {
         if (Float.compare(ramp.getStartAmplitude(), ramp.getEndAmplitude()) == 0) {
             // Amplitude is the same, so return a single step to simulate this ramp.
             return Arrays.asList(
