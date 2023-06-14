@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Ubuso bufakazelwe ubuqiniso"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Kuqinisekisiwe"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Thepha okuthi Qinisekisa ukuze uqedele"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Vula ngobuso"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Vula ngobuso. Cindezela ukuze uqhubeke."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ubuso buyaziwa. Cindezela ukuze uqhubeke."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ubuso buyaziwa. Cindezela isithonjana sokuvula ukuze uqhubeke."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Ayikwazi ukulondoloza. Zama futhi."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Ayikwazi ukulondoloza."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Sebenzisa okungenani izinhlamvu ezi-4"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Sebenzisa isinhlamvu ezimbalwa kuneziyi-<xliff:g id="LENGTH">%1$d</xliff:g>"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Yakha inombolo"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Yakha inombolo ekopishelwe kubhodi yokunamathisela."</string>
     <string name="basic_status" msgid="2315371112182658176">"Vula ingxoxo"</string>
@@ -1125,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Funda kabanzi"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Funda kabanzi ku-<xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Vula i-<xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• I-app isethiwe"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Okungenani ikhadi elilodwa lengeziwe ku-Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Faka i-app yekhamera"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• I-app isethiwe"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Okungenani idivayisi eyodwa iyatholakala"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Khetha i-app yamanothi azenzakalelayo ukuze usebenzise isinqamuleli sokubhala amanothi"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Ukuze ungeze i-app ye-Wallet njengesinqamuleli, qinisekisa ukuthi i-app ifakiwe"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Ukuze ungeze i-app ye-Wallet njengesinqamuleli, qinisekisa ukuthi okungenani ikhadi elilodwa lingeziwe"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Ukuze ungeze Iskena sekhodi ye-QR njengesinqamuleli, qinisekisa ukuthi i-app yekhamera ifakiwe"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Ukuze ungeze i-App yasekhaya njengesinqamuleli, qinisekisa ukuthi i-app ifakiwe"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Okungenani idivayisi eyodwa iyatholakala"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Khetha i-app yamanothi azenzakalelayo ukuze usebenzise isinqamuleli sokubhala amanothi"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Khetha i-app"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Thinta futhi ubambe isinqamuleli"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Khansela"</string>
@@ -1159,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Imodi ebalulekile ivuliwe"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Ukunaka kwe-Assistant kuvuliwe"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Setha i-app yamanothi azenzakalelayo Kumsethingi"</string>
+    <string name="install_app" msgid="5066668100199613936">"Faka i-app"</string>
 </resources>

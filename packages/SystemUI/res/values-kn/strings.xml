@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ಪೂರ್ಣಗೊಳಿಸಲು ದೃಢೀಕರಿಸಿ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"ಮುಖದ ಮೂಲಕ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ಮುಖವನ್ನು ಬಳಸಿ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಅನ್‌ಲಾಕ್ ಐಕಾನ್ ಅನ್ನು ಒತ್ತಿ."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"ಕನಿಷ್ಠ 4 ಅಕ್ಷರಗಳನ್ನು ಬಳಸಿ"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಅಕ್ಷರಗಳನ್ನು ಬಳಸಿ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ಬಿಲ್ಡ್ ಸಂಖ್ಯೆ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ಬಿಲ್ಡ್ ಸಂಖ್ಯೆಯನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ ನಕಲಿಸಲಾಗಿದೆ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ಸಂಭಾಷಣೆಯನ್ನು ತೆರೆಯಿರಿ"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g> ನಲ್ಲಿ ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ಆ್ಯಪ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ವಾಲೆಟ್‌ಗೆ ಕನಿಷ್ಠ ಒಂದು ಕಾರ್ಡ್ ಅನ್ನು ಸೇರಿಸಲಾಗಿದೆ"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ಕ್ಯಾಮರಾ ಆ್ಯಪ್ ಒಂದನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ಆ್ಯಪ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ಕನಿಷ್ಠ ಒಂದು ಸಾಧನ ಲಭ್ಯವಿದೆ"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"ನೋಟ್ಸ್ ಮಾಡಿಕೊಳ್ಳುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಬಳಸಲು ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಆಯ್ಕೆಮಾಡಿ"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ಆ್ಯಪ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ಸ್ಪರ್ಶಿಸಿ ಹೋಲ್ಡ್ ಮಾಡಿ ಶಾರ್ಟ್‌ಕಟ್"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ರದ್ದುಗೊಳಿಸಿ"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ಆದ್ಯತೆಯ ಮೋಡ್‌ ಆನ್‌ ಆಗಿದೆ"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant ನಿಮ್ಮ ಮಾತನ್ನು ಆಲಿಸುತ್ತಿದೆ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಅನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
+    <string name="install_app" msgid="5066668100199613936">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
 </resources>

@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Volto autenticato"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confermato"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tocca Conferma per completare"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Sbloccato con il volto"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Sbloccato con il volto. Premi per continuare."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Volto riconosciuto. Premi per continuare."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Volto riconosciuto. Premi l\'icona Sblocca e continua."</string>
@@ -307,7 +306,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC non attiva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC attiva"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Registrazione schermo"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Registrazione dello schermo"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Inizia"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Interrompi"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modalità a una mano"</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Impossibile salvare. Riprova."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Impossibile salvare."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Usa almeno 4 caratteri"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Usa meno di <xliff:g id="LENGTH">%1$d</xliff:g> caratteri"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numero build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numero build copiato negli appunti."</string>
     <string name="basic_status" msgid="2315371112182658176">"Apri conversazione"</string>
@@ -1125,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Scopri di più"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Scopri di più all\'indirizzo <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Apri <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• L\'app sia configurata"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Sia stata aggiunta almeno una carta a Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Sia installata un\'app fotocamera"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• L\'app sia configurata"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ci sia almeno un dispositivo disponibile"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Seleziona un\'app per le note predefinita per usare la scorciatoia per l\'aggiunta di note"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Per aggiungere l\'app Wallet come scorciatoia, assicurati che l\'app sia installata"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Per aggiungere l\'app Wallet come scorciatoia, assicurati che sia stata aggiunta almeno una carta"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Per aggiungere lo scanner di codici QR come scorciatoia, assicurati che ci sia un\'app fotocamera installata"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Per aggiungere l\'app Home come scorciatoia, assicurati che l\'app sia installata"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Ci sia almeno un dispositivo disponibile"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Seleziona un\'app per le note predefinita per usare la scorciatoia per l\'aggiunta di note"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Seleziona app"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Tocca scorciatoia/tieni premuto"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annulla"</string>
@@ -1159,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Modalità priorità attivata"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"L\'assistente è attivo"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Imposta l\'app per le note predefinita nelle Impostazioni"</string>
+    <string name="install_app" msgid="5066668100199613936">"Installa app"</string>
 </resources>
