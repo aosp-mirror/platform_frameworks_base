@@ -104,6 +104,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -172,6 +173,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private Optional<BubblesManager> mBubblesManagerOptional;
     private MetricsLogger mMetricsLogger;
+    private NotificationChildrenContainerLogger mChildrenContainerLogger;
     private NotificationDismissibilityProvider mDismissibilityProvider;
     private FeatureFlags mFeatureFlags;
     private int mIconTransformContentShift;
@@ -1696,6 +1698,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             NotificationGutsManager gutsManager,
             NotificationDismissibilityProvider dismissibilityProvider,
             MetricsLogger metricsLogger,
+            NotificationChildrenContainerLogger childrenContainerLogger,
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
             FeatureFlags featureFlags,
@@ -1734,6 +1737,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mBubblesManagerOptional = bubblesManagerOptional;
         mNotificationGutsManager = gutsManager;
         mMetricsLogger = metricsLogger;
+        mChildrenContainerLogger = childrenContainerLogger;
         mDismissibilityProvider = dismissibilityProvider;
         mFeatureFlags = featureFlags;
     }
@@ -1902,6 +1906,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.setIsLowPriority(mIsLowPriority);
             mChildrenContainer.setContainingNotification(ExpandableNotificationRow.this);
             mChildrenContainer.onNotificationUpdated();
+            mChildrenContainer.setLogger(mChildrenContainerLogger);
 
             mTranslateableViews.add(mChildrenContainer);
         });
