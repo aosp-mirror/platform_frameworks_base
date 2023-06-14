@@ -2799,6 +2799,22 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
+    @Override
+    public void addTransientView(View view, int index) {
+        if (mLogger != null && view instanceof ExpandableNotificationRow) {
+            mLogger.addTransientRow(((ExpandableNotificationRow) view).getEntry(), index);
+        }
+        super.addTransientView(view, index);
+    }
+
+    @Override
+    public void removeTransientView(View view) {
+        if (mLogger != null && view instanceof ExpandableNotificationRow) {
+            mLogger.removeTransientRow(((ExpandableNotificationRow) view).getEntry());
+        }
+        super.removeTransientView(view);
+    }
+
     /**
      * Has this view been fully swiped out such that it's not visible anymore.
      */

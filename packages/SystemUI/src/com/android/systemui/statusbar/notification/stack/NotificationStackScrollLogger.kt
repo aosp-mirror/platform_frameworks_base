@@ -126,6 +126,34 @@ class NotificationStackScrollLogger @Inject constructor(
                     "-- ViewGroup: $str2"
         })
     }
+
+    fun addTransientRow(
+            childEntry: NotificationEntry,
+            index: Int
+    ) {
+        notificationRenderBuffer.log(
+                TAG,
+                INFO,
+                {
+                    str1 = childEntry.logKey
+                    int1 = index
+                },
+                { "addTransientRow to NSSL: childKey: $str1 -- index: $int1" }
+        )
+    }
+
+    fun removeTransientRow(
+            childEntry: NotificationEntry,
+    ) {
+        notificationRenderBuffer.log(
+                TAG,
+                INFO,
+                {
+                    str1 = childEntry.logKey
+                },
+                { "removeTransientRow from NSSL: childKey: $str1" }
+        )
+    }
 }
 
 private const val TAG = "NotificationStackScroll"
