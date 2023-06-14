@@ -21,7 +21,6 @@ import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
@@ -137,7 +136,8 @@ class WallpaperController {
     };
 
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
-        if (!w.mTransitionController.isShellTransitionsEnabled()) {
+        final boolean useShellTransition = w.mTransitionController.isShellTransitionsEnabled();
+        if (!useShellTransition) {
             if (w.mActivityRecord != null && !w.mActivityRecord.isVisible()
                     && !w.mActivityRecord.isAnimating(TRANSITION | PARENTS)) {
                 // If this window's app token is hidden and not animating, it is of no interest.
@@ -159,30 +159,23 @@ class WallpaperController {
 
         final WindowContainer animatingContainer = w.mActivityRecord != null
                 ? w.mActivityRecord.getAnimatingContainer() : null;
-        final boolean keyguardGoingAwayWithWallpaper = (animatingContainer != null
+        if (!useShellTransition && animatingContainer != null
                 && animatingContainer.isAnimating(TRANSITION | PARENTS)
                 && AppTransition.isKeyguardGoingAwayTransitOld(animatingContainer.mTransit)
                 && (animatingContainer.mTransitFlags
-                & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
-
-        boolean needsShowWhenLockedWallpaper = false;
-        if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && mService.mPolicy.isKeyguardLocked()) {
-            final TransitionController tc = w.mTransitionController;
-            final boolean isInTransition = tc.isShellTransitionsEnabled()
-                    && tc.inTransition(w);
-            if (mService.mPolicy.isKeyguardOccluded() || mService.mPolicy.isKeyguardUnoccluding()
-                    || isInTransition) {
-                // The lowest show when locked window decides whether we need to put the wallpaper
-                // behind.
-                needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
-                        || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
-            }
+                & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0) {
+            // Keep the wallpaper visible when Keyguard is going away.
+            mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
-        if (keyguardGoingAwayWithWallpaper || needsShowWhenLockedWallpaper) {
-            // Keep the wallpaper during Keyguard exit but also when it's needed for a
-            // non-fullscreen show when locked activity.
-            mFindResults.setUseTopWallpaperAsTarget(true);
+        if (mService.mPolicy.isKeyguardLocked() && w.canShowWhenLocked()) {
+            if (mService.mPolicy.isKeyguardOccluded() || (useShellTransition
+                    ? w.inTransition() : mService.mPolicy.isKeyguardUnoccluding())) {
+                // The lowest show when locked window decides whether we need to put the wallpaper
+                // behind.
+                mFindResults.mNeedsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
+                        || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+            }
         }
 
         final boolean animationWallpaper = animatingContainer != null
@@ -691,7 +684,8 @@ class WallpaperController {
 
     private void findWallpaperTarget() {
         mFindResults.reset();
-        if (mDisplayContent.getDefaultTaskDisplayArea()
+        if (mService.mAtmService.mSupportsFreeformWindowManagement
+                && mDisplayContent.getDefaultTaskDisplayArea()
                 .isRootTaskVisible(WINDOWING_MODE_FREEFORM)) {
             // In freeform mode we set the wallpaper as its own target, so we don't need an
             // additional window to make it visible.
@@ -700,6 +694,10 @@ class WallpaperController {
 
         mDisplayContent.forAllWindows(mFindWallpapers, true /* traverseTopToBottom */);
         mDisplayContent.forAllWindows(mFindWallpaperTargetFunction, true /* traverseTopToBottom */);
+        if (mFindResults.mNeedsShowWhenLockedWallpaper) {
+            // Keep wallpaper visible if the show-when-locked activities doesn't fill screen.
+            mFindResults.setUseTopWallpaperAsTarget(true);
+        }
 
         if (mFindResults.wallpaperTarget == null && mFindResults.useTopWallpaperAsTarget) {
             mFindResults.setWallpaperTarget(
@@ -1084,6 +1082,7 @@ class WallpaperController {
         }
 
         TopWallpaper mTopWallpaper = new TopWallpaper();
+        boolean mNeedsShowWhenLockedWallpaper;
         boolean useTopWallpaperAsTarget = false;
         WindowState wallpaperTarget = null;
         boolean isWallpaperTargetForLetterbox = false;
@@ -1132,6 +1131,7 @@ class WallpaperController {
 
         void reset() {
             mTopWallpaper.reset();
+            mNeedsShowWhenLockedWallpaper = false;
             wallpaperTarget = null;
             useTopWallpaperAsTarget = false;
             isWallpaperTargetForLetterbox = false;
