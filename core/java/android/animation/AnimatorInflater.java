@@ -111,20 +111,20 @@ public class AnimatorInflater {
             float pathErrorScale) throws NotFoundException {
         final ConfigurationBoundResourceCache<Animator> animatorCache = resources
                 .getAnimatorCache();
-        ConfigurationBoundResourceCache.Entry<Animator> animatorEntry =
-                animatorCache.getInstance(id, resources, theme);
-        if (animatorEntry.hasValue()) {
+        Animator animator = animatorCache.getInstance(id, resources, theme);
+        if (animator != null) {
             if (DBG_ANIMATOR_INFLATER) {
                 Log.d(TAG, "loaded animator from cache, " + resources.getResourceName(id));
             }
-            return animatorEntry.getValue();
+            return animator;
         } else if (DBG_ANIMATOR_INFLATER) {
             Log.d(TAG, "cache miss for animator " + resources.getResourceName(id));
         }
+        int cacheGeneration = animatorCache.getGeneration();
         XmlResourceParser parser = null;
         try {
             parser = resources.getAnimation(id);
-            Animator animator = createAnimatorFromXml(resources, theme, parser, pathErrorScale);
+            animator = createAnimatorFromXml(resources, theme, parser, pathErrorScale);
             if (animator != null) {
                 animator.appendChangingConfigurations(getChangingConfigs(resources, id));
                 final ConstantState<Animator> constantState = animator.createConstantState();
@@ -132,7 +132,7 @@ public class AnimatorInflater {
                     if (DBG_ANIMATOR_INFLATER) {
                         Log.d(TAG, "caching animator for res " + resources.getResourceName(id));
                     }
-                    animatorCache.put(id, theme, constantState, animatorEntry.getGeneration());
+                    animatorCache.put(id, theme, constantState, cacheGeneration);
                     // create a new animator so that cached version is never used by the user
                     animator = constantState.newInstance(resources, theme);
                 }
@@ -161,22 +161,22 @@ public class AnimatorInflater {
         final ConfigurationBoundResourceCache<StateListAnimator> cache = resources
                 .getStateListAnimatorCache();
         final Theme theme = context.getTheme();
-        ConfigurationBoundResourceCache.Entry<StateListAnimator> animatorEntry =
-                cache.getInstance(id, resources, theme);
-        if (animatorEntry.hasValue()) {
-            return animatorEntry.getValue();
+        StateListAnimator animator = cache.getInstance(id, resources, theme);
+        if (animator != null) {
+            return animator;
         }
+        int cacheGeneration = cache.getGeneration();
         XmlResourceParser parser = null;
         try {
             parser = resources.getAnimation(id);
-            StateListAnimator animator =
+            animator =
                     createStateListAnimatorFromXml(context, parser, Xml.asAttributeSet(parser));
             if (animator != null) {
                 animator.appendChangingConfigurations(getChangingConfigs(resources, id));
                 final ConstantState<StateListAnimator> constantState = animator
                         .createConstantState();
                 if (constantState != null) {
-                    cache.put(id, theme, constantState, animatorEntry.getGeneration());
+                    cache.put(id, theme, constantState, cacheGeneration);
                     // return a clone so that the animator in constant state is never used.
                     animator = constantState.newInstance(resources, theme);
                 }

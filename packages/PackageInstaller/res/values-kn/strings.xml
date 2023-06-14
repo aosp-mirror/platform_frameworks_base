@@ -98,7 +98,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ಮುಂದುವರಿಸಿ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"wear ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌/ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
-    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿರುವ ಕುರಿತು ಅಧಿಸೂಚನೆ"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿರುವ ಕುರಿತು ನೋಟಿಫಿಕೇಶನ್"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"ಯಶಸ್ವಿಯಾಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆ"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" ಆ್ಯಪ್ ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆ"</string>
 </resources>

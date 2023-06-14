@@ -23,7 +23,6 @@ import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVIT
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -362,6 +361,27 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     public boolean isSplitActive() {
         return mMainStage.isActive();
+    }
+
+    /** @return whether the transition-request implies entering pip from split. */
+    public boolean requestImpliesSplitToPip(TransitionRequestInfo request) {
+        if (!isSplitActive() || !mMixedHandler.requestHasPipEnter(request)) {
+            return false;
+        }
+
+        if (request.getTriggerTask() != null && getSplitPosition(
+                request.getTriggerTask().taskId) != SPLIT_POSITION_UNDEFINED) {
+            return true;
+        }
+
+        // If one of the splitting tasks support auto-pip, wm-core might reparent the task to TDA
+        // and file a TRANSIT_PIP transition when finishing transitions.
+        // @see com.android.server.wm.RootWindowContainer#moveActivityToPinnedRootTask
+        if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
+            return true;
+        }
+
+        return false;
     }
 
     /** Checks if `transition` is a pending enter-split transition. */
@@ -2802,19 +2822,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         }
 
-        mRecentTasks.ifPresent(recentTasks -> {
+        if (shouldBreakPairedTaskInRecents(dismissReason)) {
             // Notify recents if we are exiting in a way that breaks the pair, and disable further
             // updates to splits in the recents until we enter split again
-            if (shouldBreakPairedTaskInRecents(dismissReason)) {
-                    for (TransitionInfo.Change change : info.getChanges()) {
-                        final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                        if (taskInfo != null
-                                && taskInfo.getWindowingMode() != WINDOWING_MODE_MULTI_WINDOW) {
-                            recentTasks.removeSplitPair(taskInfo.taskId);
-                        }
+            mRecentTasks.ifPresent(recentTasks -> {
+                for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                    final TransitionInfo.Change change = info.getChanges().get(i);
+                    final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                    if (taskInfo != null && getStageOfTask(taskInfo) != null) {
+                        recentTasks.removeSplitPair(taskInfo.taskId);
                     }
-            }
-        });
+                }
+            });
+        }
         mSplitRequest = null;
 
         // Update local states.

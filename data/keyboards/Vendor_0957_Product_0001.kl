@@ -45,6 +45,7 @@ key 11    0
 
 # custom keys
 key usage 0x000c01BB    TV_INPUT
+key usage 0x000c0186    MACRO_1
 
 key usage 0x000c0185    TV_TELETEXT
 key usage 0x000c0061    CAPTIONS

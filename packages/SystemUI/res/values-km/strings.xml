@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"បានបញ្ជាក់"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ចុច \"បញ្ជាក់\" ដើម្បីបញ្ចប់"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"បានដោះសោដោយប្រើមុខ"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"បានដោះសោដោយប្រើមុខ។ សូមចុច ដើម្បីបន្ត។"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"បានស្គាល់មុខ។ សូមចុច ដើម្បីបន្ត។"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"បានស្គាល់មុខ។ សូមចុចរូបដោះសោ ដើម្បីបន្ត។"</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"មិនអាច​រក្សាទុក​បានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"មិនអាច​រក្សាទុក​បានទេ។"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"ប្រើយ៉ាងហោចណាស់ 4 តួអក្សរ"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"ប្រើតិចជាង <xliff:g id="LENGTH">%1$d</xliff:g> តួអក្សរ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"លេខ​កំណែបង្កើត"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"បានចម្លងលេខ​កំណែបង្កើតទៅឃ្លីបបត។"</string>
     <string name="basic_status" msgid="2315371112182658176">"បើកការសន្ទនា"</string>
@@ -1125,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ស្វែងយល់បន្ថែម"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"ស្វែងយល់​បន្ថែម​តាមរយៈ <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"បើក <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• កម្មវិធីត្រូវបានរៀបចំ"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• កាតយ៉ាងតិចមួយត្រូវបានបញ្ចូលទៅក្នុង Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ដំឡើងកម្មវិធីកាមេរ៉ា"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• កម្មវិធីត្រូវបានរៀបចំ"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ឧបករណ៍យ៉ាងតិចមួយអាចប្រើបាន"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"ជ្រើសរើសកម្មវិធីកំណត់ចំណាំលំនាំដើម ដើម្បីប្រើផ្លូវកាត់សម្រាប់ការកត់ចំណាំ"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ដើម្បីបញ្ចូល​កម្មវិធី Wallet ជាផ្លូវកាត់ សូមប្រាកដថា​កម្មវិធីត្រូវបានដំឡើង"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ដើម្បីបញ្ចូល​កម្មវិធី Wallet ជាផ្លូវកាត់ សូមប្រាកដថា​បានបញ្ចូលកាត​យ៉ាងហោចណាស់មួយ"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"ដើម្បីបញ្ចូលកម្មវិធី​ស្កេនកូដ QR ជាផ្លូវកាត់ សូមប្រាកដថា​កម្មវិធីកាមេរ៉ាត្រូវបានដំឡើង"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"ដើម្បីបញ្ចូល​កម្មវិធី Home ជាផ្លូវកាត់ សូមប្រាកដថា​កម្មវិធីត្រូវបានដំឡើង"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ឧបករណ៍យ៉ាងតិចមួយអាចប្រើបាន"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"ជ្រើសរើសកម្មវិធីកំណត់ចំណាំលំនាំដើម ដើម្បីប្រើផ្លូវកាត់សម្រាប់ការកត់ចំណាំ"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ជ្រើសរើសកម្មវិធី"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ចុចឱ្យជាប់លើផ្លូវកាត់"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"បោះបង់"</string>
@@ -1159,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"មុខងារ​អាទិភាពត្រូវបានបើក"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"ភាពប្រុងប្រៀប​របស់ Google Assistant ត្រូវបានបើក"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"កំណត់កម្មវិធីកំណត់ចំណាំលំនាំដើមនៅក្នុងការកំណត់"</string>
+    <string name="install_app" msgid="5066668100199613936">"ដំឡើង​កម្មវិធី"</string>
 </resources>

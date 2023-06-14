@@ -59,6 +59,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
@@ -72,7 +73,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidTestingRunner::class)
@@ -106,7 +106,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
     @Mock
-    private lateinit var unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
+    private lateinit var unfoldTransitionProgressProvider:
+        Optional<UnfoldTransitionProgressProvider>
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
@@ -195,6 +196,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                         keyguardTransitionInteractor =
                             KeyguardTransitionInteractor(
                                 repository = FakeKeyguardTransitionRepository(),
+                                scope = testScope.backgroundScope
                             ),
                         falsingManager = FalsingManagerFake(),
                         shadeController = shadeController,
