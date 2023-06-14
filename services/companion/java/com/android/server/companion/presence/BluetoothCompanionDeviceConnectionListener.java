@@ -169,6 +169,7 @@ public class BluetoothCompanionDeviceConnectionListener
         }
 
         for (AssociationInfo association : associations) {
+            if (!association.isNotifyOnDeviceNearby()) continue;
             final int id = association.getId();
             if (connected) {
                 mCallback.onBluetoothCompanionDeviceConnected(id);
