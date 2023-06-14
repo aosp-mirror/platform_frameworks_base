@@ -294,6 +294,10 @@ constructor(
 
     val isSimpleUserSwitcher: Boolean
         get() = repository.isSimpleUserSwitcher()
+
+    val isUserSwitcherEnabled: Boolean
+        get() = repository.isUserSwitcherEnabled()
+
     val keyguardUpdateMonitorCallback =
         object : KeyguardUpdateMonitorCallback() {
             override fun onKeyguardGoingAway() {
@@ -370,6 +374,7 @@ constructor(
         }
 
         pw.println("isSimpleUserSwitcher=$isSimpleUserSwitcher")
+        pw.println("isUserSwitcherEnabled=$isUserSwitcherEnabled")
         pw.println("isGuestUserAutoCreated=$isGuestUserAutoCreated")
     }
 
