@@ -110,7 +110,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                     new SendMessageCallback() {
                         @Override
                         public void onSendCompleted(int error) {
-                            if (error != SendMessageResult.SUCCESS) {
+                            // In consideration of occasional transmission failures.
+                            if (error == SendMessageResult.NACK) {
                                 HdmiLogger.debug(
                                         "AVR did not respond to <Give System Audio Mode Status>");
                                 mService.setSystemAudioActivated(false);
