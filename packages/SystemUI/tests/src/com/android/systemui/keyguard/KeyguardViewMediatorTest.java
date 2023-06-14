@@ -24,6 +24,7 @@ import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.systemui.keyguard.KeyguardViewMediator.DELAYED_KEYGUARD_ACTION;
 import static com.android.systemui.keyguard.KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
 
@@ -417,6 +418,42 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // THEN the bouncer prompt reason should return PROMPT_REASON_DEVICE_ADMIN
         assertEquals(KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN,
+                mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    @Test
+    public void testBouncerPrompt_afterUserLockDown() {
+        // GIVEN biometrics enrolled
+        when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(true);
+
+        // WHEN user has locked down the device
+        KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                mock(KeyguardUpdateMonitor.StrongAuthTracker.class);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(strongAuthTracker);
+        when(strongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+        when(strongAuthTracker.getStrongAuthForUser(anyInt()))
+                .thenReturn(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        // THEN the bouncer prompt reason should return PROMPT_REASON_USER_REQUEST
+        assertEquals(KeyguardSecurityView.PROMPT_REASON_USER_REQUEST,
+                mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    @Test
+    public void testBouncerPrompt_afterUserLockDown_noBiometricsEnrolled() {
+        // GIVEN biometrics not enrolled
+        when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(false);
+
+        // WHEN user has locked down the device
+        KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                mock(KeyguardUpdateMonitor.StrongAuthTracker.class);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(strongAuthTracker);
+        when(strongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+        when(strongAuthTracker.getStrongAuthForUser(anyInt()))
+                .thenReturn(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        // THEN the bouncer prompt reason should return the default prompt
+        assertEquals(KeyguardSecurityView.PROMPT_REASON_NONE,
                 mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
     }
 
