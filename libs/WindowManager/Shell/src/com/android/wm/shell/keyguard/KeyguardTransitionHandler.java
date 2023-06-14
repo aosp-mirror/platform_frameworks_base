@@ -156,6 +156,8 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                 "start keyguard %s transition, info = %s", description, info);
 
         try {
+            mStartedTransitions.put(transition,
+                    new StartedTransition(info, finishTransaction, remoteHandler));
             remoteHandler.startAnimation(transition, info, startTransaction,
                     new IRemoteTransitionFinishedCallback.Stub() {
                         @Override
@@ -164,14 +166,13 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                             if (sct != null) {
                                 finishTransaction.merge(sct);
                             }
-                            mMainExecutor.execute(() -> {
+                            // Post our finish callback to let startAnimation finish first.
+                            mMainExecutor.executeDelayed(() -> {
                                 mStartedTransitions.remove(transition);
                                 finishCallback.onTransitionFinished(wct, null);
-                            });
+                            }, 0);
                         }
                     });
-            mStartedTransitions.put(transition,
-                    new StartedTransition(info, finishTransaction, remoteHandler));
         } catch (RemoteException e) {
             Log.wtf(TAG, "RemoteException thrown from local IRemoteTransition", e);
             return false;
