@@ -705,9 +705,30 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @Override
         public void verifySession() {
             assertCallerIsOwnerOrRootOrSystem();
-            Preconditions.checkArgument(isCommitted());
-            Preconditions.checkArgument(!isInTerminalState());
-            verify();
+            if (isCommittedAndNotInTerminalState()) {
+                verify();
+            }
+        }
+
+        private boolean isCommittedAndNotInTerminalState() {
+            String errorMsg = null;
+            if (!isCommitted()) {
+                errorMsg = TextUtils.formatSimple("The session %d should be committed", sessionId);
+            } else if (isSessionApplied()) {
+                errorMsg = TextUtils.formatSimple("The session %d has applied", sessionId);
+            } else if (isSessionFailed()) {
+                synchronized (PackageInstallerSession.this.mLock) {
+                    errorMsg = TextUtils.formatSimple("The session %d has failed with error: %s",
+                            sessionId, PackageInstallerSession.this.mSessionErrorMessage);
+                }
+            }
+            if (errorMsg != null) {
+                Slog.e(TAG, "verifySession error: " + errorMsg);
+                setSessionFailed(INSTALL_FAILED_INTERNAL_ERROR, errorMsg);
+                onSessionVerificationFailure(INSTALL_FAILED_INTERNAL_ERROR, errorMsg);
+                return false;
+            }
+            return true;
         }
     }
 
