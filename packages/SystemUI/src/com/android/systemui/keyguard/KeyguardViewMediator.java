@@ -720,6 +720,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 }
             }
         }
+
+        @Override
+        public void onStrongAuthStateChanged(int userId) {
+            if (mLockPatternUtils.isUserInLockdown(KeyguardUpdateMonitor.getCurrentUser())) {
+                doKeyguardLocked(null);
+            }
+        }
     };
 
     ViewMediatorCallback mViewMediatorCallback = new ViewMediatorCallback() {
@@ -1546,9 +1553,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         final ContentResolver cr = mContext.getContentResolver();
 
         // From SecuritySettings
-        final long lockAfterTimeout = Settings.Secure.getInt(cr,
+        final long lockAfterTimeout = Settings.Secure.getIntForUser(cr,
                 Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
-                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT);
+                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT, userId);
 
         // From DevicePolicyAdmin
         final long policyTimeout = mLockPatternUtils.getDevicePolicyManager()
@@ -1560,8 +1567,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             timeout = lockAfterTimeout;
         } else {
             // From DisplaySettings
-            long displayTimeout = Settings.System.getInt(cr, SCREEN_OFF_TIMEOUT,
-                    KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT);
+            long displayTimeout = Settings.System.getIntForUser(cr, SCREEN_OFF_TIMEOUT,
+                    KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT, userId);
 
             // policy in effect. Make sure we don't go beyond policy limit.
             displayTimeout = Math.max(displayTimeout, 0); // ignore negative values
@@ -1926,7 +1933,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      */
     private void doKeyguardLocked(Bundle options) {
         // if another app is disabling us, don't show
-        if (!mExternallyEnabled) {
+        if (!mExternallyEnabled
+            && !mLockPatternUtils.isUserInLockdown(KeyguardUpdateMonitor.getCurrentUser())) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
 
             mNeedToReshowWhenReenabled = true;
@@ -2388,7 +2396,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private void playSound(int soundId) {
         if (soundId == 0) return;
         final ContentResolver cr = mContext.getContentResolver();
-        if (Settings.System.getInt(cr, Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1) == 1) {
+        int lockscreenSoundsEnabled = Settings.System.getIntForUser(cr,
+                Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1,
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (lockscreenSoundsEnabled == 1) {
 
             mLockSounds.stop(mLockSoundStreamId);
             // Init mAudioManager
