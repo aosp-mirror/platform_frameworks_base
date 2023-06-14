@@ -34,6 +34,7 @@ import com.android.systemui.R
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.settings.SecureSettings
@@ -48,6 +49,7 @@ class FontScalingDialog(
     private val systemSettings: SystemSettings,
     private val secureSettings: SecureSettings,
     private val systemClock: SystemClock,
+    private val userTracker: UserTracker,
     @Main mainHandler: Handler,
     @Background private val backgroundDelayableExecutor: DelayableExecutor
 ) : SystemUIDialog(context) {
@@ -98,7 +100,8 @@ class FontScalingDialog(
 
         seekBarWithIconButtonsView.setMax((strEntryValues).size - 1)
 
-        val currentScale = systemSettings.getFloat(Settings.System.FONT_SCALE, 1.0f)
+        val currentScale =
+            systemSettings.getFloatForUser(Settings.System.FONT_SCALE, 1.0f, userTracker.userId)
         lastProgress.set(fontSizeValueToIndex(currentScale))
         seekBarWithIconButtonsView.setProgress(lastProgress.get())
 
@@ -195,18 +198,25 @@ class FontScalingDialog(
 
     @WorkerThread
     fun updateFontScale() {
-        systemSettings.putString(Settings.System.FONT_SCALE, strEntryValues[lastProgress.get()])
+        systemSettings.putStringForUser(
+            Settings.System.FONT_SCALE,
+            strEntryValues[lastProgress.get()],
+            userTracker.userId
+        )
     }
 
     @WorkerThread
     fun updateSecureSettingsIfNeeded() {
         if (
-            secureSettings.getString(Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED) !=
-                ON
-        ) {
-            secureSettings.putString(
+            secureSettings.getStringForUser(
                 Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
-                ON
+                userTracker.userId
+            ) != ON
+        ) {
+            secureSettings.putStringForUser(
+                Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
+                ON,
+                userTracker.userId
             )
         }
     }
