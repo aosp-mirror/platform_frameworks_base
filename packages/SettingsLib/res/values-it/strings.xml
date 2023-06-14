@@ -114,11 +114,9 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accesso alla SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
-    <!-- no translation found for bluetooth_profile_hearing_aid (2607867572569689732) -->
-    <skip />
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Apparecchi acustici"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE audio"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (5757754050938807276) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Connessione con gli apparecchi acustici stabilita"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connesso a LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Collegato ad audio media"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Collegato ad audio telefono"</string>
@@ -136,8 +134,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Usa per audio telefono"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Usa per trasferimento file"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Utilizza per l\'input"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (3374057355721486932) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Utilizza per gli apparecchi acustici"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Usa per LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Accoppia"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ACCOPPIA"</string>
@@ -358,10 +355,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay schermo che mostra i dati touch correnti"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostra tocchi"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Mostra feedback visivi per i tocchi"</string>
-    <!-- no translation found for show_key_presses (6360141722735900214) -->
-    <skip />
-    <!-- no translation found for show_key_presses_summary (725387457373015024) -->
-    <skip />
+    <string name="show_key_presses" msgid="6360141722735900214">"Mostra pressioni tasti"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"Mostra feedback visivo per pressioni tasti fisici"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Aggiornamenti superficie"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Fai lampeggiare le superfici delle finestre quando si aggiornano"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Aggiornam. visualizzazione"</string>
