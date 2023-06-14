@@ -351,7 +351,7 @@ public class PipTransition extends PipTransitionController {
         if (taskInfo != null) {
             startExpandAnimation(taskInfo, mPipOrganizer.getSurfaceControl(),
                     mPipBoundsState.getBounds(), mPipBoundsState.getBounds(),
-                    new Rect(mExitDestinationBounds), Surface.ROTATION_0);
+                    new Rect(mExitDestinationBounds), Surface.ROTATION_0, null /* startT */);
         }
         mExitDestinationBounds.setEmpty();
         mCurrentPipTaskToken = null;
@@ -604,14 +604,8 @@ public class PipTransition extends PipTransitionController {
             }
         }
 
-        // Set the initial frame as scaling the end to the start.
         final Rect destinationBounds = new Rect(pipChange.getEndAbsBounds());
         destinationBounds.offset(-offset.x, -offset.y);
-        startTransaction.setWindowCrop(pipLeash, destinationBounds.width(),
-                destinationBounds.height());
-        mSurfaceTransactionHelper.scale(startTransaction, pipLeash, destinationBounds,
-                currentBounds);
-        startTransaction.apply();
 
         // Check if it is fixed rotation.
         final int rotationDelta;
@@ -641,7 +635,7 @@ public class PipTransition extends PipTransitionController {
             rotationDelta = Surface.ROTATION_0;
         }
         startExpandAnimation(taskInfo, pipLeash, currentBounds, currentBounds, destinationBounds,
-                rotationDelta);
+                rotationDelta, startTransaction);
     }
 
     private void startExpandAndRotationAnimation(@NonNull TransitionInfo info,
@@ -697,7 +691,7 @@ public class PipTransition extends PipTransitionController {
 
     private void startExpandAnimation(final TaskInfo taskInfo, final SurfaceControl leash,
             final Rect baseBounds, final Rect startBounds, final Rect endBounds,
-            final int rotationDelta) {
+            final int rotationDelta, @Nullable SurfaceControl.Transaction startTransaction) {
         final Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
                 taskInfo.pictureInPictureParams, endBounds);
         final PipAnimationController.PipTransitionAnimator animator =
@@ -705,9 +699,14 @@ public class PipTransition extends PipTransitionController {
                         endBounds, sourceHintRect, TRANSITION_DIRECTION_LEAVE_PIP,
                         0 /* startingAngle */, rotationDelta);
         animator.setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP)
-                .setPipAnimationCallback(mPipAnimationCallback)
+                .setDuration(mEnterExitAnimationDuration);
+        if (startTransaction != null) {
+            animator.setPipTransactionHandler(mTransactionConsumer).applySurfaceControlTransaction(
+                    leash, startTransaction, PipAnimationController.FRACTION_START);
+            startTransaction.apply();
+        }
+        animator.setPipAnimationCallback(mPipAnimationCallback)
                 .setPipTransactionHandler(mPipOrganizer.getPipTransactionHandler())
-                .setDuration(mEnterExitAnimationDuration)
                 .start();
     }
 
