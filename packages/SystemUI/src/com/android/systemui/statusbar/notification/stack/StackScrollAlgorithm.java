@@ -766,8 +766,9 @@ public class StackScrollAlgorithm {
             boolean isTopEntry = topHeadsUpEntry == row;
             float unmodifiedEndLocation = childState.getYTranslation() + childState.height;
             if (mIsExpanded) {
-                if (row.mustStayOnScreen() && !childState.headsUpIsVisible
-                        && !row.showingPulsing() && !ambientState.isOnKeyguard()) {
+                if (shouldHunBeVisibleWhenScrolled(row.mustStayOnScreen(),
+                        childState.headsUpIsVisible, row.showingPulsing(),
+                        ambientState.isOnKeyguard(), row.getEntry().isStickyAndNotDemoted())) {
                     // Ensure that the heads up is always visible even when scrolled off
                     clampHunToTop(mQuickQsOffsetHeight, ambientState.getStackTranslation(),
                             row.getCollapsedHeight(), childState);
@@ -815,7 +816,15 @@ public class StackScrollAlgorithm {
         }
     }
 
-    /**
+    @VisibleForTesting
+    boolean shouldHunBeVisibleWhenScrolled(boolean mustStayOnScreen, boolean headsUpIsVisible,
+            boolean showingPulsing, boolean isOnKeyguard, boolean headsUpOnKeyguard) {
+        return mustStayOnScreen && !headsUpIsVisible
+                        && !showingPulsing
+                        && (!isOnKeyguard || headsUpOnKeyguard);
+    }
+
+     /**
      * When shade is open and we are scrolled to the bottom of notifications,
      * clamp incoming HUN in its collapsed form, right below qs offset.
      * Transition pinned collapsed HUN to full height when scrolling back up.
