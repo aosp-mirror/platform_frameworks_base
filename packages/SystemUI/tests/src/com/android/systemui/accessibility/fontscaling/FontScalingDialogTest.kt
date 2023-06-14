@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.whenever
@@ -38,6 +39,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
+import org.mockito.Mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -63,6 +65,7 @@ class FontScalingDialogTest : SysuiTestCase() {
             .getResources()
             .getStringArray(com.android.settingslib.R.array.entryvalues_font_size)
 
+    @Mock private lateinit var userTracker: UserTracker
     @Captor
     private lateinit var seekBarChangeCaptor: ArgumentCaptor<SeekBar.OnSeekBarChangeListener>
 
@@ -72,7 +75,7 @@ class FontScalingDialogTest : SysuiTestCase() {
         val mainHandler = Handler(TestableLooper.get(this).getLooper())
         systemSettings = FakeSettings()
         // Guarantee that the systemSettings always starts with the default font scale.
-        systemSettings.putFloat(Settings.System.FONT_SCALE, 1.0f)
+        systemSettings.putFloatForUser(Settings.System.FONT_SCALE, 1.0f, userTracker.userId)
         secureSettings = FakeSettings()
         systemClock = FakeSystemClock()
         backgroundDelayableExecutor = FakeExecutor(systemClock)
@@ -82,6 +85,7 @@ class FontScalingDialogTest : SysuiTestCase() {
                 systemSettings,
                 secureSettings,
                 systemClock,
+                userTracker,
                 mainHandler,
                 backgroundDelayableExecutor
             )
@@ -93,7 +97,12 @@ class FontScalingDialogTest : SysuiTestCase() {
 
         val seekBar: SeekBar = fontScalingDialog.findViewById<SeekBar>(R.id.seekbar)!!
         val progress: Int = seekBar.getProgress()
-        val currentScale = systemSettings.getFloat(Settings.System.FONT_SCALE, /* def= */ 1.0f)
+        val currentScale =
+            systemSettings.getFloatForUser(
+                Settings.System.FONT_SCALE,
+                /* def= */ 1.0f,
+                userTracker.userId
+            )
 
         assertThat(currentScale).isEqualTo(fontSizeValueArray[progress].toFloat())
 
@@ -119,7 +128,12 @@ class FontScalingDialogTest : SysuiTestCase() {
         backgroundDelayableExecutor.advanceClockToNext()
         backgroundDelayableExecutor.runAllReady()
 
-        val currentScale = systemSettings.getFloat(Settings.System.FONT_SCALE, /* def= */ 1.0f)
+        val currentScale =
+            systemSettings.getFloatForUser(
+                Settings.System.FONT_SCALE,
+                /* def= */ 1.0f,
+                userTracker.userId
+            )
         assertThat(seekBar.getProgress()).isEqualTo(1)
         assertThat(currentScale).isEqualTo(fontSizeValueArray[1].toFloat())
 
@@ -145,7 +159,12 @@ class FontScalingDialogTest : SysuiTestCase() {
         backgroundDelayableExecutor.advanceClockToNext()
         backgroundDelayableExecutor.runAllReady()
 
-        val currentScale = systemSettings.getFloat(Settings.System.FONT_SCALE, /* def= */ 1.0f)
+        val currentScale =
+            systemSettings.getFloatForUser(
+                Settings.System.FONT_SCALE,
+                /* def= */ 1.0f,
+                userTracker.userId
+            )
         assertThat(seekBar.getProgress()).isEqualTo(fontSizeValueArray.size - 2)
         assertThat(currentScale)
             .isEqualTo(fontSizeValueArray[fontSizeValueArray.size - 2].toFloat())
@@ -159,16 +178,21 @@ class FontScalingDialogTest : SysuiTestCase() {
 
         val seekBarWithIconButtonsView: SeekBarWithIconButtonsView =
             fontScalingDialog.findViewById(R.id.font_scaling_slider)!!
-        secureSettings.putInt(Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED, OFF)
+        secureSettings.putIntForUser(
+            Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
+            OFF,
+            userTracker.userId
+        )
 
         // Default seekbar progress for font size is 1, set it to another progress 0
         seekBarWithIconButtonsView.setProgress(0)
         backgroundDelayableExecutor.runAllReady()
 
         val currentSettings =
-            secureSettings.getInt(
+            secureSettings.getIntForUser(
                 Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
-                /* def = */ OFF
+                /* def = */ OFF,
+                userTracker.userId
             )
         assertThat(currentSettings).isEqualTo(ON)
 
@@ -199,7 +223,12 @@ class FontScalingDialogTest : SysuiTestCase() {
         backgroundDelayableExecutor.runAllReady()
 
         // Verify that the scale of font size remains the default value 1.0f.
-        var systemScale = systemSettings.getFloat(Settings.System.FONT_SCALE, /* def= */ 1.0f)
+        var systemScale =
+            systemSettings.getFloatForUser(
+                Settings.System.FONT_SCALE,
+                /* def= */ 1.0f,
+                userTracker.userId
+            )
         assertThat(systemScale).isEqualTo(1.0f)
 
         // Simulate releasing the finger from the seekbar.
@@ -209,7 +238,12 @@ class FontScalingDialogTest : SysuiTestCase() {
         backgroundDelayableExecutor.runAllReady()
 
         // Verify that the scale of font size has been updated.
-        systemScale = systemSettings.getFloat(Settings.System.FONT_SCALE, /* def= */ 1.0f)
+        systemScale =
+            systemSettings.getFloatForUser(
+                Settings.System.FONT_SCALE,
+                /* def= */ 1.0f,
+                userTracker.userId
+            )
         assertThat(systemScale).isEqualTo(fontSizeValueArray[0].toFloat())
 
         fontScalingDialog.dismiss()
