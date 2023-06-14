@@ -24,7 +24,6 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
 import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
@@ -33,7 +32,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.os.IBinder;
-import android.util.Log;
 import android.util.Pair;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -173,9 +171,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        if (mPipHandler.requestHasPipEnter(request) && mSplitHandler.isSplitActive()
-                && request.getTriggerTask() != null && mSplitHandler.getSplitItemPosition(
-                        request.getTriggerTask().token) != SPLIT_POSITION_UNDEFINED) {
+        if (mSplitHandler.requestImpliesSplitToPip(request)) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a PiP-enter request while "
                     + "Split-Screen is active, so treat it as Mixed.");
             if (request.getRemoteTransition() != null) {
@@ -651,6 +647,11 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             return mPipHandler.isInPipPackage(SplitScreenUtils.getPackageName(intent.getIntent()));
         }
         return false;
+    }
+
+    /** @return whether the transition-request represents a pip-entry. */
+    public boolean requestHasPipEnter(TransitionRequestInfo request) {
+        return mPipHandler.requestHasPipEnter(request);
     }
 
     @Override
