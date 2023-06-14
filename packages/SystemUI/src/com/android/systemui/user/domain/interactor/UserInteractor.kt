@@ -27,6 +27,7 @@ import android.content.pm.UserInfo
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.os.Process
 import android.os.RemoteException
 import android.os.UserHandle
 import android.os.UserManager
@@ -334,6 +335,7 @@ constructor(
                 onBroadcastReceived(intent, previousSelectedUser)
             }
             .launchIn(applicationScope)
+        restartSecondaryService(repository.getSelectedUserInfo().id)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
     }
 
@@ -646,7 +648,7 @@ constructor(
 
         // Connect to the new secondary user's service (purely to ensure that a persistent
         // SystemUI application is created for that user)
-        if (userId != UserHandle.USER_SYSTEM) {
+        if (userId != Process.myUserHandle().identifier) {
             applicationContext.startServiceAsUser(
                 intent,
                 UserHandle.of(userId),

@@ -102,6 +102,20 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         testScope = TestScope(testDispatcher)
         userRepository = FakeUserRepository()
         runBlocking {
+            val userInfos =
+                listOf(
+                    UserInfo(
+                        /* id= */ 0,
+                        /* name= */ "zero",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_PRIMARY or
+                            UserInfo.FLAG_ADMIN or
+                            UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_SYSTEM,
+                    ),
+                )
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(
                 UserSwitcherSettingsModel(
                     isUserSwitcherEnabled = true,
