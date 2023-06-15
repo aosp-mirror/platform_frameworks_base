@@ -1452,6 +1452,11 @@ public class TransitionTests extends WindowTestsBase {
             }
         });
         assertTrue(activity1.isVisible());
+        doReturn(false).when(task1).isTranslucent(null);
+        assertTrue(controller.canApplyDim(task1));
+        doReturn(true).when(task1).isTranslucent(null);
+        assertFalse(controller.canApplyDim(task1));
+
         controller.finishTransition(closeTransition);
         assertTrue(wasInFinishingTransition[0]);
         assertNull(controller.mFinishingTransition);
@@ -2191,8 +2196,11 @@ public class TransitionTests extends WindowTestsBase {
 
         BLASTSyncEngine.SyncGroup legacySync = mSyncEngine.prepareSyncSet(
                 mock(BLASTSyncEngine.TransactionReadyListener.class), "test");
-        final boolean[] applyLegacy = new boolean[]{false};
-        controller.startLegacySyncOrQueue(legacySync, () -> applyLegacy[0] = true);
+        final boolean[] applyLegacy = new boolean[2];
+        controller.startLegacySyncOrQueue(legacySync, (deferred) -> {
+            applyLegacy[0] = true;
+            applyLegacy[1] = deferred;
+        });
         assertFalse(applyLegacy[0]);
         waitUntilHandlersIdle();
 
@@ -2208,6 +2216,7 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(transitA.isPlaying());
         // legacy sync should start now
         assertTrue(applyLegacy[0]);
+        assertTrue(applyLegacy[1]);
         // transitB must wait
         assertTrue(transitB.isPending());
 

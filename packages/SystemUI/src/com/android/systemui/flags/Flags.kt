@@ -266,7 +266,7 @@ object Flags {
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
     @JvmField
-    val KEYGUARD_TALKBACK_FIX = unreleasedFlag(238, "keyguard_talkback_fix")
+    val KEYGUARD_TALKBACK_FIX = releasedFlag(238, "keyguard_talkback_fix")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -748,4 +748,10 @@ object Flags {
     @JvmField
     val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
             unreleasedFlag(283447257, "bigpicture_notification_lazy_loading")
+
+    // 2900 - CentralSurfaces-related flags
+
+    // TODO(b/285174336): Tracking Bug
+    @JvmField
+    val USE_REPOS_FOR_BOUNCER_SHOWING = unreleasedFlag(2900, "use_repos_for_bouncer_showing")
 }
