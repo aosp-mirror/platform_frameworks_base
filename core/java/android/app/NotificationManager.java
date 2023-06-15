@@ -465,6 +465,12 @@ public class NotificationManager {
      */
     public static final int BUBBLE_PREFERENCE_SELECTED = 2;
 
+    /**
+     * Maximum length of the component name of a registered NotificationListenerService.
+     * @hide
+     */
+    public static int MAX_SERVICE_COMPONENT_NAME_LENGTH = 500;
+
     @UnsupportedAppUsage
     private static INotificationManager sService;
 
