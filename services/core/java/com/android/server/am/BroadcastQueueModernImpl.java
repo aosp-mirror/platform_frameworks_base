@@ -1554,11 +1554,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     refreshProcessQueuesLocked(uid);
                 }
             }
+        }, ActivityManager.UID_OBSERVER_PROCSTATE,
+                ActivityManager.PROCESS_STATE_TOP, "android");
 
+        mService.registerUidObserver(new UidObserver() {
             @Override
-            public void onUidCachedChanged(int uid, boolean cached) {
+            public void onUidStateChanged(int uid, int procState, long procStateSeq,
+                    int capability) {
                 synchronized (mService) {
-                    if (cached) {
+                    if (procState > ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
                         mUidCached.put(uid, true);
                     } else {
                         mUidCached.delete(uid);
@@ -1566,8 +1570,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     refreshProcessQueuesLocked(uid);
                 }
             }
-        }, ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_CACHED,
-                ActivityManager.PROCESS_STATE_TOP, "android");
+        }, ActivityManager.UID_OBSERVER_PROCSTATE,
+                ActivityManager.PROCESS_STATE_LAST_ACTIVITY, "android");
 
         // Kick off periodic health checks
         mLocalHandler.sendEmptyMessage(MSG_CHECK_HEALTH);
