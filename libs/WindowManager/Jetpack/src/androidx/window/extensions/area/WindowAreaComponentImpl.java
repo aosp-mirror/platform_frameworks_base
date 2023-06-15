@@ -239,7 +239,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         // display state, so we have to look through all displays to match the address
         final Display[] displays = mDisplayManager.getDisplays(
                 DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
-        final Display defaultDisplay = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
+
 
         for (int i = 0; i < displays.length; i++) {
             DisplayAddress.Physical address =
@@ -255,6 +255,8 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 // TODO(b/287170025): This should be something like if (!rearDisplay.isEnabled)
                 //  instead. Currently when the rear display is disabled, its state is STATE_OFF.
                 if (rearDisplay.getDisplayId() != Display.DEFAULT_DISPLAY) {
+                    final Display defaultDisplay = mDisplayManager
+                            .getDisplay(Display.DEFAULT_DISPLAY);
                     rotateRearDisplayMetricsIfNeeded(defaultDisplay.getRotation(),
                             rearDisplay.getRotation(), rearDisplayMetrics);
                 }
