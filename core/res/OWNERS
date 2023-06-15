@@ -33,6 +33,9 @@ per-file res/xml/public-final.xml = file:/tools/aapt2/OWNERS
 # Multiuser
 per-file res/xml/config_user_types.xml = file:/MULTIUSER_OWNERS
 
+# Battery Saver
+per-file res/values/config_battery_saver.xml = file:/services/core/java/com/android/server/power/batterysaver/OWNERS
+
 # Car
 per-file res/values/dimens_car.xml = file:/platform/packages/services/Car:/OWNERS
 
