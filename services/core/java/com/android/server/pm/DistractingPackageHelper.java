@@ -32,6 +32,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -131,6 +132,39 @@ public final class DistractingPackageHelper {
             mPm.scheduleWritePackageRestrictions(userId);
         }
         return unactionedPackages.toArray(new String[0]);
+    }
+
+
+    /**
+     * Gets {@link DistractionRestriction restrictions} of the given packages of the given user.
+     *
+     * The corresponding element of the resulting array will be -1 if a given package doesn't exist.
+     *
+     * @param packageNames The packages under which to check.
+     * @param userId The user under which to check.
+     * @return an array of distracting restriction state in order of the given packages
+     */
+    int[] getDistractingPackageRestrictionsAsUser(@NonNull Computer snapshot,
+            @NonNull String[] packageNames, int userId, int callingUid) {
+        int[] res = new int[packageNames.length];
+        Arrays.fill(res, -1);
+
+        if (ArrayUtils.isEmpty(packageNames)) {
+            return res;
+        }
+
+        for (int i = 0; i < packageNames.length; i++) {
+            final String packageName = packageNames[i];
+            final PackageStateInternal packageState =
+                    snapshot.getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+            if (packageState == null) {
+                continue;
+            }
+
+            res[i] = packageState.getUserStateOrDefault(userId).getDistractionFlags();
+        }
+        return res;
     }
 
     /**

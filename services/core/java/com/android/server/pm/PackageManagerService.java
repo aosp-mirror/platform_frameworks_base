@@ -6793,6 +6793,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mHandler.post(() -> PackageManagerService.this.notifyInstallObserver(packageName,
                     true /* killApp */));
         }
+
+        @Override
+        public int[] getDistractingPackageRestrictionsAsUser(
+                @NonNull String[] packageNames, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final Computer snapshot = snapshotComputer();
+            Objects.requireNonNull(packageNames, "packageNames cannot be null");
+            return mDistractingPackageHelper.getDistractingPackageRestrictionsAsUser(snapshot,
+                    packageNames, userId, callingUid);
+        }
     }
 
     private void setEnabledOverlayPackages(@UserIdInt int userId,
