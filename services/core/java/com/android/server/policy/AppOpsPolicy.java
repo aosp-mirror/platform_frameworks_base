@@ -16,6 +16,9 @@
 
 package com.android.server.policy;
 
+import static android.app.AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -71,6 +74,9 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static final String ACTIVITY_RECOGNITION_TAGS_SEPARATOR = ";";
     private static final boolean SYSPROP_HOTWORD_DETECTION_SERVICE_REQUIRED =
             SystemProperties.getBoolean("ro.hotword.detection_service_required", false);
+
+    //TODO(b/289087412): import this from the flag value in set up in device config.
+    private static final boolean IS_VOICE_ACTIVATION_OP_ENABLED = false;
 
     @NonNull
     private final Object mLock = new Object();
@@ -203,6 +209,16 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     /**
+     * @return the op that should be noted for the voice activations of the app by detected hotword.
+     */
+    public static int getVoiceActivationOp() {
+        if (IS_VOICE_ACTIVATION_OP_ENABLED) {
+            return OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
+        }
+        return OP_RECORD_AUDIO_HOTWORD;
+    }
+
+    /**
      * @hide
      */
     public static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
@@ -320,7 +336,6 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             tagEntry.getValue().dump(writer);
         }
     }
-
 
     private int resolveDatasourceOp(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
