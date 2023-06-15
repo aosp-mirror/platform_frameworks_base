@@ -80,6 +80,8 @@ public final class SELinuxMMAC {
     // Append targetSdkVersion=n to existing seinfo label where n is the app's targetSdkVersion
     private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
 
+    private static final String PARTITION_STR = ":partition=";
+
     /**
      * Allows opt-in to the latest targetSdkVersion enforced changes without changing target SDK.
      * Turning this change on for an app targeting the latest SDK or higher is a no-op.
@@ -370,6 +372,23 @@ public final class SELinuxMMAC {
         return pkg.getTargetSdkVersion();
     }
 
+    private static String getPartition(AndroidPackage pkg) {
+        if (pkg.isSystemExt()) {
+            return "system_ext";
+        } else if (pkg.isProduct()) {
+            return "product";
+        } else if (pkg.isVendor()) {
+            return "vendor";
+        } else if (pkg.isOem()) {
+            return "oem";
+        } else if (pkg.isOdm()) {
+            return "odm";
+        } else if (pkg.isSystem()) {
+            return "system";
+        }
+        return "";
+    }
+
     /**
      * Selects a security label to a package based on input parameters and the seinfo tag taken
      * from a matched policy. All signature based policy stanzas are consulted and, if no match
@@ -432,6 +451,11 @@ public final class SELinuxMMAC {
         }
 
         seInfo += TARGETSDKVERSION_STR + targetSdkVersion;
+
+        String partition = getPartition(pkg);
+        if (!partition.isEmpty()) {
+            seInfo += PARTITION_STR + partition;
+        }
 
         if (DEBUG_POLICY_INSTALL) {
             Slog.i(TAG, "package (" + pkg.getPackageName() + ") labeled with "
