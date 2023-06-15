@@ -27,6 +27,7 @@ import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dock.DockManager
@@ -91,6 +92,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var view: NotificationShadeWindowView
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var centralSurfaces: CentralSurfaces
+    @Mock private lateinit var backActionInteractor: BackActionInteractor
     @Mock private lateinit var dockManager: DockManager
     @Mock private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock private lateinit var notificationShadeDepthController: NotificationShadeDepthController
@@ -171,6 +173,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 statusBarWindowStateController,
                 lockIconViewController,
                 centralSurfaces,
+                backActionInteractor,
                 notificationShadeWindowController,
                 unfoldTransitionProgressProvider,
                 keyguardUnlockAnimationController,

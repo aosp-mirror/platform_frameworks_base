@@ -60,16 +60,16 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
-import com.android.systemui.dock.DockManager;
-import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
-import com.android.systemui.bouncer.ui.BouncerView;
-import com.android.systemui.bouncer.ui.BouncerViewDelegate;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.bouncer.ui.BouncerView;
+import com.android.systemui.bouncer.ui.BouncerViewDelegate;
+import com.android.systemui.dock.DockManager;
+import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter;
@@ -647,21 +647,21 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Test
     public void testReportBouncerOnDreamWhenVisible() {
         mBouncerExpansionCallback.onVisibilityChanged(true);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+        assertFalse(mStatusBarKeyguardViewManager.isBouncerShowingOverDream());
         Mockito.clearInvocations(mCentralSurfaces);
         when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
         mBouncerExpansionCallback.onVisibilityChanged(true);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(true);
+        assertTrue(mStatusBarKeyguardViewManager.isBouncerShowingOverDream());
     }
 
     @Test
     public void testReportBouncerOnDreamWhenNotVisible() {
         mBouncerExpansionCallback.onVisibilityChanged(false);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+        assertFalse(mStatusBarKeyguardViewManager.isBouncerShowingOverDream());
         Mockito.clearInvocations(mCentralSurfaces);
         when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
         mBouncerExpansionCallback.onVisibilityChanged(false);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+        assertFalse(mStatusBarKeyguardViewManager.isBouncerShowingOverDream());
     }
 
     @Test
