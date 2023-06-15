@@ -232,8 +232,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final BLASTSyncEngine.SyncGroup syncGroup = prepareSyncWithOrganizer(callback);
                 final int syncId = syncGroup.mSyncId;
                 if (mTransitionController.isShellTransitionsEnabled()) {
-                    mTransitionController.startLegacySyncOrQueue(syncGroup, () -> {
-                        applyTransaction(t, syncId, null /*transition*/, caller);
+                    mTransitionController.startLegacySyncOrQueue(syncGroup, (deferred) -> {
+                        applyTransaction(t, syncId, null /* transition */, caller, deferred);
                         setSyncReady(syncId);
                     });
                 } else {
@@ -304,7 +304,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             (deferred) -> {
                                 nextTransition.start();
                                 nextTransition.mLogger.mStartWCT = wct;
-                                applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
+                                applyTransaction(wct, -1 /* syncId */, nextTransition, caller,
+                                        deferred);
                                 if (needsSetReady) {
                                     nextTransition.setAllReady();
                                 }
@@ -456,7 +457,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     transition.abort();
                     return;
                 }
-                if (applyTransaction(wct, -1 /* syncId */, transition, caller)
+                if (applyTransaction(wct, -1 /* syncId */, transition, caller, deferred)
                         == TRANSACT_EFFECTS_NONE && transition.mParticipants.isEmpty()) {
                     transition.abort();
                     return;
@@ -474,6 +475,23 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private int applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition, @NonNull CallerInfo caller) {
         return applyTransaction(t, syncId, transition, caller, null /* finishTransition */);
+    }
+
+    private int applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
+            @Nullable Transition transition, @NonNull CallerInfo caller, boolean deferred) {
+        if (deferred) {
+            try {
+                return applyTransaction(t, syncId, transition, caller);
+            } catch (RuntimeException e) {
+                // If the transaction is deferred, the caller could be from TransitionController
+                // #tryStartCollectFromQueue that executes on system's worker thread rather than
+                // binder thread. And the operation in the WCT may be outdated that violates the
+                // current state. So catch the exception to avoid crashing the system.
+                Slog.e(TAG, "Failed to execute deferred applyTransaction", e);
+            }
+            return TRANSACT_EFFECTS_NONE;
+        }
+        return applyTransaction(t, syncId, transition, caller);
     }
 
     /**
@@ -838,13 +856,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         switch (type) {
             case HIERARCHY_OP_TYPE_REMOVE_TASK: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                final Task task = wc != null ? wc.asTask() : null;
+                if (wc == null || wc.asTask() == null || !wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to remove invalid task: " + wc);
+                    break;
+                }
+                final Task task = wc.asTask();
                 task.remove(true, "Applying remove task Hierarchy Op");
                 break;
             }
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                final Task task = wc != null ? wc.asTask() : null;
+                if (wc == null || !wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to set launch root to a detached container: " + wc);
+                    break;
+                }
+                final Task task = wc.asTask();
                 if (task == null) {
                     throw new IllegalArgumentException("Cannot set non-task as launch root: " + wc);
                 } else if (task.getTaskDisplayArea() == null) {
@@ -858,7 +884,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                final Task task = wc != null ? wc.asTask() : null;
+                if (wc == null || !wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to set launch adjacent to a detached container: " + wc);
+                    break;
+                }
+                final Task task = wc.asTask();
                 final boolean clearRoot = hop.getToTop();
                 if (task == null) {
                     throw new IllegalArgumentException("Cannot set non-task as launch root: " + wc);
