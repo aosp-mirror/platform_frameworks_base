@@ -26,9 +26,9 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeSparseArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -117,8 +117,8 @@ public class UsageStatsDatabase {
 
     private final Object mLock = new Object();
     private final File[] mIntervalDirs;
-    @VisibleForTesting
-    final TimeSparseArray<AtomicFile>[] mSortedStatFiles;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    final LongSparseArray<AtomicFile>[] mSortedStatFiles;
     private final UnixCalendar mCal;
     private final File mVersionFile;
     private final File mBackupsDir;
@@ -155,7 +155,7 @@ public class UsageStatsDatabase {
         mVersionFile = new File(dir, "version");
         mBackupsDir = new File(dir, "backups");
         mUpdateBreadcrumb = new File(dir, "breadcrumb");
-        mSortedStatFiles = new TimeSparseArray[mIntervalDirs.length];
+        mSortedStatFiles = new LongSparseArray[mIntervalDirs.length];
         mPackageMappingsFile = new File(dir, "mappings");
         mCal = new UnixCalendar(0);
     }
@@ -186,8 +186,8 @@ public class UsageStatsDatabase {
             }
 
             // Delete files that are in the future.
-            for (TimeSparseArray<AtomicFile> files : mSortedStatFiles) {
-                final int startIndex = files.closestIndexOnOrAfter(currentTimeMillis);
+            for (LongSparseArray<AtomicFile> files : mSortedStatFiles) {
+                final int startIndex = files.firstIndexOnOrAfter(currentTimeMillis);
                 if (startIndex < 0) {
                     continue;
                 }
@@ -221,7 +221,7 @@ public class UsageStatsDatabase {
      */
     public boolean checkinDailyFiles(CheckinAction checkinAction) {
         synchronized (mLock) {
-            final TimeSparseArray<AtomicFile> files =
+            final LongSparseArray<AtomicFile> files =
                     mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY];
             final int fileCount = files.size();
 
@@ -292,7 +292,7 @@ public class UsageStatsDatabase {
         // Index the available usage stat files on disk.
         for (int i = 0; i < mSortedStatFiles.length; i++) {
             if (mSortedStatFiles[i] == null) {
-                mSortedStatFiles[i] = new TimeSparseArray<>();
+                mSortedStatFiles[i] = new LongSparseArray<>();
             } else {
                 mSortedStatFiles[i].clear();
             }
@@ -700,7 +700,7 @@ public class UsageStatsDatabase {
             int filesDeleted = 0;
             int filesMoved = 0;
 
-            for (TimeSparseArray<AtomicFile> files : mSortedStatFiles) {
+            for (LongSparseArray<AtomicFile> files : mSortedStatFiles) {
                 final int fileCount = files.size();
                 for (int i = 0; i < fileCount; i++) {
                     final AtomicFile file = files.valueAt(i);
@@ -834,9 +834,9 @@ public class UsageStatsDatabase {
         }
 
         synchronized (mLock) {
-            final TimeSparseArray<AtomicFile> intervalStats = mSortedStatFiles[intervalType];
+            final LongSparseArray<AtomicFile> intervalStats = mSortedStatFiles[intervalType];
 
-            int endIndex = intervalStats.closestIndexOnOrBefore(endTime);
+            int endIndex = intervalStats.lastIndexOnOrBefore(endTime);
             if (endIndex < 0) {
                 // All the stats start after this range ends, so nothing matches.
                 if (DEBUG) {
@@ -857,7 +857,7 @@ public class UsageStatsDatabase {
                 }
             }
 
-            int startIndex = intervalStats.closestIndexOnOrBefore(beginTime);
+            int startIndex = intervalStats.lastIndexOnOrBefore(beginTime);
             if (startIndex < 0) {
                 // All the stats available have timestamps after beginTime, which means they all
                 // match.
@@ -899,7 +899,7 @@ public class UsageStatsDatabase {
             int bestBucket = -1;
             long smallestDiff = Long.MAX_VALUE;
             for (int i = mSortedStatFiles.length - 1; i >= 0; i--) {
-                final int index = mSortedStatFiles[i].closestIndexOnOrBefore(beginTimeStamp);
+                final int index = mSortedStatFiles[i].lastIndexOnOrBefore(beginTimeStamp);
                 int size = mSortedStatFiles[i].size();
                 if (index >= 0 && index < size) {
                     // We have some results here, check if they are better than our current match.
@@ -1523,7 +1523,7 @@ public class UsageStatsDatabase {
             pw.println("Database Summary:");
             pw.increaseIndent();
             for (int i = 0; i < mSortedStatFiles.length; i++) {
-                final TimeSparseArray<AtomicFile> files = mSortedStatFiles[i];
+                final LongSparseArray<AtomicFile> files = mSortedStatFiles[i];
                 final int size = files.size();
                 pw.print(UserUsageStatsService.intervalToString(i));
                 pw.print(" stats files: ");

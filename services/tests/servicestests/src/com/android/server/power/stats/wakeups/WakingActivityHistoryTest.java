@@ -18,8 +18,8 @@ package com.android.server.power.stats.wakeups;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.util.LongSparseArray;
 import android.util.SparseIntArray;
-import android.util.TimeSparseArray;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -73,7 +73,7 @@ public class WakingActivityHistoryTest {
         assertThat(history.mWakingActivity.contains(subsystem + 1)).isFalse();
         assertThat(history.mWakingActivity.contains(subsystem - 1)).isFalse();
 
-        final TimeSparseArray<SparseIntArray> recordedHistory = history.mWakingActivity.get(
+        final LongSparseArray<SparseIntArray> recordedHistory = history.mWakingActivity.get(
                 subsystem);
 
         assertThat(recordedHistory.size()).isEqualTo(1);
@@ -119,7 +119,7 @@ public class WakingActivityHistoryTest {
         assertThat(history.mWakingActivity.contains(subsystem + 1)).isFalse();
         assertThat(history.mWakingActivity.contains(subsystem - 1)).isFalse();
 
-        final TimeSparseArray<SparseIntArray> recordedHistory = history.mWakingActivity.get(
+        final LongSparseArray<SparseIntArray> recordedHistory = history.mWakingActivity.get(
                 subsystem);
 
         assertThat(recordedHistory.size()).isEqualTo(1);
@@ -266,7 +266,7 @@ public class WakingActivityHistoryTest {
             final long time = random.nextLong(firstTime + mTestRetention + 100,
                     456 * mTestRetention);
             history.recordActivity(subsystem, time, new SparseIntArray());
-            assertThat(history.mWakingActivity.get(subsystem).closestIndexOnOrBefore(
+            assertThat(history.mWakingActivity.get(subsystem).lastIndexOnOrBefore(
                     time - mTestRetention)).isLessThan(0);
         }
     }

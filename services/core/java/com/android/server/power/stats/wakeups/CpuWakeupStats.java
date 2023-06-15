@@ -32,12 +32,12 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.IndentingPrintWriter;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
-import android.util.TimeSparseArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -74,12 +74,12 @@ public class CpuWakeupStats {
     private final WakingActivityHistory mRecentWakingActivity;
 
     @VisibleForTesting
-    final TimeSparseArray<Wakeup> mWakeupEvents = new TimeSparseArray<>();
+    final LongSparseArray<Wakeup> mWakeupEvents = new LongSparseArray<>();
 
     /* Maps timestamp -> {subsystem  -> {uid -> procState}} */
     @VisibleForTesting
-    final TimeSparseArray<SparseArray<SparseIntArray>> mWakeupAttribution =
-            new TimeSparseArray<>();
+    final LongSparseArray<SparseArray<SparseIntArray>> mWakeupAttribution =
+            new LongSparseArray<>();
 
     final SparseIntArray mUidProcStates = new SparseIntArray();
     private final SparseIntArray mReusableUidProcStates = new SparseIntArray(4);
@@ -218,11 +218,11 @@ public class CpuWakeupStats {
         // the last wakeup and its attribution (if computed) is always stored, even if that wakeup
         // had occurred before retentionDuration.
         final long retentionDuration = mConfig.WAKEUP_STATS_RETENTION_MS;
-        int lastIdx = mWakeupEvents.closestIndexOnOrBefore(elapsedRealtime - retentionDuration);
+        int lastIdx = mWakeupEvents.lastIndexOnOrBefore(elapsedRealtime - retentionDuration);
         for (int i = lastIdx; i >= 0; i--) {
             mWakeupEvents.removeAt(i);
         }
-        lastIdx = mWakeupAttribution.closestIndexOnOrBefore(elapsedRealtime - retentionDuration);
+        lastIdx = mWakeupAttribution.lastIndexOnOrBefore(elapsedRealtime - retentionDuration);
         for (int i = lastIdx; i >= 0; i--) {
             mWakeupAttribution.removeAt(i);
         }
@@ -273,9 +273,9 @@ public class CpuWakeupStats {
             SparseIntArray uidProcStates) {
         final long matchingWindowMillis = mConfig.WAKEUP_MATCHING_WINDOW_MS;
 
-        final int startIdx = mWakeupEvents.closestIndexOnOrAfter(
+        final int startIdx = mWakeupEvents.firstIndexOnOrAfter(
                 activityElapsed - matchingWindowMillis);
-        final int endIdx = mWakeupEvents.closestIndexOnOrBefore(
+        final int endIdx = mWakeupEvents.lastIndexOnOrBefore(
                 activityElapsed + matchingWindowMillis);
 
         for (int wakeupIdx = startIdx; wakeupIdx <= endIdx; wakeupIdx++) {
@@ -404,7 +404,7 @@ public class CpuWakeupStats {
     static final class WakingActivityHistory {
         private LongSupplier mRetentionSupplier;
         @VisibleForTesting
-        final SparseArray<TimeSparseArray<SparseIntArray>> mWakingActivity = new SparseArray<>();
+        final SparseArray<LongSparseArray<SparseIntArray>> mWakingActivity = new SparseArray<>();
 
         WakingActivityHistory(LongSupplier retentionSupplier) {
             mRetentionSupplier = retentionSupplier;
@@ -414,9 +414,9 @@ public class CpuWakeupStats {
             if (uidProcStates == null) {
                 return;
             }
-            TimeSparseArray<SparseIntArray> wakingActivity = mWakingActivity.get(subsystem);
+            LongSparseArray<SparseIntArray> wakingActivity = mWakingActivity.get(subsystem);
             if (wakingActivity == null) {
-                wakingActivity = new TimeSparseArray<>();
+                wakingActivity = new LongSparseArray<>();
                 mWakingActivity.put(subsystem, wakingActivity);
             }
             final SparseIntArray uidsToBlame = wakingActivity.get(elapsedRealtime);
@@ -435,7 +435,7 @@ public class CpuWakeupStats {
             // Limit activity history per subsystem to the last retention period as supplied by
             // mRetentionSupplier. Note that the last activity is always present, even if it
             // occurred before the retention period.
-            final int endIdx = wakingActivity.closestIndexOnOrBefore(
+            final int endIdx = wakingActivity.lastIndexOnOrBefore(
                     elapsedRealtime - mRetentionSupplier.getAsLong());
             for (int i = endIdx; i >= 0; i--) {
                 wakingActivity.removeAt(i);
@@ -445,11 +445,11 @@ public class CpuWakeupStats {
         SparseIntArray removeBetween(int subsystem, long startElapsed, long endElapsed) {
             final SparseIntArray uidsToReturn = new SparseIntArray();
 
-            final TimeSparseArray<SparseIntArray> activityForSubsystem =
+            final LongSparseArray<SparseIntArray> activityForSubsystem =
                     mWakingActivity.get(subsystem);
             if (activityForSubsystem != null) {
-                final int startIdx = activityForSubsystem.closestIndexOnOrAfter(startElapsed);
-                final int endIdx = activityForSubsystem.closestIndexOnOrBefore(endElapsed);
+                final int startIdx = activityForSubsystem.firstIndexOnOrAfter(startElapsed);
+                final int endIdx = activityForSubsystem.lastIndexOnOrBefore(endElapsed);
                 for (int i = endIdx; i >= startIdx; i--) {
                     final SparseIntArray uidsForTime = activityForSubsystem.valueAt(i);
                     for (int j = 0; j < uidsForTime.size(); j++) {
@@ -463,8 +463,8 @@ public class CpuWakeupStats {
                     activityForSubsystem.removeAt(i);
                 }
                 // Generally waking activity is a high frequency occurrence for any subsystem, so we
-                // don't delete the TimeSparseArray even if it is now empty, to avoid object churn.
-                // This will leave one TimeSparseArray per subsystem, which are few right now.
+                // don't delete the LongSparseArray even if it is now empty, to avoid object churn.
+                // This will leave one LongSparseArray per subsystem, which are few right now.
             }
             return uidsToReturn.size() > 0 ? uidsToReturn : null;
         }
@@ -474,7 +474,7 @@ public class CpuWakeupStats {
             pw.increaseIndent();
             for (int i = 0; i < mWakingActivity.size(); i++) {
                 pw.println("Subsystem " + subsystemToString(mWakingActivity.keyAt(i)) + ":");
-                final TimeSparseArray<SparseIntArray> wakingActivity = mWakingActivity.valueAt(i);
+                final LongSparseArray<SparseIntArray> wakingActivity = mWakingActivity.valueAt(i);
                 if (wakingActivity == null) {
                     continue;
                 }
