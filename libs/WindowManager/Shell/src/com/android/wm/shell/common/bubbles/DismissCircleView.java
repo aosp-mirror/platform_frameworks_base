@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.common;
+package com.android.wm.shell.common.bubbles;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.android.wm.shell.R;
+import androidx.annotation.DimenRes;
+import androidx.annotation.DrawableRes;
+import androidx.core.content.ContextCompat;
 
 /**
  * Circular view with a semitransparent, circular background with an 'X' inside it.
@@ -31,33 +32,44 @@ import com.android.wm.shell.R;
  * This is used by both Bubbles and PIP as the dismiss target.
  */
 public class DismissCircleView extends FrameLayout {
+    @DrawableRes int mBackgroundResId;
+    @DimenRes int mIconSizeResId;
 
     private final ImageView mIconView = new ImageView(getContext());
 
     public DismissCircleView(Context context) {
         super(context);
-        final Resources res = getResources();
-
-        setBackground(res.getDrawable(R.drawable.dismiss_circle_background));
-
-        mIconView.setImageDrawable(res.getDrawable(R.drawable.pip_ic_close_white));
         addView(mIconView);
-
-        setViewSizes();
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        final Resources res = getResources();
-        setBackground(res.getDrawable(R.drawable.dismiss_circle_background));
+        setBackground(ContextCompat.getDrawable(getContext(), mBackgroundResId));
+        setViewSizes();
+    }
+
+    /**
+     * Sets up view with the provided resource ids.
+     * Decouples resource dependency in order to be used externally (e.g. Launcher)
+     *
+     * @param backgroundResId drawable resource id of the circle background
+     * @param iconResId drawable resource id of the icon for the dismiss view
+     * @param iconSizeResId dimen resource id of the icon size
+     */
+    public void setup(@DrawableRes int backgroundResId, @DrawableRes int iconResId,
+            @DimenRes int iconSizeResId) {
+        mBackgroundResId = backgroundResId;
+        mIconSizeResId = iconSizeResId;
+
+        setBackground(ContextCompat.getDrawable(getContext(), backgroundResId));
+        mIconView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconResId));
         setViewSizes();
     }
 
     /** Retrieves the current dimensions for the icon and circle and applies them. */
     private void setViewSizes() {
-        final Resources res = getResources();
-        final int iconSize = res.getDimensionPixelSize(R.dimen.dismiss_target_x_size);
+        final int iconSize = getResources().getDimensionPixelSize(mIconSizeResId);
         mIconView.setLayoutParams(
                 new FrameLayout.LayoutParams(iconSize, iconSize, Gravity.CENTER));
     }
