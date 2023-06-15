@@ -18,4 +18,8 @@
     <!-- Lock pattern view size, align sysui biometric_auth_pattern_view_size -->
     <dimen name="biometric_auth_pattern_view_size">248dp</dimen>
     <dimen name="biometric_auth_pattern_view_max_size">348dp</dimen>
+
+    <!-- Power Menu Lite -->
+    <dimen name="global_actions_button_size">96dp</dimen>
+    <dimen name="global_actions_button_padding">38dp</dimen>
 </resources>
