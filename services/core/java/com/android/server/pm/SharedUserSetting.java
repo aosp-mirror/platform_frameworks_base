@@ -285,7 +285,7 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
                 continue;
             }
             final boolean isPrivileged = isPrivileged() | ps.isPrivileged();
-            ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps.getPkg(), isPrivileged,
+            ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps, ps.getPkg(), isPrivileged,
                     seInfoTargetSdkVersion));
             onChanged();
         }
