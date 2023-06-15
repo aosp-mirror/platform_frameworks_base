@@ -38,14 +38,9 @@ data class UserGroup(
 )
 
 @Composable
-fun UserProfilePager(
-    primaryUserOnly: Boolean = false,
-    content: @Composable (userGroup: UserGroup) -> Unit,
-) {
+fun UserProfilePager(content: @Composable (userGroup: UserGroup) -> Unit) {
     val context = LocalContext.current
-    val userGroups = remember {
-        context.userManager.getUserGroups(primaryUserOnly)
-    }
+    val userGroups = remember { context.userManager.getUserGroups() }
     val titles = remember {
         val enterpriseRepository = EnterpriseRepository(context)
         userGroups.map { userGroup ->
@@ -60,10 +55,9 @@ fun UserProfilePager(
     }
 }
 
-private fun UserManager.getUserGroups(primaryUserOnly: Boolean): List<UserGroup> {
+private fun UserManager.getUserGroups(): List<UserGroup> {
     val userGroupList = mutableListOf<UserGroup>()
     val profileToShowInSettingsList = getProfiles(UserHandle.myUserId())
-        .filter { userInfo -> !primaryUserOnly || userInfo.isPrimary }
         .map { userInfo -> userInfo to getUserProperties(userInfo.userHandle).showInSettings }
 
     profileToShowInSettingsList.filter { it.second == UserProperties.SHOW_IN_SETTINGS_WITH_PARENT }
