@@ -262,7 +262,7 @@ object Flags {
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
     @JvmField
-    val KEYGUARD_TALKBACK_FIX = unreleasedFlag(238, "keyguard_talkback_fix")
+    val KEYGUARD_TALKBACK_FIX = releasedFlag(238, "keyguard_talkback_fix")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
