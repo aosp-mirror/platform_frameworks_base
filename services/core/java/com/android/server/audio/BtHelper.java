@@ -218,8 +218,8 @@ public class BtHelper {
             if (AudioService.DEBUG_VOL) {
                 AudioService.sVolumeLogger.enqueue(new EventLogger.StringEvent(
                         "setAvrcpAbsoluteVolumeIndex: bailing due to null mA2dp").printLog(TAG));
-                return;
             }
+            return;
         }
         if (!mAvrcpAbsVolSupported) {
             AudioService.sVolumeLogger.enqueue(new EventLogger.StringEvent(
