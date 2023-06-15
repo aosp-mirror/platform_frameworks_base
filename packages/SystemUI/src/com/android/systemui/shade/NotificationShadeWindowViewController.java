@@ -40,18 +40,19 @@ import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
+import com.android.systemui.back.domain.interactor.BackActionInteractor;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
+import com.android.systemui.bouncer.ui.binder.KeyguardBouncerViewBinder;
+import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.bouncer.ui.binder.KeyguardBouncerViewBinder;
-import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.log.BouncerLogger;
 import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
@@ -111,6 +112,7 @@ public class NotificationShadeWindowViewController {
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
     private final CentralSurfaces mService;
+    private final BackActionInteractor mBackActionInteractor;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
     private boolean mExpandingBelowNotch;
@@ -144,6 +146,7 @@ public class NotificationShadeWindowViewController {
             StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController,
             CentralSurfaces centralSurfaces,
+            BackActionInteractor backActionInteractor,
             NotificationShadeWindowController controller,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -173,6 +176,7 @@ public class NotificationShadeWindowViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
+        mBackActionInteractor = backActionInteractor;
         mLockIconViewController.init();
         mService = centralSurfaces;
         mNotificationShadeWindowController = controller;
@@ -443,7 +447,7 @@ public class NotificationShadeWindowViewController {
                 switch (event.getKeyCode()) {
                     case KeyEvent.KEYCODE_BACK:
                         if (!down) {
-                            mService.onBackPressed();
+                            mBackActionInteractor.onBackRequested();
                         }
                         return true;
                     case KeyEvent.KEYCODE_MENU:

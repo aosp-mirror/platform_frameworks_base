@@ -119,6 +119,14 @@ public interface KeyguardViewController {
     boolean isUnlockWithWallpaper();
 
     /**
+     * @return Whether the bouncer over dream is showing. Note that the bouncer over dream is
+     * handled independently of the rest of the notification panel. As a result, setting this state
+     * via {@link CentralSurfaces#setBouncerShowing(boolean)} leads to unintended side effects from
+     * states modified behind the dream.
+     */
+    boolean isBouncerShowingOverDream();
+
+    /**
      * @return Whether subtle animation should be used for unlocking the device.
      */
     boolean shouldSubtleWindowAnimationsForUnlock();
