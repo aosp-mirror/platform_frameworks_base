@@ -337,6 +337,10 @@ final class HandwritingModeController {
             // Ask IMMS to make ink window ready.
             mInkWindowInitRunnable.run();
             mInkWindowInitRunnable = null;
+            return;
+        } else if (event.isHoverEvent()) {
+            // Hover events need not be recorded to buffer.
+            return;
         }
 
         // If handwriting delegation is ongoing, don't clear the buffer so that multiple strokes
