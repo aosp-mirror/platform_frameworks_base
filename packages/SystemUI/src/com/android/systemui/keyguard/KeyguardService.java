@@ -80,6 +80,8 @@ import com.android.wm.shell.util.CounterRotator;
 import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import javax.inject.Inject;
 
@@ -192,7 +194,8 @@ public class KeyguardService extends Service {
             private final CounterRotator mCounterRotator = new CounterRotator();
 
             @GuardedBy("mLeashMap")
-            private IRemoteTransitionFinishedCallback mFinishCallback = null;
+            private final Map<IBinder, IRemoteTransitionFinishedCallback> mFinishCallbacks =
+                    new WeakHashMap<>();
 
             @Override
             public void startAnimation(IBinder transition, TransitionInfo info,
@@ -206,7 +209,7 @@ public class KeyguardService extends Service {
                 synchronized (mLeashMap) {
                     apps = wrap(info, false /* wallpapers */, t, mLeashMap, mCounterRotator);
                     wallpapers = wrap(info, true /* wallpapers */, t, mLeashMap, mCounterRotator);
-                    mFinishCallback = finishCallback;
+                    mFinishCallbacks.put(transition, finishCallback);
                 }
 
                 // Set alpha back to 1 for the independent changes because we will be animating
@@ -229,7 +232,7 @@ public class KeyguardService extends Service {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
                                 Slog.d(TAG, "Finish IRemoteAnimationRunner.");
-                                finish();
+                                finish(transition);
                             }
                         });
             }
@@ -246,7 +249,7 @@ public class KeyguardService extends Service {
 
                 try {
                     runner.onAnimationCancelled();
-                    finish();
+                    finish(currentTransition);
                 } catch (RemoteException e) {
                     // nothing, we'll just let it finish on its own I guess.
                 }
@@ -260,7 +263,7 @@ public class KeyguardService extends Service {
                 }
             }
 
-            private void finish() throws RemoteException {
+            private void finish(IBinder transition) throws RemoteException {
                 IRemoteTransitionFinishedCallback finishCallback = null;
                 SurfaceControl.Transaction finishTransaction = null;
 
@@ -271,8 +274,7 @@ public class KeyguardService extends Service {
                         mCounterRotator.cleanUp(finishTransaction);
                     }
                     mLeashMap.clear();
-                    finishCallback = mFinishCallback;
-                    mFinishCallback = null;
+                    finishCallback = mFinishCallbacks.remove(transition);
                 }
 
                 if (finishCallback != null) {
