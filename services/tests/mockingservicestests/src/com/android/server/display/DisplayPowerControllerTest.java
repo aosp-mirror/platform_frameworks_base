@@ -46,6 +46,7 @@ import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
@@ -95,6 +96,10 @@ public final class DisplayPowerControllerTest {
     private static final int SECOND_FOLLOWER_DISPLAY_ID = FOLLOWER_DISPLAY_ID + 1;
     private static final String SECOND_FOLLOWER_UNIQUE_DISPLAY_ID = "unique_id_789";
     private static final float PROX_SENSOR_MAX_RANGE = 5;
+    private static final float BRIGHTNESS_RAMP_RATE_FAST_DECREASE = 0.3f;
+    private static final float BRIGHTNESS_RAMP_RATE_FAST_INCREASE = 0.4f;
+    private static final float BRIGHTNESS_RAMP_RATE_SLOW_DECREASE = 0.1f;
+    private static final float BRIGHTNESS_RAMP_RATE_SLOW_INCREASE = 0.2f;
 
     private OffsettableClock mClock;
     private TestLooper mTestLooper;
@@ -299,6 +304,8 @@ public final class DisplayPowerControllerTest {
     public void testDisplayBrightnessFollowers_BothDpcsSupportNits() {
         DisplayPowerControllerHolder followerDpc =
                 createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(followerDpc.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -322,10 +329,13 @@ public final class DisplayPowerControllerTest {
         when(mHolder.brightnessSetting.getBrightness()).thenReturn(leadBrightness);
         listener.onBrightnessChanged(leadBrightness);
         advanceTime(1); // Send messages, run updatePowerState
-        verify(mHolder.animator).animateTo(eq(leadBrightness), anyFloat(), anyFloat());
+        verify(mHolder.animator).animateTo(eq(leadBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
         verify(followerDpc.animator).animateTo(eq(followerBrightness), anyFloat(),
-                anyFloat());
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
 
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(leadBrightness);
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(followerBrightness);
         clearInvocations(mHolder.animator, followerDpc.animator);
 
         // Test the same float scale value
@@ -337,14 +347,18 @@ public final class DisplayPowerControllerTest {
         when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
         listener.onBrightnessChanged(brightness);
         advanceTime(1); // Send messages, run updatePowerState
-        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
-        verify(followerDpc.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(followerDpc.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
     }
 
     @Test
     public void testDisplayBrightnessFollowers_FollowerDoesNotSupportNits() {
         DisplayPowerControllerHolder followerDpc =
                 createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(followerDpc.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -365,14 +379,18 @@ public final class DisplayPowerControllerTest {
         when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
         listener.onBrightnessChanged(brightness);
         advanceTime(1); // Send messages, run updatePowerState
-        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
-        verify(followerDpc.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(followerDpc.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
     }
 
     @Test
     public void testDisplayBrightnessFollowers_LeadDpcDoesNotSupportNits() {
         DisplayPowerControllerHolder followerDpc =
                 createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(followerDpc.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -391,14 +409,18 @@ public final class DisplayPowerControllerTest {
         when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
         listener.onBrightnessChanged(brightness);
         advanceTime(1); // Send messages, run updatePowerState
-        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
-        verify(followerDpc.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(followerDpc.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
     }
 
     @Test
     public void testDisplayBrightnessFollowers_NeitherDpcSupportsNits() {
         DisplayPowerControllerHolder followerDpc =
                 createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(followerDpc.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -419,8 +441,10 @@ public final class DisplayPowerControllerTest {
         when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
         listener.onBrightnessChanged(brightness);
         advanceTime(1); // Send messages, run updatePowerState
-        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
-        verify(followerDpc.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(followerDpc.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
     }
 
     @Test
@@ -428,38 +452,86 @@ public final class DisplayPowerControllerTest {
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-        final float brightness = 0.4f;
-        final float nits = 300;
-        final float ambientLux = 3000;
-        when(mHolder.automaticBrightnessController.getRawAutomaticScreenBrightness())
-                .thenReturn(brightness);
-        when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness())
-                .thenReturn(0.3f);
-        when(mHolder.automaticBrightnessController.convertToNits(brightness)).thenReturn(nits);
-        when(mHolder.automaticBrightnessController.getAmbientLux()).thenReturn(ambientLux);
+        DisplayPowerControllerHolder followerDpc =
+                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
-        DisplayPowerController followerDpc = mock(DisplayPowerController.class);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(followerDpc.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        float leadBrightness = 0.1f;
+        float rawLeadBrightness = 0.3f;
+        float followerBrightness = 0.4f;
+        float nits = 300;
+        float ambientLux = 3000;
+        when(mHolder.automaticBrightnessController.getRawAutomaticScreenBrightness())
+                .thenReturn(rawLeadBrightness);
+        when(mHolder.automaticBrightnessController
+                .getAutomaticScreenBrightness(any(BrightnessEvent.class)))
+                .thenReturn(leadBrightness);
+        when(mHolder.automaticBrightnessController.convertToNits(rawLeadBrightness))
+                .thenReturn(nits);
+        when(mHolder.automaticBrightnessController.getAmbientLux()).thenReturn(ambientLux);
+        when(followerDpc.automaticBrightnessController.convertToFloatScale(nits))
+                .thenReturn(followerBrightness);
 
-        mHolder.dpc.addDisplayBrightnessFollower(followerDpc);
+        mHolder.dpc.addDisplayBrightnessFollower(followerDpc.dpc);
+
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        followerDpc.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        verify(followerDpc).setBrightnessToFollow(brightness, nits, ambientLux);
+        verify(mHolder.animator).animateTo(eq(leadBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        // One triggered by handleBrightnessModeChange, another triggered by setBrightnessToFollow
+        verify(followerDpc.hbmController, times(2)).onAmbientLuxChange(ambientLux);
+        verify(followerDpc.animator, times(2)).animateTo(eq(followerBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(leadBrightness);
+        when(followerDpc.displayPowerState.getScreenBrightness()).thenReturn(followerBrightness);
+        clearInvocations(mHolder.animator, followerDpc.animator);
+
+        leadBrightness = 0.05f;
+        rawLeadBrightness = 0.2f;
+        followerBrightness = 0.3f;
+        nits = 200;
+        ambientLux = 2000;
+        when(mHolder.automaticBrightnessController.getRawAutomaticScreenBrightness())
+                .thenReturn(rawLeadBrightness);
+        when(mHolder.automaticBrightnessController
+                .getAutomaticScreenBrightness(any(BrightnessEvent.class)))
+                .thenReturn(leadBrightness);
+        when(mHolder.automaticBrightnessController.convertToNits(rawLeadBrightness))
+                .thenReturn(nits);
+        when(mHolder.automaticBrightnessController.getAmbientLux()).thenReturn(ambientLux);
+        when(followerDpc.automaticBrightnessController.convertToFloatScale(nits))
+                .thenReturn(followerBrightness);
+
+        mHolder.dpc.updateBrightness();
+        advanceTime(1); // Run updatePowerState
+
+        // The second time, the animation rate should be slow
+        verify(mHolder.animator).animateTo(eq(leadBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_SLOW_DECREASE));
+        verify(followerDpc.hbmController).onAmbientLuxChange(ambientLux);
+        verify(followerDpc.animator).animateTo(eq(followerBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_SLOW_DECREASE));
     }
 
     @Test
     public void testDisplayBrightnessFollowersRemoval_RemoveSingleFollower() {
-        DisplayPowerControllerHolder followerHolder =
-                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
-        DisplayPowerControllerHolder secondFollowerHolder =
-                createDisplayPowerController(SECOND_FOLLOWER_DISPLAY_ID,
-                        SECOND_FOLLOWER_UNIQUE_DISPLAY_ID);
+        DisplayPowerControllerHolder followerDpc = createDisplayPowerController(FOLLOWER_DISPLAY_ID,
+                FOLLOWER_UNIQUE_ID);
+        DisplayPowerControllerHolder secondFollowerDpc = createDisplayPowerController(
+                SECOND_FOLLOWER_DISPLAY_ID, SECOND_FOLLOWER_UNIQUE_DISPLAY_ID);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(followerDpc.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(secondFollowerDpc.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        followerHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        secondFollowerHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        followerDpc.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        secondFollowerDpc.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
         ArgumentCaptor<BrightnessSetting.BrightnessSettingListener> listenerCaptor =
@@ -470,58 +542,71 @@ public final class DisplayPowerControllerTest {
         // Set the initial brightness on the DPC we're going to remove so we have a fixed value for
         // it to return to.
         listenerCaptor = ArgumentCaptor.forClass(BrightnessSetting.BrightnessSettingListener.class);
-        verify(followerHolder.brightnessSetting).registerListener(listenerCaptor.capture());
+        verify(followerDpc.brightnessSetting).registerListener(listenerCaptor.capture());
         BrightnessSetting.BrightnessSettingListener followerListener = listenerCaptor.getValue();
         final float initialFollowerBrightness = 0.3f;
-        when(followerHolder.brightnessSetting.getBrightness()).thenReturn(
-                initialFollowerBrightness);
+        when(followerDpc.brightnessSetting.getBrightness()).thenReturn(initialFollowerBrightness);
         followerListener.onBrightnessChanged(initialFollowerBrightness);
         advanceTime(1);
-        verify(followerHolder.animator).animateTo(eq(initialFollowerBrightness),
-                anyFloat(), anyFloat());
+        verify(followerDpc.animator).animateTo(eq(initialFollowerBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
 
-        mHolder.dpc.addDisplayBrightnessFollower(followerHolder.dpc);
-        mHolder.dpc.addDisplayBrightnessFollower(secondFollowerHolder.dpc);
-        clearInvocations(followerHolder.animator);
+        when(followerDpc.displayPowerState.getScreenBrightness())
+                .thenReturn(initialFollowerBrightness);
+
+        mHolder.dpc.addDisplayBrightnessFollower(followerDpc.dpc);
+        mHolder.dpc.addDisplayBrightnessFollower(secondFollowerDpc.dpc);
+        clearInvocations(followerDpc.animator);
 
         // Validate both followers are correctly registered and receiving brightness updates
         float brightness = 0.6f;
         float nits = 600;
         when(mHolder.automaticBrightnessController.convertToNits(brightness)).thenReturn(nits);
-        when(followerHolder.automaticBrightnessController.convertToFloatScale(nits))
+        when(followerDpc.automaticBrightnessController.convertToFloatScale(nits))
                 .thenReturn(brightness);
-        when(secondFollowerHolder.automaticBrightnessController.convertToFloatScale(nits))
+        when(secondFollowerDpc.automaticBrightnessController.convertToFloatScale(nits))
                 .thenReturn(brightness);
         when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
         listener.onBrightnessChanged(brightness);
         advanceTime(1); // Send messages, run updatePowerState
-        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
-        verify(followerHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
-        verify(secondFollowerHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(followerDpc.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(secondFollowerDpc.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
 
-        clearInvocations(mHolder.animator, followerHolder.animator, secondFollowerHolder.animator);
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(brightness);
+        when(followerDpc.displayPowerState.getScreenBrightness()).thenReturn(brightness);
+        when(secondFollowerDpc.displayPowerState.getScreenBrightness()).thenReturn(brightness);
+        clearInvocations(mHolder.animator, followerDpc.animator, secondFollowerDpc.animator);
 
         // Remove the first follower and validate it goes back to its original brightness.
-        mHolder.dpc.removeDisplayBrightnessFollower(followerHolder.dpc);
+        mHolder.dpc.removeDisplayBrightnessFollower(followerDpc.dpc);
         advanceTime(1);
-        verify(followerHolder.animator).animateTo(eq(initialFollowerBrightness),
-                anyFloat(), anyFloat());
-        clearInvocations(followerHolder.animator);
+        verify(followerDpc.animator).animateTo(eq(initialFollowerBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_DECREASE));
+
+        when(followerDpc.displayPowerState.getScreenBrightness())
+                .thenReturn(initialFollowerBrightness);
+        clearInvocations(followerDpc.animator);
 
         // Change the brightness of the lead display and validate only the second follower responds
         brightness = 0.7f;
         nits = 700;
         when(mHolder.automaticBrightnessController.convertToNits(brightness)).thenReturn(nits);
-        when(followerHolder.automaticBrightnessController.convertToFloatScale(nits))
+        when(followerDpc.automaticBrightnessController.convertToFloatScale(nits))
                 .thenReturn(brightness);
-        when(secondFollowerHolder.automaticBrightnessController.convertToFloatScale(nits))
+        when(secondFollowerDpc.automaticBrightnessController.convertToFloatScale(nits))
                 .thenReturn(brightness);
         when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
         listener.onBrightnessChanged(brightness);
         advanceTime(1); // Send messages, run updatePowerState
-        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
-        verify(followerHolder.animator, never()).animateTo(anyFloat(), anyFloat(), anyFloat());
-        verify(secondFollowerHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(followerDpc.animator, never()).animateTo(anyFloat(), anyFloat(), anyFloat());
+        verify(secondFollowerDpc.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
     }
 
     @Test
@@ -531,6 +616,9 @@ public final class DisplayPowerControllerTest {
         DisplayPowerControllerHolder secondFollowerHolder =
                 createDisplayPowerController(SECOND_FOLLOWER_DISPLAY_ID,
                         SECOND_FOLLOWER_UNIQUE_DISPLAY_ID);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(followerHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(secondFollowerHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -560,10 +648,15 @@ public final class DisplayPowerControllerTest {
         followerListener.onBrightnessChanged(initialFollowerBrightness);
         secondFollowerListener.onBrightnessChanged(initialFollowerBrightness);
         advanceTime(1);
-        verify(followerHolder.animator).animateTo(eq(initialFollowerBrightness),
-                anyFloat(), anyFloat());
-        verify(secondFollowerHolder.animator).animateTo(eq(initialFollowerBrightness),
-                anyFloat(), anyFloat());
+        verify(followerHolder.animator).animateTo(eq(initialFollowerBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(secondFollowerHolder.animator).animateTo(eq(initialFollowerBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+
+        when(followerHolder.displayPowerState.getScreenBrightness())
+                .thenReturn(initialFollowerBrightness);
+        when(secondFollowerHolder.displayPowerState.getScreenBrightness())
+                .thenReturn(initialFollowerBrightness);
 
         mHolder.dpc.addDisplayBrightnessFollower(followerHolder.dpc);
         mHolder.dpc.addDisplayBrightnessFollower(secondFollowerHolder.dpc);
@@ -580,19 +673,25 @@ public final class DisplayPowerControllerTest {
         when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
         listener.onBrightnessChanged(brightness);
         advanceTime(1); // Send messages, run updatePowerState
-        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
-        verify(followerHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
-        verify(secondFollowerHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(followerHolder.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
+        verify(secondFollowerHolder.animator).animateTo(eq(brightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE));
 
+        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(brightness);
+        when(followerHolder.displayPowerState.getScreenBrightness()).thenReturn(brightness);
+        when(secondFollowerHolder.displayPowerState.getScreenBrightness()).thenReturn(brightness);
         clearInvocations(mHolder.animator, followerHolder.animator, secondFollowerHolder.animator);
 
         // Stop the lead DPC and validate that the followers go back to their original brightness.
         mHolder.dpc.stop();
         advanceTime(1);
-        verify(followerHolder.animator).animateTo(eq(initialFollowerBrightness),
-                anyFloat(), anyFloat());
-        verify(secondFollowerHolder.animator).animateTo(eq(initialFollowerBrightness),
-                anyFloat(), anyFloat());
+        verify(followerHolder.animator).animateTo(eq(initialFollowerBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_DECREASE));
+        verify(secondFollowerHolder.animator).animateTo(eq(initialFollowerBrightness), anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_DECREASE));
         clearInvocations(followerHolder.animator, secondFollowerHolder.animator);
     }
 
@@ -907,6 +1006,14 @@ public final class DisplayPowerControllerTest {
                 });
         when(displayDeviceConfigMock.getScreenOffBrightnessSensorValueToLux())
                 .thenReturn(new int[0]);
+        when(displayDeviceConfigMock.getBrightnessRampFastDecrease())
+                .thenReturn(BRIGHTNESS_RAMP_RATE_FAST_DECREASE);
+        when(displayDeviceConfigMock.getBrightnessRampFastIncrease())
+                .thenReturn(BRIGHTNESS_RAMP_RATE_FAST_INCREASE);
+        when(displayDeviceConfigMock.getBrightnessRampSlowDecrease())
+                .thenReturn(BRIGHTNESS_RAMP_RATE_SLOW_DECREASE);
+        when(displayDeviceConfigMock.getBrightnessRampSlowIncrease())
+                .thenReturn(BRIGHTNESS_RAMP_RATE_SLOW_INCREASE);
     }
 
     private DisplayPowerControllerHolder createDisplayPowerController(int displayId,
@@ -925,10 +1032,13 @@ public final class DisplayPowerControllerTest {
         final HysteresisLevels hysteresisLevels = mock(HysteresisLevels.class);
         final ScreenOffBrightnessSensorController screenOffBrightnessSensorController =
                 mock(ScreenOffBrightnessSensorController.class);
+        final HighBrightnessModeController hbmController = mock(HighBrightnessModeController.class);
+
+        when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);
 
         DisplayPowerController.Injector injector = spy(new TestInjector(displayPowerState, animator,
                 automaticBrightnessController, brightnessMappingStrategy, hysteresisLevels,
-                screenOffBrightnessSensorController));
+                screenOffBrightnessSensorController, hbmController));
 
         final LogicalDisplay display = mock(LogicalDisplay.class);
         final DisplayDevice device = mock(DisplayDevice.class);
@@ -946,7 +1056,7 @@ public final class DisplayPowerControllerTest {
 
         return new DisplayPowerControllerHolder(dpc, display, displayPowerState, brightnessSetting,
                 animator, automaticBrightnessController, screenOffBrightnessSensorController,
-                hbmMetadata, brightnessMappingStrategy, injector);
+                hbmController, hbmMetadata, brightnessMappingStrategy, injector);
     }
 
     /**
@@ -961,6 +1071,7 @@ public final class DisplayPowerControllerTest {
         public final DualRampAnimator<DisplayPowerState> animator;
         public final AutomaticBrightnessController automaticBrightnessController;
         public final ScreenOffBrightnessSensorController screenOffBrightnessSensorController;
+        public final HighBrightnessModeController hbmController;
         public final HighBrightnessModeMetadata hbmMetadata;
         public final BrightnessMappingStrategy brightnessMappingStrategy;
         public final DisplayPowerController.Injector injector;
@@ -970,6 +1081,7 @@ public final class DisplayPowerControllerTest {
                 DualRampAnimator<DisplayPowerState> animator,
                 AutomaticBrightnessController automaticBrightnessController,
                 ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
+                HighBrightnessModeController hbmController,
                 HighBrightnessModeMetadata hbmMetadata,
                 BrightnessMappingStrategy brightnessMappingStrategy,
                 DisplayPowerController.Injector injector) {
@@ -980,6 +1092,7 @@ public final class DisplayPowerControllerTest {
             this.animator = animator;
             this.automaticBrightnessController = automaticBrightnessController;
             this.screenOffBrightnessSensorController = screenOffBrightnessSensorController;
+            this.hbmController = hbmController;
             this.hbmMetadata = hbmMetadata;
             this.brightnessMappingStrategy = brightnessMappingStrategy;
             this.injector = injector;
@@ -993,18 +1106,21 @@ public final class DisplayPowerControllerTest {
         private final BrightnessMappingStrategy mBrightnessMappingStrategy;
         private final HysteresisLevels mHysteresisLevels;
         private final ScreenOffBrightnessSensorController mScreenOffBrightnessSensorController;
+        private final HighBrightnessModeController mHighBrightnessModeController;
 
         TestInjector(DisplayPowerState dps, DualRampAnimator<DisplayPowerState> animator,
                 AutomaticBrightnessController automaticBrightnessController,
                 BrightnessMappingStrategy brightnessMappingStrategy,
                 HysteresisLevels hysteresisLevels,
-                ScreenOffBrightnessSensorController screenOffBrightnessSensorController) {
+                ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
+                HighBrightnessModeController highBrightnessModeController) {
             mDisplayPowerState = dps;
             mAnimator = animator;
             mAutomaticBrightnessController = automaticBrightnessController;
             mBrightnessMappingStrategy = brightnessMappingStrategy;
             mHysteresisLevels = hysteresisLevels;
             mScreenOffBrightnessSensorController = screenOffBrightnessSensorController;
+            mHighBrightnessModeController = highBrightnessModeController;
         }
 
         @Override
@@ -1075,6 +1191,16 @@ public final class DisplayPowerControllerTest {
                 ScreenOffBrightnessSensorController.Clock clock, int[] sensorValueToLux,
                 BrightnessMappingStrategy brightnessMapper) {
             return mScreenOffBrightnessSensorController;
+        }
+
+        @Override
+        HighBrightnessModeController getHighBrightnessModeController(Handler handler, int width,
+                int height, IBinder displayToken, String displayUniqueId, float brightnessMin,
+                float brightnessMax, DisplayDeviceConfig.HighBrightnessModeData hbmData,
+                HighBrightnessModeController.HdrBrightnessDeviceConfig hdrBrightnessCfg,
+                Runnable hbmChangeCallback, HighBrightnessModeMetadata hbmMetadata,
+                Context context) {
+            return mHighBrightnessModeController;
         }
     }
 }

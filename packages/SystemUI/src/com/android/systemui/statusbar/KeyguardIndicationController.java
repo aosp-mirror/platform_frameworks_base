@@ -91,6 +91,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -226,6 +227,7 @@ public class KeyguardIndicationController {
     // triggered while the device is asleep
     private final AlarmTimeout mHideTransientMessageHandler;
     private final AlarmTimeout mHideBiometricMessageHandler;
+    private FeatureFlags mFeatureFlags;
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
@@ -256,7 +258,8 @@ public class KeyguardIndicationController {
             AlternateBouncerInteractor alternateBouncerInteractor,
             AlarmManager alarmManager,
             UserTracker userTracker,
-            BouncerMessageInteractor bouncerMessageInteractor
+            BouncerMessageInteractor bouncerMessageInteractor,
+            FeatureFlags flags
     ) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -282,6 +285,8 @@ public class KeyguardIndicationController {
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUserTracker = userTracker;
         mBouncerMessageInteractor = bouncerMessageInteractor;
+        mFeatureFlags = flags;
+
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
         int[] msgIds = context.getResources().getIntArray(
@@ -345,7 +350,8 @@ public class KeyguardIndicationController {
                 mLockScreenIndicationView,
                 mExecutor,
                 mStatusBarStateController,
-                mKeyguardLogger
+                mKeyguardLogger,
+                mFeatureFlags
         );
         updateDeviceEntryIndication(false /* animate */);
         updateOrganizedOwnedDevice();

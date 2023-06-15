@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Begleitgerät-Manager"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"Zulassen, dass &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; auf das Gerät &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; zugreifen darf?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"Zulassen, dass &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; auf &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; zugreifen darf?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"Smartwatch"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Gerät auswählen, das von &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; verwaltet werden soll"</string>
     <string name="chooser_title" msgid="2235819929238267637">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> zum Einrichten auswählen"</string>

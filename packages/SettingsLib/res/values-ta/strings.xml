@@ -114,11 +114,9 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"சிம் அணுகல்"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ஆடியோ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ஆடியோ"</string>
-    <!-- no translation found for bluetooth_profile_hearing_aid (2607867572569689732) -->
-    <skip />
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"செவித்துணைக் கருவிகள்"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ஆடியோ"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (5757754050938807276) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"செவித்துணைக் கருவிகளுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ஆடியோவுடன் இணைக்கப்பட்டுள்ளது"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"மீடியா ஆடியோவுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"மொபைல் ஆடியோவுடன் இணைக்கப்பட்டது"</string>
@@ -136,8 +134,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"மொபைல் ஆடியோவைப் பயன்படுத்து"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ஃபைல் பரிமாற்றத்திற்காகப் பயன்படுத்து"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"உள்ளீட்டுக்குப் பயன்படுத்து"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (3374057355721486932) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"செவித்துணைக் கருவிகளுக்காகப் பயன்படுத்தப்படும்"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIOவிற்குப் பயன்படுத்தும்"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"இணை"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"இணை"</string>
@@ -358,10 +355,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"திரையின் மேல் அடுக்கானது தற்போது தொடப்பட்டிருக்கும் தரவைக் காண்பிக்கிறது"</string>
     <string name="show_touches" msgid="8437666942161289025">"தட்டல்களைக் காட்டு"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"தட்டல்களின் போது காட்சி அறிகுறிகளைக் காட்டும்"</string>
-    <!-- no translation found for show_key_presses (6360141722735900214) -->
-    <skip />
-    <!-- no translation found for show_key_presses_summary (725387457373015024) -->
-    <skip />
+    <string name="show_key_presses" msgid="6360141722735900214">"பட்டன் அழுத்தத்தை காட்டவா"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"பட்டன் அழுத்தங்களைக் காட்சி மூலம் உறுதிப்படுத்தும்"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"மேலோட்ட புதுப்பிப்புகளைக் காட்டு"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"சாளரத்தின் பரப்புநிலைகள் புதுப்பிக்கப்படும்போது, அவற்றை முழுவதுமாகக் காட்டும்"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"வியூ அப்டேட்ஸைக் காட்டு"</string>

@@ -620,6 +620,7 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"無法使用生物特徵辨識硬體"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"已取消驗證"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"無法辨識"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"無法辨識臉孔"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"已取消驗證"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"未設定 PIN 碼、解鎖圖案或密碼"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"驗證時發生錯誤"</string>
@@ -1850,7 +1851,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"如要退出，請從畫面頂端向下滑動。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋轉螢幕以瀏覽完整的檢視畫面"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"結束分割畫面以全螢幕瀏覽"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"如要享有更優質的預覽體驗，可透過全螢幕模式開啟「<xliff:g id="NAME">%s</xliff:g>」"</string>
     <string name="done_label" msgid="7283767013231718521">"完成"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"小時數環狀滑桿"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"分鐘數環狀滑桿"</string>

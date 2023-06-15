@@ -26,6 +26,7 @@ import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIME
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
+import static com.android.systemui.flags.Flags.KEYGUARD_TALKBACK_FIX;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
@@ -99,6 +100,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -286,6 +288,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             Looper.prepare();
         }
 
+        FakeFeatureFlags flags = new FakeFeatureFlags();
+        flags.set(KEYGUARD_TALKBACK_FIX, true);
         mController = new KeyguardIndicationController(
                 mContext,
                 mTestableLooper.getLooper(),
@@ -299,7 +303,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mAlternateBouncerInteractor,
                 mAlarmManager,
                 mUserTracker,
-                mock(BouncerMessageInteractor.class)
+                mock(BouncerMessageInteractor.class),
+                flags
         );
         mController.init();
         mController.setIndicationArea(mIndicationArea);

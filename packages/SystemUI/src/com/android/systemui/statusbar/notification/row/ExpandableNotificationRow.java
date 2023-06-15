@@ -2673,7 +2673,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isExpanded(boolean allowOnKeyguard) {
-        return (!mOnKeyguard || allowOnKeyguard)
+        if (DEBUG) {
+            if (!mShowingPublicInitialized && !allowOnKeyguard) {
+                Log.d(TAG, "mShowingPublic is not initialized.");
+            }
+        }
+        return !mShowingPublic && (!mOnKeyguard || allowOnKeyguard)
                 && (!hasUserChangedExpansion() && (isSystemExpanded() || isSystemChildExpanded())
                 || isUserExpanded());
     }
@@ -3620,6 +3625,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print(", mOnUserInteractionCallback null: " + (mOnUserInteractionCallback == null));
             pw.print(", removed: " + isRemoved());
             pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
+            pw.print(", mShowingPublic: " + mShowingPublic);
+            pw.print(", mShowingPublicInitialized: " + mShowingPublicInitialized);
             NotificationContentView showingLayout = getShowingLayout();
             pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
             pw.println();

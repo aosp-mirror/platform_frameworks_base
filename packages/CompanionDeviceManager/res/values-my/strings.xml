@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"တွဲဖက်ကိရိယာ မန်နေဂျာ"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; အား &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;? သုံးခွင့်ပြုခြင်း"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ကို သုံးရန် &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; အက်ပ်ကို ခွင့်ပြုမလား။"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"နာရီ"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; က စီမံခန့်ခွဲရန် စက်တစ်ခုကို ရွေးပါ"</string>
     <string name="chooser_title" msgid="2235819929238267637">"စနစ်ထည့်သွင်းရန် <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ကို ရွေးပါ"</string>

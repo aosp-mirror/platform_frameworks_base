@@ -51,6 +51,7 @@ public class KeyguardIndicationTextView extends TextView {
     private KeyguardIndication mKeyguardIndicationInfo;
 
     private Animator mLastAnimator;
+    private boolean mAlwaysAnnounceText;
 
     public KeyguardIndicationTextView(Context context) {
         super(context);
@@ -101,6 +102,19 @@ public class KeyguardIndicationTextView extends TextView {
      */
     public void switchIndication(CharSequence text, KeyguardIndication indication) {
         switchIndication(text, indication, true, null);
+    }
+
+    /**
+     * Controls whether the text displayed in the indication area will be announced always.
+     */
+    public void setAlwaysAnnounceEnabled(boolean enabled) {
+        this.mAlwaysAnnounceText = enabled;
+        if (mAlwaysAnnounceText) {
+            // We will announce the text programmatically anyway.
+            setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_NONE);
+        } else {
+            setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
+        }
     }
 
     /**
@@ -227,6 +241,9 @@ public class KeyguardIndicationTextView extends TextView {
             setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null);
         }
         setText(mMessage);
+        if (mAlwaysAnnounceText) {
+            announceForAccessibility(mMessage);
+        }
     }
 
     private AnimatorSet getInAnimator() {

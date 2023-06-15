@@ -114,11 +114,9 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ಸಿಮ್ ಆ್ಯಕ್ಸೆಸ್"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ಆಡಿಯೋ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ಆಡಿಯೋ"</string>
-    <!-- no translation found for bluetooth_profile_hearing_aid (2607867572569689732) -->
-    <skip />
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"ಶ್ರವಣ ಸಾಧನಗಳು"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ಆಡಿಯೋ"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (5757754050938807276) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"ಶ್ರವಣ ಸಾಧನಗಳಿಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ಆಡಿಯೋಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"ಮಾಧ್ಯಮ ಆಡಿಯೋಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ಫೋನ್ ಆಡಿಯೋಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
@@ -136,8 +134,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"ಫೋನ್‌ ಆಡಿಯೋಗಾಗಿ ಬಳಕೆ"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ಫೈಲ್‌ ವರ್ಗಾವಣೆಗಾಗಿ ಬಳಸು"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ಇನ್‌ಪುಟ್‌ಗಾಗಿ ಬಳಸು"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (3374057355721486932) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"ಶ್ರವಣ ಸಾಧನಗಳಿಗಾಗಿ ಬಳಸಿ"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO ಗೆ ಬಳಸಿ"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"ಜೋಡಿಸಿ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ಜೋಡಿ ಮಾಡು"</string>
@@ -358,10 +355,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"ಪ್ರಸ್ತುತ ಸ್ಪರ್ಶ ಡೇಟಾ ತೋರಿಸುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
     <string name="show_touches" msgid="8437666942161289025">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"ಟ್ಯಾಪ್‌ಗಳಿಗೆ ದೃಶ್ಯ ಪ್ರತಿಕ್ರಿಯೆ ತೋರಿಸು"</string>
-    <!-- no translation found for show_key_presses (6360141722735900214) -->
-    <skip />
-    <!-- no translation found for show_key_presses_summary (725387457373015024) -->
-    <skip />
+    <string name="show_key_presses" msgid="6360141722735900214">"ಕೀ ಪ್ರೆಸ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"ಭೌತಿಕ ಕೀ ಪ್ರೆಸ್‌ಗಳ ವಿಷುವಲ್ ಪ್ರತಿಕ್ರಿಯೆಗಾಗಿ ನೋಡಿ"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"ಸರ್ಫೇಸ್‌‌ ಅಪ್‌ಡೇಟ್ ತೋರಿಸಿ‌"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"ಅಪ್‌ಡೇಟ್‌ ಆಗುವಾಗ ವಿಂಡೋದ ಸರ್ಫೇಸ್‌ ಫ್ಲ್ಯಾಶ್ ಆಗುತ್ತದೆ"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"\'ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ\' ತೋರಿಸಿ"</string>
@@ -531,7 +526,7 @@
     <string name="back" msgid="5554327870352703710">"ಹಿಂದಕ್ಕೆ"</string>
     <string name="save" msgid="3745809743277153149">"ಉಳಿಸಿ"</string>
     <string name="okay" msgid="949938843324579502">"ಸರಿ"</string>
-    <string name="done" msgid="381184316122520313">"ಮುಗಿದಿದೆ"</string>
+    <string name="done" msgid="381184316122520313">"ಆಯಿತು"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ಅಲಾರಾಮ್‌ಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ಅಲಾರಂಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳನ್ನು ಹೊಂದಿಸಲು ಅನುಮತಿಸಿ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ಅಲಾರಂಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>

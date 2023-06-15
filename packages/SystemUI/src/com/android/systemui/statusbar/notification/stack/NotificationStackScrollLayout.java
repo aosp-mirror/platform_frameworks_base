@@ -5051,6 +5051,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             println(pw, "intrinsicPadding", mIntrinsicPadding);
             println(pw, "topPadding", mTopPadding);
             println(pw, "bottomPadding", mBottomPadding);
+            println(pw, "translationX", getTranslationX());
+            println(pw, "translationY", getTranslationY());
+            println(pw, "translationZ", getTranslationZ());
             mNotificationStackSizeCalculator.dump(pw, args);
         });
         pw.println();

@@ -114,11 +114,9 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Ufikiaji wa SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Sauti ya HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Sauti ya HD"</string>
-    <!-- no translation found for bluetooth_profile_hearing_aid (2607867572569689732) -->
-    <skip />
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Visaidizi vya kusikia"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (5757754050938807276) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Imeunganishwa kwenye visaidizi vya kusikia"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Imeunganishwa kwenye LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Imeunganishwa kwenye sikika ya njia ya mawasiliano"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Imeunganishwa kwenye sauti ya simu"</string>
@@ -136,8 +134,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Tumia kwa sauti ya simu"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Tumia kwa hali faili"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Tumia kwa kuingiza"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (3374057355721486932) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Tumia kwa visaidizi vya kusikia"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Tumia kwa ajili ya LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Oanisha"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"OANISHA"</string>
@@ -358,10 +355,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Kuegeshwa kwa skrini ikionyesha data ya mguso ya sasa"</string>
     <string name="show_touches" msgid="8437666942161289025">"Onyesha unapogusa"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Onyesha ishara za kuthibitisha unapogusa"</string>
-    <!-- no translation found for show_key_presses (6360141722735900214) -->
-    <skip />
-    <!-- no translation found for show_key_presses_summary (725387457373015024) -->
-    <skip />
+    <string name="show_key_presses" msgid="6360141722735900214">"Onyesha mibofyo ya vitufe"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"Onyesha muhtasari wa mibofyo halisi ya vitufe"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Onyesha masasisho ya sehemu"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Angaza dirisha lote zitakaposasisha"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Onyesha taarifa za kuonekana"</string>
