@@ -845,6 +845,155 @@ public final class DisplayPowerController2Test {
     }
 
     @Test
+    public void testAutoBrightnessEnabled_DisplayIsOn() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController).configure(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED,
+                /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* shouldResetShortTermModel= */ false
+        );
+        verify(mHolder.hbmController)
+                .setAutoBrightnessEnabled(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED);
+    }
+
+    @Test
+    public void testAutoBrightnessEnabled_DisplayIsInDoze() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, true);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController).configure(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED,
+                /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_DOZE,
+                /* shouldResetShortTermModel= */ false
+        );
+        verify(mHolder.hbmController)
+                .setAutoBrightnessEnabled(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED);
+    }
+
+    @Test
+    public void testAutoBrightnessDisabled_ManualBrightnessMode() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        // One triggered by the test, the other by handleBrightnessModeChange
+        verify(mHolder.automaticBrightnessController, times(2)).configure(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED,
+                /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* shouldResetShortTermModel= */ false
+        );
+        verify(mHolder.hbmController, times(2))
+                .setAutoBrightnessEnabled(AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED);
+    }
+
+    @Test
+    public void testAutoBrightnessDisabled_DisplayIsOff() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_OFF;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_OFF);
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController).configure(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE,
+                /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_OFF,
+                /* shouldResetShortTermModel= */ false
+        );
+        verify(mHolder.hbmController).setAutoBrightnessEnabled(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE);
+    }
+
+    @Test
+    public void testAutoBrightnessDisabled_DisplayIsInDoze() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, false);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController).configure(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE,
+                /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_DOZE,
+                /* shouldResetShortTermModel= */ false
+        );
+        verify(mHolder.hbmController).setAutoBrightnessEnabled(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE);
+    }
+
+    @Test
+    public void testAutoBrightnessDisabled_FollowerDisplay() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        mHolder.dpc.setBrightnessToFollow(0.3f, -1, 0, /* slowChange= */ false);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        // One triggered by the test, the other by handleBrightnessModeChange
+        verify(mHolder.automaticBrightnessController, times(2)).configure(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED,
+                /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* shouldResetShortTermModel= */ false
+        );
+
+        // HBM should be allowed for the follower display
+        verify(mHolder.hbmController)
+                .setAutoBrightnessEnabled(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED);
+    }
+
+    @Test
     public void testBrightnessNitsPersistWhenDisplayDeviceChanges() {
         float brightness = 0.3f;
         float nits = 500;

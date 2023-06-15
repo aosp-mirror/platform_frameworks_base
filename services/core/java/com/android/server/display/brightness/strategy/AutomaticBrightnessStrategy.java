@@ -73,6 +73,9 @@ public class AutomaticBrightnessStrategy {
     // the user has enabled the auto-brightness from the settings, it is disabled because the
     // display is off
     private boolean mIsAutoBrightnessEnabled = false;
+    // Indicates if auto-brightness is disabled due to the display being off. Needed for metric
+    // purposes.
+    private boolean mAutoBrightnessDisabledDueToDisplayOff;
     // If the auto-brightness model for the last manual changes done by the user.
     private boolean mIsShortTermModelActive = false;
 
@@ -96,24 +99,21 @@ public class AutomaticBrightnessStrategy {
      * AutomaticBrightnessController accounting for any manual changes made by the user.
      */
     public void setAutoBrightnessState(int targetDisplayState,
-            boolean allowAutoBrightnessWhileDozingConfig,
-            float brightnessState, int brightnessReason, int policy,
+            boolean allowAutoBrightnessWhileDozingConfig, int brightnessReason, int policy,
             float lastUserSetScreenBrightness, boolean userSetBrightnessChanged) {
         final boolean autoBrightnessEnabledInDoze =
                 allowAutoBrightnessWhileDozingConfig
                         && Display.isDozeState(targetDisplayState);
         mIsAutoBrightnessEnabled = shouldUseAutoBrightness()
                 && (targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze)
-                && (Float.isNaN(brightnessState)
-                || brightnessReason == BrightnessReason.REASON_TEMPORARY
-                || brightnessReason == BrightnessReason.REASON_BOOST)
-                && mAutomaticBrightnessController != null
-                && brightnessReason != BrightnessReason.REASON_FOLLOWER;
-        final boolean autoBrightnessDisabledDueToDisplayOff = shouldUseAutoBrightness()
+                && brightnessReason != BrightnessReason.REASON_OVERRIDE
+                && mAutomaticBrightnessController != null;
+        mAutoBrightnessDisabledDueToDisplayOff = shouldUseAutoBrightness()
                 && !(targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze);
         final int autoBrightnessState = mIsAutoBrightnessEnabled
+                    && brightnessReason != BrightnessReason.REASON_FOLLOWER
                 ? AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED
-                : autoBrightnessDisabledDueToDisplayOff
+                : mAutoBrightnessDisabledDueToDisplayOff
                         ? AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE
                         : AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED;
 
@@ -123,6 +123,10 @@ public class AutomaticBrightnessStrategy {
 
     public boolean isAutoBrightnessEnabled() {
         return mIsAutoBrightnessEnabled;
+    }
+
+    public boolean isAutoBrightnessDisabledDueToDisplayOff() {
+        return mAutoBrightnessDisabledDueToDisplayOff;
     }
 
     /**
