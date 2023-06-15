@@ -107,10 +107,15 @@ final class ResilientAtomicFile implements Closeable {
 
         // In case of MT access, it's possible the files get overwritten during write.
         // Let's open all FDs we need now.
-        mMainOutStream = new FileOutputStream(mFile);
-        mMainInStream = new FileInputStream(mFile);
-        mReserveOutStream = new FileOutputStream(mReserveCopy);
-        mReserveInStream = new FileInputStream(mReserveCopy);
+        try {
+            mMainOutStream = new FileOutputStream(mFile);
+            mMainInStream = new FileInputStream(mFile);
+            mReserveOutStream = new FileOutputStream(mReserveCopy);
+            mReserveInStream = new FileInputStream(mReserveCopy);
+        } catch (IOException e) {
+            close();
+            throw e;
+        }
 
         return mMainOutStream;
     }
