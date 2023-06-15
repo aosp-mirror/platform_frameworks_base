@@ -311,7 +311,7 @@ public class KeyguardPatternViewController
                 resId = R.string.kg_prompt_reason_device_admin;
                 break;
             case PROMPT_REASON_USER_REQUEST:
-                resId = R.string.kg_prompt_reason_user_request;
+                resId = R.string.kg_prompt_after_user_lockdown_pattern;
                 break;
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
                 resId = R.string.kg_prompt_reason_timeout_pattern;
