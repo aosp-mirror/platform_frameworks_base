@@ -250,6 +250,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     protected Handler mMainHandler;
     private int mSmallestScreenWidthDp;
+    private int mOrientation;
     private final Optional<CentralSurfaces> mCentralSurfacesOptional;
     private final ShadeController mShadeController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -394,6 +395,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mRingerModeTracker = ringerModeTracker;
         mMainHandler = handler;
         mSmallestScreenWidthDp = resources.getConfiguration().smallestScreenWidthDp;
+        mOrientation = resources.getConfiguration().orientation;
         mCentralSurfacesOptional = centralSurfacesOptional;
         mShadeController = shadeController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -750,8 +752,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     @Override
     public void onConfigChanged(Configuration newConfig) {
         if (mDialog != null && mDialog.isShowing()
-                && (newConfig.smallestScreenWidthDp != mSmallestScreenWidthDp)) {
+                && (newConfig.smallestScreenWidthDp != mSmallestScreenWidthDp
+                || newConfig.orientation != mOrientation)) {
             mSmallestScreenWidthDp = newConfig.smallestScreenWidthDp;
+            mOrientation = newConfig.orientation;
             mDialog.refreshDialog();
         }
     }
