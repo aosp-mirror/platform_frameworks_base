@@ -33,7 +33,6 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
      * modifications that were made to the flags locally.
      *
      * @param new see [DisableFlagsLogger.getDisableFlagsString]
-     * @param newAfterLocalModification see [DisableFlagsLogger.getDisableFlagsString]
      */
     fun logDisableFlagChange(
         new: DisableFlagsLogger.DisableState,
@@ -47,8 +46,7 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
                 },
                 {
                     disableFlagsLogger.getDisableFlagsString(
-                        old = null,
-                        new = DisableFlagsLogger.DisableState(int1, int2),
+                        DisableFlagsLogger.DisableState(int1, int2),
                     )
                 }
         )
