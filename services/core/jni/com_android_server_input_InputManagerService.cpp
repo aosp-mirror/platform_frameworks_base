@@ -733,7 +733,13 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerCon
     if (controller == nullptr) {
         ensureSpriteControllerLocked();
 
-        controller = PointerController::create(this, mLooper, *mLocked.spriteController);
+        static const bool ENABLE_POINTER_CHOREOGRAPHER =
+                sysprop::InputProperties::enable_pointer_choreographer().value_or(false);
+
+        // Disable the functionality of the legacy PointerController if PointerChoreographer is
+        // enabled.
+        controller = PointerController::create(this, mLooper, *mLocked.spriteController,
+                                               /*enabled=*/!ENABLE_POINTER_CHOREOGRAPHER);
         mLocked.legacyPointerController = controller;
         updateInactivityTimeoutLocked();
     }
@@ -745,7 +751,7 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::createPointerCon
     std::scoped_lock _l(mLock);
     ensureSpriteControllerLocked();
     std::shared_ptr<PointerController> pc =
-            PointerController::create(this, mLooper, *mLocked.spriteController);
+            PointerController::create(this, mLooper, *mLocked.spriteController, /*enabled=*/true);
     mLocked.pointerControllers.emplace_back(pc);
     return pc;
 }
