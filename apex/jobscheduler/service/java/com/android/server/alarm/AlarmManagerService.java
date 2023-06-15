@@ -72,6 +72,7 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManagerInternal;
@@ -732,9 +733,6 @@ public class AlarmManagerService extends SystemService {
         @VisibleForTesting
         static final String KEY_MAX_DEVICE_IDLE_FUZZ = "max_device_idle_fuzz";
         @VisibleForTesting
-        static final String KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
-                "kill_on_schedule_exact_alarm_revoked";
-        @VisibleForTesting
         static final String KEY_TEMPORARY_QUOTA_BUMP = "temporary_quota_bump";
         @VisibleForTesting
         static final String KEY_CACHED_LISTENER_REMOVAL_DELAY = "cached_listener_removal_delay";
@@ -776,8 +774,6 @@ public class AlarmManagerService extends SystemService {
 
         private static final long DEFAULT_MIN_DEVICE_IDLE_FUZZ = 2 * 60_000;
         private static final long DEFAULT_MAX_DEVICE_IDLE_FUZZ = 15 * 60_000;
-
-        private static final boolean DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED = true;
 
         private static final int DEFAULT_TEMPORARY_QUOTA_BUMP = 0;
 
@@ -857,13 +853,6 @@ public class AlarmManagerService extends SystemService {
          */
         public long MAX_DEVICE_IDLE_FUZZ = DEFAULT_MAX_DEVICE_IDLE_FUZZ;
 
-        /**
-         * Whether or not to kill app when the permission
-         * {@link Manifest.permission#SCHEDULE_EXACT_ALARM} is revoked.
-         */
-        public boolean KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
-                DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED;
-
         public int USE_TARE_POLICY = EconomyManager.DEFAULT_ENABLE_POLICY_ALARM
                 ? EconomyManager.DEFAULT_ENABLE_TARE_MODE : EconomyManager.ENABLED_MODE_OFF;
 
@@ -915,6 +904,7 @@ public class AlarmManagerService extends SystemService {
                     economyManagerInternal.getEnabledMode(AlarmManagerEconomicPolicy.POLICY_ALARM));
         }
 
+        @SuppressLint("MissingPermission")
         public void updateAllowWhileIdleWhitelistDurationLocked() {
             if (mLastAllowWhileIdleWhitelistDuration != ALLOW_WHILE_IDLE_WHITELIST_DURATION) {
                 mLastAllowWhileIdleWhitelistDuration = ALLOW_WHILE_IDLE_WHITELIST_DURATION;
@@ -1056,11 +1046,6 @@ public class AlarmManagerService extends SystemService {
                                 updateDeviceIdleFuzzBoundaries();
                                 deviceIdleFuzzBoundariesUpdated = true;
                             }
-                            break;
-                        case KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED:
-                            KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED = properties.getBoolean(
-                                    KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED,
-                                    DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED);
                             break;
                         case KEY_TEMPORARY_QUOTA_BUMP:
                             TEMPORARY_QUOTA_BUMP = properties.getInt(KEY_TEMPORARY_QUOTA_BUMP,
@@ -1303,10 +1288,6 @@ public class AlarmManagerService extends SystemService {
             pw.print(KEY_MAX_DEVICE_IDLE_FUZZ);
             pw.print("=");
             TimeUtils.formatDuration(MAX_DEVICE_IDLE_FUZZ, pw);
-            pw.println();
-
-            pw.print(KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED,
-                    KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED);
             pw.println();
 
             pw.print(Settings.Global.ENABLE_TARE,
@@ -4089,7 +4070,7 @@ public class AlarmManagerService extends SystemService {
             removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
         }
 
-        if (killUid && mConstants.KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED) {
+        if (killUid) {
             PermissionManagerService.killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
                     "schedule_exact_alarm revoked");
         }
