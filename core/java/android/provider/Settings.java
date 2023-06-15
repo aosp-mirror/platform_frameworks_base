@@ -5627,12 +5627,20 @@ public final class Settings {
         public static final String SHOW_TOUCHES = "show_touches";
 
         /**
-         * Show key presses and other events dispatched to focused windows on the screen.
+         * Show key presses dispatched to focused windows on the screen.
          * 0 = no
          * 1 = yes
          * @hide
          */
         public static final String SHOW_KEY_PRESSES = "show_key_presses";
+
+        /**
+         * Show rotary input dispatched to focused windows on the screen.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String SHOW_ROTARY_INPUT = "show_rotary_input";
 
         /**
          * Log raw orientation data from
