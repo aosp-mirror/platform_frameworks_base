@@ -43,6 +43,7 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     /* package */ final RouterManagerCallback mMediaRouterCallback = new RouterManagerCallback();
     @VisibleForTesting
     /* package */ MediaRouter2Manager mRouterManager;
+    boolean mIsScanning = false;
 
     private final Executor mExecutor = Executors.newSingleThreadExecutor();
 
@@ -58,14 +59,20 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     @Override
     protected void startScanOnRouter() {
-        mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
-        mRouterManager.registerScanRequest();
+        if (!mIsScanning) {
+            mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
+            mRouterManager.registerScanRequest();
+            mIsScanning = true;
+        }
     }
 
     @Override
     public void stopScan() {
-        mRouterManager.unregisterCallback(mMediaRouterCallback);
-        mRouterManager.unregisterScanRequest();
+        if (mIsScanning) {
+            mRouterManager.unregisterCallback(mMediaRouterCallback);
+            mRouterManager.unregisterScanRequest();
+            mIsScanning = false;
+        }
     }
 
     @Override
