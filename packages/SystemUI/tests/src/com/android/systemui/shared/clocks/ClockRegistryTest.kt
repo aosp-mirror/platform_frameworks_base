@@ -321,9 +321,9 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun knownPluginAttached_clockAndListChanged_notLoaded() {
         val mockPluginLifecycle1 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
-        whenever(mockPluginLifecycle1.getPackage()).thenReturn("com.android.systemui.falcon.one")
+        whenever(mockPluginLifecycle1.getPackage()).thenReturn("com.android.systemui.clocks.metro")
         val mockPluginLifecycle2 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
-        whenever(mockPluginLifecycle2.getPackage()).thenReturn("com.android.systemui.falcon.two")
+        whenever(mockPluginLifecycle2.getPackage()).thenReturn("com.android.systemui.clocks.bignum")
 
         var changeCallCount = 0
         var listChangeCallCount = 0
