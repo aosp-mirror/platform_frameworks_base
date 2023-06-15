@@ -116,6 +116,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private lateinit var customDrawableView: ImageView
     private lateinit var chevronView: ImageView
     private var mQsLogger: QSLogger? = null
+
+    /**
+     * Controls if tile background is set to a [RippleDrawable] see [setClickable]
+     */
     protected var showRippleEffect = true
 
     private lateinit var ripple: RippleDrawable
@@ -440,7 +444,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     protected open fun handleStateChanged(state: QSTile.State) {
         val allowAnimations = animationsEnabled()
-        showRippleEffect = state.showRippleEffect
         isClickable = state.state != Tile.STATE_UNAVAILABLE
         isLongClickable = state.handlesLongClick
         icon.setIcon(state, allowAnimations)
