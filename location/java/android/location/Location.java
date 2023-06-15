@@ -709,7 +709,7 @@ public class Location implements Parcelable {
     /**
      * Returns the Mean Sea Level altitude of this location in meters.
      *
-     * <p>This is only valid if {@link #hasMslAltitude()} is true.
+     * @throws IllegalStateException if {@link #hasMslAltitude()} is false.
      */
     public @FloatRange double getMslAltitudeMeters() {
         Preconditions.checkState(hasMslAltitude(),
@@ -744,7 +744,7 @@ public class Location implements Parcelable {
      * percentile confidence level. This means that there is 68% chance that the true Mean Sea Level
      * altitude of this location falls within {@link #getMslAltitudeMeters()} +/- this uncertainty.
      *
-     * <p>This is only valid if {@link #hasMslAltitudeAccuracy()} is true.
+     * @throws IllegalStateException if {@link #hasMslAltitudeAccuracy()} is false.
      */
     public @FloatRange(from = 0.0) float getMslAltitudeAccuracyMeters() {
         Preconditions.checkState(hasMslAltitudeAccuracy(),
