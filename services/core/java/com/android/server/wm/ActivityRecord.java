@@ -108,7 +108,6 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.Display.COLOR_MODE_DEFAULT;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -4668,26 +4667,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @return Whether we are allowed to show non-starting windows at the moment. We disallow
-     *         showing windows while the transition animation is playing in case we have windows
-     *         that have wide-color-gamut color mode set to avoid jank in the middle of the
-     *         animation.
+     * @return Whether we are allowed to show non-starting windows at the moment.
      */
     boolean canShowWindows() {
-        final boolean drawn = mTransitionController.isShellTransitionsEnabled()
+        return mTransitionController.isShellTransitionsEnabled()
                 ? mSyncState != SYNC_STATE_WAITING_FOR_DRAW : allDrawn;
-        final boolean animating = mTransitionController.isShellTransitionsEnabled()
-                ? mTransitionController.inPlayingTransition(this)
-                : isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION);
-        return drawn && !(animating && hasNonDefaultColorWindow());
-    }
-
-    /**
-     * @return true if we have a window that has a non-default color mode set; false otherwise.
-     */
-    private boolean hasNonDefaultColorWindow() {
-        return forAllWindows(ws -> ws.mAttrs.getColorMode() != COLOR_MODE_DEFAULT,
-                true /* topToBottom */);
     }
 
     @Override
