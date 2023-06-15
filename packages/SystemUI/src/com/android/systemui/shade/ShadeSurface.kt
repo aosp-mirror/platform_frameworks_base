@@ -36,32 +36,11 @@ interface ShadeSurface : ShadeViewController {
         headsUpManager: HeadsUpManagerPhone
     )
 
-    /**
-     * Animate QS collapse by flinging it. If QS is expanded, it will collapse into QQS and stop. If
-     * in split shade, it will collapse the whole shade.
-     *
-     * @param fullyCollapse Do not stop when QS becomes QQS. Fling until QS isn't visible anymore.
-     */
-    fun animateCollapseQs(fullyCollapse: Boolean)
-
-    /** Returns whether the shade can be collapsed. */
-    fun canBeCollapsed(): Boolean
-
     /** Cancels any pending collapses. */
     fun cancelPendingCollapse()
 
     /** Cancels the views current animation. */
     fun cancelAnimation()
-
-    /**
-     * Close the keyguard user switcher if it is open and capable of closing.
-     *
-     * Has no effect if user switcher isn't supported, if the user switcher is already closed, or if
-     * the user switcher uses "simple" mode. The simple user switcher cannot be closed.
-     *
-     * @return true if the keyguard user switcher was open, and is now closed
-     */
-    fun closeUserSwitcherIfOpen(): Boolean
 
     /** Input focus transfer is about to happen. */
     fun startWaitingForExpandGesture()
@@ -115,9 +94,6 @@ interface ShadeSurface : ShadeViewController {
 
     /** Sets the view's alpha to max. */
     fun resetAlpha()
-
-    /** Called when Back gesture has been committed (i.e. a back event has definitely occurred) */
-    fun onBackPressed()
 
     /** Sets progress of the predictive back animation. */
     fun onBackProgressed(progressFraction: Float)

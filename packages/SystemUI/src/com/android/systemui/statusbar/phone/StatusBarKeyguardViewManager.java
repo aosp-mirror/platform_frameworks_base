@@ -53,16 +53,16 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.bouncer.ui.BouncerView;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.bouncer.ui.BouncerView;
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
@@ -144,6 +144,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     // Local cache of expansion events, to avoid duplicates
     private float mFraction = -1f;
     private boolean mTracking = false;
+    private boolean mBouncerShowingOverDream;
 
     private final PrimaryBouncerExpansionCallback mExpansionCallback =
             new PrimaryBouncerExpansionCallback() {
@@ -182,8 +183,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
             @Override
             public void onVisibilityChanged(boolean isVisible) {
-                mCentralSurfaces.setBouncerShowingOverDream(
-                        isVisible && mDreamOverlayStateController.isOverlayActive());
+                mBouncerShowingOverDream =
+                        isVisible && mDreamOverlayStateController.isOverlayActive();
 
                 if (!isVisible) {
                     mCentralSurfaces.setPrimaryBouncerHiddenFraction(EXPANSION_HIDDEN);
@@ -820,6 +821,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Override
     public boolean isUnlockWithWallpaper() {
         return mNotificationShadeWindowController.isShowingWallpaper();
+    }
+
+    @Override
+    public boolean isBouncerShowingOverDream() {
+        return mBouncerShowingOverDream;
     }
 
     @Override
