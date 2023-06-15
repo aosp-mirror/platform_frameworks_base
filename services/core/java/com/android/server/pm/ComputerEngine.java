@@ -4311,7 +4311,12 @@ public class ComputerEngine implements Computer {
         if (Process.isIsolatedUid(uid)
                 && mPermissionManager.getHotwordDetectionServiceProvider() != null
                 && uid == mPermissionManager.getHotwordDetectionServiceProvider().getUid()) {
-            uid = getIsolatedOwner(uid);
+            try {
+                uid = getIsolatedOwner(uid);
+            } catch (IllegalStateException e) {
+                // If the owner uid doesn't exist, just use the current uid
+                Slog.wtf(TAG, "Expected isolated uid " + uid + " to have an owner", e);
+            }
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
@@ -4352,7 +4357,12 @@ public class ComputerEngine implements Computer {
             if (Process.isIsolatedUid(uid)
                     && mPermissionManager.getHotwordDetectionServiceProvider() != null
                     && uid == mPermissionManager.getHotwordDetectionServiceProvider().getUid()) {
-                uid = getIsolatedOwner(uid);
+                try {
+                    uid = getIsolatedOwner(uid);
+                } catch (IllegalStateException e) {
+                    // If the owner uid doesn't exist, just use the current uid
+                    Slog.wtf(TAG, "Expected isolated uid " + uid + " to have an owner", e);
+                }
             }
             final int appId = UserHandle.getAppId(uid);
             final Object obj = mSettings.getSettingBase(appId);
