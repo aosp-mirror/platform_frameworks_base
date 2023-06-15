@@ -433,6 +433,10 @@ constructor(
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_PICKER_UI_FOR_AIWP,
                 value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_UI_FOR_AIWP)
+            ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_TRANSIT_CLOCK,
+                value = featureFlags.isEnabled(Flags.TRANSIT_CLOCK)
             )
         )
     }
