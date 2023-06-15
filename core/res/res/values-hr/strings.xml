@@ -161,7 +161,7 @@
     <string name="httpErrorLookup" msgid="3099834738227549349">"URL nije moguće pronaći."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Shema autentifikacije web-lokacije nije podržana."</string>
     <string name="httpErrorAuth" msgid="469553140922938968">"Autentifikacija nije moguća."</string>
-    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"Provjera autentičnosti preko proxy poslužitelja nije bila uspješna."</string>
+    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"Autentifikacija preko proxy poslužitelja nije bila uspješna."</string>
     <string name="httpErrorConnect" msgid="3295081579893205617">"Povezivanje s poslužiteljem nije moguće."</string>
     <string name="httpErrorIO" msgid="3860318696166314490">"Komunikacija s poslužiteljem nije moguća. Pokušajte ponovno kasnije."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"Veza s poslužiteljem privremeno je zaustavljena."</string>
@@ -1851,7 +1851,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Za izlaz prijeđite prstom od vrha prema dolje."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Shvaćam"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zakrenite kako biste bolje vidjeli"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Zatvorite podijeljeni zaslon kako biste bolje vidjeli"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otvorite aplikaciju <xliff:g id="NAME">%s</xliff:g> preko cijelog zaslona za bolji prikaz"</string>
     <string name="done_label" msgid="7283767013231718521">"Gotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kružni klizač sati"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kružni klizač minuta"</string>

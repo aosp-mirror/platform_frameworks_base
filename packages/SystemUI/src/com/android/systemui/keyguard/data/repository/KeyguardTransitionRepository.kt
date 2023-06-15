@@ -160,35 +160,28 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
             // An animator was provided, so use it to run the transition
             animator.setFloatValues(startingValue, 1f)
             animator.duration = ((1f - startingValue) * animator.duration).toLong()
-            val updateListener =
-                object : AnimatorUpdateListener {
-                    override fun onAnimationUpdate(animation: ValueAnimator) {
-                        emitTransition(
-                            TransitionStep(
-                                info,
-                                (animation.getAnimatedValue() as Float),
-                                TransitionState.RUNNING
-                            )
-                        )
-                    }
-                }
+            val updateListener = AnimatorUpdateListener { animation ->
+                emitTransition(
+                    TransitionStep(
+                        info,
+                        (animation.animatedValue as Float),
+                        TransitionState.RUNNING
+                    )
+                )
+            }
             val adapter =
                 object : AnimatorListenerAdapter() {
                     override fun onAnimationStart(animation: Animator) {
                         emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        endAnimation(animation, lastStep.value, TransitionState.CANCELED)
+                        endAnimation(lastStep.value, TransitionState.CANCELED)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        endAnimation(animation, 1f, TransitionState.FINISHED)
+                        endAnimation(1f, TransitionState.FINISHED)
                     }
 
-                    private fun endAnimation(
-                        animation: Animator,
-                        value: Float,
-                        state: TransitionState
-                    ) {
+                    private fun endAnimation(value: Float, state: TransitionState) {
                         emitTransition(TransitionStep(info, value, state))
                         animator.removeListener(this)
                         animator.removeUpdateListener(updateListener)
@@ -201,7 +194,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
             return@startTransition null
         }
             ?: run {
-                emitTransition(TransitionStep(info, 0f, TransitionState.STARTED))
+                emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
 
                 // No animator, so it's manual. Provide a mechanism to callback
                 updateTransitionId = UUID.randomUUID()

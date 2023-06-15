@@ -627,8 +627,8 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ошибка аутентификации."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Использовать блокировку экрана"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Чтобы продолжить, разблокируйте экран."</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Плотно прижмите палец к сканеру."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Не удалось распознать отпечаток пальца. Повторите попытку."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Плотно прижмите палец к сканеру"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Не удалось распознать отпечаток. Повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Очистите сканер отпечатков пальцев и повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Очистите сканер и повторите попытку."</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Плотно прижмите палец к сканеру."</string>
@@ -1852,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Чтобы выйти, проведите по экрану сверху вниз."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ОК"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Поверните, чтобы лучше видеть."</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Выйдите из режима разделения экрана, чтобы лучше видеть."</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Откройте приложение \"<xliff:g id="NAME">%s</xliff:g>\" в полноэкранном режиме, чтобы лучше видеть."</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Выбор часов на циферблате"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Выбор минут на циферблате"</string>

@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Gezicht geverifieerd"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bevestigd"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tik op Bevestigen om te voltooien"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Ontgrendeld via gezicht"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ontgrendeld via gezicht. Druk om door te gaan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gezicht herkend. Druk om door te gaan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gezicht herkend. Druk op het ontgrendelicoon."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Kan niet opslaan. Probeer het opnieuw."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Kan niet opslaan."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Gebruik minstens 4 tekens"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Gebruik minder dan <xliff:g id="LENGTH">%1$d</xliff:g> tekens"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildnummer naar klembord gekopieerd."</string>
     <string name="basic_status" msgid="2315371112182658176">"Gesprek openen"</string>
@@ -1125,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Meer informatie"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Ga voor meer informatie naar <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> openen"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• De app is ingesteld"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Er is ten minste één kaart aan Wallet toegevoegd"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Er moet een camera-app zijn geïnstalleerd"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• De app is ingesteld"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Er is ten minste één apparaat beschikbaar"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Selecteer een standaard notitie-app om de sneltoets voor notities maken te gebruiken"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Als je de Wallet-app wilt toevoegen als sneltoets, zorg je dat de app is geïnstalleerd"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Als je de Wallet-app wilt toevoegen als sneltoets, zorg je dat er minstens één kaart is toegevoegd"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Als je de QR-codescanner wilt toevoegen als sneltoets, zorg je dat er een camera-app is geïnstalleerd"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Als je de Home-app wilt toevoegen als sneltoets, zorg je dat de app is geïnstalleerd"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Er is minstens één apparaat beschikbaar"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Selecteer een standaard notitie-app om de sneltoets voor notities maken te gebruiken"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"App selecteren"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Houd de sneltoets ingedrukt"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuleren"</string>
@@ -1159,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioriteitsmodus aan"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistent-aandacht aan"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standaard notitie-app instellen in Instellingen"</string>
+    <string name="install_app" msgid="5066668100199613936">"App installeren"</string>
 </resources>
