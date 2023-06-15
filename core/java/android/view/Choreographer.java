@@ -732,8 +732,6 @@ public final class Choreographer {
      * @throws IllegalStateException if no frame is in progress.
      * @hide
      */
-    @TestApi
-    @UnsupportedAppUsage
     public long getExpectedPresentationTimeNanos() {
         return mFrameData.getPreferredFrameTimeline().getExpectedPresentationTimeNanos();
     }
