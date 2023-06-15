@@ -178,6 +178,10 @@ class Dimmer {
         mSurfaceAnimatorStarter = surfaceAnimatorStarter;
     }
 
+    WindowContainer<?> getHost() {
+        return mHost;
+    }
+
     private SurfaceControl makeDimLayer() {
         return mHost.makeChildSurface(null)
                 .setParent(mHost.getSurfaceControl())

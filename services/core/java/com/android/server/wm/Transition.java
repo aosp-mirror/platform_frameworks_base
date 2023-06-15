@@ -397,6 +397,28 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return false;
     }
 
+    boolean canApplyDim(@NonNull Task task) {
+        if (mTransientLaunches == null) return true;
+        final Dimmer dimmer = task.getDimmer();
+        final WindowContainer<?> dimmerHost = dimmer != null ? dimmer.getHost() : null;
+        if (dimmerHost == null) return false;
+        if (isInTransientHide(dimmerHost)) {
+            // The layer of dimmer is inside transient-hide task, then allow to dim.
+            return true;
+        }
+        // The dimmer host of a translucent task can be a display, then it is not in transient-hide.
+        for (int i = mTransientLaunches.size() - 1; i >= 0; --i) {
+            // The transient task is usually the task of recents/home activity.
+            final Task transientTask = mTransientLaunches.keyAt(i).getTask();
+            if (transientTask != null && transientTask.canAffectSystemUiFlags()) {
+                // It usually means that the recents animation has moved the transient-hide task
+                // an noticeable distance, then the display level dimmer should not show.
+                return false;
+            }
+        }
+        return true;
+    }
+
     boolean hasTransientLaunch() {
         return mTransientLaunches != null && !mTransientLaunches.isEmpty();
     }
@@ -1223,6 +1245,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayContent dc =
                     mController.mAtm.mRootWindowContainer.getDisplayContent(mRecentsDisplayId);
             dc.getInputMonitor().setActiveRecents(null /* activity */, null /* layer */);
+        }
+        if (mTransientLaunches != null) {
+            for (int i = mTransientLaunches.size() - 1; i >= 0; --i) {
+                // Reset the ability of controlling SystemUi which might be changed by
+                // setTransientLaunch or setRecentsAppBehindSystemBars.
+                final Task task = mTransientLaunches.keyAt(i).getTask();
+                if (task != null) {
+                    task.setCanAffectSystemUiFlags(true);
+                }
+            }
         }
 
         for (int i = 0; i < mTargetDisplays.size(); ++i) {
