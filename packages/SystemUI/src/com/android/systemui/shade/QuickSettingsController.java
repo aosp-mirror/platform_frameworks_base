@@ -780,7 +780,6 @@ public class QuickSettingsController implements Dumpable {
 
     /** update Qs height state */
     public void setExpansionHeight(float height) {
-        checkCorrectSplitShadeState(height);
         int maxHeight = getMaxExpansionHeight();
         height = Math.min(Math.max(
                 height, getMinExpansionHeight()), maxHeight);
@@ -799,14 +798,6 @@ public class QuickSettingsController implements Dumpable {
 
         if (mExpansionHeightListener != null) {
             mExpansionHeightListener.onQsSetExpansionHeightCalled(getFullyExpanded());
-        }
-    }
-
-    /** TODO(b/269742565) Remove this logging */
-    private void checkCorrectSplitShadeState(float height) {
-        if (mSplitShadeEnabled && height == 0
-                && mPanelViewControllerLazy.get().isShadeFullyExpanded()) {
-            Log.wtfStack(TAG, "qsExpansion set to 0 while split shade is expanding or open");
         }
     }
 
@@ -1939,7 +1930,7 @@ public class QuickSettingsController implements Dumpable {
                 target = getMaxExpansionHeight();
                 break;
             case FLING_COLLAPSE:
-                if (mSplitShadeEnabled) { // TODO:(b/269742565) remove below log
+                if (mSplitShadeEnabled) {
                     Log.wtfStack(TAG, "FLING_COLLAPSE called in split shade");
                 }
                 setExpandImmediate(false);

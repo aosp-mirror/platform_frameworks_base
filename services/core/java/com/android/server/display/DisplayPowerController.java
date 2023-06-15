@@ -512,6 +512,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // of the lead display that this DPC should follow.
     private float mBrightnessToFollow;
 
+    // Indicates whether we should ramp slowly to the brightness value to follow.
+    private boolean mBrightnessToFollowSlowChange;
+
     // The last auto brightness adjustment that was set by the user and not temporary. Set to
     // Float.NaN when an auto-brightness adjustment hasn't been recorded yet.
     private float mAutoBrightnessAdjustment;
@@ -812,7 +815,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     @Override
-    public void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux) {
+    public void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux,
+            boolean slowChange) {
         mBrightnessRangeController.onAmbientLuxChange(ambientLux);
         if (nits < 0) {
             mBrightnessToFollow = leadDisplayBrightness;
@@ -825,6 +829,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mBrightnessToFollow = leadDisplayBrightness;
             }
         }
+        mBrightnessToFollowSlowChange = slowChange;
         sendUpdatePowerState();
     }
 
@@ -842,7 +847,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mDisplayBrightnessFollowers.remove(follower.getDisplayId());
             mHandler.postAtTime(() -> follower.setBrightnessToFollow(
                     PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
-                    /* ambientLux= */ 0), mClock.uptimeMillis());
+                    /* ambientLux= */ 0, /* slowChange= */ false), mClock.uptimeMillis());
         }
     }
 
@@ -852,7 +857,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             DisplayPowerControllerInterface follower = mDisplayBrightnessFollowers.valueAt(i);
             mHandler.postAtTime(() -> follower.setBrightnessToFollow(
                     PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
-                    /* ambientLux= */ 0), mClock.uptimeMillis());
+                    /* ambientLux= */ 0, /* slowChange= */ false), mClock.uptimeMillis());
         }
         mDisplayBrightnessFollowers.clear();
     }
@@ -1559,6 +1564,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final int oldState = mPowerState.getScreenState();
         animateScreenStateChange(state, performScreenOffTransition);
         state = mPowerState.getScreenState();
+        boolean slowChange = false;
 
         if (state == Display.STATE_OFF) {
             brightnessState = PowerManager.BRIGHTNESS_OFF_FLOAT;
@@ -1567,6 +1573,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         if (Float.isNaN(brightnessState) && isValidBrightnessValue(mBrightnessToFollow)) {
             brightnessState = mBrightnessToFollow;
+            slowChange = mBrightnessToFollowSlowChange;
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_FOLLOWER);
         }
 
@@ -1661,7 +1668,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         float rawBrightnessState = brightnessState;
 
         // Apply auto-brightness.
-        boolean slowChange = false;
         if (Float.isNaN(brightnessState)) {
             float newAutoBrightnessAdjustment = autoBrightnessAdjustment;
             if (autoBrightnessEnabled) {
@@ -1740,6 +1746,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_MANUAL);
         }
 
+        float ambientLux = mAutomaticBrightnessController == null ? 0
+                : mAutomaticBrightnessController.getAmbientLux();
+        for (int i = 0; i < displayBrightnessFollowers.size(); i++) {
+            DisplayPowerControllerInterface follower = displayBrightnessFollowers.valueAt(i);
+            follower.setBrightnessToFollow(rawBrightnessState, convertToNits(rawBrightnessState),
+                    ambientLux, slowChange);
+        }
+
         // Now that a desired brightness has been calculated, apply brightness throttling. The
         // dimming and low power transformations that follow can only dim brightness further.
         //
@@ -1760,14 +1774,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAppliedThrottling = true;
         } else if (mAppliedThrottling) {
             mAppliedThrottling = false;
-        }
-
-        float ambientLux = mAutomaticBrightnessController == null ? 0
-                : mAutomaticBrightnessController.getAmbientLux();
-        for (int i = 0; i < displayBrightnessFollowers.size(); i++) {
-            DisplayPowerControllerInterface follower = displayBrightnessFollowers.valueAt(i);
-            follower.setBrightnessToFollow(rawBrightnessState, convertToNits(rawBrightnessState),
-                    ambientLux);
         }
 
         if (updateScreenBrightnessSetting) {
@@ -2157,8 +2163,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final DisplayDeviceConfig.HighBrightnessModeData hbmData =
                 ddConfig != null ? ddConfig.getHighBrightnessModeData() : null;
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
-        return new HighBrightnessModeController(mHandler, info.width, info.height, displayToken,
-                displayUniqueId, PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, hbmData,
+        return mInjector.getHighBrightnessModeController(mHandler, info.width, info.height,
+                displayToken, displayUniqueId, PowerManager.BRIGHTNESS_MIN,
+                PowerManager.BRIGHTNESS_MAX, hbmData,
                 new HighBrightnessModeController.HdrBrightnessDeviceConfig() {
                     @Override
                     public float getHdrBrightnessFromSdr(
@@ -2949,6 +2956,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 + mPendingScreenBrightnessSetting);
         pw.println("  mTemporaryScreenBrightness=" + mTemporaryScreenBrightness);
         pw.println("  mBrightnessToFollow=" + mBrightnessToFollow);
+        pw.println("  mBrightnessToFollowSlowChange=" + mBrightnessToFollowSlowChange);
         pw.println("  mAutoBrightnessAdjustment=" + mAutoBrightnessAdjustment);
         pw.println("  mBrightnessReason=" + mBrightnessReason);
         pw.println("  mTemporaryAutoBrightnessAdjustment=" + mTemporaryAutoBrightnessAdjustment);
@@ -3527,6 +3535,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     sensorValueToLux,
                     brightnessMapper
             );
+        }
+
+        HighBrightnessModeController getHighBrightnessModeController(Handler handler, int width,
+                int height, IBinder displayToken, String displayUniqueId, float brightnessMin,
+                float brightnessMax, DisplayDeviceConfig.HighBrightnessModeData hbmData,
+                HighBrightnessModeController.HdrBrightnessDeviceConfig hdrBrightnessCfg,
+                Runnable hbmChangeCallback, HighBrightnessModeMetadata hbmMetadata,
+                Context context) {
+            return new HighBrightnessModeController(handler, width, height, displayToken,
+                    displayUniqueId, brightnessMin, brightnessMax, hbmData, hdrBrightnessCfg,
+                    hbmChangeCallback, hbmMetadata, context);
         }
     }
 

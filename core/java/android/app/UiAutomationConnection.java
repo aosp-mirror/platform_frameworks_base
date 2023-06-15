@@ -39,7 +39,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.permission.IPermissionManager;
 import android.util.Log;
-import android.util.Pair;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -52,7 +51,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
 import android.window.ScreenCapture;
 import android.window.ScreenCapture.CaptureArgs;
-import android.window.ScreenCapture.ScreenCaptureListener;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
+import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import libcore.io.IoUtils;
 
@@ -235,12 +235,12 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             final CaptureArgs captureArgs = new CaptureArgs.Builder<>()
                     .setSourceCrop(crop)
                     .build();
-            Pair<ScreenCaptureListener, ScreenCapture.ScreenshotSync> syncScreenCapture =
+            SynchronousScreenCaptureListener syncScreenCapture =
                     ScreenCapture.createSyncCaptureListener();
             mWindowManager.captureDisplay(DEFAULT_DISPLAY, captureArgs,
-                    syncScreenCapture.first);
-            final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                    syncScreenCapture.second.get();
+                    syncScreenCapture);
+            final ScreenshotHardwareBuffer screenshotBuffer =
+                    syncScreenCapture.getBuffer();
             return screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         } catch (RemoteException re) {
             re.rethrowAsRuntimeException();

@@ -52,7 +52,7 @@ public class LegacyNotificationShelfControllerImpl implements NotificationShelfC
         mActivatableNotificationViewController = activatableNotificationViewController;
         mKeyguardBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
-        mView.setSensitiveRevealAnimEndabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
+        mView.setSensitiveRevealAnimEnabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
         mOnAttachStateChangeListener = new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {

@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard;
 
 
+import static com.android.systemui.flags.Flags.KEYGUARD_TALKBACK_FIX;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
@@ -42,6 +43,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -81,8 +83,10 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mView.getTextColors()).thenReturn(ColorStateList.valueOf(Color.WHITE));
+        FakeFeatureFlags flags = new FakeFeatureFlags();
+        flags.set(KEYGUARD_TALKBACK_FIX, true);
         mController = new KeyguardIndicationRotateTextViewController(mView, mExecutor,
-                mStatusBarStateController, mLogger);
+                mStatusBarStateController, mLogger, flags);
         mController.onViewAttached();
 
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());

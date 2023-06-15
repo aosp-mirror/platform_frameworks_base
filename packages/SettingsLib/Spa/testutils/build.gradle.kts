@@ -15,8 +15,8 @@
  */
 
 plugins {
-    id(libs.plugins.android.library.get().pluginId)
-    id(libs.plugins.kotlin.android.get().pluginId)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 val jetpackComposeVersion: String? by extra
@@ -41,6 +41,6 @@ dependencies {
     api("androidx.arch.core:core-testing:2.2.0-alpha01")
     api("androidx.compose.ui:ui-test-junit4:$jetpackComposeVersion")
     api(libs.truth)
-    api(libs.dexmaker.mockito)
+    api("org.mockito:mockito-core:2.21.0")
     debugApi("androidx.compose.ui:ui-test-manifest:$jetpackComposeVersion")
 }

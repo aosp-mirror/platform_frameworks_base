@@ -210,7 +210,6 @@ public class AutomaticBrightnessStrategyTest {
         when(mAutomaticBrightnessController.getAutomaticScreenBrightnessAdjustment()).thenReturn(
                 autoBrightnessAdjustment);
         mAutomaticBrightnessStrategy.adjustAutomaticBrightnessStateIfValid(brightnessState);
-        assertTrue(mAutomaticBrightnessStrategy.hasAppliedAutoBrightness());
         assertEquals(autoBrightnessAdjustment,
                 mAutomaticBrightnessStrategy.getAutoBrightnessAdjustment(), 0.0f);
         assertEquals(autoBrightnessAdjustment, Settings.System.getFloatForUser(
@@ -222,7 +221,6 @@ public class AutomaticBrightnessStrategyTest {
         float invalidBrightness = -0.5f;
         mAutomaticBrightnessStrategy
                 .adjustAutomaticBrightnessStateIfValid(invalidBrightness);
-        assertFalse(mAutomaticBrightnessStrategy.hasAppliedAutoBrightness());
         assertEquals(autoBrightnessAdjustment,
                 mAutomaticBrightnessStrategy.getAutoBrightnessAdjustment(), 0.0f);
         assertEquals(0,

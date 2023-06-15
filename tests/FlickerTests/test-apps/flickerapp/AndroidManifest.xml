@@ -22,7 +22,9 @@
     <application android:allowBackup="false"
                  android:supportsRtl="true">
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
-
+        <property
+            android:name="android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED"
+            android:value="true" />
         <activity android:name=".SimpleActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SimpleActivity"
                   android:theme="@style/CutoutShortEdges"
