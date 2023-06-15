@@ -21,6 +21,8 @@
 
     <integer name="magnification_default_scale">2</integer>
 
+    <integer name="dock_enter_exit_duration">250</integer>
+
     <!-- The position of the volume dialog on the screen.
          See com.android.systemui.volume.VolumeDialogImpl.
          Value 21 corresponds to RIGHT|CENTER_VERTICAL. -->

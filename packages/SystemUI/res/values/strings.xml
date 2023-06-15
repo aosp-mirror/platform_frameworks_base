@@ -300,6 +300,13 @@
     <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
     <string name="screenrecord_start_error">Error starting screen recording</string>
 
+    <!-- Cling help message title when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
+    <string name="immersive_cling_title">Viewing full screen</string>
+    <!-- Cling help message description when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
+    <string name="immersive_cling_description">To exit, swipe down from the top.</string>
+    <!-- Cling help message confirmation button when hiding the navigation bar entering immersive mode [CHAR LIMIT=30] -->
+    <string name="immersive_cling_positive">Got it</string>
+
     <!-- Content description of the back button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_back">Back</string>
     <!-- Content description of the home button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
