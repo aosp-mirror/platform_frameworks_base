@@ -1013,6 +1013,24 @@ public class HdmiCecLocalDeviceTvTest {
     }
 
     @Test
+    public void receiveSetAudioVolumeLevel_volumeOutOfBounds_noVolumeChange() {
+        mAudioFramework.setStreamMaxVolume(AudioManager.STREAM_MUSIC, 25);
+
+        // Max volume of STREAM_MUSIC is retrieved on boot
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.onCecMessage(SetAudioVolumeLevelMessage.build(
+                ADDR_PLAYBACK_1,
+                ADDR_TV,
+                127));
+        mTestLooper.dispatchAll();
+
+        verify(mAudioManager, never()).setStreamVolume(eq(AudioManager.STREAM_MUSIC), anyInt(),
+                anyInt());
+    }
+
+    @Test
     public void tvSendRequestArcTerminationOnSleep() {
         // Emulate Audio device on port 0x2000 (supports ARC)
         mNativeWrapper.setPortConnectionStatus(2, true);

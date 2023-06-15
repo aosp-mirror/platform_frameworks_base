@@ -1184,7 +1184,11 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (mService.isSystemAudioActivated()) {
             return Constants.ABORT_NOT_IN_CORRECT_MODE;
         } else {
-            mService.setStreamMusicVolume(message.getAudioVolumeLevel(), 0);
+            int audioVolumeLevel = message.getAudioVolumeLevel();
+            if (audioVolumeLevel >= AudioStatus.MIN_VOLUME
+                    && audioVolumeLevel <= AudioStatus.MAX_VOLUME) {
+                mService.setStreamMusicVolume(audioVolumeLevel, 0);
+            }
             return Constants.HANDLED;
         }
     }
