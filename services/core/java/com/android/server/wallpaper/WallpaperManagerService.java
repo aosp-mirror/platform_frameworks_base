@@ -3293,7 +3293,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData wallpaper;
 
         synchronized (mLock) {
-            Slog.v(TAG, "setWallpaperComponent name=" + name);
+            Slog.v(TAG, "setWallpaperComponent name=" + name + ", which=" + which);
             wallpaper = mWallpaperMap.get(userId);
             if (wallpaper == null) {
                 throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
@@ -3324,7 +3324,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 wallpaper.mWhich = which;
                 wallpaper.fromForegroundApp = isFromForegroundApp(callingPackage);
                 boolean same = changingToSame(name, wallpaper);
-                if (bindWallpaperComponentLocked(name, false, true, wallpaper, null)) {
+
+                // force rebind when reapplying a system-only wallpaper to system+lock
+                boolean forceRebind = same && mLockWallpaperMap.get(userId) != null
+                        && which == (FLAG_SYSTEM | FLAG_LOCK);
+                if (bindWallpaperComponentLocked(name, forceRebind, true, wallpaper, null)) {
                     if (!same) {
                         wallpaper.primaryColors = null;
                     } else {
