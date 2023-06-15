@@ -1525,10 +1525,14 @@ public final class CachedAppOptimizer {
                 opt.setPendingFreeze(false);
             }
 
-            UidRecord uidRec = app.getUidRecord();
-            if (uidRec != null && uidRec.isFrozen()) {
-                uidRec.setFrozen(false);
-                postUidFrozenMessage(uidRec.getUid(), false);
+            final UidRecord uidRec = app.getUidRecord();
+            if (uidRec != null) {
+                final boolean isFrozen = uidRec.getNumOfProcs() > 1
+                        && uidRec.areAllProcessesFrozen(app);
+                if (isFrozen != uidRec.isFrozen()) {
+                    uidRec.setFrozen(isFrozen);
+                    postUidFrozenMessage(uidRec.getUid(), isFrozen);
+                }
             }
 
             mFrozenProcesses.delete(app.getPid());
