@@ -1452,6 +1452,11 @@ public class TransitionTests extends WindowTestsBase {
             }
         });
         assertTrue(activity1.isVisible());
+        doReturn(false).when(task1).isTranslucent(null);
+        assertTrue(controller.canApplyDim(task1));
+        doReturn(true).when(task1).isTranslucent(null);
+        assertFalse(controller.canApplyDim(task1));
+
         controller.finishTransition(closeTransition);
         assertTrue(wasInFinishingTransition[0]);
         assertNull(controller.mFinishingTransition);

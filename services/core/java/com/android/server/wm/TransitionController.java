@@ -477,6 +477,19 @@ class TransitionController {
         return false;
     }
 
+    boolean canApplyDim(@Nullable Task task) {
+        if (task == null) {
+            // Always allow non-activity window.
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (!mPlayingTransitions.get(i).canApplyDim(task)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * During transient-launch, the "behind" app should retain focus during the transition unless
      * something takes focus from it explicitly (eg. by calling ATMS.setFocusedTask or by another
