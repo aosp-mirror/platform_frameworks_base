@@ -39,19 +39,12 @@ constructor(
      * [cutout]. We don't show battery estimation in qqs header on the devices with center cutout.
      * The result might be null when the battery icon is invisible during the qs-qqs transition
      * animation.
+     *
+     * Note: short-circuiting this value until a comprehensive fix for b/282044659 is finished.
      */
     @BatteryMeterView.BatteryPercentMode
     fun getBatteryMode(cutout: DisplayCutout?, qsExpandedFraction: Float): Int? =
-        when {
-            qsExpandedFraction > fadeInStartFraction -> BatteryMeterView.MODE_ESTIMATE
-            qsExpandedFraction < fadeOutCompleteFraction ->
-                if (hasCenterCutout(cutout)) {
-                    BatteryMeterView.MODE_ON
-                } else {
-                    BatteryMeterView.MODE_ESTIMATE
-                }
-            else -> null
-        }
+        BatteryMeterView.MODE_ON
 
     fun updateResources() {
         fadeInStartFraction =
