@@ -52,7 +52,11 @@ sealed class TileSpec private constructor(open val spec: String) {
     internal constructor(
         override val spec: String,
         val componentName: ComponentName,
-    ) : TileSpec(spec)
+    ) : TileSpec(spec) {
+        override fun toString(): String {
+            return "CustomTileSpec(${componentName.toShortString()})"
+        }
+    }
 
     companion object {
         /** Create a [TileSpec] from the string [spec]. */
