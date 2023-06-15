@@ -580,6 +580,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         final int oldSize = mConfiguration.perConnectionSql.size();
         final int newSize = configuration.perConnectionSql.size();
         boolean perConnectionSqlChanged = newSize > oldSize;
+        boolean journalModeChanged = !configuration.resolveJournalMode().equalsIgnoreCase(
+                mConfiguration.resolveJournalMode());
+        boolean syncModeChanged =
+                !configuration.resolveSyncMode().equalsIgnoreCase(mConfiguration.resolveSyncMode());
 
         // Update configuration parameters.
         mConfiguration.updateParametersFrom(configuration);
@@ -591,14 +595,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             setForeignKeyModeFromConfiguration();
         }
 
-        boolean journalModeChanged = !configuration.resolveJournalMode().equalsIgnoreCase(
-                mConfiguration.resolveJournalMode());
         if (journalModeChanged) {
             setJournalFromConfiguration();
         }
 
-        boolean syncModeChanged =
-                !configuration.resolveSyncMode().equalsIgnoreCase(mConfiguration.resolveSyncMode());
         if (syncModeChanged) {
             setSyncModeFromConfiguration();
         }
