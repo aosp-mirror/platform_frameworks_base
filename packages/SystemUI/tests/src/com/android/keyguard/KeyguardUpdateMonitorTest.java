@@ -169,6 +169,7 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -674,6 +675,130 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN verify keyguardUpdateMonitorCallback receives a refresh callback
         // Note that we have times(2) here because it's been called once already
         verify(mTestCallback, times(2)).onRefreshCarrierInfo();
+    }
+
+    @Test
+    public void testHandleSimStateChange_Unknown() {
+        Intent intent = new Intent(Intent.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(Intent.EXTRA_SIM_STATE, Intent.SIM_STATE_UNKNOWN);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_UNKNOWN,
+                mKeyguardUpdateMonitor.getCachedSimState());
+    }
+
+    @Test
+    public void testHandleSimStateChange_Absent() {
+        Intent intent = new Intent(Intent.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(Intent.EXTRA_SIM_STATE, Intent.SIM_STATE_ABSENT);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_ABSENT,
+                mKeyguardUpdateMonitor.getCachedSimState());
+    }
+
+    @Test
+    public void testHandleSimStateChange_CardIOError() {
+        Intent intent = new Intent(Intent.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(Intent.EXTRA_SIM_STATE, Intent.SIM_STATE_CARD_IO_ERROR);
+        intent.putExtra(Intent.EXTRA_SIM_LOCKED_REASON, Intent.SIM_STATE_CARD_IO_ERROR);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_CARD_IO_ERROR,
+                mKeyguardUpdateMonitor.getCachedSimState());
+    }
+
+    @Test
+    public void testHandleSimStateChange_CardRestricted() {
+        Intent intent = new Intent(Intent.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(Intent.EXTRA_SIM_STATE, Intent.SIM_STATE_CARD_RESTRICTED);
+        intent.putExtra(Intent.EXTRA_SIM_LOCKED_REASON, Intent.SIM_STATE_CARD_RESTRICTED);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_CARD_RESTRICTED,
+                mKeyguardUpdateMonitor.getCachedSimState());
+    }
+
+    @Test
+    public void testHandleSimStateChange_Locked() {
+        Intent intent = new Intent(Intent.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(Intent.EXTRA_SIM_STATE, Intent.SIM_STATE_LOCKED);
+
+        // locked on PIN1
+        intent.putExtra(Intent.EXTRA_SIM_LOCKED_REASON, Intent.SIM_LOCKED_ON_PIN);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, true));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_PIN_REQUIRED,
+                mKeyguardUpdateMonitor.getCachedSimState());
+
+        // locked on PUK1
+        intent.putExtra(Intent.EXTRA_SIM_LOCKED_REASON, Intent.SIM_LOCKED_ON_PUK);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, true));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_PUK_REQUIRED,
+                mKeyguardUpdateMonitor.getCachedSimState());
+
+        // locked on network personalization
+        intent.putExtra(Intent.EXTRA_SIM_LOCKED_REASON, Intent.SIM_LOCKED_NETWORK);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, true));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_NETWORK_LOCKED,
+                mKeyguardUpdateMonitor.getCachedSimState());
+
+        // permanently disabled due to puk fails
+        intent.putExtra(Intent.EXTRA_SIM_LOCKED_REASON, Intent.SIM_ABSENT_ON_PERM_DISABLED);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, true));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_PERM_DISABLED,
+                mKeyguardUpdateMonitor.getCachedSimState());
+    }
+
+    @Test
+    public void testHandleSimStateChange_NotReady() {
+        Intent intent = new Intent(Intent.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(Intent.EXTRA_SIM_STATE, Intent.SIM_STATE_NOT_READY);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_NOT_READY,
+                mKeyguardUpdateMonitor.getCachedSimState());
+    }
+
+    @Test
+    public void testHandleSimStateChange_Ready() {
+        Intent intent = new Intent(Intent.ACTION_SIM_STATE_CHANGED);
+
+        // ICC IMSI is ready in property
+        intent.putExtra(Intent.EXTRA_SIM_STATE, Intent.SIM_STATE_IMSI);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_READY,
+                mKeyguardUpdateMonitor.getCachedSimState());
+
+        // ICC is ready to access
+        intent.putExtra(Intent.EXTRA_SIM_STATE, Intent.SIM_STATE_READY);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_READY,
+                mKeyguardUpdateMonitor.getCachedSimState());
+
+        // all ICC records, including IMSI, are loaded
+        intent.putExtra(Intent.EXTRA_SIM_STATE, Intent.SIM_STATE_LOADED);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, true));
+        mTestableLooper.processAllMessages();
+        Assert.assertEquals(TelephonyManager.SIM_STATE_READY,
+                mKeyguardUpdateMonitor.getCachedSimState());
     }
 
     @Test
@@ -3144,6 +3269,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     private class TestableKeyguardUpdateMonitor extends KeyguardUpdateMonitor {
         AtomicBoolean mSimStateChanged = new AtomicBoolean(false);
+        AtomicInteger mCachedSimState = new AtomicInteger(-1);
 
         protected TestableKeyguardUpdateMonitor(Context context) {
             super(context, mUserTracker,
@@ -3166,9 +3292,14 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             return mSimStateChanged.getAndSet(false);
         }
 
+        public int getCachedSimState() {
+            return mCachedSimState.getAndSet(-1);
+        }
+
         @Override
         protected void handleSimStateChange(int subId, int slotId, int state) {
             mSimStateChanged.set(true);
+            mCachedSimState.set(state);
             super.handleSimStateChange(subId, slotId, state);
         }
 
