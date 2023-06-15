@@ -112,7 +112,7 @@ class MetricsHelper {
                 (a.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE) != 0,
                 a.alarmClock != null,
                 a.repeatInterval != 0,
-                reasonToStatsReason(a.mExactAllowReason),
+                reasonToStatsReason(a.exactAllowReason),
                 AlarmManagerService.isRtc(a.type),
                 ActivityManager.processStateAmToProto(callerProcState));
     }

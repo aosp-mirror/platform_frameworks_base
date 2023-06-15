@@ -143,6 +143,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerExemptionManager;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -2136,31 +2137,59 @@ public final class AlarmManagerServiceTest {
 
         assertEquals(deviceIdleUntil, mTestTimer.getElapsed());
 
-        final PendingIntent pi5wakeup = getNewMockPendingIntent();
-        final PendingIntent pi4wakeupPackage = getNewMockPendingIntent();
-        final PendingIntent pi2nonWakeup = getNewMockPendingIntent(57, "test.different.package");
+        final PendingIntent pi4System = getNewMockPendingIntent(Process.SYSTEM_UID, "android");
+        final PendingIntent pi9System = getNewMockPendingIntent(Process.SYSTEM_UID, "android");
 
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 5, pi5wakeup);
-        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 4, pi4wakeupPackage);
+        final PendingIntent pi5wakeupPackage = getNewMockPendingIntent();
+        final IAlarmListener listener2WakeupPackage = getNewListener(() -> {});
+        final PendingIntent pi4wakeupPackage = getNewMockPendingIntent(41, "test.wakeup.package2");
+        final PendingIntent pi19wakeupPackage = getNewMockPendingIntent(41, "test.wakeup.package2");
+
+        final PendingIntent pi2nonWakeup = getNewMockPendingIntent(57, "test.nonwakeup.package1");
+        final PendingIntent pi8nonWakeup = getNewMockPendingIntent(59, "test.nonwakeup.package2");
+        final PendingIntent pi11nonWakeup = getNewMockPendingIntent(51, "test.nonwakeup.package3");
+
+        // Alarms from the system
+        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 4, pi4System);
+        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 9, pi9System);
+
+        // Alarms from TEST_CALLING_PACKAGE, TEST_CALLING_UID, having one wakeup alarm
+        setTestAlarmWithListener(ELAPSED_REALTIME, mNowElapsedTest + 20, mService.mTimeTickTrigger);
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 5, pi5wakeupPackage);
+        setTestAlarmWithListener(ELAPSED_REALTIME, mNowElapsedTest + 2, listener2WakeupPackage);
+
+        // Alarms from 41, "test.wakeup.package2", having one wakeup alarm
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 4, pi4wakeupPackage);
+        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 19, pi19wakeupPackage);
+
+        // Alarms from other packages having no wakeup alarms
+        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 8, pi8nonWakeup);
+        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 11, pi11nonWakeup);
         setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 2, pi2nonWakeup);
 
         mNowElapsedTest = deviceIdleUntil;
         mTestTimer.expire();
 
-        // The order of the alarms in delivery list should be:
-        // IdleUntil, all alarms of a package with any wakeup alarms, then the rest.
-        // Within a package, alarms should be ordered by requested delivery time.
-        final PendingIntent[] expectedOrder = new PendingIntent[]{
-                idleUntilPi, pi4wakeupPackage, pi5wakeup, pi2nonWakeup};
+        // IdleUntil should always go out first. The others are divided into three classes:
+        // System alarms | Alarms of packages with any wakeup alarms | Others.
+        // Within each class, time_tick should go first if present, others should be ordered by
+        // requested delivery time.
+        final PendingIntent[] expectedPiOrder = new PendingIntent[]{
+                idleUntilPi, pi4System, pi9System, null, null, pi4wakeupPackage, pi5wakeupPackage,
+                pi19wakeupPackage, pi2nonWakeup, pi8nonWakeup, pi11nonWakeup};
+
+        final IAlarmListener[] expectedListenerOrder = new IAlarmListener[expectedPiOrder.length];
+        expectedListenerOrder[3] = mService.mTimeTickTrigger;
+        expectedListenerOrder[4] = listener2WakeupPackage;
 
         ArgumentCaptor<ArrayList<Alarm>> listCaptor = ArgumentCaptor.forClass(ArrayList.class);
         verify(mService).deliverAlarmsLocked(listCaptor.capture(), anyLong());
         final ArrayList<Alarm> deliveryList = listCaptor.getValue();
 
-        assertEquals(expectedOrder.length, deliveryList.size());
-        for (int i = 0; i < expectedOrder.length; i++) {
+        assertEquals(expectedPiOrder.length, deliveryList.size());
+        for (int i = 0; i < expectedPiOrder.length; i++) {
             assertTrue("Unexpected alarm: " + deliveryList.get(i) + " at pos: " + i,
-                    deliveryList.get(i).matches(expectedOrder[i], null));
+                    deliveryList.get(i).matches(expectedPiOrder[i], expectedListenerOrder[i]));
         }
     }
 

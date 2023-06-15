@@ -70,6 +70,7 @@ import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.EnforcePermission;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -175,6 +176,8 @@ import libcore.util.EmptyArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -182,7 +185,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
@@ -1342,87 +1344,91 @@ public class AlarmManagerService extends SystemService {
 
     Constants mConstants;
 
-    // Alarm delivery ordering bookkeeping
-    static final int PRIO_TICK = 0;
-    static final int PRIO_WAKEUP = 1;
-    static final int PRIO_NORMAL = 2;
+    /** Dispatch priority to use for system alarms. */
+    static final int PRIORITY_SYSTEM = 0;
+    /** Dispatch priority to use for a package that has any wakeup alarm in the pending batch. */
+    static final int PRIORITY_WAKEUP = 1;
+    /** The default dispatch priority to use when no special conditions apply. */
+    static final int PRIORITY_NORMAL = 2;
 
-    final class PriorityClass {
-        int seq;
-        int priority;
+    /**
+     * Priority to assign to alarms in an outgoing batch. Higher priority alarms are considered more
+     * urgent than lower priority ones (smaller value is higher priority). Priorities are assigned
+     * per package, so all alarms in one package will share the same priority in an outgoing batch -
+     * which should be the highest (minimum) priority computed over all its alarms.
+     * This is done to ensure that alarms in the same package preserve their relative ordering.
+     */
+    @IntDef(prefix = "PRIORITY_", value = {
+            PRIORITY_SYSTEM,
+            PRIORITY_WAKEUP,
+            PRIORITY_NORMAL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DispatchPriority {}
 
-        PriorityClass() {
-            seq = mCurrentSeq - 1;
-            priority = PRIO_NORMAL;
+    final Comparator<Alarm> mAlarmDispatchComparator = (lhs, rhs) -> {
+
+        // Alarm to exit device_idle should go out first.
+        final boolean idleUntil1 = (lhs.flags & FLAG_IDLE_UNTIL) != 0;
+        final boolean idleUntil2 = (rhs.flags & FLAG_IDLE_UNTIL) != 0;
+        if (idleUntil1 != idleUntil2) {
+            return idleUntil1 ? -1 : 1;
         }
-    }
 
-    final HashMap<String, PriorityClass> mPriorities = new HashMap<>();
-    int mCurrentSeq = 0;
-
-    final Comparator<Alarm> mAlarmDispatchComparator = new Comparator<Alarm>() {
-        @Override
-        public int compare(Alarm lhs, Alarm rhs) {
-
-            // Alarm to exit device_idle should go out first.
-            final boolean lhsIdleUntil = (lhs.flags & FLAG_IDLE_UNTIL) != 0;
-            final boolean rhsIdleUntil = (rhs.flags & FLAG_IDLE_UNTIL) != 0;
-            if (lhsIdleUntil != rhsIdleUntil) {
-                return lhsIdleUntil ? -1 : 1;
-            }
-
-            // Then, priority class trumps everything.  TICK < WAKEUP < NORMAL
-            if (lhs.priorityClass.priority < rhs.priorityClass.priority) {
-                return -1;
-            } else if (lhs.priorityClass.priority > rhs.priorityClass.priority) {
-                return 1;
-            }
-
-            // within each class, sort by requested delivery time
-            if (lhs.getRequestedElapsed() < rhs.getRequestedElapsed()) {
-                return -1;
-            } else if (lhs.getRequestedElapsed() > rhs.getRequestedElapsed()) {
-                return 1;
-            }
-
-            return 0;
+        // Then, priority class trumps everything.  SYSTEM < WAKEUP < NORMAL
+        if (lhs.priorityClass < rhs.priorityClass) {
+            return -1;
+        } else if (lhs.priorityClass > rhs.priorityClass) {
+            return 1;
         }
+
+        // Within all system alarms, pulling time_tick to the front, as it is time-sensitive.
+        final boolean timeTick1 = (lhs.listener == mTimeTickTrigger);
+        final boolean timeTick2 = (rhs.listener == mTimeTickTrigger);
+        if (timeTick1 != timeTick2) {
+            return timeTick1 ? -1 : 1;
+        }
+
+        // Within each class, sort by requested delivery time
+        if (lhs.getRequestedElapsed() < rhs.getRequestedElapsed()) {
+            return -1;
+        } else if (lhs.getRequestedElapsed() > rhs.getRequestedElapsed()) {
+            return 1;
+        }
+
+        return 0;
     };
 
+    /**
+     * Assigns a {@link DispatchPriority} to each alarm that will be used to order alarms in an
+     * outgoing batch.
+     *
+     * @param alarms The batch of alarms about to be sent.
+     */
     void calculateDeliveryPriorities(ArrayList<Alarm> alarms) {
         final int N = alarms.size();
+
+        // Batches are expected to be small (generally N < 10). So an additional iteration to
+        // collect a small set of UserPackage objects should be unnoticeable.
+        final ArraySet<UserPackage> wakeupPackages = new ArraySet<>(4);
         for (int i = 0; i < N; i++) {
-            Alarm a = alarms.get(i);
-
-            final int alarmPrio;
-            if (a.listener == mTimeTickTrigger) {
-                alarmPrio = PRIO_TICK;
-            } else if (a.wakeup) {
-                alarmPrio = PRIO_WAKEUP;
-            } else {
-                alarmPrio = PRIO_NORMAL;
+            final Alarm a = alarms.get(i);
+            if (a.wakeup) {
+                wakeupPackages.add(
+                        UserPackage.of(UserHandle.getUserId(a.creatorUid), a.sourcePackage));
             }
+        }
 
-            PriorityClass packagePrio = a.priorityClass;
-            String alarmPackage = a.sourcePackage;
-            if (packagePrio == null) packagePrio = mPriorities.get(alarmPackage);
-            if (packagePrio == null) {
-                packagePrio = a.priorityClass = new PriorityClass(); // lowest prio & stale sequence
-                mPriorities.put(alarmPackage, packagePrio);
-            }
-            a.priorityClass = packagePrio;
+        for (int i = 0; i < N; i++) {
+            final Alarm a = alarms.get(i);
 
-            if (packagePrio.seq != mCurrentSeq) {
-                // first alarm we've seen in the current delivery generation from this package
-                packagePrio.priority = alarmPrio;
-                packagePrio.seq = mCurrentSeq;
+            if (a.creatorUid == Process.SYSTEM_UID && "android".equals(a.sourcePackage)) {
+                a.priorityClass = PRIORITY_SYSTEM;
+            } else if (wakeupPackages.contains(
+                    UserPackage.of(UserHandle.getUserId(a.creatorUid), a.sourcePackage))) {
+                a.priorityClass = PRIORITY_WAKEUP;
             } else {
-                // Multiple alarms from this package being delivered in this generation;
-                // bump the package's delivery class if it's warranted.
-                // TICK < WAKEUP < NORMAL
-                if (alarmPrio < packagePrio.priority) {
-                    packagePrio.priority = alarmPrio;
-                }
+                a.priorityClass = PRIORITY_NORMAL;
             }
         }
     }
@@ -1727,6 +1733,7 @@ public class AlarmManagerService extends SystemService {
         final BroadcastStats mBroadcastStats;
         final FilterStats mFilterStats;
         final int mAlarmType;
+        final int mPriorityClass;
 
         InFlight(AlarmManagerService service, Alarm alarm, long nowELAPSED) {
             mPendingIntent = alarm.operation;
@@ -1747,6 +1754,7 @@ public class AlarmManagerService extends SystemService {
             fs.lastTime = nowELAPSED;
             mFilterStats = fs;
             mAlarmType = alarm.type;
+            mPriorityClass = alarm.priorityClass;
         }
 
         boolean isBroadcast() {
@@ -1765,6 +1773,7 @@ public class AlarmManagerService extends SystemService {
                     + ", broadcastStats=" + mBroadcastStats
                     + ", filterStats=" + mFilterStats
                     + ", alarmType=" + mAlarmType
+                    + ", priorityClass=" + mPriorityClass
                     + "}";
         }
 
@@ -4419,9 +4428,6 @@ public class AlarmManagerService extends SystemService {
             }
         }
 
-        // This is a new alarm delivery set; bump the sequence number to indicate that
-        // all apps' alarm delivery classes should be recalculated.
-        mCurrentSeq++;
         calculateDeliveryPriorities(triggerList);
         Collections.sort(triggerList, mAlarmDispatchComparator);
 
@@ -5291,7 +5297,6 @@ public class AlarmManagerService extends SystemService {
                             // external-applications-unavailable case
                             removeLocked(pkg, REMOVE_REASON_UNDEFINED);
                         }
-                        mPriorities.remove(pkg);
                         for (int i = mBroadcastStats.size() - 1; i >= 0; i--) {
                             ArrayMap<String, BroadcastStats> uidStats = mBroadcastStats.valueAt(i);
                             if (uidStats.remove(pkg) != null) {
