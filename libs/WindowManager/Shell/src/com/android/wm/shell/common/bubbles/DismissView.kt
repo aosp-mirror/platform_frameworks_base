@@ -14,41 +14,73 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.bubbles
+package com.android.wm.shell.common.bubbles
 
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.IntProperty
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.annotation.ColorRes
+import androidx.annotation.DimenRes
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_LOW_BOUNCY
 import androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW
-import com.android.wm.shell.R
 import com.android.wm.shell.animation.PhysicsAnimator
-import com.android.wm.shell.common.DismissCircleView
 
-/*
+/**
  * View that handles interactions between DismissCircleView and BubbleStackView.
+ *
+ * @note [setup] method should be called after initialisation
  */
 class DismissView(context: Context) : FrameLayout(context) {
+    /**
+     * The configuration is used to provide module specific resource ids
+     *
+     * @see [setup] method
+     */
+    data class Config(
+            /** dimen resource id of the dismiss target circle view size */
+            @DimenRes val targetSizeResId: Int,
+            /** dimen resource id of the icon size in the dismiss target */
+            @DimenRes val iconSizeResId: Int,
+            /** dimen resource id of the bottom margin for the dismiss target */
+            @DimenRes var bottomMarginResId: Int,
+            /** dimen resource id of the height for dismiss area gradient */
+            @DimenRes val floatingGradientHeightResId: Int,
+            /** color resource id of the dismiss area gradient color */
+            @ColorRes val floatingGradientColorResId: Int,
+            /** drawable resource id of the dismiss target background */
+            @DrawableRes val backgroundResId: Int,
+            /** drawable resource id of the icon for the dismiss target */
+            @DrawableRes val iconResId: Int
+    )
+
+    companion object {
+        private const val SHOULD_SETUP =
+                "The view isn't ready. Should be called after `setup`"
+        private val TAG = DismissView::class.simpleName
+    }
 
     var circle = DismissCircleView(context)
     var isShowing = false
-    var targetSizeResId: Int
+    var config: Config? = null
 
     private val animator = PhysicsAnimator.getInstance(circle)
     private val spring = PhysicsAnimator.SpringConfig(STIFFNESS_LOW, DAMPING_RATIO_LOW_BOUNCY)
     private val DISMISS_SCRIM_FADE_MS = 200L
     private var wm: WindowManager =
             context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private var gradientDrawable = createGradient()
+    private var gradientDrawable: GradientDrawable? = null
 
     private val GRADIENT_ALPHA: IntProperty<GradientDrawable> =
             object : IntProperty<GradientDrawable>("alpha") {
@@ -61,23 +93,41 @@ class DismissView(context: Context) : FrameLayout(context) {
     }
 
     init {
-        setLayoutParams(LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            resources.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height),
-            Gravity.BOTTOM))
-        updatePadding()
         setClipToPadding(false)
         setClipChildren(false)
         setVisibility(View.INVISIBLE)
+        addView(circle)
+    }
+
+    /**
+     * Sets up view with the provided resource ids.
+     *
+     * Decouples resource dependency in order to be used externally (e.g. Launcher). Usually called
+     * with default params in module specific extension:
+     * @see [DismissView.setup] in DismissViewExt.kt
+     */
+    fun setup(config: Config) {
+        this.config = config
+
+        // Setup layout
+        layoutParams = LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                resources.getDimensionPixelSize(config.floatingGradientHeightResId),
+                Gravity.BOTTOM)
+        updatePadding()
+
+        // Setup gradient
+        gradientDrawable = createGradient(color = config.floatingGradientColorResId)
         setBackgroundDrawable(gradientDrawable)
 
-        targetSizeResId = R.dimen.dismiss_circle_size
-        val targetSize: Int = resources.getDimensionPixelSize(targetSizeResId)
-        addView(circle, LayoutParams(targetSize, targetSize,
-                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL))
-        // start with circle offscreen so it's animated up
-        circle.setTranslationY(resources.getDimensionPixelSize(
-                R.dimen.floating_dismiss_gradient_height).toFloat())
+        // Setup DismissCircleView
+        circle.setup(config.backgroundResId, config.iconResId, config.iconSizeResId)
+        val targetSize: Int = resources.getDimensionPixelSize(config.targetSizeResId)
+        circle.layoutParams = LayoutParams(targetSize, targetSize,
+                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+        // Initial position with circle offscreen so it's animated up
+        circle.translationY = resources.getDimensionPixelSize(config.floatingGradientHeightResId)
+                .toFloat()
     }
 
     /**
@@ -85,6 +135,7 @@ class DismissView(context: Context) : FrameLayout(context) {
      */
     fun show() {
         if (isShowing) return
+        val gradientDrawable = checkExists(gradientDrawable) ?: return
         isShowing = true
         setVisibility(View.VISIBLE)
         val alphaAnim = ObjectAnimator.ofInt(gradientDrawable, GRADIENT_ALPHA,
@@ -104,6 +155,7 @@ class DismissView(context: Context) : FrameLayout(context) {
      */
     fun hide() {
         if (!isShowing) return
+        val gradientDrawable = checkExists(gradientDrawable) ?: return
         isShowing = false
         val alphaAnim = ObjectAnimator.ofInt(gradientDrawable, GRADIENT_ALPHA,
                 gradientDrawable.alpha, 0)
@@ -124,18 +176,17 @@ class DismissView(context: Context) : FrameLayout(context) {
     }
 
     fun updateResources() {
+        val config = checkExists(config) ?: return
         updatePadding()
-        layoutParams.height = resources.getDimensionPixelSize(
-                R.dimen.floating_dismiss_gradient_height)
-
-        val targetSize = resources.getDimensionPixelSize(targetSizeResId)
+        layoutParams.height = resources.getDimensionPixelSize(config.floatingGradientHeightResId)
+        val targetSize = resources.getDimensionPixelSize(config.targetSizeResId)
         circle.layoutParams.width = targetSize
         circle.layoutParams.height = targetSize
         circle.requestLayout()
     }
 
-    private fun createGradient(): GradientDrawable {
-        val gradientColor = context.resources.getColor(android.R.color.system_neutral1_900)
+    private fun createGradient(@ColorRes color: Int): GradientDrawable {
+        val gradientColor = ContextCompat.getColor(context, color)
         val alpha = 0.7f * 255
         val gradientColorWithAlpha = Color.argb(alpha.toInt(),
                 Color.red(gradientColor),
@@ -150,10 +201,22 @@ class DismissView(context: Context) : FrameLayout(context) {
     }
 
     private fun updatePadding() {
+        val config = checkExists(config) ?: return
         val insets: WindowInsets = wm.getCurrentWindowMetrics().getWindowInsets()
         val navInset = insets.getInsetsIgnoringVisibility(
                 WindowInsets.Type.navigationBars())
         setPadding(0, 0, 0, navInset.bottom +
-                resources.getDimensionPixelSize(R.dimen.floating_dismiss_bottom_margin))
+                resources.getDimensionPixelSize(config.bottomMarginResId))
+    }
+
+    /**
+     * Checks if the value is set up and exists, if not logs an exception.
+     * Used for convenient logging in case `setup` wasn't called before
+     *
+     * @return value provided as argument
+     */
+    private fun <T>checkExists(value: T?): T? {
+        if (value == null) Log.e(TAG, SHOULD_SETUP)
+        return value
     }
 }
