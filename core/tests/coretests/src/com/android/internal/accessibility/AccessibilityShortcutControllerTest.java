@@ -55,6 +55,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
@@ -150,7 +151,7 @@ public class AccessibilityShortcutControllerTest {
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
 
         when(mAccessibilityManagerService.getInstalledAccessibilityServiceList(anyInt()))
-                .thenReturn(Collections.singletonList(mServiceInfo));
+                .thenReturn(new ParceledListSlice<>(Collections.singletonList(mServiceInfo)));
 
         // Use the extra level of indirection in the object to mock framework objects
         AccessibilityManager accessibilityManager =

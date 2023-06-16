@@ -43,6 +43,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
@@ -111,7 +112,8 @@ public class AccessibilityShortcutChooserActivityTest {
         when(mResolveInfo.loadLabel(any(PackageManager.class))).thenReturn(TEST_LABEL);
         when(mAccessibilityServiceInfo.getComponentName()).thenReturn(TEST_COMPONENT_NAME);
         when(mAccessibilityManagerService.getInstalledAccessibilityServiceList(
-                anyInt())).thenReturn(Collections.singletonList(mAccessibilityServiceInfo));
+                anyInt())).thenReturn(new ParceledListSlice<>(
+                        Collections.singletonList(mAccessibilityServiceInfo)));
         when(mAccessibilityManagerService.isAccessibilityTargetAllowed(
                 anyString(), anyInt(), anyInt())).thenReturn(true);
         TestAccessibilityShortcutChooserActivity.setupForTesting(mAccessibilityManagerService);

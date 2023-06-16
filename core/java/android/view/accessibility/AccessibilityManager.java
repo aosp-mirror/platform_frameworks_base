@@ -848,7 +848,7 @@ public final class AccessibilityManager {
 
         List<AccessibilityServiceInfo> services = null;
         try {
-            services = service.getInstalledAccessibilityServiceList(userId);
+            services = service.getInstalledAccessibilityServiceList(userId).getList();
             if (DEBUG) {
                 Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
             }
