@@ -44,6 +44,8 @@ import android.util.Slog;
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.ServiceConnector;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Class responsible for connection with the Remote {@link FieldClassificationService}.
  * This class is instantiated when {@link AutofillManagerServiceImpl} is established.
@@ -133,7 +135,8 @@ final class RemoteFieldClassificationService
     }
 
     public void onFieldClassificationRequest(@NonNull FieldClassificationRequest request,
-            FieldClassificationServiceCallbacks fieldClassificationServiceCallbacks) {
+            WeakReference<FieldClassificationServiceCallbacks>
+                fieldClassificationServiceCallbacksWeakRef) {
         final long startTime = SystemClock.elapsedRealtime();
         if (sVerbose) {
             Slog.v(TAG, "onFieldClassificationRequest request:" + request);
@@ -170,6 +173,15 @@ final class RemoteFieldClassificationService
                                                 Slog.d(TAG, "onSuccess " + msg);
                                             }
                                         }
+                                        FieldClassificationServiceCallbacks
+                                                fieldClassificationServiceCallbacks =
+                                                        Helper.weakDeref(
+                                                                fieldClassificationServiceCallbacksWeakRef,
+                                                                TAG, "onSuccess "
+                                                        );
+                                        if (fieldClassificationServiceCallbacks == null) {
+                                            return;
+                                        }
                                         fieldClassificationServiceCallbacks
                                                 .onClassificationRequestSuccess(response);
                                     }
@@ -179,6 +191,15 @@ final class RemoteFieldClassificationService
                                         logLatency(startTime);
                                         if (sDebug) {
                                             Slog.d(TAG, "onFailure");
+                                        }
+                                        FieldClassificationServiceCallbacks
+                                                fieldClassificationServiceCallbacks =
+                                                        Helper.weakDeref(
+                                                                fieldClassificationServiceCallbacksWeakRef,
+                                                                TAG, "onFailure "
+                                                        );
+                                        if (fieldClassificationServiceCallbacks == null) {
+                                            return;
                                         }
                                         fieldClassificationServiceCallbacks
                                                 .onClassificationRequestFailure(0, null);
