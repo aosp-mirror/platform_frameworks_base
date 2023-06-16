@@ -3043,7 +3043,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean shouldShowImeSwitcherLocked(
             @InputMethodService.ImeWindowVisibility int visibility) {
         if (!mShowOngoingImeSwitcherForPhones) return false;
+        // When the IME switcher dialog is shown, the IME switcher button should be hidden.
         if (mMenuController.getSwitchingDialogLocked() != null) return false;
+        // When we are switching IMEs, the IME switcher button should be hidden.
+        if (!Objects.equals(getCurIdLocked(), getSelectedMethodIdLocked())) {
+            return false;
+        }
         if (mWindowManagerInternal.isKeyguardShowingAndNotOccluded()
                 && mWindowManagerInternal.isKeyguardSecure(mSettings.getCurrentUserId())) {
             return false;
@@ -3208,7 +3213,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             } else {
                 vis &= ~InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
             }
-            // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
+            if (mMenuController.getSwitchingDialogLocked() != null
+                    || !Objects.equals(getCurIdLocked(), getSelectedMethodIdLocked())) {
+                // When the IME switcher dialog is shown, or we are switching IMEs,
+                // the back button should be in the default state (as if the IME is not shown).
+                backDisposition = InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING;
+            }
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBarManagerInternal != null) {
                 mStatusBarManagerInternal.setImeWindowStatus(mCurTokenDisplayId,
@@ -5775,7 +5785,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // input target changed, in case seeing the dialog dismiss flickering during
                 // the next focused window starting the input connection.
                 if (mLastImeTargetWindow != mCurFocusedWindow) {
-                    mMenuController.hideInputMethodMenu();
+                    mMenuController.hideInputMethodMenuLocked();
                 }
             }
         }
