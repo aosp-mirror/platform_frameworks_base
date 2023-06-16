@@ -46,6 +46,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -319,6 +320,13 @@ public final class Helper {
         return context.createDisplayContext(display);
     }
 
+    static <T> @Nullable T weakDeref(WeakReference<T> weakRef, String tag, String prefix) {
+        T deref = weakRef.get();
+        if (deref == null) {
+            Slog.wtf(tag, prefix + "fail to deref " + weakRef);
+        }
+        return deref;
+    }
 
     private interface ViewNodeFilter {
         boolean matches(ViewNode node);
