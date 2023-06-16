@@ -156,6 +156,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ShadeWindowLogger mShadeWindowLogger;
     private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
             mKeyguardUpdateMonitorCallbackCaptor;
+    private @Captor ArgumentCaptor<KeyguardStateController.Callback>
+            mKeyguardStateControllerCallback;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -662,6 +664,33 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         );
     }
 
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void pendingPinLockOnKeyguardGoingAway_doKeyguardLockedOnKeyguardVisibilityChanged() {
+        // GIVEN SIM_STATE_PIN_REQUIRED
+        mViewMediator.onSystemReady();
+        final KeyguardUpdateMonitorCallback keyguardUpdateMonitorCallback =
+                mViewMediator.mUpdateCallback;
+        keyguardUpdateMonitorCallback.onSimStateChanged(0, 0,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+        TestableLooper.get(this).processAllMessages();
+
+        // ...and then the primary bouncer shows while the keyguard is going away
+        captureKeyguardStateControllerCallback();
+        when(mKeyguardStateController.isPrimaryBouncerShowing()).thenReturn(true);
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(true);
+        mKeyguardStateControllerCallback.getValue().onPrimaryBouncerShowingChanged();
+        TestableLooper.get(this).processAllMessages();
+
+        // WHEN keyguard visibility becomes FALSE
+        mViewMediator.setShowingLocked(false);
+        keyguardUpdateMonitorCallback.onKeyguardVisibilityChanged(false);
+        TestableLooper.get(this).processAllMessages();
+
+        // THEN keyguard shows due to the pending SIM PIN lock
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
     private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,
@@ -707,5 +736,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     private void captureKeyguardUpdateMonitorCallback() {
         verify(mUpdateMonitor).registerCallback(mKeyguardUpdateMonitorCallbackCaptor.capture());
+    }
+
+    private void captureKeyguardStateControllerCallback() {
+        verify(mKeyguardStateController).addCallback(mKeyguardStateControllerCallback.capture());
     }
 }
