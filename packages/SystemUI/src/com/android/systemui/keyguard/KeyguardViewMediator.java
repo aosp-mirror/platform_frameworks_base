@@ -1260,7 +1260,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         @Override
         public void onPrimaryBouncerShowingChanged() {
             synchronized (KeyguardViewMediator.this) {
-                if (mKeyguardStateController.isPrimaryBouncerShowing()) {
+                if (mKeyguardStateController.isPrimaryBouncerShowing()
+                        && !mKeyguardStateController.isKeyguardGoingAway()) {
                     mPendingPinLock = false;
                 }
                 adjustStatusBarLocked(mKeyguardStateController.isPrimaryBouncerShowing(), false);
