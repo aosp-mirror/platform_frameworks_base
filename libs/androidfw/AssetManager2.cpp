@@ -1094,14 +1094,16 @@ base::expected<std::monostate, NullOrIOError> AssetManager2::ResolveReference(
 
 base::expected<const std::vector<uint32_t>*, NullOrIOError> AssetManager2::GetBagResIdStack(
     uint32_t resid) const {
-  auto [it, inserted] = cached_bag_resid_stacks_.try_emplace(resid);
-  if (inserted) {
-    // This is a new entry in the cache, need to populate it.
-    if (auto maybe_bag = GetBag(resid, it->second); UNLIKELY(IsIOError(maybe_bag))) {
-      cached_bag_resid_stacks_.erase(it);
-      return base::unexpected(maybe_bag.error());
-    }
+  auto it = cached_bag_resid_stacks_.find(resid);
+  if (it != cached_bag_resid_stacks_.end()) {
+    return &it->second;
   }
+  std::vector<uint32_t> stacks;
+  if (auto maybe_bag = GetBag(resid, stacks); UNLIKELY(IsIOError(maybe_bag))) {
+    return base::unexpected(maybe_bag.error());
+  }
+
+  it = cached_bag_resid_stacks_.emplace(resid, std::move(stacks)).first;
   return &it->second;
 }
 
@@ -1119,8 +1121,12 @@ base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::ResolveBag(
 }
 
 base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::GetBag(uint32_t resid) const {
-  auto [resid_stacks_it, _] = cached_bag_resid_stacks_.try_emplace(resid);
-  resid_stacks_it->second.clear();
+  auto resid_stacks_it = cached_bag_resid_stacks_.find(resid);
+  if (resid_stacks_it != cached_bag_resid_stacks_.end()) {
+    resid_stacks_it->second.clear();
+  } else {
+    resid_stacks_it = cached_bag_resid_stacks_.emplace(resid, std::vector<uint32_t>{}).first;
+  }
   const auto bag = GetBag(resid, resid_stacks_it->second);
   if (UNLIKELY(IsIOError(bag))) {
     cached_bag_resid_stacks_.erase(resid_stacks_it);
@@ -1438,25 +1444,40 @@ void AssetManager2::RebuildFilterList() {
 }
 
 void AssetManager2::InvalidateCaches(uint32_t diff) {
-  cached_bag_resid_stacks_.clear();
+  cached_resolved_values_.clear();
 
   if (diff == 0xffffffffu) {
     // Everything must go.
     cached_bags_.clear();
+    cached_bag_resid_stacks_.clear();
     return;
   }
 
   // Be more conservative with what gets purged. Only if the bag has other possible
   // variations with respect to what changed (diff) should we remove it.
-  for (auto iter = cached_bags_.cbegin(); iter != cached_bags_.cend();) {
-    if (diff & iter->second->type_spec_flags) {
-      iter = cached_bags_.erase(iter);
+  for (auto stack_it = cached_bag_resid_stacks_.begin();
+       stack_it != cached_bag_resid_stacks_.end();) {
+    const auto it = cached_bags_.find(stack_it->first);
+    if (it == cached_bags_.end()) {
+      stack_it = cached_bag_resid_stacks_.erase(stack_it);
+    } else if ((diff & it->second->type_spec_flags) != 0) {
+      cached_bags_.erase(it);
+      stack_it = cached_bag_resid_stacks_.erase(stack_it);
     } else {
-      ++iter;
+      ++stack_it;  // Keep the item in both caches.
     }
   }
 
-  cached_resolved_values_.clear();
+  // Need to ensure that both bag caches are consistent, as we populate them in the same function.
+  // Iterate over the cached bags to erase the items without the corresponding resid_stack cache
+  // items.
+  for (auto it = cached_bags_.begin(); it != cached_bags_.end();) {
+    if ((diff & it->second->type_spec_flags) != 0) {
+      it = cached_bags_.erase(it);
+    } else {
+      ++it;
+    }
+  }
 }
 
 uint8_t AssetManager2::GetAssignedPackageId(const LoadedPackage* package) const {
