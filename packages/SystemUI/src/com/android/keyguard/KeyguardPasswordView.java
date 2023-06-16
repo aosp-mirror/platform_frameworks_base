@@ -23,6 +23,7 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
@@ -99,6 +100,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
         switch (reason) {
             case PROMPT_REASON_RESTART:
                 return R.string.kg_prompt_reason_restart_password;
+            case PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE:
+                return R.string.kg_prompt_after_update_password;
             case PROMPT_REASON_TIMEOUT:
                 return R.string.kg_prompt_reason_timeout_password;
             case PROMPT_REASON_DEVICE_ADMIN:
@@ -106,7 +109,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
             case PROMPT_REASON_USER_REQUEST:
                 return R.string.kg_prompt_after_user_lockdown_password;
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
-                return R.string.kg_prompt_reason_timeout_password;
+                return R.string.kg_prompt_unattended_update_password;
             case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
                 return R.string.kg_prompt_reason_timeout_password;
             case PROMPT_REASON_TRUSTAGENT_EXPIRED:
