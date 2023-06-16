@@ -151,7 +151,6 @@ import com.android.wm.shell.taskview.TaskViewTransitions;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -594,7 +593,6 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore("Currently broken.")
     public void testCollapseAfterChangingExpandedBubble() {
         // Mark it as a bubble and add it explicitly
         mEntryListener.onEntryAdded(mRow);
