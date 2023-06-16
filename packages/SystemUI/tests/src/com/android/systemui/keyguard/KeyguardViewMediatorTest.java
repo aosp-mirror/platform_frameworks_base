@@ -21,6 +21,7 @@ import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -71,6 +72,7 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
@@ -104,6 +106,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.flow.Flow;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -156,6 +161,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock CentralSurfaces mCentralSurfaces;
     private @Mock UiEventLogger mUiEventLogger;
     private @Mock SessionTracker mSessionTracker;
+    private @Mock CoroutineDispatcher mDispatcher;
+    private @Mock DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
 
     private FakeFeatureFlags mFeatureFlags;
 
@@ -171,6 +178,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         final ViewRootImpl testViewRoot = mock(ViewRootImpl.class);
         when(testViewRoot.getView()).thenReturn(mock(View.class));
         when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(testViewRoot);
+        when(mDreamingToLockscreenTransitionViewModel.getDreamOverlayAlpha())
+                .thenReturn(mock(Flow.class));
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mViewMediator, mKeyguardBypassController,
@@ -186,6 +195,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void onLockdown_showKeyguard_evenIfKeyguardIsNotEnabledExternally() {
         // GIVEN keyguard is not enabled and isn't showing
         mViewMediator.onSystemReady();
@@ -343,6 +353,42 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // THEN the bouncer prompt reason should return PROMPT_REASON_DEVICE_ADMIN
         assertEquals(KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN,
+                mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    @Test
+    public void testBouncerPrompt_afterUserLockDown() {
+        // GIVEN biometrics enrolled
+        when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(true);
+
+        // WHEN user has locked down the device
+        KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                mock(KeyguardUpdateMonitor.StrongAuthTracker.class);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(strongAuthTracker);
+        when(strongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+        when(strongAuthTracker.getStrongAuthForUser(anyInt()))
+                .thenReturn(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        // THEN the bouncer prompt reason should return PROMPT_REASON_USER_REQUEST
+        assertEquals(KeyguardSecurityView.PROMPT_REASON_USER_REQUEST,
+                mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    @Test
+    public void testBouncerPrompt_afterUserLockDown_noBiometricsEnrolled() {
+        // GIVEN biometrics not enrolled
+        when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(false);
+
+        // WHEN user has locked down the device
+        KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                mock(KeyguardUpdateMonitor.StrongAuthTracker.class);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(strongAuthTracker);
+        when(strongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+        when(strongAuthTracker.getStrongAuthForUser(anyInt()))
+                .thenReturn(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        // THEN the bouncer prompt reason should return the default prompt
+        assertEquals(KeyguardSecurityView.PROMPT_REASON_NONE,
                 mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
     }
 
@@ -629,7 +675,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mNotificationShadeWindowController,
                 () -> mActivityLaunchAnimator,
                 () -> mScrimController,
-                mFeatureFlags);
+                mFeatureFlags,
+                mDispatcher,
+                () -> mDreamingToLockscreenTransitionViewModel);
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);

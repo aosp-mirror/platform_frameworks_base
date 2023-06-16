@@ -162,6 +162,8 @@ import java.util.concurrent.TimeUnit;
 // TODO(b/180451994): ensure all incoming + outgoing calls have a cleared calling identity
 public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private static final String TAG = VcnManagementService.class.getSimpleName();
+    @NonNull private static final String CONTEXT_ATTRIBUTION_TAG = "VCN";
+
     private static final long DUMP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(5);
     private static final int LOCAL_LOG_LINE_COUNT = 512;
 
@@ -223,7 +225,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     VcnManagementService(@NonNull Context context, @NonNull Dependencies deps) {
-        mContext = requireNonNull(context, "Missing context");
+        mContext =
+                requireNonNull(context, "Missing context")
+                        .createAttributionContext(CONTEXT_ATTRIBUTION_TAG);
         mDeps = requireNonNull(deps, "Missing dependencies");
 
         mLooper = mDeps.getLooper();

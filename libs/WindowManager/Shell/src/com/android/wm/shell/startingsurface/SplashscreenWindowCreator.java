@@ -20,6 +20,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Choreographer.CALLBACK_INSETS_ANIMATION;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -370,8 +371,11 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
         mStartingWindowRecordManager.addRecord(taskId, tView);
     }
 
-    private void removeWindowInner(View decorView, boolean hideView) {
+    private void removeWindowInner(@NonNull View decorView, boolean hideView) {
         requestTopUi(false);
+        if (!decorView.isAttachedToWindow()) {
+            return;
+        }
         if (hideView) {
             decorView.setVisibility(View.GONE);
         }

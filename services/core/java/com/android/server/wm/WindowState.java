@@ -2983,10 +2983,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public boolean canShowWhenLocked() {
-        final boolean showBecauseOfActivity =
-                mActivityRecord != null && mActivityRecord.canShowWhenLocked();
-        final boolean showBecauseOfWindow = (getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0;
-        return showBecauseOfActivity || showBecauseOfWindow;
+        if (mActivityRecord != null) {
+            // It will also check if its windows contain FLAG_SHOW_WHEN_LOCKED.
+            return mActivityRecord.canShowWhenLocked();
+        }
+        return (mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
     }
 
     /**
@@ -3883,15 +3884,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * @return {@code true} if activity bounds are letterboxed or letterboxed for display cutout.
-     * Note that it's always {@code false} if the activity is in pip mode.
+     * Returns {@code true} if activity bounds are letterboxed or letterboxed for display cutout.
      *
      * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
      * LetterboxUiController#shouldShowLetterboxUi} for more context.
      */
     boolean areAppWindowBoundsLetterboxed() {
         return mActivityRecord != null
-                && !mActivityRecord.inPinnedWindowingMode()
                 && (mActivityRecord.areBoundsLetterboxed() || isLetterboxedForDisplayCutout());
     }
 
@@ -5121,12 +5120,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void applyDims() {
         if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || shouldDrawBlurBehind())
-                   && isVisibleNow() && !mHidden) {
+                   && isVisibleNow() && !mHidden && mTransitionController.canApplyDim(getTask())) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or blur behind is requested
             // 2. The WindowToken is not hidden so dims aren't shown when the window is exiting.
             // 3. The WS is considered visible according to the isVisible() method
             // 4. The WS is not hidden.
+            // 5. The window is not in a transition or is in a transition that allows to dim.
             mIsDimming = true;
             final float dimAmount = (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? mAttrs.dimAmount : 0;
             final int blurRadius = shouldDrawBlurBehind() ? mAttrs.getBlurBehindRadius() : 0;

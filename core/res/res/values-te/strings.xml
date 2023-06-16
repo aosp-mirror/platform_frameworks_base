@@ -1198,7 +1198,7 @@
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"షేర్ చేయి"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"దీన్ని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$sని ఉపయోగించి పంపండి"</string>
-    <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"పంపు"</string>
+    <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"పంపండి"</string>
     <string name="whichHomeApplication" msgid="8276350727038396616">"హోమ్ యాప్‌ను ఎంచుకోండి"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"%1$sని హోమ్‌గా ఉపయోగించండి"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"చిత్రాన్ని క్యాప్చర్ చేయి"</string>
@@ -1330,7 +1330,7 @@
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ఒక మెసేజ్‌ను &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;కి పంపాలనుకుంటోంది."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"దీని వలన మీ మొబైల్ ఖాతాకు "<b>"ఛార్జీలు విధించబడవచ్చు"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"దీని వలన మీ మొబైల్ ఖాతాకు ఛార్జీలు విధించబడవచ్చు."</b></string>
-    <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"పంపు"</string>
+    <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"పంపండి"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"రద్దు చేయండి"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"నా ఎంపికను గుర్తుంచుకో"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"మీరు దీన్ని తర్వాత సెట్టింగ్‌లు &gt; అనువర్తనాలులో మార్చవచ్చు"</string>
@@ -1470,7 +1470,7 @@
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"విడ్జెట్‌ను జోడించడం సాధ్యపడలేదు."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"వెళ్లు"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"సెర్చ్"</string>
-    <string name="ime_action_send" msgid="8456843745664334138">"పంపు"</string>
+    <string name="ime_action_send" msgid="8456843745664334138">"పంపండి"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"తర్వాత"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"పూర్తయింది"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"మునుపటి"</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"నిష్క్రమించడానికి, పై నుండి క్రిందికి స్వైప్ చేయండి."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"అర్థమైంది"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"మెరుగైన వీక్షణ కోసం తిప్పండి"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"మెరుగైన వీక్షణ కోసం స్ప్లిట్ స్క్రీన్ నుండి నిష్క్రమించండి"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"మెరుగైన వీక్షణ కోసం <xliff:g id="NAME">%s</xliff:g>‌ను ఫుల్ స్క్రీన్‌లో తెరవండి"</string>
     <string name="done_label" msgid="7283767013231718521">"పూర్తయింది"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"గంటల వృత్తాకార స్లయిడర్"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"నిమిషాల వృత్తాకార స్లయిడర్"</string>

@@ -223,6 +223,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.LetterboxConfiguration.DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
 import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
@@ -2425,7 +2426,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, activityAllDrawn, snapshot);
 
-        //TODO(191787740) Remove for T+
+        //TODO(191787740) Remove for V+
         final boolean useLegacy = type == STARTING_WINDOW_TYPE_SPLASH_SCREEN
                 && mWmService.mStartingSurfaceController.isExceptionApp(packageName, mTargetSdk,
                     () -> {
@@ -4550,6 +4551,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * immediately finishes after, so we have to transfer T to M.
      */
     void transferStartingWindowFromHiddenAboveTokenIfNeeded() {
+        final WindowState mainWin = findMainWindow(false);
+        if (mainWin != null && mainWin.mWinAnimator.getShown()) {
+            // This activity already has a visible window, so doesn't need to transfer the starting
+            // window from above activity to here. The starting window will be removed with above
+            // activity.
+            return;
+        }
         task.forAllActivities(fromActivity -> {
             if (fromActivity == this) return true;
             return !fromActivity.isVisibleRequested() && transferStartingWindow(fromActivity);
@@ -8294,6 +8302,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         mIsAspectRatioApplied = false;
+        mIsEligibleForFixedOrientationLetterbox = false;
+        mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
 
         // Can't use resolvedConfig.windowConfiguration.getWindowingMode() because it can be
         // different from windowing mode of the task (PiP) during transition from fullscreen to PiP
@@ -8303,8 +8313,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean isFixedOrientationLetterboxAllowed =
                 parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
-                        // Switching from PiP to fullscreen.
-                        || (parentWindowingMode == WINDOWING_MODE_PINNED
+                        // When starting to switch between PiP and fullscreen, the task is pinned
+                        // and the activity is fullscreen. But only allow to apply letterbox if the
+                        // activity is exiting PiP because an entered PiP should fill the task.
+                        || (!mWaitForEnteringPinnedMode
+                                && parentWindowingMode == WINDOWING_MODE_PINNED
                                 && resolvedConfig.windowConfiguration.getWindowingMode()
                                         == WINDOWING_MODE_FULLSCREEN);
         // TODO(b/181207944): Consider removing the if condition and always run
@@ -8698,8 +8711,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * in this method.
      */
     private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig) {
-        mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
-        mIsEligibleForFixedOrientationLetterbox = false;
         final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
         final Rect stableBounds = new Rect();
         // If orientation is respected when insets are applied, then stableBounds will be empty.
@@ -8784,9 +8795,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final float letterboxAspectRatioOverride =
                 mLetterboxUiController.getFixedOrientationLetterboxAspectRatio(newParentConfig);
-        final float desiredAspectRatio =
-                letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
-                        ? letterboxAspectRatioOverride : computeAspectRatio(parentBounds);
+
+        // Aspect ratio as suggested by the system. Apps requested mix/max aspect ratio will
+        // be respected in #applyAspectRatio.
+        final float desiredAspectRatio;
+        if (isDefaultMultiWindowLetterboxAspectRatioDesired(newParentConfig)) {
+            desiredAspectRatio = DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
+        } else if (letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO) {
+            desiredAspectRatio = letterboxAspectRatioOverride;
+        } else {
+            desiredAspectRatio = computeAspectRatio(parentBounds);
+        }
+
         // Apply aspect ratio to resolved bounds
         mIsAspectRatioApplied = applyAspectRatio(resolvedBounds, containingBoundsWithInsets,
                 containingBounds, desiredAspectRatio);
@@ -8809,6 +8829,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getTaskFragment().computeConfigResourceOverrides(getResolvedOverrideConfiguration(),
                 newParentConfig, compatDisplayInsets);
         mLetterboxBoundsForFixedOrientationAndAspectRatio = new Rect(resolvedBounds);
+    }
+
+    /**
+     * Returns {@code true} if the default aspect ratio for a letterboxed app in multi-window mode
+     * should be used.
+     */
+    private boolean isDefaultMultiWindowLetterboxAspectRatioDesired(
+            @NonNull Configuration parentConfig) {
+        if (mDisplayContent == null) {
+            return false;
+        }
+        final int windowingMode = parentConfig.windowConfiguration.getWindowingMode();
+        return WindowConfiguration.inMultiWindowMode(windowingMode)
+                && !mDisplayContent.getIgnoreOrientationRequest();
     }
 
     /**

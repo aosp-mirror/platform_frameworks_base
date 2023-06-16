@@ -29,6 +29,7 @@ import android.view.Display;
 import android.view.IDisplayWindowListener;
 import android.view.IWindowManager;
 import android.view.InsetsState;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
 
@@ -83,11 +84,6 @@ public class DisplayController {
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to register display controller");
         }
-    }
-
-    /** Get the DisplayChangeController. */
-    public DisplayChangeController getChangeController() {
-        return mChangeController;
     }
 
     /**
@@ -192,6 +188,26 @@ public class DisplayController {
             for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
                 mDisplayChangedListeners.get(i).onDisplayAdded(displayId);
             }
+        }
+    }
+
+
+    /** Called when a display rotate requested. */
+    public void onDisplayRotateRequested(WindowContainerTransaction wct, int displayId,
+            int fromRotation, int toRotation) {
+        synchronized (mDisplays) {
+            final DisplayRecord dr = mDisplays.get(displayId);
+            if (dr == null) {
+                Slog.w(TAG, "Skipping Display rotate on non-added display.");
+                return;
+            }
+
+            if (dr.mDisplayLayout != null) {
+                dr.mDisplayLayout.rotateTo(dr.mContext.getResources(), toRotation);
+            }
+
+            mChangeController.dispatchOnDisplayChange(
+                    wct, displayId, fromRotation, toRotation, null /* newDisplayAreaInfo */);
         }
     }
 

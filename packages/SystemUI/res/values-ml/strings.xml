@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"സ്ഥിരീകരിച്ചു"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"പൂർത്തിയാക്കാൻ സ്ഥിരീകരിക്കുക ടാപ്പ് ചെയ്യൂ"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"മുഖം ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തു"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"മുഖം ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തു. തുടരാൻ അമർത്തുക."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"മുഖം തിരിച്ചറിഞ്ഞു. തുടരാൻ അമർത്തുക."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"മുഖം തിരിച്ചറിഞ്ഞു. തുടരാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"സംരക്ഷിക്കാൻ കഴിയില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"സംരക്ഷിക്കാൻ കഴിയില്ല."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"കുറഞ്ഞത് 4 പ്രതീകങ്ങളെങ്കിലും ഉപയോഗിക്കുക"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g>-ൽ കുറവ് പ്രതീകങ്ങൾ ഉപയോഗിക്കുക"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ബിൽഡ് നമ്പർ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ക്ലിപ്പ്ബോർഡിലേക്ക് ബിൽഡ് നമ്പർ പകർത്തി."</string>
     <string name="basic_status" msgid="2315371112182658176">"സംഭാഷണം തുറക്കുക"</string>
@@ -1125,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"കൂടുതലറിയുക"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g> എന്നതിൽ കൂടുതലറിയുക"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> തുറക്കുക"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ആപ്പ് സജ്ജീകരിച്ചിട്ടുണ്ട്"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet-ലേക്ക് ഒരു കാർഡെങ്കിലും ചേർത്തിട്ടുണ്ട്"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ഒരു ക്യാമറാ ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ട്"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ആപ്പ് സജ്ജീകരിച്ചിട്ടുണ്ട്"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ഒരു ഉപകരണമെങ്കിലും ലഭ്യമാണ്"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"കുറിപ്പ് രേഖപ്പെടുത്തൽ കുറുക്കുവഴി ഉപയോഗിക്കുന്നതിന് ഒരു ഡിഫോൾട്ട് കുറിപ്പ് ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"കുറുക്കുവഴിയായി Wallet ആപ്പ് ചേർക്കാൻ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"കുറുക്കുവഴിയായി Wallet ആപ്പ് ചേർക്കാൻ, ഒരു കാർഡെങ്കിലും ചേർത്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"കുറുക്കുവഴിയായി QR കോഡ് സ്‌കാനർ ചേർക്കാൻ, ക്യാമറാ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"കുറുക്കുവഴിയായി Home ആപ്പ് ചേർക്കാൻ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ഒരു ഉപകരണമെങ്കിലും ലഭ്യമാണ്"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"കുറിപ്പ് രേഖപ്പെടുത്തൽ കുറുക്കുവഴി ഉപയോഗിക്കുന്നതിന് ഒരു ഡിഫോൾട്ട് കുറിപ്പ് ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"സ്പർശിച്ച് പിടിക്കുക കുറുക്കുവഴി"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"റദ്ദാക്കുക"</string>
@@ -1159,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"മുൻഗണനാ മോഡ് ഓണാണ്"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant സജീവമാണ്"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ക്രമീകരണത്തിൽ കുറിപ്പുകൾക്കുള്ള ഡിഫോൾട്ട് ആപ്പ് സജ്ജീകരിക്കുക"</string>
+    <string name="install_app" msgid="5066668100199613936">"ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ"</string>
 </resources>

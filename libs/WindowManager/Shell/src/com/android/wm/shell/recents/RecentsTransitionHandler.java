@@ -313,7 +313,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         private Pair<int[], TaskSnapshot[]> getSnapshotsForPausingTasks() {
             int[] taskIds = null;
             TaskSnapshot[] snapshots = null;
-            if (mPausingTasks.size() > 0) {
+            if (mPausingTasks != null && mPausingTasks.size() > 0) {
                 taskIds = new int[mPausingTasks.size()];
                 snapshots = new TaskSnapshot[mPausingTasks.size()];
                 try {
@@ -424,6 +424,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             // the change count). This lets us categorize things into above/below/between
             // while maintaining their relative ordering.
             final int belowLayers = info.getChanges().size();
+            final int middleLayers = info.getChanges().size() * 2;
             final int aboveLayers = info.getChanges().size() * 3;
             for (int i = 0; i < info.getChanges().size(); ++i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
@@ -441,14 +442,19 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                             belowLayers - i, info, t, mLeashMap);
                     apps.add(target);
                     if (TransitionUtil.isClosingType(change.getMode())) {
-                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                                "  adding pausing leaf taskId=%d", taskInfo.taskId);
-                        // raise closing (pausing) task to "above" layer so it isn't covered
-                        t.setLayer(target.leash, aboveLayers - i);
                         mPausingTasks.add(new TaskState(change, target.leash));
                         if (taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
+                            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                    "  adding pausing leaf home taskId=%d", taskInfo.taskId);
                             // This can only happen if we have a separate recents/home (3p launcher)
                             mPausingSeparateHome = true;
+                        } else {
+                            final int layer = aboveLayers - i;
+                            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                    "  adding pausing leaf taskId=%d at layer=%d",
+                                    taskInfo.taskId, layer);
+                            // raise closing (pausing) task to "above" layer so it isn't covered
+                            t.setLayer(target.leash, layer);
                         }
                         if (taskInfo.pictureInPictureParams != null
                                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
@@ -456,8 +462,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         }
                     } else if (taskInfo != null
                             && taskInfo.topActivityType == ACTIVITY_TYPE_RECENTS) {
-                        // There's a 3p launcher, so make sure recents goes above that.
-                        t.setLayer(target.leash, aboveLayers - i);
+                        final int layer = middleLayers - i;
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "  setting recents activity layer=%d", layer);
+                        // There's a 3p launcher, so make sure recents goes above that, but under
+                        // the pausing apps.
+                        t.setLayer(target.leash, layer);
                     } else if (taskInfo != null && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
                         // do nothing
                     } else if (TransitionUtil.isOpeningType(change.getMode())) {
@@ -468,16 +478,18 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 } else if (taskInfo != null && TransitionInfo.isIndependent(change, info)) {
                     // Root tasks
                     if (TransitionUtil.isClosingType(change.getMode())) {
+                        final int layer = aboveLayers - i;
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                                "  adding pausing taskId=%d", taskInfo.taskId);
+                                "  adding pausing taskId=%d at layer=%d", taskInfo.taskId, layer);
                         // raise closing (pausing) task to "above" layer so it isn't covered
-                        t.setLayer(change.getLeash(), aboveLayers - i);
+                        t.setLayer(change.getLeash(), layer);
                         mPausingTasks.add(new TaskState(change, null /* leash */));
                     } else if (TransitionUtil.isOpeningType(change.getMode())) {
+                        final int layer = belowLayers - i;
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                                "  adding opening taskId=%d", taskInfo.taskId);
+                                "  adding opening taskId=%d at layer=%d", taskInfo.taskId, layer);
                         // Put into the "below" layer space.
-                        t.setLayer(change.getLeash(), belowLayers - i);
+                        t.setLayer(change.getLeash(), layer);
                         mOpeningTasks.add(new TaskState(change, null /* leash */));
                     }
                 } else if (TransitionUtil.isDividerBar(change)) {

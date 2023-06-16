@@ -15,8 +15,6 @@
  */
 package com.android.systemui.navigationbar.gestural;
 
-import static android.view.InputDevice.SOURCE_MOUSE;
-import static android.view.InputDevice.SOURCE_TOUCHPAD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
@@ -951,12 +949,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mMLResults = 0;
             mLogGesture = false;
             mInRejectedExclusion = false;
-            // Trackpad back gestures don't have zones, so we don't need to check if the down event
-            // is within insets. Also we don't allow back for button press from the trackpad, and
-            // yet we do with a mouse.
             boolean isWithinInsets = isWithinInsets((int) ev.getX(), (int) ev.getY());
+            // Trackpad back gestures don't have zones, so we don't need to check if the down event
+            // is within insets.
             mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed
-                    && !isButtonPressFromTrackpad(ev)
                     && (isTrackpadMultiFingerSwipe || isWithinInsets)
                     && !mGestureBlockingActivityRunning
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
@@ -1067,11 +1063,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         }
 
         mProtoTracer.scheduleFrameUpdate();
-    }
-
-    private boolean isButtonPressFromTrackpad(MotionEvent ev) {
-        int sources = InputManager.getInstance().getInputDevice(ev.getDeviceId()).getSources();
-        return (sources & (SOURCE_MOUSE | SOURCE_TOUCHPAD)) == sources && ev.getButtonState() != 0;
     }
 
     private void dispatchToBackAnimation(MotionEvent event) {

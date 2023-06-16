@@ -4011,7 +4011,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mCentralSurfaces.resetUserExpandedStates();
             clearTemporaryViews();
             clearUserLockedViews();
-            cancelActiveSwipe();
+            resetAllSwipeState();
         }
     }
 
@@ -4077,7 +4077,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mGroupExpansionManager.collapseGroups();
                 mExpandHelper.cancelImmediately();
                 if (!mIsExpansionChanging) {
-                    cancelActiveSwipe();
+                    resetAllSwipeState();
                 }
                 finalizeClearAllAnimation();
             }
@@ -4406,7 +4406,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         boolean nowHiddenAtAll = mAmbientState.isHiddenAtAll();
         if (nowFullyHidden != wasFullyHidden) {
             updateVisibility();
-            mSwipeHelper.resetTouchState();
+            resetAllSwipeState();
         }
         if (!wasHiddenAtAll && nowHiddenAtAll) {
             resetExposedMenuView(true /* animate */, true /* animate */);
@@ -5866,9 +5866,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    private void cancelActiveSwipe() {
+    private void resetAllSwipeState() {
+        Trace.beginSection("NSSL.resetAllSwipeState()");
         mSwipeHelper.resetTouchState();
+        for (int i = 0; i < getChildCount(); i++) {
+            mSwipeHelper.forceResetSwipeState(getChildAt(i));
+        }
         updateContinuousShadowDrawing();
+        Trace.endSection();
     }
 
     void updateContinuousShadowDrawing() {

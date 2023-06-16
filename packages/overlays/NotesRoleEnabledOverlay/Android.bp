@@ -25,6 +25,7 @@ package {
 
 runtime_resource_overlay {
     name: "NotesRoleEnabledOverlay",
+    certificate: "platform",
     theme: "NotesRoleEnabled",
     product_specific: true,
 }

@@ -3443,6 +3443,7 @@ class Task extends TaskFragment {
                 : INVALID_TASK_ID;
         info.isFocused = isFocused();
         info.isVisible = hasVisibleChildren();
+        info.isVisibleRequested = isVisibleRequested();
         info.isSleeping = shouldSleepActivities();
         info.isLetterboxDoubleTapEnabled = top != null
                 && top.mLetterboxUiController.isLetterboxDoubleTapEducationEnabled();

@@ -404,8 +404,7 @@ constructor(
             val darkClockColor = wallpaperColorScheme?.accent2?.s600
             /** Note that when [wallpaperColors] is null, isWallpaperDark is true. */
             val isWallpaperDark: Boolean =
-                (wallpaperColors?.colorHints?.and(WallpaperColors.HINT_SUPPORTS_DARK_TEXT)) !=
-                    WallpaperColors.HINT_SUPPORTS_DARK_TEXT
+                (wallpaperColors?.colorHints?.and(WallpaperColors.HINT_SUPPORTS_DARK_TEXT)) == 0
             clock.events.onSeedColorChanged(
                 if (isWallpaperDark) lightClockColor else darkClockColor
             )

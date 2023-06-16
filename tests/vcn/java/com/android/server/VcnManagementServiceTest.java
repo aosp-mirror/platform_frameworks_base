@@ -118,6 +118,7 @@ import java.util.UUID;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnManagementServiceTest {
+    private static final String CONTEXT_ATTRIBUTION_TAG = "VCN";
     private static final String TEST_PACKAGE_NAME =
             VcnManagementServiceTest.class.getPackage().getName();
     private static final String TEST_PACKAGE_NAME_2 = "TEST_PKG_2";
@@ -177,6 +178,7 @@ public class VcnManagementServiceTest {
                     0 /* carrierId */,
                     0 /* profileClass */);
 
+    private final Context mMockContextWithoutAttributionTag = mock(Context.class);
     private final Context mMockContext = mock(Context.class);
     private final VcnManagementService.Dependencies mMockDeps =
             mock(VcnManagementService.Dependencies.class);
@@ -202,6 +204,10 @@ public class VcnManagementServiceTest {
     private final IBinder mMockIBinder = mock(IBinder.class);
 
     public VcnManagementServiceTest() throws Exception {
+        doReturn(mMockContext)
+                .when(mMockContextWithoutAttributionTag)
+                .createAttributionContext(CONTEXT_ATTRIBUTION_TAG);
+
         setupSystemService(
                 mMockContext, mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
         setupSystemService(
@@ -249,7 +255,7 @@ public class VcnManagementServiceTest {
         doReturn(bundle).when(mConfigReadWriteHelper).readFromDisk();
 
         setupMockedCarrierPrivilege(true);
-        mVcnMgmtSvc = new VcnManagementService(mMockContext, mMockDeps);
+        mVcnMgmtSvc = new VcnManagementService(mMockContextWithoutAttributionTag, mMockDeps);
         setupActiveSubscription(TEST_UUID_1);
 
         doReturn(mMockIBinder).when(mMockPolicyListener).asBinder();

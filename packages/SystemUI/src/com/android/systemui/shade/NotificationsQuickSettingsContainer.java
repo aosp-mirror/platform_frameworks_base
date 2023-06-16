@@ -55,6 +55,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private Consumer<QS> mQSFragmentAttachedListener = qs -> {};
     private QS mQs;
     private View mQSContainer;
+    private int mLastQSPaddingBottom;
 
     /**
      *  These are used to compute the bounding box containing the shade and the notification scrim,
@@ -83,6 +84,10 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         mQs = (QS) fragment;
         mQSFragmentAttachedListener.accept(mQs);
         mQSContainer = mQs.getView().findViewById(R.id.quick_settings_container);
+        // We need to restore the bottom padding as the fragment may have been recreated due to
+        // some special Configuration change, so we apply the last known padding (this will be
+        // correct even if it has changed while the fragment was destroyed and re-created).
+        setQSContainerPaddingBottom(mLastQSPaddingBottom);
     }
 
     @Override
@@ -109,6 +114,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     }
 
     public void setQSContainerPaddingBottom(int paddingBottom) {
+        mLastQSPaddingBottom = paddingBottom;
         if (mQSContainer != null) {
             mQSContainer.setPadding(
                     mQSContainer.getPaddingLeft(),

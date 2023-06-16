@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Kasvot tunnistettu"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Vahvistettu"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Valitse lopuksi Vahvista"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (2378151312221818694) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Avattu kasvojen avulla"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Avattu kasvojen avulla. Jatka painamalla."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Kasvot tunnistettu. Jatka painamalla."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Kasvot tunnistettu. Jatka lukituksen avauskuvakkeella."</string>
@@ -1004,8 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Tallennus ei onnistu. Yritä uudelleen."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Tallennus ei onnistu."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Käytä vähintään 4 merkkiä"</string>
-    <!-- no translation found for media_output_broadcast_edit_hint_no_more_than_max (3923625800037673922) -->
-    <skip />
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Käytä alle <xliff:g id="LENGTH">%1$d</xliff:g> merkkiä"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Koontiversion numero"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Koontiversion numero kopioitu leikepöydälle"</string>
     <string name="basic_status" msgid="2315371112182658176">"Avaa keskustelu"</string>
@@ -1125,12 +1123,18 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Lue lisää"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Lue lisää: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Avaa <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Sovellus on otettu käyttöön"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Ainakin yksi kortti on lisätty Walletiin"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Asenna kamerasovellus"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Sovellus on otettu käyttöön"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ainakin yksi laite on käytettävissä"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Valitse muistiinpanojen tekemisen oletussovellus, jota käytetään pikanäppäimen avulla"</string>
+    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
+    <skip />
+    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
+    <skip />
+    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
+    <skip />
+    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
+    <skip />
+    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Valitse sovellus"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Kosketa pikakuvaketta pitkään"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Peru"</string>
@@ -1159,4 +1163,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Tärkeät-tila on päällä"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant on aktiivinen"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Aseta oletusmuistiinpanosovellus Asetuksista"</string>
+    <string name="install_app" msgid="5066668100199613936">"Asenna sovellus"</string>
 </resources>

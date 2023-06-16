@@ -259,7 +259,7 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"Ойгоо туруу"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Түзмөк кубатталып жатканда экран өчпөйт"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI журналын иштетүү"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth таңгактарын алуу. (Бул жөндөөнү өзгөрткөндөн кийин Bluetooth\'ду өчүрүп / күйгүзүңүз)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth таңгактарын алуу. (Бул параметрди өзгөрткөндөн кийин Bluetooth\'ду өчүрүп / күйгүзүңүз)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM бөгөттөн чыгаруу"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Кайра жүктөгүчтү бөгөттөн чыгарууга уруксат берүү"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM бөгөттөн чыгарууга уруксатпы?"</string>

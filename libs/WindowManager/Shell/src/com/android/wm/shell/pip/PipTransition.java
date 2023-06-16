@@ -989,12 +989,7 @@ public class PipTransition extends PipTransitionController {
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull TaskInfo taskInfo) {
-        final int changeSize = info.getChanges().size();
-        if (changeSize < 4) {
-            throw new RuntimeException(
-                    "Got an exit-pip-to-split transition with unexpected change-list");
-        }
-        for (int i = changeSize - 1; i >= 0; i--) {
+        for (int i = info.getChanges().size() - 1; i >= 0; i--) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final int mode = change.getMode();
 
@@ -1023,24 +1018,17 @@ public class PipTransition extends PipTransitionController {
     private void resetPrevPip(@NonNull TransitionInfo.Change prevPipTaskChange,
             @NonNull SurfaceControl.Transaction startTransaction) {
         final SurfaceControl leash = prevPipTaskChange.getLeash();
-        final Rect bounds = prevPipTaskChange.getEndAbsBounds();
-        final Point offset = prevPipTaskChange.getEndRelOffset();
-        bounds.offset(-offset.x, -offset.y);
+        startTransaction.remove(leash);
 
-        startTransaction.setWindowCrop(leash, null);
-        startTransaction.setMatrix(leash, 1, 0, 0, 1);
-        startTransaction.setCornerRadius(leash, 0);
-        startTransaction.setPosition(leash, bounds.left, bounds.top);
-
-        if (mHasFadeOut && prevPipTaskChange.getTaskInfo().isVisible()) {
-            if (mPipAnimationController.getCurrentAnimator() != null) {
-                mPipAnimationController.getCurrentAnimator().cancel();
-            }
-            startTransaction.setAlpha(leash, 1);
-        }
         mHasFadeOut = false;
         mCurrentPipTaskToken = null;
-        mPipOrganizer.onExitPipFinished(prevPipTaskChange.getTaskInfo());
+
+        // clean-up the state in PipTaskOrganizer if the PipTaskOrganizer#onTaskAppeared() hasn't
+        // been called yet with its leash reference now pointing to a new SurfaceControl not
+        // matching the leash of the pip we are removing.
+        if (mPipOrganizer.getSurfaceControl() == leash) {
+            mPipOrganizer.onExitPipFinished(prevPipTaskChange.getTaskInfo());
+        }
     }
 
     @Override

@@ -187,9 +187,9 @@ public class KeyguardService extends Service {
         final IRemoteAnimationRunner runner, final boolean lockscreenLiveWallpaperEnabled) {
         return new IRemoteTransition.Stub() {
 
+            @GuardedBy("mLeashMap")
             private final ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = new ArrayMap<>();
             private final CounterRotator mCounterRotator = new CounterRotator();
-
 
             @GuardedBy("mLeashMap")
             private IRemoteTransitionFinishedCallback mFinishCallback = null;
@@ -200,40 +200,38 @@ public class KeyguardService extends Service {
                     throws RemoteException {
                 Slog.d(TAG, "Starts IRemoteAnimationRunner: info=" + info);
 
+                final RemoteAnimationTarget[] apps;
+                final RemoteAnimationTarget[] wallpapers;
+                final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
                 synchronized (mLeashMap) {
-                    final RemoteAnimationTarget[] apps =
-                            wrap(info, false /* wallpapers */, t, mLeashMap, mCounterRotator);
-                    final RemoteAnimationTarget[] wallpapers =
-                            wrap(info, true /* wallpapers */, t, mLeashMap, mCounterRotator);
-                    final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
-
-                    // Set alpha back to 1 for the independent changes because we will be animating
-                    // children instead.
-                    for (TransitionInfo.Change chg : info.getChanges()) {
-                        if (TransitionInfo.isIndependent(chg, info)) {
-                            t.setAlpha(chg.getLeash(), 1.f);
-                        }
-                    }
-                    initAlphaForAnimationTargets(t, apps);
-                    if (lockscreenLiveWallpaperEnabled) {
-                        initAlphaForAnimationTargets(t, wallpapers);
-                    }
-                    t.apply();
+                    apps = wrap(info, false /* wallpapers */, t, mLeashMap, mCounterRotator);
+                    wallpapers = wrap(info, true /* wallpapers */, t, mLeashMap, mCounterRotator);
                     mFinishCallback = finishCallback;
-                    runner.onAnimationStart(
-                            getTransitionOldType(info.getType(), info.getFlags(), apps),
-                            apps, wallpapers, nonApps,
-                            new IRemoteAnimationFinishedCallback.Stub() {
-                                @Override
-                                public void onAnimationFinished() throws RemoteException {
-                                    synchronized (mLeashMap) {
-                                        Slog.d(TAG, "Finish IRemoteAnimationRunner.");
-                                        finish();
-                                    }
-                                }
-                            }
-                    );
                 }
+
+                // Set alpha back to 1 for the independent changes because we will be animating
+                // children instead.
+                for (TransitionInfo.Change chg : info.getChanges()) {
+                    if (TransitionInfo.isIndependent(chg, info)) {
+                        t.setAlpha(chg.getLeash(), 1.f);
+                    }
+                }
+                initAlphaForAnimationTargets(t, apps);
+                if (lockscreenLiveWallpaperEnabled) {
+                    initAlphaForAnimationTargets(t, wallpapers);
+                }
+                t.apply();
+
+                runner.onAnimationStart(
+                        getTransitionOldType(info.getType(), info.getFlags(), apps),
+                        apps, wallpapers, nonApps,
+                        new IRemoteAnimationFinishedCallback.Stub() {
+                            @Override
+                            public void onAnimationFinished() throws RemoteException {
+                                Slog.d(TAG, "Finish IRemoteAnimationRunner.");
+                                finish();
+                            }
+                        });
             }
 
             public void mergeAnimation(IBinder candidateTransition, TransitionInfo candidateInfo,
@@ -247,10 +245,8 @@ public class KeyguardService extends Service {
                 }
 
                 try {
-                    synchronized (mLeashMap) {
-                        runner.onAnimationCancelled();
-                        finish();
-                    }
+                    runner.onAnimationCancelled();
+                    finish();
                 } catch (RemoteException e) {
                     // nothing, we'll just let it finish on its own I guess.
                 }
@@ -264,18 +260,22 @@ public class KeyguardService extends Service {
                 }
             }
 
-            @GuardedBy("mLeashMap")
             private void finish() throws RemoteException {
+                IRemoteTransitionFinishedCallback finishCallback = null;
                 SurfaceControl.Transaction finishTransaction = null;
-                if (mCounterRotator.getSurface() != null
-                        && mCounterRotator.getSurface().isValid()) {
-                    finishTransaction = new SurfaceControl.Transaction();
-                    mCounterRotator.cleanUp(finishTransaction);
-                }
-                mLeashMap.clear();
-                final IRemoteTransitionFinishedCallback finishCallback = mFinishCallback;
-                if (finishCallback != null) {
+
+                synchronized (mLeashMap) {
+                    if (mCounterRotator.getSurface() != null
+                            && mCounterRotator.getSurface().isValid()) {
+                        finishTransaction = new SurfaceControl.Transaction();
+                        mCounterRotator.cleanUp(finishTransaction);
+                    }
+                    mLeashMap.clear();
+                    finishCallback = mFinishCallback;
                     mFinishCallback = null;
+                }
+
+                if (finishCallback != null) {
                     finishCallback.onTransitionFinished(null /* wct */, finishTransaction);
                 } else if (finishTransaction != null) {
                     finishTransaction.apply();

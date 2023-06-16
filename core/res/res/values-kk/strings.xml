@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Шығу үшін жоғарыдан төмен қарай сырғытыңыз."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Түсінікті"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Жақсырақ көру үшін бұрыңыз."</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Жақсырақ көру үшін экранды бөлу режимінен шығыңыз."</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Жақсырақ көру үшін <xliff:g id="NAME">%s</xliff:g> қолданбасын толық экранда ашыңыз."</string>
     <string name="done_label" msgid="7283767013231718521">"Дайын"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Сағаттар айналымының қозғалтқышы"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Минут айналымын қозғалтқыш"</string>
@@ -1943,7 +1943,7 @@
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Ұсынылатын аймақтар"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Ұсынылған тілдер"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Ұсынылған аймақтар"</string>
-    <string name="language_picker_section_all" msgid="1985809075777564284">"Барлық тілдер"</string>
+    <string name="language_picker_section_all" msgid="1985809075777564284">"Барлық тіл"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Барлық аймақтар"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Іздеу"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"Қолданба қолжетімді емес"</string>
@@ -2289,7 +2289,7 @@
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Жаңа ұлғайту параметрлері"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Енді экранның бір бөлігін ұлғайтуға болады."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Параметрлер бөлімінен қосу"</string>
-    <string name="dismiss_action" msgid="1728820550388704784">"Қабылдамау"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Жабу"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонын блоктан шығарыңыз"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасын блоктан шығарыңыз"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; және барлық қолданбалар мен қызметтерге арналған."</string>

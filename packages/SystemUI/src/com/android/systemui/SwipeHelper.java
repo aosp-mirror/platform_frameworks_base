@@ -34,6 +34,7 @@ import android.app.PendingIntent;
 import android.content.res.Resources;
 import android.graphics.RectF;
 import android.os.Handler;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -277,9 +278,11 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
 
     // invalidate the view's own bounds all the way up the view hierarchy
     public static void invalidateGlobalRegion(View view) {
+        Trace.beginSection("SwipeHelper.invalidateGlobalRegion");
         invalidateGlobalRegion(
             view,
             new RectF(view.getLeft(), view.getTop(), view.getRight(), view.getBottom()));
+        Trace.endSection();
     }
 
     // invalidate a rectangle relative to the view's coordinate system all the way up the view
@@ -492,7 +495,7 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
                 }
                 if (!mCancelled || wasRemoved) {
                     mCallback.onChildDismissed(animView);
-                    resetSwipeOfView(animView);
+                    resetViewIfSwiping(animView);
                 }
                 if (endAction != null) {
                     endAction.accept(mCancelled);
@@ -547,7 +550,7 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
 
             if (!cancelled) {
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
-                resetSwipeOfView(animView);
+                resetViewIfSwiping(animView);
                 // Clear the snapped view after success, assuming it's not being swiped now
                 if (animView == mTouchedView && !mIsSwiping) {
                     mTouchedView = null;
@@ -811,7 +814,7 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
         return mIsSwiping ? mTouchedView : null;
     }
 
-    protected void resetSwipeOfView(View view) {
+    protected void resetViewIfSwiping(View view) {
         if (getSwipedView() == view) {
             resetSwipeState();
         }
@@ -823,6 +826,12 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
 
     public void resetTouchState() {
         resetSwipeStates(/* resetAll= */ true);
+    }
+
+    public void forceResetSwipeState(@NonNull View view) {
+        if (view.getTranslationX() == 0) return;
+        setTranslation(view, 0);
+        updateSwipeProgressFromOffset(view, /* dismissable= */ true, 0);
     }
 
     /** This method resets the swipe state, and if `resetAll` is true, also resets the snap state */

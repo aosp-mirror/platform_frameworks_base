@@ -208,7 +208,7 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
         @Override
         public void run() {
             final View host = mHost.get();
-            if (host != null) {
+            if (host != null && host.isVisibleToUser()) {
                 host.announceForAccessibility(mTextToAnnounce);
             }
         }

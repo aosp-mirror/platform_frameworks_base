@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Strjúktu niður frá efri brún til að hætta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ég skil"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Snúðu til að sjá betur"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Lokaðu skjáskiptingu til að sjá betur"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Opnaðu <xliff:g id="NAME">%s</xliff:g> á öllum skjánum til að fá betra yfirlit"</string>
     <string name="done_label" msgid="7283767013231718521">"Lokið"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Valskífa fyrir klukkustundir"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Valskífa fyrir mínútur"</string>
