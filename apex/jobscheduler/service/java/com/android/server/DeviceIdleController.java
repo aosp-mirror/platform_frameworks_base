@@ -374,6 +374,8 @@ public class DeviceIdleController extends SystemService
     private boolean mBatterySaverEnabled;
     @GuardedBy("this")
     private boolean mIsOffBody;
+    @GuardedBy("this")
+    private boolean mForceBodyState;
     private Sensor mOffBodySensor;
 
     /** Time in the elapsed realtime timebase when this listener last received a motion event. */
@@ -850,14 +852,24 @@ public class DeviceIdleController extends SystemService
                 return;
             }
             synchronized (DeviceIdleController.this) {
-                mIsOffBody = (event.values[0] == 0);
-                // Get into quick doze faster when the device is off body instead of taking
-                // traditional multi-stage approach.
-                updateQuickDozeFlagLocked();
-                if (!mIsOffBody && !mBatterySaverEnabled) {
-                    mActiveReason = ACTIVE_REASON_ONBODY;
-                    becomeActiveLocked("onbody", Process.myUid());
+                final boolean isOffBody = (event.values[0] == 0);
+                if (!mForceBodyState && mIsOffBody != isOffBody) {
+                    // Only consider the sensor value change when mForceBodyState is false, which
+                    // is used to enforce the mIsOffBody to be set by the adb shell command.
+                    mIsOffBody = isOffBody;
+                    onOffBodyChangedLocked();
                 }
+            }
+        }
+
+        @GuardedBy("DeviceIdleController.this")
+        public void onOffBodyChangedLocked() {
+            // Get into quick doze faster when the device is off body instead of taking
+            // traditional multi-stage approach.
+            updateQuickDozeFlagLocked();
+            if (!mIsOffBody && !mBatterySaverEnabled) {
+                mActiveReason = ACTIVE_REASON_ONBODY;
+                becomeActiveLocked("onbody", Process.myUid());
             }
         }
 
@@ -4468,8 +4480,10 @@ public class DeviceIdleController extends SystemService
         pw.println("  force-inactive");
         pw.println("    Force to be inactive, ready to freely step idle states.");
         pw.println("  unforce");
-        pw.println("    Resume normal functioning after force-idle or force-inactive.");
-        pw.println("  get [light|deep|force|screen|charging|network]");
+        pw.println(
+                "    Resume normal functioning after force-idle or force-inactive or "
+                        + "force-offbody or force-onbody.");
+        pw.println("  get [light|deep|force|screen|charging|network|offbody|forcebodystate]");
         pw.println("    Retrieve the current given state.");
         pw.println("  disable [light|deep|all]");
         pw.println("    Completely disable device idle mode.");
@@ -4503,6 +4517,14 @@ public class DeviceIdleController extends SystemService
                 + "and any [-d] is ignored");
         pw.println("  motion");
         pw.println("    Simulate a motion event to bring the device out of deep doze");
+        pw.println("  force-offbody");
+        pw.println(
+                "    Simulate a low latency body sensor detecting a device is offbody. "
+                        + "mForceBodyState will be set to true to ignore body sensor reading.");
+        pw.println("  force-onbody");
+        pw.println(
+                "    Simulate a low latency body sensor detecting a device is onbody. "
+                        + "mForceBodyState will be set to true to ignore body sensor reading.");
     }
 
     class Shell extends ShellCommand {
@@ -4634,6 +4656,8 @@ public class DeviceIdleController extends SystemService
                     pw.print(lightStateToString(mLightState));
                     pw.print(", deep state: ");
                     pw.println(stateToString(mState));
+                    mForceBodyState = false;
+                    pw.println("mForceBodyState: " + mForceBodyState);
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
@@ -4654,6 +4678,8 @@ public class DeviceIdleController extends SystemService
                             case "screen": pw.println(mScreenOn); break;
                             case "charging": pw.println(mCharging); break;
                             case "network": pw.println(mNetworkConnected); break;
+                            case "offbody": pw.println(mIsOffBody); break;
+                            case "forcebodystate": pw.println(mForceBodyState); break;
                             default: pw.println("Unknown get option: " + arg); break;
                         }
                     } finally {
@@ -4946,6 +4972,36 @@ public class DeviceIdleController extends SystemService
                     pw.print(lightStateToString(mLightState));
                     pw.print(", deep state: ");
                     pw.println(stateToString(mState));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        } else if ("force-offbody".equals(cmd)) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+            synchronized (DeviceIdleController.this) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mForceBodyState = true;
+                    pw.println("mForceBodyState: " + mForceBodyState);
+                    mIsOffBody = true;
+                    pw.println("mIsOffBody: " + mIsOffBody);
+                    mLowLatencyOffBodyListener.onOffBodyChangedLocked();
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        } else if ("force-onbody".equals(cmd)) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+            synchronized (DeviceIdleController.this) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mForceBodyState = true;
+                    pw.println("mForceBodyState: " + mForceBodyState);
+                    mIsOffBody = false;
+                    pw.println("mIsOffBody: " + mIsOffBody);
+                    mLowLatencyOffBodyListener.onOffBodyChangedLocked();
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
