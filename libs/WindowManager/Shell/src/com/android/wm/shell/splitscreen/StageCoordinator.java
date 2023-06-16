@@ -2377,6 +2377,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, out);
                 }
             }
+
+            // When split in the background, it should be only opening/dismissing transition and
+            // would keep out not empty. Prevent intercepting all transitions for split screen when
+            // it is in the background and not identify to handle it.
+            return (!out.isEmpty() || isSplitScreenVisible()) ? out : null;
         } else {
             if (isOpening && getStageOfTask(triggerTask) != null) {
                 // One task is appearing into split, prepare to enter split screen.
@@ -2385,8 +2390,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                         TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
             }
+            return out;
         }
-        return out;
     }
 
     /**
