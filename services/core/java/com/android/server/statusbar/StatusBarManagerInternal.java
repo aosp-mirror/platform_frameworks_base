@@ -19,6 +19,7 @@ package com.android.server.statusbar;
 import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
+import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.WindowInsets.Type.InsetsType;
@@ -54,13 +55,13 @@ public interface StatusBarManagerInternal {
      * @param displayId The display to which the IME is bound to.
      * @param token The IME token.
      * @param vis Bit flags about the IME visibility.
-     *            (e.g. {@link android.inputmethodservice.InputMethodService#IME_ACTIVE})
      * @param backDisposition Bit flags about the IME back disposition.
-     *         (e.g. {@link android.inputmethodservice.InputMethodService#BACK_DISPOSITION_DEFAULT})
      * @param showImeSwitcher {@code true} when the IME switcher button should be shown.
      */
-    void setImeWindowStatus(int displayId, IBinder token, int vis,
-            int backDisposition, boolean showImeSwitcher);
+    void setImeWindowStatus(int displayId, IBinder token,
+            @InputMethodService.ImeWindowVisibility int vis,
+            @InputMethodService.BackDispositionMode int backDisposition,
+            boolean showImeSwitcher);
 
     /**
      * See {@link android.app.StatusBarManager#setIcon(String, int, int, String)}.
