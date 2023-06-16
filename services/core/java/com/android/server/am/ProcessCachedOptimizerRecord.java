@@ -127,6 +127,12 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     private @UptimeMillisLong long mEarliestFreezableTimeMillis;
 
+    /**
+     * This is the most recently used timeout for freezing the app in millis
+     */
+    @GuardedBy("mProcLock")
+    private long mLastUsedTimeout;
+
     @GuardedBy("mProcLock")
     long getLastCompactTime() {
         return mLastCompactTime;
@@ -279,6 +285,16 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     void setEarliestFreezableTime(@UptimeMillisLong long earliestFreezableTimeMillis) {
         mEarliestFreezableTimeMillis = earliestFreezableTimeMillis;
+    }
+
+    @GuardedBy("mProcLock")
+    long getLastUsedTimeout() {
+        return mLastUsedTimeout;
+    }
+
+    @GuardedBy("mProcLock")
+    void setLastUsedTimeout(long lastUsedTimeout) {
+        mLastUsedTimeout = lastUsedTimeout;
     }
 
     @GuardedBy("mProcLock")
