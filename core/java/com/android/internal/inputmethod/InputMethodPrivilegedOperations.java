@@ -20,6 +20,7 @@ import android.annotation.AnyThread;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -105,14 +106,10 @@ public final class InputMethodPrivilegedOperations {
      *
      * @param vis visibility flags
      * @param backDisposition disposition flags
-     * @see android.inputmethodservice.InputMethodService#IME_ACTIVE
-     * @see android.inputmethodservice.InputMethodService#IME_VISIBLE
-     * @see android.inputmethodservice.InputMethodService#IME_INVISIBLE
-     * @see android.inputmethodservice.InputMethodService#BACK_DISPOSITION_DEFAULT
-     * @see android.inputmethodservice.InputMethodService#BACK_DISPOSITION_ADJUST_NOTHING
      */
     @AnyThread
-    public void setImeWindowStatusAsync(int vis, int backDisposition) {
+    public void setImeWindowStatusAsync(@InputMethodService.ImeWindowVisibility int vis,
+            @InputMethodService.BackDispositionMode int backDisposition) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;

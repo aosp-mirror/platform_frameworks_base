@@ -104,7 +104,8 @@ public class Utilities {
      * @return updated set of flags from InputMethodService based off {@param oldHints}
      *          Leaves original hints unmodified
      */
-    public static int calculateBackDispositionHints(int oldHints, int backDisposition,
+    public static int calculateBackDispositionHints(int oldHints,
+            @InputMethodService.BackDispositionMode int backDisposition,
             boolean imeShown, boolean showImeSwitcher) {
         int hints = oldHints;
         switch (backDisposition) {
