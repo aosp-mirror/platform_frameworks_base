@@ -458,7 +458,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             updateWarmProcess(queue);
 
             final boolean processWarm = queue.isProcessWarm();
-            if (!processWarm) {
+            if (processWarm) {
+                mService.mOomAdjuster.unfreezeTemporarily(queue.app,
+                        CachedAppOptimizer.UNFREEZE_REASON_START_RECEIVER);
+                // The process could be killed as part of unfreezing. So, check again if it
+                // is still warm.
+                if (!queue.isProcessWarm()) {
+                    queue = nextQueue;
+                    enqueueUpdateRunningList();
+                    continue;
+                }
+            } else {
                 // We only offer to run one cold-start at a time to preserve
                 // system resources; below we either claim that single slot or
                 // skip to look for another warm process
@@ -530,6 +540,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         mRunningColdStart.reEnqueueActiveBroadcast();
         demoteFromRunningLocked(mRunningColdStart);
         clearRunningColdStart();
+        enqueueUpdateRunningList();
     }
 
     private void checkPendingColdStartValidity() {
@@ -564,6 +575,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @Override
     public boolean onApplicationAttachedLocked(@NonNull ProcessRecord app)
             throws BroadcastDeliveryFailedException {
+        if (DEBUG_BROADCAST) {
+            logv("Process " + app + " is attached");
+        }
         // Process records can be recycled, so always start by looking up the
         // relevant per-process queue
         final BroadcastProcessQueue queue = getProcessQueue(app);
@@ -613,18 +627,21 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public void onApplicationCleanupLocked(@NonNull ProcessRecord app) {
-        // Process records can be recycled, so always start by looking up the
-        // relevant per-process queue
-        final BroadcastProcessQueue queue = getProcessQueue(app);
-        if (queue != null) {
-            setQueueProcess(queue, null);
+        if (DEBUG_BROADCAST) {
+            logv("Process " + app + " is cleaned up");
         }
 
-        if ((mRunningColdStart != null) && (mRunningColdStart == queue)) {
+        // This cleanup callback could be for an old process and not for the one we are waiting
+        // on, so explicitly check if this for the same ProcessRecord that a queue has.
+        final BroadcastProcessQueue queue = getProcessQueue(app);
+        if ((mRunningColdStart != null) && (mRunningColdStart == queue)
+                && mRunningColdStart.app == app) {
             clearRunningColdStart();
         }
 
-        if (queue != null) {
+        if (queue != null && queue.app == app) {
+            setQueueProcess(queue, null);
+
             // If queue was running a broadcast, fail it
             if (queue.isActive()) {
                 finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE,
@@ -1073,6 +1090,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 // If we were trying to deliver a manifest broadcast, throw the error as we need
                 // to try redelivering the broadcast to this receiver.
                 if (receiver instanceof ResolveInfo) {
+                    mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);
                     throw new BroadcastDeliveryFailedException(e);
                 }
                 finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE,
