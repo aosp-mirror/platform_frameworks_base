@@ -1419,7 +1419,7 @@ public final class AssetManager implements AutoCloseable {
      * <a href="https://tools.ietf.org/html/bcp47">BCP-47</a> language tags and can be
      * parsed using {@link Locale#forLanguageTag(String)}.
      *
-     * <p>On SDK 20 (Android 4.4W: Kitkat for watches) and below, locale strings
+     * <p>On SDK 20 (Android 4.4W: KitKat for watches) and below, locale strings
      * are of the form {@code ll_CC} where {@code ll} is a two letter language code,
      * and {@code CC} is a two letter country code.
      */
