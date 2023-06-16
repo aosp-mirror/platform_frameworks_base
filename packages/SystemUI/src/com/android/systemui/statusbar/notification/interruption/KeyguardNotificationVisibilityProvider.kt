@@ -180,8 +180,8 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
     }
 
     private fun shouldHideIfEntrySilent(entry: ListEntry): Boolean = when {
-        // Show if high priority (not hidden)
-        highPriorityProvider.isHighPriority(entry) -> false
+        // Show if explicitly high priority (not hidden)
+        highPriorityProvider.isExplicitlyHighPriority(entry) -> false
         // Ambient notifications are hidden always from lock screen
         entry.representativeEntry?.isAmbient == true -> true
         // [Now notification is silent]
