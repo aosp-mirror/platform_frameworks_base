@@ -1199,11 +1199,16 @@ public class AudioDeviceInventory {
                     AudioDeviceInfo device = Stream.of(connectedDevices)
                             .filter(d -> d.getInternalType() == ada.getInternalType())
                             .filter(d -> (!AudioSystem.isBluetoothDevice(d.getInternalType())
-                                            || (d.getAddress() == ada.getAddress())))
+                                            || (d.getAddress().equals(ada.getAddress()))))
                             .findFirst()
                             .orElse(null);
 
                     if (device == null) {
+                        if (AudioService.DEBUG_DEVICES) {
+                            Slog.i(TAG, "purgeRoles() removing device: " + ada.toString()
+                                    + ", for strategy: " + keyRole.first
+                                    + " and role: " + keyRole.second);
+                        }
                         asi.deviceRoleAction(keyRole.first, keyRole.second, Arrays.asList(ada));
                         itDev.remove();
                     }
