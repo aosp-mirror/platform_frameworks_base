@@ -23,7 +23,6 @@ import android.service.dreams.IDreamManager;
 import androidx.annotation.Nullable;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.keyguard.clock.ClockInfoModule;
 import com.android.keyguard.dagger.ClockRegistryModule;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
@@ -160,7 +159,6 @@ import javax.inject.Named;
             BiometricsModule.class,
             BouncerViewModule.class,
             ClipboardOverlayModule.class,
-            ClockInfoModule.class,
             ClockRegistryModule.class,
             CommonRepositoryModule.class,
             ConnectivityModule.class,
