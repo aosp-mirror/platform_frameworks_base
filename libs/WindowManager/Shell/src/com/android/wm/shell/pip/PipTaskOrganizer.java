@@ -1146,7 +1146,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void setPipVisibility(boolean visible) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "setPipVisibility: %s, state=%s visible=%s",
-                mTaskInfo.topActivity, mPipTransitionState, visible);
+                (mTaskInfo != null ? mTaskInfo.topActivity : null), mPipTransitionState, visible);
         if (!isInPip()) {
             return;
         }
