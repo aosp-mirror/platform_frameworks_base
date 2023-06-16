@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
@@ -131,7 +130,6 @@ open class ChangeAppRotationTest(flicker: FlickerTest) : RotationTransition(flic
 
     @Test
     @PlatinumTest(focusArea = "framework")
-    @IwTest(focusArea = "framework")
     override fun cujCompleted() {
         super.cujCompleted()
         focusChanges()
