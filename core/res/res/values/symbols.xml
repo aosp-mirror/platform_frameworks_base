@@ -3936,7 +3936,6 @@
 
   <!-- From media projection -->
   <java-symbol type="string" name="config_mediaProjectionPermissionDialogComponent" />
-  <java-symbol type="string" name="config_batterySaverDeviceSpecificConfig" />
 
   <!-- Compile SDK check -->
   <java-symbol type="layout" name="unsupported_compile_sdk_dialog_content" />
@@ -4000,11 +3999,30 @@
   <java-symbol type="string" name="notification_app_name_system" />
   <java-symbol type="string" name="notification_app_name_settings" />
 
+  <!-- Battery saver config -->
   <java-symbol type="integer" name="config_lowBatteryAutoTriggerDefaultLevel" />
+  <java-symbol type="string" name="config_batterySaverDeviceSpecificConfig" />
   <java-symbol type="bool" name="config_batterySaverStickyBehaviourDisabled" />
   <java-symbol type="integer" name="config_dynamicPowerSavingsDefaultDisableThreshold" />
   <java-symbol type="string" name="config_batterySaverScheduleProvider" />
   <java-symbol type="string" name="config_powerSaveModeChangedListenerPackage" />
+  <java-symbol type="dimen" name="config_batterySaver_full_adjustBrightnessFactor" />
+  <java-symbol type="bool" name="config_batterySaver_full_deferFullBackup" />
+  <java-symbol type="bool" name="config_batterySaver_full_deferKeyValueBackup" />
+  <java-symbol type="bool" name="config_batterySaver_full_disableAnimation" />
+  <java-symbol type="bool" name="config_batterySaver_full_disableAod" />
+  <java-symbol type="bool" name="config_batterySaver_full_disableLaunchBoost" />
+  <java-symbol type="bool" name="config_batterySaver_full_disableOptionalSensors" />
+  <java-symbol type="bool" name="config_batterySaver_full_disableVibration" />
+  <java-symbol type="bool" name="config_batterySaver_full_enableAdjustBrightness" />
+  <java-symbol type="bool" name="config_batterySaver_full_enableDataSaver" />
+  <java-symbol type="bool" name="config_batterySaver_full_enableFirewall" />
+  <java-symbol type="bool" name="config_batterySaver_full_enableNightMode" />
+  <java-symbol type="bool" name="config_batterySaver_full_enableQuickDoze" />
+  <java-symbol type="bool" name="config_batterySaver_full_forceAllAppsStandby" />
+  <java-symbol type="bool" name="config_batterySaver_full_forceBackgroundCheck" />
+  <java-symbol type="integer" name="config_batterySaver_full_locationMode" />
+  <java-symbol type="integer" name="config_batterySaver_full_soundTriggerMode" />
 
   <!-- For car devices -->
   <java-symbol type="string" name="car_loading_profile" />

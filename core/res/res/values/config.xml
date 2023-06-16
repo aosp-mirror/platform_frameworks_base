@@ -4803,8 +4803,6 @@
     <!-- Size of icon shown beside a preference locked by admin -->
     <dimen name="config_restrictedIconSize">@dimen/restricted_icon_size_material</dimen>
 
-    <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
-
     <!-- Component name that should be granted Notification Assistant access -->
     <string name="config_defaultAssistantAccessComponent" translatable="false">android.ext.services/android.ext.services.notification.Assistant</string>
 
@@ -4833,12 +4831,6 @@
 
     <!-- Default value set for battery percentage in status bar false = disabled, true = enabled -->
     <bool name="config_defaultBatteryPercentageSetting">false</bool>
-
-    <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
-    <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
-
-    <!-- Config flag to track default disable threshold for Dynamic power savings enabled battery saver. -->
-    <integer name="config_dynamicPowerSavingsDefaultDisableThreshold">80</integer>
 
     <!-- Model of potentially misprovisioned devices. If none is specified in an overlay, an
          empty string is passed in. -->

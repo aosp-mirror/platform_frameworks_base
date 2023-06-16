@@ -19,6 +19,7 @@ import android.annotation.IntDef;
 import android.app.UiModeManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatterySaverPolicyConfig;
@@ -162,26 +163,8 @@ public class BatterySaverPolicy extends ContentObserver implements
 
     private static final Policy DEFAULT_ADAPTIVE_POLICY = OFF_POLICY;
 
-    private static final Policy DEFAULT_FULL_POLICY = new Policy(
-            0.5f,  /* adjustBrightnessFactor */
-            true,  /* advertiseIsEnabled */
-            true,  /* deferFullBackup */
-            true,  /* deferKeyValueBackup */
-            false, /* disableAnimation */
-            true,  /* disableAod */
-            true,  /* disableLaunchBoost */
-            true,  /* disableOptionalSensors */
-            false,  /* disableVibration */
-            false, /* enableAdjustBrightness */
-            false, /* enableDataSaver */
-            true,  /* enableFirewall */
-            true, /* enableNightMode */
-            true, /* enableQuickDoze */
-            true, /* forceAllAppsStandby */
-            true, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_FOREGROUND_ONLY, /* locationMode */
-            PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY /* soundTriggerMode */
-    );
+    /** The base default full policy for the device. */
+    private final Policy DEFAULT_FULL_POLICY;
 
     private final Object mLock;
     private final Handler mHandler;
@@ -222,13 +205,13 @@ public class BatterySaverPolicy extends ContentObserver implements
     @GuardedBy("mLock")
     private Policy mAdaptivePolicy = DEFAULT_ADAPTIVE_POLICY;
 
-    /** The current default full policy. */
+    /** The current default full policy. This may be modified by Settings or DeviceConfig flags. */
     @GuardedBy("mLock")
-    private Policy mDefaultFullPolicy = DEFAULT_FULL_POLICY;
+    private Policy mDefaultFullPolicy;
 
     /** The policy to be used for full battery saver. */
     @GuardedBy("mLock")
-    private Policy mFullPolicy = DEFAULT_FULL_POLICY;
+    private Policy mFullPolicy;
 
     /**
      * The current effective policy. This is based on the current policy level's policy, with any
@@ -273,6 +256,30 @@ public class BatterySaverPolicy extends ContentObserver implements
         mContext = context;
         mContentResolver = context.getContentResolver();
         mBatterySavingStats = batterySavingStats;
+
+        final Resources res = context.getResources();
+        DEFAULT_FULL_POLICY = new Policy(
+                res.getFloat(R.dimen.config_batterySaver_full_adjustBrightnessFactor),
+                true,  /* advertiseIsEnabled */
+                res.getBoolean(R.bool.config_batterySaver_full_deferFullBackup),
+                res.getBoolean(R.bool.config_batterySaver_full_deferKeyValueBackup),
+                res.getBoolean(R.bool.config_batterySaver_full_disableAnimation),
+                res.getBoolean(R.bool.config_batterySaver_full_disableAod),
+                res.getBoolean(R.bool.config_batterySaver_full_disableLaunchBoost),
+                res.getBoolean(R.bool.config_batterySaver_full_disableOptionalSensors),
+                res.getBoolean(R.bool.config_batterySaver_full_disableVibration),
+                res.getBoolean(R.bool.config_batterySaver_full_enableAdjustBrightness),
+                res.getBoolean(R.bool.config_batterySaver_full_enableDataSaver),
+                res.getBoolean(R.bool.config_batterySaver_full_enableFirewall),
+                res.getBoolean(R.bool.config_batterySaver_full_enableNightMode),
+                res.getBoolean(R.bool.config_batterySaver_full_enableQuickDoze),
+                res.getBoolean(R.bool.config_batterySaver_full_forceAllAppsStandby),
+                res.getBoolean(R.bool.config_batterySaver_full_forceBackgroundCheck),
+                res.getInteger(R.integer.config_batterySaver_full_locationMode),
+                res.getInteger(R.integer.config_batterySaver_full_soundTriggerMode)
+        );
+        mDefaultFullPolicy = DEFAULT_FULL_POLICY;
+        mFullPolicy = DEFAULT_FULL_POLICY;
     }
 
     /**
