@@ -185,4 +185,10 @@ class PackageUserStateDefault implements PackageUserStateInternal {
             @NonNull ComponentName componentName) {
         return null;
     }
+
+    @Nullable
+    @Override
+    public ArchiveState getArchiveState() {
+        return null;
+    }
 }

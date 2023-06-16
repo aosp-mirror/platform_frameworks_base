@@ -68,6 +68,7 @@ import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
@@ -864,6 +865,34 @@ public class PackageManagerSettingsTests {
     }
 
     @Test
+    public void testWriteReadArchiveState() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        ArchiveState archiveState = new ArchiveState(
+                List.of(new ArchiveState.ArchiveActivityInfo("title1", Path.of("/path1"),
+                                Path.of("/monochromePath1")),
+                        new ArchiveState.ArchiveActivityInfo("title2", Path.of("/path2"),
+                                Path.of("/monochromePath2"))),
+                "installerTitle");
+        packageSetting.modifyUserState(UserHandle.SYSTEM.getIdentifier()).setArchiveState(
+                archiveState);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /*sync=*/true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+
+        Truth.assertThat(settings.getPackageLPr(PACKAGE_NAME_1).getStateForUser(
+                UserHandle.SYSTEM).getArchiveState()).isEqualTo(archiveState);
+    }
+
+    @Test
     public void testPackageRestrictionsDistractionFlagsDefault() {
         final PackageSetting defaultSetting = createPackageSetting(PACKAGE_NAME_1);
         assertThat(defaultSetting.getDistractionFlags(0), is(PackageManager.RESTRICTION_NONE));
@@ -971,7 +1000,7 @@ public class PackageManagerSettingsTests {
         origPkgSetting01.setUserState(0, 100, 1, true, false, false, false, 0, null, false,
                 false, "lastDisabledCaller", new ArraySet<>(new String[]{"enabledComponent1"}),
                 new ArraySet<>(new String[]{"disabledComponent1"}), 0, 0, "harmfulAppWarning",
-                "splashScreenTheme", 1000L, PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
+                "splashScreenTheme", 1000L, PackageManager.USER_MIN_ASPECT_RATIO_UNSET, null);
         final PersistableBundle appExtras1 = createPersistableBundle(
                 PACKAGE_NAME_1, 1L, 0.01, true, "appString1");
         final PersistableBundle launcherExtras1 = createPersistableBundle(
