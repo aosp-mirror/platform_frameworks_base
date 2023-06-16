@@ -141,7 +141,12 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 // Since Quick Share target recommendation does not rely on image URL, it is
                 // queried and surfaced before image compress/export. Action intent would not be
                 // used, because it does not contain image URL.
-                queryQuickShareAction(image, user);
+                Notification.Action quickShare =
+                        queryQuickShareAction(mScreenshotId, image, user, null);
+                if (quickShare != null) {
+                    mQuickShareData.quickShareAction = quickShare;
+                    mParams.mQuickShareActionsReadyListener.onActionsReady(mQuickShareData);
+                }
             }
 
             // Call synchronously here since already on a background thread.
@@ -180,9 +185,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     smartActionsEnabled);
             mImageData.deleteAction = createDeleteAction(mContext, mContext.getResources(), uri,
                     smartActionsEnabled);
-            mImageData.quickShareAction = createQuickShareAction(mContext,
-                    mQuickShareData.quickShareAction, uri);
-            mImageData.subject = getSubjectString();
+            mImageData.quickShareAction = createQuickShareAction(
+                    mQuickShareData.quickShareAction, mScreenshotId, uri, mImageTime, image,
+                    user);
+            mImageData.subject = getSubjectString(mImageTime);
 
             mParams.mActionsReadyListener.onActionsReady(mImageData);
             if (DEBUG_CALLBACK) {
@@ -257,7 +263,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}),
                     new ClipData.Item(uri));
             sharingIntent.setClipData(clipdata);
-            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getSubjectString());
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getSubjectString(mImageTime));
             sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
@@ -423,60 +429,73 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     }
 
     /**
-     * Populate image uri into intent of Quick Share action.
+     * Wrap the quickshare intent and populate the fillin intent with the URI
      */
     @VisibleForTesting
-    private Notification.Action createQuickShareAction(Context context, Notification.Action action,
-            Uri uri) {
-        if (action == null) {
+    Notification.Action createQuickShareAction(
+            Notification.Action quickShare, String screenshotId, Uri uri, long imageTime,
+            Bitmap image, UserHandle user) {
+        if (quickShare == null) {
             return null;
+        } else if (quickShare.actionIntent.isImmutable()) {
+            Notification.Action quickShareWithUri =
+                    queryQuickShareAction(screenshotId, image, user, uri);
+            if (quickShareWithUri == null
+                    || !quickShareWithUri.title.toString().contentEquals(quickShare.title)) {
+                return null;
+            }
+            quickShare = quickShareWithUri;
         }
-        // Populate image URI into Quick Share chip intent
-        Intent sharingIntent = action.actionIntent.getIntent();
-        sharingIntent.setType("image/png");
-        sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
-        String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        // Include URI in ClipData also, so that grantPermission picks it up.
-        // We don't use setData here because some apps interpret this as "to:".
-        ClipData clipdata = new ClipData(new ClipDescription("content",
-                new String[]{"image/png"}),
-                new ClipData.Item(uri));
-        sharingIntent.setClipData(clipdata);
-        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        PendingIntent updatedPendingIntent = PendingIntent.getActivity(
-                context, 0, sharingIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        // Proxy smart actions through {@link SmartActionsReceiver} for logging smart actions.
-        Bundle extras = action.getExtras();
+        Intent wrappedIntent = new Intent(mContext, SmartActionsReceiver.class)
+                .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, quickShare.actionIntent)
+                .putExtra(ScreenshotController.EXTRA_ACTION_INTENT_FILLIN,
+                        createFillInIntent(uri, imageTime))
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        Bundle extras = quickShare.getExtras();
         String actionType = extras.getString(
                 ScreenshotNotificationSmartActionsProvider.ACTION_TYPE,
                 ScreenshotNotificationSmartActionsProvider.DEFAULT_ACTION_TYPE);
-        Intent intent = new Intent(context, SmartActionsReceiver.class)
-                .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, updatedPendingIntent)
-                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         // We only query for quick share actions when smart actions are enabled, so we can assert
         // that it's true here.
-        addIntentExtras(mScreenshotId, intent, actionType, true /* smartActionsEnabled */);
-        PendingIntent broadcastIntent = PendingIntent.getBroadcast(context,
-                mRandom.nextInt(),
-                intent,
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        return new Notification.Action.Builder(action.getIcon(), action.title,
-                broadcastIntent).setContextual(true).addExtras(extras).build();
+        addIntentExtras(screenshotId, wrappedIntent, actionType, true /* smartActionsEnabled */);
+        PendingIntent broadcastIntent =
+                PendingIntent.getBroadcast(mContext, mRandom.nextInt(), wrappedIntent,
+                        PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        return new Notification.Action.Builder(quickShare.getIcon(), quickShare.title,
+                broadcastIntent)
+                .setContextual(true)
+                .addExtras(extras)
+                .build();
+    }
+
+    private Intent createFillInIntent(Uri uri, long imageTime) {
+        Intent fillIn = new Intent();
+        fillIn.setType("image/png");
+        fillIn.putExtra(Intent.EXTRA_STREAM, uri);
+        fillIn.putExtra(Intent.EXTRA_SUBJECT, getSubjectString(imageTime));
+        // Include URI in ClipData also, so that grantPermission picks it up.
+        // We don't use setData here because some apps interpret this as "to:".
+        ClipData clipData = new ClipData(
+                new ClipDescription("content", new String[]{"image/png"}),
+                new ClipData.Item(uri));
+        fillIn.setClipData(clipData);
+        fillIn.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        return fillIn;
     }
 
     /**
      * Query and surface Quick Share chip if it is available. Action intent would not be used,
      * because it does not contain image URL which would be populated in {@link
-     * #createQuickShareAction(Context, Notification.Action, Uri)}
+     * #createQuickShareAction(Notification.Action, String, Uri, long, Bitmap, UserHandle)}
      */
-    private void queryQuickShareAction(Bitmap image, UserHandle user) {
+
+    @VisibleForTesting
+    Notification.Action queryQuickShareAction(
+            String screenshotId, Bitmap image, UserHandle user, Uri uri) {
         CompletableFuture<List<Notification.Action>> quickShareActionsFuture =
                 mScreenshotSmartActions.getSmartActionsFuture(
-                        mScreenshotId, null, image, mSmartActionsProvider,
+                        screenshotId, uri, image, mSmartActionsProvider,
                         ScreenshotSmartActionType.QUICK_SHARE_ACTION,
                         true /* smartActionsEnabled */, user);
         int timeoutMs = DeviceConfig.getInt(
@@ -485,17 +504,17 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 500);
         List<Notification.Action> quickShareActions =
                 mScreenshotSmartActions.getSmartActions(
-                        mScreenshotId, quickShareActionsFuture, timeoutMs,
+                        screenshotId, quickShareActionsFuture, timeoutMs,
                         mSmartActionsProvider,
                         ScreenshotSmartActionType.QUICK_SHARE_ACTION);
         if (!quickShareActions.isEmpty()) {
-            mQuickShareData.quickShareAction = quickShareActions.get(0);
-            mParams.mQuickShareActionsReadyListener.onActionsReady(mQuickShareData);
+            return quickShareActions.get(0);
         }
+        return null;
     }
 
-    private String getSubjectString() {
-        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
+    private static String getSubjectString(long imageTime) {
+        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(imageTime));
         return String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
     }
 }
