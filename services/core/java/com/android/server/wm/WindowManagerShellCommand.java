@@ -1006,13 +1006,16 @@ public class WindowManagerShellCommand extends ShellCommand {
                     runSetBooleanFlag(pw, mLetterboxConfiguration
                             ::setTranslucentLetterboxingOverrideEnabled);
                     break;
+                case "--isUserAppAspectRatioSettingsEnabled":
+                    runSetBooleanFlag(pw, mLetterboxConfiguration
+                            ::setUserAppAspectRatioSettingsOverrideEnabled);
+                    break;
                 case "--isCameraCompatRefreshEnabled":
-                    runSetBooleanFlag(pw, enabled -> mLetterboxConfiguration
-                            .setCameraCompatRefreshEnabled(enabled));
+                    runSetBooleanFlag(pw, mLetterboxConfiguration::setCameraCompatRefreshEnabled);
                     break;
                 case "--isCameraCompatRefreshCycleThroughStopEnabled":
-                    runSetBooleanFlag(pw, enabled -> mLetterboxConfiguration
-                            .setCameraCompatRefreshCycleThroughStopEnabled(enabled));
+                    runSetBooleanFlag(pw,
+                            mLetterboxConfiguration::setCameraCompatRefreshCycleThroughStopEnabled);
                     break;
                 default:
                     getErrPrintWriter().println(
@@ -1083,6 +1086,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                         break;
                     case "isTranslucentLetterboxingEnabled":
                         mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
+                        break;
+                    case "isUserAppAspectRatioSettingsEnabled":
+                        mLetterboxConfiguration.resetUserAppAspectRatioSettingsEnabled();
                         break;
                     case "isCameraCompatRefreshEnabled":
                         mLetterboxConfiguration.resetCameraCompatRefreshEnabled();
@@ -1194,6 +1200,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
             mLetterboxConfiguration.resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
             mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
+            mLetterboxConfiguration.resetUserAppAspectRatioSettingsEnabled();
             mLetterboxConfiguration.resetCameraCompatRefreshEnabled();
             mLetterboxConfiguration.resetCameraCompatRefreshCycleThroughStopEnabled();
         }
@@ -1249,7 +1256,6 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.isCameraCompatRefreshEnabled());
             pw.println("    Refresh using \"stopped -> resumed\" cycle: "
                     + mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled());
-
             pw.println("Background type: "
                     + LetterboxConfiguration.letterboxBackgroundTypeToString(
                             mLetterboxConfiguration.getLetterboxBackgroundType()));
@@ -1259,12 +1265,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.getLetterboxBackgroundWallpaperBlurRadius());
             pw.println("    Wallpaper dark scrim alpha: "
                     + mLetterboxConfiguration.getLetterboxBackgroundWallpaperDarkScrimAlpha());
-
-            if (mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
-                pw.println("Letterboxing for translucent activities: enabled");
-            } else {
-                pw.println("Letterboxing for translucent activities: disabled");
-            }
+            pw.println("Is letterboxing for translucent activities enabled: "
+                    + mLetterboxConfiguration.isTranslucentLetterboxingEnabled());
+            pw.println("Is the user aspect ratio settings enabled: "
+                    + mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled());
         }
         return 0;
     }
@@ -1462,6 +1466,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        unresizable apps.");
         pw.println("      --isTranslucentLetterboxingEnabled [true|1|false|0]");
         pw.println("        Whether letterboxing for translucent activities is enabled.");
+        pw.println("      --isUserAppAspectRatioSettingsEnabled [true|1|false|0]");
+        pw.println("        Whether user aspect ratio settings are enabled.");
         pw.println("      --isCameraCompatRefreshEnabled [true|1|false|0]");
         pw.println("        Whether camera compatibility refresh is enabled.");
         pw.println("      --isCameraCompatRefreshCycleThroughStopEnabled [true|1|false|0]");
@@ -1473,7 +1479,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      |horizontalPositionMultiplier|verticalPositionMultiplier");
         pw.println("      |isHorizontalReachabilityEnabled|isVerticalReachabilityEnabled");
         pw.println("      |isEducationEnabled||defaultPositionMultiplierForHorizontalReachability");
-        pw.println("      |isTranslucentLetterboxingEnabled");
+        pw.println("      |isTranslucentLetterboxingEnabled|isUserAppAspectRatioSettingsEnabled");
         pw.println("      |defaultPositionMultiplierForVerticalReachability]");
         pw.println("    Resets overrides to default values for specified properties separated");
         pw.println("    by space, e.g. 'reset-letterbox-style aspectRatio cornerRadius'.");
