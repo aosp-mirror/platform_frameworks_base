@@ -406,6 +406,8 @@ public final class ActiveServices {
     // allowlisted packageName.
     ArraySet<String> mAllowListWhileInUsePermissionInFgs = new ArraySet<>();
 
+    String mCachedDeviceProvisioningPackage;
+
     // TODO: remove this after feature development is done
     private static final SimpleDateFormat DATE_FORMATTER =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -480,7 +482,8 @@ public final class ActiveServices {
                 // (REASON_ALARM_MANAGER_ALARM_CLOCK), allow it to continue and do not stop it,
                 // even the app is background-restricted.
                 if (r.isForeground
-                        && r.mAllowStartForegroundAtEntering != REASON_ALARM_MANAGER_ALARM_CLOCK) {
+                        && r.mAllowStartForegroundAtEntering != REASON_ALARM_MANAGER_ALARM_CLOCK
+                        && !isDeviceProvisioningPackage(r.packageName)) {
                     toStop.add(r);
                 }
             }
@@ -880,7 +883,8 @@ public final class ActiveServices {
         boolean forcedStandby = false;
         if (bgLaunch
                 && appRestrictedAnyInBackground(appUid, appPackageName)
-                && !isTempAllowedByAlarmClock(appUid)) {
+                && !isTempAllowedByAlarmClock(appUid)
+                && !isDeviceProvisioningPackage(appPackageName)) {
             if (DEBUG_FOREGROUND_SERVICE) {
                 Slog.d(TAG, "Forcing bg-only service start only for " + r.shortInstanceName
                         + " : bgLaunch=" + bgLaunch + " callerFg=" + callerFg);
@@ -1926,6 +1930,9 @@ public final class ActiveServices {
      */
     private boolean isForegroundServiceAllowedInBackgroundRestricted(ProcessRecord app) {
         final ProcessStateRecord state = app.mState;
+        if (isDeviceProvisioningPackage(app.info.packageName)) {
+            return true;
+        }
         if (!state.isBackgroundRestricted()
                 || state.getSetProcState() <= ActivityManager.PROCESS_STATE_BOUND_TOP) {
             return true;
@@ -8404,5 +8411,14 @@ public final class ActiveServices {
             }
         }
         return results;
+    }
+
+    private boolean isDeviceProvisioningPackage(String packageName) {
+        if (mCachedDeviceProvisioningPackage == null) {
+            mCachedDeviceProvisioningPackage = mAm.mContext.getResources().getString(
+                    com.android.internal.R.string.config_deviceProvisioningPackage);
+        }
+        return mCachedDeviceProvisioningPackage != null
+                && mCachedDeviceProvisioningPackage.equals(packageName);
     }
 }
