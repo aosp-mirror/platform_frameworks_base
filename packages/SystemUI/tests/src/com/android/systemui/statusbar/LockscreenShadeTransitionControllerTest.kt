@@ -8,12 +8,15 @@ import com.android.systemui.ExpandHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
+import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -26,6 +29,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.util.mockito.mock
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -83,6 +87,12 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var qsTransitionController: LockscreenShadeQsTransitionController
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var transitionControllerCallback: LockscreenShadeTransitionController.Callback
+    private val powerInteractor = PowerInteractor(
+        FakePowerRepository(),
+        FalsingCollectorFake(),
+        screenOffAnimationController = mock(),
+        statusBarStateController = mock(),
+    )
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     private val configurationController = FakeConfigurationController()
@@ -129,6 +139,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 qsTransitionControllerFactory = { qsTransitionController },
                 activityStarter = activityStarter,
                 shadeRepository = FakeShadeRepository(),
+                powerInteractor = powerInteractor,
             )
         transitionController.addCallback(transitionControllerCallback)
         whenever(nsslController.view).thenReturn(stackscroller)

@@ -929,16 +929,18 @@ public class FingerprintService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
-        public void onUiReady(long requestId, int sensorId) {
-            super.onUiReady_enforcePermission();
+        public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event, long requestId,
+                int sensorId) {
+            super.onUdfpsUiEvent_enforcePermission();
 
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
-                Slog.w(TAG, "No matching provider for onUiReady, sensorId: " + sensorId);
+                Slog.w(TAG, "No matching provider for onUdfpsUiEvent, sensorId: " + sensorId);
                 return;
             }
-            provider.onUiReady(requestId, sensorId);
+            provider.onUdfpsUiEvent(event, requestId, sensorId);
         }
+
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override

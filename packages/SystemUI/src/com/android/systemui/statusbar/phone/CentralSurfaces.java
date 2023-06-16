@@ -302,8 +302,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /** Should the keyguard be hidden immediately in response to a back press/gesture. */
     boolean shouldKeyguardHideImmediately();
 
-    boolean onBackPressed();
-
     boolean onSpacePressed();
 
     void showBouncerWithDimissAndCancelIfKeyguard(OnDismissAction performAction,
@@ -319,8 +317,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     void showPinningEscapeToast();
 
     void setBouncerShowing(boolean bouncerShowing);
-
-    void setBouncerShowingOverDream(boolean bouncerShowingOverDream);
 
     int getWakefulnessState();
 

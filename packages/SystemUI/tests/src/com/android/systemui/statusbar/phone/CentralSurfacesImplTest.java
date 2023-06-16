@@ -98,6 +98,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -281,6 +282,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     @Mock private LockscreenWallpaper mLockscreenWallpaper;
     @Mock private DozeServiceHost mDozeServiceHost;
+    @Mock private BackActionInteractor mBackActionInteractor;
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
     @Mock private VolumeComponent mVolumeComponent;
     @Mock private CommandQueue mCommandQueue;
@@ -353,6 +355,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // For the Shade to animate during the Back gesture, we must enable the animation flag.
         mFeatureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true);
         mFeatureFlags.set(Flags.LIGHT_REVEAL_MIGRATION, true);
+        // Turn AOD on and toggle feature flag for jank fixes
+        mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
+        when(mDozeParameters.getAlwaysOn()).thenReturn(true);
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -511,7 +516,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mBiometricUnlockControllerLazy,
                 mAuthRippleController,
                 mDozeServiceHost,
-                mPowerManager, mScreenPinningRequest,
+                mBackActionInteractor,
+                mPowerManager,
+                mScreenPinningRequest,
                 mDozeScrimController,
                 mVolumeComponent,
                 mCommandQueue,
@@ -825,9 +832,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
                 mOnBackInvokedCallback.capture());
 
-        when(mNotificationPanelViewController.canBeCollapsed()).thenReturn(true);
+        when(mBackActionInteractor.shouldBackBeHandled()).thenReturn(true);
         mOnBackInvokedCallback.getValue().onBackInvoked();
-        verify(mShadeController).animateCollapseShade();
+        verify(mBackActionInteractor).onBackRequested();
     }
 
     /**
@@ -845,6 +852,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         OnBackAnimationCallback onBackAnimationCallback =
                 (OnBackAnimationCallback) (mOnBackInvokedCallback.getValue());
+        when(mBackActionInteractor.shouldBackBeHandled()).thenReturn(true);
         when(mNotificationPanelViewController.canBeCollapsed()).thenReturn(true);
 
         BackEvent fakeSwipeInFromLeftEdge = new BackEvent(20.0f, 100.0f, 1.0f, BackEvent.EDGE_LEFT);
@@ -867,6 +875,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         OnBackAnimationCallback onBackAnimationCallback =
                 (OnBackAnimationCallback) (mOnBackInvokedCallback.getValue());
+        when(mBackActionInteractor.shouldBackBeHandled()).thenReturn(true);
         when(mNotificationPanelViewController.canBeCollapsed()).thenReturn(true);
 
         BackEvent fakeSwipeInFromLeftEdge = new BackEvent(20.0f, 10.0f, 0.0f, BackEvent.EDGE_LEFT);

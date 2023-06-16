@@ -31,7 +31,6 @@ import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.CURRENT_LSKF_BASED_PROTECTOR_ID_KEY;
@@ -40,9 +39,12 @@ import static com.android.internal.widget.LockPatternUtils.PIN_LENGTH_UNAVAILABL
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
+import static com.android.internal.widget.LockPatternUtils.USER_REPAIR_MODE;
 import static com.android.internal.widget.LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE;
 import static com.android.internal.widget.LockPatternUtils.VERIFY_FLAG_WRITE_REPAIR_MODE_PW;
 import static com.android.internal.widget.LockPatternUtils.frpCredentialEnabled;
+import static com.android.internal.widget.LockPatternUtils.isSpecialUserId;
+import static com.android.internal.widget.LockPatternUtils.pinOrPasswordQualityToCredentialType;
 import static com.android.internal.widget.LockPatternUtils.userOwnsFrpCredential;
 import static com.android.server.locksettings.SyntheticPasswordManager.TOKEN_TYPE_STRONG;
 import static com.android.server.locksettings.SyntheticPasswordManager.TOKEN_TYPE_WEAK;
@@ -1289,8 +1291,8 @@ public class LockSettingsService extends ILockSettings.Stub {
      * {@link #CREDENTIAL_TYPE_PASSWORD}
      */
     private int getCredentialTypeInternal(int userId) {
-        if (userId == USER_FRP) {
-            return getFrpCredentialType();
+        if (isSpecialUserId(userId)) {
+            return mSpManager.getSpecialUserCredentialType(userId);
         }
         synchronized (mSpManager) {
             final long protectorId = getCurrentLskfBasedProtectorId(userId);
@@ -1304,29 +1306,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
             return pinOrPasswordQualityToCredentialType(getKeyguardStoredQuality(userId));
         }
-    }
-
-    private int getFrpCredentialType() {
-        PersistentData data = mStorage.readPersistentDataBlock();
-        if (data.type != PersistentData.TYPE_SP_GATEKEEPER &&
-                data.type != PersistentData.TYPE_SP_WEAVER) {
-            return CREDENTIAL_TYPE_NONE;
-        }
-        int credentialType = SyntheticPasswordManager.getFrpCredentialType(data.payload);
-        if (credentialType != CREDENTIAL_TYPE_PASSWORD_OR_PIN) {
-            return credentialType;
-        }
-        return pinOrPasswordQualityToCredentialType(data.qualityForUi);
-    }
-
-    private static int pinOrPasswordQualityToCredentialType(int quality) {
-        if (LockPatternUtils.isQualityAlphabeticPassword(quality)) {
-            return CREDENTIAL_TYPE_PASSWORD;
-        }
-        if (LockPatternUtils.isQualityNumericPin(quality)) {
-            return CREDENTIAL_TYPE_PIN;
-        }
-        throw new IllegalArgumentException("Quality is neither Pin nor password: " + quality);
     }
 
     private boolean isUserSecure(int userId) {
@@ -1570,8 +1549,8 @@ public class LockSettingsService extends ILockSettings.Stub {
      * unlock operation.
      */
     private void sendCredentialsOnUnlockIfRequired(LockscreenCredential credential, int userId) {
-        // Don't send credentials during the factory reset protection flow.
-        if (userId == USER_FRP) {
+        // Don't send credentials during the special user flow.
+        if (isSpecialUserId(userId)) {
             return;
         }
 
@@ -2195,15 +2174,19 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.e(TAG, "FRP credential can only be verified prior to provisioning.");
             return VerifyCredentialResponse.ERROR;
         }
+        if (userId == USER_REPAIR_MODE && !LockPatternUtils.isRepairModeActive(mContext)) {
+            Slog.e(TAG, "Repair mode is not active on the device.");
+            return VerifyCredentialResponse.ERROR;
+        }
         Slogf.i(TAG, "Verifying lockscreen credential for user %d", userId);
 
         final AuthenticationResult authResult;
         VerifyCredentialResponse response;
 
         synchronized (mSpManager) {
-            if (userId == USER_FRP) {
-                return mSpManager.verifyFrpCredential(getGateKeeperService(), credential,
-                        progressCallback);
+            if (isSpecialUserId(userId)) {
+                return mSpManager.verifySpecialUserCredential(userId, getGateKeeperService(),
+                        credential, progressCallback);
             }
 
             long protectorId = getCurrentLskfBasedProtectorId(userId);

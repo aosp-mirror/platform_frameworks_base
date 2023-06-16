@@ -186,7 +186,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     }
 
     @Override
-    public void onUiReady() {
+    public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event) {
         // Unsupported in HIDL.
     }
 }

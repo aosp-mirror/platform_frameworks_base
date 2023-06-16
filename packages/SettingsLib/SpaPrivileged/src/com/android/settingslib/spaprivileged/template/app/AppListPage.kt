@@ -42,7 +42,6 @@ fun <T : AppRecord> AppListPage(
     showInstantApps: Boolean = false,
     noMoreOptions: Boolean = false,
     matchAnyUserForAdmin: Boolean = false,
-    primaryUserOnly: Boolean = false,
     noItemMessage: String? = null,
     moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
     header: @Composable () -> Unit = {},
@@ -60,7 +59,7 @@ fun <T : AppRecord> AppListPage(
             }
         },
     ) { bottomPadding, searchQuery ->
-        UserProfilePager(primaryUserOnly) { userGroup ->
+        UserProfilePager { userGroup ->
             val appListInput = AppListInput(
                 config = AppListConfig(
                     userIds = userGroup.userInfos.map { it.id },

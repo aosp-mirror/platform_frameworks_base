@@ -37,10 +37,23 @@ public class LockPatternUtilsTest {
     }
 
     @Test
+    public void testUserRepairMode_isNotRegularUser() {
+        assertTrue(LockPatternUtils.USER_REPAIR_MODE < 0);
+    }
+
+    @Test
     public void testUserFrp_isNotAReservedSpecialUser() throws Exception {
         assertNotEquals(UserHandle.USER_NULL, LockPatternUtils.USER_FRP);
         assertNotEquals(UserHandle.USER_ALL, LockPatternUtils.USER_FRP);
         assertNotEquals(UserHandle.USER_CURRENT, LockPatternUtils.USER_FRP);
         assertNotEquals(UserHandle.USER_CURRENT_OR_SELF, LockPatternUtils.USER_FRP);
+    }
+
+    @Test
+    public void testUserRepairMode_isNotAReservedSpecialUser() throws Exception {
+        assertNotEquals(UserHandle.USER_NULL, LockPatternUtils.USER_REPAIR_MODE);
+        assertNotEquals(UserHandle.USER_ALL, LockPatternUtils.USER_REPAIR_MODE);
+        assertNotEquals(UserHandle.USER_CURRENT, LockPatternUtils.USER_REPAIR_MODE);
+        assertNotEquals(UserHandle.USER_CURRENT_OR_SELF, LockPatternUtils.USER_REPAIR_MODE);
     }
 }

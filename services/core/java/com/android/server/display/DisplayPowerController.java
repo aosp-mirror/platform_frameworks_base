@@ -2301,29 +2301,23 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void loadAmbientLightSensor() {
-        DisplayDeviceConfig.SensorData lightSensor = mDisplayDeviceConfig.getAmbientLightSensor();
         final int fallbackType = mDisplayId == Display.DEFAULT_DISPLAY
                 ? Sensor.TYPE_LIGHT : SensorUtils.NO_FALLBACK;
-        mLightSensor = SensorUtils.findSensor(mSensorManager, lightSensor.type, lightSensor.name,
-                fallbackType);
+        mLightSensor = SensorUtils.findSensor(mSensorManager,
+                mDisplayDeviceConfig.getAmbientLightSensor(), fallbackType);
     }
 
     private void loadScreenOffBrightnessSensor() {
-        DisplayDeviceConfig.SensorData screenOffBrightnessSensor =
-                mDisplayDeviceConfig.getScreenOffBrightnessSensor();
         mScreenOffBrightnessSensor = SensorUtils.findSensor(mSensorManager,
-                screenOffBrightnessSensor.type, screenOffBrightnessSensor.name,
-                SensorUtils.NO_FALLBACK);
+                mDisplayDeviceConfig.getScreenOffBrightnessSensor(), SensorUtils.NO_FALLBACK);
     }
 
     private void loadProximitySensor() {
         if (DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT || mDisplayId != Display.DEFAULT_DISPLAY) {
             return;
         }
-        final DisplayDeviceConfig.SensorData proxSensor =
-                mDisplayDeviceConfig.getProximitySensor();
-        mProximitySensor = SensorUtils.findSensor(mSensorManager, proxSensor.type, proxSensor.name,
-                Sensor.TYPE_PROXIMITY);
+        mProximitySensor = SensorUtils.findSensor(mSensorManager,
+                mDisplayDeviceConfig.getProximitySensor(), Sensor.TYPE_PROXIMITY);
         if (mProximitySensor != null) {
             mProximityThreshold = Math.min(mProximitySensor.getMaximumRange(),
                     TYPICAL_PROXIMITY_THRESHOLD);
