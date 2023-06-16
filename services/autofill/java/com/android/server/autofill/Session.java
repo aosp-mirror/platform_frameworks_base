@@ -850,8 +850,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             RemoteFieldClassificationService remoteFieldClassificationService =
                     mService.getRemoteFieldClassificationServiceLocked();
             if (remoteFieldClassificationService != null) {
+                WeakReference<RemoteFieldClassificationService.FieldClassificationServiceCallbacks>
+                        fieldClassificationServiceCallbacksWeakRef =
+                                new WeakReference<>(Session.this);
                 remoteFieldClassificationService.onFieldClassificationRequest(
-                        mClassificationState.mPendingFieldClassificationRequest, Session.this);
+                        mClassificationState.mPendingFieldClassificationRequest,
+                                fieldClassificationServiceCallbacksWeakRef);
             }
             mClassificationState.onFieldClassificationRequestSent();
         }
