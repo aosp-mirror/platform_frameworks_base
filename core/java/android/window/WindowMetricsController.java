@@ -145,13 +145,13 @@ public final class WindowMetricsController {
         for (int i = 0; i < possibleDisplayInfos.size(); i++) {
             currentDisplayInfo = possibleDisplayInfos.get(i);
 
-            // Calculate max bounds for natural rotation and state.
-            Rect maxBounds = new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
-                    currentDisplayInfo.getNaturalHeight());
+            // Calculate max bounds for this rotation and state.
+            Rect maxBounds = new Rect(0, 0, currentDisplayInfo.logicalWidth,
+                    currentDisplayInfo.logicalHeight);
 
-            // Calculate insets for the natural max bounds.
+            // Calculate insets for the rotated max bounds.
             final boolean isScreenRound = (currentDisplayInfo.flags & Display.FLAG_ROUND) != 0;
-            // Initialize insets based on Surface.ROTATION_0. Note any window-provided insets
+            // Initialize insets based upon display rotation. Note any window-provided insets
             // will not be set.
             windowInsets = getWindowInsetsFromServerForDisplay(
                     currentDisplayInfo.displayId, null /* token */,
