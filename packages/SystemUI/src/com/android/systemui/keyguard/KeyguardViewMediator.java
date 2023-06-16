@@ -137,6 +137,7 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.log.SessionTracker;
@@ -167,6 +168,7 @@ import dagger.Lazy;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -280,6 +282,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * keyguard to show even if it is disabled for the current user.
      */
     public static final String OPTION_FORCE_SHOW = "force_show";
+    public static final String SYS_BOOT_REASON_PROP = "sys.boot.reason.last";
+    public static final String REBOOT_MAINLINE_UPDATE = "reboot,mainline_update";
     private final DreamOverlayStateController mDreamOverlayStateController;
 
     /** The stream type that the lock sounds are tied to. */
@@ -315,6 +319,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     /** UserSwitcherController for creating guest user on boot complete */
     private final UserSwitcherController mUserSwitcherController;
+    private SystemPropertiesHelper mSystemPropertiesHelper;
 
     /**
      * Used to keep the device awake while to ensure the keyguard finishes opening before
@@ -846,7 +851,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     strongAuthTracker.isNonStrongBiometricAllowedAfterIdleTimeout(currentUser);
 
             if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
-                return KeyguardSecurityView.PROMPT_REASON_RESTART;
+                String reasonForReboot = mSystemPropertiesHelper.get(SYS_BOOT_REASON_PROP);
+                if (Objects.equals(reasonForReboot, REBOOT_MAINLINE_UPDATE)) {
+                    return KeyguardSecurityView.PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE;
+                } else {
+                    return  KeyguardSecurityView.PROMPT_REASON_RESTART;
+                }
             } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
             } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN) != 0) {
@@ -1304,7 +1314,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             Lazy<ScrimController> scrimControllerLazy,
             FeatureFlags featureFlags,
             @Main CoroutineDispatcher mainDispatcher,
-            Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel) {
+            Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
+            SystemPropertiesHelper systemPropertiesHelper) {
         mContext = context;
         mUserTracker = userTracker;
         mFalsingCollector = falsingCollector;
@@ -1318,6 +1329,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mPM = powerManager;
         mTrustManager = trustManager;
         mUserSwitcherController = userSwitcherController;
+        mSystemPropertiesHelper = systemPropertiesHelper;
         mStatusBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mKeyguardDisplayManager = keyguardDisplayManager;
