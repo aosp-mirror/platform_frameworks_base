@@ -16,15 +16,18 @@
 
 package com.android.server.os;
 
+import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.os.Binder;
 import android.os.BugreportManager.BugreportCallback;
 import android.os.IBinder;
 import android.os.IDumpstateListener;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -37,21 +40,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.FileDescriptor;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
 public class BugreportManagerServiceImplTest {
 
-    Context mContext;
-    BugreportManagerServiceImpl mService;
-    BugreportManagerServiceImpl.BugreportFileManager mBugreportFileManager;
+    private Context mContext;
+    private BugreportManagerServiceImpl mService;
+    private BugreportManagerServiceImpl.BugreportFileManager mBugreportFileManager;
 
-    int mCallingUid = 1234;
-    String mCallingPackage  = "test.package";
+    private int mCallingUid = 1234;
+    private String mCallingPackage  = "test.package";
 
-    String mBugreportFile = "bugreport-file.zip";
-    String mBugreportFile2 = "bugreport-file2.zip";
+    private String mBugreportFile = "bugreport-file.zip";
+    private String mBugreportFile2 = "bugreport-file2.zip";
 
     @Before
     public void setUp() {
@@ -109,6 +114,36 @@ public class BugreportManagerServiceImplTest {
                 BugreportCallback.BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE);
     }
 
+    @Test
+    public void testCancelBugreportWithoutRole() throws Exception {
+        // Clear out allowlisted packages.
+        mService = new BugreportManagerServiceImpl(
+                new BugreportManagerServiceImpl.Injector(mContext, new ArraySet<>()));
+
+        assertThrows(SecurityException.class, () -> mService.cancelBugreport(
+                Binder.getCallingUid(), mContext.getPackageName()));
+    }
+
+    @Test
+    public void testCancelBugreportWithRole() throws Exception {
+        // Clear out allowlisted packages.
+        mService = new BugreportManagerServiceImpl(
+                new BugreportManagerServiceImpl.Injector(mContext, new ArraySet<>()));
+        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+        CallbackFuture future = new CallbackFuture();
+        runWithShellPermissionIdentity(() -> roleManager.setBypassingRoleQualification(true));
+        runWithShellPermissionIdentity(() -> roleManager.addRoleHolderAsUser(
+                "android.app.role.SYSTEM_AUTOMOTIVE_PROJECTION",
+                mContext.getPackageName(),
+                /* flags= */ 0,
+                Process.myUserHandle(),
+                mContext.getMainExecutor(),
+                future));
+
+        assertThat(future.get()).isEqualTo(true);
+        mService.cancelBugreport(Binder.getCallingUid(), mContext.getPackageName());
+    }
+
     private static class Listener implements IDumpstateListener {
         CountDownLatch mLatch;
         int mErrorCode;
@@ -147,6 +182,14 @@ public class BugreportManagerServiceImplTest {
 
         int getErrorCode() {
             return mErrorCode;
+        }
+    }
+
+    private static class CallbackFuture extends CompletableFuture<Boolean>
+            implements Consumer<Boolean> {
+        @Override
+        public void accept(Boolean successful) {
+            complete(successful);
         }
     }
 }
