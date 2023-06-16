@@ -103,6 +103,12 @@ public interface KeyguardSecurityView {
     int PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT = 15;
 
     /**
+     * Strong auth is required because the device has just booted because of an automatic
+     * mainline update.
+     */
+    int PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE = 16;
+
+    /**
      * Reset the view and prepare to take input. This should do things like clearing the
      * password or pattern and clear error messages.
      */
