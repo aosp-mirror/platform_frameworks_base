@@ -125,6 +125,7 @@ interface CurrentTilesInteractor : ProtoDumpable {
 class CurrentTilesInteractorImpl
 @Inject
 constructor(
+    autoAddInteractor: AutoAddInteractor,
     private val tileSpecRepository: TileSpecRepository,
     private val installedTilesComponentRepository: InstalledTilesComponentRepository,
     private val userRepository: UserRepository,
@@ -171,6 +172,10 @@ constructor(
     init {
         if (featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
             startTileCollection()
+        }
+
+        if (featureFlags.isEnabled(Flags.QS_PIPELINE_AUTO_ADD)) {
+            autoAddInteractor.init(this)
         }
     }
 

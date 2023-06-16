@@ -19,6 +19,7 @@ package com.android.systemui.qs.pipeline.shared.logging
 import android.annotation.UserIdInt
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
+import com.android.systemui.qs.pipeline.dagger.QSAutoAddLog
 import com.android.systemui.qs.pipeline.dagger.QSTileListLog
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
@@ -32,10 +33,12 @@ class QSPipelineLogger
 @Inject
 constructor(
     @QSTileListLog private val tileListLogBuffer: LogBuffer,
+    @QSAutoAddLog private val tileAutoAddLogBuffer: LogBuffer,
 ) {
 
     companion object {
         const val TILE_LIST_TAG = "QSTileListLog"
+        const val AUTO_ADD_TAG = "QSAutoAddableLog"
     }
 
     /**
@@ -133,6 +136,31 @@ constructor(
                 int1 = user
             },
             { "Tiles kept for not installed packages for user $int1: $str1" }
+        )
+    }
+
+    fun logTileAutoAdded(userId: Int, spec: TileSpec, position: Int) {
+        tileAutoAddLogBuffer.log(
+            AUTO_ADD_TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                int2 = position
+                str1 = spec.toString()
+            },
+            { "Tile $str1 auto added for user $int1 at position $int2" }
+        )
+    }
+
+    fun logTileAutoRemoved(userId: Int, spec: TileSpec) {
+        tileAutoAddLogBuffer.log(
+            AUTO_ADD_TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                str1 = spec.toString()
+            },
+            { "Tile $str1 auto removed for user $int1" }
         )
     }
 

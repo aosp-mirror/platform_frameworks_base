@@ -161,7 +161,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             // finishes before creating any tiles.
             tunerService.addTunable(this, TILES_SETTING);
             // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
-            mAutoTiles = autoTiles.get();
+            if (!mFeatureFlags.isEnabled(Flags.QS_PIPELINE_AUTO_ADD)) {
+                mAutoTiles = autoTiles.get();
+            }
         });
     }
 
