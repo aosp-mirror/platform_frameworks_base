@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
-import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.Nullable;
@@ -37,7 +36,7 @@ import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
-import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Binder;
@@ -226,8 +225,10 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @param backDisposition Disposition mode of back button. It should be one of below flags:
          * @param showImeSwitcher {@code true} to show IME switch button.
          */
-        default void setImeWindowStatus(int displayId, IBinder token,  int vis,
-                @BackDispositionMode int backDisposition, boolean showImeSwitcher) { }
+        default void setImeWindowStatus(int displayId, IBinder token,
+                @InputMethodService.ImeWindowVisibility int vis,
+                @InputMethodService.BackDispositionMode int backDisposition,
+                boolean showImeSwitcher) { }
         default void showRecentApps(boolean triggeredFromAltTab) { }
         default void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) { }
         default void toggleTaskbar() { }
@@ -678,7 +679,9 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+    public void setImeWindowStatus(int displayId, IBinder token,
+            @InputMethodService.ImeWindowVisibility int vis,
+            @InputMethodService.BackDispositionMode int backDisposition,
             boolean showImeSwitcher) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_SHOW_IME_BUTTON);
@@ -1092,7 +1095,9 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
     }
 
-    private void handleShowImeButton(int displayId, IBinder token, int vis, int backDisposition,
+    private void handleShowImeButton(int displayId, IBinder token,
+            @InputMethodService.ImeWindowVisibility int vis,
+            @InputMethodService.BackDispositionMode int backDisposition,
             boolean showImeSwitcher) {
         if (displayId == INVALID_DISPLAY) return;
 
@@ -1112,7 +1117,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private void sendImeInvisibleStatusForPrevNavBar() {
         for (int i = 0; i < mCallbacks.size(); i++) {
             mCallbacks.get(i).setImeWindowStatus(mLastUpdatedImeDisplayId,
-                    null /* token */, IME_INVISIBLE, BACK_DISPOSITION_DEFAULT,
+                    null /* token */, 0 /* vis */, BACK_DISPOSITION_DEFAULT,
                     false /* showImeSwitcher */);
         }
     }
