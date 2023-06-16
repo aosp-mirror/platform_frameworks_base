@@ -66,6 +66,11 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
 
+    private static final String SINGLE_CARRIER_TEXT = "singleCarrierText";
+    private static final String MULTI_CARRIER_TEXT = "multiCarrierText";
+    private static final String FIRST_CARRIER_NAME = "carrier1";
+    private static final String SECOND_CARRIER_NAME = "carrier2";
+
     private ShadeCarrierGroupController mShadeCarrierGroupController;
     private SignalCallback mSignalCallback;
     private CarrierTextManager.CarrierTextCallback mCallback;
@@ -148,8 +153,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // listOfCarriers length 1, subscriptionIds length 1, anySims false
         CarrierTextManager.CarrierTextCallbackInfo
                 c1 = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
+                SINGLE_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME},
                 false,
                 new int[]{0});
         mCallback.updateCarrierInfo(c1);
@@ -157,8 +162,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // listOfCarriers length 1, subscriptionIds length 1, anySims true
         CarrierTextManager.CarrierTextCallbackInfo
                 c2 = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
+                SINGLE_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME},
                 true,
                 new int[]{0});
         mCallback.updateCarrierInfo(c2);
@@ -166,8 +171,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // listOfCarriers length 2, subscriptionIds length 2, anySims false
         CarrierTextManager.CarrierTextCallbackInfo
                 c3 = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
+                MULTI_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 false,
                 new int[]{0, 1});
         mCallback.updateCarrierInfo(c3);
@@ -175,8 +180,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // listOfCarriers length 2, subscriptionIds length 2, anySims true
         CarrierTextManager.CarrierTextCallbackInfo
                 c4 = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
+                MULTI_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
                 new int[]{0, 1});
         mCallback.updateCarrierInfo(c4);
@@ -189,8 +194,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // listOfCarriers length 2, subscriptionIds length 1, anySims false
         CarrierTextManager.CarrierTextCallbackInfo
                 c1 = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
+                MULTI_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 false,
                 new int[]{0});
         mCallback.updateCarrierInfo(c1);
@@ -198,8 +203,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // listOfCarriers length 2, subscriptionIds length 1, anySims true
         CarrierTextManager.CarrierTextCallbackInfo
                 c2 = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
+                MULTI_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
                 new int[]{0});
         mCallback.updateCarrierInfo(c2);
@@ -207,8 +212,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // listOfCarriers length 1, subscriptionIds length 2, anySims false
         CarrierTextManager.CarrierTextCallbackInfo
                 c3 = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
+                SINGLE_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME},
                 false,
                 new int[]{0, 1});
         mCallback.updateCarrierInfo(c3);
@@ -216,8 +221,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // listOfCarriers length 1, subscriptionIds length 2, anySims true
         CarrierTextManager.CarrierTextCallbackInfo
                 c4 = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
+                SINGLE_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME},
                 true,
                 new int[]{0, 1});
         mCallback.updateCarrierInfo(c4);
@@ -230,8 +235,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
 
         CarrierTextManager.CarrierTextCallbackInfo
                 c4 = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
+                MULTI_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
                 new int[]{0, 1});
         mCallback.updateCarrierInfo(c4);
@@ -264,6 +269,20 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
     }
 
     @Test
+    public void testVisibleView_airplaneMode_WFCOn() {
+        CarrierTextManager.CarrierTextCallbackInfo
+                info = new CarrierTextManager.CarrierTextCallbackInfo(
+                "",
+                new CharSequence[]{FIRST_CARRIER_NAME, ""},
+                true,
+                new int[]{0, 1},
+                false /* airplaneMode */);
+        mCallback.updateCarrierInfo(info);
+        mTestableLooper.processAllMessages();
+        assertEquals(View.VISIBLE, mShadeCarrierGroupController.getShadeCarrierVisibility(0));
+    }
+
+    @Test
     public void testListenerNotCalledOnRegistreation() {
         mShadeCarrierGroupController
                 .setOnSingleCarrierChangedListener(mOnSingleCarrierChangedListener);
@@ -276,8 +295,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // Only one element in the info
         CarrierTextManager.CarrierTextCallbackInfo
                 info = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
+                SINGLE_CARRIER_TEXT,
+                new CharSequence[]{SINGLE_CARRIER_TEXT},
                 true,
                 new int[]{0},
                 false /* airplaneMode */);
@@ -295,8 +314,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         // More than one element in the info
         CarrierTextManager.CarrierTextCallbackInfo
                 info = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
+                MULTI_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
                 new int[]{0, 1},
                 false /* airplaneMode */);
@@ -313,16 +332,16 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
     public void testSingleMultiCarrierSwitch() {
         CarrierTextManager.CarrierTextCallbackInfo
                 singleCarrierInfo = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
+                SINGLE_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME},
                 true,
                 new int[]{0},
                 false /* airplaneMode */);
 
         CarrierTextManager.CarrierTextCallbackInfo
                 multiCarrierInfo = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
+                MULTI_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
                 new int[]{0, 1},
                 false /* airplaneMode */);
@@ -347,8 +366,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
     public void testNoCallbackIfSingleCarrierDoesntChange() {
         CarrierTextManager.CarrierTextCallbackInfo
                 singleCarrierInfo = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
+                SINGLE_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME},
                 true,
                 new int[]{0},
                 false /* airplaneMode */);
@@ -369,8 +388,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
     public void testNoCallbackIfMultiCarrierDoesntChange() {
         CarrierTextManager.CarrierTextCallbackInfo
                 multiCarrierInfo = new CarrierTextManager.CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
+                MULTI_CARRIER_TEXT,
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
                 new int[]{0, 1},
                 false /* airplaneMode */);
