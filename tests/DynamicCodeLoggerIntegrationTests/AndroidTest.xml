@@ -22,9 +22,6 @@
     <option name="test-suite-tag" value="apct"/>
     <option name="test-tag" value="DynamicCodeLoggerIntegrationTests"/>
 
-    <!-- This test make uses of the event log, make sure we capture it. -->
-    <option name="logcat-options" value="-b all" />
-
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
         <option name="package" value="com.android.frameworks.dynamiccodeloggertest"/>
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner"/>
