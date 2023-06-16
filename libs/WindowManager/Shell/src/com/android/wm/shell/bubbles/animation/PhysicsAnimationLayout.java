@@ -523,6 +523,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
      */
     @Nullable private SpringAnimation getSpringAnimationFromView(
             DynamicAnimation.ViewProperty property, View view) {
+        if (view == null) return null;
         return (SpringAnimation) view.getTag(getTagIdForProperty(property));
     }
 
@@ -531,11 +532,13 @@ public class PhysicsAnimationLayout extends FrameLayout {
      * system.
      */
     @Nullable private ViewPropertyAnimator getViewPropertyAnimatorFromView(View view) {
+        if (view == null) return null;
         return (ViewPropertyAnimator) view.getTag(R.id.reorder_animator_tag);
     }
 
     /** Retrieves the target animator from the view via the view tag system. */
     @Nullable private ObjectAnimator getTargetAnimatorFromView(View view) {
+        if (view == null) return null;
         return (ObjectAnimator) view.getTag(R.id.target_animator_tag);
     }
 
