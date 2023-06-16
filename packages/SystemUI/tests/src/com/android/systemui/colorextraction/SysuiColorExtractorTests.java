@@ -17,7 +17,6 @@
 package com.android.systemui.colorextraction;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -101,21 +100,6 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
                 assertEquals("Not using extracted colors!",
                         mColorExtractor.getColors(which, type), mColors);
             }
-        }
-    }
-
-    @Test
-    public void getColors_fallbackWhenMediaIsVisible() {
-        simulateEvent(mColorExtractor);
-        mColorExtractor.setHasMediaArtwork(true);
-
-        ColorExtractor.GradientColors fallbackColors = mColorExtractor.getNeutralColors();
-
-        for (int type : sTypes) {
-            assertEquals("Not using fallback!",
-                    mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
-            assertNotEquals("Media visibility should not affect system wallpaper.",
-                    mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
         }
     }
 

@@ -82,18 +82,16 @@ class WallpaperWindowToken extends WindowToken {
             return;
         }
         mShowWhenLocked = showWhenLocked;
-        if (mDisplayContent.mWallpaperController.mIsLockscreenLiveWallpaperEnabled) {
-            // Move the window token to the front (private) or back (showWhenLocked). This is
-            // possible
-            // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER
-            // windows.
-            final int position = showWhenLocked ? POSITION_BOTTOM : POSITION_TOP;
+        // Move the window token to the front (private) or back (showWhenLocked). This is
+        // possible
+        // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER
+        // windows.
+        final int position = showWhenLocked ? POSITION_BOTTOM : POSITION_TOP;
 
-            // Note: Moving all the way to the front or back breaks ordering based on addition
-            // times.
-            // We should never have more than one non-animating token of each type.
-            getParent().positionChildAt(position, this /* child */, false /*includingParents */);
-        }
+        // Note: Moving all the way to the front or back breaks ordering based on addition
+        // times.
+        // We should never have more than one non-animating token of each type.
+        getParent().positionChildAt(position, this /* child */, false /*includingParents */);
     }
 
     boolean canShowWhenLocked() {

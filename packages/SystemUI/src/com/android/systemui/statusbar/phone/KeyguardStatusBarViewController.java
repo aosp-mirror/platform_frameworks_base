@@ -546,8 +546,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                     * (1.0f - mKeyguardHeadsUpShowingAmount);
         }
 
-        if (mSystemEventAnimator.isAnimationRunning()
-                && !mNotificationMediaManager.isLockscreenWallpaperOnNotificationShade()) {
+        if (mSystemEventAnimator.isAnimationRunning()) {
             newAlpha = Math.min(newAlpha, mSystemEventAnimatorAlpha);
         } else {
             mView.setTranslationX(0);
@@ -704,21 +703,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     private StatusBarSystemEventDefaultAnimator getSystemEventAnimator(boolean isAnimationRunning) {
         return new StatusBarSystemEventDefaultAnimator(getResources(), (alpha) -> {
-            // TODO(b/273443374): remove if-else condition
-            if (!mNotificationMediaManager.isLockscreenWallpaperOnNotificationShade()) {
-                mSystemEventAnimatorAlpha = alpha;
-            } else {
-                mSystemEventAnimatorAlpha = 1f;
-            }
+            mSystemEventAnimatorAlpha = alpha;
             updateViewState();
             return Unit.INSTANCE;
         }, (translationX) -> {
-            // TODO(b/273443374): remove if-else condition
-            if (!mNotificationMediaManager.isLockscreenWallpaperOnNotificationShade()) {
-                mView.setTranslationX(translationX);
-            } else {
-                mView.setTranslationX(0);
-            }
+            mView.setTranslationX(translationX);
             return Unit.INSTANCE;
         }, isAnimationRunning);
     }
