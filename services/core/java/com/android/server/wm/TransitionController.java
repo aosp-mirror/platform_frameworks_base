@@ -58,6 +58,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.FgThread;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
 /**
@@ -474,6 +475,19 @@ class TransitionController {
             if (mPlayingTransitions.get(i).isInTransientHide(task)) return true;
         }
         return false;
+    }
+
+    boolean canApplyDim(@Nullable Task task) {
+        if (task == null) {
+            // Always allow non-activity window.
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (!mPlayingTransitions.get(i).canApplyDim(task)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -1314,18 +1328,18 @@ class TransitionController {
         return transit;
     }
 
-    /** Returns {@code true} if it started collecting, {@code false} if it was queued. */
-    boolean startLegacySyncOrQueue(BLASTSyncEngine.SyncGroup syncGroup, Runnable applySync) {
+    /** Starts the sync set if there is no pending or active syncs, otherwise enqueue the sync. */
+    void startLegacySyncOrQueue(BLASTSyncEngine.SyncGroup syncGroup, Consumer<Boolean> applySync) {
         if (!mQueuedTransitions.isEmpty() || mSyncEngine.hasActiveSync()) {
             // Just add to queue since we already have a queue.
-            mQueuedTransitions.add(new QueuedTransition(syncGroup, (d) -> applySync.run()));
+            mQueuedTransitions.add(new QueuedTransition(syncGroup,
+                    (deferred) -> applySync.accept(true /* deferred */)));
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
                     "Queueing legacy sync-set: %s", syncGroup.mSyncId);
-            return false;
+            return;
         }
         mSyncEngine.startSyncSet(syncGroup);
-        applySync.run();
-        return true;
+        applySync.accept(false /* deferred */);
     }
 
     interface OnStartCollect {
