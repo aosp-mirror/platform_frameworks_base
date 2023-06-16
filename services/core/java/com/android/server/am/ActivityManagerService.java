@@ -1526,7 +1526,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     int mBootPhase;
 
-    volatile boolean mDeterministicUidIdle = false;
+    @GuardedBy("this")
+    boolean mDeterministicUidIdle = false;
 
     @VisibleForTesting
     public WindowManagerService mWindowManager;
@@ -16551,7 +16552,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void setDeterministicUidIdle(boolean deterministic) {
-        mDeterministicUidIdle = deterministic;
+        synchronized (this) {
+            mDeterministicUidIdle = deterministic;
+        }
     }
 
     /** Make the currently active UIDs idle after a certain grace period. */
