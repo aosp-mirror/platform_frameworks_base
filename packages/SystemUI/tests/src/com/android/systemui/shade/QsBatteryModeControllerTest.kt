@@ -63,40 +63,36 @@ class QsBatteryModeControllerTest : SysuiTestCase() {
 
     @Test
     fun returnsMODE_ESTIMATEforQsWithCenterCutout() {
-        // TODO (b/282044659): revert this test to previous behavior
         assertThat(controller.getBatteryMode(CENTER_TOP_CUTOUT, QS_END_FRAME.nextFrameToFraction()))
-            .isEqualTo(BatteryMeterView.MODE_ON)
+            .isEqualTo(BatteryMeterView.MODE_ESTIMATE)
     }
 
     @Test
     fun returnsMODE_ONforQqsWithCornerCutout() {
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(true)
 
-        // TODO (b/282044659): revert this test to previous behavior
         assertThat(
                 controller.getBatteryMode(CENTER_TOP_CUTOUT, QQS_START_FRAME.prevFrameToFraction())
             )
-            .isEqualTo(BatteryMeterView.MODE_ON)
+            .isEqualTo(BatteryMeterView.MODE_ESTIMATE)
     }
 
     @Test
     fun returnsMODE_ESTIMATEforQsWithCornerCutout() {
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(true)
 
-        // TODO (b/282044659): revert this test to previous behavior
         assertThat(controller.getBatteryMode(CENTER_TOP_CUTOUT, QS_END_FRAME.nextFrameToFraction()))
-            .isEqualTo(BatteryMeterView.MODE_ON)
+            .isEqualTo(BatteryMeterView.MODE_ESTIMATE)
     }
 
     @Test
     fun returnsNullInBetween() {
-        // TODO (b/282044659): revert this test to previous behavior
         assertThat(
                 controller.getBatteryMode(CENTER_TOP_CUTOUT, QQS_START_FRAME.nextFrameToFraction())
             )
-            .isEqualTo(BatteryMeterView.MODE_ON)
+            .isNull()
         assertThat(controller.getBatteryMode(CENTER_TOP_CUTOUT, QS_END_FRAME.prevFrameToFraction()))
-            .isEqualTo(BatteryMeterView.MODE_ON)
+            .isNull()
     }
 
     private fun Int.prevFrameToFraction(): Float = (this - 1) / MOTION_LAYOUT_MAX_FRAME.toFloat()
