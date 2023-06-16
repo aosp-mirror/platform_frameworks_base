@@ -478,7 +478,7 @@ object Flags {
     @Keep
     @JvmField
     val WM_CAPTION_ON_SHELL =
-        sysPropBooleanFlag(1105, "persist.wm.debug.caption_on_shell", default = false)
+        sysPropBooleanFlag(1105, "persist.wm.debug.caption_on_shell", default = true)
 
     @Keep
     @JvmField
