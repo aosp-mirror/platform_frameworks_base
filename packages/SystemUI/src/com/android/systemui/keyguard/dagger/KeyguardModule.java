@@ -43,6 +43,7 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -142,7 +143,8 @@ public class KeyguardModule {
             SystemSettings systemSettings,
             SystemClock systemClock,
             @Main CoroutineDispatcher mainDispatcher,
-            Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel) {
+            Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
+            SystemPropertiesHelper systemPropertiesHelper) {
         return new KeyguardViewMediator(
                 context,
                 uiEventLogger,
@@ -182,7 +184,8 @@ public class KeyguardModule {
                 systemSettings,
                 systemClock,
                 mainDispatcher,
-                dreamingToLockscreenTransitionViewModel);
+                dreamingToLockscreenTransitionViewModel,
+                systemPropertiesHelper);
     }
 
     /** */
