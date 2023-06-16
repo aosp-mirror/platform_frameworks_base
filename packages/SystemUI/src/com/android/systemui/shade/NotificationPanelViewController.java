@@ -4813,7 +4813,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
             if (!mHeadsUpTouchHelper.isTrackingHeadsUp() && mQsController.handleTouch(
                     event, isFullyCollapsed(), isShadeOrQsHeightAnimationRunning())) {
-                mShadeLog.logMotionEvent(event, "onTouch: handleQsTouch handled event");
+                if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+                    mShadeLog.logMotionEvent(event, "onTouch: handleQsTouch handled event");
+                }
                 return true;
             }
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
@@ -4827,7 +4829,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
 
             handled |= handleTouch(event);
-            mShadeLog.logOnTouchEventLastReturn(event, !mDozing, handled);
             return !mDozing || handled;
         }
 
@@ -5010,7 +5011,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     }
                     break;
             }
-            mShadeLog.logHandleTouchLastReturn(event, !mGestureWaitForTouchSlop, mTracking);
             return !mGestureWaitForTouchSlop || mTracking;
         }
 
