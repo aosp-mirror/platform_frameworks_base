@@ -447,7 +447,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             }
             finishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
         };
-        if (isGoingHome) {
+        if (isGoingHome || mSplitHandler.getSplitItemPosition(pipChange.getLastParent())
+                != SPLIT_POSITION_UNDEFINED) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animation is actually mixed "
                     + "since entering-PiP caused us to leave split and return home.");
             // We need to split the transition into 2 parts: the pip part (animated by pip)
@@ -516,10 +517,27 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     }
 
     /**
+     * This is intended to be called by SplitCoordinator as a helper to mix a split handling
+     * transition with an entering-pip change. The use-case for this is when an auto-pip change
+     * gets collected into the transition which has already claimed by
+     * StageCoordinator.handleRequest. This happens when launching a fullscreen app while having an
+     * auto-pip activity in the foreground split pair.
+     */
+    // TODO(b/287704263): Remove when split/mixed are reversed.
+    public boolean animatePendingEnterPipFromSplit(IBinder transition, TransitionInfo info,
+            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
+            Transitions.TransitionFinishCallback finishCallback) {
+        final MixedTransition mixed = new MixedTransition(
+                MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT, transition);
+        mActiveTransitions.add(mixed);
+        return animateEnterPipFromSplit(mixed, info, startT, finishT, finishCallback);
+    }
+
+    /**
      * This is intended to be called by SplitCoordinator as a helper to mix an already-pending
      * split transition with a display-change. The use-case for this is when a display
      * change/rotation gets collected into a split-screen enter/exit transition which has already
-     * been claimed by StageCoordinator.handleRequest . This happens during launcher tests.
+     * been claimed by StageCoordinator.handleRequest. This happens during launcher tests.
      */
     public boolean animatePendingSplitWithDisplayChange(@NonNull IBinder transition,
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startT,
@@ -666,6 +684,13 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     /** @return whether the transition-request represents a pip-entry. */
     public boolean requestHasPipEnter(TransitionRequestInfo request) {
         return mPipHandler.requestHasPipEnter(request);
+    }
+
+    /** Whether a particular change is a window that is entering pip. */
+    // TODO(b/287704263): Remove when split/mixed are reversed.
+    public boolean isEnteringPip(TransitionInfo.Change change,
+            @WindowManager.TransitionType int transitType) {
+        return mPipHandler.isEnteringPip(change, transitType);
     }
 
     @Override
