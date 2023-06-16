@@ -40,8 +40,6 @@ class MediaSessionStack {
     private static final boolean DEBUG = MediaSessionService.DEBUG;
     private static final String TAG = "MediaSessionStack";
 
-    private static final int DUMP_EVENTS_MAX_COUNT = 70;
-
     /**
      * Listen the change in the media button session.
      */
