@@ -259,6 +259,8 @@ public class BatteryStatsHistory {
     }
 
     private TraceDelegate mTracer;
+    private int mTraceLastState = 0;
+    private int mTraceLastState2 = 0;
 
     /**
      * Constructor
@@ -1241,7 +1243,6 @@ public class BatteryStatsHistory {
      */
     private void recordTraceEvents(int code, HistoryTag tag) {
         if (code == HistoryItem.EVENT_NONE) return;
-        if (!mTracer.tracingEnabled()) return;
 
         final int idx = code & HistoryItem.EVENT_TYPE_MASK;
         final String prefix = (code & HistoryItem.EVENT_FLAG_START) != 0 ? "+" :
@@ -1270,8 +1271,6 @@ public class BatteryStatsHistory {
      * Writes changes to a HistoryItem state bitmap to Atrace.
      */
     private void recordTraceCounters(int oldval, int newval, BitDescription[] descriptions) {
-        if (!mTracer.tracingEnabled()) return;
-
         int diff = oldval ^ newval;
         if (diff == 0) return;
 
@@ -1324,6 +1323,16 @@ public class BatteryStatsHistory {
     }
 
     private void writeHistoryItem(long elapsedRealtimeMs, long uptimeMs, HistoryItem cur) {
+        if (mTracer != null && mTracer.tracingEnabled()) {
+            recordTraceEvents(cur.eventCode, cur.eventTag);
+            recordTraceCounters(mTraceLastState, cur.states,
+                    BatteryStats.HISTORY_STATE_DESCRIPTIONS);
+            recordTraceCounters(mTraceLastState2, cur.states2,
+                    BatteryStats.HISTORY_STATE2_DESCRIPTIONS);
+            mTraceLastState = cur.states;
+            mTraceLastState2 = cur.states2;
+        }
+
         if (!mHaveBatteryLevel || !mRecordingHistory) {
             return;
         }
@@ -1344,12 +1353,6 @@ public class BatteryStatsHistory {
                     + Integer.toHexString(diffStates2) + " lastDiff2="
                     + Integer.toHexString(lastDiffStates2));
         }
-
-        recordTraceEvents(cur.eventCode, cur.eventTag);
-        recordTraceCounters(mHistoryLastWritten.states,
-                cur.states, BatteryStats.HISTORY_STATE_DESCRIPTIONS);
-        recordTraceCounters(mHistoryLastWritten.states2,
-                cur.states2, BatteryStats.HISTORY_STATE2_DESCRIPTIONS);
 
         if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE
                 && timeDiffMs < 1000 && (diffStates & lastDiffStates) == 0
