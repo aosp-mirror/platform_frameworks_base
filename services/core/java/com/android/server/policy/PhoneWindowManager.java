@@ -1020,6 +1020,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void interceptPowerKeyUp(KeyEvent event, boolean canceled) {
+        // Inform the StatusBar; but do not allow it to consume the event.
+        sendSystemKeyToStatusBarAsync(event);
+
         final boolean handled = canceled || mPowerKeyHandled;
 
         if (!handled) {
@@ -4567,6 +4570,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MACRO_4:
                 // TODO(b/266098478): Add logic to handle KEYCODE_MACROx feature
                 result &= ~ACTION_PASS_TO_USER;
+                break;
+            case KeyEvent.KEYCODE_STEM_PRIMARY:
+                sendSystemKeyToStatusBarAsync(event);
                 break;
         }
 
