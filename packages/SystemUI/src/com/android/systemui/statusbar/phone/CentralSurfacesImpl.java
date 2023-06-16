@@ -135,6 +135,7 @@ import com.android.systemui.R;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -456,6 +457,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      */
     private boolean mShouldDelayWakeUpAnimation = false;
 
+    /**
+     * Whether we should delay the AOD->Lockscreen animation.
+     * If false, the animation will start in onStartedWakingUp().
+     * If true, the animation will start in onFinishedWakingUp().
+     */
+    private boolean mShouldDelayLockscreenTransitionFromAod = false;
+
     private final Object mQueueLock = new Object();
 
     private final PulseExpansionHandler mPulseExpansionHandler;
@@ -600,6 +608,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ViewMediatorCallback mKeyguardViewMediatorCallback;
     private final ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
+    private final BackActionInteractor mBackActionInteractor;
     private final Executor mUiBgExecutor;
 
     protected boolean mDozing;
@@ -660,17 +669,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final InteractionJankMonitor mJankMonitor;
 
     /** Existing callback that handles back gesture invoked for the Shade. */
-    private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
-        if (DEBUG) {
-            Log.d(TAG, "mOnBackInvokedCallback() called");
-        }
-        onBackPressed();
-    };
-
-    private boolean shouldBackBeHandled() {
-        return (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED
-                && !isBouncerShowingOverDream());
-    }
+    private final OnBackInvokedCallback mOnBackInvokedCallback;
 
     /**
      *  New callback that handles back gesture invoked, cancel, progress
@@ -680,12 +679,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final OnBackAnimationCallback mOnBackAnimationCallback = new OnBackAnimationCallback() {
         @Override
         public void onBackInvoked() {
-            onBackPressed();
+            mBackActionInteractor.onBackRequested();
         }
 
         @Override
         public void onBackProgressed(BackEvent event) {
-            if (shouldBackBeHandled()) {
+            if (mBackActionInteractor.shouldBackBeHandled()) {
                 if (mShadeSurface.canBeCollapsed()) {
                     float fraction = event.getProgress();
                     mShadeSurface.onBackProgressed(fraction);
@@ -756,6 +755,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             AuthRippleController authRippleController,
             DozeServiceHost dozeServiceHost,
+            BackActionInteractor backActionInteractor,
             PowerManager powerManager,
             ScreenPinningRequest screenPinningRequest,
             DozeScrimController dozeScrimController,
@@ -815,6 +815,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManagerPhone;
+        mBackActionInteractor = backActionInteractor;
         mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mFalsingCollector = falsingCollector;
@@ -935,6 +936,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
         // Based on teamfood flag, enable predictive back animation for the Shade.
         mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
+        mOnBackInvokedCallback = () -> {
+            if (DEBUG) {
+                Log.d(TAG, "mOnBackInvokedCallback() called");
+            }
+            mBackActionInteractor.onBackRequested();
+        };
     }
 
     private void initBubbles(Bubbles bubbles) {
@@ -1654,6 +1661,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStackScrollerController =
                 mCentralSurfacesComponent.getNotificationStackScrollLayoutController();
         mQsController = mCentralSurfacesComponent.getQuickSettingsController();
+        mBackActionInteractor.setup(mQsController, mShadeSurface);
         mStackScroller = mStackScrollerController.getView();
         mNotifListContainer = mCentralSurfacesComponent.getNotificationListContainer();
         mPresenter = mCentralSurfacesComponent.getNotificationPresenter();
@@ -2749,7 +2757,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             case KeyEvent.KEYCODE_BACK:
                 if (mState == StatusBarState.KEYGUARD
                         && mStatusBarKeyguardViewManager.dispatchBackKeyEventPreIme()) {
-                    return onBackPressed();
+                    return mBackActionInteractor.onBackRequested();
                 }
         }
         return false;
@@ -2786,34 +2794,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
         final boolean isBouncerOverDream = isBouncerShowingOverDream();
         return (isScrimmedBouncer || isBouncerOverDream);
-    }
-
-    @Override
-    public boolean onBackPressed() {
-        if (mStatusBarKeyguardViewManager.canHandleBackPressed()) {
-            mStatusBarKeyguardViewManager.onBackPressed();
-            return true;
-        }
-        if (mQsController.isCustomizing()) {
-            mQsController.closeQsCustomizer();
-            return true;
-        }
-        if (mQsController.getExpanded()) {
-            mShadeSurface.animateCollapseQs(false);
-            return true;
-        }
-        if (mShadeSurface.closeUserSwitcherIfOpen()) {
-            return true;
-        }
-        if (shouldBackBeHandled()) {
-            if (mShadeSurface.canBeCollapsed()) {
-                // this is the Shade dismiss animation, so make sure QQS closes when it ends.
-                mShadeSurface.onBackPressed();
-                mShadeController.animateCollapseShade();
-            }
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -2943,17 +2923,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     /**
-     * Sets whether the bouncer over dream is showing. Note that the bouncer over dream is handled
-     * independently of the rest of the notification panel. As a result, setting this state via
-     * {@link #setBouncerShowing(boolean)} leads to unintended side effects from states modified
-     * behind the dream.
-     */
-    @Override
-    public void setBouncerShowingOverDream(boolean bouncerShowingOverDream) {
-        mBouncerShowingOverDream = bouncerShowingOverDream;
-    }
-
-    /**
      * Propagate the bouncer state to status bar components.
      *
      * Separate from {@link #setBouncerShowing} because we sometimes re-create the status bar and
@@ -3077,28 +3046,43 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                 updateVisibleToUser();
                 updateIsKeyguard();
+                mShouldDelayLockscreenTransitionFromAod = mDozeParameters.getAlwaysOn()
+                        && mFeatureFlags.isEnabled(
+                                Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD);
+                if (!mShouldDelayLockscreenTransitionFromAod) {
+                    startLockscreenTransitionFromAod();
+                }
             });
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 
+        /**
+         * Private helper for starting the LOCKSCREEN_TRANSITION_FROM_AOD animation - only necessary
+         * so we can start it from either onFinishedWakingUp() or onFinishedWakingUp().
+         */
+        private void startLockscreenTransitionFromAod() {
+            // stopDozing() starts the LOCKSCREEN_TRANSITION_FROM_AOD animation.
+            mDozeServiceHost.stopDozing();
+            // This is intentionally below the stopDozing call above, since it avoids that we're
+            // unnecessarily animating the wakeUp transition. Animations should only be enabled
+            // once we fully woke up.
+            updateRevealEffect(true /* wakingUp */);
+            updateNotificationPanelTouchState();
+            mStatusBarTouchableRegionManager.updateTouchableRegion();
+
+            // If we are waking up during the screen off animation, we should undo making the
+            // expanded visible (we did that so the LightRevealScrim would be visible).
+            if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
+                mShadeController.makeExpandedInvisible();
+            }
+        }
+
         @Override
         public void onFinishedWakingUp() {
-            mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
-                // stopDozing() starts the LOCKSCREEN_TRANSITION_FROM_AOD animation.
-                mDozeServiceHost.stopDozing();
-                // This is intentionally below the stopDozing call above, since it avoids that we're
-                // unnecessarily animating the wakeUp transition. Animations should only be enabled
-                // once we fully woke up.
-                updateRevealEffect(true /* wakingUp */);
-                updateNotificationPanelTouchState();
-                mStatusBarTouchableRegionManager.updateTouchableRegion();
-
-                // If we are waking up during the screen off animation, we should undo making the
-                // expanded visible (we did that so the LightRevealScrim would be visible).
-                if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
-                    mShadeController.makeExpandedInvisible();
-                }
-            });
+            if (mShouldDelayLockscreenTransitionFromAod) {
+                mNotificationShadeWindowController.batchApplyWindowLayoutParams(
+                        this::startLockscreenTransitionFromAod);
+            }
             mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false, false);
             if (mKeyguardStateController.isOccluded()

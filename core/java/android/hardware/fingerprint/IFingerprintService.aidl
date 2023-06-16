@@ -193,7 +193,7 @@ interface IFingerprintService {
 
     // Notifies about the fingerprint UI being ready (e.g. HBM illumination is enabled).
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void onUiReady(long requestId, int sensorId);
+    void onUdfpsUiEvent(int event, long requestId, int sensorId);
 
     // Sets the controller for managing the UDFPS overlay.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
