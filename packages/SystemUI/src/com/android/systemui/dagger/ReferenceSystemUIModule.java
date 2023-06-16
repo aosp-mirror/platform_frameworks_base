@@ -40,7 +40,6 @@ import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
 import com.android.systemui.rotationlock.RotationLockModule;
-import com.android.systemui.scene.SceneContainerFrameworkModule;
 import com.android.systemui.screenshot.ReferenceScreenshotModule;
 import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
@@ -104,7 +103,6 @@ import javax.inject.Named;
         QSModule.class,
         ReferenceScreenshotModule.class,
         RotationLockModule.class,
-        SceneContainerFrameworkModule.class,
         StatusBarEventsModule.class,
         StartCentralSurfacesModule.class,
         VolumeModule.class,

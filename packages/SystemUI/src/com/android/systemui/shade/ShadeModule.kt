@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade
 
+import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.os.Handler
 import android.view.LayoutInflater
@@ -28,13 +29,19 @@ import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.biometrics.AuthRippleController
 import com.android.systemui.biometrics.AuthRippleView
+import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.privacy.OngoingPrivacyChip
+import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.shared.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.SceneContainerNames
+import com.android.systemui.scene.ui.view.SceneWindowRootView
 import com.android.systemui.scene.ui.view.WindowRootView
+import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShelf
@@ -67,14 +74,30 @@ abstract class ShadeModule {
     companion object {
         const val SHADE_HEADER = "large_screen_shade_header"
 
+        @SuppressLint("InflateParams") // Root views don't have parents.
         @Provides
         @SysUISingleton
         fun providesWindowRootView(
             layoutInflater: LayoutInflater,
             featureFlags: FeatureFlags,
+            @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
+            viewModelProvider: Provider<SceneContainerViewModel>,
+            @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
+            containerConfigProvider: Provider<SceneContainerConfig>,
+            @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
+            scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
         ): WindowRootView {
-            return if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
-                layoutInflater.inflate(R.layout.scene_window_root, null)
+            return if (
+                featureFlags.isEnabled(Flags.SCENE_CONTAINER) && ComposeFacade.isComposeAvailable()
+            ) {
+                val sceneWindowRootView =
+                    layoutInflater.inflate(R.layout.scene_window_root, null) as SceneWindowRootView
+                sceneWindowRootView.init(
+                    viewModel = viewModelProvider.get(),
+                    containerConfig = containerConfigProvider.get(),
+                    scenes = scenesProvider.get(),
+                )
+                sceneWindowRootView
             } else {
                 layoutInflater.inflate(R.layout.super_notification_shade, null)
             }

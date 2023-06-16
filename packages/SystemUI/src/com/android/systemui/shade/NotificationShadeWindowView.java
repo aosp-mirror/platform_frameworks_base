@@ -58,7 +58,6 @@ import android.widget.FrameLayout;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 import com.android.systemui.R;
-import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.scene.ui.view.WindowRootView;
 
 /**
@@ -149,18 +148,6 @@ public class NotificationShadeWindowView extends WindowRootView {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         setWillNotDraw(!DEBUG);
-
-        if (ComposeFacade.INSTANCE.isComposeAvailable()) {
-            ComposeFacade.INSTANCE.composeInitializer().onAttachedToWindow(this);
-        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (ComposeFacade.INSTANCE.isComposeAvailable()) {
-            ComposeFacade.INSTANCE.composeInitializer().onDetachedFromWindow(this);
-        }
     }
 
     @Override
