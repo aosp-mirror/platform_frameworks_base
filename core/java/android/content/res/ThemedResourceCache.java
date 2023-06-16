@@ -41,29 +41,6 @@ abstract class ThemedResourceCache<T> {
 
     private int mGeneration;
 
-    public static class Entry<S> {
-        private S mValue;
-        private int mGeneration;
-
-
-        public S getValue() {
-            return mValue;
-        }
-
-        public boolean hasValue() {
-            return mValue != null;
-        }
-
-        public int getGeneration() {
-            return mGeneration;
-        }
-
-        Entry(S value, int generation) {
-            this.mValue = value;
-            this.mGeneration = generation;
-        }
-    }
-
     /**
      * Adds a new theme-dependent entry to the cache.
      *
@@ -109,6 +86,15 @@ abstract class ThemedResourceCache<T> {
     }
 
     /**
+     * Returns the current generation of the cache
+     *
+     * @return The current generation
+     */
+    public int getGeneration() {
+        return mGeneration;
+    }
+
+    /**
      * Returns an entry from the cache.
      *
      * @param key a key that uniquely identifies the entry
@@ -116,7 +102,7 @@ abstract class ThemedResourceCache<T> {
      * @return a cached entry, or {@code null} if not in the cache
      */
     @Nullable
-    public Entry get(long key, @Nullable Theme theme) {
+    public T get(long key, @Nullable Theme theme) {
         // The themed (includes null-themed) and unthemed caches are mutually
         // exclusive, so we'll give priority to whichever one we think we'll
         // hit first. Since most of the framework drawables are themed, that's
@@ -126,7 +112,7 @@ abstract class ThemedResourceCache<T> {
             if (themedEntries != null) {
                 final WeakReference<T> themedEntry = themedEntries.get(key);
                 if (themedEntry != null) {
-                    return new Entry(themedEntry.get(), mGeneration);
+                    return themedEntry.get();
                 }
             }
 
@@ -134,13 +120,14 @@ abstract class ThemedResourceCache<T> {
             if (unthemedEntries != null) {
                 final WeakReference<T> unthemedEntry = unthemedEntries.get(key);
                 if (unthemedEntry != null) {
-                    return new Entry(unthemedEntry.get(), mGeneration);
+                    return unthemedEntry.get();
                 }
             }
         }
 
-        return new Entry(null, mGeneration);
+        return null;
     }
+
 
     /**
      * Prunes cache entries that have been invalidated by a configuration
