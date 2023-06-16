@@ -63,7 +63,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 
@@ -147,7 +146,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
     public void testShouldIgnoreRequestedOrientation_cameraCompatTreatment_returnsTrue() {
-        doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled(anyBoolean());
+        doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled();
+        doReturn(true).when(mLetterboxConfiguration)
+                .isCameraCompatTreatmentEnabledAtBuildTime();
 
         // Recreate DisplayContent with DisplayRotationCompatPolicy
         mActivity = setUpActivityWithComponent();
@@ -306,7 +307,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testShouldRefreshActivityForCameraCompat_flagIsDisabled_returnsFalse() {
         doReturn(false).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
 
         assertFalse(mController.shouldRefreshActivityForCameraCompat());
     }
@@ -315,7 +316,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH})
     public void testShouldRefreshActivityForCameraCompat_overrideEnabled_returnsFalse() {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
 
         assertFalse(mController.shouldRefreshActivityForCameraCompat());
     }
@@ -325,7 +326,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testShouldRefreshActivityForCameraCompat_propertyIsTrueAndOverride_returnsFalse()
             throws Exception {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
         mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH, /* value */ true);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -337,7 +338,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testShouldRefreshActivityForCameraCompat_propertyIsFalse_returnsFalse()
             throws Exception {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
         mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH, /* value */ false);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -349,7 +350,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testShouldRefreshActivityForCameraCompat_propertyIsTrue_returnsTrue()
             throws Exception {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
         mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH, /* value */ true);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -363,7 +364,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE})
     public void testShouldRefreshActivityViaPauseForCameraCompat_flagIsDisabled_returnsFalse() {
         doReturn(false).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
 
         assertFalse(mController.shouldRefreshActivityViaPauseForCameraCompat());
     }
@@ -372,7 +373,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE})
     public void testShouldRefreshActivityViaPauseForCameraCompat_overrideEnabled_returnsTrue() {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
 
         assertTrue(mController.shouldRefreshActivityViaPauseForCameraCompat());
     }
@@ -382,7 +383,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testShouldRefreshActivityViaPauseForCameraCompat_propertyIsFalseAndOverride_returnFalse()
             throws Exception {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
         mockThatProperty(PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE, /* value */ false);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -394,7 +395,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testShouldRefreshActivityViaPauseForCameraCompat_propertyIsTrue_returnsTrue()
             throws Exception {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
         mockThatProperty(PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE, /* value */ true);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -407,7 +408,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testShouldForceRotateForCameraCompat_flagIsDisabled_returnsFalse() {
         doReturn(false).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
 
         assertFalse(mController.shouldForceRotateForCameraCompat());
     }
@@ -416,7 +417,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION})
     public void testShouldForceRotateForCameraCompat_overrideEnabled_returnsFalse() {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
 
         assertFalse(mController.shouldForceRotateForCameraCompat());
     }
@@ -426,7 +427,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testShouldForceRotateForCameraCompat_propertyIsTrueAndOverride_returnsFalse()
             throws Exception {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
         mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION, /* value */ true);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -438,7 +439,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testShouldForceRotateForCameraCompat_propertyIsFalse_returnsFalse()
             throws Exception {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
         mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION, /* value */ false);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -450,7 +451,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public void testShouldForceRotateForCameraCompat_propertyIsTrue_returnsTrue()
             throws Exception {
         doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true);
+                .isCameraCompatTreatmentEnabled();
         mockThatProperty(PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION, /* value */ true);
 
         mController = new LetterboxUiController(mWm, mActivity);
@@ -741,7 +742,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT,
             OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA})
     public void testOverrideOrientationIfNeeded_whenCameraNotActive_returnsUnchanged() {
-        doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled(anyBoolean());
+        doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled();
+        doReturn(true).when(mLetterboxConfiguration)
+                .isCameraCompatTreatmentEnabledAtBuildTime();
 
         // Recreate DisplayContent with DisplayRotationCompatPolicy
         mActivity = setUpActivityWithComponent();
@@ -759,7 +762,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT,
             OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA})
     public void testOverrideOrientationIfNeeded_whenCameraActive_returnsPortrait() {
-        doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled(anyBoolean());
+        doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled();
+        doReturn(true).when(mLetterboxConfiguration)
+                .isCameraCompatTreatmentEnabledAtBuildTime();
 
         // Recreate DisplayContent with DisplayRotationCompatPolicy
         mActivity = setUpActivityWithComponent();
@@ -1060,7 +1065,9 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testgetFixedOrientationLetterboxAspectRatio_splitScreenAspectEnabled() {
         doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabled(anyBoolean());
+                .isCameraCompatTreatmentEnabled();
+        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+                .isCameraCompatTreatmentEnabledAtBuildTime();
         doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
                 .isCameraCompatSplitScreenAspectRatioEnabled();
         doReturn(false).when(mActivity.mWmService.mLetterboxConfiguration)

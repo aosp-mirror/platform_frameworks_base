@@ -336,8 +336,7 @@ final class DisplayRotationCompatPolicy {
      * </ul>
      */
     private boolean isTreatmentEnabledForDisplay() {
-        return mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                    /* checkDeviceConfig */ true)
+        return mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabled()
                 && mDisplayContent.getIgnoreOrientationRequest()
                 // TODO(b/225928882): Support camera compat rotation for external displays
                 && mDisplayContent.getDisplay().getType() == TYPE_INTERNAL;

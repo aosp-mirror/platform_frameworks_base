@@ -1125,15 +1125,19 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Whether camera compatibility treatment is enabled.
-     *
-     * @param checkDeviceConfig whether it should check both build time flag and a dynamic property
-     *        from {@link DeviceConfig} or only build time flag value.
+     * @return Whether camera compatibility treatment is currently enabled.
      */
-    boolean isCameraCompatTreatmentEnabled(boolean checkDeviceConfig) {
-        return mDeviceConfig.isBuildTimeFlagEnabled(KEY_ENABLE_CAMERA_COMPAT_TREATMENT)
-                    && (!checkDeviceConfig
-                    || mDeviceConfig.getFlagValue(KEY_ENABLE_CAMERA_COMPAT_TREATMENT));
+    boolean isCameraCompatTreatmentEnabled() {
+        return mDeviceConfig.getFlagValue(KEY_ENABLE_CAMERA_COMPAT_TREATMENT);
+    }
+
+    /**
+     * @return Whether camera compatibility treatment is enabled at build time. This is used when
+     * we need to safely initialize a component before the {@link DeviceConfig} flag value is
+     * available.
+     */
+    boolean isCameraCompatTreatmentEnabledAtBuildTime() {
+        return mDeviceConfig.isBuildTimeFlagEnabled(KEY_ENABLE_CAMERA_COMPAT_TREATMENT);
     }
 
     /** Whether camera compatibility refresh is enabled. */
@@ -1179,20 +1183,28 @@ final class LetterboxConfiguration {
 
     /**
      * Checks whether rotation compat policy for immersive apps that prevents auto rotation
-     * into non-optimal screen orientation while in fullscreen is enabled.
+     * into non-optimal screen orientation while in fullscreen is enabled at build time. This is
+     * used when we need to safely initialize a component before the {@link DeviceConfig} flag
+     * value is available.
      *
      * <p>This is needed because immersive apps, such as games, are often not optimized for all
      * orientations and can have a poor UX when rotated. Additionally, some games rely on sensors
      * for the gameplay so users can trigger such rotations accidentally when auto rotation is on.
-     *
-     * @param checkDeviceConfig whether it should check both build time flag and a dynamic property
-     *        from {@link DeviceConfig} or only build time flag value.
      */
-    boolean isDisplayRotationImmersiveAppCompatPolicyEnabled(final boolean checkDeviceConfig) {
+    boolean isDisplayRotationImmersiveAppCompatPolicyEnabledAtBuildTime() {
         return mDeviceConfig.isBuildTimeFlagEnabled(
-                    KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY) && (!checkDeviceConfig
-                    || mDeviceConfig.getFlagValue(
-                    KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY));
+                KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
     }
 
+    /**
+     * Checks whether rotation compat policy for immersive apps that prevents auto rotation
+     * into non-optimal screen orientation while in fullscreen is currently enabled.
+     *
+     * <p>This is needed because immersive apps, such as games, are often not optimized for all
+     * orientations and can have a poor UX when rotated. Additionally, some games rely on sensors
+     * for the gameplay so users can trigger such rotations accidentally when auto rotation is on.
+     */
+    boolean isDisplayRotationImmersiveAppCompatPolicyEnabled() {
+        return mDeviceConfig.getFlagValue(KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
+    }
 }
