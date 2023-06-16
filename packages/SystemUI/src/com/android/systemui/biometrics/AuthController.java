@@ -1216,8 +1216,11 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
 
         final PromptInfo promptInfo = (PromptInfo) args.arg1;
         final int[] sensorIds = (int[]) args.arg3;
+
+        // TODO(b/251476085): remove these unused parameters (replaced with SSOT elsewhere)
         final boolean credentialAllowed = (boolean) args.arg4;
         final boolean requireConfirmation = (boolean) args.arg5;
+
         final int userId = args.argi1;
         final String opPackageName = (String) args.arg6;
         final long operationId = args.argl1;

@@ -158,7 +158,7 @@ object BiometricViewBinder {
                 view.updateFingerprintAffordanceSize(iconController)
             }
             if (iconController is HackyCoexIconController) {
-                iconController.faceMode = !viewModel.isConfirmationRequested.first()
+                iconController.faceMode = !viewModel.isConfirmationRequired.first()
             }
 
             // the icon controller must be created before this happens for the legacy
