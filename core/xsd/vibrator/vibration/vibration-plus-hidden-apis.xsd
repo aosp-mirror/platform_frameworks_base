@@ -15,7 +15,9 @@
   ~ limitations under the License.
   -->
 <!--
-    This defines the format of the XML file used to define VibrationEffect created via public APIs
+    This defines the format of the XML file used to define VibrationEffect created via public and
+    hidden APIs. This format is not enforced in a backwards compatible way, and should only be used
+    on device-specific vibration files.
 -->
 <xs:schema version="2.0"
            elementFormDefault="qualified"
@@ -91,15 +93,36 @@
 
     <xs:complexType name="PredefinedEffect">
         <xs:attribute name="name" type="PredefinedEffectName" use="required"/>
+        <xs:attribute name="fallback" type="xs:boolean"/><!-- hidden -->
     </xs:complexType>
 
     <!-- Predefined effect names as defined by VibrationEffect.EFFECT_* -->
     <xs:simpleType  name="PredefinedEffectName">
         <xs:restriction base="xs:string">
+            <!-- Public effects -->
             <xs:enumeration value="tick"/>
             <xs:enumeration value="click"/>
             <xs:enumeration value="heavy_click"/>
             <xs:enumeration value="double_click"/>
+            <!-- Hidden effects -->
+            <xs:enumeration value="texture_tick"/>
+            <xs:enumeration value="thud"/>
+            <xs:enumeration value="pop"/>
+            <xs:enumeration value="ringtone_1"/>
+            <xs:enumeration value="ringtone_2"/>
+            <xs:enumeration value="ringtone_3"/>
+            <xs:enumeration value="ringtone_4"/>
+            <xs:enumeration value="ringtone_5"/>
+            <xs:enumeration value="ringtone_6"/>
+            <xs:enumeration value="ringtone_7"/>
+            <xs:enumeration value="ringtone_8"/>
+            <xs:enumeration value="ringtone_9"/>
+            <xs:enumeration value="ringtone_10"/>
+            <xs:enumeration value="ringtone_11"/>
+            <xs:enumeration value="ringtone_12"/>
+            <xs:enumeration value="ringtone_13"/>
+            <xs:enumeration value="ringtone_14"/>
+            <xs:enumeration value="ringtone_15"/>
         </xs:restriction>
     </xs:simpleType>
 

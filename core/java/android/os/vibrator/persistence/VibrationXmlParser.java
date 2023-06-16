@@ -16,6 +16,7 @@
 
 package android.os.vibrator.persistence;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -35,6 +36,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Parses XML into a {@link VibrationEffect}.
@@ -43,10 +46,10 @@ import java.io.Reader;
  *
  * * Predefined vibration effects
  *
- * <pre>VibrationEffect
+ * <pre>
  *   {@code
  *     <vibration>
- *       <predefined-effect id="0" />
+ *       <predefined-effect name="click" />
  *     </vibration>
  *   }
  * </pre>
@@ -75,10 +78,10 @@ import java.io.Reader;
  * <pre>
  *   {@code
  *     <vibration>
- *       <primitive-effect id="1" />
- *       <primitive-effect id="2" scale="0.8" />
- *       <primitive-effect id="3" delayMs="50" />
- *       <primitive-effect id="2" scale="0.5" delayMs="100" />
+ *       <primitive-effect name="click" />
+ *       <primitive-effect name="slow_rise" scale="0.8" />
+ *       <primitive-effect name="quick_fall" delayMs="50" />
+ *       <primitive-effect name="tick" scale="0.5" delayMs="100" />
  *     </vibration>
  *   }
  * </pre>
@@ -88,6 +91,24 @@ import java.io.Reader;
 @TestApi
 public final class VibrationXmlParser {
     private static final String TAG = "VibrationXmlParser";
+
+    /**
+     * Allows {@link VibrationEffect} instances created via non-public APIs to be parsed/serialized.
+     *
+     * <p>Note that the XML schema for non-public APIs is not backwards compatible. This is intended
+     * for loading custom {@link VibrationEffect} configured per device and platform version, not
+     * to be restored from old platform versions.
+     *
+     * @hide
+     */
+    public static final int FLAG_ALLOW_HIDDEN_APIS = 1 << 0; // Same as VibrationXmlSerializer
+
+    /** @hide */
+    @IntDef(prefix = { "FLAG_" }, flag = true, value = {
+            FLAG_ALLOW_HIDDEN_APIS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
 
     /**
      * Parses XML content from given input stream into a {@link VibrationEffect}.
@@ -103,6 +124,19 @@ public final class VibrationXmlParser {
     @TestApi
     @Nullable
     public static VibrationEffect parse(@NonNull Reader reader) throws IOException {
+        return parse(reader, /* flags= */ 0);
+    }
+
+    /**
+     * Parses XML content from given input stream into a {@link VibrationEffect}.
+     *
+     * <p>Same as {@link #parse(Reader)}, with extra flags to control the parsing behavior.
+     *
+     * @hide
+     */
+    @Nullable
+    public static VibrationEffect parse(@NonNull Reader reader, @Flags int flags)
+            throws IOException {
         TypedXmlPullParser parser = Xml.newFastPullParser();
 
         try {
@@ -116,14 +150,19 @@ public final class VibrationXmlParser {
             // Ensure XML starts with expected root tag.
             XmlReader.readDocumentStartTag(parser, XmlConstants.TAG_VIBRATION);
 
+            int parserFlags = 0;
+            if ((flags & FLAG_ALLOW_HIDDEN_APIS) != 0) {
+                parserFlags |= XmlConstants.FLAG_ALLOW_HIDDEN_APIS;
+            }
+
             // Parse root tag as a vibration effect.
-            XmlSerializedVibration<VibrationEffect> serializable =
-                    VibrationEffectXmlParser.parseTag(parser);
+            XmlSerializedVibration<VibrationEffect> serializedVibration =
+                    VibrationEffectXmlParser.parseTag(parser, parserFlags);
 
             // Ensure XML ends after root tag is consumed.
             XmlReader.readDocumentEndTag(parser);
 
-            return serializable.deserialize();
+            return serializedVibration.deserialize();
         } catch (XmlParserException e) {
             Slog.w(TAG, "Error parsing vibration XML", e);
             return null;

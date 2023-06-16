@@ -78,9 +78,9 @@ final class SerializedCompositionPrimitive implements SerializedSegment {
     @Override
     public String toString() {
         return "SerializedCompositionPrimitive{"
-                + "primitiveName=" + mPrimitiveName
-                + ", primitiveScale=" + mPrimitiveScale
-                + ", primitiveDelayMs=" + mPrimitiveDelayMs
+                + "name=" + mPrimitiveName
+                + ", scale=" + mPrimitiveScale
+                + ", delayMs=" + mPrimitiveDelayMs
                 + '}';
     }
 

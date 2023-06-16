@@ -16,12 +16,14 @@
 
 package com.android.internal.vibrator.persistence;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.VibrationEffect;
 import android.os.VibrationEffect.Composition.PrimitiveType;
-import android.os.VibrationEffect.EffectType;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 
 /**
@@ -42,12 +44,27 @@ public final class XmlConstants {
     public static final String TAG_REPEATING = "repeating";
 
     public static final String ATTRIBUTE_NAME = "name";
+    public static final String ATTRIBUTE_FALLBACK = "fallback";
     public static final String ATTRIBUTE_DURATION_MS = "durationMs";
     public static final String ATTRIBUTE_AMPLITUDE = "amplitude";
     public static final String ATTRIBUTE_SCALE = "scale";
     public static final String ATTRIBUTE_DELAY_MS = "delayMs";
 
     public static final String VALUE_AMPLITUDE_DEFAULT = "default";
+
+    /**
+     * Allow {@link VibrationEffect} hidden APIs to be used during parsing/serializing.
+     *
+     * <p>Use the schema at services/core/xsd/vibrator/vibration/vibration-plus-hidden-apis.xsd.
+     */
+    public static final int FLAG_ALLOW_HIDDEN_APIS = 1 << 0;
+
+    /** @hide */
+    @IntDef(prefix = { "FLAG_" }, flag = true, value = {
+            FLAG_ALLOW_HIDDEN_APIS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
 
     /** Represent supported values for attribute name in {@link #TAG_PRIMITIVE_EFFECT}  */
     public enum PrimitiveEffectName {
@@ -106,15 +123,38 @@ public final class XmlConstants {
 
     /** Represent supported values for attribute name in {@link #TAG_PREDEFINED_EFFECT}  */
     public enum PredefinedEffectName {
-        TICK(VibrationEffect.EFFECT_TICK),
-        CLICK(VibrationEffect.EFFECT_CLICK),
-        HEAVY_CLICK(VibrationEffect.EFFECT_HEAVY_CLICK),
-        DOUBLE_CLICK(VibrationEffect.EFFECT_DOUBLE_CLICK);
+        // Public effects
+        TICK(VibrationEffect.EFFECT_TICK, true),
+        CLICK(VibrationEffect.EFFECT_CLICK, true),
+        HEAVY_CLICK(VibrationEffect.EFFECT_HEAVY_CLICK, true),
+        DOUBLE_CLICK(VibrationEffect.EFFECT_DOUBLE_CLICK, true),
 
-        @EffectType private final int mEffectId;
+        // Hidden effects
+        TEXTURE_TICK(VibrationEffect.EFFECT_TEXTURE_TICK, false),
+        THUD(VibrationEffect.EFFECT_THUD, false),
+        POP(VibrationEffect.EFFECT_POP, false),
+        RINGTONE_1(VibrationEffect.RINGTONES[0], false),
+        RINGTONE_2(VibrationEffect.RINGTONES[1], false),
+        RINGTONE_3(VibrationEffect.RINGTONES[2], false),
+        RINGTONE_4(VibrationEffect.RINGTONES[3], false),
+        RINGTONE_5(VibrationEffect.RINGTONES[4], false),
+        RINGTONE_6(VibrationEffect.RINGTONES[5], false),
+        RINGTONE_7(VibrationEffect.RINGTONES[6], false),
+        RINGTONE_8(VibrationEffect.RINGTONES[7], false),
+        RINGTONE_9(VibrationEffect.RINGTONES[8], false),
+        RINGTONE_10(VibrationEffect.RINGTONES[9], false),
+        RINGTONE_11(VibrationEffect.RINGTONES[10], false),
+        RINGTONE_12(VibrationEffect.RINGTONES[11], false),
+        RINGTONE_13(VibrationEffect.RINGTONES[12], false),
+        RINGTONE_14(VibrationEffect.RINGTONES[13], false),
+        RINGTONE_15(VibrationEffect.RINGTONES[14], false);
 
-        PredefinedEffectName(@EffectType int id) {
+        private final int mEffectId;
+        private final boolean mIsPublic;
+
+        PredefinedEffectName(int id, boolean isPublic) {
             mEffectId = id;
+            mIsPublic = isPublic;
         }
 
         /**
@@ -122,10 +162,11 @@ public final class XmlConstants {
          * none of the available names maps to the given id.
          */
         @Nullable
-        public static PredefinedEffectName findById(int effectId) {
+        public static PredefinedEffectName findById(int effectId, @XmlConstants.Flags int flags) {
+            boolean allowHidden = (flags & XmlConstants.FLAG_ALLOW_HIDDEN_APIS) != 0;
             for (PredefinedEffectName name : PredefinedEffectName.values()) {
                 if (name.mEffectId == effectId) {
-                    return name;
+                    return (name.mIsPublic || allowHidden) ? name : null;
                 }
             }
             return null;
@@ -136,15 +177,18 @@ public final class XmlConstants {
          * none of the available names maps to the given name.
          */
         @Nullable
-        public static PredefinedEffectName findByName(@NonNull String effectName) {
+        public static PredefinedEffectName findByName(@NonNull String effectName,
+                @XmlConstants.Flags int flags) {
+            boolean allowHidden = (flags & XmlConstants.FLAG_ALLOW_HIDDEN_APIS) != 0;
             try {
-                return PredefinedEffectName.valueOf(effectName.toUpperCase(Locale.ROOT));
+                PredefinedEffectName name = PredefinedEffectName.valueOf(
+                        effectName.toUpperCase(Locale.ROOT));
+                return (name.mIsPublic || allowHidden) ? name : null;
             } catch (IllegalArgumentException e) {
                 return null;
             }
         }
 
-        @EffectType
         public int getEffectId() {
             return mEffectId;
         }

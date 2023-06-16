@@ -34,16 +34,18 @@ import java.util.List;
 /**
  * Parser implementation for {@link VibrationEffect}.
  *
+ * <p>This parser supports the schema defined by services/core/xsd/vibrator/vibration/vibration.xsd.
+ *
  * <p>This parser does not support effects created with {@link VibrationEffect.WaveformBuilder} nor
  * {@link VibrationEffect.Composition#addEffect(VibrationEffect)}. It only supports vibration
  * effects defined as:
  *
  * * Predefined vibration effects
  *
- * <pre>VibrationEffect
+ * <pre>
  *   {@code
  *     <vibration>
- *       <predefined-effect id="0" />
+ *       <predefined-effect name="click" />
  *     </vibration>
  *   }
  * </pre>
@@ -72,8 +74,8 @@ import java.util.List;
  * <pre>
  *   {@code
  *     <vibration>
- *       <primitive-effect id="1" />
- *       <primitive-effect id="2" scale="0.5" delayMs="100" />
+ *       <primitive-effect name="click" />
+ *       <primitive-effect name="tick" scale="0.5" delayMs="100" />
  *     </vibration>
  *   }
  * </pre>
@@ -90,10 +92,12 @@ public class VibrationEffectXmlParser {
      */
     @NonNull
     public static XmlSerializedVibration<VibrationEffect> parseTag(
-            @NonNull TypedXmlPullParser parser) throws XmlParserException, IOException {
+            @NonNull TypedXmlPullParser parser, @XmlConstants.Flags int flags)
+            throws XmlParserException, IOException {
         XmlValidator.checkStartTag(parser, TAG_VIBRATION);
         XmlValidator.checkTagHasNoUnexpectedAttributes(parser);
-        return parseVibrationContent(parser);
+
+        return parseVibrationContent(parser, flags);
     }
 
     /**
@@ -103,8 +107,8 @@ public class VibrationEffectXmlParser {
      * <p>This can be reused for reading a vibration from an XML root tag or from within a combined
      * vibration, but it should always be called from places that validates the top level tag.
      */
-    static SerializedVibrationEffect parseVibrationContent(TypedXmlPullParser parser)
-            throws XmlParserException, IOException {
+    static SerializedVibrationEffect parseVibrationContent(TypedXmlPullParser parser,
+            @XmlConstants.Flags int flags) throws XmlParserException, IOException {
         String vibrationTagName = parser.getName();
         int vibrationTagDepth = parser.getDepth();
 
@@ -117,11 +121,15 @@ public class VibrationEffectXmlParser {
         switch (parser.getName()) {
             case TAG_PREDEFINED_EFFECT:
                 serializedVibration = new SerializedVibrationEffect(
-                        SerializedPredefinedEffect.Parser.parseNext(parser));
+                        SerializedPredefinedEffect.Parser.parseNext(parser, flags));
                 break;
             case TAG_PRIMITIVE_EFFECT:
+                List<SerializedSegment> primitives = new ArrayList<>();
+                do { // First primitive tag already open
+                    primitives.add(SerializedCompositionPrimitive.Parser.parseNext(parser));
+                } while (XmlReader.readNextTagWithin(parser, vibrationTagDepth));
                 serializedVibration = new SerializedVibrationEffect(
-                        parsePrimitiveList(parser, vibrationTagDepth));
+                        primitives.toArray(new SerializedSegment[primitives.size()]));
                 break;
             case TAG_WAVEFORM_EFFECT:
                 serializedVibration = new SerializedVibrationEffect(
@@ -136,16 +144,5 @@ public class VibrationEffectXmlParser {
         XmlReader.readEndTag(parser, vibrationTagName, vibrationTagDepth);
 
         return serializedVibration;
-    }
-
-    private static SerializedSegment[] parsePrimitiveList(
-            TypedXmlPullParser parser, int outerDepth) throws XmlParserException, IOException {
-        List<SerializedSegment> segments = new ArrayList<>();
-
-        do { // First primitive tag already open
-            segments.add(SerializedCompositionPrimitive.Parser.parseNext(parser));
-        } while (XmlReader.readNextTagWithin(parser, outerDepth));
-
-        return segments.toArray(new SerializedSegment[segments.size()]);
     }
 }
