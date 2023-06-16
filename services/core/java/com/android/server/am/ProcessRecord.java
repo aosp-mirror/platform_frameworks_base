@@ -674,6 +674,11 @@ class ProcessRecord implements WindowProcessListener {
         return mState.getCurProcState();
     }
 
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    int getSetProcState() {
+        return mState.getSetProcState();
+    }
+
     @GuardedBy({"mService", "mProcLock"})
     public void makeActive(IApplicationThread thread, ProcessStatsService tracker) {
         mProfile.onProcessActive(thread, tracker);

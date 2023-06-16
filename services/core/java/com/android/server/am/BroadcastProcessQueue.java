@@ -25,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
+import android.app.ActivityManager;
 import android.app.BroadcastOptions;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -1045,6 +1046,7 @@ class BroadcastProcessQueue {
     static final int REASON_CONTAINS_MANIFEST = 17;
     static final int REASON_FOREGROUND = 18;
     static final int REASON_CORE_UID = 19;
+    static final int REASON_TOP_PROCESS = 20;
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
@@ -1066,6 +1068,7 @@ class BroadcastProcessQueue {
             REASON_CONTAINS_MANIFEST,
             REASON_FOREGROUND,
             REASON_CORE_UID,
+            REASON_TOP_PROCESS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -1091,6 +1094,7 @@ class BroadcastProcessQueue {
             case REASON_CONTAINS_MANIFEST: return "CONTAINS_MANIFEST";
             case REASON_FOREGROUND: return "FOREGROUND";
             case REASON_CORE_UID: return "CORE_UID";
+            case REASON_TOP_PROCESS: return "TOP_PROCESS";
             default: return Integer.toString(reason);
         }
     }
@@ -1132,6 +1136,11 @@ class BroadcastProcessQueue {
             } else if (mUidForeground) {
                 mRunnableAt = runnableAt + constants.DELAY_FOREGROUND_PROC_MILLIS;
                 mRunnableAtReason = REASON_FOREGROUND;
+            } else if (app != null && app.getSetProcState() == ActivityManager.PROCESS_STATE_TOP) {
+                // TODO (b/287676625): Use a callback to check when a process goes in and out of
+                // the TOP state.
+                mRunnableAt = runnableAt + constants.DELAY_FOREGROUND_PROC_MILLIS;
+                mRunnableAtReason = REASON_TOP_PROCESS;
             } else if (mProcessPersistent) {
                 mRunnableAt = runnableAt + constants.DELAY_PERSISTENT_PROC_MILLIS;
                 mRunnableAtReason = REASON_PERSISTENT;
