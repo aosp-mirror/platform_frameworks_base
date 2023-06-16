@@ -59,6 +59,11 @@ interface IVirtualDevice {
     int getDeviceId();
 
     /**
+     * Returns the persistent ID of this virtual device.
+     */
+    String getPersistentDeviceId();
+
+    /**
      * Closes the virtual device and frees all associated resources.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")

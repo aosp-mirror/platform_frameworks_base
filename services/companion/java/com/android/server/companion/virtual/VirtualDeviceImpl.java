@@ -113,6 +113,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
 
+    private static final String PERSISTENT_ID_PREFIX_CDM_ASSOCIATION = "companion:";
+
     /**
      * Timeout until {@link #launchPendingIntent} stops waiting for an activity to be launched.
      */
@@ -126,6 +128,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final PendingTrampolineCallback mPendingTrampolineCallback;
     private final int mOwnerUid;
     private int mDeviceId;
+    private @Nullable String mPersistentDeviceId;
     // Thou shall not hold the mVirtualDeviceLock over the mInputController calls.
     // Holding the lock can lead to lock inversion with GlobalWindowManagerLock.
     // 1. After display is created the window manager calls into VDM during construction
@@ -240,6 +243,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(ownerUid);
         mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
+        mPersistentDeviceId = PERSISTENT_ID_PREFIX_CDM_ASSOCIATION + associationInfo.getId();
         mService = service;
         mPendingTrampolineCallback = pendingTrampolineCallback;
         mActivityListener = activityListener;
@@ -327,6 +331,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override // Binder call
     public int getDeviceId() {
         return mDeviceId;
+    }
+
+    /** Returns the unique device ID of this device. */
+    @Override // Binder call
+    public @Nullable String getPersistentDeviceId() {
+        return mPersistentDeviceId;
     }
 
     @Override // Binder call

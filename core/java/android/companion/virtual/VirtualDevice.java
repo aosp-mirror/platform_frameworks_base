@@ -35,6 +35,7 @@ import java.util.Objects;
 public final class VirtualDevice implements Parcelable {
 
     private final int mId;
+    private final @Nullable String mPersistentId;
     private final @Nullable String mName;
 
     /**
@@ -43,25 +44,52 @@ public final class VirtualDevice implements Parcelable {
      *
      * @hide
      */
-    public VirtualDevice(int id, @Nullable String name) {
+    public VirtualDevice(int id, @Nullable String persistentId, @Nullable String name) {
         if (id <= Context.DEVICE_ID_DEFAULT) {
-            throw new IllegalArgumentException("VirtualDevice ID mist be greater than "
+            throw new IllegalArgumentException("VirtualDevice ID must be greater than "
                     + Context.DEVICE_ID_DEFAULT);
         }
         mId = id;
+        mPersistentId = persistentId;
         mName = name;
     }
 
     private VirtualDevice(@NonNull Parcel parcel) {
         mId = parcel.readInt();
+        mPersistentId = parcel.readString8();
         mName = parcel.readString8();
     }
 
     /**
      * Returns the unique ID of the virtual device.
+     *
+     * <p>This identifier corresponds to {@link Context#getDeviceId()} and can be used to access
+     * device-specific system capabilities.
+     *
+     * <p class="note">This identifier is ephemeral and should not be used for persisting any data
+     * per device.
+     *
+     * @see Context#createDeviceContext
+     * @see #getPersistentDeviceId
      */
     public int getDeviceId() {
         return mId;
+    }
+
+    /**
+     * Returns the persistent identifier of this virtual device, if any.
+     *
+     * <p> If there is no stable identifier for this virtual device, then this returns {@code null}.
+
+     * <p>This identifier may correspond to a physical device. In that case it remains valid for as
+     * long as that physical device is associated with the host device and may be used to persist
+     * data per device.
+     *
+     * <p class="note">This identifier may not be unique across virtual devices, in case there are
+     * more than one virtual devices corresponding to the same physical device.
+     */
+    public @Nullable String getPersistentDeviceId() {
+        return mPersistentId;
     }
 
     /**
@@ -81,6 +109,7 @@ public final class VirtualDevice implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mId);
+        dest.writeString8(mPersistentId);
         dest.writeString8(mName);
     }
 
@@ -94,12 +123,13 @@ public final class VirtualDevice implements Parcelable {
         }
         VirtualDevice that = (VirtualDevice) o;
         return mId == that.mId
+                && Objects.equals(mPersistentId, that.mPersistentId)
                 && Objects.equals(mName, that.mName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mName);
+        return Objects.hash(mId, mPersistentId, mName);
     }
 
     @Override
@@ -107,6 +137,7 @@ public final class VirtualDevice implements Parcelable {
     public String toString() {
         return "VirtualDevice("
                 + " mId=" + mId
+                + " mPersistentId=" + mPersistentId
                 + " mName=" + mName
                 + ")";
     }
