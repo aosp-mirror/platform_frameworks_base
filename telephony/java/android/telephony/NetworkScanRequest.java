@@ -17,6 +17,8 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,6 +26,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Defines a request to perform a network scan.
@@ -108,6 +111,7 @@ public final class NetworkScanRequest implements Parcelable {
     private int mIncrementalResultsPeriodicity;
 
     /** Describes the radio access technologies with bands or channels that need to be scanned. */
+    @Nullable
     private RadioAccessSpecifier[] mSpecifiers;
 
     /**
@@ -117,6 +121,7 @@ public final class NetworkScanRequest implements Parcelable {
      * If list not sent, search to be completed till end and all PLMNs found to be reported.
      * Max size of array is MAX_MCC_MNC_LIST_SIZE
      */
+    @NonNull
     private ArrayList<String> mMccMncs;
 
     /**
@@ -240,27 +245,20 @@ public final class NetworkScanRequest implements Parcelable {
     }
 
     @Override
-    public boolean equals (Object o) {
-        NetworkScanRequest nsr;
+    public boolean equals(Object other) {
+        if (this == other) return true;
 
-        try {
-            nsr = (NetworkScanRequest) o;
-        } catch (ClassCastException ex) {
-            return false;
-        }
+        if (!(other instanceof NetworkScanRequest)) return false;
 
-        if (o == null) {
-            return false;
-        }
+        NetworkScanRequest nsr = (NetworkScanRequest) other;
 
-        return (mScanType == nsr.mScanType
+        return mScanType == nsr.mScanType
                 && Arrays.equals(mSpecifiers, nsr.mSpecifiers)
                 && mSearchPeriodicity == nsr.mSearchPeriodicity
                 && mMaxSearchTime == nsr.mMaxSearchTime
                 && mIncrementalResults == nsr.mIncrementalResults
                 && mIncrementalResultsPeriodicity == nsr.mIncrementalResultsPeriodicity
-                && (((mMccMncs != null)
-                && mMccMncs.equals(nsr.mMccMncs))));
+                && Objects.equals(mMccMncs, nsr.mMccMncs);
     }
 
     @Override
