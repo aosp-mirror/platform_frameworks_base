@@ -39,7 +39,7 @@ class RoundedCornerDecorProviderFactoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        roundedCornerResDelegate = spy(RoundedCornerResDelegate(mContext.resources, null))
+        roundedCornerResDelegate = spy(RoundedCornerResDelegateImpl(mContext.resources, null))
     }
 
     @Test

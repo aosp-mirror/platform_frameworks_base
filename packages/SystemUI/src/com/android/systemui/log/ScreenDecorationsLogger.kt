@@ -21,9 +21,9 @@ import android.graphics.Rect
 import android.graphics.RectF
 import androidx.core.graphics.toRectF
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.ERROR
+import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.dagger.ScreenDecorationsLog
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
@@ -163,5 +163,50 @@ constructor(
 
     fun cameraProtectionEvent(@CompileTimeConstant cameraProtectionEvent: String) {
         logBuffer.log(TAG, DEBUG, cameraProtectionEvent)
+    }
+
+    fun logRotationChangeDeferred(currentRot: Int, newRot: Int) {
+        logBuffer.log(
+            TAG,
+            INFO,
+            {
+                int1 = currentRot
+                int2 = newRot
+            },
+            { "Rotation changed, deferring $int2, staying at $int2" },
+        )
+    }
+
+    fun logRotationChanged(oldRot: Int, newRot: Int) {
+        logBuffer.log(
+            TAG,
+            INFO,
+            {
+                int1 = oldRot
+                int2 = newRot
+            },
+            { "Rotation changed from $int1 to $int2" }
+        )
+    }
+
+    fun logDisplayModeChanged(currentMode: Int, newMode: Int) {
+        logBuffer.log(
+            TAG,
+            INFO,
+            {
+                int1 = currentMode
+                int2 = newMode
+            },
+            { "Resolution changed, deferring mode change to $int2, staying at $int1" },
+        )
+    }
+
+    fun logUserSwitched(newUser: Int) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { int1 = newUser },
+            { "UserSwitched newUserId=$int1. Updating color inversion setting" },
+        )
     }
 }
