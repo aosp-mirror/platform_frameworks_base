@@ -1214,8 +1214,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplayRotationCompatPolicy =
                 // Not checking DeviceConfig value here to allow enabling via DeviceConfig
                 // without the need to restart the device.
-                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                            /* checkDeviceConfig */ false)
+                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime()
                         ? new DisplayRotationCompatPolicy(this) : null;
         mRotationReversionController = new DisplayRotationReversionController(this);
 
