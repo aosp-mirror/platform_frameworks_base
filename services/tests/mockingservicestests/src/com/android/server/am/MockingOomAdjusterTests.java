@@ -2512,6 +2512,35 @@ public class MockingOomAdjusterTests {
         assertEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoAll_Side_Cycle() {
+        final ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        final ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        final ProcessRecord app3 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        long now = SystemClock.uptimeMillis();
+        ServiceRecord s = bindService(app, app2, null, 0, mock(IBinder.class));
+        s.startRequested = true;
+        s.lastActivity = now;
+        s = bindService(app2, app3, null, 0, mock(IBinder.class));
+        s.lastActivity = now;
+        s = bindService(app3, app2, null, 0, mock(IBinder.class));
+        s.lastActivity = now;
+
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        sService.mOomAdjuster.mNumServiceProcs = 3;
+        updateOomAdj(app, app2, app3);
+
+        assertEquals(SERVICE_ADJ, app.mState.getSetAdj());
+        assertTrue(sFirstCachedAdj <= app2.mState.getSetAdj());
+        assertTrue(sFirstCachedAdj <= app3.mState.getSetAdj());
+        assertTrue(CACHED_APP_MAX_ADJ >= app2.mState.getSetAdj());
+        assertTrue(CACHED_APP_MAX_ADJ >= app3.mState.getSetAdj());
+    }
+
     private ProcessRecord makeDefaultProcessRecord(int pid, int uid, String processName,
             String packageName, boolean hasShownUi) {
         long now = SystemClock.uptimeMillis();
