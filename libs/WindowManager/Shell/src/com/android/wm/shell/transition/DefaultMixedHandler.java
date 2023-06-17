@@ -631,11 +631,12 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 finishCallback.onTransitionFinished(wct, wctCB);
             }
         };
+        mixed.mInFlightSubAnimations++;
         if (!mKeyguardHandler.startAnimation(
                 mixed.mTransition, info, startTransaction, finishTransaction, finishCB)) {
+            mixed.mInFlightSubAnimations--;
             return false;
         }
-        mixed.mInFlightSubAnimations++;
         // Sync pip state.
         if (mPipHandler != null) {
             // We don't know when to apply `startTransaction` so use a separate transaction here.
