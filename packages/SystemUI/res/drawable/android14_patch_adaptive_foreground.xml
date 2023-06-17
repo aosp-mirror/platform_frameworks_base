@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2023 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <path
+      android:pathData="M54.03,33.03C52.99,33.03 52.14,33.86 52.14,34.87V37.14C52.14,37.34 52.3,37.5 52.5,37.5C52.69,37.5 52.85,37.34 52.85,37.14V36.53C52.85,36.14 53.17,35.82 53.56,35.82H54.51C54.9,35.82 55.22,36.14 55.22,36.53V37.14C55.22,37.34 55.38,37.5 55.57,37.5C55.77,37.5 55.93,37.34 55.93,37.14V34.87C55.93,33.86 55.08,33.03 54.03,33.03H54.03Z"
+      android:fillColor="@android:color/system_accent3_400"/>
+  <path
+      android:pathData="M108,0H0V108H108V0ZM54,80.67C68.73,80.67 80.67,68.73 80.67,54C80.67,39.27 68.73,27.33 54,27.33C39.27,27.33 27.33,39.27 27.33,54C27.33,68.73 39.27,80.67 54,80.67Z"
+      android:fillColor="@android:color/system_accent1_400"
+      android:fillType="evenOdd"/>
+  <group>
+    <!-- the text doesn't look great everywhere but you can remove the clip to try it out. -->
+    <clip-path />
+    <path
+        android:pathData="M28.58,32.18L29.18,31.5L33.82,33.02L33.12,33.81L32.15,33.48L30.92,34.87L31.37,35.8L30.68,36.58L28.58,32.18L28.58,32.18ZM31.25,33.18L29.87,32.71L30.51,34.02L31.25,33.18V33.18Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M38,29.76L34.61,28.79L36.23,31.04L35.42,31.62L32.8,27.99L33.5,27.48L36.88,28.45L35.26,26.21L36.08,25.62L38.7,29.25L38,29.76Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M39.23,23.87L40.63,23.27C41.79,22.77 43.13,23.28 43.62,24.43C44.11,25.57 43.56,26.89 42.4,27.39L40.99,27.99L39.23,23.87ZM42.03,26.54C42.73,26.24 42.96,25.49 42.68,24.83C42.4,24.17 41.69,23.82 41,24.11L40.51,24.32L41.55,26.75L42.03,26.54Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M45.91,21.43L47.64,21.09C48.47,20.93 49.12,21.41 49.27,22.15C49.38,22.72 49.15,23.14 48.63,23.45L50.57,25.08L49.39,25.31L47.57,23.79L47.41,23.82L47.76,25.63L46.78,25.83L45.91,21.43H45.91ZM47.87,22.86C48.16,22.8 48.34,22.59 48.29,22.34C48.24,22.07 48,21.96 47.71,22.02L47.07,22.14L47.24,22.98L47.87,22.86Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M52.17,22.69C52.19,21.41 53.24,20.39 54.52,20.41C55.8,20.43 56.82,21.49 56.8,22.76C56.78,24.04 55.72,25.06 54.45,25.04C53.17,25.02 52.15,23.96 52.17,22.69ZM55.79,22.75C55.8,22.02 55.23,21.39 54.51,21.38C53.78,21.37 53.19,21.98 53.18,22.7C53.17,23.43 53.73,24.06 54.47,24.07C55.19,24.08 55.78,23.47 55.79,22.75H55.79Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M60,21.01L60.98,21.2L60.12,25.6L59.14,25.41L60,21.01Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M64.3,22.03L65.73,22.58C66.91,23.03 67.51,24.32 67.07,25.49C66.62,26.65 65.31,27.22 64.13,26.77L62.71,26.22L64.3,22.03L64.3,22.03ZM64.46,25.9C65.17,26.17 65.86,25.8 66.12,25.12C66.37,24.45 66.11,23.71 65.4,23.44L64.91,23.25L63.97,25.72L64.46,25.9Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M73.59,27.94L72.94,27.44L73.51,26.69L74.92,27.77L72.2,31.34L71.45,30.76L73.59,27.94Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M76.18,33.75L74.69,32.14L75.25,31.62L78.81,31.42L79.4,32.05L77.47,33.85L77.86,34.27L77.22,34.86L76.83,34.44L76.12,35.11L75.47,34.41L76.18,33.75ZM77.72,32.31L76.12,32.4L76.82,33.15L77.72,32.31Z"
+        android:fillColor="#ffffff"/>
+  </group>
+</vector>
