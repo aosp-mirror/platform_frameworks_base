@@ -172,6 +172,7 @@ public class BroadcastQueueTest {
     BroadcastConstants mConstants;
     private BroadcastSkipPolicy mSkipPolicy;
     private UidObserver mUidObserver;
+    private UidObserver mUidCachedStateObserver;
 
     /**
      * Desired behavior of the next
@@ -317,7 +318,13 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             mUidObserver = invocation.getArgument(0);
             return null;
-        }).when(mAms).registerUidObserver(any(), anyInt(), anyInt(), any());
+        }).when(mAms).registerUidObserver(any(), anyInt(),
+                eq(ActivityManager.PROCESS_STATE_TOP), any());
+        doAnswer((invocation) -> {
+            mUidCachedStateObserver = invocation.getArgument(0);
+            return null;
+        }).when(mAms).registerUidObserver(any(), anyInt(),
+                eq(ActivityManager.PROCESS_STATE_LAST_ACTIVITY), any());
 
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mConstants.TIMEOUT = 100;
@@ -1762,8 +1769,12 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
         final ProcessRecord receiverOrangeApp = makeActiveProcessRecord(PACKAGE_ORANGE);
 
-        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), true);
-        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_BLUE), true);
+        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_GREEN),
+                ActivityManager.PROCESS_STATE_CACHED_ACTIVITY, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
+        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_BLUE),
+                ActivityManager.PROCESS_STATE_CACHED_EMPTY, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
         final BroadcastOptions opts = BroadcastOptions.makeBasic()
@@ -1807,12 +1818,16 @@ public class BroadcastQueueTest {
                 eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
 
         // Shift blue to be active and confirm that deferred broadcast is delivered
-        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_BLUE), false);
+        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_BLUE),
+                ActivityManager.PROCESS_STATE_TOP, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, timeTick);
 
         // Shift green to be active and confirm that deferred broadcast is delivered
-        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), false);
+        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_GREEN),
+                ActivityManager.PROCESS_STATE_SERVICE, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, timeTick);
     }
@@ -2237,9 +2252,15 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
         final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
 
-        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), true);
-        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_BLUE), true);
-        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_YELLOW), false);
+        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_GREEN),
+                ActivityManager.PROCESS_STATE_CACHED_ACTIVITY, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
+        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_BLUE),
+                ActivityManager.PROCESS_STATE_CACHED_EMPTY, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
+        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_YELLOW),
+                ActivityManager.PROCESS_STATE_SERVICE, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastOptions opts = BroadcastOptions.makeBasic()
@@ -2262,7 +2283,9 @@ public class BroadcastQueueTest {
         verifyScheduleRegisteredReceiver(times(1), receiverYellowApp, airplane);
 
         // Shift green to be active and confirm that deferred broadcast is delivered
-        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), false);
+        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_GREEN),
+                ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
     }
