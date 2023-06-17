@@ -1009,7 +1009,6 @@ public class OomAdjuster {
             mCacheOomRanker.reRankLruCachedAppsLSP(mProcessList.getLruProcessesLSP(),
                     mProcessList.getLruProcessServiceStartLOSP());
         }
-        assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
 
         if (computeClients) { // There won't be cycles if we didn't compute clients above.
             // Cycle strategy:
@@ -1034,7 +1033,7 @@ public class OomAdjuster {
                     ProcessRecord app = activeProcesses.get(i);
                     final ProcessStateRecord state = app.mState;
                     if (!app.isKilledByAm() && app.getThread() != null && state.containsCycle()) {
-                        if (computeOomAdjLSP(app, state.getCurRawAdj(), topApp, true, now,
+                        if (computeOomAdjLSP(app, UNKNOWN_ADJ, topApp, true, now,
                                 true, true)) {
                             retryCycles = true;
                         }
@@ -1043,6 +1042,8 @@ public class OomAdjuster {
             }
         }
         mProcessesInCycle.clear();
+
+        assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
 
         mNumNonCachedProcs = 0;
         mNumCachedHiddenProcs = 0;

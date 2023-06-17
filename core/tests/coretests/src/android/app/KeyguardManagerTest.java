@@ -19,6 +19,7 @@ package android.app;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
@@ -207,6 +209,42 @@ public class KeyguardManagerTest {
         assertFalse(correctLockCredentials);
 
         verifyDeviceLockedAndRemoveLock();
+    }
+
+    @Test
+    public void createConfirmDeviceCredentialForRemoteValidationIntent() {
+        RemoteLockscreenValidationSession remoteLockscreenValidationSession =
+                new RemoteLockscreenValidationSession.Builder()
+                        .setSourcePublicKey("sourcePublicKey".getBytes())
+                        .build();
+        ComponentName componentName = new ComponentName("pkg", "cls");
+        String title = "title";
+        String description = "description";
+        String checkboxLabel = "checkboxLabel";
+        String alternateButtonLabel = "alternateButtonLabel";
+
+        Intent intent = mKeyguardManager.createConfirmDeviceCredentialForRemoteValidationIntent(
+                remoteLockscreenValidationSession,
+                componentName,
+                title,
+                description,
+                checkboxLabel,
+                alternateButtonLabel
+        );
+
+        assertNotNull(intent);
+        assertEquals(KeyguardManager.ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL, intent.getAction());
+        assertEquals(remoteLockscreenValidationSession,
+                intent.getParcelableExtra(
+                        KeyguardManager.EXTRA_REMOTE_LOCKSCREEN_VALIDATION_SESSION,
+                        RemoteLockscreenValidationSession.class));
+        assertEquals(componentName,
+                intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME, ComponentName.class));
+        assertEquals(title, intent.getStringExtra(KeyguardManager.EXTRA_TITLE));
+        assertEquals(description, intent.getStringExtra(KeyguardManager.EXTRA_DESCRIPTION));
+        assertEquals(checkboxLabel, intent.getStringExtra(KeyguardManager.EXTRA_CHECKBOX_LABEL));
+        assertEquals(alternateButtonLabel,
+                intent.getStringExtra(KeyguardManager.EXTRA_ALTERNATE_BUTTON_LABEL));
     }
 
     private void verifyDeviceLockedAndRemoveLock() {
