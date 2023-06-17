@@ -358,12 +358,12 @@
     <!-- Message shown to prepare for an unattended update (OTA). Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
     <string name="kg_prompt_unattended_update_pattern">Draw pattern to install update later</string>
 
-    <!-- Message shown after an unattended update (OTA) asking the user to enter their PIN. Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
+    <!--  Message shown after an unattended mainline (major) update asking the user to enter their PIN. [CHAR LIMIT=70] -->
     <string name="kg_prompt_after_update_pin">Device updated. Enter PIN to continue.</string>
 
-    <!-- Message shown after an unattended update (OTA) asking the user to enter their password. Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
+    <!-- Message shown after an unattended mainline (major) update asking the user to enter their password. [CHAR LIMIT=70] -->
     <string name="kg_prompt_after_update_password">Device updated. Enter password to continue.</string>
 
-    <!-- Message shown after an unattended update (OTA) asking the user to enter their pattern. Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
+    <!-- Message shown after an unattended mainline (major) update asking the user to enter their pattern. [CHAR LIMIT=70] -->
     <string name="kg_prompt_after_update_pattern">Device updated. Draw pattern to continue.</string>
 </resources>

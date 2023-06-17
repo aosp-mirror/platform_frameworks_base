@@ -475,6 +475,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      */
     private boolean mShouldDelayWakeUpAnimation = false;
 
+    /**
+     * Whether we should delay the AOD->Lockscreen animation.
+     * If false, the animation will start in onStartedWakingUp().
+     * If true, the animation will start in onFinishedWakingUp().
+     */
+    private boolean mShouldDelayLockscreenTransitionFromAod = false;
+
     private final Object mQueueLock = new Object();
 
     private final PulseExpansionHandler mPulseExpansionHandler;
@@ -3242,7 +3249,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                 updateVisibleToUser();
                 updateIsKeyguard();
-                if (!mFeatureFlags.isEnabled(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD)) {
+                mShouldDelayLockscreenTransitionFromAod = mDozeParameters.getAlwaysOn()
+                        && mFeatureFlags.isEnabled(
+                                Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD);
+                if (!mShouldDelayLockscreenTransitionFromAod) {
                     startLockscreenTransitionFromAod();
                 }
             });
@@ -3251,8 +3261,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         /**
          * Private helper for starting the LOCKSCREEN_TRANSITION_FROM_AOD animation - only necessary
-         * so we can start it from either onFinishedWakingUp() or onFinishedWakingUp() depending
-         * on a flag value.
+         * so we can start it from either onFinishedWakingUp() or onFinishedWakingUp().
          */
         private void startLockscreenTransitionFromAod() {
             // stopDozing() starts the LOCKSCREEN_TRANSITION_FROM_AOD animation.
@@ -3273,7 +3282,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         @Override
         public void onFinishedWakingUp() {
-            if (mFeatureFlags.isEnabled(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD)) {
+            if (mShouldDelayLockscreenTransitionFromAod) {
                 mNotificationShadeWindowController.batchApplyWindowLayoutParams(
                         this::startLockscreenTransitionFromAod);
             }
