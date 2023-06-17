@@ -790,7 +790,8 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
             // If SystemUI is dragging for recents, we want to reset the dim state so any dim layer
             // on the display level fades out.
-            if (forAllTasks(task -> !task.canAffectSystemUiFlags())) {
+            if (!mTransitionController.isShellTransitionsEnabled()
+                    && forAllTasks(task -> !task.canAffectSystemUiFlags())) {
                 mDimmer.resetDimStates();
             }
 

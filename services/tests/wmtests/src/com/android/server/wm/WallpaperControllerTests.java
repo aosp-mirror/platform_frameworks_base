@@ -288,6 +288,32 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertEquals(homeWin, dc.mWallpaperController.getWallpaperTarget());
     }
 
+    @Test
+    public void testShowWhenLockedWallpaperTarget() {
+        final WindowState wallpaperWindow = createWallpaperWindow(mDisplayContent);
+        wallpaperWindow.mToken.asWallpaperToken().setShowWhenLocked(true);
+        final WindowState behind = createWindow(null, TYPE_BASE_APPLICATION, "behind");
+        final WindowState topTranslucent = createWindow(null, TYPE_BASE_APPLICATION,
+                "topTranslucent");
+        behind.mAttrs.width = behind.mAttrs.height = topTranslucent.mAttrs.width =
+                topTranslucent.mAttrs.height = WindowManager.LayoutParams.MATCH_PARENT;
+        topTranslucent.mAttrs.flags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+        doReturn(true).when(behind.mActivityRecord).fillsParent();
+        doReturn(false).when(topTranslucent.mActivityRecord).fillsParent();
+
+        spyOn(mWm.mPolicy);
+        doReturn(true).when(mWm.mPolicy).isKeyguardLocked();
+        doReturn(true).when(mWm.mPolicy).isKeyguardOccluded();
+        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
+        // Wallpaper is visible because the show-when-locked activity is translucent.
+        assertTrue(mDisplayContent.mWallpaperController.isWallpaperTarget(wallpaperWindow));
+
+        behind.mActivityRecord.setShowWhenLocked(true);
+        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
+        // Wallpaper is invisible because the lowest show-when-locked activity is opaque.
+        assertTrue(mDisplayContent.mWallpaperController.isWallpaperTarget(null));
+    }
+
     /**
      * Tests that the windowing mode of the wallpaper window must always be fullscreen.
      */

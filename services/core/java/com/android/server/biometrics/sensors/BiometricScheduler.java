@@ -268,6 +268,14 @@ public class BiometricScheduler {
             return;
         }
 
+        if (mCurrentOperation.isAcquisitionOperation()) {
+            AcquisitionClient client = (AcquisitionClient) mCurrentOperation.getClientMonitor();
+            if (client.isAlreadyCancelled()) {
+                mCurrentOperation.cancel(mHandler, mInternalCallback);
+                return;
+            }
+        }
+
         if (mGestureAvailabilityDispatcher != null && mCurrentOperation.isAcquisitionOperation()) {
             mGestureAvailabilityDispatcher.markSensorActive(
                     mCurrentOperation.getSensorId(), true /* active */);

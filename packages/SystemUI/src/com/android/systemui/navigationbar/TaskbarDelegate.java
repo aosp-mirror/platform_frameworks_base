@@ -224,7 +224,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                         return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;
                     }
                 });
-        controller.overrideIconTintForNavMode(true);
 
         return controller;
     }

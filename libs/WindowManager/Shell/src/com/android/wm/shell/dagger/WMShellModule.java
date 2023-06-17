@@ -64,7 +64,6 @@ import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
 import com.android.wm.shell.freeform.FreeformTaskTransitionObserver;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
-import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -735,28 +734,6 @@ public abstract class WMShellModule {
     }
 
     //
-    // Kids mode
-    //
-    @WMSingleton
-    @Provides
-    static KidsModeTaskOrganizer provideKidsModeTaskOrganizer(
-            Context context,
-            ShellInit shellInit,
-            ShellCommandHandler shellCommandHandler,
-            SyncTransactionQueue syncTransactionQueue,
-            DisplayController displayController,
-            DisplayInsetsController displayInsetsController,
-            Optional<UnfoldAnimationController> unfoldAnimationController,
-            Optional<RecentTasksController> recentTasksOptional,
-            @ShellMainThread ShellExecutor mainExecutor,
-            @ShellMainThread Handler mainHandler
-    ) {
-        return new KidsModeTaskOrganizer(context, shellInit, shellCommandHandler,
-                syncTransactionQueue, displayController, displayInsetsController,
-                unfoldAnimationController, recentTasksOptional, mainExecutor, mainHandler);
-    }
-
-    //
     // Misc
     //
 
@@ -767,7 +744,6 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DefaultMixedHandler defaultMixedHandler,
-            KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<DesktopModeController> desktopModeController) {
         return new Object();
     }

@@ -14449,6 +14449,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     && !Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
                 Slog.w(TAG, "Skipping broadcast of " + intent
                         + ": user " + userId + " and its parent (if any) are stopped");
+                scheduleCanceledResultTo(resultToApp, resultTo, intent, userId,
+                        brOptions, callingUid, callerPackage);
                 return ActivityManager.BROADCAST_FAILED_USER_STOPPED;
             }
         }
@@ -14520,6 +14522,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             isProtectedBroadcast = AppGlobals.getPackageManager().isProtectedBroadcast(action);
         } catch (RemoteException e) {
             Slog.w(TAG, "Remote exception", e);
+            scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                    userId, brOptions, callingUid, callerPackage);
             return ActivityManager.BROADCAST_SUCCESS;
         }
 
@@ -14753,6 +14757,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (aInfo == null) {
                             Slog.w(TAG, "Dropping ACTION_PACKAGE_REPLACED for non-existent pkg:"
                                     + " ssp=" + ssp + " data=" + data);
+                            scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                                    userId, brOptions, callingUid, callerPackage);
                             return ActivityManager.BROADCAST_SUCCESS;
                         }
                         updateAssociationForApp(aInfo);
@@ -14838,6 +14844,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Apps should now be using ShortcutManager.pinRequestShortcut().
                     Log.w(TAG, "Broadcast " + action
                             + " no longer supported. It will not be delivered.");
+                    scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                            userId, brOptions, callingUid, callerPackage);
                     return ActivityManager.BROADCAST_SUCCESS;
                 case Intent.ACTION_PRE_BOOT_COMPLETED:
                     timeoutExempt = true;
@@ -14845,6 +14853,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case Intent.ACTION_CLOSE_SYSTEM_DIALOGS:
                     if (!mAtmInternal.checkCanCloseSystemDialogs(callingPid, callingUid,
                             callerPackage)) {
+                        scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                                userId, brOptions, callingUid, callerPackage);
                         // Returning success seems to be the pattern here
                         return ActivityManager.BROADCAST_SUCCESS;
                     }
@@ -14879,6 +14889,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (requiredPermissions != null && requiredPermissions.length > 0) {
                 Slog.w(TAG, "Can't broadcast sticky intent " + intent
                         + " and enforce permissions " + Arrays.toString(requiredPermissions));
+                scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                        userId, brOptions, callingUid, callerPackage);
                 return ActivityManager.BROADCAST_STICKY_CANT_HAVE_PERMISSION;
             }
             if (intent.getComponent() != null) {
@@ -15127,6 +15139,33 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return ActivityManager.BROADCAST_SUCCESS;
+    }
+
+    @GuardedBy("this")
+    private void scheduleCanceledResultTo(ProcessRecord resultToApp, IIntentReceiver resultTo,
+            Intent intent, int userId, BroadcastOptions options, int callingUid,
+            String callingPackage) {
+        if (resultTo == null) {
+            return;
+        }
+        final ProcessRecord app = resultToApp;
+        final IApplicationThread thread  = (app != null) ? app.getOnewayThread() : null;
+        if (thread != null) {
+            try {
+                final boolean shareIdentity = (options != null && options.isShareIdentityEnabled());
+                thread.scheduleRegisteredReceiver(
+                        resultTo, intent, Activity.RESULT_CANCELED, null, null,
+                        false, false, true, userId, app.mState.getReportedProcState(),
+                        shareIdentity ? callingUid : Process.INVALID_UID,
+                        shareIdentity ? callingPackage : null);
+            } catch (RemoteException e) {
+                final String msg = "Failed to schedule result of " + intent + " via "
+                        + app + ": " + e;
+                app.killLocked("Can't schedule resultTo", ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
+                Slog.d(TAG, msg);
+            }
+        }
     }
 
     @GuardedBy("this")
