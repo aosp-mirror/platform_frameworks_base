@@ -16,12 +16,14 @@
   -->
 <MotionScene
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:motion="http://schemas.android.com/apk/res-auto">
 
     <Transition
         android:id="@+id/header_transition"
         app:constraintSetEnd="@id/qs_header_constraint"
-        app:constraintSetStart="@id/qqs_header_constraint">
+        app:constraintSetStart="@id/qqs_header_constraint"
+        motion:layoutDuringTransition="honorRequest">
         <KeyFrameSet>
             <!-- These positions are to prevent visual movement of @id/date -->
             <KeyPosition

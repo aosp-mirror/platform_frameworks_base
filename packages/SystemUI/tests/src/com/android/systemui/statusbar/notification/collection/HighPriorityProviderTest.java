@@ -92,8 +92,9 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .getPeopleNotificationType(entry))
                 .thenReturn(TYPE_PERSON);
 
-        // THEN it has high priority
+        // THEN it has high priority BUT it has low explicit priority.
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
+        assertFalse(mHighPriorityProvider.isExplicitlyHighPriority(entry));
     }
 
     @Test
@@ -115,7 +116,7 @@ public class HighPriorityProviderTest extends SysuiTestCase {
 
     @Test
     public void lowImportanceConversation() {
-        // GIVEN notification is high importance and is a people notification
+        // GIVEN notification is low importance and is a people notification
         final Notification notification = new Notification.Builder(mContext, "test")
                 .build();
         final NotificationEntry entry = new NotificationEntryBuilder()
@@ -162,8 +163,9 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .getPeopleNotificationType(entry))
                 .thenReturn(TYPE_NON_PERSON);
 
-        // THEN it has high priority
+        // THEN it has high priority but low explicit priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
+        assertFalse(mHighPriorityProvider.isExplicitlyHighPriority(entry));
     }
 
     @Test

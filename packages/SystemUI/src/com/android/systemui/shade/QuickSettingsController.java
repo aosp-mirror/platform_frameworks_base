@@ -1186,7 +1186,6 @@ public class QuickSettingsController implements Dumpable {
                         mClippingAnimationEndBounds.left, fraction);
                 int animTop = (int) MathUtils.lerp(startTop,
                         mClippingAnimationEndBounds.top, fraction);
-                logClippingTopBound("interpolated top bound", top);
                 int animRight = (int) MathUtils.lerp(startRight,
                         mClippingAnimationEndBounds.right, fraction);
                 int animBottom = (int) MathUtils.lerp(startBottom,
@@ -1216,7 +1215,8 @@ public class QuickSettingsController implements Dumpable {
         if (mIsFullWidth) {
             clipStatusView = qsVisible;
             float screenCornerRadius =
-                    mRecordingController.isRecording() || mCastController.hasConnectedCastDevice()
+                    !mSplitShadeEnabled || mRecordingController.isRecording()
+                            || mCastController.hasConnectedCastDevice()
                             ? 0 : mScreenCornerRadius;
             radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
@@ -1337,8 +1337,6 @@ public class QuickSettingsController implements Dumpable {
             // the screen without clipping.
             return -mAmbientState.getStackTopMargin();
         } else {
-            logNotificationsClippingTopBound(qsTop,
-                    mNotificationStackScrollLayoutController.getTop());
             return qsTop - mNotificationStackScrollLayoutController.getTop();
         }
     }
@@ -1380,25 +1378,21 @@ public class QuickSettingsController implements Dumpable {
                     keyguardNotificationStaticPadding, maxQsPadding) : maxQsPadding;
             topPadding = (int) MathUtils.lerp((float) getMinExpansionHeight(),
                     (float) max, expandedFraction);
-            logNotificationsTopPadding("keyguard and expandImmediate", topPadding);
             return topPadding;
         } else if (isSizeChangeAnimationRunning()) {
             topPadding = Math.max((int) mSizeChangeAnimator.getAnimatedValue(),
                     keyguardNotificationStaticPadding);
-            logNotificationsTopPadding("size change animation running", topPadding);
             return topPadding;
         } else if (keyguardShowing) {
             // We can only do the smoother transition on Keyguard when we also are not collapsing
             // from a scrolled quick settings.
             topPadding = MathUtils.lerp((float) keyguardNotificationStaticPadding,
                     (float) (getMaxExpansionHeight()), computeExpansionFraction());
-            logNotificationsTopPadding("keyguard", topPadding);
             return topPadding;
         } else {
             topPadding = Math.max(mQsFrameTranslateController.getNotificationsTopPadding(
                     mExpansionHeight, mNotificationStackScrollLayoutController),
                     mQuickQsHeaderHeight);
-            logNotificationsTopPadding("default case", topPadding);
             return topPadding;
         }
     }
@@ -1446,38 +1440,6 @@ public class QuickSettingsController implements Dumpable {
                         - mAmbientState.getScrollY());
     }
 
-    /** TODO(b/273591201): remove after bug resolved */
-    private void logNotificationsTopPadding(String message, float rawPadding) {
-        int padding =  ((int) rawPadding / 10) * 10;
-        if (mBarState != KEYGUARD && padding != mLastNotificationsTopPadding && !mExpanded) {
-            mLastNotificationsTopPadding = padding;
-            mShadeLog.logNotificationsTopPadding(message, padding);
-        }
-    }
-
-    /** TODO(b/273591201): remove after bug resolved */
-    private void logClippingTopBound(String message, int top) {
-        top = (top / 10) * 10;
-        if (mBarState != KEYGUARD && mShadeExpandedFraction == 1
-                && top != mLastClippingTopBound && !mExpanded) {
-            mLastClippingTopBound = top;
-            mShadeLog.logClippingTopBound(message, top);
-        }
-    }
-
-    /** TODO(b/273591201): remove after bug resolved */
-    private void logNotificationsClippingTopBound(int top, int nsslTop) {
-        top = (top / 10) * 10;
-        nsslTop = (nsslTop / 10) * 10;
-        if (mBarState == SHADE && mShadeExpandedFraction == 1
-                && (top != mLastNotificationsClippingTopBound
-                || nsslTop != mLastNotificationsClippingTopBoundNssl) && !mExpanded) {
-            mLastNotificationsClippingTopBound = top;
-            mLastNotificationsClippingTopBoundNssl = nsslTop;
-            mShadeLog.logNotificationsClippingTopBound(top, nsslTop);
-        }
-    }
-
     private int calculateTopClippingBound(int qsPanelBottomY) {
         int top;
         if (mSplitShadeEnabled) {
@@ -1487,7 +1449,6 @@ public class QuickSettingsController implements Dumpable {
                 // If we're transitioning, let's use the actual value. The else case
                 // can be wrong during transitions when waiting for the keyguard to unlock
                 top = mTransitionToFullShadePosition;
-                logClippingTopBound("set while transitioning to full shade", top);
             } else {
                 final float notificationTop = getEdgePosition();
                 if (mBarState == KEYGUARD) {
@@ -1496,10 +1457,8 @@ public class QuickSettingsController implements Dumpable {
                         // this should go away once we unify the stackY position and don't have
                         // to do this min anymore below.
                         top = qsPanelBottomY;
-                        logClippingTopBound("bypassing keyguard", top);
                     } else {
                         top = (int) Math.min(qsPanelBottomY, notificationTop);
-                        logClippingTopBound("keyguard default case", top);
                     }
                 } else {
                     top = (int) notificationTop;
@@ -1507,14 +1466,12 @@ public class QuickSettingsController implements Dumpable {
             }
             // TODO (b/265193930): remove dependency on NPVC
             top += mPanelViewControllerLazy.get().getOverStretchAmount();
-            logClippingTopBound("including overstretch", top);
             // Correction for instant expansion caused by HUN pull down/
             float minFraction = mPanelViewControllerLazy.get().getMinFraction();
             if (minFraction > 0f && minFraction < 1f) {
                 float realFraction = (mShadeExpandedFraction
                         - minFraction) / (1f - minFraction);
                 top *= MathUtils.saturate(realFraction / minFraction);
-                logClippingTopBound("after adjusted fraction", top);
             }
         }
         return top;
@@ -1654,15 +1611,11 @@ public class QuickSettingsController implements Dumpable {
         // as sometimes the qsExpansionFraction can be a tiny value instead of 0 when in QQS.
         if (!mSplitShadeEnabled && !mLastShadeFlingWasExpanding
                 && computeExpansionFraction() <= 0.01 && mShadeExpandedFraction < 1.0) {
-            mShadeLog.logMotionEvent(event,
-                    "handleQsTouch: shade touched while shade collapsing, QS tracking disabled");
             mTracking = false;
         }
         if (!isExpandImmediate() && mTracking) {
             onTouch(event);
             if (!mConflictingExpansionGesture && !mSplitShadeEnabled) {
-                mShadeLog.logMotionEvent(event,
-                        "handleQsTouch: not immediate expand or conflicting gesture");
                 return true;
             }
         }
@@ -1756,7 +1709,6 @@ public class QuickSettingsController implements Dumpable {
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                mShadeLog.logMotionEvent(event, "onQsTouch: move action, setting QS expansion");
                 setExpansionHeight(h + mInitialHeightOnTouch);
                 // TODO (b/265193930): remove dependency on NPVC
                 if (h >= mPanelViewControllerLazy.get().getFalsingThreshold()) {
@@ -1844,17 +1796,14 @@ public class QuickSettingsController implements Dumpable {
                 final float h = y - mInitialTouchY;
                 trackMovement(event);
                 if (mTracking) {
-
                     // Already tracking because onOverscrolled was called. We need to update here
                     // so we don't stop for a frame until the next touch event gets handled in
                     // onTouchEvent.
                     setExpansionHeight(h + mInitialHeightOnTouch);
                     trackMovement(event);
                     return true;
-                } else {
-                    mShadeLog.logMotionEvent(event,
-                            "onQsIntercept: move ignored because qs tracking disabled");
                 }
+
                 // TODO (b/265193930): remove dependency on NPVC
                 float touchSlop = event.getClassification()
                         == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE
@@ -1878,7 +1827,7 @@ public class QuickSettingsController implements Dumpable {
                 } else {
                     mShadeLog.logQsTrackingNotStarted(mInitialTouchY, y, h, touchSlop,
                             getExpanded(), mPanelViewControllerLazy.get().isKeyguardShowing(),
-                            isExpansionEnabled());
+                            isExpansionEnabled(), event.getDownTime());
                 }
                 break;
 
