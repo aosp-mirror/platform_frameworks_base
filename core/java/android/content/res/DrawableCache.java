@@ -40,30 +40,12 @@ class DrawableCache extends ThemedResourceCache<Drawable.ConstantState> {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Drawable getInstance(long key, Resources resources, Resources.Theme theme) {
-        final Entry<Drawable.ConstantState> entry = get(key, theme);
-        if (entry.getValue() != null) {
-            return entry.getValue().newDrawable(resources, theme);
+        final Drawable.ConstantState entry = get(key, theme);
+        if (entry != null) {
+            return entry.newDrawable(resources, theme);
         }
 
         return null;
-    }
-
-    /**
-     * If the resource is cached, creates and returns a new instance of it.
-     *
-     * @param key a key that uniquely identifies the drawable resource
-     * @param resources a Resources object from which to create new instances.
-     * @param theme the theme where the resource will be used
-     * @return an Entry wrapping a a new instance of the resource, or {@code null} if not in
-     *         the cache
-     */
-    public Entry<Drawable> getDrawable(long key, Resources resources, Resources.Theme theme) {
-        final Entry<Drawable.ConstantState> e = get(key, theme);
-        if (e.hasValue()) {
-            return new Entry<>(e.getValue().newDrawable(resources, theme), e.getGeneration());
-        }
-
-        return new Entry<>(null, e.getGeneration());
     }
 
     @Override

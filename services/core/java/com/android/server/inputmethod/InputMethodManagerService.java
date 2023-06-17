@@ -633,8 +633,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private InputMethodSubtype mCurrentSubtype;
 
     /**
-     * {@code true} if the IME has not been mostly hidden via {@link android.view.InsetsController}
+     * {@code true} if the IME has not been mostly hidden via {@link android.view.InsetsController}.
      */
+    @GuardedBy("ImfLock.class")
     private boolean mCurPerceptible;
 
     /**
@@ -748,33 +749,26 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     SparseArray<AccessibilitySessionState> mEnabledAccessibilitySessions = new SparseArray<>();
 
     /**
-     * True if the device is currently interactive with user.  The value is true initially.
+     * {@code true} if the device is currently interactive with the user, initially true.
+     *
+     * @see #handleSetInteractive
      */
+    @GuardedBy("ImfLock.class")
     boolean mIsInteractive = true;
 
+    @GuardedBy("ImfLock.class")
+    @InputMethodService.BackDispositionMode
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
 
     /**
-     * A set of status bits regarding the active IME.
+     * The {@link InputMethodService.ImeWindowVisibility} of the currently bound IME,
+     * or {@code 0} if no IME is bound.
      *
-     * <p>This value is a combination of following two bits:</p>
-     * <dl>
-     * <dt>{@link InputMethodService#IME_ACTIVE}</dt>
-     * <dd>
-     *   If this bit is ON, connected IME is ready to accept touch/key events.
-     * </dd>
-     * <dt>{@link InputMethodService#IME_VISIBLE}</dt>
-     * <dd>
-     *   If this bit is ON, some of IME view, e.g. software input, candidate view, is visible.
-     * </dd>
-     * <dt>{@link InputMethodService#IME_INVISIBLE}</dt>
-     * <dd> If this bit is ON, IME is ready with views from last EditorInfo but is
-     *    currently invisible.
-     * </dd>
-     * </dl>
-     * <em>Do not update this value outside of {@link #setImeWindowStatus(IBinder, int, int)} and
+     * <p><em>Do not update this value outside of {@link #setImeWindowStatus(IBinder, int, int)} and
      * {@link InputMethodBindingController#unbindCurrentMethod()}.</em>
      */
+    @GuardedBy("ImfLock.class")
+    @InputMethodService.ImeWindowVisibility
     int mImeWindowVis;
 
     private LocaleList mLastSystemLocales;
@@ -1535,7 +1529,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             // Uh oh, current input method is no longer around!
                             // Pick another one...
                             Slog.i(TAG, "Current input method removed: " + curInputMethodId);
-                            updateSystemUiLocked(0 /* vis */, mBackDisposition);
                             if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
@@ -2938,7 +2931,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     sessionState.mSession.finishSession();
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Session failed to close due to remote exception", e);
-                    updateSystemUiLocked(0 /* vis */, mBackDisposition);
                 }
                 sessionState.mSession = null;
             }
@@ -3048,15 +3040,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean shouldShowImeSwitcherLocked(int visibility) {
+    private boolean shouldShowImeSwitcherLocked(
+            @InputMethodService.ImeWindowVisibility int visibility) {
         if (!mShowOngoingImeSwitcherForPhones) return false;
+        // When the IME switcher dialog is shown, the IME switcher button should be hidden.
         if (mMenuController.getSwitchingDialogLocked() != null) return false;
+        // When we are switching IMEs, the IME switcher button should be hidden.
+        if (!Objects.equals(getCurIdLocked(), getSelectedMethodIdLocked())) {
+            return false;
+        }
         if (mWindowManagerInternal.isKeyguardShowingAndNotOccluded()
                 && mWindowManagerInternal.isKeyguardSecure(mSettings.getCurrentUserId())) {
             return false;
         }
-        if ((visibility & InputMethodService.IME_ACTIVE) == 0
-                || (visibility & InputMethodService.IME_INVISIBLE) != 0) {
+        if ((visibility & InputMethodService.IME_ACTIVE) == 0) {
             return false;
         }
         if (mWindowManagerInternal.isHardKeyboardAvailable()) {
@@ -3115,7 +3112,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     @SuppressWarnings("deprecation")
-    private void setImeWindowStatus(@NonNull IBinder token, int vis, int backDisposition) {
+    private void setImeWindowStatus(@NonNull IBinder token,
+            @InputMethodService.ImeWindowVisibility int vis,
+            @InputMethodService.BackDispositionMode int backDisposition) {
         final int topFocusedDisplayId = mWindowManagerInternal.getTopFocusedDisplayId();
 
         synchronized (ImfLock.class) {
@@ -3132,7 +3131,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             mImeWindowVis = vis;
             mBackDisposition = backDisposition;
-            updateSystemUiLocked(vis, backDisposition);
+            updateSystemUiLocked(mImeWindowVis, mBackDisposition);
         }
 
         final boolean dismissImeOnBackKeyPressed;
@@ -3167,37 +3166,46 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void updateImeWindowStatus(boolean disableImeIcon) {
         synchronized (ImfLock.class) {
-            if (disableImeIcon) {
-                updateSystemUiLocked(0, mBackDisposition);
-            } else {
-                updateSystemUiLocked();
-            }
+            // TODO(b/285109020): disableImeIcon should be stored in a property like
+            //  mIsSwitcherIconDisabled, but it is currently not reliably cleared.
+            updateSystemUiLocked(disableImeIcon ? 0 : mImeWindowVis, mBackDisposition);
         }
     }
 
     @GuardedBy("ImfLock.class")
     void updateSystemUiLocked() {
+        // This is only used by InputMethodMenuController to trigger the IME switcher icon
+        // visibility, by having {@code shouldShowImeSwitcherLocked} called, which depends on the
+        // visibility of the IME switcher dialog.
         updateSystemUiLocked(mImeWindowVis, mBackDisposition);
     }
 
     // Caution! This method is called in this class. Handle multi-user carefully
     @GuardedBy("ImfLock.class")
-    private void updateSystemUiLocked(int vis, int backDisposition) {
+    private void updateSystemUiLocked(@InputMethodService.ImeWindowVisibility int vis,
+            @InputMethodService.BackDispositionMode int backDisposition) {
         if (getCurTokenLocked() == null) {
             return;
         }
         if (DEBUG) {
             Slog.d(TAG, "IME window vis: " + vis
-                    + " active: " + (vis & InputMethodService.IME_ACTIVE)
-                    + " inv: " + (vis & InputMethodService.IME_INVISIBLE)
+                    + " active: " + ((vis & InputMethodService.IME_ACTIVE) != 0)
+                    + " visible: " + ((vis & InputMethodService.IME_VISIBLE) != 0)
+                    + " backDisposition: " + backDisposition
+                    + " isInteractive: " + mIsInteractive
+                    + " curPerceptible: " + mCurPerceptible
                     + " displayId: " + mCurTokenDisplayId);
         }
 
         // TODO: Move this clearing calling identity block to setImeWindowStatus after making sure
-        // all updateSystemUi happens on system privilege.
+        //  all updateSystemUi happens on system privilege.
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (!mCurPerceptible) {
+            if (!mIsInteractive) {
+                // When we are not interactive,
+                // the visibility should be 0 (no IME icons should be shown).
+                vis = 0;
+            } else if (!mCurPerceptible) {
                 if ((vis & InputMethodService.IME_VISIBLE) != 0) {
                     vis &= ~InputMethodService.IME_VISIBLE;
                     vis |= InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
@@ -3205,7 +3213,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             } else {
                 vis &= ~InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
             }
-            // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
+            if (mMenuController.getSwitchingDialogLocked() != null
+                    || !Objects.equals(getCurIdLocked(), getSelectedMethodIdLocked())) {
+                // When the IME switcher dialog is shown, or we are switching IMEs,
+                // the back button should be in the default state (as if the IME is not shown).
+                backDisposition = InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING;
+            }
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBarManagerInternal != null) {
                 mStatusBarManagerInternal.setImeWindowStatus(mCurTokenDisplayId,
@@ -3527,7 +3540,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     return;
                 }
                 mCurPerceptible = perceptible;
-                updateSystemUiLocked();
+                updateSystemUiLocked(mImeWindowVis, mBackDisposition);
             }
         });
     }
@@ -5089,8 +5102,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void handleSetInteractive(final boolean interactive) {
         synchronized (ImfLock.class) {
+            if (mIsInteractive == interactive) {
+                return;
+            }
             mIsInteractive = interactive;
-            updateSystemUiLocked(interactive ? mImeWindowVis : 0, mBackDisposition);
+            updateSystemUiLocked(mImeWindowVis, mBackDisposition);
 
             // Inform the current client of the change in active status
             if (mCurClient == null || mCurClient.mClient == null) {
@@ -5769,7 +5785,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // input target changed, in case seeing the dialog dismiss flickering during
                 // the next focused window starting the input connection.
                 if (mLastImeTargetWindow != mCurFocusedWindow) {
-                    mMenuController.hideInputMethodMenu();
+                    mMenuController.hideInputMethodMenuLocked();
                 }
             }
         }
@@ -6725,7 +6741,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void setImeWindowStatusAsync(int vis, int backDisposition) {
+        public void setImeWindowStatusAsync(@InputMethodService.ImeWindowVisibility int vis,
+                @InputMethodService.BackDispositionMode int backDisposition) {
             mImms.setImeWindowStatus(mToken, vis, backDisposition);
         }
 

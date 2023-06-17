@@ -374,7 +374,6 @@ public class AuthContainerView extends LinearLayout
         if (Utils.isBiometricAllowed(config.mPromptInfo)) {
             mPromptSelectorInteractorProvider.get().useBiometricsForAuthentication(
                     config.mPromptInfo,
-                    config.mRequireConfirmation,
                     config.mUserId,
                     config.mOperationId,
                     new BiometricModalities(fpProps, faceProps));

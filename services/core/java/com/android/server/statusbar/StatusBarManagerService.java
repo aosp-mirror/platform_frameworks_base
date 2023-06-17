@@ -59,6 +59,7 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
+import android.inputmethodservice.InputMethodService;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.net.Uri;
@@ -516,7 +517,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+        public void setImeWindowStatus(int displayId, IBinder token,
+                @InputMethodService.ImeWindowVisibility int vis,
+                @InputMethodService.BackDispositionMode int backDisposition,
                 boolean showImeSwitcher) {
             StatusBarManagerService.this.setImeWindowStatus(displayId, token, vis, backDisposition,
                     showImeSwitcher);
@@ -1221,12 +1224,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void setImeWindowStatus(int displayId, final IBinder token, final int vis,
-            final int backDisposition, final boolean showImeSwitcher) {
+    public void setImeWindowStatus(int displayId, final IBinder token,
+            @InputMethodService.ImeWindowVisibility final int vis,
+            @InputMethodService.BackDispositionMode final int backDisposition,
+            final boolean showImeSwitcher) {
         enforceStatusBar();
 
         if (SPEW) {
-            Slog.d(TAG, "swetImeWindowStatus vis=" + vis + " backDisposition=" + backDisposition);
+            Slog.d(TAG, "setImeWindowStatus vis=" + vis + " backDisposition=" + backDisposition);
         }
 
         synchronized(mLock) {
@@ -1289,7 +1294,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         private String mPackageName = "none";
         private int mDisabled1 = 0;
         private int mDisabled2 = 0;
+        @InputMethodService.ImeWindowVisibility
         private int mImeWindowVis = 0;
+        @InputMethodService.BackDispositionMode
         private int mImeBackDisposition = 0;
         private boolean mShowImeSwitcher = false;
         private IBinder mImeToken = null;
@@ -1334,7 +1341,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             return mDisabled1 == disabled1 && mDisabled2 == disabled2;
         }
 
-        private void setImeWindowState(final int vis, final int backDisposition,
+        private void setImeWindowState(@InputMethodService.ImeWindowVisibility final int vis,
+                @InputMethodService.BackDispositionMode final int backDisposition,
                 final boolean showImeSwitcher, final IBinder token) {
             mImeWindowVis = vis;
             mImeBackDisposition = backDisposition;

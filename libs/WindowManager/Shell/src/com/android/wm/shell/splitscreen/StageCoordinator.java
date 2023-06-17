@@ -378,6 +378,27 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return mMainStage.isActive();
     }
 
+    /** @return whether the transition-request implies entering pip from split. */
+    public boolean requestImpliesSplitToPip(TransitionRequestInfo request) {
+        if (!isSplitActive() || !mMixedHandler.requestHasPipEnter(request)) {
+            return false;
+        }
+
+        if (request.getTriggerTask() != null && getSplitPosition(
+                request.getTriggerTask().taskId) != SPLIT_POSITION_UNDEFINED) {
+            return true;
+        }
+
+        // If one of the splitting tasks support auto-pip, wm-core might reparent the task to TDA
+        // and file a TRANSIT_PIP transition when finishing transitions.
+        // @see com.android.server.wm.RootWindowContainer#moveActivityToPinnedRootTask
+        if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     /** Checks if `transition` is a pending enter-split transition. */
     public boolean isPendingEnter(IBinder transition) {
         return mSplitTransitions.isPendingEnter(transition);

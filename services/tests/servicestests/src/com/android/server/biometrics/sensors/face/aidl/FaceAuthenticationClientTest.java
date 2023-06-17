@@ -152,6 +152,28 @@ public class FaceAuthenticationClientTest {
     }
 
     @Test
+    public void testLockoutEndsOperation() throws RemoteException {
+        final FaceAuthenticationClient client = createClient(2);
+        client.start(mCallback);
+        client.onLockoutPermanent();
+
+        verify(mClientMonitorCallbackConverter).onError(anyInt(), anyInt(),
+                eq(FACE_ERROR_LOCKOUT_PERMANENT), anyInt());
+        verify(mCallback).onClientFinished(client, false);
+    }
+
+    @Test
+    public void testTemporaryLockoutEndsOperation() throws RemoteException {
+        final FaceAuthenticationClient client = createClient(2);
+        client.start(mCallback);
+        client.onLockoutTimed(1000);
+
+        verify(mClientMonitorCallbackConverter).onError(anyInt(), anyInt(),
+                eq(FACE_ERROR_LOCKOUT), anyInt());
+        verify(mCallback).onClientFinished(client, false);
+    }
+
+    @Test
     public void notifyHalWhenContextChanges() throws RemoteException {
         final FaceAuthenticationClient client = createClient();
         client.start(mCallback);

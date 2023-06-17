@@ -20,6 +20,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
 
+import android.app.ActivityManager;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -178,6 +179,18 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull TransitionFinishCallback finishCallback) {
         if (info.getType() == TRANSIT_CHANGE) {
+            // TODO (b/286928742) unfold transition handler should be part of mixed handler to
+            //  handle merges better.
+            for (int i = 0; i < info.getChanges().size(); ++i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                if (taskInfo != null
+                        && taskInfo.configuration.windowConfiguration.isAlwaysOnTop()) {
+                    // Tasks that are always on top (e.g. bubbles), will handle their own transition
+                    // as they are on top of everything else. So skip merging transitions here.
+                    return;
+                }
+            }
             // Apply changes happening during the unfold animation immediately
             t.apply();
             finishCallback.onTransitionFinished(null, null);
