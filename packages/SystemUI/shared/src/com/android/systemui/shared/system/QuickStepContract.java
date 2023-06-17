@@ -324,7 +324,7 @@ public class QuickStepContract {
      * Returns whether the specified sysui state is such that the back gesture should be
      * disabled.
      */
-    public static boolean isBackGestureDisabled(int sysuiStateFlags) {
+    public static boolean isBackGestureDisabled(int sysuiStateFlags, boolean forTrackpad) {
         // Always allow when the bouncer/global actions/voice session is showing (even on top of
         // the keyguard)
         if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
@@ -335,16 +335,23 @@ public class QuickStepContract {
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
             sysuiStateFlags &= ~SYSUI_STATE_NAV_BAR_HIDDEN;
         }
+
+        return (sysuiStateFlags & getBackGestureDisabledMask(forTrackpad)) != 0;
+    }
+
+    private static int getBackGestureDisabledMask(boolean forTrackpad) {
         // Disable when in immersive, or the notifications are interactive
-        int disableFlags = SYSUI_STATE_NAV_BAR_HIDDEN | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+        int disableFlags = SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+        if (!forTrackpad) {
+            disableFlags |= SYSUI_STATE_NAV_BAR_HIDDEN;
+        }
 
         // EdgeBackGestureHandler ignores Back gesture when SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED.
         // To allow Shade to respond to Back, we're bypassing this check (behind a flag).
         if (!ALLOW_BACK_GESTURE_IN_SHADE) {
             disableFlags |= SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
         }
-
-        return (sysuiStateFlags & disableFlags) != 0;
+        return disableFlags;
     }
 
     /**
