@@ -732,4 +732,19 @@ public abstract class WMShellModule {
     static DesktopModeTaskRepository provideDesktopModeTaskRepository() {
         return new DesktopModeTaskRepository();
     }
+
+    //
+    // Misc
+    //
+
+    // TODO: Temporarily move dependencies to this instead of ShellInit since that is needed to add
+    // the callback. We will be moving to a different explicit startup mechanism in a follow- up CL.
+    @WMSingleton
+    @ShellCreateTriggerOverride
+    @Provides
+    static Object provideIndependentShellComponentsToCreate(
+            DefaultMixedHandler defaultMixedHandler,
+            Optional<DesktopModeController> desktopModeController) {
+        return new Object();
+    }
 }
