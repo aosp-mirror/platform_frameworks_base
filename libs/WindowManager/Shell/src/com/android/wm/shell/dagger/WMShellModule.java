@@ -64,7 +64,6 @@ import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
 import com.android.wm.shell.freeform.FreeformTaskTransitionObserver;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
-import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -732,43 +731,5 @@ public abstract class WMShellModule {
     @DynamicOverride
     static DesktopModeTaskRepository provideDesktopModeTaskRepository() {
         return new DesktopModeTaskRepository();
-    }
-
-    //
-    // Kids mode
-    //
-    @WMSingleton
-    @Provides
-    static KidsModeTaskOrganizer provideKidsModeTaskOrganizer(
-            Context context,
-            ShellInit shellInit,
-            ShellCommandHandler shellCommandHandler,
-            SyncTransactionQueue syncTransactionQueue,
-            DisplayController displayController,
-            DisplayInsetsController displayInsetsController,
-            Optional<UnfoldAnimationController> unfoldAnimationController,
-            Optional<RecentTasksController> recentTasksOptional,
-            @ShellMainThread ShellExecutor mainExecutor,
-            @ShellMainThread Handler mainHandler
-    ) {
-        return new KidsModeTaskOrganizer(context, shellInit, shellCommandHandler,
-                syncTransactionQueue, displayController, displayInsetsController,
-                unfoldAnimationController, recentTasksOptional, mainExecutor, mainHandler);
-    }
-
-    //
-    // Misc
-    //
-
-    // TODO: Temporarily move dependencies to this instead of ShellInit since that is needed to add
-    // the callback. We will be moving to a different explicit startup mechanism in a follow- up CL.
-    @WMSingleton
-    @ShellCreateTriggerOverride
-    @Provides
-    static Object provideIndependentShellComponentsToCreate(
-            DefaultMixedHandler defaultMixedHandler,
-            KidsModeTaskOrganizer kidsModeTaskOrganizer,
-            Optional<DesktopModeController> desktopModeController) {
-        return new Object();
     }
 }
