@@ -267,17 +267,30 @@ class PreAuthInfo {
     }
 
     private Pair<BiometricSensor, Integer> calculateErrorByPriority() {
-        // If the caller requested STRONG, and the device contains both STRONG and non-STRONG
-        // sensors, prioritize BIOMETRIC_NOT_ENROLLED over the weak sensor's
-        // BIOMETRIC_INSUFFICIENT_STRENGTH error. Pretty sure we can always prioritize
-        // BIOMETRIC_NOT_ENROLLED over any other error (unless of course its calculation is
-        // wrong, in which case we should fix that instead).
+        Pair<BiometricSensor, Integer> sensorNotEnrolled = null;
+        Pair<BiometricSensor, Integer> sensorLockout = null;
         for (Pair<BiometricSensor, Integer> pair : ineligibleSensors) {
+            int status = pair.second;
+            if (status == BIOMETRIC_LOCKOUT_TIMED || status == BIOMETRIC_LOCKOUT_PERMANENT) {
+                sensorLockout = pair;
+            }
             if (pair.second == BIOMETRIC_NOT_ENROLLED) {
-                return pair;
+                sensorNotEnrolled = pair;
             }
         }
 
+        // If there is a sensor locked out, prioritize lockout over other sensor's error.
+        // See b/286923477.
+        if (sensorLockout != null) {
+            return sensorLockout;
+        }
+
+        // If the caller requested STRONG, and the device contains both STRONG and non-STRONG
+        // sensors, prioritize BIOMETRIC_NOT_ENROLLED over the weak sensor's
+        // BIOMETRIC_INSUFFICIENT_STRENGTH error.
+        if (sensorNotEnrolled != null) {
+            return sensorNotEnrolled;
+        }
         return ineligibleSensors.get(0);
     }
 

@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.util.ArrayMap;
+import android.util.Pair;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -165,19 +166,28 @@ final class DeviceStateController {
 
             // Make a copy here because it's possible that the consumer tries to remove a callback
             // while we're still iterating through the list, which would end up in a
-            // ConcurrentModificationException.
-            final List<Map.Entry<Consumer<DeviceState>, Executor>> entries = new ArrayList<>();
-            synchronized (mWmLock) {
-                for (Map.Entry<Consumer<DeviceState>, Executor> entry
-                        : mDeviceStateCallbacks.entrySet()) {
-                    entries.add(entry);
-                }
-            }
+            // ConcurrentModificationException. Note that cannot use a List<Map.Entry> because the
+            // entries are tied to the backing map. So, if a client removes a callback while
+            // we are notifying clients, we will get a NPE.
+            final List<Pair<Consumer<DeviceState>, Executor>> entries = copyDeviceStateCallbacks();
 
             for (int i = 0; i < entries.size(); i++) {
-                Map.Entry<Consumer<DeviceState>, Executor> entry = entries.get(i);
-                entry.getValue().execute(() -> entry.getKey().accept(mCurrentDeviceState));
+                final Pair<Consumer<DeviceState>, Executor> entry = entries.get(i);
+                entry.second.execute(() -> entry.first.accept(deviceState));
             }
         }
+    }
+
+    @VisibleForTesting
+    @NonNull
+    List<Pair<Consumer<DeviceState>, Executor>> copyDeviceStateCallbacks() {
+        final List<Pair<Consumer<DeviceState>, Executor>> entries = new ArrayList<>();
+
+        synchronized (mWmLock) {
+            mDeviceStateCallbacks.forEach((deviceStateConsumer, executor) -> {
+                entries.add(new Pair<>(deviceStateConsumer, executor));
+            });
+        }
+        return entries;
     }
 }

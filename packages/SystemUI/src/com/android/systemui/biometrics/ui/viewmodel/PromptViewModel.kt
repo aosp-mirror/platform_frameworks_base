@@ -61,8 +61,11 @@ constructor(
     /** If the user has successfully authenticated and confirmed (when explicitly required). */
     val isAuthenticated: Flow<PromptAuthState> = _isAuthenticated.asStateFlow()
 
-    /** If the API caller requested explicit confirmation after successful authentication. */
-    val isConfirmationRequested: Flow<Boolean> = interactor.isConfirmationRequested
+    /**
+     * If the API caller or the user's personal preferences require explicit confirmation after
+     * successful authentication.
+     */
+    val isConfirmationRequired: Flow<Boolean> = interactor.isConfirmationRequired
 
     /** The kind of credential the user has. */
     val credentialKind: Flow<PromptKind> = interactor.credentialKind
@@ -91,7 +94,7 @@ constructor(
                 _forceLargeSize,
                 _forceMediumSize,
                 modalities,
-                interactor.isConfirmationRequested,
+                interactor.isConfirmationRequired,
                 fingerprintStartMode,
             ) { forceLarge, forceMedium, modalities, confirmationRequired, fpStartMode ->
                 when {
@@ -383,7 +386,7 @@ constructor(
 
     private suspend fun needsExplicitConfirmation(modality: BiometricModality): Boolean {
         val availableModalities = modalities.first()
-        val confirmationRequested = interactor.isConfirmationRequested.first()
+        val confirmationRequested = interactor.isConfirmationRequired.first()
 
         if (availableModalities.hasFaceAndFingerprint) {
             // coex only needs confirmation when face is successful, unless it happens on the

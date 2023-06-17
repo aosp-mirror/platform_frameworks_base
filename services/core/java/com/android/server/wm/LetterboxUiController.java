@@ -294,18 +294,15 @@ final class LetterboxUiController {
                         PROPERTY_COMPAT_ENABLE_FAKE_FOCUS);
         mBooleanPropertyCameraCompatAllowForceRotation =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
-                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                                /* checkDeviceConfig */ true),
+                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(),
                         PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION);
         mBooleanPropertyCameraCompatAllowRefresh =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
-                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                                /* checkDeviceConfig */ true),
+                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(),
                         PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH);
         mBooleanPropertyCameraCompatEnableRefreshViaPause =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
-                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                                /* checkDeviceConfig */ true),
+                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(),
                         PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE);
 
         mBooleanPropertyAllowOrientationOverride =
@@ -697,7 +694,7 @@ final class LetterboxUiController {
     boolean shouldRefreshActivityForCameraCompat() {
         return shouldEnableWithOptOutOverrideAndProperty(
                 /* gatingCondition */ () -> mLetterboxConfiguration
-                        .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
+                        .isCameraCompatTreatmentEnabled(),
                 mIsOverrideCameraCompatDisableRefreshEnabled,
                 mBooleanPropertyCameraCompatAllowRefresh);
     }
@@ -719,7 +716,7 @@ final class LetterboxUiController {
     boolean shouldRefreshActivityViaPauseForCameraCompat() {
         return shouldEnableWithOverrideAndProperty(
                 /* gatingCondition */ () -> mLetterboxConfiguration
-                        .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
+                        .isCameraCompatTreatmentEnabled(),
                 mIsOverrideCameraCompatEnableRefreshViaPauseEnabled,
                 mBooleanPropertyCameraCompatEnableRefreshViaPause);
     }
@@ -738,7 +735,7 @@ final class LetterboxUiController {
     boolean shouldForceRotateForCameraCompat() {
         return shouldEnableWithOptOutOverrideAndProperty(
                 /* gatingCondition */ () -> mLetterboxConfiguration
-                        .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
+                        .isCameraCompatTreatmentEnabled(),
                 mIsOverrideCameraCompatDisableForceRotationEnabled,
                 mBooleanPropertyCameraCompatAllowForceRotation);
     }

@@ -24,9 +24,9 @@ import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
-import com.android.systemui.scene.data.model.SceneContainerConfig
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,7 +51,7 @@ class SceneTestUtils(
                 fakeSceneContainerConfig(CONTAINER_2),
             )
     ): SceneContainerRepository {
-        return SceneContainerRepository(containerConfigurations)
+        return SceneContainerRepository(containerConfigurations.associateBy { it.name })
     }
 
     fun fakeSceneKeys(): List<SceneKey> {
