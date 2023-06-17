@@ -2523,8 +2523,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         && getStageType(dismissStages.valueAt(0)) == STAGE_TYPE_MAIN)
                         || mMainStage.getChildCount() == 0 ? STAGE_TYPE_SIDE : STAGE_TYPE_MAIN;
                 // If there is a fullscreen opening change, we should not bring stage to top.
-                prepareExitSplitScreen(record.mContainShowFullscreenChange
-                        ? STAGE_TYPE_UNDEFINED : dismissTop, wct);
+                prepareExitSplitScreen(
+                        !record.mContainShowFullscreenChange && isSplitScreenVisible()
+                        ? dismissTop : STAGE_TYPE_UNDEFINED, wct);
                 mSplitTransitions.startDismissTransition(wct, this, dismissTop,
                         EXIT_REASON_APP_FINISHED);
                 // This can happen in some pathological cases. For example:
