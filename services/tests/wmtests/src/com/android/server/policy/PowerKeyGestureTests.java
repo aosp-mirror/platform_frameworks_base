@@ -21,6 +21,7 @@ import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_ASSISTANT;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_GLOBAL_ACTIONS;
 import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_POWER_DREAM_OR_SLEEP;
+import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_POWER_GO_TO_SLEEP;
 
 import android.provider.Settings;
 import android.view.Display;
@@ -39,6 +40,7 @@ public class PowerKeyGestureTests extends ShortcutKeyTestBase {
      */
     @Test
     public void testPowerSinglePress() {
+        mPhoneWindowManager.overrideShortPressOnPower(SHORT_PRESS_POWER_GO_TO_SLEEP);
         sendKey(KEYCODE_POWER);
         mPhoneWindowManager.assertPowerSleep();
 
