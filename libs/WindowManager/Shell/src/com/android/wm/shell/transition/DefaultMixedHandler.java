@@ -24,6 +24,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
 import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
@@ -340,6 +341,19 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             return animateOpenIntentWithRemoteAndPip(mixed, info, startTransaction,
                     finishTransaction, finishCallback);
         } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
+            for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                // Pip auto-entering info might be appended to recent transition like pressing
+                // home-key in 3-button navigation. This offers split handler the opportunity to
+                // handle split to pip animation.
+                if (mPipHandler.isEnteringPip(change, info.getType())
+                        && mSplitHandler.getSplitItemPosition(change.getLastParent())
+                        != SPLIT_POSITION_UNDEFINED) {
+                    return animateEnterPipFromSplit(mixed, info, startTransaction,
+                            finishTransaction, finishCallback);
+                }
+            }
+
             return animateRecentsDuringSplit(mixed, info, startTransaction, finishTransaction,
                     finishCallback);
         } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
@@ -617,11 +631,12 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 finishCallback.onTransitionFinished(wct, wctCB);
             }
         };
+        mixed.mInFlightSubAnimations++;
         if (!mKeyguardHandler.startAnimation(
                 mixed.mTransition, info, startTransaction, finishTransaction, finishCB)) {
+            mixed.mInFlightSubAnimations--;
             return false;
         }
-        mixed.mInFlightSubAnimations++;
         // Sync pip state.
         if (mPipHandler != null) {
             // We don't know when to apply `startTransaction` so use a separate transaction here.

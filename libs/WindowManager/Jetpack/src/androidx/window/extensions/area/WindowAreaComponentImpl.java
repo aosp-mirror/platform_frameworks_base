@@ -28,6 +28,7 @@ import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.Display;
 import android.view.DisplayAddress;
+import android.view.Surface;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,6 +37,7 @@ import androidx.window.extensions.core.util.function.Consumer;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.Objects;
@@ -229,27 +231,43 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
      * @since {@link WindowExtensions#VENDOR_API_LEVEL_3}
      */
     @Override
+    @NonNull
     public DisplayMetrics getRearDisplayMetrics() {
-        DisplayMetrics metrics = null;
+        DisplayMetrics rearDisplayMetrics = null;
 
         // DISPLAY_CATEGORY_REAR displays are only available when you are in the concurrent
         // display state, so we have to look through all displays to match the address
-        Display[] displays = mDisplayManager.getDisplays(
+        final Display[] displays = mDisplayManager.getDisplays(
                 DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+
+
         for (int i = 0; i < displays.length; i++) {
             DisplayAddress.Physical address =
                     (DisplayAddress.Physical) displays[i].getAddress();
             if (mRearDisplayAddress == address.getPhysicalDisplayId()) {
-                metrics = new DisplayMetrics();
-                displays[i].getRealMetrics(metrics);
+                rearDisplayMetrics = new DisplayMetrics();
+                final Display rearDisplay = displays[i];
+
+                // We must always retrieve the metrics for the rear display regardless of if it is
+                // the default display or not.
+                rearDisplay.getRealMetrics(rearDisplayMetrics);
+
+                // TODO(b/287170025): This should be something like if (!rearDisplay.isEnabled)
+                //  instead. Currently when the rear display is disabled, its state is STATE_OFF.
+                if (rearDisplay.getDisplayId() != Display.DEFAULT_DISPLAY) {
+                    final Display defaultDisplay = mDisplayManager
+                            .getDisplay(Display.DEFAULT_DISPLAY);
+                    rotateRearDisplayMetricsIfNeeded(defaultDisplay.getRotation(),
+                            rearDisplay.getRotation(), rearDisplayMetrics);
+                }
                 break;
             }
         }
 
         synchronized (mLock) {
             // Update the rear display metrics with our latest value if one was received
-            if (metrics != null) {
-                mRearDisplayMetrics = metrics;
+            if (rearDisplayMetrics != null) {
+                mRearDisplayMetrics = rearDisplayMetrics;
             }
 
             return Objects.requireNonNullElseGet(mRearDisplayMetrics, DisplayMetrics::new);
@@ -538,6 +556,34 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     @WindowAreaSessionState
     private int getLastReportedRearDisplayPresentationStatus() {
         return mLastReportedRearDisplayPresentationStatus;
+    }
+
+    @VisibleForTesting
+    static void rotateRearDisplayMetricsIfNeeded(
+            @Surface.Rotation int defaultDisplayRotation,
+            @Surface.Rotation int rearDisplayRotation,
+            @NonNull DisplayMetrics inOutMetrics) {
+        // If the rear display has a non-zero rotation, it means the backing DisplayContent /
+        // DisplayRotation is fresh.
+        if (rearDisplayRotation != Surface.ROTATION_0) {
+            return;
+        }
+
+        // If the default display is 0 or 180, the rear display must also be 0 or 180.
+        if (defaultDisplayRotation == Surface.ROTATION_0
+                || defaultDisplayRotation == Surface.ROTATION_180) {
+            return;
+        }
+
+        final int heightPixels = inOutMetrics.heightPixels;
+        final int widthPixels = inOutMetrics.widthPixels;
+        inOutMetrics.widthPixels = heightPixels;
+        inOutMetrics.heightPixels = widthPixels;
+
+        final int noncompatHeightPixels = inOutMetrics.noncompatHeightPixels;
+        final int noncompatWidthPixels = inOutMetrics.noncompatWidthPixels;
+        inOutMetrics.noncompatWidthPixels = noncompatHeightPixels;
+        inOutMetrics.noncompatHeightPixels = noncompatWidthPixels;
     }
 
     /**

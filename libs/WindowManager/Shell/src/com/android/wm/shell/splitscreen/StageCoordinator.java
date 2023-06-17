@@ -23,7 +23,6 @@ import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVIT
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -2378,6 +2377,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, out);
                 }
             }
+
+            // When split in the background, it should be only opening/dismissing transition and
+            // would keep out not empty. Prevent intercepting all transitions for split screen when
+            // it is in the background and not identify to handle it.
+            return (!out.isEmpty() || isSplitScreenVisible()) ? out : null;
         } else {
             if (isOpening && getStageOfTask(triggerTask) != null) {
                 // One task is appearing into split, prepare to enter split screen.
@@ -2386,8 +2390,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
                         TRANSIT_SPLIT_SCREEN_PAIR_OPEN, !mIsDropEntering);
             }
+            return out;
         }
-        return out;
     }
 
     /**
@@ -2519,8 +2523,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         && getStageType(dismissStages.valueAt(0)) == STAGE_TYPE_MAIN)
                         || mMainStage.getChildCount() == 0 ? STAGE_TYPE_SIDE : STAGE_TYPE_MAIN;
                 // If there is a fullscreen opening change, we should not bring stage to top.
-                prepareExitSplitScreen(record.mContainShowFullscreenChange
-                        ? STAGE_TYPE_UNDEFINED : dismissTop, wct);
+                prepareExitSplitScreen(
+                        !record.mContainShowFullscreenChange && isSplitScreenVisible()
+                        ? dismissTop : STAGE_TYPE_UNDEFINED, wct);
                 mSplitTransitions.startDismissTransition(wct, this, dismissTop,
                         EXIT_REASON_APP_FINISHED);
                 // This can happen in some pathological cases. For example:
@@ -2835,19 +2840,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         }
 
-        mRecentTasks.ifPresent(recentTasks -> {
+        if (shouldBreakPairedTaskInRecents(dismissReason)) {
             // Notify recents if we are exiting in a way that breaks the pair, and disable further
             // updates to splits in the recents until we enter split again
-            if (shouldBreakPairedTaskInRecents(dismissReason)) {
-                    for (TransitionInfo.Change change : info.getChanges()) {
-                        final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                        if (taskInfo != null
-                                && taskInfo.getWindowingMode() != WINDOWING_MODE_MULTI_WINDOW) {
-                            recentTasks.removeSplitPair(taskInfo.taskId);
-                        }
+            mRecentTasks.ifPresent(recentTasks -> {
+                for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                    final TransitionInfo.Change change = info.getChanges().get(i);
+                    final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                    if (taskInfo != null && getStageOfTask(taskInfo) != null) {
+                        recentTasks.removeSplitPair(taskInfo.taskId);
                     }
-            }
-        });
+                }
+            });
+        }
         mSplitRequest = null;
 
         // Update local states.
