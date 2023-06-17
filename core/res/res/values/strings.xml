@@ -1793,6 +1793,8 @@
     <string name="biometric_error_hw_unavailable">Biometric hardware unavailable</string>
     <!-- Message shown when biometric authentication was canceled by the user [CHAR LIMIT=50] -->
     <string name="biometric_error_user_canceled">Authentication canceled</string>
+    <!-- Message shown by the biometric dialog when biometric is not recognized -->
+    <string name="biometric_not_recognized">Not recognized</string>
     <!-- Message shown by the biometric dialog when face is not recognized [CHAR LIMIT=50] -->
     <string name="biometric_face_not_recognized">Face not recognized</string>
     <!-- Message shown when biometric authentication has been canceled [CHAR LIMIT=50] -->

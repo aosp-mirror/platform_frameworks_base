@@ -1057,8 +1057,16 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     }
 
     private String getNotRecognizedString(@Modality int modality) {
-        return mContext.getString(modality == TYPE_FACE
-                ? R.string.biometric_face_not_recognized : R.string.fingerprint_error_not_match);
+        final int messageRes;
+        final int userId = mCurrentDialogArgs.argi1;
+        if (isFaceAuthEnrolled(userId) && isFingerprintEnrolled(userId)) {
+            messageRes = modality == TYPE_FACE
+                    ? R.string.biometric_face_not_recognized
+                    : R.string.fingerprint_error_not_match;
+        } else {
+            messageRes = R.string.biometric_not_recognized;
+        }
+        return mContext.getString(messageRes);
     }
 
     private String getErrorString(@Modality int modality, int error, int vendorCode) {
