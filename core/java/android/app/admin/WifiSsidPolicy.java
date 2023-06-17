@@ -136,7 +136,7 @@ public final class WifiSsidPolicy implements Parcelable {
     }
 
     /**
-     * Two instances of WifiSsidPolicy is considered equal if they have
+     * Two instances of WifiSsidPolicy are considered equal if they have
      * the same WifiSsidPolicyType and the same set of WifiSsids
      */
     @Override
