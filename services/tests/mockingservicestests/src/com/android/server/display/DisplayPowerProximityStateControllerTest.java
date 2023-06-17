@@ -34,8 +34,8 @@ import android.hardware.display.DisplayManagerInternal;
 import android.os.test.TestLooper;
 import android.view.Display;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.testutils.OffsettableClock;
 
@@ -92,7 +92,7 @@ public final class DisplayPowerProximityStateControllerTest {
                 };
         mDisplayPowerProximityStateController = new DisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mTestLooper.getLooper(),
-                mNudgeUpdatePowerState, Display.DEFAULT_DISPLAY,
+                mNudgeUpdatePowerState, 0,
                 mSensorManager, injector);
         mSensorEventListener = mDisplayPowerProximityStateController.getProximitySensorListener();
     }
@@ -128,7 +128,7 @@ public final class DisplayPowerProximityStateControllerTest {
         enableProximitySensor();
         emitAndValidatePositiveProximityEvent();
         mDisplayPowerProximityStateController.ignoreProximitySensorUntilChangedInternal();
-        advanceTime();
+        advanceTime(1);
         assertTrue(mDisplayPowerProximityStateController.shouldIgnoreProximityUntilChanged());
         verify(mNudgeUpdatePowerState, times(2)).run();
 
@@ -170,7 +170,7 @@ public final class DisplayPowerProximityStateControllerTest {
     }
 
     @Test
-    public void isProximitySensorAvailableReturnsFalseWhenNotAvailableAndNoDefault() {
+    public void isProximitySensorAvailableReturnsFalseWhenNotAvailable() {
         when(mDisplayDeviceConfig.getProximitySensor()).thenReturn(
                 new DisplayDeviceConfig.SensorData() {
                     {
@@ -178,60 +178,9 @@ public final class DisplayPowerProximityStateControllerTest {
                         name = null;
                     }
                 });
-        mDisplayPowerProximityStateController = new DisplayPowerProximityStateController(
-                mWakelockController, mDisplayDeviceConfig, mTestLooper.getLooper(),
-                mNudgeUpdatePowerState, Display.DEFAULT_DISPLAY,
-                mSensorManager, null);
-        assertFalse(mDisplayPowerProximityStateController.isProximitySensorAvailable());
-    }
-
-    @Test
-    public void isProximitySensorAvailableReturnsTrueWhenNotAvailableAndHasDefault()
-            throws Exception {
-        when(mDisplayDeviceConfig.getProximitySensor()).thenReturn(
-                new DisplayDeviceConfig.SensorData() {
-                    {
-                        type = null;
-                        name = null;
-                    }
-                });
-        when(mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)).thenReturn(
-                TestUtils.createSensor(Sensor.TYPE_PROXIMITY, "proximity"));
-        mDisplayPowerProximityStateController = new DisplayPowerProximityStateController(
-                mWakelockController, mDisplayDeviceConfig, mTestLooper.getLooper(),
-                mNudgeUpdatePowerState, Display.DEFAULT_DISPLAY,
-                mSensorManager, null);
-        assertTrue(mDisplayPowerProximityStateController.isProximitySensorAvailable());
-    }
-
-    @Test
-    public void isProximitySensorAvailableReturnsFalseWhenNotAvailableHasDefaultNonDefaultDisplay()
-            throws Exception {
-        when(mDisplayDeviceConfig.getProximitySensor()).thenReturn(
-                new DisplayDeviceConfig.SensorData() {
-                    {
-                        type = null;
-                        name = null;
-                    }
-                });
-        when(mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)).thenReturn(
-                TestUtils.createSensor(Sensor.TYPE_PROXIMITY, "proximity"));
         mDisplayPowerProximityStateController = new DisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mTestLooper.getLooper(),
                 mNudgeUpdatePowerState, 1,
-                mSensorManager, null);
-        assertFalse(mDisplayPowerProximityStateController.isProximitySensorAvailable());
-    }
-
-    @Test
-    public void isProximitySensorAvailableReturnsTrueWhenNoSensorConfigured() throws Exception {
-        when(mDisplayDeviceConfig.getProximitySensor()).thenReturn(null);
-        when(mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)).thenReturn(
-                TestUtils.createSensor(Sensor.TYPE_PROXIMITY, Sensor.STRING_TYPE_PROXIMITY));
-
-        mDisplayPowerProximityStateController = new DisplayPowerProximityStateController(
-                mWakelockController, mDisplayDeviceConfig, mTestLooper.getLooper(),
-                mNudgeUpdatePowerState, Display.DEFAULT_DISPLAY,
                 mSensorManager, null);
         assertFalse(mDisplayPowerProximityStateController.isProximitySensorAvailable());
     }
@@ -377,8 +326,8 @@ public final class DisplayPowerProximityStateControllerTest {
         assertEquals(mDisplayPowerProximityStateController.getPendingProximityDebounceTime(), -1);
     }
 
-    private void advanceTime() {
-        mClock.fastForward(1);
+    private void advanceTime(long timeMs) {
+        mClock.fastForward(timeMs);
         mTestLooper.dispatchAll();
     }
 
