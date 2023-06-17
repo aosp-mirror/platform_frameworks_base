@@ -19,6 +19,8 @@ package com.android.server.biometrics.sensors;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_SUCCESS;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -403,6 +405,59 @@ public class BiometricSchedulerTest {
     @Test
     public void testDoesNotCancel_whenEnrollRequestIdMismatched() {
         testCancelsEnrollWhenRequestId(10L, 20, false /* started */);
+    }
+
+    @Test
+    public void testCancelAuthenticationClientWithoutStarting() {
+        final Supplier<Object> lazyDaemon = () -> mock(Object.class);
+        final TestHalClientMonitor client1 = new TestHalClientMonitor(mContext, mToken, lazyDaemon);
+        final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
+        final TestAuthenticationClient client2 = new TestAuthenticationClient(mContext, lazyDaemon,
+                mToken, callback, mBiometricContext);
+
+        //Schedule authentication client to the pending queue
+        mScheduler.scheduleClientMonitor(client1);
+        mScheduler.scheduleClientMonitor(client2);
+        waitForIdle();
+
+        assertThat(mScheduler.getCurrentClient()).isEqualTo(client1);
+
+        client2.cancel();
+        waitForIdle();
+
+        assertThat(client2.isAlreadyCancelled()).isTrue();
+
+        client1.getCallback().onClientFinished(client1, false);
+        waitForIdle();
+
+        assertThat(mScheduler.getCurrentClient()).isNull();
+    }
+
+    @Test
+    public void testCancelAuthenticationClientWithoutStarting_whenAppCrashes() {
+        final Supplier<Object> lazyDaemon = () -> mock(Object.class);
+        final TestHalClientMonitor client1 = new TestHalClientMonitor(mContext, mToken, lazyDaemon);
+        final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
+        final TestAuthenticationClient client2 = new TestAuthenticationClient(mContext, lazyDaemon,
+                mToken, callback, mBiometricContext);
+
+        //Schedule authentication client to the pending queue
+        mScheduler.scheduleClientMonitor(client1);
+        mScheduler.scheduleClientMonitor(client2);
+        waitForIdle();
+
+        assertThat(mScheduler.getCurrentClient()).isEqualTo(client1);
+
+        //App crashes
+        client2.binderDied();
+        waitForIdle();
+
+        assertThat(client2.isAlreadyCancelled()).isTrue();
+
+        client1.getCallback().onClientFinished(client1, false);
+        waitForIdle();
+
+        assertThat(mScheduler.getCurrentClient()).isNull();
     }
 
     private void testCancelsEnrollWhenRequestId(@Nullable Long requestId, long cancelRequestId,
