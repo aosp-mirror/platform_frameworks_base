@@ -54,7 +54,8 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         touchSlop: Float,
         qsExpanded: Boolean,
         keyguardShowing: Boolean,
-        qsExpansionEnabled: Boolean
+        qsExpansionEnabled: Boolean,
+        downTime: Long
     ) {
         buffer.log(
             TAG,
@@ -67,10 +68,11 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 bool1 = qsExpanded
                 bool2 = keyguardShowing
                 bool3 = qsExpansionEnabled
+                str1 = downTime.toString()
             },
             {
-                "QsTrackingNotStarted: initTouchY=$int1,y=$int2,h=$long1,slop=$double1,qsExpanded" +
-                    "=$bool1,keyguardShowing=$bool2,qsExpansion=$bool3"
+                "QsTrackingNotStarted: downTime=$str1,initTouchY=$int1,y=$int2,h=$long1," +
+                        "slop=$double1,qsExpanded=$bool1,keyguardShowing=$bool2,qsExpansion=$bool3"
             }
         )
     }
@@ -303,91 +305,6 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             LogLevel.VERBOSE,
             { bool1 = splitShadeEnabled },
             { "Split shade state changed: split shade ${if (bool1) "enabled" else "disabled"}" }
-        )
-    }
-
-    fun logNotificationsTopPadding(message: String, padding: Int) {
-        buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                str1 = message
-                int1 = padding
-            },
-            { "QSC NotificationsTopPadding $str1: $int1"}
-        )
-    }
-
-    fun logClippingTopBound(message: String, top: Int) {
-        buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                str1 = message
-                int1 = top
-            },
-            { "QSC ClippingTopBound $str1: $int1" }
-        )
-    }
-
-    fun logNotificationsClippingTopBound(top: Int, nsslTop: Int) {
-        buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                int1 = top
-                int2 = nsslTop
-            },
-            { "QSC NotificationsClippingTopBound set to $int1 - $int2" }
-        )
-    }
-
-    fun logOnTouchEventLastReturn(
-        event: MotionEvent,
-        dozing: Boolean,
-        handled: Boolean,
-    ) {
-        buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                bool1 = dozing
-                bool2 = handled
-                long1 = event.eventTime
-                long2 = event.downTime
-                int1 = event.action
-                int2 = event.classification
-                double1 = event.y.toDouble()
-            },
-            {
-                "NPVC onTouchEvent last return: !mDozing: $bool1 || handled: $bool2 " +
-                        "\neventTime=$long1,downTime=$long2,y=$double1,action=$int1,class=$int2"
-            }
-        )
-    }
-
-    fun logHandleTouchLastReturn(
-        event: MotionEvent,
-        gestureWaitForTouchSlop: Boolean,
-        tracking: Boolean,
-    ) {
-        buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                bool1 = gestureWaitForTouchSlop
-                bool2 = tracking
-                long1 = event.eventTime
-                long2 = event.downTime
-                int1 = event.action
-                int2 = event.classification
-                double1 = event.y.toDouble()
-            },
-            {
-                "NPVC handleTouch last return: !mGestureWaitForTouchSlop: $bool1 " +
-                        "|| mTracking: $bool2 " +
-                        "\neventTime=$long1,downTime=$long2,y=$double1,action=$int1,class=$int2"
-            }
         )
     }
 
