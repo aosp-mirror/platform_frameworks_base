@@ -1948,15 +1948,19 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     private void loadAmbientLightSensor() {
+        DisplayDeviceConfig.SensorData lightSensor = mDisplayDeviceConfig.getAmbientLightSensor();
         final int fallbackType = mDisplayId == Display.DEFAULT_DISPLAY
                 ? Sensor.TYPE_LIGHT : SensorUtils.NO_FALLBACK;
-        mLightSensor = SensorUtils.findSensor(mSensorManager,
-                mDisplayDeviceConfig.getAmbientLightSensor(), fallbackType);
+        mLightSensor = SensorUtils.findSensor(mSensorManager, lightSensor.type, lightSensor.name,
+                fallbackType);
     }
 
     private void loadScreenOffBrightnessSensor() {
+        DisplayDeviceConfig.SensorData screenOffBrightnessSensor =
+                mDisplayDeviceConfig.getScreenOffBrightnessSensor();
         mScreenOffBrightnessSensor = SensorUtils.findSensor(mSensorManager,
-                mDisplayDeviceConfig.getScreenOffBrightnessSensor(), SensorUtils.NO_FALLBACK);
+                screenOffBrightnessSensor.type, screenOffBrightnessSensor.name,
+                SensorUtils.NO_FALLBACK);
     }
 
     private float clampScreenBrightness(float value) {
