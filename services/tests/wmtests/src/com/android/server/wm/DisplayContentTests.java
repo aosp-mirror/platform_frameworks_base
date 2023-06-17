@@ -797,6 +797,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseDensity = 320;
         final float baseXDpi = 60;
         final float baseYDpi = 60;
+        final int originalMinTaskSizeDp = displayContent.mMinSizeOfResizeableTaskDp;
 
         displayContent.mInitialDisplayWidth = baseWidth;
         displayContent.mInitialDisplayHeight = baseHeight;
@@ -813,6 +814,9 @@ public class DisplayContentTests extends WindowTestsBase {
         // Verify that forcing the density is idempotent.
         displayContent.setForcedDensity(forcedDensity, 0 /* userId */);
         verifySizes(displayContent, baseWidth, baseHeight, forcedDensity);
+
+        // Verify that minimal task size (dp) doesn't change with density of display.
+        assertEquals(originalMinTaskSizeDp, displayContent.mMinSizeOfResizeableTaskDp);
 
         // Verify that forcing resolution won't affect the already forced density.
         displayContent.setForcedSize(1800, 1200);
@@ -1809,30 +1813,6 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mDisplayContent).updateOrientation(eq(app), anyBoolean());
         assertFalse(app.isFixedRotationTransforming());
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
-    }
-
-    /**
-     * Creates different types of displays, verifies that minimal task size doesn't change
-     * with density of display.
-     */
-    @Test
-    public void testCalculatesDisplaySpecificMinTaskSizes() {
-        DisplayContent defaultTestDisplay =
-                new TestDisplayContent.Builder(mAtm, 1000, 2000).build();
-        final int defaultMinTaskSize = defaultTestDisplay.mMinSizeOfResizeableTaskDp;
-        DisplayContent firstDisplay = new TestDisplayContent.Builder(mAtm, 1000, 2000)
-                .setDensityDpi(300)
-                .updateDisplayMetrics()
-                .setDefaultMinTaskSizeDp(defaultMinTaskSize + 10)
-                .build();
-        assertEquals(defaultMinTaskSize + 10, firstDisplay.mMinSizeOfResizeableTaskDp);
-
-        DisplayContent secondDisplay = new TestDisplayContent.Builder(mAtm, 200, 200)
-                .setDensityDpi(320)
-                .updateDisplayMetrics()
-                .setDefaultMinTaskSizeDp(defaultMinTaskSize + 20)
-                .build();
-        assertEquals(defaultMinTaskSize + 20, secondDisplay.mMinSizeOfResizeableTaskDp);
     }
 
     @Test
