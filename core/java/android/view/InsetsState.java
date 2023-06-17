@@ -178,7 +178,8 @@ public class InsetsState implements Parcelable {
         if ((legacyWindowFlags & FLAG_FULLSCREEN) != 0) {
             compatInsetsTypes &= ~statusBars();
         }
-        if (clearsCompatInsets(windowType, legacyWindowFlags, windowingMode)) {
+        if (clearsCompatInsets(windowType, legacyWindowFlags, windowingMode)
+                && !alwaysConsumeSystemBars) {
             compatInsetsTypes = 0;
         }
 
