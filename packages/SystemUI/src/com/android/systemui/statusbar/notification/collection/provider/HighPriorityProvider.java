@@ -63,10 +63,27 @@ public class HighPriorityProvider {
      *      - has a media session associated with it
      *      - has messaging style
      *
-     * A GroupEntry is considered high priority if its representativeEntry (summary) or children are
-     * high priority
+     * A GroupEntry is considered high priority if its representativeEntry (summary) or any of its
+     * children are high priority.
      */
     public boolean isHighPriority(@Nullable ListEntry entry) {
+        return isHighPriority(entry, /* allowImplicit = */ true);
+    }
+
+    /**
+     * @return true if the ListEntry is explicitly high priority, else false
+     *
+     * A NotificationEntry is considered explicitly high priority if has importance greater than or
+     * equal to IMPORTANCE_DEFAULT.
+     *
+     * A GroupEntry is considered explicitly high priority if its representativeEntry (summary) or
+     * any of its children are explicitly high priority.
+     */
+    public boolean isExplicitlyHighPriority(@Nullable ListEntry entry) {
+        return isHighPriority(entry, /* allowImplicit= */ false);
+    }
+
+    private boolean isHighPriority(@Nullable ListEntry entry, boolean allowImplicit) {
         if (entry == null) {
             return false;
         }
@@ -77,8 +94,8 @@ public class HighPriorityProvider {
         }
 
         return notifEntry.getRanking().getImportance() >= NotificationManager.IMPORTANCE_DEFAULT
-                || hasHighPriorityCharacteristics(notifEntry)
-                || hasHighPriorityChild(entry);
+                || (allowImplicit && hasHighPriorityCharacteristics(notifEntry))
+                || hasHighPriorityChild(entry, allowImplicit);
     }
 
     /**
@@ -112,7 +129,7 @@ public class HighPriorityProvider {
                                 >= NotificationManager.IMPORTANCE_DEFAULT);
     }
 
-    private boolean hasHighPriorityChild(ListEntry entry) {
+    private boolean hasHighPriorityChild(ListEntry entry, boolean allowImplicit) {
         if (entry instanceof NotificationEntry
                 && !mGroupMembershipManager.isGroupSummary((NotificationEntry) entry)) {
             return false;
@@ -121,7 +138,7 @@ public class HighPriorityProvider {
         List<NotificationEntry> children = mGroupMembershipManager.getChildren(entry);
         if (children != null) {
             for (NotificationEntry child : children) {
-                if (child != entry && isHighPriority(child)) {
+                if (child != entry && isHighPriority(child, allowImplicit)) {
                     return true;
                 }
             }
