@@ -515,9 +515,7 @@ public class DisplayDeviceConfig {
     private final SensorData mScreenOffBrightnessSensor = new SensorData();
 
     // The details of the proximity sensor associated with this display.
-    // Is null when no sensor should be used for that display
-    @Nullable
-    private SensorData mProximitySensor = new SensorData();
+    private final SensorData mProximitySensor = new SensorData();
 
     private final List<RefreshRateLimitation> mRefreshRateLimitations =
             new ArrayList<>(2 /*initialCapacity*/);
@@ -1339,7 +1337,6 @@ public class DisplayDeviceConfig {
         return mScreenOffBrightnessSensor;
     }
 
-    @Nullable
     SensorData getProximitySensor() {
         return mProximitySensor;
     }
@@ -2566,48 +2563,43 @@ public class DisplayDeviceConfig {
     private void loadAmbientLightSensorFromDdc(DisplayConfiguration config) {
         final SensorDetails sensorDetails = config.getLightSensor();
         if (sensorDetails != null) {
-            loadSensorData(sensorDetails, mAmbientLightSensor);
+            mAmbientLightSensor.type = sensorDetails.getType();
+            mAmbientLightSensor.name = sensorDetails.getName();
+            final RefreshRateRange rr = sensorDetails.getRefreshRate();
+            if (rr != null) {
+                mAmbientLightSensor.minRefreshRate = rr.getMinimum().floatValue();
+                mAmbientLightSensor.maxRefreshRate = rr.getMaximum().floatValue();
+            }
         } else {
             loadAmbientLightSensorFromConfigXml();
         }
     }
 
     private void setProxSensorUnspecified() {
-        mProximitySensor = new SensorData();
+        mProximitySensor.name = null;
+        mProximitySensor.type = null;
     }
 
     private void loadScreenOffBrightnessSensorFromDdc(DisplayConfiguration config) {
         final SensorDetails sensorDetails = config.getScreenOffBrightnessSensor();
         if (sensorDetails != null) {
-            loadSensorData(sensorDetails, mScreenOffBrightnessSensor);
+            mScreenOffBrightnessSensor.type = sensorDetails.getType();
+            mScreenOffBrightnessSensor.name = sensorDetails.getName();
         }
     }
 
     private void loadProxSensorFromDdc(DisplayConfiguration config) {
         SensorDetails sensorDetails = config.getProxSensor();
         if (sensorDetails != null) {
-            String name = sensorDetails.getName();
-            String type = sensorDetails.getType();
-            if ("".equals(name) && "".equals(type)) {
-                // <proxSensor> with empty values to the config means no sensor should be used
-                mProximitySensor = null;
-            } else {
-                mProximitySensor = new SensorData();
-                loadSensorData(sensorDetails, mProximitySensor);
+            mProximitySensor.name = sensorDetails.getName();
+            mProximitySensor.type = sensorDetails.getType();
+            final RefreshRateRange rr = sensorDetails.getRefreshRate();
+            if (rr != null) {
+                mProximitySensor.minRefreshRate = rr.getMinimum().floatValue();
+                mProximitySensor.maxRefreshRate = rr.getMaximum().floatValue();
             }
         } else {
             setProxSensorUnspecified();
-        }
-    }
-
-    private void loadSensorData(@NonNull SensorDetails sensorDetails,
-            @NonNull SensorData sensorData) {
-        sensorData.name = sensorDetails.getName();
-        sensorData.type = sensorDetails.getType();
-        final RefreshRateRange rr = sensorDetails.getRefreshRate();
-        if (rr != null) {
-            sensorData.minRefreshRate = rr.getMinimum().floatValue();
-            sensorData.maxRefreshRate = rr.getMaximum().floatValue();
         }
     }
 
