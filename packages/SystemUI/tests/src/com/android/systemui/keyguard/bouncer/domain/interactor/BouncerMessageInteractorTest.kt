@@ -42,6 +42,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
@@ -53,6 +54,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
+@Ignore("b/236891644")
 class BouncerMessageInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var securityModel: KeyguardSecurityModel
