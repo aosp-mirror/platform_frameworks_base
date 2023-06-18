@@ -391,11 +391,11 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Network logging"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA certificates"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"View Policies"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"View policies"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"View controls"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> may be able to access data associated with this device, manage apps and change this device\'s settings.\n\nIf you have questions, contact <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"This device belongs to your organisation.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"This device belongs to your organisation.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Your organisation installed a certificate authority on this device. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Your organisation installed a certificate authority in your work profile. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"A certificate authority is installed on this device. Your secure network traffic may be monitored or modified."</string>

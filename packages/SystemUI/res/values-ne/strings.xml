@@ -401,9 +401,9 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"यस डिभाइसमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरिएको छ। तपाईंको सुरक्षित नेटवर्कको ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"तपाईंका प्रशासकले तपाईंको डिभाइसमा ट्राफिकको अनुगमन गर्ने नेटवर्क लग गर्ने प्रक्रियालाई सक्रिय गर्नुभएको छ।"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"तपाईंका एड्मिनले \'नेटवर्क लगिङ\' सुविधा अन गर्नुभएको छ। यो सुविधाले तपाईंको कार्य प्रोफाइलको ट्राफिक अनुगमन गर्छ तर व्यक्तिगत प्रोफाइलको ट्राफिक भने अनुगमन गर्दैन।"</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"यो डिभाइस <xliff:g id="VPN_APP">%1$s</xliff:g> मार्फत इन्टरनेटमा कनेक्ट गरिएको छ। तपाईंको सूचना प्रविधि व्यवस्थापक तपाईंको इमेल र ब्राउजिङ डेटासहित नेटवर्कसम्बन्धी क्रियाकलाप हेर्न सक्छन्।"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"तपाईंको डिभाइस <xliff:g id="VPN_APP_0">%1$s</xliff:g> र <xliff:g id="VPN_APP_1">%2$s</xliff:g> मार्फत इन्टरनेटमा कनेक्ट गरिएको छ। तपाईंको सूचना प्रविधि व्यवस्थापक तपाईंको इमेल र ब्राउजिङ डेटासहित नेटवर्कसम्बन्धी क्रियाकलाप हेर्न सक्छन्।"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"तपाईंका कामसम्बन्धी एपहरू <xliff:g id="VPN_APP">%1$s</xliff:g> मार्फत इन्टरनेटमा कनेक्ट गरिएका छन्। तपाईंको सूचना प्रविधि व्यवस्थापक र VPN प्रदायक कामसम्बन्धी एपहरूमा भएका तपाईंका इमेल र ब्राउजिङ डेटासहित नेटवर्कसम्बन्धी क्रियाकलाप हेर्न सक्छन्।"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"यो डिभाइस <xliff:g id="VPN_APP">%1$s</xliff:g> मार्फत इन्टरनेटमा कनेक्ट गरिएको छ। तपाईंका IT एड्मिन तपाईंका इमेल र ब्राउजिङ डेटासहित नेटवर्कसम्बन्धी क्रियाकलाप हेर्न सक्छन्।"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"तपाईंको डिभाइस <xliff:g id="VPN_APP_0">%1$s</xliff:g> र <xliff:g id="VPN_APP_1">%2$s</xliff:g> मार्फत इन्टरनेटमा कनेक्ट गरिएको छ। तपाईंका IT एड्मिन तपाईंका इमेल र ब्राउजिङ डेटासहित नेटवर्कसम्बन्धी क्रियाकलाप हेर्न सक्छन्।"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"तपाईंका कामसम्बन्धी एपहरू <xliff:g id="VPN_APP">%1$s</xliff:g> मार्फत इन्टरनेटमा कनेक्ट गरिएका छन्। तपाईंको IT एड्मिन र VPN प्रदायक कामसम्बन्धी एपहरूमा भएका तपाईंका इमेल र ब्राउजिङ डेटासहित नेटवर्कसम्बन्धी क्रियाकलाप हेर्न सक्छन्।"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"तपाईंका व्यक्तिगत एपहरू <xliff:g id="VPN_APP">%1$s</xliff:g> मार्फत इन्टरनेटमा कनेक्ट गरिएका छन्। तपाईंको VPN प्रदायक तपाईंको इमेल र ब्राउजिङ डेटासहित नेटवर्कसम्बन्धी क्रियाकलाप हेर्न सक्छन्।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN सम्बन्धी सेटिङहरू खोल्नुहोस्"</string>
@@ -581,7 +581,7 @@
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"एपहरू"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"सहायता"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"ब्राउजर"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"सम्पर्कहरू"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"कन्ट्याक्टहरू"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"इमेल"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"सङ्गीत"</string>
@@ -691,7 +691,7 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"सतर्कताहरू"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"ब्याट्री"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"स्क्रिनशटहरू"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"सामान्य सन्देशहरू"</string>
+    <string name="notification_channel_general" msgid="4384774889645929705">"सामान्य म्यासेजहरू"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"भण्डारण"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"सङ्केतहरू"</string>
     <string name="instant_apps" msgid="8337185853050247304">"तात्कालिक एपहरू"</string>
