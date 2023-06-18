@@ -36,43 +36,9 @@ import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.R.string.bouncer_face_not_recognized
 import com.android.systemui.R.string.keyguard_enter_password
 import com.android.systemui.R.string.keyguard_enter_pattern
 import com.android.systemui.R.string.keyguard_enter_pin
-import com.android.systemui.R.string.kg_bio_too_many_attempts_password
-import com.android.systemui.R.string.kg_bio_too_many_attempts_pattern
-import com.android.systemui.R.string.kg_bio_too_many_attempts_pin
-import com.android.systemui.R.string.kg_bio_try_again_or_password
-import com.android.systemui.R.string.kg_bio_try_again_or_pattern
-import com.android.systemui.R.string.kg_bio_try_again_or_pin
-import com.android.systemui.R.string.kg_face_locked_out
-import com.android.systemui.R.string.kg_fp_locked_out
-import com.android.systemui.R.string.kg_fp_not_recognized
-import com.android.systemui.R.string.kg_primary_auth_locked_out_password
-import com.android.systemui.R.string.kg_primary_auth_locked_out_pattern
-import com.android.systemui.R.string.kg_primary_auth_locked_out_pin
-import com.android.systemui.R.string.kg_prompt_after_dpm_lock
-import com.android.systemui.R.string.kg_prompt_after_user_lockdown_password
-import com.android.systemui.R.string.kg_prompt_after_user_lockdown_pattern
-import com.android.systemui.R.string.kg_prompt_after_user_lockdown_pin
-import com.android.systemui.R.string.kg_prompt_auth_timeout
-import com.android.systemui.R.string.kg_prompt_password_auth_timeout
-import com.android.systemui.R.string.kg_prompt_pattern_auth_timeout
-import com.android.systemui.R.string.kg_prompt_pin_auth_timeout
-import com.android.systemui.R.string.kg_prompt_reason_restart_password
-import com.android.systemui.R.string.kg_prompt_reason_restart_pattern
-import com.android.systemui.R.string.kg_prompt_reason_restart_pin
-import com.android.systemui.R.string.kg_prompt_unattended_update
-import com.android.systemui.R.string.kg_too_many_failed_attempts_countdown
-import com.android.systemui.R.string.kg_trust_agent_disabled
-import com.android.systemui.R.string.kg_unlock_with_password_or_fp
-import com.android.systemui.R.string.kg_unlock_with_pattern_or_fp
-import com.android.systemui.R.string.kg_unlock_with_pin_or_fp
-import com.android.systemui.R.string.kg_wrong_input_try_fp_suggestion
-import com.android.systemui.R.string.kg_wrong_password_try_again
-import com.android.systemui.R.string.kg_wrong_pattern_try_again
-import com.android.systemui.R.string.kg_wrong_pin_try_again
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.keyguard.bouncer.shared.model.Message
@@ -186,175 +152,171 @@ private fun defaultMessage(securityMode: SecurityMode): Pair<Int, Int> {
 
 private fun defaultMessageWithFingerprint(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(kg_unlock_with_pattern_or_fp, 0)
-        SecurityMode.Password -> Pair(kg_unlock_with_password_or_fp, 0)
-        SecurityMode.PIN -> Pair(kg_unlock_with_pin_or_fp, 0)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun incorrectSecurityInput(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(kg_wrong_pattern_try_again, 0)
-        SecurityMode.Password -> Pair(kg_wrong_password_try_again, 0)
-        SecurityMode.PIN -> Pair(kg_wrong_pin_try_again, 0)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun incorrectSecurityInputWithFingerprint(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(kg_wrong_pattern_try_again, kg_wrong_input_try_fp_suggestion)
-        SecurityMode.Password -> Pair(kg_wrong_password_try_again, kg_wrong_input_try_fp_suggestion)
-        SecurityMode.PIN -> Pair(kg_wrong_pin_try_again, kg_wrong_input_try_fp_suggestion)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun incorrectFingerprintInput(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(kg_fp_not_recognized, kg_bio_try_again_or_pattern)
-        SecurityMode.Password -> Pair(kg_fp_not_recognized, kg_bio_try_again_or_password)
-        SecurityMode.PIN -> Pair(kg_fp_not_recognized, kg_bio_try_again_or_pin)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun incorrectFaceInput(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(bouncer_face_not_recognized, kg_bio_try_again_or_pattern)
-        SecurityMode.Password -> Pair(bouncer_face_not_recognized, kg_bio_try_again_or_password)
-        SecurityMode.PIN -> Pair(bouncer_face_not_recognized, kg_bio_try_again_or_pin)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun incorrectFaceInputWithFingerprintAllowed(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(kg_unlock_with_pattern_or_fp, bouncer_face_not_recognized)
-        SecurityMode.Password -> Pair(kg_unlock_with_password_or_fp, bouncer_face_not_recognized)
-        SecurityMode.PIN -> Pair(kg_unlock_with_pin_or_fp, bouncer_face_not_recognized)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun biometricLockout(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_bio_too_many_attempts_pattern)
-        SecurityMode.Password -> Pair(keyguard_enter_password, kg_bio_too_many_attempts_password)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_bio_too_many_attempts_pin)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun authRequiredAfterReboot(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_reason_restart_pattern)
-        SecurityMode.Password -> Pair(keyguard_enter_password, kg_prompt_reason_restart_password)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_reason_restart_pin)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun authRequiredAfterAdminLockdown(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_after_dpm_lock)
-        SecurityMode.Password -> Pair(keyguard_enter_password, kg_prompt_after_dpm_lock)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_after_dpm_lock)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun authRequiredAfterUserLockdown(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_after_user_lockdown_pattern)
-        SecurityMode.Password ->
-            Pair(keyguard_enter_password, kg_prompt_after_user_lockdown_password)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_after_user_lockdown_pin)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun authRequiredForUnattendedUpdate(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_unattended_update)
-        SecurityMode.Password -> Pair(keyguard_enter_password, kg_prompt_unattended_update)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_unattended_update)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun authRequiredAfterPrimaryAuthTimeout(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_pattern_auth_timeout)
-        SecurityMode.Password -> Pair(keyguard_enter_password, kg_prompt_password_auth_timeout)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_pin_auth_timeout)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun nonStrongAuthTimeout(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_auth_timeout)
-        SecurityMode.Password -> Pair(keyguard_enter_password, kg_prompt_auth_timeout)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_auth_timeout)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun nonStrongAuthTimeoutWithFingerprintAllowed(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(kg_unlock_with_pattern_or_fp, kg_prompt_auth_timeout)
-        SecurityMode.Password -> Pair(kg_unlock_with_password_or_fp, kg_prompt_auth_timeout)
-        SecurityMode.PIN -> Pair(kg_unlock_with_pin_or_fp, kg_prompt_auth_timeout)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun faceUnlockUnavailable(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_face_locked_out)
-        SecurityMode.Password -> Pair(keyguard_enter_password, kg_face_locked_out)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_face_locked_out)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun fingerprintUnlockUnavailable(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_fp_locked_out)
-        SecurityMode.Password -> Pair(keyguard_enter_password, kg_fp_locked_out)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_fp_locked_out)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun trustAgentDisabled(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_trust_agent_disabled)
-        SecurityMode.Password -> Pair(keyguard_enter_password, kg_trust_agent_disabled)
-        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_trust_agent_disabled)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun trustAgentDisabledWithFingerprintAllowed(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern -> Pair(kg_unlock_with_pattern_or_fp, kg_trust_agent_disabled)
-        SecurityMode.Password -> Pair(kg_unlock_with_password_or_fp, kg_trust_agent_disabled)
-        SecurityMode.PIN -> Pair(kg_unlock_with_pin_or_fp, kg_trust_agent_disabled)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
 
 private fun primaryAuthLockedOut(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
-        SecurityMode.Pattern ->
-            Pair(kg_too_many_failed_attempts_countdown, kg_primary_auth_locked_out_pattern)
-        SecurityMode.Password ->
-            Pair(kg_too_many_failed_attempts_countdown, kg_primary_auth_locked_out_password)
-        SecurityMode.PIN ->
-            Pair(kg_too_many_failed_attempts_countdown, kg_primary_auth_locked_out_pin)
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, 0)
+        SecurityMode.Password -> Pair(keyguard_enter_password, 0)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, 0)
         else -> Pair(0, 0)
     }
 }
