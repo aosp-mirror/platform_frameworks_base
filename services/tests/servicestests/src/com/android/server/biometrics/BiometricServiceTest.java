@@ -182,6 +182,10 @@ public class BiometricServiceTest {
                 .thenReturn(ERROR_HW_UNAVAILABLE);
         when(mResources.getString(R.string.biometric_not_recognized))
                 .thenReturn(ERROR_NOT_RECOGNIZED);
+        when(mResources.getString(R.string.biometric_face_not_recognized))
+                .thenReturn(ERROR_NOT_RECOGNIZED);
+        when(mResources.getString(R.string.fingerprint_error_not_match))
+                .thenReturn(ERROR_NOT_RECOGNIZED);
         when(mResources.getString(R.string.biometric_error_user_canceled))
                 .thenReturn(ERROR_USER_CANCELED);
 
