@@ -534,8 +534,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
-        final Rect displayBounds = mPipBoundsState.getDisplayBounds();
-        final Rect destinationBounds = new Rect(displayBounds);
+        final Rect destinationBounds = new Rect(getExitDestinationBounds());
         final int direction = syncWithSplitScreenBounds(destinationBounds, requestEnterSplit)
                 ? TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
                 : TRANSITION_DIRECTION_LEAVE_PIP;
