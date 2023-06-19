@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
 
+import com.android.server.pm.pkg.PackageUserStateImpl;
 import com.android.server.pm.pkg.SuspendParams;
 
 public interface PackageUserStateWrite {
@@ -68,4 +69,8 @@ public interface PackageUserStateWrite {
     @NonNull
     PackageUserStateWrite setComponentLabelIcon(@NonNull ComponentName componentName,
             @Nullable String nonLocalizedLabel, @Nullable Integer icon);
+
+    /** @see PackageUserStateImpl#setMinAspectRatio(int) */
+    @NonNull
+    PackageUserStateWrite setMinAspectRatio(@PackageManager.UserMinAspectRatio int aspectRatio);
 }

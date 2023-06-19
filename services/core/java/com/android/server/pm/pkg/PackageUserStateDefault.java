@@ -136,6 +136,11 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     }
 
     @Override
+    public @PackageManager.UserMinAspectRatio int getMinAspectRatio() {
+        return PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
+    }
+
+    @Override
     public long getFirstInstallTimeMillis() {
         return 0;
     }
