@@ -563,6 +563,36 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(freeformBounds, task.getBounds());
     }
 
+    @Test
+    public void testTopActivityEligibleForUserAspectRatioButton() {
+        DisplayContent display = mAtm.mRootWindowContainer.getDefaultDisplay();
+        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
+        final Task task = rootTask.getBottomMostTask();
+        final ActivityRecord root = task.getTopNonFinishingActivity();
+        spyOn(mWm.mLetterboxConfiguration);
+
+        // When device config flag is disabled the button is not enabled
+        doReturn(false).when(mWm.mLetterboxConfiguration)
+                .isUserAppAspectRatioSettingsEnabled();
+        doReturn(false).when(mWm.mLetterboxConfiguration)
+                .isTranslucentLetterboxingEnabled();
+        assertFalse(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
+
+        // The flag is enabled
+        doReturn(true).when(mWm.mLetterboxConfiguration)
+                .isUserAppAspectRatioSettingsEnabled();
+        spyOn(root);
+        doReturn(task).when(root).getOrganizedTask();
+        // When the flag is enabled and the top activity is not in size compat mode.
+        doReturn(false).when(root).inSizeCompatMode();
+        assertTrue(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
+
+        // When in size compat mode the button is not enabled
+        doReturn(true).when(root).inSizeCompatMode();
+        assertFalse(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
+    }
+
     /**
      * Tests that a task with forced orientation has orientation-consistent bounds within the
      * parent.
