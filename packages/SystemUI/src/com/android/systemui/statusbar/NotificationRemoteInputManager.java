@@ -402,7 +402,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         while (p != null) {
             if (p instanceof View) {
                 View pv = (View) p;
-                if (pv.isRootNamespace()) {
+                if (pv.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
                     riv = findRemoteInputView(pv);
                     row = (ExpandableNotificationRow) pv.getTag(R.id.row_tag_for_content_view);
                     break;

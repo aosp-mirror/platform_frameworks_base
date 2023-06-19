@@ -208,6 +208,23 @@ public class NotificationContentView extends FrameLayout implements Notification
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
         mStatusBarService = statusBarService;
+        // We set root namespace so that we avoid searching children for id. Notification  might
+        // contain custom view and their ids may clash with ids already existing in shade or
+        // notification panel
+        setIsRootNamespace(true);
+    }
+
+    @Override
+    public View focusSearch(View focused, int direction) {
+        // This implementation is copied from ViewGroup but with removed special handling of
+        // setIsRootNamespace. This view is set as tree root using setIsRootNamespace and it
+        // causes focus to be stuck inside of it. We need to be root to avoid id conflicts
+        // but we don't want to behave like root when it comes to focusing.
+        if (mParent != null) {
+            return mParent.focusSearch(focused, direction);
+        }
+        Log.wtf(TAG, "NotificationContentView doesn't have parent");
+        return null;
     }
 
     public void reinflate() {
