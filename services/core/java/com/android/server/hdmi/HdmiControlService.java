@@ -3786,6 +3786,7 @@ public class HdmiControlService extends SystemService {
             if (mVendorCommandListenerRecords.isEmpty()) {
                 return false;
             }
+            boolean notifiedVendorCommandToListeners = false;
             for (VendorCommandListenerRecord record : mVendorCommandListenerRecords) {
                 if (hasVendorId) {
                     int vendorId =
@@ -3798,12 +3799,12 @@ public class HdmiControlService extends SystemService {
                 }
                 try {
                     record.mListener.onReceived(srcAddress, destAddress, params, hasVendorId);
-                    return true;
+                    notifiedVendorCommandToListeners = true;
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to notify vendor command reception", e);
                 }
             }
-            return false;
+            return notifiedVendorCommandToListeners;
         }
     }
 
