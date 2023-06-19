@@ -4689,7 +4689,9 @@ public class HdmiControlService extends SystemService {
     private int getEarcStatus() {
         assertRunOnServiceThread();
         if (mEarcLocalDevice != null) {
-            return mEarcLocalDevice.mEarcStatus;
+            synchronized (mLock) {
+                return mEarcLocalDevice.mEarcStatus;
+            }
         }
         return HDMI_EARC_STATUS_UNKNOWN;
     }
