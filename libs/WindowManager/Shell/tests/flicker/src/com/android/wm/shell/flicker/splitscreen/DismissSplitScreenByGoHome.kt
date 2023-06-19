@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
 /**
  * Test dismiss split screen by go home.
  *
- * To run this test: `atest WMShellFlickerTests:DismissSplitScreenByGoHome`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:DismissSplitScreenByGoHome`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

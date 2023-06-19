@@ -46,7 +46,7 @@ import org.junit.runners.Parameterized
 /**
  * Test copy content from the left to the right side of the split-screen.
  *
- * To run this test: `atest WMShellFlickerTests:CopyContentInSplit`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:CopyContentInSplit`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

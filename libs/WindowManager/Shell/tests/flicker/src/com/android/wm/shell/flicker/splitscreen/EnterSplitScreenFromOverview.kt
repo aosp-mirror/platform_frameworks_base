@@ -40,7 +40,7 @@ import org.junit.runners.Parameterized
 /**
  * Test enter split screen from Overview.
  *
- * To run this test: `atest WMShellFlickerTests:EnterSplitScreenFromOverview`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:EnterSplitScreenFromOverview`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
