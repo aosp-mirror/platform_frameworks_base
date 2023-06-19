@@ -1296,7 +1296,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mAutomaticBrightnessStrategy.isShortTermModelActive();
         mAutomaticBrightnessStrategy.setAutoBrightnessState(state,
                 mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig(),
-                brightnessState, mBrightnessReasonTemp.getReason(), mPowerRequest.policy,
+                mBrightnessReasonTemp.getReason(), mPowerRequest.policy,
                 mDisplayBrightnessController.getLastUserSetScreenBrightness(),
                 userSetBrightnessChanged);
 
@@ -1306,10 +1306,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 && (mAutomaticBrightnessStrategy.getAutoBrightnessAdjustmentChanged()
                 || userSetBrightnessChanged);
 
-        mBrightnessRangeController.setAutoBrightnessEnabled(mAutomaticBrightnessStrategy
-                .shouldUseAutoBrightness()
+        mBrightnessRangeController.setAutoBrightnessEnabled(
+                mAutomaticBrightnessStrategy.isAutoBrightnessEnabled()
                 ? AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED
-                : AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED);
+                : mAutomaticBrightnessStrategy.isAutoBrightnessDisabledDueToDisplayOff()
+                        ? AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE
+                        : AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED);
 
         boolean updateScreenBrightnessSetting = false;
         float currentBrightnessSetting = mDisplayBrightnessController.getCurrentBrightness();
