@@ -24,7 +24,11 @@ import static android.media.audiopolicy.AudioMixingRule.MIX_ROLE_PLAYERS;
 import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_AUDIO_SESSION_ID;
 import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_UID;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+
 import android.media.AudioFormat;
+import android.media.AudioSystem;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioPolicyConfig;
@@ -144,6 +148,84 @@ public class AudioMixUnitTests {
 
         equalsTester.testEquals();
     }
+
+    @Test
+    public void buildRenderToRemoteSubmix_success() {
+        final String deviceAddress = "address";
+        final AudioMix audioMix = new AudioMix.Builder(new AudioMixingRule.Builder()
+                .setTargetMixRole(MIX_ROLE_PLAYERS)
+                .addMixRule(RULE_MATCH_UID, 42).build())
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_RENDER)
+                .setDevice(AudioSystem.DEVICE_OUT_REMOTE_SUBMIX, /*address=*/deviceAddress).build();
+
+        assertEquals(deviceAddress, audioMix.getRegistration());
+        assertEquals(OUTPUT_FORMAT_MONO_16KHZ_PCM, audioMix.getFormat());
+        assertEquals(AudioMix.ROUTE_FLAG_RENDER, audioMix.getRouteFlags());
+    }
+
+    @Test
+    public void buildLoopbackAndRenderToRemoteSubmix_success() {
+        final String deviceAddress = "address";
+        final AudioMix audioMix = new AudioMix.Builder(new AudioMixingRule.Builder()
+                .setTargetMixRole(MIX_ROLE_PLAYERS)
+                .addMixRule(RULE_MATCH_UID, 42).build())
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK_RENDER)
+                .setDevice(AudioSystem.DEVICE_OUT_REMOTE_SUBMIX, /*address=*/deviceAddress).build();
+
+        assertEquals(deviceAddress, audioMix.getRegistration());
+        assertEquals(OUTPUT_FORMAT_MONO_16KHZ_PCM, audioMix.getFormat());
+        assertEquals(AudioMix.ROUTE_FLAG_LOOP_BACK_RENDER, audioMix.getRouteFlags());
+    }
+
+    @Test
+    public void buildRenderToSpeaker_success() {
+        final AudioMix audioMix = new AudioMix.Builder(new AudioMixingRule.Builder()
+                .setTargetMixRole(MIX_ROLE_PLAYERS)
+                .addMixRule(RULE_MATCH_UID, 42).build())
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_RENDER)
+                .setDevice(AudioSystem.DEVICE_OUT_SPEAKER, /*address=*/"").build();
+
+        assertEquals(OUTPUT_FORMAT_MONO_16KHZ_PCM, audioMix.getFormat());
+        assertEquals(AudioMix.ROUTE_FLAG_RENDER, audioMix.getRouteFlags());
+    }
+
+    @Test
+    public void buildLoopbackForPlayerMix_success() {
+        final AudioMix audioMix = new AudioMix.Builder(new AudioMixingRule.Builder()
+                .setTargetMixRole(MIX_ROLE_PLAYERS)
+                .addMixRule(RULE_MATCH_UID, 42).build())
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK).build();
+
+        assertEquals(OUTPUT_FORMAT_MONO_16KHZ_PCM, audioMix.getFormat());
+        assertEquals(AudioMix.ROUTE_FLAG_LOOP_BACK, audioMix.getRouteFlags());
+    }
+
+    @Test
+    public void buildLoopbackWithDevice_throws() {
+        assertThrows(IllegalArgumentException.class, () -> new AudioMix.Builder(
+                new AudioMixingRule.Builder()
+                        .setTargetMixRole(MIX_ROLE_PLAYERS)
+                        .addMixRule(RULE_MATCH_UID, 42).build())
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK)
+                .setDevice(AudioSystem.DEVICE_OUT_SPEAKER, /*address=*/"").build());
+    }
+
+    @Test
+    public void buildRenderWithoutDevice_throws() {
+        assertThrows(IllegalArgumentException.class, () -> new AudioMix.Builder(
+                new AudioMixingRule.Builder()
+                        .setTargetMixRole(MIX_ROLE_PLAYERS)
+                        .addMixRule(RULE_MATCH_UID, 42).build())
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_RENDER).build());
+    }
+
+
 
     private static AudioMix writeToAndFromParcel(AudioMix audioMix) {
         AudioPolicyConfig apc = new AudioPolicyConfig(new ArrayList<>(List.of(audioMix)));
