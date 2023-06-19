@@ -601,6 +601,7 @@ final class Constants {
     })
     @interface RcProfileSource {}
 
+    static final int HDMI_EARC_STATUS_UNKNOWN = -1;
     static final int HDMI_EARC_STATUS_IDLE = IEArcStatus.IDLE; // IDLE1
     static final int HDMI_EARC_STATUS_EARC_PENDING =
             IEArcStatus.EARC_PENDING; // DISC1 and DISC2
@@ -609,6 +610,7 @@ final class Constants {
             IEArcStatus.EARC_CONNECTED; // eARC connected
 
     @IntDef({
+            HDMI_EARC_STATUS_UNKNOWN,
             HDMI_EARC_STATUS_IDLE,
             HDMI_EARC_STATUS_EARC_PENDING,
             HDMI_EARC_STATUS_ARC_PENDING,

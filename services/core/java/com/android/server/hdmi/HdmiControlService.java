@@ -28,6 +28,7 @@ import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.DISABLED;
 import static com.android.server.hdmi.Constants.ENABLED;
 import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_ARC_PENDING;
+import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_UNKNOWN;
 import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_INPUT_SWITCHING;
 import static com.android.server.hdmi.Constants.OPTION_MHL_POWER_CHARGE;
@@ -91,6 +92,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
+import android.stats.hdmi.HdmiStatsEnums;
 import android.sysprop.HdmiProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -3555,7 +3557,8 @@ public class HdmiControlService extends SystemService {
         }
     }
 
-    private boolean isEarcSupported() {
+    @VisibleForTesting
+    protected boolean isEarcSupported() {
         synchronized (mLock) {
             return mEarcSupported;
         }
@@ -3672,6 +3675,11 @@ public class HdmiControlService extends SystemService {
             } else {
                 setEarcEnabledInHal(false, false);
             }
+        }
+        if (isTvDevice()) {
+            int earcStatus = getEarcStatus();
+            getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
+                    earcStatus, earcStatus, HdmiStatsEnums.LOG_REASON_WAKE);
         }
         // TODO: Initialize MHL local devices.
     }
@@ -4703,6 +4711,15 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
+    private int getEarcStatus() {
+        assertRunOnServiceThread();
+        if (mEarcLocalDevice != null) {
+            return mEarcLocalDevice.mEarcStatus;
+        }
+        return HDMI_EARC_STATUS_UNKNOWN;
+    }
+
+    @ServiceThreadOnly
     @VisibleForTesting
     HdmiEarcLocalDevice getEarcLocalDevice() {
         assertRunOnServiceThread();
@@ -4754,14 +4771,19 @@ public class HdmiControlService extends SystemService {
             Slog.w(TAG, "Tried to update eARC status on a port that doesn't support eARC.");
             return;
         }
+        int oldEarcStatus = getEarcStatus();
         if (mEarcLocalDevice != null) {
             mEarcLocalDevice.handleEarcStateChange(status);
+            getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
+                    oldEarcStatus, status, HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED);
         } else if (status == HDMI_EARC_STATUS_ARC_PENDING) {
             // If eARC is disabled, the local device is null. This is why we notify
             // AudioService here that the eARC connection is terminated.
             HdmiLogger.debug("eARC state change [new: HDMI_EARC_STATUS_ARC_PENDING(2)]");
             notifyEarcStatusToAudioService(false, new ArrayList<>());
             startArcAction(true, null);
+            getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
+                    oldEarcStatus, status, HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED);
         }
     }
 
