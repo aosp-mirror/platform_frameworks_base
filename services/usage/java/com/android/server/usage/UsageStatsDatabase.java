@@ -178,7 +178,12 @@ public class UsageStatsDatabase {
             }
 
             checkVersionAndBuildLocked();
-            indexFilesLocked();
+            // Perform a pruning of older files if there was an upgrade, otherwise do indexing.
+            if (mUpgradePerformed) {
+                prune(currentTimeMillis); // prune performs an indexing when done
+            } else {
+                indexFilesLocked();
+            }
 
             // Delete files that are in the future.
             for (TimeSparseArray<AtomicFile> files : mSortedStatFiles) {
@@ -914,26 +919,31 @@ public class UsageStatsDatabase {
      */
     public void prune(final long currentTimeMillis) {
         synchronized (mLock) {
+            // prune all files older than 2 years in the yearly directory
             mCal.setTimeInMillis(currentTimeMillis);
-            mCal.addYears(-3);
+            mCal.addYears(-2);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_YEARLY],
                     mCal.getTimeInMillis());
 
+            // prune all files older than 6 months in the monthly directory
             mCal.setTimeInMillis(currentTimeMillis);
             mCal.addMonths(-6);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_MONTHLY],
                     mCal.getTimeInMillis());
 
+            // prune all files older than 4 weeks in the weekly directory
             mCal.setTimeInMillis(currentTimeMillis);
             mCal.addWeeks(-4);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_WEEKLY],
                     mCal.getTimeInMillis());
 
+            // prune all files older than 10 days in the weekly directory
             mCal.setTimeInMillis(currentTimeMillis);
             mCal.addDays(-10);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_DAILY],
                     mCal.getTimeInMillis());
 
+            // prune chooser counts for all usage stats older than the defined period
             mCal.setTimeInMillis(currentTimeMillis);
             mCal.addDays(-SELECTION_LOG_RETENTION_LEN);
             for (int i = 0; i < mIntervalDirs.length; ++i) {
