@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -95,7 +96,8 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     // Types that we can't really produce. No methods receiving these parameters will be invoked.
     private static final ImmutableSet<Class<?>> UNUSABLE_TYPES =
             ImmutableSet.of(Consumer.class, IBinder.class, MediaSession.Token.class, Parcel.class,
-                    PrintWriter.class, Resources.Theme.class, View.class);
+                    PrintWriter.class, Resources.Theme.class, View.class,
+                    LayoutInflater.Factory2.class);
 
     // Maximum number of times we allow generating the same class recursively.
     // E.g. new RemoteViews.addView(new RemoteViews()) but stop there.
