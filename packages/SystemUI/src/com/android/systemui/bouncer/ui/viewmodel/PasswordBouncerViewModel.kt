@@ -50,7 +50,7 @@ class PasswordBouncerViewModel(
 
     /** Notifies that the user has pressed the key for attempting to authenticate the password. */
     fun onAuthenticateKeyPressed() {
-        if (!interactor.authenticate(password.value.toCharArray().toList())) {
+        if (interactor.authenticate(password.value.toCharArray().toList()) != true) {
             showFailureAnimation()
         }
 
