@@ -18,6 +18,8 @@ package com.android.server.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
 import android.app.assist.AssistStructure.WindowNode;
@@ -31,13 +33,18 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
+import android.widget.RemoteViews;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
+
+import java.util.Arrays;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 
 public final class Helper {
 
@@ -70,6 +77,44 @@ public final class Helper {
     private Helper() {
         throw new UnsupportedOperationException("contains static members only");
     }
+
+    private static boolean checkRemoteViewUriPermissions(
+            @UserIdInt int userId, @NonNull RemoteViews rView) {
+        final AtomicBoolean permissionsOk = new AtomicBoolean(true);
+
+        rView.visitUris(uri -> {
+            int uriOwnerId = android.content.ContentProvider.getUserIdFromUri(uri);
+            boolean allowed = uriOwnerId == userId;
+            permissionsOk.set(allowed && permissionsOk.get());
+        });
+
+        return permissionsOk.get();
+    }
+
+    /**
+     * Checks the URI permissions of the remote view,
+     * to see if the current userId is able to access it.
+     *
+     * Returns the RemoteView that is passed if user is able, null otherwise.
+     *
+     * TODO: instead of returning a null remoteview when
+     * the current userId cannot access an URI,
+     * return a new RemoteView with the URI removed.
+     */
+    public static @Nullable RemoteViews sanitizeRemoteView(RemoteViews rView) {
+        if (rView == null) return null;
+
+        int userId = ActivityManager.getCurrentUser();
+
+        boolean ok = checkRemoteViewUriPermissions(userId, rView);
+        if (!ok) {
+            Slog.w(TAG,
+                    "sanitizeRemoteView() user: " + userId
+                    + " tried accessing resource that does not belong to them");
+        }
+        return (ok ? rView : null);
+    }
+
 
     @Nullable
     static AutofillId[] toArray(@Nullable ArraySet<AutofillId> set) {
