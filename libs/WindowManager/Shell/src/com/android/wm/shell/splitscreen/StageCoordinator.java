@@ -41,6 +41,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.common.split.SplitScreenConstants.splitPositionToString;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
+import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
@@ -473,6 +474,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (isEnteringSplit && mSideStage.getChildCount() == 0) {
                     mMainExecutor.execute(() -> exitSplitScreen(
                             null /* childrenToTop */, EXIT_REASON_UNKNOWN));
+                    Log.w(TAG, splitFailureMessage("startShortcut",
+                            "side stage was not populated"));
                     mSplitUnsupportedToast.show();
                 }
 
@@ -560,6 +563,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (isEnteringSplit && mSideStage.getChildCount() == 0) {
                     mMainExecutor.execute(() -> exitSplitScreen(
                             null /* childrenToTop */, EXIT_REASON_UNKNOWN));
+                    Log.w(TAG, splitFailureMessage("startIntentLegacy",
+                            "side stage was not populated"));
                     mSplitUnsupportedToast.show();
                 }
 
@@ -1090,6 +1095,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mMainExecutor.execute(() ->
                     exitSplitScreen(mMainStage.getChildCount() == 0
                             ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
+            Log.w(TAG, splitFailureMessage("onRemoteAnimationFinishedOrCancelled",
+                    "main or side stage was not populated."));
             mSplitUnsupportedToast.show();
         } else {
             mSyncQueue.queue(evictWct);
@@ -1109,6 +1116,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
             mMainExecutor.execute(() -> exitSplitScreen(mMainStage.getChildCount() == 0
                     ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
+            Log.w(TAG, splitFailureMessage("onRemoteAnimationFinished",
+                    "main or side stage was not populated"));
             mSplitUnsupportedToast.show();
             return;
         }
@@ -2704,12 +2713,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         } else {
             if (mainChild == null || sideChild == null) {
-                Log.w(TAG, "Launched 2 tasks in split, but didn't receive"
-                        + " 2 tasks in transition. Possibly one of them failed to launch");
                 final int dismissTop = mainChild != null ? STAGE_TYPE_MAIN :
                         (sideChild != null ? STAGE_TYPE_SIDE : STAGE_TYPE_UNDEFINED);
                 mSplitTransitions.mPendingEnter.cancel(
                         (cancelWct, cancelT) -> prepareExitSplitScreen(dismissTop, cancelWct));
+                Log.w(TAG, splitFailureMessage("startPendingEnterAnimation",
+                        "launched 2 tasks in split, but didn't receive "
+                        + "2 tasks in transition. Possibly one of them failed to launch"));
                 mSplitUnsupportedToast.show();
                 return true;
             }
@@ -3159,7 +3169,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         @Override
-        public void onNoLongerSupportMultiWindow() {
+        public void onNoLongerSupportMultiWindow(ActivityManager.RunningTaskInfo taskInfo) {
             if (mMainStage.isActive()) {
                 final boolean isMainStage = mMainStageListener == this;
                 if (!ENABLE_SHELL_TRANSITIONS) {
@@ -3174,6 +3184,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 prepareExitSplitScreen(stageType, wct);
                 mSplitTransitions.startDismissTransition(wct, StageCoordinator.this, stageType,
                         EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
+                Log.w(TAG, splitFailureMessage("onNoLongerSupportMultiWindow",
+                        "app package " + taskInfo.baseActivity.getPackageName()
+                        + " does not support splitscreen, or is a controlled activity type"));
                 mSplitUnsupportedToast.show();
             }
         }
