@@ -252,7 +252,7 @@ object Flags {
     /** Migrate the indication area to the new keyguard root view. */
     // TODO(b/280067944): Tracking bug.
     @JvmField
-    val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area")
+    val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area", teamfood = true)
 
     /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
     // TODO(b/283260512): Tracking bug.
