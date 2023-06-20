@@ -3452,7 +3452,6 @@ package android.view {
   }
 
   public final class Choreographer {
-    method public long getExpectedPresentationTimeNanos();
     method public static long getFrameDelay();
     method public long getFrameTimeNanos();
     method public void postCallback(int, Runnable, Object);
