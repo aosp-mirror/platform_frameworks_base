@@ -265,6 +265,15 @@ public class PackageInstallerActivity extends AlertActivity {
     }
 
     private String getPackageNameForUid(int sourceUid) {
+        // If the sourceUid belongs to the system downloads provider, we explicitly return the
+        // name of the Download Manager package. This is because its UID is shared with multiple
+        // packages, resulting in uncertainty about which package will end up first in the list
+        // of packages associated with this UID
+        ApplicationInfo systemDownloadProviderInfo = PackageUtil.getSystemDownloadsProviderInfo(
+                                                        mPm, sourceUid);
+        if (systemDownloadProviderInfo != null) {
+            return systemDownloadProviderInfo.packageName;
+        }
         String[] packagesForUid = mPm.getPackagesForUid(sourceUid);
         if (packagesForUid == null) {
             return null;
