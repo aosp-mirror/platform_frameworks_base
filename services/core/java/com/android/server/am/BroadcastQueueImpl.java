@@ -466,6 +466,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         skipCurrentOrPendingReceiverLocked(app);
     }
 
+    public void onProcessFreezableChangedLocked(ProcessRecord app) {
+        // Not supported; ignore
+    }
+
     public boolean sendPendingBroadcastsLocked(ProcessRecord app)
             throws BroadcastDeliveryFailedException {
         boolean didSomething = false;

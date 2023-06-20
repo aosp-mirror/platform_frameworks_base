@@ -1197,6 +1197,9 @@ class ProcessRecord implements WindowProcessListener {
                         "Killing " + toShortString() + " (adj " + mState.getSetAdj()
                         + "): " + reason, info.uid);
             }
+            // Since the process is getting killed, reset the freezable related state.
+            mOptRecord.setPendingFreeze(false);
+            mOptRecord.setFrozen(false);
             if (mPid > 0) {
                 mService.mProcessList.noteAppKill(this, reasonCode, subReason, description);
                 EventLog.writeEvent(EventLogTags.AM_KILL,
