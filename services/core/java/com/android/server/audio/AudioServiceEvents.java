@@ -228,6 +228,7 @@ public class AudioServiceEvents {
         static final int VOL_MUTE_STREAM_INT = 9;
         static final int VOL_SET_LE_AUDIO_VOL = 10;
         static final int VOL_ADJUST_GROUP_VOL = 11;
+        static final int VOL_MASTER_MUTE = 12;
 
         final int mOp;
         final int mStream;
@@ -314,6 +315,17 @@ public class AudioServiceEvents {
         VolumeEvent(int op, int stream, boolean state) {
             mOp = op;
             mStream = stream;
+            mVal1 = state ? 1 : 0;
+            mVal2 = 0;
+            mCaller = null;
+            mGroupName = null;
+            logMetricEvent();
+        }
+
+        /** used for VOL_MASTER_MUTE */
+        VolumeEvent(int op, boolean state) {
+            mOp = op;
+            mStream = -1;
             mVal1 = state ? 1 : 0;
             mVal2 = 0;
             mCaller = null;
@@ -429,6 +441,9 @@ public class AudioServiceEvents {
                 case VOL_MUTE_STREAM_INT:
                     // No value in logging metrics for this internal event
                     return;
+                case VOL_MASTER_MUTE:
+                    // No value in logging metrics for this internal event
+                    return;
                 default:
                     return;
             }
@@ -509,6 +524,10 @@ public class AudioServiceEvents {
                     return new StringBuilder("VolumeStreamState.muteInternally(stream:")
                             .append(AudioSystem.streamToString(mStream))
                             .append(mVal1 == 1 ? ", muted)" : ", unmuted)")
+                            .toString();
+                case VOL_MASTER_MUTE:
+                    return new StringBuilder("Master mute:")
+                            .append(mVal1 == 1 ? " muted)" : " unmuted)")
                             .toString();
                 default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }
