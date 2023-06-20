@@ -865,7 +865,7 @@ public class AudioPolicy {
                 for (final WeakReference<AudioTrack> weakTrack : mInjectors) {
                     final AudioTrack track = weakTrack.get();
                     if (track == null) {
-                        break;
+                        continue;
                     }
                     try {
                         // TODO: add synchronous versions
@@ -876,12 +876,13 @@ public class AudioPolicy {
                         // released by the user of the AudioPolicy
                     }
                 }
+                mInjectors.clear();
             }
             if (mCaptors != null) {
                 for (final WeakReference<AudioRecord> weakRecord : mCaptors) {
                     final AudioRecord record = weakRecord.get();
                     if (record == null) {
-                        break;
+                        continue;
                     }
                     try {
                         // TODO: if needed: implement an invalidate method
@@ -891,6 +892,7 @@ public class AudioPolicy {
                         // released by the user of the AudioPolicy
                     }
                 }
+                mCaptors.clear();
             }
         }
     }
