@@ -52,6 +52,7 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.server.autofill.AutofillManagerService;
+import com.android.server.autofill.Helper;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -197,7 +198,8 @@ final class DialogFillUi {
     }
 
     private void setHeader(View decor, FillResponse response) {
-        final RemoteViews presentation = response.getDialogHeader();
+        final RemoteViews presentation =
+                Helper.sanitizeRemoteView(response.getDialogHeader());
         if (presentation == null) {
             return;
         }
@@ -232,9 +234,10 @@ final class DialogFillUi {
     }
 
     private void initialAuthenticationLayout(View decor, FillResponse response) {
-        RemoteViews presentation = response.getDialogPresentation();
+        RemoteViews presentation = Helper.sanitizeRemoteView(
+                response.getDialogPresentation());
         if (presentation == null) {
-            presentation = response.getPresentation();
+            presentation = Helper.sanitizeRemoteView(response.getPresentation());
         }
         if (presentation == null) {
             throw new RuntimeException("No presentation for fill dialog authentication");
@@ -278,7 +281,8 @@ final class DialogFillUi {
             final Dataset dataset = response.getDatasets().get(i);
             final int index = dataset.getFieldIds().indexOf(focusedViewId);
             if (index >= 0) {
-                RemoteViews presentation = dataset.getFieldDialogPresentation(index);
+                RemoteViews presentation = Helper.sanitizeRemoteView(
+                        dataset.getFieldDialogPresentation(index));
                 if (presentation == null) {
                     if (sDebug) {
                         Slog.w(TAG, "not displaying UI on field " + focusedViewId + " because "
