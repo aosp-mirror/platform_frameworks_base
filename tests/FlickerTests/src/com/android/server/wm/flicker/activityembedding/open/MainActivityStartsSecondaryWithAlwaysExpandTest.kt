@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.activityembedding
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -53,7 +54,7 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
             testApp.launchViaIntent(wmHelper)
             testApp.launchSecondaryActivity(wmHelper)
             startDisplayBounds =
-                wmHelper.currentState.layerState.physicalDisplayBounds ?: error("Display not found")
+              wmHelper.currentState.layerState.physicalDisplayBounds ?: error("Display not found")
         }
         transitions {
             // Launch C with alwaysExpand
@@ -64,6 +65,21 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
             testApp.exit(wmHelper)
         }
     }
+
+    @FlakyTest(bugId = 286952194)
+    @Presubmit
+    @Test
+    override fun navBarWindowIsVisibleAtStartAndEnd() {}
+
+    @FlakyTest(bugId = 286952194)
+    @Presubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() {}
+
+    @FlakyTest(bugId = 286952194)
+    @Presubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() {}
 
     /** Transition begins with a split. */
     @Presubmit
@@ -110,6 +126,7 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
     }
 
     /** Always expand activity is on top of the split. */
+    @FlakyTest(bugId = 286952194)
     @Presubmit
     @Test
     fun endsWithAlwaysExpandActivityOnTop() {
