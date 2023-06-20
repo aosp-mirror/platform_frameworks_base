@@ -9407,6 +9407,37 @@ public class CarrierConfigManager {
             "missed_incoming_call_sms_pattern_string_array";
 
     /**
+     * Indicate the satellite services supported per provider by a carrier.
+     *
+     * Key is the PLMN of a satellite provider. Value should be an integer array of supported
+     * services with the following value:
+     * <ul>
+     * <li>1 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VOICE}</li>
+     * <li>2 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_DATA}</li>
+     * <li>3 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_SMS}</li>
+     * <li>4 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VIDEO}</li>
+     * <li>5 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_EMERGENCY}</li>
+     * </ul>
+     * <p>
+     * If this carrier config is not present, the overlay config
+     * {@code config_satellite_services_supported_by_providers} will be used. If the carrier config
+     * is present, the supported satellite services will be identified as follows:
+     * <ul>
+     * <li>For the PLMN that exists in both provider supported satellite services and carrier
+     * supported satellite services, the supported services will be the intersection of the two
+     * sets.</li>
+     * <li>For the PLMN that is present in provider supported satellite services but not in carrier
+     * supported satellite services, the provider supported satellite services will be used.</li>
+     * <li>For the PLMN that is present in carrier supported satellite services but not in provider
+     * supported satellite services, the PLMN will be ignored.</li>
+     * </ul>
+     *
+     * This config is empty by default.
+     */
+    public static final String KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE =
+            "carrier_supported_satellite_services_per_provider_bundle";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -10412,6 +10443,9 @@ public class CarrierConfigManager {
                 });
         sDefaults.putBoolean(KEY_DELAY_IMS_TEAR_DOWN_UNTIL_CALL_END_BOOL, false);
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
+        sDefaults.putPersistableBundle(
+                KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
+                PersistableBundle.EMPTY);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
