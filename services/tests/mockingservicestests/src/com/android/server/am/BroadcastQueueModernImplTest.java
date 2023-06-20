@@ -410,9 +410,9 @@ public final class BroadcastQueueModernImplTest {
                 List.of(makeMockRegisteredReceiver()), false);
         enqueueOrReplaceBroadcast(queue, airplaneRecord, 0);
 
-        queue.setProcessAndUidState(null, false, false);
+        queue.setProcessAndUidState(mProcess, false, false);
         final long notCachedRunnableAt = queue.getRunnableAt();
-        queue.setProcessAndUidState(null, false, true);
+        queue.setProcessAndUidState(mProcess, false, true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertFalse(queue.isRunnable());
@@ -437,9 +437,9 @@ public final class BroadcastQueueModernImplTest {
                 List.of(makeMockRegisteredReceiver()), false);
         enqueueOrReplaceBroadcast(queue, airplaneRecord, 0);
 
-        queue.setProcessAndUidState(null, false, false);
+        queue.setProcessAndUidState(mProcess, false, false);
         final long notCachedRunnableAt = queue.getRunnableAt();
-        queue.setProcessAndUidState(null, false, true);
+        queue.setProcessAndUidState(mProcess, false, true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertTrue(queue.isRunnable());
