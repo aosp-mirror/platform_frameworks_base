@@ -406,9 +406,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     void setLaunchEmergencyActionOnFinishedWaking(boolean launch);
 
     QSPanelController getQSPanelController();
-
-    boolean areNotificationAlertsDisabled();
-
     float getDisplayDensity();
 
     void extendDozePulse();
