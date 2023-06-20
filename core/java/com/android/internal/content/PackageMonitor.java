@@ -34,6 +34,7 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 
 import java.util.Objects;
@@ -348,7 +349,12 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         doHandlePackageEvent(intent);
     }
 
-    private void doHandlePackageEvent(Intent intent) {
+    /**
+     * Handle the package related event
+     * @param intent the intent that contains package related event information
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public void doHandlePackageEvent(Intent intent) {
         mChangeUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                 UserHandle.USER_NULL);
         if (mChangeUserId == UserHandle.USER_NULL) {
