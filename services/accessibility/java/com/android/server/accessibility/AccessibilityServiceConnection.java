@@ -158,10 +158,11 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                     mSystemSupport.persistComponentNamesToSettingLocked(
                             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                             userState.getEnabledServicesLocked(), userState.mUserId);
+
+                    mSystemSupport.onClientChangeLocked(false);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
-                mSystemSupport.onClientChangeLocked(false);
             }
         }
     }
@@ -285,7 +286,13 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             }
             final AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return false;
-            return userState.setSoftKeyboardModeLocked(showMode, mComponentName);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return userState.setSoftKeyboardModeLocked(showMode, mComponentName);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -295,7 +302,12 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             logTraceSvcConn("getSoftKeyboardShowMode", "");
         }
         final AccessibilityUserState userState = mUserStateWeakReference.get();
-        return (userState != null) ? userState.getSoftKeyboardShowModeLocked() : 0;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return (userState != null) ? userState.getSoftKeyboardShowModeLocked() : 0;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
@@ -363,8 +375,14 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
-            AccessibilityUserState userState = mUserStateWeakReference.get();
-            return (userState != null) && isAccessibilityButtonAvailableLocked(userState);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                AccessibilityUserState userState = mUserStateWeakReference.get();
+                return (userState != null) && isAccessibilityButtonAvailableLocked(userState);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -456,26 +474,32 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
         synchronized (mLock) {
             if (mServiceInterface != null && mSecurityPolicy.canPerformGestures(this)) {
-                MotionEventInjector motionEventInjector =
-                        mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
-                if (wmTracingEnabled()) {
-                    logTraceWM("isTouchOrFaketouchDevice", "");
-                }
-                if (motionEventInjector != null
-                        && mWindowManagerService.isTouchOrFaketouchDevice()) {
-                    motionEventInjector.injectEvents(
-                            gestureSteps.getList(), mServiceInterface, sequence, displayId);
-                } else {
-                    try {
-                        if (svcClientTracingEnabled()) {
-                            logTraceSvcClient("onPerformGestureResult", sequence + ", false");
-                        }
-                        mServiceInterface.onPerformGestureResult(sequence, false);
-                    } catch (RemoteException re) {
-                        Slog.e(LOG_TAG, "Error sending motion event injection failure to "
-                                + mServiceInterface, re);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    MotionEventInjector motionEventInjector =
+                            mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
+                    if (wmTracingEnabled()) {
+                        logTraceWM("isTouchOrFaketouchDevice", "");
                     }
+                    if (motionEventInjector != null
+                            && mWindowManagerService.isTouchOrFaketouchDevice()) {
+                        motionEventInjector.injectEvents(
+                                gestureSteps.getList(), mServiceInterface, sequence, displayId);
+                    } else {
+                        try {
+                            if (svcClientTracingEnabled()) {
+                                logTraceSvcClient("onPerformGestureResult", sequence + ", false");
+                            }
+                            mServiceInterface.onPerformGestureResult(sequence, false);
+                        } catch (RemoteException re) {
+                            Slog.e(LOG_TAG, "Error sending motion event injection failure to "
+                                    + mServiceInterface, re);
+                        }
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
                 }
+
             }
         }
     }
@@ -501,10 +525,15 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 return;
             }
 
-            // Sets the appearance data in the A11yUserState.
-            userState.setFocusAppearanceLocked(strokeWidth, color);
-            // Updates the appearance data in the A11yManager.
-            mSystemSupport.onClientChangeLocked(false);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                // Sets the appearance data in the A11yUserState.
+                userState.setFocusAppearanceLocked(strokeWidth, color);
+                // Updates the appearance data in the A11yManager.
+                mSystemSupport.onClientChangeLocked(false);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
