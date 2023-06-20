@@ -16,6 +16,8 @@
 
 package com.android.systemui.authentication.shared.model
 
+import androidx.annotation.VisibleForTesting
+
 /** Enumerates all known authentication methods. */
 sealed class AuthenticationMethodModel(
     /**
@@ -38,7 +40,16 @@ sealed class AuthenticationMethodModel(
      * In practice, a pin is restricted to 16 decimal digits , see
      * [android.app.admin.DevicePolicyManager.MAX_PASSWORD_LENGTH]
      */
-    data class Pin(val code: Long) : AuthenticationMethodModel(isSecure = true)
+    data class Pin(val code: List<Int>, val autoConfirm: Boolean) :
+        AuthenticationMethodModel(isSecure = true) {
+
+        /** Convenience constructor for tests only. */
+        @VisibleForTesting
+        constructor(
+            code: Long,
+            autoConfirm: Boolean = false
+        ) : this(code.toString(10).map { it - '0' }, autoConfirm) {}
+    }
 
     data class Password(val password: String) : AuthenticationMethodModel(isSecure = true)
 

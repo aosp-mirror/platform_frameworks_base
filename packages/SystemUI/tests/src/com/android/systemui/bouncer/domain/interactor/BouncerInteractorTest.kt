@@ -95,6 +95,61 @@ class BouncerInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun pinAuthMethod_tryAutoConfirm_withAutoConfirmPin() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
+            val message by collectLastValue(underTest.message)
+
+            authenticationInteractor.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234, autoConfirm = true)
+            )
+            authenticationInteractor.lockDevice()
+            underTest.showOrUnlockDevice("container1")
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
+            underTest.clearMessage()
+
+            // Incomplete input.
+            assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true)).isNull()
+            assertThat(message).isEmpty()
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+
+            // Wrong 4-digit pin
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 5), tryAutoConfirm = true)).isFalse()
+            assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+
+            // Correct input.
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 4), tryAutoConfirm = true)).isTrue()
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+        }
+
+    @Test
+    fun pinAuthMethod_tryAutoConfirm_withoutAutoConfirmPin() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
+            val message by collectLastValue(underTest.message)
+
+            authenticationInteractor.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234, autoConfirm = false)
+            )
+            authenticationInteractor.lockDevice()
+            underTest.showOrUnlockDevice("container1")
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            underTest.clearMessage()
+
+            // Incomplete input.
+            assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true)).isNull()
+            assertThat(message).isEmpty()
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+
+            // Correct input.
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 4), tryAutoConfirm = true)).isNull()
+            assertThat(message).isEmpty()
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+        }
+
+    @Test
     fun passwordAuthMethod() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
