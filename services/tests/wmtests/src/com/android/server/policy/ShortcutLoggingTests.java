@@ -221,9 +221,8 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
     }
 
     @Before
-    @Override
     public void setUp() {
-        super.setUp();
+        setUpPhoneWindowManager();
         mPhoneWindowManager.overrideKeyEventSource(VENDOR_ID, PRODUCT_ID);
         mPhoneWindowManager.overrideLaunchHome();
         mPhoneWindowManager.overrideSearchKeyBehavior(

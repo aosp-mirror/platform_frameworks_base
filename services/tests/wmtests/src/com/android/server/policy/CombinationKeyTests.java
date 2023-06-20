@@ -27,6 +27,7 @@ import android.view.ViewConfiguration;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -40,6 +41,11 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class CombinationKeyTests extends ShortcutKeyTestBase {
     private static final long A11Y_KEY_HOLD_MILLIS = 3500;
+
+    @Before
+    public void setUp() {
+        setUpPhoneWindowManager();
+    }
 
     /**
      * Power-VolDown to take screenshot.

@@ -44,6 +44,7 @@ import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
 import org.junit.Test;
 
 @Presubmit
@@ -59,6 +60,11 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
         META_SHORTCUTS.append(KEYCODE_M, Intent.CATEGORY_APP_MAPS);
         META_SHORTCUTS.append(KEYCODE_P, Intent.CATEGORY_APP_MUSIC);
         META_SHORTCUTS.append(KEYCODE_S, Intent.CATEGORY_APP_MESSAGING);
+    }
+
+    @Before
+    public void setUp() {
+        setUpPhoneWindowManager();
     }
 
     /**

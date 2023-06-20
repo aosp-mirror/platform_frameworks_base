@@ -39,6 +39,7 @@ import static android.view.KeyEvent.META_SHIFT_RIGHT_ON;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.server.policy.WindowManagerPolicy.ACTION_PASS_TO_USER;
 
@@ -53,12 +54,17 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
+
 import org.junit.After;
-import org.junit.Before;
+import org.junit.Rule;
 
 import java.util.Map;
 
 class ShortcutKeyTestBase {
+    @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+
     TestPhoneWindowManager mPhoneWindowManager;
     final Context mContext = spy(getInstrumentation().getTargetContext());
 
@@ -78,18 +84,35 @@ class ShortcutKeyTestBase {
         MODIFIER = unmodifiableMap(map);
     }
 
-    @Before
-    public void setUp() {
+    /** Same as {@link setUpPhoneWindowManager(boolean)}, without supporting settings update. */
+    protected final void setUpPhoneWindowManager() {
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ false);
+    }
+
+    /**
+     * Creates and sets up a {@link TestPhoneWindowManager} instance.
+     *
+     * <p>Subclasses must call this at the start of the test if they intend to interact with phone
+     * window manager.
+     *
+     * @param supportSettingsUpdate {@code true} if this test should read and listen to provider
+     *      settings values.
+     */
+    protected final void setUpPhoneWindowManager(boolean supportSettingsUpdate) {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
 
-        mPhoneWindowManager = new TestPhoneWindowManager(mContext);
+        doReturn(mSettingsProviderRule.mockContentResolver(mContext))
+                .when(mContext).getContentResolver();
+        mPhoneWindowManager = new TestPhoneWindowManager(mContext, supportSettingsUpdate);
     }
 
     @After
     public void tearDown() {
-        mPhoneWindowManager.tearDown();
+        if (mPhoneWindowManager != null) {
+            mPhoneWindowManager.tearDown();
+        }
     }
 
     void sendKeyCombination(int[] keyCodes, long duration) {

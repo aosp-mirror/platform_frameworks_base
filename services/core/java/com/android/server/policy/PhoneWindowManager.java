@@ -2656,7 +2656,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    public void updateSettings() {
+    private void updateSettings() {
+        updateSettings(null);
+    }
+
+    /**
+     * Update provider Setting values on a given {@code handler}, or synchronously if {@code null}
+     * is passed for handler.
+     */
+    void updateSettings(Handler handler) {
+        if (handler != null) {
+            handler.post(() -> updateSettings(null));
+            return;
+        }
         ContentResolver resolver = mContext.getContentResolver();
         boolean updateRotation = false;
         synchronized (mLock) {
@@ -5583,12 +5595,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayRotation.updateOrientationListener();
         synchronized (mLock) {
             mSystemReady = true;
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateSettings();
-                }
-            });
+            updateSettings(mHandler);
             // If this happens, for whatever reason, systemReady came later than systemBooted.
             // And keyguard should be already bound from systemBooted
             if (mSystemBooted) {
