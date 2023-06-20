@@ -94,6 +94,7 @@ final class SettingsState {
 
     static final int SETTINGS_VERSION_NEW_ENCODING = 121;
 
+    public static final int MAX_LENGTH_PER_STRING = 32768;
     private static final long WRITE_SETTINGS_DELAY_MILLIS = 200;
     private static final long MAX_WRITE_SETTINGS_DELAY_MILLIS = 2000;
 
@@ -428,6 +429,19 @@ final class SettingsState {
             boolean overrideableByRestore) {
         if (TextUtils.isEmpty(name)) {
             return false;
+        }
+
+        final boolean isNameTooLong = name.length() > SettingsState.MAX_LENGTH_PER_STRING;
+        final boolean isValueTooLong =
+                value != null && value.length() > SettingsState.MAX_LENGTH_PER_STRING;
+        if (isNameTooLong || isValueTooLong) {
+            // only print the first few bytes of the name in case it is long
+            final String errorMessage = "The " + (isNameTooLong ? "name" : "value")
+                    + " of your setting ["
+                    + (name.length() > 20 ? (name.substring(0, 20) + "...") : name)
+                    + "] is too long. The max length allowed for the string is "
+                    + MAX_LENGTH_PER_STRING + ".";
+            throw new IllegalArgumentException(errorMessage);
         }
 
         Setting oldState = mSettings.get(name);
@@ -860,7 +874,6 @@ final class SettingsState {
 
                 final int settingCount = settings.size();
                 for (int i = 0; i < settingCount; i++) {
-
                     Setting setting = settings.valueAt(i);
                     if (setting.isTransient()) {
                         if (DEBUG_PERSISTENCE) {
@@ -869,14 +882,21 @@ final class SettingsState {
                         continue;
                     }
 
-                    if (writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
-                            setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
-                            setting.getTag(), setting.isDefaultFromSystem(),
-                            setting.isValuePreservedInRestore())) {
-                        if (DEBUG_PERSISTENCE) {
-                            Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
-                                    + setting.getValue());
+                    try {
+                        if (writeSingleSetting(mVersion, serializer, setting.getId(),
+                                setting.getName(),
+                                setting.getValue(), setting.getDefaultValue(),
+                                setting.getPackageName(),
+                                setting.getTag(), setting.isDefaultFromSystem(),
+                                setting.isValuePreservedInRestore())) {
+                            if (DEBUG_PERSISTENCE) {
+                                Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
+                                        + setting.getValue());
+                            }
                         }
+                    } catch (IOException ex) {
+                        Slog.e(LOG_TAG, "[SKIPPED PERSISTING]" + setting.getName()
+                                + " due to error writing to disk", ex);
                     }
                 }
                 serializer.endTag(null, TAG_SETTINGS);
