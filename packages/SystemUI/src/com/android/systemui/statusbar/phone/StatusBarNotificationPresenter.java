@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsInteractor;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -83,6 +84,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
     private final CentralSurfaces mCentralSurfaces;
+    private final NotificationsInteractor mNotificationsInteractor;
     private final LockscreenShadeTransitionController mShadeTransitionController;
     private final CommandQueue mCommandQueue;
 
@@ -111,6 +113,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardStateController keyguardStateController,
             CentralSurfaces centralSurfaces,
+            NotificationsInteractor notificationsInteractor,
             LockscreenShadeTransitionController shadeTransitionController,
             CommandQueue commandQueue,
             NotificationLockscreenUserManager lockscreenUserManager,
@@ -133,6 +136,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         mDynamicPrivacyController = dynamicPrivacyController;
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mCentralSurfaces = centralSurfaces;
+        mNotificationsInteractor = notificationsInteractor;
         mShadeTransitionController = shadeTransitionController;
         mCommandQueue = commandQueue;
         mLockscreenUserManager = lockscreenUserManager;
@@ -333,7 +337,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
 
         @Override
         public boolean suppressInterruptions(NotificationEntry entry) {
-            return mCentralSurfaces.areNotificationAlertsDisabled();
+            return !mNotificationsInteractor.areNotificationAlertsEnabled();
         }
     };
 }

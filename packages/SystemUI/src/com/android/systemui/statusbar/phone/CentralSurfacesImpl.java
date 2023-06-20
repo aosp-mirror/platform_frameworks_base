@@ -1774,11 +1774,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 && mFalsingCollector.isReportingEnabled() ? View.VISIBLE : View.INVISIBLE);
     }
 
-    @Override
-    public boolean areNotificationAlertsDisabled() {
-        return (mDisabled1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
-    }
-
     /**
      * Whether we are currently animating an activity launch above the lockscreen (occluding
      * activity).
