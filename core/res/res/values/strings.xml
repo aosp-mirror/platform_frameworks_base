@@ -5377,7 +5377,7 @@
     <!-- Title of the dialog shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title"><xliff:g id="activity" example="Permission dialog">%1$s</xliff:g> unavailable</string>
     <!-- Title of the dialog shown when the permissioncontroller is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_title_for_permission_dialog">Permission needed</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog">Permission request suppressed</string>
     <!-- Title of the dialog shown when the camera permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title_for_camera_dialog">Camera unavailable</string>
     <!-- Title of the dialog shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
@@ -5398,6 +5398,12 @@
     <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your Android TV device first.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your tablet first.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="default">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your phone first.</string>
     <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv">This app is requesting additional security. Try on your Android TV device instead.</string>
     <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
