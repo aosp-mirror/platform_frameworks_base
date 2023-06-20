@@ -176,6 +176,7 @@ class PhoneStatusBarViewController private constructor(
                     shadeLogger.logMotionEvent(event, "top edge touch ignored")
                     return true
                 }
+                centralSurfaces.shadeViewController.startTrackingExpansionFromStatusBar()
             }
             return centralSurfaces.shadeViewController.handleExternalTouch(event)
         }
