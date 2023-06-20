@@ -44,7 +44,7 @@ import org.junit.runners.Parameterized
 /**
  * Test double tap the divider bar to switch the two apps.
  *
- * To run this test: `atest WMShellFlickerTests:SwitchAppByDoubleTapDivider`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:SwitchAppByDoubleTapDivider`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

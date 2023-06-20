@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
 /**
  * Test switch back to split pair from recent.
  *
- * To run this test: `atest WMShellFlickerTests:SwitchBackToSplitFromRecent`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:SwitchBackToSplitFromRecent`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

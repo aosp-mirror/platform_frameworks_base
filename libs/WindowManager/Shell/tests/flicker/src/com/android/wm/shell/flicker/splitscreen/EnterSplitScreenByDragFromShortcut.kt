@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
 /**
  * Test enter split screen by dragging a shortcut. This test is only for large screen devices.
  *
- * To run this test: `atest WMShellFlickerTests:EnterSplitScreenByDragFromShortcut`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:EnterSplitScreenByDragFromShortcut`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
