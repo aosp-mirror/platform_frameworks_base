@@ -56,6 +56,7 @@ private val KNOWN_PLUGINS =
         "com.android.systemui.falcon.four" to listOf(ClockMetadata("DIGITAL_CLOCK_GROWTH")),
         "com.android.systemui.falcon.five" to listOf(ClockMetadata("DIGITAL_CLOCK_HANDWRITTEN")),
         "com.android.systemui.falcon.six" to listOf(ClockMetadata("DIGITAL_CLOCK_INFLATE")),
+        "com.android.systemui.falcon.seven" to listOf(ClockMetadata("DIGITAL_CLOCK_METRO")),
         "com.android.systemui.falcon.eight" to listOf(ClockMetadata("DIGITAL_CLOCK_NUMBEROVERLAP")),
         "com.android.systemui.falcon.nine" to listOf(ClockMetadata("DIGITAL_CLOCK_WEATHER")),
     )
