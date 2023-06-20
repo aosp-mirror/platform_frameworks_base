@@ -77,16 +77,30 @@ class DebugRoundedCornerDelegate : RoundedCornerResDelegate {
     }
 
     fun applyNewDebugCorners(
-        topCorner: DebugRoundedCornerModel,
-        bottomCorner: DebugRoundedCornerModel,
+        topCorner: DebugRoundedCornerModel?,
+        bottomCorner: DebugRoundedCornerModel?,
     ) {
-        hasTop = true
-        topRoundedDrawable = topCorner.toPathDrawable(paint)
-        topRoundedSize = topCorner.size()
+        topCorner?.let {
+            hasTop = true
+            topRoundedDrawable = it.toPathDrawable(paint)
+            topRoundedSize = it.size()
+        }
+            ?: {
+                hasTop = false
+                topRoundedDrawable = null
+                topRoundedSize = Size(0, 0)
+            }
 
-        hasBottom = true
-        bottomRoundedDrawable = bottomCorner.toPathDrawable(paint)
-        bottomRoundedSize = bottomCorner.size()
+        bottomCorner?.let {
+            hasBottom = true
+            bottomRoundedDrawable = it.toPathDrawable(paint)
+            bottomRoundedSize = it.size()
+        }
+            ?: {
+                hasBottom = false
+                bottomRoundedDrawable = null
+                bottomRoundedSize = Size(0, 0)
+            }
     }
 
     /**

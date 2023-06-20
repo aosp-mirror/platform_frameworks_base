@@ -72,6 +72,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
 import com.android.systemui.decor.DebugRoundedCornerDelegate;
+import com.android.systemui.decor.DebugRoundedCornerModel;
 import com.android.systemui.decor.DecorProvider;
 import com.android.systemui.decor.DecorProviderFactory;
 import com.android.systemui.decor.DecorProviderKt;
@@ -356,7 +357,42 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     };
 
     private final ScreenDecorCommand.Callback mScreenDecorCommandCallback = (cmd, pw) -> {
-        android.util.Log.d(TAG, cmd.toString());
+        // If we are exiting debug mode, we can set it (false) and bail, otherwise we will
+        // ensure that debug mode is set
+        if (cmd.getDebug() != null && !cmd.getDebug()) {
+            setDebug(false);
+            return;
+        } else {
+            // setDebug is idempotent
+            setDebug(true);
+        }
+
+        if (cmd.getColor() != null) {
+            mDebugColor = cmd.getColor();
+            mExecutor.execute(() -> {
+                if (mScreenDecorHwcLayer != null) {
+                    mScreenDecorHwcLayer.setDebugColor(cmd.getColor());
+                }
+                updateColorInversionDefault();
+            });
+        }
+
+        DebugRoundedCornerModel roundedTop = null;
+        DebugRoundedCornerModel roundedBottom = null;
+        if (cmd.getRoundedTop() != null) {
+            roundedTop = cmd.getRoundedTop().toRoundedCornerDebugModel();
+        }
+        if (cmd.getRoundedBottom() != null) {
+            roundedBottom = cmd.getRoundedBottom().toRoundedCornerDebugModel();
+        }
+        if (roundedTop != null || roundedBottom != null) {
+            mDebugRoundedCornerDelegate.applyNewDebugCorners(roundedTop, roundedBottom);
+            mExecutor.execute(() -> {
+                removeAllOverlays();
+                removeHwcOverlay();
+                setupDecorations();
+            });
+        }
     };
 
     @Override
@@ -1239,7 +1275,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             bottomDrawable = mDebugRoundedCornerDelegate.getBottomRoundedDrawable();
         }
 
-        if (topDrawable == null || bottomDrawable == null) {
+        if (topDrawable == null && bottomDrawable == null) {
             return;
         }
         mScreenDecorHwcLayer.updateRoundedCornerDrawable(topDrawable, bottomDrawable);

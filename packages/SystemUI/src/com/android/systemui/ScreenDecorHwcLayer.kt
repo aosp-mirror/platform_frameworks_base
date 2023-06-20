@@ -56,9 +56,14 @@ class ScreenDecorHwcLayer(
 ) : DisplayCutoutBaseView(context) {
     val colorMode: Int
     private val useInvertedAlphaColor: Boolean
-    private val color: Int
+    private var color: Int = Color.BLACK
+        set(value) {
+            field = value
+            paint.color = value
+        }
+
     private val bgColor: Int
-    private val cornerFilter: ColorFilter
+    private var cornerFilter: ColorFilter
     private val cornerBgFilter: ColorFilter
     private val clearPaint: Paint
     @JvmField val transparentRect: Rect = Rect()
@@ -109,9 +114,15 @@ class ScreenDecorHwcLayer(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         parent.requestTransparentRegion(this)
+        updateColors()
+    }
+
+    private fun updateColors() {
         if (!debug) {
             viewRootImpl.setDisplayDecoration(true)
         }
+
+        cornerFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
 
         if (useInvertedAlphaColor) {
             paint.set(clearPaint)
@@ -119,6 +130,21 @@ class ScreenDecorHwcLayer(
             paint.color = color
             paint.style = Paint.Style.FILL
         }
+    }
+
+    fun setDebugColor(color: Int) {
+        if (!debug) {
+            return
+        }
+
+        if (this.color == color) {
+            return
+        }
+
+        this.color = color
+
+        updateColors()
+        invalidate()
     }
 
     override fun onUpdate() {
@@ -367,7 +393,7 @@ class ScreenDecorHwcLayer(
     /**
      * Update the rounded corner drawables.
      */
-    fun updateRoundedCornerDrawable(top: Drawable, bottom: Drawable) {
+    fun updateRoundedCornerDrawable(top: Drawable?, bottom: Drawable?) {
         roundedCornerDrawableTop = top
         roundedCornerDrawableBottom = bottom
         updateRoundedCornerDrawableBounds()
