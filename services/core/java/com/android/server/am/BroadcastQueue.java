@@ -174,6 +174,13 @@ public abstract class BroadcastQueue {
     public abstract void onApplicationCleanupLocked(@NonNull ProcessRecord app);
 
     /**
+     * Signal from OS internals that the given process is in a freezable state and will be
+     * frozen soon after.
+     */
+    @GuardedBy("mService")
+    public abstract void onProcessFreezableChangedLocked(@NonNull ProcessRecord app);
+
+    /**
      * Signal from OS internals that the given package (or some subset of that
      * package) has been disabled or uninstalled, and that any pending
      * broadcasts should be cleaned up.
