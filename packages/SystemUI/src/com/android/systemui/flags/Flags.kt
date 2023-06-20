@@ -746,6 +746,11 @@ object Flags {
     val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
             unreleasedFlag(283447257, "bigpicture_notification_lazy_loading")
 
+    // TODO(b/283740863): Tracking Bug
+    @JvmField
+    val ENABLE_NEW_PRIVACY_DIALOG =
+            unreleasedFlag(283740863, "enable_new_privacy_dialog", teamfood = false)
+
     // 2900 - CentralSurfaces-related flags
 
     // TODO(b/285174336): Tracking Bug
