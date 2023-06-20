@@ -18,7 +18,7 @@ package com.android.server.audio;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -42,10 +42,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @MediumTest
 @RunWith(AndroidJUnit4.class)
@@ -58,7 +58,7 @@ public class AudioServiceTest {
     public final MockitoRule mockito = MockitoJUnit.rule();
 
     private Context mContext;
-    private AudioSystemAdapter mAudioSystem;
+    private AudioSystemAdapter mSpyAudioSystem;
     private SettingsAdapter mSettingsAdapter;
 
     @Spy private NoOpSystemServerAdapter mSpySystemServer;
@@ -78,11 +78,11 @@ public class AudioServiceTest {
             sLooperPrepared = true;
         }
         mContext = InstrumentationRegistry.getTargetContext();
-        mAudioSystem = new NoOpAudioSystemAdapter();
+        mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSettingsAdapter = new NoOpSettingsAdapter();
         when(mMockAppOpsManager.noteOp(anyInt(), anyInt(), anyString(), anyString(), anyString()))
                 .thenReturn(AppOpsManager.MODE_ALLOWED);
-        mAudioService = new AudioService(mContext, mAudioSystem, mSpySystemServer,
+        mAudioService = new AudioService(mContext, mSpyAudioSystem, mSpySystemServer,
                 mSettingsAdapter, mMockAudioPolicy, null, mMockAppOpsManager,
                 mMockPermissionEnforcer);
     }
@@ -95,7 +95,7 @@ public class AudioServiceTest {
     public void testMuteMicrophone() throws Exception {
         Log.i(TAG, "running testMuteMicrophone");
         Assert.assertNotNull(mAudioService);
-        final NoOpAudioSystemAdapter testAudioSystem = (NoOpAudioSystemAdapter) mAudioSystem;
+        final NoOpAudioSystemAdapter testAudioSystem = (NoOpAudioSystemAdapter) mSpyAudioSystem;
         testAudioSystem.configureMuteMicrophoneToFail(false);
         for (boolean muted : new boolean[] { true, false}) {
             testAudioSystem.configureIsMicrophoneMuted(!muted);
@@ -120,7 +120,7 @@ public class AudioServiceTest {
     public void testMuteMicrophoneWhenFail() throws Exception {
         Log.i(TAG, "running testMuteMicrophoneWhenFail");
         Assert.assertNotNull(mAudioService);
-        final NoOpAudioSystemAdapter testAudioSystem = (NoOpAudioSystemAdapter) mAudioSystem;
+        final NoOpAudioSystemAdapter testAudioSystem = (NoOpAudioSystemAdapter) mSpyAudioSystem;
         testAudioSystem.configureMuteMicrophoneToFail(true);
         for (boolean muted : new boolean[] { true, false}) {
             testAudioSystem.configureIsMicrophoneMuted(!muted);
@@ -174,5 +174,29 @@ public class AudioServiceTest {
                     new IllegalStateException(), new IllegalStateException());
         Assert.assertEquals(false, mAudioService.isHotwordStreamSupported(false));
         Assert.assertEquals(false, mAudioService.isHotwordStreamSupported(true));
+    }
+
+    /**
+     * Test master mute setter and getter
+     */
+    @Test
+    public void testMasterMute() throws Exception {
+        Log.i(TAG, "running testMasterMute");
+        Assert.assertNotNull(mAudioService);
+        for (boolean mute : new boolean[] { true, false}) {
+            boolean wasMute = mAudioService.isMasterMute();
+            mAudioService.setMasterMute(mute, 0 /* flags */, mContext.getOpPackageName(),
+                    UserHandle.getCallingUserId(), null);
+
+            Assert.assertEquals("master mute reporting wrong value",
+                    mute, mAudioService.isMasterMute());
+
+            verify(mSpyAudioSystem, times(wasMute == mute ? 0 : 1)).setMasterMute(mute);
+            // verify the intent for master mute changed is supposed to be fired
+            verify(mSpySystemServer,
+                    after(MAX_MESSAGE_HANDLING_DELAY_MS).times(wasMute == mute ? 0 : 1))
+                    .broadcastMasterMuteStatus(mute);
+            reset(mSpySystemServer);
+        }
     }
 }
