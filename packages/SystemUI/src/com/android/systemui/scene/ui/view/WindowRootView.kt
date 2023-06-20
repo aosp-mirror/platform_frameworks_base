@@ -47,6 +47,7 @@ open class WindowRootView(
      * Please see the class-level documentation to understand why this is possible.
      */
     private fun isRoot(): Boolean {
+        // TODO(b/283300105): remove this check once there's only one subclass of WindowRootView.
         return parent.let { it !is View || it.id == android.R.id.content }
     }
 }
