@@ -291,6 +291,11 @@ object Flags {
     @JvmField
     val WIDGET_ON_KEYGUARD = unreleasedFlag(241, "widget_on_keyguard")
 
+    /** Migrate the NSSL to the a sibling to both the panel and keyguard root view. */
+    // TODO(b/288074305): Tracking bug.
+    @JvmField
+    val MIGRATE_NSSL = unreleasedFlag(242, "migrate_nssl")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
