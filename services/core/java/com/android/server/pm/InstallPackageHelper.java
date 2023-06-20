@@ -3712,12 +3712,15 @@ final class InstallPackageHelper {
 
             if (throwable == null) {
                 try {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "addForInitLI");
                     addForInitLI(parseResult.parsedPackage, parseFlags, scanFlags,
                             new UserHandle(UserHandle.USER_SYSTEM), apexInfo);
                 } catch (PackageManagerException e) {
                     errorCode = e.error;
                     errorMsg = "Failed to scan " + parseResult.scanFile + ": " + e.getMessage();
                     Slog.w(TAG, errorMsg);
+                } finally {
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
             } else if (throwable instanceof PackageManagerException) {
                 PackageManagerException e = (PackageManagerException) throwable;
