@@ -42,8 +42,8 @@ class IntentCreator {
         //   "If using EXTRA_TEXT, the MIME type should be "text/plain"; otherwise it should be the
         //    MIME type of the data in EXTRA_STREAM"
         if (clipData.getItemAt(0).getUri() != null) {
-            shareIntent.setDataAndType(
-                    clipData.getItemAt(0).getUri(), clipData.getDescription().getMimeType(0));
+            // We don't use setData here because some apps interpret this as "to:".
+            shareIntent.setType(clipData.getDescription().getMimeType(0));
             shareIntent.putExtra(Intent.EXTRA_STREAM, clipData.getItemAt(0).getUri());
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } else {
