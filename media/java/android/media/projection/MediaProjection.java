@@ -159,7 +159,14 @@ public final class MediaProjection {
      * @param surface  The surface to which the content of the virtual display should be rendered,
      *                 or null if there is none initially.
      * @param flags    A combination of virtual display flags. See {@link DisplayManager} for the
-     *                 full list of flags.
+     *                 full list of flags. Note that
+     *                 {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PRESENTATION}
+     *                 is always enabled. The following flags may be overridden, depending on how
+     *                 the component with {android.Manifest.permission.MANAGE_MEDIA_PROJECTION}
+     *                 handles the user's consent:
+     *                 {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY},
+     *                 {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR},
+     *                 {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC}.
      * @param callback Callback invoked when the virtual display's state changes, or null.
      * @param handler  The {@link android.os.Handler} on which the callback should be invoked, or
      *                 null if the callback should be invoked on the calling thread's main
