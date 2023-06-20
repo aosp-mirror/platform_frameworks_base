@@ -1122,9 +1122,7 @@ base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::ResolveBag(
 
 base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::GetBag(uint32_t resid) const {
   auto resid_stacks_it = cached_bag_resid_stacks_.find(resid);
-  if (resid_stacks_it != cached_bag_resid_stacks_.end()) {
-    resid_stacks_it->second.clear();
-  } else {
+  if (resid_stacks_it == cached_bag_resid_stacks_.end()) {
     resid_stacks_it = cached_bag_resid_stacks_.emplace(resid, std::vector<uint32_t>{}).first;
   }
   const auto bag = GetBag(resid, resid_stacks_it->second);
