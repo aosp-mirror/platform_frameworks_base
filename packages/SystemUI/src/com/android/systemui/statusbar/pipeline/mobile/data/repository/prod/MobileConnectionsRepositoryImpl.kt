@@ -255,15 +255,8 @@ constructor(
             .distinctUntilChanged()
             .onEach { logger.logDefaultMobileIconGroup(it) }
 
-    override fun getRepoForSubId(subId: Int): FullMobileConnectionRepository {
-        if (!isValidSubId(subId)) {
-            throw IllegalArgumentException(
-                "subscriptionId $subId is not in the list of valid subscriptions"
-            )
-        }
-
-        return getOrCreateRepoForSubId(subId)
-    }
+    override fun getRepoForSubId(subId: Int): FullMobileConnectionRepository =
+        getOrCreateRepoForSubId(subId)
 
     private fun getOrCreateRepoForSubId(subId: Int) =
         subIdRepositoryCache[subId]
