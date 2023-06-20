@@ -2841,6 +2841,8 @@
     <string name="controls_media_smartspace_rec_item_description">Play <xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> by <xliff:g id="artist_name" example="Various artists">%2$s</xliff:g> from <xliff:g id="app_label" example="Spotify">%3$s</xliff:g></string>
     <!-- Description for Smartspace recommendation's media item which doesn't have artist info, including information for the media's title and the source app [CHAR LIMIT=NONE]-->
     <string name="controls_media_smartspace_rec_item_no_artist_description">Play <xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> from <xliff:g id="app_label" example="Spotify">%2$s</xliff:g></string>
+    <!-- Placeholder title to inform user that an app has posted media controls [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_empty_title"><xliff:g id="app_name" example="Foo Music App">%1$s</xliff:g> is running</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
