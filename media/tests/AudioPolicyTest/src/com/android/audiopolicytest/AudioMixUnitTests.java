@@ -117,7 +117,7 @@ public class AudioMixUnitTests {
         // --- Equality group 3
         final AudioMix recordingAudioMixWithSessionId42AndUid123Render =
                 new AudioMix.Builder(new AudioMixingRule.Builder()
-                        .setTargetMixRole(MIX_ROLE_INJECTOR)
+                        .setTargetMixRole(MIX_ROLE_PLAYERS)
                         .addMixRule(RULE_MATCH_AUDIO_SESSION_ID, 42)
                         .addMixRule(RULE_MATCH_UID, 123).build())
                         .setFormat(INPUT_FORMAT_MONO_16KHZ_PCM)
@@ -205,7 +205,19 @@ public class AudioMixUnitTests {
     }
 
     @Test
-    public void buildLoopbackWithDevice_throws() {
+    public void buildLoopbackForInjectorMix_success() {
+        final AudioMix audioMix = new AudioMix.Builder(new AudioMixingRule.Builder()
+                .setTargetMixRole(MIX_ROLE_INJECTOR)
+                .addMixRule(RULE_MATCH_UID, 42).build())
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK).build();
+
+        assertEquals(OUTPUT_FORMAT_MONO_16KHZ_PCM, audioMix.getFormat());
+        assertEquals(AudioMix.ROUTE_FLAG_LOOP_BACK, audioMix.getRouteFlags());
+    }
+
+    @Test
+    public void buildLoopbackWithIncompatibleDevice_throws() {
         assertThrows(IllegalArgumentException.class, () -> new AudioMix.Builder(
                 new AudioMixingRule.Builder()
                         .setTargetMixRole(MIX_ROLE_PLAYERS)
@@ -223,6 +235,28 @@ public class AudioMixUnitTests {
                         .addMixRule(RULE_MATCH_UID, 42).build())
                 .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
                 .setRouteFlags(AudioMix.ROUTE_FLAG_RENDER).build());
+    }
+
+    @Test
+    public void buildRenderWithInputDevice_throws() {
+        assertThrows(IllegalArgumentException.class, () -> new AudioMix.Builder(
+                new AudioMixingRule.Builder()
+                        .setTargetMixRole(MIX_ROLE_PLAYERS)
+                        .addMixRule(RULE_MATCH_UID, 42).build())
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_RENDER)
+                .setDevice(AudioSystem.DEVICE_IN_BUILTIN_MIC, /*address=*/"").build());
+    }
+
+    @Test
+    public void buildRenderWithInjectorMix_throws() {
+        assertThrows(IllegalArgumentException.class, () -> new AudioMix.Builder(
+                new AudioMixingRule.Builder()
+                        .setTargetMixRole(MIX_ROLE_INJECTOR)
+                        .addMixRule(RULE_MATCH_UID, 42).build())
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_RENDER)
+                .setDevice(AudioSystem.DEVICE_OUT_SPEAKER, /*address=*/"").build());
     }
 
 

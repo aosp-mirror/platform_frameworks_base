@@ -1342,6 +1342,11 @@ public class AudioSystem
     }
 
     /** @hide */
+    public static boolean isRemoteSubmixDevice(int deviceType) {
+        return deviceType == DEVICE_IN_REMOTE_SUBMIX || deviceType == DEVICE_OUT_REMOTE_SUBMIX;
+    }
+
+    /** @hide */
     public static final String LEGACY_REMOTE_SUBMIX_ADDRESS = "0";
 
     // device states, must match AudioSystem::device_connection_state
