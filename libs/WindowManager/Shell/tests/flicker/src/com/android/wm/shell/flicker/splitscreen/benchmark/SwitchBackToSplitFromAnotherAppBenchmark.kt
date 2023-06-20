@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
@@ -65,7 +64,6 @@ open class SwitchBackToSplitFromAnotherAppBenchmark(override val flicker: Flicke
         }
 
     @PlatinumTest(focusArea = "sysui")
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun cujCompleted() = flicker.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = true)
