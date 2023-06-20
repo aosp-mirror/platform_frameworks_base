@@ -16,6 +16,8 @@
 
 package android.database.sqlite;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.database.CursorWindow;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
@@ -33,8 +35,9 @@ public final class SQLiteQuery extends SQLiteProgram {
 
     private final CancellationSignal mCancellationSignal;
 
-    SQLiteQuery(SQLiteDatabase db, String query, CancellationSignal cancellationSignal) {
-        super(db, query, null, cancellationSignal);
+    SQLiteQuery(@NonNull SQLiteDatabase db, @Nullable SQLiteAuthorizer authorizer,
+            @NonNull String query, @Nullable CancellationSignal cancellationSignal) {
+        super(db, authorizer, query, null, cancellationSignal);
 
         mCancellationSignal = cancellationSignal;
     }
@@ -59,9 +62,9 @@ public final class SQLiteQuery extends SQLiteProgram {
         try {
             window.acquireReference();
             try {
-                int numRows = getSession().executeForCursorWindow(getSql(), getBindArgs(),
-                        window, startPos, requiredPos, countAllRows, getConnectionFlags(),
-                        mCancellationSignal);
+                int numRows = getSession().executeForCursorWindow(getAuthorizer(), getSql(),
+                        getBindArgs(), window, startPos, requiredPos, countAllRows,
+                        getConnectionFlags(), mCancellationSignal);
                 return numRows;
             } catch (SQLiteDatabaseCorruptException ex) {
                 onCorruption();
