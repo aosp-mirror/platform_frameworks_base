@@ -108,8 +108,7 @@ genrule {
     name: "protolog.json.gz",
     srcs: [":generate-wm_shell_protolog.json"],
     out: ["wmshell.protolog.json.gz"],
-    cmd: "$(location minigzip) -c < $(in) > $(out)",
-    tools: ["minigzip"],
+    cmd: "gzip -c < $(in) > $(out)",
 }
 
 prebuilt_etc {
