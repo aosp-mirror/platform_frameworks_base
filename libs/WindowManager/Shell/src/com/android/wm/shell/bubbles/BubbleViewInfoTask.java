@@ -176,43 +176,13 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.bubbleBarExpandedView = (BubbleBarExpandedView) inflater.inflate(
                         R.layout.bubble_bar_expanded_view, layerView, false /* attachToRoot */);
-                info.bubbleBarExpandedView.initialize(controller);
+                info.bubbleBarExpandedView.initialize(controller, false /* isOverflow */);
             }
 
-            if (b.getShortcutInfo() != null) {
-                info.shortcutInfo = b.getShortcutInfo();
-            }
-
-            // App name & app icon
-            PackageManager pm = BubbleController.getPackageManagerForUser(c,
-                    b.getUser().getIdentifier());
-            ApplicationInfo appInfo;
-            Drawable badgedIcon;
-            Drawable appIcon;
-            try {
-                appInfo = pm.getApplicationInfo(
-                        b.getPackageName(),
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES
-                                | PackageManager.MATCH_DISABLED_COMPONENTS
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_AWARE);
-                if (appInfo != null) {
-                    info.appName = String.valueOf(pm.getApplicationLabel(appInfo));
-                }
-                appIcon = pm.getApplicationIcon(b.getPackageName());
-                badgedIcon = pm.getUserBadgedIcon(appIcon, b.getUser());
-            } catch (PackageManager.NameNotFoundException exception) {
-                // If we can't find package... don't think we should show the bubble.
-                Log.w(TAG, "Unable to find package: " + b.getPackageName());
+            if (!populateCommonInfo(info, c, b, iconFactory)) {
+                // if we failed to update common fields return null
                 return null;
             }
-
-            info.rawBadgeBitmap = iconFactory.getBadgeBitmap(badgedIcon, false).icon;
-            float[] bubbleBitmapScale = new float[1];
-            info.bubbleBitmap = iconFactory.getBubbleBitmap(
-                    iconFactory.getBubbleDrawable(c, info.shortcutInfo,
-                            b.getIcon()), bubbleBitmapScale);
-
 
             return info;
         }
@@ -236,65 +206,10 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 info.expandedView.initialize(controller, stackView, false /* isOverflow */);
             }
 
-            if (b.getShortcutInfo() != null) {
-                info.shortcutInfo = b.getShortcutInfo();
-            }
-
-            // App name & app icon
-            PackageManager pm = BubbleController.getPackageManagerForUser(c,
-                    b.getUser().getIdentifier());
-            ApplicationInfo appInfo;
-            Drawable badgedIcon;
-            Drawable appIcon;
-            try {
-                appInfo = pm.getApplicationInfo(
-                        b.getPackageName(),
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES
-                                | PackageManager.MATCH_DISABLED_COMPONENTS
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_AWARE);
-                if (appInfo != null) {
-                    info.appName = String.valueOf(pm.getApplicationLabel(appInfo));
-                }
-                appIcon = pm.getApplicationIcon(b.getPackageName());
-                badgedIcon = pm.getUserBadgedIcon(appIcon, b.getUser());
-            } catch (PackageManager.NameNotFoundException exception) {
-                // If we can't find package... don't think we should show the bubble.
-                Log.w(TAG, "Unable to find package: " + b.getPackageName());
+            if (!populateCommonInfo(info, c, b, iconFactory)) {
+                // if we failed to update common fields return null
                 return null;
             }
-
-            // Badged bubble image
-            Drawable bubbleDrawable = iconFactory.getBubbleDrawable(c, info.shortcutInfo,
-                    b.getIcon());
-            if (bubbleDrawable == null) {
-                // Default to app icon
-                bubbleDrawable = appIcon;
-            }
-
-            BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon,
-                    b.isImportantConversation());
-            info.badgeBitmap = badgeBitmapInfo.icon;
-            // Raw badge bitmap never includes the important conversation ring
-            info.rawBadgeBitmap = b.isImportantConversation()
-                    ? iconFactory.getBadgeBitmap(badgedIcon, false).icon
-                    : badgeBitmapInfo.icon;
-
-            float[] bubbleBitmapScale = new float[1];
-            info.bubbleBitmap = iconFactory.getBubbleBitmap(bubbleDrawable, bubbleBitmapScale);
-
-            // Dot color & placement
-            Path iconPath = PathParser.createPathFromPathData(
-                    c.getResources().getString(com.android.internal.R.string.config_icon_mask));
-            Matrix matrix = new Matrix();
-            float scale = bubbleBitmapScale[0];
-            float radius = DEFAULT_PATH_SIZE / 2f;
-            matrix.setScale(scale /* x scale */, scale /* y scale */, radius /* pivot x */,
-                    radius /* pivot y */);
-            iconPath.transform(matrix);
-            info.dotPath = iconPath;
-            info.dotColor = ColorUtils.blendARGB(badgeBitmapInfo.color,
-                    Color.WHITE, WHITE_SCRIM_ALPHA);
 
             // Flyout
             info.flyoutMessage = b.getFlyoutMessage();
@@ -304,6 +219,75 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             }
             return info;
         }
+    }
+
+    /**
+     * Modifies the given {@code info} object and populates common fields in it.
+     *
+     * <p>This method returns {@code true} if the update was successful and {@code false} otherwise.
+     * Callers should assume that the info object is unusable if the update was unsuccessful.
+     */
+    private static boolean populateCommonInfo(
+            BubbleViewInfo info, Context c, Bubble b, BubbleIconFactory iconFactory) {
+        if (b.getShortcutInfo() != null) {
+            info.shortcutInfo = b.getShortcutInfo();
+        }
+
+        // App name & app icon
+        PackageManager pm = BubbleController.getPackageManagerForUser(c,
+                b.getUser().getIdentifier());
+        ApplicationInfo appInfo;
+        Drawable badgedIcon;
+        Drawable appIcon;
+        try {
+            appInfo = pm.getApplicationInfo(
+                    b.getPackageName(),
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES
+                            | PackageManager.MATCH_DISABLED_COMPONENTS
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_AWARE);
+            if (appInfo != null) {
+                info.appName = String.valueOf(pm.getApplicationLabel(appInfo));
+            }
+            appIcon = pm.getApplicationIcon(b.getPackageName());
+            badgedIcon = pm.getUserBadgedIcon(appIcon, b.getUser());
+        } catch (PackageManager.NameNotFoundException exception) {
+            // If we can't find package... don't think we should show the bubble.
+            Log.w(TAG, "Unable to find package: " + b.getPackageName());
+            return false;
+        }
+
+        // Badged bubble image
+        Drawable bubbleDrawable = iconFactory.getBubbleDrawable(c, info.shortcutInfo, b.getIcon());
+        if (bubbleDrawable == null) {
+            // Default to app icon
+            bubbleDrawable = appIcon;
+        }
+
+        BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon,
+                b.isImportantConversation());
+        info.badgeBitmap = badgeBitmapInfo.icon;
+        // Raw badge bitmap never includes the important conversation ring
+        info.rawBadgeBitmap = b.isImportantConversation() // is this needed for bar?
+                ? iconFactory.getBadgeBitmap(badgedIcon, false).icon
+                : badgeBitmapInfo.icon;
+
+        float[] bubbleBitmapScale = new float[1];
+        info.bubbleBitmap = iconFactory.getBubbleBitmap(bubbleDrawable, bubbleBitmapScale);
+
+        // Dot color & placement
+        Path iconPath = PathParser.createPathFromPathData(
+                c.getResources().getString(com.android.internal.R.string.config_icon_mask));
+        Matrix matrix = new Matrix();
+        float scale = bubbleBitmapScale[0];
+        float radius = DEFAULT_PATH_SIZE / 2f;
+        matrix.setScale(scale /* x scale */, scale /* y scale */, radius /* pivot x */,
+                radius /* pivot y */);
+        iconPath.transform(matrix);
+        info.dotPath = iconPath;
+        info.dotColor = ColorUtils.blendARGB(badgeBitmapInfo.color,
+                Color.WHITE, WHITE_SCRIM_ALPHA);
+        return true;
     }
 
     @Nullable

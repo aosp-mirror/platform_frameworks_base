@@ -27,6 +27,7 @@ import android.widget.FrameLayout;
 
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.animation.PhysicsAnimator;
+import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix;
@@ -215,9 +216,10 @@ public class BubbleBarAnimationHelper {
         }
         BubbleBarExpandedView bbev = mExpandedBubble.getBubbleBarExpandedView();
 
+        boolean isOverflowExpanded = mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
         final int padding = mPositioner.getBubbleBarExpandedViewPadding();
-        final int width = mPositioner.getExpandedViewWidthForBubbleBar();
-        final int height = mPositioner.getExpandedViewHeightForBubbleBar();
+        final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
+        final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) bbev.getLayoutParams();
         lp.width = width;
         lp.height = height;
@@ -227,7 +229,8 @@ public class BubbleBarAnimationHelper {
         } else {
             bbev.setX(mPositioner.getAvailableRect().width() - width - padding);
         }
-        bbev.setY(mPositioner.getInsets().top + padding);
+        bbev.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
         bbev.updateLocation();
+        bbev.maybeShowOverflow();
     }
 }
