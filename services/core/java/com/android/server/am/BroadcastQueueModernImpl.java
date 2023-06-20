@@ -232,16 +232,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     private final SparseBooleanArray mUidForeground = new SparseBooleanArray();
 
-    /**
-     * Map from UID to its last known "cached" state.
-     * <p>
-     * We manually maintain this data structure since the lifecycle of
-     * {@link ProcessRecord} and {@link BroadcastProcessQueue} can be
-     * mismatched.
-     */
-    @GuardedBy("mService")
-    private final SparseBooleanArray mUidCached = new SparseBooleanArray();
-
     private final BroadcastConstants mConstants;
     private final BroadcastConstants mFgConstants;
     private final BroadcastConstants mBgConstants;
@@ -258,6 +248,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private static final int MSG_BG_ACTIVITY_START_TIMEOUT = 4;
     private static final int MSG_CHECK_HEALTH = 5;
     private static final int MSG_CHECK_PENDING_COLD_START_VALIDITY = 6;
+    private static final int MSG_PROCESS_FREEZABLE_CHANGED = 7;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
@@ -296,6 +287,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
             case MSG_CHECK_PENDING_COLD_START_VALIDITY: {
                 checkPendingColdStartValidity();
+                return true;
+            }
+            case MSG_PROCESS_FREEZABLE_CHANGED: {
+                synchronized (mService) {
+                    refreshProcessQueueLocked((ProcessRecord) msg.obj);
+                }
                 return true;
             }
         }
@@ -670,6 +667,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         // We might be willing to kick off another cold start
         enqueueUpdateRunningList();
+    }
+
+    @Override
+    public void onProcessFreezableChangedLocked(@NonNull ProcessRecord app) {
+        mLocalHandler.removeMessages(MSG_PROCESS_FREEZABLE_CHANGED, app);
+        mLocalHandler.sendMessage(mHandler.obtainMessage(MSG_PROCESS_FREEZABLE_CHANGED, app));
     }
 
     @Override
@@ -1465,7 +1468,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             };
             broadcastPredicate = BROADCAST_PREDICATE_ANY;
 
-            cleanupUserStateLocked(mUidCached, userId);
             cleanupUserStateLocked(mUidForeground, userId);
         }
         return forEachMatchingBroadcast(queuePredicate, broadcastPredicate,
@@ -1610,22 +1612,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
         }, ActivityManager.UID_OBSERVER_PROCSTATE,
                 ActivityManager.PROCESS_STATE_TOP, "android");
-
-        mService.registerUidObserver(new UidObserver() {
-            @Override
-            public void onUidStateChanged(int uid, int procState, long procStateSeq,
-                    int capability) {
-                synchronized (mService) {
-                    if (procState > ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
-                        mUidCached.put(uid, true);
-                    } else {
-                        mUidCached.delete(uid);
-                    }
-                    refreshProcessQueuesLocked(uid);
-                }
-            }
-        }, ActivityManager.UID_OBSERVER_PROCSTATE,
-                ActivityManager.PROCESS_STATE_LAST_ACTIVITY, "android");
 
         // Kick off periodic health checks
         mLocalHandler.sendEmptyMessage(MSG_CHECK_HEALTH);
@@ -1816,10 +1802,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // warm via this operation, we're going to immediately promote it to
             // be running, and any side effect of this operation will then apply
             // after it's finished and is returned to the runnable list.
-            queue.setProcessAndUidState(
-                    mService.getProcessRecordLocked(queue.processName, queue.uid),
-                    mUidForeground.get(queue.uid, false),
-                    mUidCached.get(queue.uid, false));
+            final ProcessRecord app = mService.getProcessRecordLocked(queue.processName, queue.uid);
+            queue.setProcessAndUidState(app, mUidForeground.get(queue.uid, false),
+                    isProcessFreezable(app));
         }
     }
 
@@ -1831,8 +1816,18 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void setQueueProcess(@NonNull BroadcastProcessQueue queue,
             @Nullable ProcessRecord app) {
         if (queue.setProcessAndUidState(app, mUidForeground.get(queue.uid, false),
-                mUidCached.get(queue.uid, false))) {
+                isProcessFreezable(app))) {
             updateRunnableList(queue);
+        }
+    }
+
+    @GuardedBy("mService")
+    private boolean isProcessFreezable(@Nullable ProcessRecord app) {
+        if (app == null) {
+            return false;
+        }
+        synchronized (mService.mProcLock) {
+            return app.mOptRecord.isPendingFreeze() || app.mOptRecord.isFrozen();
         }
     }
 
@@ -1849,6 +1844,20 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             setQueueProcess(leaf, leaf.app);
             leaf = leaf.processNameNext;
         }
+        enqueueUpdateRunningList();
+    }
+
+    /**
+     * Refresh the process queue corresponding to {@code app} with the latest process state
+     * so that runnableAt can be updated.
+     */
+    @GuardedBy("mService")
+    private void refreshProcessQueueLocked(@NonNull ProcessRecord app) {
+        final BroadcastProcessQueue queue = getProcessQueue(app.processName, app.uid);
+        if (queue == null || queue.app == null || queue.app.getPid() != app.getPid()) {
+            return;
+        }
+        setQueueProcess(queue, queue.app);
         enqueueUpdateRunningList();
     }
 
@@ -2175,12 +2184,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.println("Broadcasts with ignored delivery group policies:");
         ipw.increaseIndent();
         mService.dumpDeliveryGroupPolicyIgnoredActions(ipw);
-        ipw.decreaseIndent();
-        ipw.println();
-
-        ipw.println("Cached UIDs:");
-        ipw.increaseIndent();
-        ipw.println(mUidCached);
         ipw.decreaseIndent();
         ipw.println();
 

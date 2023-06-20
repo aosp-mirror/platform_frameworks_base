@@ -1402,6 +1402,7 @@ public final class CachedAppOptimizer {
                 }
             }
         }
+        reportProcessFreezableChangedLocked(app);
         app.mOptRecord.setLastUsedTimeout(delayMillis);
         mFreezeHandler.sendMessageDelayed(
                 mFreezeHandler.obtainMessage(SET_FROZEN_PROCESS_MSG, DO_FREEZE, 0, app),
@@ -1440,6 +1441,7 @@ public final class CachedAppOptimizer {
             uidRec.setFrozen(false);
             postUidFrozenMessage(uidRec.getUid(), false);
         }
+        reportProcessFreezableChangedLocked(app);
 
         opt.setFreezerOverride(false);
         if (pid == 0 || !opt.isFrozen()) {
@@ -2128,6 +2130,11 @@ public final class CachedAppOptimizer {
                 0, uidObj));
     }
 
+    @GuardedBy("mAm")
+    private void reportProcessFreezableChangedLocked(ProcessRecord app) {
+        mAm.onProcessFreezableChangedLocked(app);
+    }
+
     private final class FreezeHandler extends Handler implements
             ProcLocksReader.ProcLocksReaderCallback {
         private FreezeHandler() {
@@ -2137,7 +2144,7 @@ public final class CachedAppOptimizer {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case SET_FROZEN_PROCESS_MSG:
+                case SET_FROZEN_PROCESS_MSG: {
                     ProcessRecord proc = (ProcessRecord) msg.obj;
                     synchronized (mAm) {
                         freezeProcess(proc);
@@ -2147,8 +2154,8 @@ public final class CachedAppOptimizer {
                         removeMessages(DEADLOCK_WATCHDOG_MSG);
                         sendEmptyMessageDelayed(DEADLOCK_WATCHDOG_MSG, FREEZE_DEADLOCK_TIMEOUT_MS);
                     }
-                    break;
-                case REPORT_UNFREEZE_MSG:
+                } break;
+                case REPORT_UNFREEZE_MSG: {
                     int pid = msg.arg1;
                     int frozenDuration = msg.arg2;
                     Pair<String, Integer> obj = (Pair<String, Integer>) msg.obj;
@@ -2156,13 +2163,13 @@ public final class CachedAppOptimizer {
                     int reason = obj.second;
 
                     reportUnfreeze(pid, frozenDuration, processName, reason);
-                    break;
-                case UID_FROZEN_STATE_CHANGED_MSG:
+                } break;
+                case UID_FROZEN_STATE_CHANGED_MSG: {
                     final boolean frozen = (msg.arg1 == 1);
                     final int uid = (int) msg.obj;
                     reportOneUidFrozenStateChanged(uid, frozen);
-                    break;
-                case DEADLOCK_WATCHDOG_MSG:
+                } break;
+                case DEADLOCK_WATCHDOG_MSG: {
                     try {
                         // post-check to prevent deadlock
                         if (DEBUG_FREEZER) {
@@ -2172,7 +2179,7 @@ public final class CachedAppOptimizer {
                     } catch (IOException e) {
                         Slog.w(TAG_AM, "Unable to check file locks");
                     }
-                    break;
+                } break;
                 default:
                     return;
             }

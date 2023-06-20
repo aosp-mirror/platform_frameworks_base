@@ -17328,6 +17328,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    void onProcessFreezableChangedLocked(ProcessRecord app) {
+        if (mEnableModernQueue) {
+            mBroadcastQueues[0].onProcessFreezableChangedLocked(app);
+        }
+    }
+
     @VisibleForTesting
     public final class LocalService extends ActivityManagerInternal
             implements ActivityManagerLocal {
@@ -19039,25 +19045,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         // too quickly in parallel below
         pingCount.incrementAndGet();
 
-        synchronized (mProcLock) {
-            final ArrayMap<String, SparseArray<ProcessRecord>> pmap =
-                    mProcessList.getProcessNamesLOSP().getMap();
-            final int numProc = pmap.size();
-            for (int iProc = 0; iProc < numProc; iProc++) {
-                final SparseArray<ProcessRecord> apps = pmap.valueAt(iProc);
-                for (int iApp = 0, numApps = apps.size(); iApp < numApps; iApp++) {
-                    final ProcessRecord app = apps.valueAt(iApp);
-                    final IApplicationThread thread = app.getOnewayThread();
-                    if (thread != null) {
-                        mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
-                                CachedAppOptimizer.UNFREEZE_REASON_PING);
-                        pingCount.incrementAndGet();
-                        try {
-                            thread.schedulePing(pongCallback);
-                        } catch (RemoteException ignored) {
-                            // When we failed to ping remote process, pretend as
-                            // if we received the expected pong
-                            pongCallback.sendResult(null);
+        synchronized (ActivityManagerService.this) {
+            synchronized (mProcLock) {
+                final ArrayMap<String, SparseArray<ProcessRecord>> pmap =
+                        mProcessList.getProcessNamesLOSP().getMap();
+                final int numProc = pmap.size();
+                for (int iProc = 0; iProc < numProc; iProc++) {
+                    final SparseArray<ProcessRecord> apps = pmap.valueAt(iProc);
+                    for (int iApp = 0, numApps = apps.size(); iApp < numApps; iApp++) {
+                        final ProcessRecord app = apps.valueAt(iApp);
+                        final IApplicationThread thread = app.getOnewayThread();
+                        if (thread != null) {
+                            mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
+                                    CachedAppOptimizer.UNFREEZE_REASON_PING);
+                            pingCount.incrementAndGet();
+                            try {
+                                thread.schedulePing(pongCallback);
+                            } catch (RemoteException ignored) {
+                                // When we failed to ping remote process, pretend as
+                                // if we received the expected pong
+                                pongCallback.sendResult(null);
+                            }
                         }
                     }
                 }
