@@ -243,7 +243,7 @@ public class AvatarPickerActivity extends Activity {
                 int index = indexFromPosition(position);
                 viewHolder.setSelected(position == mSelectedPosition);
                 viewHolder.setDrawable(mImageDrawables.get(index));
-                if (mImageDescriptions != null) {
+                if (mImageDescriptions != null && index < mImageDescriptions.size()) {
                     viewHolder.setContentDescription(mImageDescriptions.get(index));
                 } else {
                     viewHolder.setContentDescription(getString(
