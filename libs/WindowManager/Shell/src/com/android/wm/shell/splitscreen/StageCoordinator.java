@@ -2530,8 +2530,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // handling to the mixed-handler to deal with splitting it up.
             if (mMixedHandler.animatePendingSplitWithDisplayChange(transition, info,
                     startTransaction, finishTransaction, finishCallback)) {
-                mSplitLayout.update(startTransaction);
-                startTransaction.apply();
+                if (mSplitTransitions.isPendingResize(transition)) {
+                    // Only need to update in resize because divider exist before transition.
+                    mSplitLayout.update(startTransaction);
+                    startTransaction.apply();
+                }
                 return true;
             }
         }
@@ -2888,8 +2891,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSideStage.getSplitDecorManager().release(callbackT);
             callbackWct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token, false);
         });
-
-        addDividerBarToTransition(info, false /* show */);
         return true;
     }
 
