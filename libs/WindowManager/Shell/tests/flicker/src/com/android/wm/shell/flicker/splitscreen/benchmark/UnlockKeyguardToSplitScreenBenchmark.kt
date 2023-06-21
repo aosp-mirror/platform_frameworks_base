@@ -37,7 +37,7 @@ open class UnlockKeyguardToSplitScreenBenchmark(override val flicker: LegacyFlic
     SplitScreenBase(flicker) {
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
-            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp) }
+            setup { SplitScreenUtils.enterSplitViaIntent(wmHelper, primaryApp, secondaryApp) }
             transitions {
                 device.sleep()
                 wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
