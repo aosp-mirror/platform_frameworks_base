@@ -237,7 +237,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         final int captionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
         final int captionWidth = taskBounds.width();
+
+        // We use mDecorationContainerSurface to define input window for task resizing; by layering
+        // it in front of mCaptionContainerSurface, we can allow it to handle input prior to
+        // caption view itself, treating corner inputs as resize events rather than repositioning.
         startT.setWindowCrop(mCaptionContainerSurface, captionWidth, captionHeight)
+                .setLayer(mCaptionContainerSurface, -1)
                 .show(mCaptionContainerSurface);
 
         if (ViewRootImpl.CAPTION_ON_SHELL) {
