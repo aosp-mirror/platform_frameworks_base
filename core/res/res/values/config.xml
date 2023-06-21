@@ -542,6 +542,9 @@
     <bool name="config_goToSleepOnButtonPressTheaterMode">true</bool>
     <!-- If this is true, long press on power button will be available from the non-interactive state -->
     <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
+    <!-- If this is true, short press on power button will be available whenever the default display
+         is on even if the device is non-interactive (dreaming). -->
+    <bool name="config_supportShortPressPowerWhenDefaultDisplayOn">false</bool>
 
     <!-- If this is true, then keep dreaming when unplugging.
          This config was formerly known as config_keepDreamingWhenUndocking.
