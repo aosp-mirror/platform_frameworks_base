@@ -339,19 +339,36 @@ public class PipTransition extends PipTransitionController {
         }
         // This means an expand happened before enter-pip finished and we are now "merging" a
         // no-op transition that happens to match our exit-pip.
+        // Or that the keyguard is up and preventing the transition from applying, in which case we
+        // want to manually reset pip. (b/283783868)
         boolean cancelled = false;
         if (mPipAnimationController.getCurrentAnimator() != null) {
             mPipAnimationController.getCurrentAnimator().cancel();
+            mPipAnimationController.resetAnimatorState();
             cancelled = true;
         }
+
         // Unset exitTransition AFTER cancel so that finishResize knows we are merging.
         mExitTransition = null;
-        if (!cancelled || aborted) return;
+        if (!cancelled) return;
         final ActivityManager.RunningTaskInfo taskInfo = mPipOrganizer.getTaskInfo();
         if (taskInfo != null) {
-            startExpandAnimation(taskInfo, mPipOrganizer.getSurfaceControl(),
-                    mPipBoundsState.getBounds(), mPipBoundsState.getBounds(),
-                    new Rect(mExitDestinationBounds), Surface.ROTATION_0, null /* startT */);
+            if (aborted) {
+                // keyguard case - the transition got aborted, so we want to reset state and
+                // windowing mode before reapplying the resize transaction
+                sendOnPipTransitionFinished(TRANSITION_DIRECTION_LEAVE_PIP);
+                mPipOrganizer.onExitPipFinished(taskInfo);
+
+                WindowContainerTransaction wct = new WindowContainerTransaction();
+                mPipOrganizer.applyWindowingModeChangeOnExit(wct, TRANSITION_DIRECTION_LEAVE_PIP);
+                wct.setBounds(taskInfo.token, null);
+                mPipOrganizer.applyFinishBoundsResize(wct, TRANSITION_DIRECTION_LEAVE_PIP, false);
+            } else {
+                // merge case
+                startExpandAnimation(taskInfo, mPipOrganizer.getSurfaceControl(),
+                        mPipBoundsState.getBounds(), mPipBoundsState.getBounds(),
+                        new Rect(mExitDestinationBounds), Surface.ROTATION_0, null /* startT */);
+            }
         }
         mExitDestinationBounds.setEmpty();
         mCurrentPipTaskToken = null;
