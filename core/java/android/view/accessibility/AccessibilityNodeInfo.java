@@ -290,6 +290,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Action that selects the node.
+     * @see AccessibilityAction#ACTION_SELECT
      */
     public static final int ACTION_SELECT = 1 << 2;
 
@@ -446,19 +447,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Action to set the selection. Performing this action with no arguments
      * clears the selection.
-     * <p>
-     * <strong>Arguments:</strong>
-     * {@link #ACTION_ARGUMENT_SELECTION_START_INT},
-     * {@link #ACTION_ARGUMENT_SELECTION_END_INT}<br>
-     * <strong>Example:</strong>
-     * <code><pre><p>
-     *   Bundle arguments = new Bundle();
-     *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, 1);
-     *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, 2);
-     *   info.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
-     * </code></pre></p>
-     * </p>
      *
+     * @see AccessibilityAction#ACTION_SET_SELECTION
      * @see #ACTION_ARGUMENT_SELECTION_START_INT
      * @see #ACTION_ARGUMENT_SELECTION_END_INT
      */
@@ -483,16 +473,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Action that sets the text of the node. Performing the action without argument, using <code>
      * null</code> or empty {@link CharSequence} will clear the text. This action will also put the
      * cursor at the end of text.
-     * <p>
-     * <strong>Arguments:</strong>
-     * {@link #ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE}<br>
-     * <strong>Example:</strong>
-     * <code><pre><p>
-     *   Bundle arguments = new Bundle();
-     *   arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
-     *       "android");
-     *   info.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-     * </code></pre></p>
+     * @see AccessibilityAction#ACTION_SET_TEXT
      */
     public static final int ACTION_SET_TEXT = 1 << 21;
 
@@ -5188,12 +5169,16 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          *  Action that selects the node.
+         *  The view the implements this should send a
+         *  {@link AccessibilityEvent#TYPE_VIEW_SELECTED} event.
+         * @see AccessibilityAction#ACTION_CLEAR_SELECTION
          */
         public static final AccessibilityAction ACTION_SELECT =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_SELECT);
 
         /**
          * Action that deselects the node.
+         * @see AccessibilityAction#ACTION_SELECT
          */
         public static final AccessibilityAction ACTION_CLEAR_SELECTION =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
@@ -5427,7 +5412,10 @@ public class AccessibilityNodeInfo implements Parcelable {
          *   info.performAction(AccessibilityAction.ACTION_SET_SELECTION.getId(), arguments);
          * </code></pre></p>
          * </p>
-         *
+         * <p> If this is a text selection, the UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED} event if its selection is
+         * updated. This element should also return {@code true} for
+         * {@link AccessibilityNodeInfo#isTextSelectable()}.
          * @see AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_START_INT
          *  AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT
          * @see AccessibilityNodeInfo#ACTION_ARGUMENT_SELECTION_END_INT
@@ -5469,6 +5457,10 @@ public class AccessibilityNodeInfo implements Parcelable {
          *       "android");
          *   info.performAction(AccessibilityAction.ACTION_SET_TEXT.getId(), arguments);
          * </code></pre></p>
+         * <p> The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED} event if its text is updated.
+         * This element should also return {@code true} for
+         * {@link AccessibilityNodeInfo#isEditable()}.
          */
         public static final AccessibilityAction ACTION_SET_TEXT =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
