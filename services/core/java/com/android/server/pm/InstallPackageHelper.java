@@ -1077,6 +1077,8 @@ final class InstallPackageHelper {
         final boolean isApex = ((installFlags & PackageManager.INSTALL_APEX) != 0);
         final boolean isRollback =
                 request.getInstallReason() == PackageManager.INSTALL_REASON_ROLLBACK;
+        final boolean extractProfile =
+                ((installFlags & PackageManager.INSTALL_DONT_EXTRACT_BASELINE_PROFILES) == 0);
         @PackageManagerService.ScanFlags int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
         if (request.isInstallMove()) {
             // moving a complete application; perform an initial scan on the new install location
@@ -1112,7 +1114,9 @@ final class InstallPackageHelper {
         @ParsingPackageUtils.ParseFlags final int parseFlags =
                 mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_CHATTY
                         | ParsingPackageUtils.PARSE_ENFORCE_CODE
-                        | (onExternal ? ParsingPackageUtils.PARSE_EXTERNAL_STORAGE : 0);
+                        | (onExternal ? ParsingPackageUtils.PARSE_EXTERNAL_STORAGE : 0)
+                        | (extractProfile
+                        ? ParsingPackageUtils.PARSE_EXTRACT_BASELINE_PROFILES_FROM_APK : 0);
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final ParsedPackage parsedPackage;
