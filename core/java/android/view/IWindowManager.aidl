@@ -93,6 +93,11 @@ interface IWindowManager
      * Only use {@link DisplayRotation#mUserRotation} as the display rotation.
      */
     const int FIXED_TO_USER_ROTATION_ENABLED = 2;
+    /**
+     * If auto-rotation is not supported, {@link DisplayRotation#mUserRotation} will be used.
+     * Otherwise the behavior is same as {link #FIXED_TO_USER_ROTATION_DISABLED}.
+     */
+    const int FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION = 3;
 
     /**
      * ===== NOTICE =====
