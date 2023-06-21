@@ -67,10 +67,6 @@ public final class UsbGadgetAidl implements UsbGadgetHal {
         return GADGET_HAL_V2_0;
     }
 
-    @Override
-    public void systemReady() {
-    }
-
     public void serviceDied() {
         logAndPrint(Log.ERROR, mPw, "Usb Gadget AIDL hal service died");
         synchronized (mGadgetProxyLock) {
