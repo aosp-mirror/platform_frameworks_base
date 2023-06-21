@@ -17,7 +17,6 @@
 package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -200,7 +199,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
         }
 
         if (type == Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
-                && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
                 && mPosition != null) {
             // This Transition animates a task to fullscreen after being dragged from the status
             // bar and then released back into the status bar area
