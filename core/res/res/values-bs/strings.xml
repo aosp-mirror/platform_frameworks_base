@@ -682,8 +682,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nema dovoljno svjetlosti"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Odmaknite telefon"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Primaknite telefon"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Pomjerite telefon naviše"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Pomjerite telefon naniže"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Pomjerite telefon nagore"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Pomjerite telefon nadolje"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Pomjerite telefon ulijevo"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Pomjerite telefon udesno"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Gledajte direktno u uređaj."</string>

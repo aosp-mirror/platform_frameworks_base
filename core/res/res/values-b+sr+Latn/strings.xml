@@ -1364,7 +1364,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Režim PTP preko USB-a je uključen"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB privezivanje je uključeno"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Režim MIDI preko USB-a je uključen"</string>
-    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Uređaj povezan sa veb-kamerom"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Uređaj povezan kao veb-kamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB dodatak je povezan"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Dodirnite za još opcija."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Povezani uređaj se puni. Dodirnite za još opcija."</string>
