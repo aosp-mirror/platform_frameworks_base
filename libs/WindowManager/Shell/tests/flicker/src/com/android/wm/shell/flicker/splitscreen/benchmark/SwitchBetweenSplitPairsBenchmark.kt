@@ -20,8 +20,8 @@ import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import com.android.wm.shell.flicker.splitscreen.SplitScreenUtils
@@ -35,7 +35,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class SwitchBetweenSplitPairsBenchmark(override val flicker: FlickerTest) :
+open class SwitchBetweenSplitPairsBenchmark(override val flicker: LegacyFlickerTest) :
     SplitScreenBase(flicker) {
     protected val thirdApp = SplitScreenUtils.getIme(instrumentation)
     protected val fourthApp = SplitScreenUtils.getSendNotification(instrumentation)
@@ -70,8 +70,6 @@ open class SwitchBetweenSplitPairsBenchmark(override val flicker: FlickerTest) :
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests()
-        }
+        fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
     }
 }
