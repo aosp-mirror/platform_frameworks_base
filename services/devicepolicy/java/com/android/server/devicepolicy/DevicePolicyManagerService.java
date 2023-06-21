@@ -24132,7 +24132,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // When listener is added onSubscriptionsChanged gets called immediately for once
                 // (even if subscriptions are not changed) and later on when subscriptions changes.
                 subscriptionManager.addOnSubscriptionsChangedListener(
-                        mSubscriptionsChangedListener.getHandlerExecutor(),
+                        mHandler::post,
                         mSubscriptionsChangedListener);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
