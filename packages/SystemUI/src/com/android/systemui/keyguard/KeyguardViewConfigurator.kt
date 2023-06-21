@@ -47,9 +47,10 @@ constructor(
     private var indicationAreaHandle: DisposableHandle? = null
 
     override fun start() {
-        bindIndicationArea(
+        val notificationPanel =
             notificationShadeWindowView.requireViewById(R.id.notification_panel) as ViewGroup
-        )
+        bindIndicationArea(notificationPanel)
+        bindLockIconView(notificationPanel)
     }
 
     fun bindIndicationArea(legacyParent: ViewGroup) {
@@ -73,5 +74,17 @@ constructor(
                 keyguardIndicationAreaViewModel,
                 indicationController
             )
+    }
+
+    private fun bindLockIconView(legacyParent: ViewGroup) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+            legacyParent.requireViewById<View>(R.id.lock_icon_view).let {
+                legacyParent.removeView(it)
+            }
+        } else {
+            keyguardRootView.findViewById<View?>(R.id.lock_icon_view)?.let {
+                keyguardRootView.removeView(it)
+            }
+        }
     }
 }
