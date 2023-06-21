@@ -4779,11 +4779,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
 
-        // Watches consume all key events during ambient when keyguard is not showing.
-        if (mHasFeatureWatch) {
-            return false;
-        }
-
         // TODO(b/123372519): Refine when dream can support multi display.
         if (isDefaultDisplay) {
             // Send events to a dozing dream since the dream is in control of the state of the
