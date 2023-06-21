@@ -43,8 +43,9 @@ object PackageVersionMigration {
             permissionVersion == -1 && appOpVersion == -1 ->
                 error("getVersion() called when there are no legacy files")
             // merging combination of versions based on released android version
-            // permissions version 1-8 were released in Q, 9 in S and 10 in T
+            // permissions version 1-8 were released in Q, 9 in S, 10 in T and 11 in U
             // app ops version 1 was released in P, 3 in U.
+            permissionVersion >= 11 && appOpVersion >= 3 -> 15
             permissionVersion >= 10 && appOpVersion >= 3 -> 14
             permissionVersion >= 10 && appOpVersion >= 1 -> 13
             permissionVersion >= 9 && appOpVersion >= 1 -> 12
