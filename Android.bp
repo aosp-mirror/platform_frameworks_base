@@ -579,7 +579,6 @@ metalava_framework_docs_args = "" +
     "--hide RequiresPermission " +
     "--hide SdkConstant " +
     "--hide Todo " +
-    "--hide Typo " +
     "--hide UnavailableSymbol " +
     "--manifest $(location :frameworks-base-core-AndroidManifest.xml) "
 
