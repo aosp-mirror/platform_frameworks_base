@@ -1597,24 +1597,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mCommandQueue.disable(mDisplayId, state1, state2, false /* animate */);
     }
 
-    /**
-     * Ask the display to wake up if currently dozing, else do nothing
-     *
-     * @deprecated Use {@link PowerInteractor#wakeUpIfDozing(String, int)} instead.
-     *
-     * @param time when to wake up
-     * @param why the reason for the wake up
-     */
-    @Override
-    @Deprecated
-    public void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason) {
-        if (mDozing && mScreenOffAnimationController.allowWakeUpIfDozing()) {
-            mPowerManager.wakeUp(
-                    time, wakeReason, "com.android.systemui:" + why);
-            mFalsingCollector.onScreenOnFromTouch();
-        }
-    }
-
     // TODO(b/117478341): This was left such that CarStatusBar can override this method.
     // Try to remove this.
     protected void createNavigationBar(@Nullable RegisterStatusBarResult result) {
@@ -2907,8 +2889,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         if (mBouncerShowing) {
-            wakeUpIfDozing(SystemClock.uptimeMillis(), "BOUNCER_VISIBLE",
-                    PowerManager.WAKE_REASON_GESTURE);
+            mPowerInteractor.wakeUpIfDozing("BOUNCER_VISIBLE", PowerManager.WAKE_REASON_GESTURE);
         }
         updateScrimController();
         if (!mBouncerShowing) {
