@@ -5118,14 +5118,15 @@ public class SettingsProvider extends ContentProvider {
                             Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY);
                     final boolean supportMagnificationArea = getContext().getResources().getBoolean(
                             com.android.internal.R.bool.config_magnification_area);
-                    final int capability = supportMagnificationArea
-                            ? R.integer.def_accessibility_magnification_capabilities
-                            : Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
                     final String supportShowPrompt = supportMagnificationArea ? "1" : "0";
                     if (magnificationCapabilities.isNull()) {
+                        final int capability = supportMagnificationArea
+                                ? getContext().getResources().getInteger(
+                                        R.integer.def_accessibility_magnification_capabilities)
+                                : Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
                         secureSettings.insertSettingLocked(
                                 Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
-                                String.valueOf(getContext().getResources().getInteger(capability)),
+                                String.valueOf(capability),
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
 
                         if (isMagnificationSettingsOn(secureSettings)) {
