@@ -664,29 +664,39 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
     @Override
     public PackageImpl addUsesLibrary(String libraryName) {
-        this.usesLibraries = CollectionUtils.add(this.usesLibraries,
-                TextUtils.safeIntern(libraryName));
+        libraryName = TextUtils.safeIntern(libraryName);
+        if (!ArrayUtils.contains(this.usesLibraries, libraryName)) {
+            this.usesLibraries = CollectionUtils.add(this.usesLibraries, libraryName);
+        }
         return this;
     }
 
     @Override
     public final PackageImpl addUsesNativeLibrary(String libraryName) {
-        this.usesNativeLibraries = CollectionUtils.add(this.usesNativeLibraries,
-                TextUtils.safeIntern(libraryName));
+        libraryName = TextUtils.safeIntern(libraryName);
+        if (!ArrayUtils.contains(this.usesNativeLibraries, libraryName)) {
+            this.usesNativeLibraries = CollectionUtils.add(this.usesNativeLibraries, libraryName);
+        }
         return this;
     }
 
     @Override
     public PackageImpl addUsesOptionalLibrary(String libraryName) {
-        this.usesOptionalLibraries = CollectionUtils.add(this.usesOptionalLibraries,
-                TextUtils.safeIntern(libraryName));
+        libraryName = TextUtils.safeIntern(libraryName);
+        if (!ArrayUtils.contains(this.usesOptionalLibraries, libraryName)) {
+            this.usesOptionalLibraries = CollectionUtils.add(this.usesOptionalLibraries,
+                    libraryName);
+        }
         return this;
     }
 
     @Override
     public final PackageImpl addUsesOptionalNativeLibrary(String libraryName) {
-        this.usesOptionalNativeLibraries = CollectionUtils.add(this.usesOptionalNativeLibraries,
-                TextUtils.safeIntern(libraryName));
+        libraryName = TextUtils.safeIntern(libraryName);
+        if (!ArrayUtils.contains(this.usesOptionalNativeLibraries, libraryName)) {
+            this.usesOptionalNativeLibraries = CollectionUtils.add(this.usesOptionalNativeLibraries,
+                    libraryName);
+        }
         return this;
     }
 
