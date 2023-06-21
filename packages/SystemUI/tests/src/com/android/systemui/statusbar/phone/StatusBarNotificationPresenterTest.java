@@ -37,6 +37,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
@@ -127,6 +128,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mCentralSurfaces,
                 mNotificationsInteractor,
                 mock(LockscreenShadeTransitionController.class),
+                mock(PowerInteractor.class),
                 mCommandQueue,
                 mock(NotificationLockscreenUserManager.class),
                 mock(SysuiStatusBarStateController.class),
