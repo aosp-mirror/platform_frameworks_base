@@ -771,7 +771,7 @@ public class ZygoteInit {
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
             if (Zygote.nativeSupportsMemoryTagging()) {
-                String mode = SystemProperties.get("arm64.memtag.process.system_server", "");
+                String mode = SystemProperties.get("persist.arm64.memtag.system_server", "");
                 if (mode.isEmpty()) {
                   /* The system server has ASYNC MTE by default, in order to allow
                    * system services to specify their own MTE level later, as you
