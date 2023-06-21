@@ -106,6 +106,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long THROW_FOR_INVALID_BROADCAST_RECEIVER = 270049379L;
 
+    /**
+     * {@link MediaSession#setMediaButtonReceiver(PendingIntent)} throws an {@link
+     * IllegalArgumentException} if the provided {@link PendingIntent} targets an {@link
+     * android.app.Activity activity} for apps targeting Android V and above. For apps targeting
+     * Android U and below, the request will be ignored.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long THROW_FOR_ACTIVITY_MEDIA_BUTTON_RECEIVER = 272737196L;
+
     private static final String TAG = "MediaSessionRecord";
     private static final String[] ART_URIS = new String[] {
             MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
@@ -1055,13 +1065,26 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
 
         @Override
-        public void setMediaButtonReceiver(PendingIntent pi) throws RemoteException {
+        public void setMediaButtonReceiver(@Nullable PendingIntent pi) throws RemoteException {
+            final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 if ((mPolicies & MediaSessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
                         != 0) {
                     return;
                 }
+
+                if (pi != null && pi.isActivity()) {
+                    if (CompatChanges.isChangeEnabled(
+                            THROW_FOR_ACTIVITY_MEDIA_BUTTON_RECEIVER, uid)) {
+                        throw new IllegalArgumentException(
+                                "The media button receiver cannot be set to an activity.");
+                    } else {
+                        Log.w(TAG, "Ignoring invalid media button receiver targeting an activity.");
+                        return;
+                    }
+                }
+
                 mMediaButtonReceiverHolder =
                         MediaButtonReceiverHolder.create(mUserId, pi, mPackageName);
                 mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
