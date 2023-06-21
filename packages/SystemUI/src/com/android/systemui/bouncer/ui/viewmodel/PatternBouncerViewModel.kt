@@ -29,13 +29,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the pattern bouncer UI. */
 class PatternBouncerViewModel(
     private val applicationContext: Context,
-    applicationScope: CoroutineScope,
+    private val applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
 ) :
@@ -69,12 +71,17 @@ class PatternBouncerViewModel(
 
     /** Whether the pattern itself should be rendered visibly. */
     val isPatternVisible: StateFlow<Boolean> =
-        interactor.authenticationMethod
-            .map { authMethod -> isPatternVisible(authMethod) }
+        flow {
+                emit(null)
+                emit(interactor.getAuthenticationMethod())
+            }
+            .map { authMethod ->
+                (authMethod as? AuthenticationMethodModel.Pattern)?.isPatternVisible ?: false
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = isPatternVisible(interactor.authenticationMethod.value),
+                initialValue = false,
             )
 
     /** Notifies that the UI has been shown to the user. */
@@ -154,17 +161,15 @@ class PatternBouncerViewModel(
     /** Notifies that the user has ended the drag gesture across the dot grid. */
     fun onDragEnd() {
         val pattern = _selectedDots.value.map { it.toCoordinate() }
-        if (interactor.authenticate(pattern) != true) {
-            showFailureAnimation()
-        }
-
         _dots.value = defaultDots()
         _currentDot.value = null
         _selectedDots.value = linkedSetOf()
-    }
 
-    private fun isPatternVisible(authMethodModel: AuthenticationMethodModel): Boolean {
-        return (authMethodModel as? AuthenticationMethodModel.Pattern)?.isPatternVisible ?: false
+        applicationScope.launch {
+            if (interactor.authenticate(pattern) != true) {
+                showFailureAnimation()
+            }
+        }
     }
 
     private fun defaultDots(): List<PatternDotViewModel> {

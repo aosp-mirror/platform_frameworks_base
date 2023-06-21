@@ -26,7 +26,6 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -40,8 +39,8 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class BouncerInteractorTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
-    private val utils = SceneTestUtils(this, testScope)
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private val authenticationInteractor =
         utils.authenticationInteractor(
             repository = utils.authenticationRepository(),
@@ -69,7 +68,9 @@ class BouncerInteractorTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
             val message by collectLastValue(underTest.message)
 
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
             authenticationInteractor.lockDevice()
             underTest.showOrUnlockDevice("container1")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -100,7 +101,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
             val message by collectLastValue(underTest.message)
 
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = true)
             )
             authenticationInteractor.lockDevice()
@@ -130,7 +131,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
             val message by collectLastValue(underTest.message)
 
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = false)
             )
             authenticationInteractor.lockDevice()
@@ -154,7 +155,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
             val message by collectLastValue(underTest.message)
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
             authenticationInteractor.lockDevice()
@@ -186,7 +187,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
             val message by collectLastValue(underTest.message)
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(emptyList())
             )
             authenticationInteractor.lockDevice()
@@ -222,7 +223,9 @@ class BouncerInteractorTest : SysuiTestCase() {
     fun showOrUnlockDevice_notLocked_switchesToGoneScene() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
             authenticationInteractor.unlockDevice()
             runCurrent()
 
@@ -235,7 +238,7 @@ class BouncerInteractorTest : SysuiTestCase() {
     fun showOrUnlockDevice_authMethodNotSecure_switchesToGoneScene() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
             authenticationInteractor.lockDevice()
 
             underTest.showOrUnlockDevice("container1")
@@ -248,7 +251,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
             val message by collectLastValue(underTest.message)
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
             authenticationInteractor.lockDevice()
@@ -266,7 +269,9 @@ class BouncerInteractorTest : SysuiTestCase() {
             val throttling by collectLastValue(underTest.throttling)
             val message by collectLastValue(underTest.message)
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
             assertThat(throttling).isNull()
             assertThat(message).isEqualTo("")
             assertThat(isUnlocked).isFalse()
