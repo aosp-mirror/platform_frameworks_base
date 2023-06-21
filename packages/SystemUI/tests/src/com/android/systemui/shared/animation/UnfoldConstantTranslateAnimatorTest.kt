@@ -36,21 +36,26 @@ class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
 
     private val progressProvider = TestUnfoldTransitionProvider()
 
-    @Mock private lateinit var parent: ViewGroup
+    @Mock
+    private lateinit var parent: ViewGroup
+
+    @Mock
+    private lateinit var shouldBeAnimated: () -> Boolean
 
     private lateinit var animator: UnfoldConstantTranslateAnimator
 
-    private val viewsIdToRegister =
-        setOf(
-            ViewIdToTranslate(START_VIEW_ID, Direction.START),
-            ViewIdToTranslate(END_VIEW_ID, Direction.END))
+    private val viewsIdToRegister
+        get() =
+            setOf(
+                    ViewIdToTranslate(START_VIEW_ID, Direction.START, shouldBeAnimated),
+                    ViewIdToTranslate(END_VIEW_ID, Direction.END, shouldBeAnimated)
+            )
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
-        animator =
-            UnfoldConstantTranslateAnimator(viewsIdToRegister, progressProvider)
+        whenever(shouldBeAnimated.invoke()).thenReturn(true)
+        animator = UnfoldConstantTranslateAnimator(viewsIdToRegister, progressProvider)
 
         animator.init(parent, MAX_TRANSLATION)
     }
@@ -94,6 +99,20 @@ class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
 
         moveAndValidate(listOf(leftView to START, rightView to END), View.LAYOUT_DIRECTION_LTR)
         moveAndValidate(listOf(leftView to START, rightView to END), View.LAYOUT_DIRECTION_LTR)
+    }
+
+    @Test
+    fun onTransition_completeStartedTranslation() {
+        // GIVEN
+        val leftView = View(context)
+        whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(leftView)
+        // To start animation, shouldBeAnimated should return true.
+        // There is a possibility for shouldBeAnimated to return false during the animation.
+        whenever(shouldBeAnimated.invoke()).thenReturn(true).thenReturn(false)
+
+        // shouldBeAnimated state may change during the animation.
+        // However, started animation should be completed.
+        moveAndValidate(listOf(leftView to START), View.LAYOUT_DIRECTION_LTR)
     }
 
     private fun moveAndValidate(list: List<Pair<View, Int>>, layoutDirection: Int) {

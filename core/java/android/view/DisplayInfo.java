@@ -253,6 +253,12 @@ public final class DisplayInfo implements Parcelable {
     public int state;
 
     /**
+     * The current committed state of the display. For example, this becomes
+     * {@link android.view.Display#STATE_ON} only after the power state ON is fully committed.
+     */
+    public int committedState;
+
+    /**
      * The UID of the application that owns this display, or zero if it is owned by the system.
      * <p>
      * If the display is private, then only the owner can use it.
@@ -380,6 +386,7 @@ public final class DisplayInfo implements Parcelable {
                 && appVsyncOffsetNanos == other.appVsyncOffsetNanos
                 && presentationDeadlineNanos == other.presentationDeadlineNanos
                 && state == other.state
+                && committedState == other.committedState
                 && ownerUid == other.ownerUid
                 && Objects.equals(ownerPackageName, other.ownerPackageName)
                 && removeMode == other.removeMode
@@ -431,6 +438,7 @@ public final class DisplayInfo implements Parcelable {
         appVsyncOffsetNanos = other.appVsyncOffsetNanos;
         presentationDeadlineNanos = other.presentationDeadlineNanos;
         state = other.state;
+        committedState = other.committedState;
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
         removeMode = other.removeMode;
@@ -482,6 +490,7 @@ public final class DisplayInfo implements Parcelable {
         appVsyncOffsetNanos = source.readLong();
         presentationDeadlineNanos = source.readLong();
         state = source.readInt();
+        committedState = source.readInt();
         ownerUid = source.readInt();
         ownerPackageName = source.readString8();
         uniqueId = source.readString8();
@@ -538,6 +547,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeLong(appVsyncOffsetNanos);
         dest.writeLong(presentationDeadlineNanos);
         dest.writeInt(state);
+        dest.writeInt(committedState);
         dest.writeInt(ownerUid);
         dest.writeString8(ownerPackageName);
         dest.writeString8(uniqueId);
@@ -761,6 +771,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(rotation);
         sb.append(", state ");
         sb.append(Display.stateToString(state));
+        sb.append(", committedState ");
+        sb.append(Display.stateToString(committedState));
 
         if (Process.myUid() != Process.SYSTEM_UID) {
             sb.append("}");

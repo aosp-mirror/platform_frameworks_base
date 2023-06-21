@@ -80,6 +80,7 @@ internal class HueSubtract(val amountDegrees: Double) : Hue {
 internal class HueVibrantSecondary() : Hue {
     val hueToRotations = listOf(Pair(0, 18), Pair(41, 15), Pair(61, 10), Pair(101, 12),
             Pair(131, 15), Pair(181, 18), Pair(251, 15), Pair(301, 12), Pair(360, 12))
+
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
@@ -88,6 +89,7 @@ internal class HueVibrantSecondary() : Hue {
 internal class HueVibrantTertiary() : Hue {
     val hueToRotations = listOf(Pair(0, 35), Pair(41, 30), Pair(61, 20), Pair(101, 25),
             Pair(131, 30), Pair(181, 35), Pair(251, 30), Pair(301, 25), Pair(360, 25))
+
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
@@ -96,6 +98,7 @@ internal class HueVibrantTertiary() : Hue {
 internal class HueExpressiveSecondary() : Hue {
     val hueToRotations = listOf(Pair(0, 45), Pair(21, 95), Pair(51, 45), Pair(121, 20),
             Pair(151, 45), Pair(191, 90), Pair(271, 45), Pair(321, 45), Pair(360, 45))
+
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
@@ -104,6 +107,7 @@ internal class HueExpressiveSecondary() : Hue {
 internal class HueExpressiveTertiary() : Hue {
     val hueToRotations = listOf(Pair(0, 120), Pair(21, 120), Pair(51, 20), Pair(121, 45),
             Pair(151, 20), Pair(191, 15), Pair(271, 20), Pair(321, 120), Pair(360, 120))
+
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
@@ -148,11 +152,11 @@ internal class TonalSpec(val hue: Hue = HueSource(), val chroma: Chroma) {
 }
 
 internal class CoreSpec(
-    val a1: TonalSpec,
-    val a2: TonalSpec,
-    val a3: TonalSpec,
-    val n1: TonalSpec,
-    val n2: TonalSpec
+        val a1: TonalSpec,
+        val a2: TonalSpec,
+        val a3: TonalSpec,
+        val n1: TonalSpec,
+        val n2: TonalSpec
 )
 
 enum class Style(internal val coreSpec: CoreSpec) {
@@ -214,51 +218,86 @@ enum class Style(internal val coreSpec: CoreSpec) {
     )),
 }
 
+class TonalPalette {
+    val shadeKeys = listOf(10, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
+    val allShades: List<Int>
+    val allShadesMapped: Map<Int, Int>
+    val baseColor: Int
+
+    internal constructor(spec: TonalSpec, seedColor: Int) {
+        val seedCam = Cam.fromInt(seedColor)
+        allShades = spec.shades(seedCam)
+        allShadesMapped = shadeKeys.zip(allShades).toMap()
+
+        val h = spec.hue.get(seedCam).toFloat()
+        val c = spec.chroma.get(seedCam).toFloat()
+        baseColor = ColorUtils.CAMToColor(h, c, CamUtils.lstarFromInt(seedColor))
+    }
+
+    val s10: Int get() = this.allShades[0]
+    val s50: Int get() = this.allShades[1]
+    val s100: Int get() = this.allShades[2]
+    val s200: Int get() = this.allShades[3]
+    val s300: Int get() = this.allShades[4]
+    val s400: Int get() = this.allShades[5]
+    val s500: Int get() = this.allShades[6]
+    val s600: Int get() = this.allShades[7]
+    val s700: Int get() = this.allShades[8]
+    val s800: Int get() = this.allShades[9]
+    val s900: Int get() = this.allShades[10]
+    val s1000: Int get() = this.allShades[11]
+}
+
 class ColorScheme(
-    @ColorInt val seed: Int,
-    val darkTheme: Boolean,
-    val style: Style = Style.TONAL_SPOT
+        @ColorInt val seed: Int,
+        val darkTheme: Boolean,
+        val style: Style = Style.TONAL_SPOT
 ) {
 
-    val accent1: List<Int>
-    val accent2: List<Int>
-    val accent3: List<Int>
-    val neutral1: List<Int>
-    val neutral2: List<Int>
+    val accent1: TonalPalette
+    val accent2: TonalPalette
+    val accent3: TonalPalette
+    val neutral1: TonalPalette
+    val neutral2: TonalPalette
 
     constructor(@ColorInt seed: Int, darkTheme: Boolean) :
             this(seed, darkTheme, Style.TONAL_SPOT)
 
     @JvmOverloads
     constructor(
-        wallpaperColors: WallpaperColors,
-        darkTheme: Boolean,
-        style: Style = Style.TONAL_SPOT
+            wallpaperColors: WallpaperColors,
+            darkTheme: Boolean,
+            style: Style = Style.TONAL_SPOT
     ) :
             this(getSeedColor(wallpaperColors, style != Style.CONTENT), darkTheme, style)
+
+    val allHues: List<TonalPalette>
+        get() {
+            return listOf(accent1, accent2, accent3, neutral1, neutral2)
+        }
 
     val allAccentColors: List<Int>
         get() {
             val allColors = mutableListOf<Int>()
-            allColors.addAll(accent1)
-            allColors.addAll(accent2)
-            allColors.addAll(accent3)
+            allColors.addAll(accent1.allShades)
+            allColors.addAll(accent2.allShades)
+            allColors.addAll(accent3.allShades)
             return allColors
         }
 
     val allNeutralColors: List<Int>
         get() {
             val allColors = mutableListOf<Int>()
-            allColors.addAll(neutral1)
-            allColors.addAll(neutral2)
+            allColors.addAll(neutral1.allShades)
+            allColors.addAll(neutral2.allShades)
             return allColors
         }
 
     val backgroundColor
-        get() = ColorUtils.setAlphaComponent(if (darkTheme) neutral1[8] else neutral1[0], 0xFF)
+        get() = ColorUtils.setAlphaComponent(if (darkTheme) neutral1.s700 else neutral1.s10, 0xFF)
 
     val accentColor
-        get() = ColorUtils.setAlphaComponent(if (darkTheme) accent1[2] else accent1[6], 0xFF)
+        get() = ColorUtils.setAlphaComponent(if (darkTheme) accent1.s100 else accent1.s500, 0xFF)
 
     init {
         val proposedSeedCam = Cam.fromInt(seed)
@@ -269,24 +308,26 @@ class ColorScheme(
         } else {
             seed
         }
-        val camSeed = Cam.fromInt(seedArgb)
-        accent1 = style.coreSpec.a1.shades(camSeed)
-        accent2 = style.coreSpec.a2.shades(camSeed)
-        accent3 = style.coreSpec.a3.shades(camSeed)
-        neutral1 = style.coreSpec.n1.shades(camSeed)
-        neutral2 = style.coreSpec.n2.shades(camSeed)
+
+        accent1 = TonalPalette(style.coreSpec.a1, seedArgb)
+        accent2 = TonalPalette(style.coreSpec.a2, seedArgb)
+        accent3 = TonalPalette(style.coreSpec.a3, seedArgb)
+        neutral1 = TonalPalette(style.coreSpec.n1, seedArgb)
+        neutral2 = TonalPalette(style.coreSpec.n2, seedArgb)
     }
+
+    val shadeCount get() = this.accent1.allShades.size
 
     override fun toString(): String {
         return "ColorScheme {\n" +
                 "  seed color: ${stringForColor(seed)}\n" +
                 "  style: $style\n" +
                 "  palettes: \n" +
-                "  ${humanReadable("PRIMARY", accent1)}\n" +
-                "  ${humanReadable("SECONDARY", accent2)}\n" +
-                "  ${humanReadable("TERTIARY", accent3)}\n" +
-                "  ${humanReadable("NEUTRAL", neutral1)}\n" +
-                "  ${humanReadable("NEUTRAL VARIANT", neutral2)}\n" +
+                "  ${humanReadable("PRIMARY", accent1.allShades)}\n" +
+                "  ${humanReadable("SECONDARY", accent2.allShades)}\n" +
+                "  ${humanReadable("TERTIARY", accent3.allShades)}\n" +
+                "  ${humanReadable("NEUTRAL", neutral1.allShades)}\n" +
+                "  ${humanReadable("NEUTRAL VARIANT", neutral2.allShades)}\n" +
                 "}"
     }
 
@@ -385,7 +426,8 @@ class ColorScheme(
                     val existingSeedNearby = seeds.find {
                         val hueA = intToCam[int]!!.hue
                         val hueB = intToCam[it]!!.hue
-                        hueDiff(hueA, hueB) < i } != null
+                        hueDiff(hueA, hueB) < i
+                    } != null
                     if (existingSeedNearby) {
                         continue
                     }
@@ -460,9 +502,9 @@ class ColorScheme(
         }
 
         private fun huePopulations(
-            camByColor: Map<Int, Cam>,
-            populationByColor: Map<Int, Double>,
-            filter: Boolean = true
+                camByColor: Map<Int, Cam>,
+                populationByColor: Map<Int, Double>,
+                filter: Boolean = true
         ): List<Double> {
             val huePopulation = List(size = 360, init = { 0.0 }).toMutableList()
 

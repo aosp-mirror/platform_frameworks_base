@@ -21,7 +21,6 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SEARCH_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
 
@@ -74,11 +73,11 @@ import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
 import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.rotation.RotationButtonController;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -125,6 +124,7 @@ public class NavigationBarView extends FrameLayout {
     private int mDarkIconColor;
 
     private EdgeBackGestureHandler mEdgeBackGestureHandler;
+    private DisplayTracker mDisplayTracker;
     private final DeadZone mDeadZone;
     private NavigationBarTransitions mBarTransitions;
     @Nullable
@@ -160,6 +160,7 @@ public class NavigationBarView extends FrameLayout {
      * fully locked mode we only show that unlocking is blocked.
      */
     private ScreenPinningNotify mScreenPinningNotify;
+    private boolean mScreenPinningActive = false;
 
     /**
      * {@code true} if the IME can render the back button and the IME switcher button.
@@ -300,7 +301,8 @@ public class NavigationBarView extends FrameLayout {
                 R.dimen.floating_rotation_button_taskbar_left_margin,
                 R.dimen.floating_rotation_button_taskbar_bottom_margin,
                 R.dimen.floating_rotation_button_diameter,
-                R.dimen.key_button_ripple_max_width);
+                R.dimen.key_button_ripple_max_width,
+                R.bool.floating_rotation_button_position_left);
         mRotationButtonController = new RotationButtonController(mLightContext, mLightIconColor,
                 mDarkIconColor, R.drawable.ic_sysbar_rotate_button_ccw_start_0,
                 R.drawable.ic_sysbar_rotate_button_ccw_start_90,
@@ -356,6 +358,10 @@ public class NavigationBarView extends FrameLayout {
 
     public void setBackgroundExecutor(Executor bgExecutor) {
         mBgExecutor = bgExecutor;
+    }
+
+    public void setDisplayTracker(DisplayTracker displayTracker) {
+        mDisplayTracker = displayTracker;
     }
 
     public void setTouchHandler(Gefingerpoken touchHandler) {
@@ -555,7 +561,8 @@ public class NavigationBarView extends FrameLayout {
     }
 
     public void setBehavior(@Behavior int behavior) {
-        mRotationButtonController.onBehaviorChanged(Display.DEFAULT_DISPLAY, behavior);
+        mRotationButtonController.onBehaviorChanged(mDisplayTracker.getDefaultDisplayId(),
+                behavior);
     }
 
     @Override
@@ -636,14 +643,13 @@ public class NavigationBarView extends FrameLayout {
         // When screen pinning, don't hide back and home when connected service or back and
         // recents buttons when disconnected from launcher service in screen pinning mode,
         // as they are used for exiting.
-        final boolean pinningActive = ActivityManagerWrapper.getInstance().isScreenPinningActive();
         if (mOverviewProxyEnabled) {
             // Force disable recents when not in legacy mode
             disableRecent |= !QuickStepContract.isLegacyMode(mNavBarMode);
-            if (pinningActive && !QuickStepContract.isGesturalMode(mNavBarMode)) {
+            if (mScreenPinningActive && !QuickStepContract.isGesturalMode(mNavBarMode)) {
                 disableBack = disableHome = false;
             }
-        } else if (pinningActive) {
+        } else if (mScreenPinningActive) {
             disableBack = disableRecent = false;
         }
 
@@ -676,7 +682,7 @@ public class NavigationBarView extends FrameLayout {
     @VisibleForTesting
     boolean isRecentsButtonDisabled() {
         return mUseCarModeUi || !isOverviewEnabled()
-                || getContext().getDisplayId() != Display.DEFAULT_DISPLAY;
+                || getContext().getDisplayId() != mDisplayTracker.getDefaultDisplayId();
     }
 
     private Display getContextDisplay() {
@@ -738,15 +744,17 @@ public class NavigationBarView extends FrameLayout {
     public void updateDisabledSystemUiStateFlags(SysUiState sysUiState) {
         int displayId = mContext.getDisplayId();
 
-        sysUiState.setFlag(SYSUI_STATE_SCREEN_PINNING,
-                        ActivityManagerWrapper.getInstance().isScreenPinningActive())
-                .setFlag(SYSUI_STATE_OVERVIEW_DISABLED,
+        sysUiState.setFlag(SYSUI_STATE_OVERVIEW_DISABLED,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0)
                 .setFlag(SYSUI_STATE_HOME_DISABLED,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0)
                 .setFlag(SYSUI_STATE_SEARCH_DISABLED,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0)
                 .commitUpdate(displayId);
+    }
+
+    public void setInScreenPinning(boolean active) {
+        mScreenPinningActive = active;
     }
 
     private void updatePanelSystemUiStateFlags() {
@@ -1085,13 +1093,10 @@ public class NavigationBarView extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        // This needs to happen first as it can changed the enabled state which can affect whether
-        // the back button is visible
-        mEdgeBackGestureHandler.onNavBarAttached();
         requestApplyInsets();
         reorient();
         if (mRotationButtonController != null) {
-            mRotationButtonController.registerListeners();
+            mRotationButtonController.registerListeners(false /* registerRotationWatcher */);
         }
 
         updateNavButtonIcons();
@@ -1107,8 +1112,6 @@ public class NavigationBarView extends FrameLayout {
             mFloatingRotationButton.hide();
             mRotationButtonController.unregisterListeners();
         }
-
-        mEdgeBackGestureHandler.onNavBarDetached();
     }
 
     void dump(PrintWriter pw) {

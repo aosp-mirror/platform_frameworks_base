@@ -58,13 +58,15 @@ import java.util.function.Consumer;
 public final class PlaybackActivityMonitor
         implements AudioPlaybackConfiguration.PlayerDeathMonitor, PlayerFocusEnforcer {
 
-    public static final String TAG = "AudioService.PlaybackActivityMonitor";
+    public static final String TAG = "AS.PlayActivityMonitor";
 
     /*package*/ static final boolean DEBUG = false;
     /*package*/ static final int VOLUME_SHAPER_SYSTEM_DUCK_ID = 1;
     /*package*/ static final int VOLUME_SHAPER_SYSTEM_FADEOUT_ID = 2;
     /*package*/ static final int VOLUME_SHAPER_SYSTEM_MUTE_AWAIT_CONNECTION_ID = 3;
+    /*package*/ static final int VOLUME_SHAPER_SYSTEM_STRONG_DUCK_ID = 4;
 
+    // ducking settings for a "normal duck" at -14dB
     private static final VolumeShaper.Configuration DUCK_VSHAPE =
             new VolumeShaper.Configuration.Builder()
                 .setId(VOLUME_SHAPER_SYSTEM_DUCK_ID)
@@ -78,6 +80,22 @@ public final class PlaybackActivityMonitor
                 .build();
     private static final VolumeShaper.Configuration DUCK_ID =
             new VolumeShaper.Configuration(VOLUME_SHAPER_SYSTEM_DUCK_ID);
+
+    // ducking settings for a "strong duck" at -35dB (attenuation factor of 0.017783)
+    private static final VolumeShaper.Configuration STRONG_DUCK_VSHAPE =
+            new VolumeShaper.Configuration.Builder()
+                .setId(VOLUME_SHAPER_SYSTEM_STRONG_DUCK_ID)
+                .setCurve(new float[] { 0.f, 1.f } /* times */,
+                        new float[] { 1.f, 0.017783f } /* volumes */)
+                .setOptionFlags(VolumeShaper.Configuration.OPTION_FLAG_CLOCK_TIME)
+                .setDuration(MediaFocusControl.getFocusRampTimeMs(
+                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+                        new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                                .build()))
+                    .build();
+    private static final VolumeShaper.Configuration STRONG_DUCK_ID =
+            new VolumeShaper.Configuration(VOLUME_SHAPER_SYSTEM_STRONG_DUCK_ID);
+
     private static final VolumeShaper.Operation PLAY_CREATE_IF_NEEDED =
             new VolumeShaper.Operation.Builder(VolumeShaper.Operation.PLAY)
                     .createIfNeeded()
@@ -659,9 +677,21 @@ public final class PlaybackActivityMonitor
             // add the players eligible for ducking to the list, and duck them
             // (if apcsToDuck is empty, this will at least mark this uid as ducked, so when
             //  players of the same uid start, they will be ducked by DuckingManager.checkDuck())
-            mDuckingManager.duckUid(loser.getClientUid(), apcsToDuck);
+            mDuckingManager.duckUid(loser.getClientUid(), apcsToDuck, reqCausesStrongDuck(winner));
         }
         return true;
+    }
+
+    private boolean reqCausesStrongDuck(FocusRequester requester) {
+        if (requester.getGainRequest() != AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK) {
+            return false;
+        }
+        final int reqUsage = requester.getAudioAttributes().getUsage();
+        if ((reqUsage == AudioAttributes.USAGE_ASSISTANT)
+                || (reqUsage == AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -939,10 +969,11 @@ public final class PlaybackActivityMonitor
     private static final class DuckingManager {
         private final HashMap<Integer, DuckedApp> mDuckers = new HashMap<Integer, DuckedApp>();
 
-        synchronized void duckUid(int uid, ArrayList<AudioPlaybackConfiguration> apcsToDuck) {
+        synchronized void duckUid(int uid, ArrayList<AudioPlaybackConfiguration> apcsToDuck,
+                boolean requestCausesStrongDuck) {
             if (DEBUG) {  Log.v(TAG, "DuckingManager: duckUid() uid:"+ uid); }
             if (!mDuckers.containsKey(uid)) {
-                mDuckers.put(uid, new DuckedApp(uid));
+                mDuckers.put(uid, new DuckedApp(uid, requestCausesStrongDuck));
             }
             final DuckedApp da = mDuckers.get(uid);
             for (AudioPlaybackConfiguration apc : apcsToDuck) {
@@ -989,10 +1020,13 @@ public final class PlaybackActivityMonitor
 
         private static final class DuckedApp {
             private final int mUid;
+            /** determines whether ducking is done with DUCK_VSHAPE or STRONG_DUCK_VSHAPE */
+            private final boolean mUseStrongDuck;
             private final ArrayList<Integer> mDuckedPlayers = new ArrayList<Integer>();
 
-            DuckedApp(int uid) {
+            DuckedApp(int uid, boolean useStrongDuck) {
                 mUid = uid;
+                mUseStrongDuck = useStrongDuck;
             }
 
             void dump(PrintWriter pw) {
@@ -1013,9 +1047,9 @@ public final class PlaybackActivityMonitor
                     return;
                 }
                 try {
-                    sEventLogger.log((new DuckEvent(apc, skipRamp)).printLog(TAG));
+                    sEventLogger.log((new DuckEvent(apc, skipRamp, mUseStrongDuck)).printLog(TAG));
                     apc.getPlayerProxy().applyVolumeShaper(
-                            DUCK_VSHAPE,
+                            mUseStrongDuck ? STRONG_DUCK_VSHAPE : DUCK_VSHAPE,
                             skipRamp ? PLAY_SKIP_RAMP : PLAY_CREATE_IF_NEEDED);
                     mDuckedPlayers.add(piid);
                 } catch (Exception e) {
@@ -1031,7 +1065,7 @@ public final class PlaybackActivityMonitor
                             sEventLogger.log((new AudioEventLogger.StringEvent("unducking piid:"
                                     + piid)).printLog(TAG));
                             apc.getPlayerProxy().applyVolumeShaper(
-                                    DUCK_ID,
+                                    mUseStrongDuck ? STRONG_DUCK_ID : DUCK_ID,
                                     VolumeShaper.Operation.REVERSE);
                         } catch (Exception e) {
                             Log.e(TAG, "Error unducking player piid:" + piid + " uid:" + mUid, e);
@@ -1146,13 +1180,17 @@ public final class PlaybackActivityMonitor
     }
 
     static final class DuckEvent extends VolumeShaperEvent {
+        final boolean mUseStrongDuck;
+
         @Override
         String getVSAction() {
-            return "ducking";
+            return mUseStrongDuck ? "ducking (strong)" : "ducking";
         }
 
-        DuckEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp) {
+        DuckEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp, boolean useStrongDuck)
+        {
             super(apc, skipRamp);
+            mUseStrongDuck = useStrongDuck;
         }
     }
 

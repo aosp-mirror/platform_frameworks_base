@@ -19,11 +19,16 @@ package com.android.keyguard;
 import android.util.Log;
 import android.view.LayoutInflater;
 
+import androidx.annotation.Nullable;
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardInputViewController.Factory;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.systemui.R;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
@@ -44,18 +49,24 @@ public class KeyguardSecurityViewFlipperController
     private final List<KeyguardInputViewController<KeyguardInputView>> mChildren =
             new ArrayList<>();
     private final LayoutInflater mLayoutInflater;
+    private final AsyncLayoutInflater mAsyncLayoutInflater;
     private final EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
     private final Factory mKeyguardSecurityViewControllerFactory;
+    private final FeatureFlags mFeatureFlags;
 
     @Inject
     protected KeyguardSecurityViewFlipperController(KeyguardSecurityViewFlipper view,
             LayoutInflater layoutInflater,
+            AsyncLayoutInflater asyncLayoutInflater,
             KeyguardInputViewController.Factory keyguardSecurityViewControllerFactory,
-            EmergencyButtonController.Factory emergencyButtonControllerFactory) {
+            EmergencyButtonController.Factory emergencyButtonControllerFactory,
+            FeatureFlags featureFlags) {
         super(view);
         mKeyguardSecurityViewControllerFactory = keyguardSecurityViewControllerFactory;
         mLayoutInflater = layoutInflater;
         mEmergencyButtonControllerFactory = emergencyButtonControllerFactory;
+        mAsyncLayoutInflater = asyncLayoutInflater;
+        mFeatureFlags = featureFlags;
     }
 
     @Override
@@ -92,13 +103,12 @@ public class KeyguardSecurityViewFlipperController
             }
         }
 
-        if (childController == null
+        if (!mFeatureFlags.isEnabled(Flags.ASYNC_INFLATE_BOUNCER) && childController == null
                 && securityMode != SecurityMode.None && securityMode != SecurityMode.Invalid) {
-
             int layoutId = getLayoutIdFor(securityMode);
             KeyguardInputView view = null;
             if (layoutId != 0) {
-                if (DEBUG) Log.v(TAG, "inflating id = " + layoutId);
+                if (DEBUG) Log.v(TAG, "inflating on main thread id = " + layoutId);
                 view = (KeyguardInputView) mLayoutInflater.inflate(
                         layoutId, mView, false);
                 mView.addView(view);
@@ -117,6 +127,36 @@ public class KeyguardSecurityViewFlipperController
         }
 
         return childController;
+    }
+
+    /**
+     * Asynchronously inflate view and then add it to view flipper on the main thread when complete.
+     *
+     * OnInflateFinishedListener will be called on the main thread.
+     *
+     * @param securityMode
+     * @param keyguardSecurityCallback
+     */
+    public void asynchronouslyInflateView(SecurityMode securityMode,
+            KeyguardSecurityCallback keyguardSecurityCallback,
+            @Nullable OnViewInflatedListener onViewInflatedListener) {
+        int layoutId = getLayoutIdFor(securityMode);
+        if (layoutId != 0) {
+            if (DEBUG) Log.v(TAG, "inflating on bg thread id = " + layoutId);
+            mAsyncLayoutInflater.inflate(layoutId, mView,
+                    (view, resId, parent) -> {
+                        mView.addView(view);
+                        KeyguardInputViewController<KeyguardInputView> childController =
+                                mKeyguardSecurityViewControllerFactory.create(
+                                        (KeyguardInputView) view, securityMode,
+                                        keyguardSecurityCallback);
+                        childController.init();
+                        mChildren.add(childController);
+                        if (onViewInflatedListener != null) {
+                            onViewInflatedListener.onViewInflated();
+                        }
+                    });
+        }
     }
 
     private int getLayoutIdFor(SecurityMode securityMode) {
@@ -161,5 +201,11 @@ public class KeyguardSecurityViewFlipperController
         protected int getInitialMessageResId() {
             return 0;
         }
+    }
+
+    /** Listener to when view has finished inflation. */
+    public interface OnViewInflatedListener {
+        /** Notifies that view has been inflated */
+        void onViewInflated();
     }
 }

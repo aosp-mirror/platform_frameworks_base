@@ -70,7 +70,15 @@ class NotificationInterruptLogger @Inject constructor(
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
         }, {
-            "No alerting: snoozed package: $str1"
+            "No heads up: snoozed package: $str1"
+        })
+    }
+
+    fun logHeadsUpPackageSnoozeBypassedHasFsi(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "Heads up: package snooze bypassed because notification has full-screen intent: $str1"
         })
     }
 

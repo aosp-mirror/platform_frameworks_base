@@ -29,6 +29,7 @@ import android.graphics.drawable.Icon;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
@@ -43,6 +44,8 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +60,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     private static final String TEST_DEVICE_ID_1 = "test_device_id_1";
     private static final String TEST_DEVICE_ID_2 = "test_device_id_2";
     private static final String TEST_SESSION_NAME = "test_session_name";
+
     private static final int TEST_MAX_VOLUME = 20;
     private static final int TEST_CURRENT_VOLUME = 10;
 
@@ -69,6 +73,8 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     private IconCompat mIconCompat = mock(IconCompat.class);
     private View mDialogLaunchView = mock(View.class);
 
+    @Captor
+    private ArgumentCaptor<SeekBar.OnSeekBarChangeListener> mOnSeekBarChangeListenerCaptor;
     private MediaOutputAdapter mMediaOutputAdapter;
     private MediaOutputAdapter.MediaDeviceViewHolder mViewHolder;
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
@@ -78,6 +84,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     @Before
     public void setUp() {
         when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(false);
+        when(mMediaOutputController.isSubStatusSupported()).thenReturn(false);
         when(mMediaOutputController.getMediaItemList()).thenReturn(mMediaItems);
         when(mMediaOutputController.getMediaDevices()).thenReturn(mMediaDevices);
         when(mMediaOutputController.hasAdjustVolumeUserRestriction()).thenReturn(false);
@@ -348,6 +355,24 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBindViewHolder_dragSeekbar_setsVolume() {
+        mOnSeekBarChangeListenerCaptor = ArgumentCaptor.forClass(
+                SeekBar.OnSeekBarChangeListener.class);
+        MediaOutputSeekbar mSpySeekbar = spy(mViewHolder.mSeekBar);
+        mViewHolder.mSeekBar = mSpySeekbar;
+        when(mMediaDevice1.getMaxVolume()).thenReturn(TEST_MAX_VOLUME);
+        when(mMediaDevice1.getCurrentVolume()).thenReturn(TEST_MAX_VOLUME);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        verify(mViewHolder.mSeekBar).setOnSeekBarChangeListener(
+                mOnSeekBarChangeListenerCaptor.capture());
+
+        mOnSeekBarChangeListenerCaptor.getValue().onStopTrackingTouch(mViewHolder.mSeekBar);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        verify(mMediaOutputController).logInteractionAdjustVolume(mMediaDevice1);
+    }
+
+    @Test
     public void onBindViewHolder_bindSelectableDevice_verifyView() {
         List<MediaDevice> selectableDevices = new ArrayList<>();
         selectableDevices.add(mMediaDevice2);
@@ -400,6 +425,24 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mSubTitleText.getText()).isEqualTo(mContext.getText(
                 R.string.media_output_dialog_connect_failed));
+        assertThat(mViewHolder.mTwoLineTitleText.getText()).isEqualTo(TEST_DEVICE_NAME_2);
+    }
+
+    @Test
+    public void subStatusSupported_onBindViewHolder_bindFailedStateDevice_verifyView() {
+        String deviceStatus = "";
+        when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
+        when(mMediaDevice2.hasDisabledReason()).thenReturn(true);
+        when(mMediaDevice2.getDisableReason()).thenReturn(-1);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
+
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSubTitleText.getText()).isEqualTo(deviceStatus);
         assertThat(mViewHolder.mTwoLineTitleText.getText()).isEqualTo(TEST_DEVICE_NAME_2);
     }
 

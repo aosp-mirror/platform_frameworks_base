@@ -18,9 +18,9 @@ package com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.google.common.truth.Truth.assertThat
@@ -42,7 +42,7 @@ class AirplaneModeViewModelImplTest : SysuiTestCase() {
 
     private lateinit var underTest: AirplaneModeViewModelImpl
 
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var logger: TableLogBuffer
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var interactor: AirplaneModeInteractor

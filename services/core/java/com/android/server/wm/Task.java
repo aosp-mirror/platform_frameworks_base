@@ -609,7 +609,7 @@ class Task extends TaskFragment {
      */
     ActivityRecord mChildPipActivity;
 
-    boolean mLastSurfaceShowing = true;
+    boolean mLastSurfaceShowing;
 
     /**
      * Tracks if a back gesture is in progress.
@@ -3330,11 +3330,16 @@ class Task extends TaskFragment {
         // We intend to let organizer manage task visibility but it doesn't
         // have enough information until we finish shell transitions.
         // In the mean time we do an easy fix here.
-        final boolean show = isVisible() || isAnimating(TRANSITION | PARENTS | CHILDREN);
+        final boolean visible = isVisible();
+        final boolean show = visible || isAnimating(TRANSITION | PARENTS | CHILDREN);
         if (mSurfaceControl != null) {
             if (show != mLastSurfaceShowing) {
                 t.setVisibility(mSurfaceControl, show);
             }
+        }
+        // Only show the overlay if the task has other visible children
+        if (mOverlayHost != null) {
+            mOverlayHost.setVisibility(t, visible);
         }
         mLastSurfaceShowing = show;
     }
@@ -3447,13 +3452,22 @@ class Task extends TaskFragment {
                 && info.pictureInPictureParams.isLaunchIntoPip()
                 && top.getLastParentBeforePip() != null)
                         ? top.getLastParentBeforePip().mTaskId : INVALID_TASK_ID;
+        info.lastParentTaskIdBeforePip = top != null && top.getLastParentBeforePip() != null
+                ? top.getLastParentBeforePip().mTaskId : INVALID_TASK_ID;
         info.shouldDockBigOverlays = top != null && top.shouldDockBigOverlays;
         info.mTopActivityLocusId = top != null ? top.getLocusId() : null;
 
         final boolean isTopActivityResumed = top != null
                 && top.getOrganizedTask() == this && top.isState(RESUMED);
-        // Whether the direct top activity is in size compat mode on foreground.
-        info.topActivityInSizeCompat = isTopActivityResumed && top.inSizeCompatMode();
+        final boolean isTopActivityVisible = top != null
+                && top.getOrganizedTask() == this && top.isVisible();
+        // Whether the direct top activity is in size compat mode
+        info.topActivityInSizeCompat = isTopActivityVisible && top.inSizeCompatMode();
+        if (info.topActivityInSizeCompat
+                && mWmService.mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
+            // We hide the restart button in case of transparent activities.
+            info.topActivityInSizeCompat = top.fillsParent();
+        }
         // Whether the direct top activity is eligible for letterbox education.
         info.topActivityEligibleForLetterboxEducation = isTopActivityResumed
                 && top.isEligibleForLetterboxEducation();
@@ -3469,6 +3483,26 @@ class Task extends TaskFragment {
         info.isFocused = isFocused();
         info.isVisible = hasVisibleChildren();
         info.isSleeping = shouldSleepActivities();
+        info.isLetterboxDoubleTapEnabled = top != null
+                && top.mLetterboxUiController.isLetterboxDoubleTapEducationEnabled();
+        info.topActivityLetterboxVerticalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
+        info.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
+        info.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
+        info.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
+        info.isFromLetterboxDoubleTap = top != null && top.mLetterboxUiController.isFromDoubleTap();
+        if (info.isLetterboxDoubleTapEnabled) {
+            info.topActivityLetterboxWidth = top.getBounds().width();
+            info.topActivityLetterboxHeight = top.getBounds().height();
+            if (info.topActivityLetterboxWidth < info.topActivityLetterboxHeight) {
+                // Pillarboxed
+                info.topActivityLetterboxHorizontalPosition =
+                        top.mLetterboxUiController.getLetterboxPositionForHorizontalReachability();
+            } else {
+                // Letterboxed
+                info.topActivityLetterboxVerticalPosition =
+                        top.mLetterboxUiController.getLetterboxPositionForVerticalReachability();
+            }
+        }
     }
 
     /**
@@ -4201,13 +4235,7 @@ class Task extends TaskFragment {
 
     @Override
     boolean showSurfaceOnCreation() {
-        if (mCreatedByOrganizer) {
-            // Tasks created by the organizer are default visible because they can synchronously
-            // update the leash before new children are added to the task.
-            return true;
-        }
-        // Organized tasks handle their own surface visibility
-        return !canBeOrganized();
+        return false;
     }
 
     @Override
@@ -5884,8 +5912,11 @@ class Task extends TaskFragment {
             final int taskId = activity != null
                     ? mTaskSupervisor.getNextTaskIdForUser(activity.mUserId)
                     : mTaskSupervisor.getNextTaskIdForUser();
+            final int activityType = getActivityType();
             task = new Task.Builder(mAtmService)
                     .setTaskId(taskId)
+                    .setActivityType(activityType != ACTIVITY_TYPE_UNDEFINED ? activityType
+                            : ACTIVITY_TYPE_STANDARD)
                     .setActivityInfo(info)
                     .setActivityOptions(options)
                     .setIntent(intent)
@@ -6415,6 +6446,11 @@ class Task extends TaskFragment {
             return this;
         }
 
+        Builder setRemoveWithTaskOrganizer(boolean removeWithTaskOrganizer) {
+            mRemoveWithTaskOrganizer = removeWithTaskOrganizer;
+            return this;
+        }
+
         private Builder setUserId(int userId) {
             mUserId = userId;
             return this;
@@ -6612,7 +6648,7 @@ class Task extends TaskFragment {
             mCallingPackage = mActivityInfo.packageName;
             mResizeMode = mActivityInfo.resizeMode;
             mSupportsPictureInPicture = mActivityInfo.supportsPictureInPicture();
-            if (mActivityOptions != null) {
+            if (!mRemoveWithTaskOrganizer && mActivityOptions != null) {
                 mRemoveWithTaskOrganizer = mActivityOptions.getRemoveWithTaskOranizer();
             }
 

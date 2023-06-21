@@ -18,27 +18,29 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.phone.KeyguardBouncer
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.util.ListenerSet
 import javax.inject.Inject
 
 /** Interactor to add and remove callbacks for the bouncer. */
 @SysUISingleton
 class PrimaryBouncerCallbackInteractor @Inject constructor() {
-    private var resetCallbacks = ListenerSet<KeyguardBouncer.KeyguardResetCallback>()
-    private var expansionCallbacks = ArrayList<KeyguardBouncer.PrimaryBouncerExpansionCallback>()
+    private var resetCallbacks = ListenerSet<KeyguardResetCallback>()
+    private var expansionCallbacks = ArrayList<PrimaryBouncerExpansionCallback>()
+
     /** Add a KeyguardResetCallback. */
-    fun addKeyguardResetCallback(callback: KeyguardBouncer.KeyguardResetCallback) {
+    fun addKeyguardResetCallback(callback: KeyguardResetCallback) {
         resetCallbacks.addIfAbsent(callback)
     }
 
     /** Remove a KeyguardResetCallback. */
-    fun removeKeyguardResetCallback(callback: KeyguardBouncer.KeyguardResetCallback) {
+    fun removeKeyguardResetCallback(callback: KeyguardResetCallback) {
         resetCallbacks.remove(callback)
     }
 
     /** Adds a callback to listen to bouncer expansion updates. */
-    fun addBouncerExpansionCallback(callback: KeyguardBouncer.PrimaryBouncerExpansionCallback) {
+    fun addBouncerExpansionCallback(callback: PrimaryBouncerExpansionCallback) {
         if (!expansionCallbacks.contains(callback)) {
             expansionCallbacks.add(callback)
         }
@@ -48,7 +50,7 @@ class PrimaryBouncerCallbackInteractor @Inject constructor() {
      * Removes a previously added callback. If the callback was never added, this method does
      * nothing.
      */
-    fun removeBouncerExpansionCallback(callback: KeyguardBouncer.PrimaryBouncerExpansionCallback) {
+    fun removeBouncerExpansionCallback(callback: PrimaryBouncerExpansionCallback) {
         expansionCallbacks.remove(callback)
     }
 
@@ -98,5 +100,41 @@ class PrimaryBouncerCallbackInteractor @Inject constructor() {
         for (callback in resetCallbacks) {
             callback.onKeyguardReset()
         }
+    }
+
+    /** Callback updated when the primary bouncer's show and hide states change. */
+    interface PrimaryBouncerExpansionCallback {
+        /**
+         * Invoked when the bouncer expansion reaches [EXPANSION_VISIBLE]. This is NOT called each
+         * time the bouncer is shown, but rather only when the fully shown amount has changed based
+         * on the panel expansion. The bouncer's visibility can still change when the expansion
+         * amount hasn't changed. See [PrimaryBouncerInteractor.isFullyShowing] for the checks for
+         * the bouncer showing state.
+         */
+        fun onFullyShown() {}
+
+        /** Invoked when the bouncer is starting to transition to a hidden state. */
+        fun onStartingToHide() {}
+
+        /** Invoked when the bouncer is starting to transition to a visible state. */
+        fun onStartingToShow() {}
+
+        /** Invoked when the bouncer expansion reaches [EXPANSION_HIDDEN]. */
+        fun onFullyHidden() {}
+
+        /**
+         * From 0f [EXPANSION_VISIBLE] when fully visible to 1f [EXPANSION_HIDDEN] when fully hidden
+         */
+        fun onExpansionChanged(bouncerHideAmount: Float) {}
+
+        /**
+         * Invoked when visibility of KeyguardBouncer has changed. Note the bouncer expansion can be
+         * [EXPANSION_VISIBLE], but the view's visibility can be [View.INVISIBLE].
+         */
+        fun onVisibilityChanged(isVisible: Boolean) {}
+    }
+
+    interface KeyguardResetCallback {
+        fun onKeyguardReset()
     }
 }

@@ -17,7 +17,6 @@
 package com.android.systemui.qs.tiles;
 
 import android.app.UiModeManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Handler;
@@ -60,6 +59,9 @@ import javax.inject.Inject;
 public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         ConfigurationController.ConfigurationListener,
         BatteryController.BatteryStateChangeCallback {
+
+    public static final String TILE_SPEC = "dark";
+
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
     private final UiModeManager mUiModeManager;
     private final BatteryController mBatteryController;

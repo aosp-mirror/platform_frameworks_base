@@ -29,12 +29,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Debug;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.util.Log;
 
 import androidx.core.content.FileProvider;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.settings.UserTracker;
 
 import com.google.android.collect.Lists;
 
@@ -62,13 +62,15 @@ public class LeakReporter {
     static final String LEAK_DUMP = "leak.dump";
 
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final LeakDetector mLeakDetector;
     private final String mLeakReportEmail;
 
     @Inject
-    public LeakReporter(Context context, LeakDetector leakDetector,
+    public LeakReporter(Context context, UserTracker userTracker, LeakDetector leakDetector,
             @Nullable @Named(LEAK_REPORT_EMAIL_NAME) String leakReportEmail) {
         mContext = context;
+        mUserTracker = userTracker;
         mLeakDetector = leakDetector;
         mLeakReportEmail = leakReportEmail;
     }
@@ -111,7 +113,7 @@ public class LeakReporter {
                             getIntent(hprofFile, dumpFile),
                             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                             null,
-                            UserHandle.CURRENT));
+                            mUserTracker.getUserHandle()));
             notiMan.notify(TAG, 0, builder.build());
         } catch (IOException e) {
             Log.e(TAG, "Couldn't dump heap for leak", e);

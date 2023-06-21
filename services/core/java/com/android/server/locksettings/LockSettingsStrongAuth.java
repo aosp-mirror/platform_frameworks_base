@@ -25,6 +25,7 @@ import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -33,6 +34,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -46,8 +48,8 @@ import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
  */
 public class LockSettingsStrongAuth {
 
-    private static final String TAG = "LockSettings";
-    private static final boolean DEBUG = false;
+    private static final String TAG = "LockSettingsStrongAuth";
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int MSG_REQUIRE_STRONG_AUTH = 1;
     private static final int MSG_REGISTER_TRACKER = 2;
@@ -267,6 +269,7 @@ public class LockSettingsStrongAuth {
     }
 
     private void handleScheduleStrongAuthTimeout(int userId) {
+        if (DEBUG) Slog.d(TAG, "handleScheduleStrongAuthTimeout for userId=" + userId);
         rescheduleStrongAuthTimeoutAlarm(mInjector.getElapsedRealtimeMs(), userId);
 
         // cancel current non-strong biometric alarm listener for the user (if there was one)

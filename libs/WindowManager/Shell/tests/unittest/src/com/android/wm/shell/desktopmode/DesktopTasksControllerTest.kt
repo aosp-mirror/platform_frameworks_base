@@ -26,6 +26,8 @@ import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.os.Binder
 import android.testing.AndroidTestingRunner
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.TransitionRequestInfo
@@ -55,6 +57,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -141,7 +144,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps()
 
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
         assertThat(wct.hierarchyOps).hasSize(3)
         // Expect order to be from bottom: home, task1, task2
         wct.assertReorderAt(index = 0, homeTask)
@@ -150,8 +153,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun showDesktopApps_appsAlreadyVisible_doesNothing() {
-        setUpHomeTask()
+    fun showDesktopApps_appsAlreadyVisible_bringsToFront() {
+        val homeTask = setUpHomeTask()
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
         markTaskVisible(task1)
@@ -159,7 +162,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps()
 
-        verifyWCTNotExecuted()
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
+        assertThat(wct.hierarchyOps).hasSize(3)
+        // Expect order to be from bottom: home, task1, task2
+        wct.assertReorderAt(index = 0, homeTask)
+        wct.assertReorderAt(index = 1, task1)
+        wct.assertReorderAt(index = 2, task2)
     }
 
     @Test
@@ -172,7 +180,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps()
 
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
         assertThat(wct.hierarchyOps).hasSize(3)
         // Expect order to be from bottom: home, task1, task2
         wct.assertReorderAt(index = 0, homeTask)
@@ -186,16 +194,37 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps()
 
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
         assertThat(wct.hierarchyOps).hasSize(1)
         wct.assertReorderAt(index = 0, homeTask)
+    }
+
+    @Test
+    fun getVisibleTaskCount_noTasks_returnsZero() {
+        assertThat(controller.getVisibleTaskCount()).isEqualTo(0)
+    }
+
+    @Test
+    fun getVisibleTaskCount_twoTasks_bothVisible_returnsTwo() {
+        setUpHomeTask()
+        setUpFreeformTask().also(::markTaskVisible)
+        setUpFreeformTask().also(::markTaskVisible)
+        assertThat(controller.getVisibleTaskCount()).isEqualTo(2)
+    }
+
+    @Test
+    fun getVisibleTaskCount_twoTasks_oneVisible_returnsOne() {
+        setUpHomeTask()
+        setUpFreeformTask().also(::markTaskVisible)
+        setUpFreeformTask().also(::markTaskHidden)
+        assertThat(controller.getVisibleTaskCount()).isEqualTo(1)
     }
 
     @Test
     fun moveToDesktop() {
         val task = setUpFullscreenTask()
         controller.moveToDesktop(task)
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FREEFORM)
     }
@@ -207,10 +236,27 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    fun moveToDesktop_otherFreeformTasksBroughtToFront() {
+        val homeTask = setUpHomeTask()
+        val freeformTask = setUpFreeformTask()
+        val fullscreenTask = setUpFullscreenTask()
+        markTaskHidden(freeformTask)
+
+        controller.moveToDesktop(fullscreenTask)
+
+        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+            assertThat(hierarchyOps).hasSize(3)
+            assertReorderSequence(homeTask, freeformTask, fullscreenTask)
+            assertThat(changes[fullscreenTask.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_FREEFORM)
+        }
+    }
+
+    @Test
     fun moveToFullscreen() {
         val task = setUpFreeformTask()
         controller.moveToFullscreen(task)
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FULLSCREEN)
     }
@@ -372,10 +418,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
         desktopModeTaskRepository.updateVisibleFreeformTasks(task.taskId, visible = false)
     }
 
-    private fun getLatestWct(): WindowContainerTransaction {
+    private fun getLatestWct(
+        @WindowManager.TransitionType expectTransition: Int = TRANSIT_OPEN
+    ): WindowContainerTransaction {
         val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         if (ENABLE_SHELL_TRANSITIONS) {
-            verify(transitions).startTransition(anyInt(), arg.capture(), isNull())
+            verify(transitions).startTransition(eq(expectTransition), arg.capture(), isNull())
         } else {
             verify(shellTaskOrganizer).applyTransaction(arg.capture())
         }
@@ -405,4 +453,10 @@ private fun WindowContainerTransaction.assertReorderAt(index: Int, task: Running
     val op = hierarchyOps[index]
     assertThat(op.type).isEqualTo(HIERARCHY_OP_TYPE_REORDER)
     assertThat(op.container).isEqualTo(task.token.asBinder())
+}
+
+private fun WindowContainerTransaction.assertReorderSequence(vararg tasks: RunningTaskInfo) {
+    for (i in tasks.indices) {
+        assertReorderAt(i, tasks[i])
+    }
 }

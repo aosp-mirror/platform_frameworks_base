@@ -18,7 +18,6 @@ package com.android.systemui.shared.system;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityTaskManager.getService;
 
 import android.annotation.NonNull;
@@ -45,6 +44,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Display;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
@@ -112,6 +112,13 @@ public class ActivityManagerWrapper {
     }
 
     /**
+     * @see #getRunningTasks(boolean , int)
+     */
+    public ActivityManager.RunningTaskInfo[] getRunningTasks(boolean filterOnlyVisibleRecents) {
+        return getRunningTasks(filterOnlyVisibleRecents, Display.INVALID_DISPLAY);
+    }
+
+    /**
      * We ask for {@link #NUM_RECENT_ACTIVITIES_REQUEST} activities because when in split screen,
      * we'll get back 2 activities for each split app and one for launcher. Launcher might be more
      * "recently" used than one of the split apps so if we only request 2 tasks, then we might miss
@@ -120,10 +127,12 @@ public class ActivityManagerWrapper {
      * @return an array of up to {@link #NUM_RECENT_ACTIVITIES_REQUEST} running tasks
      *         filtering only for tasks that can be visible in the recent tasks list.
      */
-    public ActivityManager.RunningTaskInfo[] getRunningTasks(boolean filterOnlyVisibleRecents) {
+    public ActivityManager.RunningTaskInfo[] getRunningTasks(boolean filterOnlyVisibleRecents,
+            int displayId) {
         // Note: The set of running tasks from the system is ordered by recency
         List<ActivityManager.RunningTaskInfo> tasks =
-                mAtm.getTasks(NUM_RECENT_ACTIVITIES_REQUEST, filterOnlyVisibleRecents);
+                mAtm.getTasks(NUM_RECENT_ACTIVITIES_REQUEST,
+                        filterOnlyVisibleRecents, /* keepInExtras= */ false, displayId);
         return tasks.toArray(new RunningTaskInfo[tasks.size()]);
     }
 
@@ -279,17 +288,6 @@ public class ActivityManagerWrapper {
             getService().removeAllVisibleRecentTasks();
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to remove all tasks", e);
-        }
-    }
-
-    /**
-     * @return whether screen pinning is active.
-     */
-    public boolean isScreenPinningActive() {
-        try {
-            return getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED;
-        } catch (RemoteException e) {
-            return false;
         }
     }
 

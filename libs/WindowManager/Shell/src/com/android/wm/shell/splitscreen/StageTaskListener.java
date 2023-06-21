@@ -220,12 +220,20 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 mCallbacks.onNoLongerSupportMultiWindow();
                 return;
             }
-            mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
+            if (taskInfo.topActivity == null && mChildrenTaskInfo.contains(taskInfo.taskId)
+                    && mChildrenTaskInfo.get(taskInfo.taskId).topActivity != null) {
+                // If top activity become null, it means the task is about to vanish, we use this
+                // signal to remove it from children list earlier for smooth dismiss transition.
+                mChildrenTaskInfo.remove(taskInfo.taskId);
+                mChildrenLeashes.remove(taskInfo.taskId);
+            } else {
+                mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
+            }
             mCallbacks.onChildTaskStatusChanged(taskInfo.taskId, true /* present */,
                     taskInfo.isVisible);
-            if (!ENABLE_SHELL_TRANSITIONS) {
-                updateChildTaskSurface(
-                        taskInfo, mChildrenLeashes.get(taskInfo.taskId), false /* firstAppeared */);
+            if (!ENABLE_SHELL_TRANSITIONS && mChildrenLeashes.contains(taskInfo.taskId)) {
+                updateChildTaskSurface(taskInfo, mChildrenLeashes.get(taskInfo.taskId),
+                        false /* firstAppeared */);
             }
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
@@ -259,9 +267,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 return;
             }
             sendStatusChanged();
-        } else {
-            throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
-                    + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
     }
 

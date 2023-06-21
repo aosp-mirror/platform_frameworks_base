@@ -16,10 +16,16 @@
 
 package com.android.systemui.util.sensors;
 
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_CLOSED;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.Resources;
+import android.hardware.Sensor;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -46,26 +52,50 @@ public class PostureDependentProximitySensorTest extends SysuiTestCase {
     @Mock private Resources mResources;
     @Mock private DevicePostureController mDevicePostureController;
     @Mock private AsyncSensorManager mSensorManager;
+    @Mock private Sensor mMockedPrimaryProxSensor;
 
     @Captor private ArgumentCaptor<DevicePostureController.Callback> mPostureListenerCaptor =
             ArgumentCaptor.forClass(DevicePostureController.Callback.class);
     private DevicePostureController.Callback mPostureListener;
 
-    private PostureDependentProximitySensor mProximitySensor;
-    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    private PostureDependentProximitySensor mPostureDependentProximitySensor;
+    private ThresholdSensor[] mPrimaryProxSensors;
+    private ThresholdSensor[] mSecondaryProxSensors;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         allowTestableLooperAsMainThread();
 
-        mProximitySensor = new PostureDependentProximitySensor(
-                new ThresholdSensor[DevicePostureController.SUPPORTED_POSTURES_SIZE],
-                new ThresholdSensor[DevicePostureController.SUPPORTED_POSTURES_SIZE],
-                mFakeExecutor,
+        setupProximitySensors(DEVICE_POSTURE_CLOSED);
+        mPostureDependentProximitySensor = new PostureDependentProximitySensor(
+                mPrimaryProxSensors,
+                mSecondaryProxSensors,
+                new FakeExecutor(new FakeSystemClock()),
                 new FakeExecution(),
                 mDevicePostureController
         );
+    }
+
+    /**
+     * Support a proximity sensor only for the given devicePosture for the primary sensor.
+     * Otherwise, all other postures don't support prox.
+     */
+    private void setupProximitySensors(
+            @DevicePostureController.DevicePostureInt int proxExistsForPosture) {
+        final ThresholdSensorImpl.Builder sensorBuilder = new ThresholdSensorImpl.BuilderFactory(
+                mResources, mSensorManager, new FakeExecution()).createBuilder();
+
+        mPrimaryProxSensors = new ThresholdSensor[DevicePostureController.SUPPORTED_POSTURES_SIZE];
+        mSecondaryProxSensors =
+                new ThresholdSensor[DevicePostureController.SUPPORTED_POSTURES_SIZE];
+        for (int i = 0; i < DevicePostureController.SUPPORTED_POSTURES_SIZE; i++) {
+            mPrimaryProxSensors[i] = sensorBuilder.setSensor(null).setThresholdValue(0).build();
+            mSecondaryProxSensors[i] = sensorBuilder.setSensor(null).setThresholdValue(0).build();
+        }
+
+        mPrimaryProxSensors[proxExistsForPosture] = sensorBuilder
+                .setSensor(mMockedPrimaryProxSensor).setThresholdValue(5).build();
     }
 
     @Test
@@ -83,29 +113,58 @@ public class PostureDependentProximitySensorTest extends SysuiTestCase {
 
         // THEN device posture is updated to DEVICE_POSTURE_OPENED
         assertEquals(DevicePostureController.DEVICE_POSTURE_OPENED,
-                mProximitySensor.mDevicePosture);
+                mPostureDependentProximitySensor.mDevicePosture);
 
         // WHEN the posture changes to DEVICE_POSTURE_CLOSED
-        mPostureListener.onPostureChanged(DevicePostureController.DEVICE_POSTURE_CLOSED);
+        mPostureListener.onPostureChanged(DEVICE_POSTURE_CLOSED);
 
         // THEN device posture is updated to DEVICE_POSTURE_CLOSED
-        assertEquals(DevicePostureController.DEVICE_POSTURE_CLOSED,
-                mProximitySensor.mDevicePosture);
+        assertEquals(DEVICE_POSTURE_CLOSED,
+                mPostureDependentProximitySensor.mDevicePosture);
 
         // WHEN the posture changes to DEVICE_POSTURE_FLIPPED
         mPostureListener.onPostureChanged(DevicePostureController.DEVICE_POSTURE_FLIPPED);
 
         // THEN device posture is updated to DEVICE_POSTURE_FLIPPED
         assertEquals(DevicePostureController.DEVICE_POSTURE_FLIPPED,
-                mProximitySensor.mDevicePosture);
+                mPostureDependentProximitySensor.mDevicePosture);
 
         // WHEN the posture changes to DEVICE_POSTURE_HALF_OPENED
         mPostureListener.onPostureChanged(DevicePostureController.DEVICE_POSTURE_HALF_OPENED);
 
         // THEN device posture is updated to DEVICE_POSTURE_HALF_OPENED
         assertEquals(DevicePostureController.DEVICE_POSTURE_HALF_OPENED,
-                mProximitySensor.mDevicePosture);
+                mPostureDependentProximitySensor.mDevicePosture);
     }
+
+    @Test
+    public void proxSensorRegisters_proxSensorValid() {
+        // GIVEN posture that supports a valid posture with a prox sensor
+        capturePostureListener();
+        mPostureListener.onPostureChanged(DEVICE_POSTURE_CLOSED);
+
+        // WHEN a listener registers
+        mPostureDependentProximitySensor.register(mock(ThresholdSensor.Listener.class));
+
+        // THEN PostureDependentProximitySensor is registered
+        assertTrue(mPostureDependentProximitySensor.isRegistered());
+    }
+
+    @Test
+    public void proxSensorReregisters_postureChangesAndNewlySupportsProx() {
+        // GIVEN there's a registered listener but posture doesn't support prox
+        assertFalse(mPostureDependentProximitySensor.isRegistered());
+        mPostureDependentProximitySensor.register(mock(ThresholdSensor.Listener.class));
+        assertFalse(mPostureDependentProximitySensor.isRegistered());
+
+        // WHEN posture that supports a valid posture with a prox sensor
+        capturePostureListener();
+        mPostureListener.onPostureChanged(DEVICE_POSTURE_CLOSED);
+
+        // THEN PostureDependentProximitySensor is registered
+        assertTrue(mPostureDependentProximitySensor.isRegistered());
+    }
+
 
     private void capturePostureListener() {
         verify(mDevicePostureController).addCallback(mPostureListenerCaptor.capture());

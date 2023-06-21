@@ -243,6 +243,13 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void dismissDialog_closesDialogByBroadcastSender() {
+        mMediaOutputBaseDialogImpl.dismissDialog();
+
+        verify(mBroadcastSender).closeSystemDialogs();
+    }
+
+    @Test
     public void whenBroadcasting_verifyLeBroadcastServiceCallBackIsRegisteredAndUnregistered() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);

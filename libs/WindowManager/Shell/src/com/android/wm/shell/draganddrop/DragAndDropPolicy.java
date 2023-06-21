@@ -34,6 +34,7 @@ import static android.content.Intent.EXTRA_USER;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.draganddrop.DragAndDropConstants.EXTRA_DISALLOW_HIT_REGION;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_FULLSCREEN;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
@@ -53,6 +54,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -86,6 +88,7 @@ public class DragAndDropPolicy {
     private final Starter mStarter;
     private final SplitScreenController mSplitScreen;
     private final ArrayList<DragAndDropPolicy.Target> mTargets = new ArrayList<>();
+    private final RectF mDisallowHitRegion = new RectF();
 
     private InstanceId mLoggerSessionId;
     private DragSession mSession;
@@ -111,6 +114,12 @@ public class DragAndDropPolicy {
         mSession = new DragSession(mActivityTaskManager, displayLayout, data);
         // TODO(b/169894807): Also update the session data with task stack changes
         mSession.update();
+        RectF disallowHitRegion = (RectF) mSession.dragData.getExtra(EXTRA_DISALLOW_HIT_REGION);
+        if (disallowHitRegion == null) {
+            mDisallowHitRegion.setEmpty();
+        } else {
+            mDisallowHitRegion.set(disallowHitRegion);
+        }
     }
 
     /**
@@ -218,6 +227,9 @@ public class DragAndDropPolicy {
      */
     @Nullable
     Target getTargetAtLocation(int x, int y) {
+        if (mDisallowHitRegion.contains(x, y)) {
+            return null;
+        }
         for (int i = mTargets.size() - 1; i >= 0; i--) {
             DragAndDropPolicy.Target t = mTargets.get(i);
             if (t.hitRegion.contains(x, y)) {

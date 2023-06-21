@@ -340,6 +340,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode capturar gestos realizados no sensor de impressões digitais do dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fazer captura de ecrã"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"É possível tirar uma captura de ecrã."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Pré-visualização, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desativar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite à app desativar a barra de estado ou adicionar e remover ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ser apresentada na barra de estado"</string>
@@ -1840,6 +1841,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização de ecrã inteiro"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para sair, deslize rapidamente para baixo a partir da parte superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rode para uma melhor visualização"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Saia do ecrã dividido para uma melhor visualização"</string>
     <string name="done_label" msgid="7283767013231718521">"Concluído"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Controlo de deslize circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Controlo de deslize circular dos minutos"</string>

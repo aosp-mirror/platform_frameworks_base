@@ -71,7 +71,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     @Mock
     private QSPanel mQSPanel;
     @Mock
-    private QSTileHost mQSTileHost;
+    private QSHost mQSHost;
     @Mock
     private QSCustomizerController mQSCustomizerController;
     @Mock
@@ -105,7 +105,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
     /** Implementation needed to ensure we have a reflectively-available class name. */
     private class TestableQSPanelControllerBase extends QSPanelControllerBase<QSPanel> {
-        protected TestableQSPanelControllerBase(QSPanel view, QSTileHost host,
+        protected TestableQSPanelControllerBase(QSPanel view, QSHost host,
                 QSCustomizerController qsCustomizerController, MediaHost mediaHost,
                 MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
                 DumpManager dumpManager) {
@@ -130,8 +130,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSPanel.getOrCreateTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSPanel.getTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSTile.getTileSpec()).thenReturn("dnd");
-        when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
-        when(mQSTileHost.createTileView(any(), eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
+        when(mQSHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
+        when(mQSHost.createTileView(any(), eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mQSTileRevealControllerFactory.create(any(), any()))
                 .thenReturn(mQSTileRevealController);
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
@@ -142,7 +142,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
             return null;
         }).when(mQSPanel).setListening(anyBoolean());
 
-        mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
+        mController = new TestableQSPanelControllerBase(mQSPanel, mQSHost,
                 mQSCustomizerController, mMediaHost,
                 mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager);
 
@@ -155,7 +155,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         mController.onViewDetached();
 
         QSPanelControllerBase<QSPanel> controller = new TestableQSPanelControllerBase(mQSPanel,
-                mQSTileHost, mQSCustomizerController, mMediaHost,
+                mQSHost, mQSCustomizerController, mMediaHost,
                 mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager) {
             @Override
             protected QSTileRevealController createTileRevealController() {
@@ -250,7 +250,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(false);
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanelLandscape");
-        mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
+        mController = new TestableQSPanelControllerBase(mQSPanel, mQSHost,
                 mQSCustomizerController, mMediaHost,
                 mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager);
         mController.init();
@@ -259,7 +259,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanelPortrait");
-        mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
+        mController = new TestableQSPanelControllerBase(mQSPanel, mQSHost,
                 mQSCustomizerController, mMediaHost,
                 mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager);
         mController.init();
@@ -291,7 +291,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
     @Test
     public void testRefreshAllTilesDoesntRefreshListeningTiles() {
-        when(mQSTileHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
+        when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
         mController.setTiles();
 
         when(mQSTile.isListening()).thenReturn(false);

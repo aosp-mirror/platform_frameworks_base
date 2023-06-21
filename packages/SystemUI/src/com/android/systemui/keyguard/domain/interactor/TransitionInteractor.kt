@@ -30,7 +30,26 @@ sealed class TransitionInteractor(val name: String) {
 
     abstract fun start()
 
+    fun <A, B, C> toTriple(a: A, b: B, c: C) = Triple(a, b, c)
+
     fun <A, B, C> toTriple(a: A, bc: Pair<B, C>) = Triple(a, bc.first, bc.second)
 
     fun <A, B, C> toTriple(ab: Pair<A, B>, c: C) = Triple(ab.first, ab.second, c)
+
+    fun <A, B, C, D> toQuad(a: A, b: B, c: C, d: D) = Quad(a, b, c, d)
+
+    fun <A, B, C, D> toQuad(a: A, bcd: Triple<B, C, D>) = Quad(a, bcd.first, bcd.second, bcd.third)
+
+    fun <A, B, C, D, E> toQuint(a: A, bcde: Quad<B, C, D, E>) =
+        Quint(a, bcde.first, bcde.second, bcde.third, bcde.fourth)
 }
+
+data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+
+data class Quint<A, B, C, D, E>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D,
+    val fifth: E
+)

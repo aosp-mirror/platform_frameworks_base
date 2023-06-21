@@ -483,6 +483,38 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
 
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testDoKeyguardWhileInteractive_resets() {
+        mViewMediator.setShowingLocked(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        TestableLooper.get(this).processAllMessages();
+
+        when(mPowerManager.isInteractive()).thenReturn(true);
+
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+        verify(mStatusBarKeyguardViewManager).reset(anyBoolean());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testDoKeyguardWhileNotInteractive_showsInsteadOfResetting() {
+        mViewMediator.setShowingLocked(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        TestableLooper.get(this).processAllMessages();
+
+        when(mPowerManager.isInteractive()).thenReturn(false);
+
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+        verify(mStatusBarKeyguardViewManager, never()).reset(anyBoolean());
+    }
+
     private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,

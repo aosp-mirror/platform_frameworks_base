@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.RoutingSessionInfo;
 import android.os.Build;
@@ -210,6 +211,15 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public boolean isMediaSessionAvailableForVolumeControl() {
         return mInfoMediaManager.isRoutingSessionAvailableForVolumeControl();
+    }
+
+    /**
+     * Returns if media app establishes a preferred route listing order.
+     *
+     * @return True if route list ordering exist and not using system ordering, false otherwise.
+     */
+    public boolean isPreferenceRouteListingExist() {
+        return mInfoMediaManager.preferRouteListingOrdering();
     }
 
     /**
@@ -583,9 +593,11 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         private boolean isMutingExpectedDevice(CachedBluetoothDevice cachedDevice) {
-            return mAudioManager.getMutingExpectedDevice() != null
-                    && cachedDevice.getAddress().equals(
-                    mAudioManager.getMutingExpectedDevice().getAddress());
+            AudioDeviceAttributes mutingExpectedDevice = mAudioManager.getMutingExpectedDevice();
+            if (mutingExpectedDevice == null || cachedDevice == null) {
+                return false;
+            }
+            return cachedDevice.getAddress().equals(mutingExpectedDevice.getAddress());
         }
 
         private List<MediaDevice> buildDisconnectedBluetoothDevice() {

@@ -33,7 +33,6 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
@@ -46,12 +45,12 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
 
     private final TextView mDigitText;
     private final TextView mKlondikeText;
-    private final LockPatternUtils mLockPatternUtils;
     private final PowerManager mPM;
 
     private int mDigit = -1;
     private int mTextViewResId;
     private PasswordTextView mTextView;
+    private boolean mAnimationsEnabled = true;
 
     @Nullable
     private NumPadAnimator mAnimator;
@@ -107,7 +106,6 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         setOnHoverListener(new LiftToActivateListener(
                 (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE)));
 
-        mLockPatternUtils = new LockPatternUtils(context);
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
@@ -167,11 +165,11 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         switch(event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 doHapticKeyClick();
-                if (mAnimator != null) mAnimator.expand();
+                if (mAnimator != null && mAnimationsEnabled) mAnimator.expand();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (mAnimator != null) mAnimator.contract();
+                if (mAnimator != null && mAnimationsEnabled) mAnimator.contract();
                 break;
         }
         return super.onTouchEvent(event);
@@ -230,5 +228,12 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         if (mAnimator != null) {
             mAnimator.setProgress(progress);
         }
+    }
+
+    /**
+     * Controls the animation when a key is pressed
+     */
+    public void setAnimationEnabled(boolean enabled) {
+        mAnimationsEnabled = enabled;
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.systemui.temporarydisplay.chipbar
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Rect
 import android.os.PowerManager
@@ -27,13 +29,14 @@ import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.IdRes
+import androidx.annotation.VisibleForTesting
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
-import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text.Companion.loadText
@@ -78,8 +81,10 @@ constructor(
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
     powerManager: PowerManager,
+    private val chipbarAnimator: ChipbarAnimator,
     private val falsingManager: FalsingManager,
     private val falsingCollector: FalsingCollector,
+    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler?,
     private val viewUtil: ViewUtil,
     private val vibratorHelper: VibratorHelper,
     wakeLockBuilder: WakeLock.Builder,
@@ -101,10 +106,21 @@ constructor(
 
     private lateinit var parent: ChipbarRootView
 
+    /** The current loading information, or null we're not currently loading. */
+    @VisibleForTesting
+    internal var loadingDetails: LoadingDetails? = null
+        private set(value) {
+            // Always cancel the old one before updating
+            field?.animator?.cancel()
+            field = value
+        }
+
     override val windowLayoutParams =
         commonWindowLayoutParams.apply { gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL) }
 
     override fun updateView(newInfo: ChipbarInfo, currentView: ViewGroup) {
+        updateGestureListening()
+
         logger.logViewUpdate(
             newInfo.windowTitle,
             newInfo.text.loadText(context),
@@ -141,8 +157,22 @@ constructor(
 
         // ---- End item ----
         // Loading
-        currentView.requireViewById<View>(R.id.loading).visibility =
-            (newInfo.endItem == ChipbarEndItem.Loading).visibleIfTrue()
+        val isLoading = newInfo.endItem == ChipbarEndItem.Loading
+        val loadingView = currentView.requireViewById<ImageView>(R.id.loading)
+        loadingView.visibility = isLoading.visibleIfTrue()
+
+        if (isLoading) {
+            val currentLoadingDetails = loadingDetails
+            // Since there can be multiple chipbars, we need to check if the loading view is the
+            // same and possibly re-start the loading animation on the new view.
+            if (currentLoadingDetails == null || currentLoadingDetails.loadingView != loadingView) {
+                val newDetails = createLoadingDetails(loadingView)
+                newDetails.animator.start()
+                loadingDetails = newDetails
+            }
+        } else {
+            loadingDetails = null
+        }
 
         // Error
         currentView.requireViewById<View>(R.id.error).visibility =
@@ -203,35 +233,76 @@ constructor(
     }
 
     override fun animateViewIn(view: ViewGroup) {
-        ViewHierarchyAnimator.animateAddition(
-            view.getInnerView(),
-            ViewHierarchyAnimator.Hotspot.TOP,
-            Interpolators.EMPHASIZED_DECELERATE,
-            duration = ANIMATION_IN_DURATION,
-            includeMargins = true,
-            includeFadeIn = true,
-            // We can only request focus once the animation finishes.
-            onAnimationEnd = {
-                maybeGetAccessibilityFocus(view.getTag(INFO_TAG) as ChipbarInfo?, view)
-            },
-        )
+        // We can only request focus once the animation finishes.
+        val onAnimationEnd = Runnable {
+            maybeGetAccessibilityFocus(view.getTag(INFO_TAG) as ChipbarInfo?, view)
+        }
+        val animatedIn = chipbarAnimator.animateViewIn(view.getInnerView(), onAnimationEnd)
+
+        // If the view doesn't get animated, the [onAnimationEnd] runnable won't get run and the
+        // views would remain un-displayed. So, just force-set/run those items immediately.
+        if (!animatedIn) {
+            logger.logAnimateInFailure()
+            chipbarAnimator.forceDisplayView(view.getInnerView())
+            onAnimationEnd.run()
+        }
     }
 
     override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
         val innerView = view.getInnerView()
         innerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_NONE
-        ViewHierarchyAnimator.animateRemoval(
-            innerView,
-            ViewHierarchyAnimator.Hotspot.TOP,
-            Interpolators.EMPHASIZED_ACCELERATE,
-            ANIMATION_OUT_DURATION,
-            includeMargins = true,
-            onAnimationEnd,
-        )
+
+        val fullEndRunnable = Runnable {
+            loadingDetails = null
+            onAnimationEnd.run()
+        }
+        val removed = chipbarAnimator.animateViewOut(innerView, fullEndRunnable)
+        // If the view doesn't get animated, the [onAnimationEnd] runnable won't get run. So, just
+        // run it immediately.
+        if (!removed) {
+            logger.logAnimateOutFailure()
+            fullEndRunnable.run()
+        }
+
+        updateGestureListening()
+    }
+
+    private fun updateGestureListening() {
+        if (swipeChipbarAwayGestureHandler == null) {
+            return
+        }
+
+        val currentDisplayInfo = getCurrentDisplayInfo()
+        if (currentDisplayInfo != null && currentDisplayInfo.info.allowSwipeToDismiss) {
+            swipeChipbarAwayGestureHandler.setViewFetcher { currentDisplayInfo.view }
+            swipeChipbarAwayGestureHandler.addOnGestureDetectedCallback(TAG) {
+                onSwipeUpGestureDetected()
+            }
+        } else {
+            swipeChipbarAwayGestureHandler.resetViewFetcher()
+            swipeChipbarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
+        }
+    }
+
+    private fun onSwipeUpGestureDetected() {
+        val currentDisplayInfo = getCurrentDisplayInfo()
+        if (currentDisplayInfo == null) {
+            logger.logSwipeGestureError(id = null, errorMsg = "No info is being displayed")
+            return
+        }
+        if (!currentDisplayInfo.info.allowSwipeToDismiss) {
+            logger.logSwipeGestureError(
+                id = currentDisplayInfo.info.id,
+                errorMsg = "This view prohibits swipe-to-dismiss",
+            )
+            return
+        }
+        removeView(currentDisplayInfo.info.id, SWIPE_UP_GESTURE_REASON)
+        updateGestureListening()
     }
 
     private fun ViewGroup.getInnerView(): ViewGroup {
-        return requireViewById(R.id.chipbar_inner)
+        return this.requireViewById(R.id.chipbar_inner)
     }
 
     override fun getTouchableRegion(view: View, outRect: Rect) {
@@ -245,8 +316,28 @@ constructor(
             View.GONE
         }
     }
+
+    private fun createLoadingDetails(loadingView: View): LoadingDetails {
+        // Ideally, we would use a <ProgressBar> view, which would automatically handle the loading
+        // spinner rotation for us. However, due to b/243983980, the ProgressBar animation
+        // unexpectedly pauses when SysUI starts another window. ObjectAnimator is a workaround that
+        // won't pause.
+        val animator =
+            ObjectAnimator.ofFloat(loadingView, View.ROTATION, 0f, 360f).apply {
+                duration = LOADING_ANIMATION_DURATION_MS
+                repeatCount = ValueAnimator.INFINITE
+                interpolator = Interpolators.LINEAR
+            }
+        return LoadingDetails(loadingView, animator)
+    }
+
+    internal data class LoadingDetails(
+        val loadingView: View,
+        val animator: ObjectAnimator,
+    )
 }
 
-private const val ANIMATION_IN_DURATION = 500L
-private const val ANIMATION_OUT_DURATION = 250L
 @IdRes private val INFO_TAG = R.id.tag_chipbar_info
+private const val SWIPE_UP_GESTURE_REASON = "SWIPE_UP_GESTURE_DETECTED"
+private const val TAG = "ChipbarCoordinator"
+private const val LOADING_ANIMATION_DURATION_MS = 1000L

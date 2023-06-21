@@ -93,6 +93,16 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     @IntDef({STATE_ICON, STATE_DOT, STATE_HIDDEN})
     public @interface VisibleState { }
 
+    /** Returns a human-readable string of {@link VisibleState}. */
+    public static String getVisibleStateString(@VisibleState int state) {
+        switch(state) {
+            case STATE_ICON: return "ICON";
+            case STATE_DOT: return "DOT";
+            case STATE_HIDDEN: return "HIDDEN";
+            default: return "UNKNOWN";
+        }
+    }
+
     private static final String TAG = "StatusBarIconView";
     private static final Property<StatusBarIconView, Float> ICON_APPEAR_AMOUNT
             = new FloatProperty<StatusBarIconView>("iconAppearAmount") {
@@ -561,7 +571,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     @Override
     public String toString() {
         return "StatusBarIconView("
-                + "slot='" + mSlot + " alpha=" + getAlpha() + " icon=" + mIcon
+                + "slot='" + mSlot + "' alpha=" + getAlpha() + " icon=" + mIcon
+                + " visibleState=" + getVisibleStateString(getVisibleState())
                 + " iconColor=#" + Integer.toHexString(mIconColor)
                 + " notification=" + mNotification + ')';
     }

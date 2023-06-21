@@ -1,6 +1,8 @@
 package com.android.systemui.dreams
 
+import android.animation.Animator
 import android.animation.AnimatorSet
+import android.animation.ValueAnimator
 import android.testing.AndroidTestingRunner
 import android.view.View
 import androidx.test.filters.SmallTest
@@ -10,13 +12,16 @@ import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransition
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.eq
@@ -71,6 +76,19 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testExitAnimationUpdatesState() {
+        controller.startExitAnimations(animatorBuilder = { mockAnimator })
+
+        verify(stateController).setExitAnimationsRunning(true)
+
+        val captor = argumentCaptor<Animator.AnimatorListener>()
+        verify(mockAnimator).addListener(captor.capture())
+
+        captor.value.onAnimationEnd(mockAnimator)
+        verify(stateController).setExitAnimationsRunning(false)
+    }
+
+    @Test
     fun testWakeUpCallsExecutor() {
         val mockExecutor: DelayableExecutor = mock()
         val mockCallback: Runnable = mock()
@@ -87,7 +105,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
     fun testWakeUpAfterStartWillCancel() {
         val mockStartAnimator: AnimatorSet = mock()
 
-        controller.startEntryAnimations(animatorBuilder = { mockStartAnimator })
+        controller.startEntryAnimations(false, animatorBuilder = { mockStartAnimator })
 
         verify(mockStartAnimator, never()).cancel()
 
@@ -99,5 +117,51 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
         // Verify that we cancelled the start animator in favor of the exit
         // animator.
         verify(mockStartAnimator, times(1)).cancel()
+    }
+
+    @Test
+    fun testEntryAnimations_translatesUpwards() {
+        val mockStartAnimator: AnimatorSet = mock()
+
+        controller.startEntryAnimations(
+            /* downwards= */ false,
+            animatorBuilder = { mockStartAnimator }
+        )
+
+        val animatorCaptor = ArgumentCaptor.forClass(Animator::class.java)
+        verify(mockStartAnimator).playTogether(animatorCaptor.capture())
+
+        // Check if there's a ValueAnimator starting at the expected Y distance.
+        val animators: List<ValueAnimator> = animatorCaptor.allValues as List<ValueAnimator>
+        assertTrue(
+            animators.any {
+                // Call setCurrentFraction so the animated value jumps to the initial value.
+                it.setCurrentFraction(0f)
+                it.animatedValue == DREAM_IN_TRANSLATION_Y_DISTANCE.toFloat()
+            }
+        )
+    }
+
+    @Test
+    fun testEntryAnimations_translatesDownwards() {
+        val mockStartAnimator: AnimatorSet = mock()
+
+        controller.startEntryAnimations(
+            /* downwards= */ true,
+            animatorBuilder = { mockStartAnimator }
+        )
+
+        val animatorCaptor = ArgumentCaptor.forClass(Animator::class.java)
+        verify(mockStartAnimator).playTogether(animatorCaptor.capture())
+
+        // Check if there's a ValueAnimator starting at the expected Y distance.
+        val animators: List<ValueAnimator> = animatorCaptor.allValues as List<ValueAnimator>
+        assertTrue(
+            animators.any {
+                // Call setCurrentFraction so the animated value jumps to the initial value.
+                it.setCurrentFraction(0f)
+                it.animatedValue == -DREAM_IN_TRANSLATION_Y_DISTANCE.toFloat()
+            }
+        )
     }
 }

@@ -40,24 +40,49 @@ import java.io.IOException;
 public class MemoryTrackingTestCase extends SysuiTestCase {
     private static File sFilesDir = null;
     private static String sLatestTestClassName = null;
+    private static int sHeapCount = 0;
+    private static File sLatestBaselineHeapFile = null;
 
-    @Before public void grabFilesDir() {
+    // Ideally, we would do this in @BeforeClass just once, but we need mContext to get the files
+    // dir, and that does not exist until @Before on each test method.
+    @Before
+    public void grabFilesDir() throws IOException {
+        // This should happen only once per suite
         if (sFilesDir == null) {
             sFilesDir = mContext.getFilesDir();
         }
-        sLatestTestClassName = getClass().getName();
+
+        // This will happen before the first test method in each class
+        if (sLatestTestClassName == null) {
+            sLatestTestClassName = getClass().getName();
+            sLatestBaselineHeapFile = dump("baseline" + (++sHeapCount), "before-test");
+        }
     }
 
     @AfterClass
     public static void dumpHeap() throws IOException {
+        File afterTestHeap = dump(sLatestTestClassName, "after-test");
+        if (sLatestBaselineHeapFile != null && afterTestHeap != null) {
+            Log.w("MEMORY", "To compare heap to baseline (use go/ahat):");
+            Log.w("MEMORY", "  adb pull " + sLatestBaselineHeapFile);
+            Log.w("MEMORY", "  adb pull " + afterTestHeap);
+            Log.w("MEMORY",
+                    "  java -jar ahat.jar --baseline " + sLatestBaselineHeapFile.getName() + " "
+                            + afterTestHeap.getName());
+        }
+        sLatestTestClassName = null;
+    }
+
+    private static File dump(String basename, String heapKind) throws IOException {
         if (sFilesDir == null) {
             Log.e("MEMORY", "Somehow no test cases??");
-            return;
+            return null;
         }
         mockitoTearDown();
-        Log.w("MEMORY", "about to dump heap");
-        File path = new File(sFilesDir, sLatestTestClassName + ".ahprof");
+        Log.w("MEMORY", "about to dump " + heapKind + " heap");
+        File path = new File(sFilesDir, basename + ".ahprof");
         Debug.dumpHprofData(path.getPath());
-        Log.w("MEMORY", "did it!  Location: " + path);
+        Log.w("MEMORY", "Success!  Location: " + path);
+        return path;
     }
 }

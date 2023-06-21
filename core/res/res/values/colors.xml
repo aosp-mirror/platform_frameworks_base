@@ -150,6 +150,8 @@
     <color name="notification_default_color">#757575</color> <!-- Gray 600 -->
 
     <color name="notification_action_button_text_color">@color/notification_default_color</color>
+    <item  name="notification_action_disabled_content_alpha" format="float" type="dimen">0.38</item>
+    <item  name="notification_action_disabled_container_alpha" format="float" type="dimen">0.12</item>
 
     <color name="notification_progress_background_color">@color/notification_secondary_text_color_current</color>
 

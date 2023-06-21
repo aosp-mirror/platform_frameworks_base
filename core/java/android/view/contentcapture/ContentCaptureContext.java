@@ -82,11 +82,19 @@ public final class ContentCaptureContext implements Parcelable {
     @SystemApi
     public static final int FLAG_RECONNECTED = 0x4;
 
+    /**
+     * Flag used to disable flush when receiving a VIEW_TREE_APPEARING event.
+     *
+     * @hide
+     */
+    public static final int FLAG_DISABLED_FLUSH_FOR_VIEW_TREE_APPEARING = 1 << 3;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_DISABLED_BY_APP,
             FLAG_DISABLED_BY_FLAG_SECURE,
-            FLAG_RECONNECTED
+            FLAG_RECONNECTED,
+            FLAG_DISABLED_FLUSH_FOR_VIEW_TREE_APPEARING
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ContextCreationFlags{}
@@ -252,7 +260,8 @@ public final class ContentCaptureContext implements Parcelable {
      * Gets the flags associated with this context.
      *
      * @return any combination of {@link #FLAG_DISABLED_BY_FLAG_SECURE},
-     * {@link #FLAG_DISABLED_BY_APP} and {@link #FLAG_RECONNECTED}.
+     * {@link #FLAG_DISABLED_BY_APP}, {@link #FLAG_RECONNECTED} and {@link
+     * #FLAG_DISABLED_FLUSH_FOR_VIEW_TREE_APPEARING}.
      *
      * @hide
      */

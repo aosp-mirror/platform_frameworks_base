@@ -1582,6 +1582,55 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetComponentState_differentUsers() throws Exception {
+        Context context = mock(Context.class);
+        PackageManager pm = mock(PackageManager.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        when(context.getPackageName()).thenReturn(mContext.getPackageName());
+        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageManager()).thenReturn(pm);
+        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+        ComponentName cn = ComponentName.unflattenFromString("a/a");
+
+        addExpectedServices(service, Arrays.asList("a"), mZero.id);
+        addExpectedServices(service, Arrays.asList("a"), mTen.id);
+        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ServiceConnection sc = (ServiceConnection) args[1];
+            sc.onServiceConnected(cn, mock(IBinder.class));
+            return true;
+        });
+        service.addApprovedList("a/a", 0, true);
+        service.addApprovedList("a/a", 10, false);
+
+        service.registerService(cn, mZero.id);
+        assertTrue(service.isBound(cn, mZero.id));
+
+        service.onUserSwitched(mTen.id);
+        assertFalse(service.isBound(cn, mZero.id));
+        service.registerService(cn, mTen.id);
+        assertTrue(service.isBound(cn, mTen.id));
+
+        service.setComponentState(cn, mTen.id, false);
+        assertFalse(service.isBound(cn, mZero.id));
+        assertFalse(service.isBound(cn, mTen.id));
+
+        // Service should be rebound on user 0, since it was only disabled for user 10.
+        service.onUserSwitched(mZero.id);
+        assertTrue(service.isBound(cn, mZero.id));
+        assertFalse(service.isBound(cn, mTen.id));
+
+        // Service should stay unbound on going back to user 10.
+        service.onUserSwitched(mTen.id);
+        assertFalse(service.isBound(cn, mZero.id));
+        assertFalse(service.isBound(cn, mTen.id));
+    }
+    @Test
     public void testOnPackagesChanged_nullValuesPassed_noNullPointers() {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
@@ -1847,7 +1896,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     private void addExpectedServices(final ManagedServices service, final List<String> packages,
-            int userId) {
+            int userId) throws Exception {
         ManagedServices.Config config = service.getConfig();
         when(mPm.queryIntentServicesAsUser(any(), anyInt(), eq(userId))).
                 thenAnswer(new Answer<List<ResolveInfo>>() {
@@ -1876,6 +1925,20 @@ public class ManagedServicesTest extends UiServiceTestCase {
                         return new ArrayList<>();
                     }
                 });
+
+        when(mIpm.getServiceInfo(any(), anyLong(), anyInt())).thenAnswer(
+                (Answer<ServiceInfo>) invocation -> {
+                    ComponentName invocationCn = invocation.getArgument(0);
+                    if (invocationCn != null && packages.contains(invocationCn.getPackageName())) {
+                        ServiceInfo serviceInfo = new ServiceInfo();
+                        serviceInfo.packageName = invocationCn.getPackageName();
+                        serviceInfo.name = invocationCn.getClassName();
+                        serviceInfo.permission = service.getConfig().bindPermission;
+                        return serviceInfo;
+                    }
+                    return null;
+                }
+        );
     }
 
     private List<String> stringToList(String list) {

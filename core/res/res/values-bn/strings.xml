@@ -339,6 +339,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ডিভাইসের আঙ্গুলের ছাপের সেন্সরের উপরে ইঙ্গিত করলে বুঝতে পারে।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"স্ক্রিনশট নিন"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ডিসপ্লের একটি স্ক্রিনশট নিতে পারেন।"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"প্রিভিউ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"স্ট্যাটাস বার নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"অ্যাপ্লিকেশনকে স্ট্যাটাস বার অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"স্থিতি দন্ডে থাকুন"</string>
@@ -1839,6 +1840,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"পূর্ণ স্ক্রিনে দেখা হচ্ছে"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"প্রস্থান করতে উপর থেকে নিচের দিকে সোয়াইপ করুন"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুঝেছি"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"আরও ভাল ক্যামেরা ভিউ পাওয়ার জন্য ঘোরান"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"আরও ভাল ক্যামেরা ভিউ পাওয়ার জন্য স্প্লিট স্ক্রিন থেকে বেরিয়ে আসুন"</string>
     <string name="done_label" msgid="7283767013231718521">"সম্পন্ন হয়েছে"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"বৃত্তাকার ঘণ্টা নির্বাচকের স্লাইডার"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"বৃত্তাকার মিনিট নির্বাচকের স্লাইডার"</string>

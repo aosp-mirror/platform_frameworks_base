@@ -168,7 +168,7 @@ public final class InputManager {
      * The <code>android:label</code> attribute specifies a human-readable descriptive
      * label to describe the keyboard layout in the user interface, such as "English (US)".
      * The <code>android:keyboardLayout</code> attribute refers to a
-     * <a href="http://source.android.com/tech/input/key-character-map-files.html">
+     * <a href="https://source.android.com/docs/core/interaction/input/key-character-map-files">
      * key character map</a> resource that defines the keyboard layout.
      * </p>
      */

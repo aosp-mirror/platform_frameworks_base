@@ -127,6 +127,6 @@ class TargetSdkResolverTest : SysuiTestCase() {
                 NotificationManager.IMPORTANCE_DEFAULT,
                 null, null,
                 null, null, null, true, 0, false, -1, false, null, null, false, false,
-                false, null, 0, false)
+                false, null, 0, false, 0)
     }
 }

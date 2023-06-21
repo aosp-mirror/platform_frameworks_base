@@ -18,10 +18,16 @@ package com.android.keyguard;
 
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.text.TextUtils;
+import android.view.View;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.util.ViewController;
+
+import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
 
@@ -31,8 +37,14 @@ import javax.inject.Inject;
  */
 public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
         extends ViewController<T> {
+    /**
+     * Delay before speaking an accessibility announcement. Used to prevent
+     * lift-to-type from interrupting itself.
+     */
+    private static final long ANNOUNCEMENT_DELAY = 250;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
+    private final AnnounceRunnable mAnnounceRunnable;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         public void onFinishedGoingToSleep(int why) {
@@ -68,6 +80,7 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
 
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mConfigurationController = configurationController;
+        mAnnounceRunnable = new AnnounceRunnable(mView);
     }
 
     @Override
@@ -100,6 +113,12 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
      */
     public void setMessage(CharSequence s, boolean animate) {
         mView.setMessage(s, animate);
+        CharSequence msg = mView.getText();
+        if (!TextUtils.isEmpty(msg)) {
+            mView.removeCallbacks(mAnnounceRunnable);
+            mAnnounceRunnable.setTextToAnnounce(msg);
+            mView.postDelayed(mAnnounceRunnable, ANNOUNCEMENT_DELAY);
+        }
     }
 
     public void setMessage(int resId) {
@@ -132,6 +151,32 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
         public KeyguardMessageAreaController create(KeyguardMessageArea view) {
             return new KeyguardMessageAreaController(
                     view, mKeyguardUpdateMonitor, mConfigurationController);
+        }
+    }
+
+    /**
+     * Runnable used to delay accessibility announcements.
+     */
+    @VisibleForTesting
+    public static class AnnounceRunnable implements Runnable {
+        private final WeakReference<View> mHost;
+        private CharSequence mTextToAnnounce;
+
+        AnnounceRunnable(View host) {
+            mHost = new WeakReference<>(host);
+        }
+
+        /** Sets the text to announce. */
+        public void setTextToAnnounce(CharSequence textToAnnounce) {
+            mTextToAnnounce = textToAnnounce;
+        }
+
+        @Override
+        public void run() {
+            final View host = mHost.get();
+            if (host != null) {
+                host.announceForAccessibility(mTextToAnnounce);
+            }
         }
     }
 }

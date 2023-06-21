@@ -36,6 +36,17 @@ class TableChangeTest : SysuiTestCase() {
     }
 
     @Test
+    fun setString_null() {
+        val underTest = TableChange()
+
+        underTest.reset(timestamp = 100, columnPrefix = "", columnName = "fakeName")
+        underTest.set(null as String?)
+
+        assertThat(underTest.hasData()).isTrue()
+        assertThat(underTest.getVal()).isEqualTo("null")
+    }
+
+    @Test
     fun setBoolean_isBoolean() {
         val underTest = TableChange()
 
@@ -55,6 +66,17 @@ class TableChangeTest : SysuiTestCase() {
 
         assertThat(underTest.hasData()).isTrue()
         assertThat(underTest.getVal()).isEqualTo("8900")
+    }
+
+    @Test
+    fun setInt_null() {
+        val underTest = TableChange()
+
+        underTest.reset(timestamp = 100, columnPrefix = "", columnName = "fakeName")
+        underTest.set(null as Int?)
+
+        assertThat(underTest.hasData()).isTrue()
+        assertThat(underTest.getVal()).isEqualTo("null")
     }
 
     @Test
@@ -98,5 +120,93 @@ class TableChangeTest : SysuiTestCase() {
         assertThat(underTest.getName()).doesNotContain("prefix")
         assertThat(underTest.getName()).doesNotContain("original")
         assertThat(underTest.getVal()).isEqualTo("8900")
+    }
+
+    @Test
+    fun updateTo_emptyToString_isString() {
+        val underTest = TableChange(columnPrefix = "fakePrefix", columnName = "fakeName")
+
+        val new = TableChange(columnPrefix = "newPrefix", columnName = "newName")
+        new.set("newString")
+        underTest.updateTo(new)
+
+        assertThat(underTest.hasData()).isTrue()
+        assertThat(underTest.getName()).contains("newPrefix")
+        assertThat(underTest.getName()).contains("newName")
+        assertThat(underTest.getVal()).isEqualTo("newString")
+    }
+
+    @Test
+    fun updateTo_intToEmpty_isEmpty() {
+        val underTest = TableChange(columnPrefix = "fakePrefix", columnName = "fakeName")
+        underTest.set(42)
+
+        val new = TableChange(columnPrefix = "newPrefix", columnName = "newName")
+        underTest.updateTo(new)
+
+        assertThat(underTest.hasData()).isFalse()
+        assertThat(underTest.getName()).contains("newPrefix")
+        assertThat(underTest.getName()).contains("newName")
+        assertThat(underTest.getVal()).isEqualTo("null")
+    }
+
+    @Test
+    fun updateTo_stringToBool_isBool() {
+        val underTest = TableChange(columnPrefix = "fakePrefix", columnName = "fakeName")
+        underTest.set("oldString")
+
+        val new = TableChange(columnPrefix = "newPrefix", columnName = "newName")
+        new.set(true)
+        underTest.updateTo(new)
+
+        assertThat(underTest.hasData()).isTrue()
+        assertThat(underTest.getName()).contains("newPrefix")
+        assertThat(underTest.getName()).contains("newName")
+        assertThat(underTest.getVal()).isEqualTo("true")
+    }
+
+    @Test
+    fun updateTo_intToString_isString() {
+        val underTest = TableChange(columnPrefix = "fakePrefix", columnName = "fakeName")
+        underTest.set(43)
+
+        val new = TableChange(columnPrefix = "newPrefix", columnName = "newName")
+        new.set("newString")
+        underTest.updateTo(new)
+
+        assertThat(underTest.hasData()).isTrue()
+        assertThat(underTest.getName()).contains("newPrefix")
+        assertThat(underTest.getName()).contains("newName")
+        assertThat(underTest.getVal()).isEqualTo("newString")
+    }
+
+    @Test
+    fun updateTo_boolToInt_isInt() {
+        val underTest = TableChange(columnPrefix = "fakePrefix", columnName = "fakeName")
+        underTest.set(false)
+
+        val new = TableChange(columnPrefix = "newPrefix", columnName = "newName")
+        new.set(44)
+        underTest.updateTo(new)
+
+        assertThat(underTest.hasData()).isTrue()
+        assertThat(underTest.getName()).contains("newPrefix")
+        assertThat(underTest.getName()).contains("newName")
+        assertThat(underTest.getVal()).isEqualTo("44")
+    }
+
+    @Test
+    fun updateTo_boolToNewBool_isNewBool() {
+        val underTest = TableChange(columnPrefix = "fakePrefix", columnName = "fakeName")
+        underTest.set(false)
+
+        val new = TableChange(columnPrefix = "newPrefix", columnName = "newName")
+        new.set(true)
+        underTest.updateTo(new)
+
+        assertThat(underTest.hasData()).isTrue()
+        assertThat(underTest.getName()).contains("newPrefix")
+        assertThat(underTest.getName()).contains("newName")
+        assertThat(underTest.getVal()).isEqualTo("true")
     }
 }

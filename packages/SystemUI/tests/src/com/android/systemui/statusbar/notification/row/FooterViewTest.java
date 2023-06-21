@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -97,6 +99,17 @@ public class FooterViewTest extends SysuiTestCase {
         assertFalse(mView.isSecondaryVisible());
 
         mView.setSecondaryVisible(true /* visible */, true /* animate */);
+    }
+
+    @Test
+    public void testSetFooterLabelTextAndIcon() {
+        mView.setFooterLabelTextAndIcon(
+                R.string.unlock_to_see_notif_text,
+                R.drawable.ic_friction_lock_closed);
+        assertThat(mView.findViewById(R.id.manage_text).getVisibility()).isEqualTo(View.GONE);
+        assertThat(mView.findSecondaryView().getVisibility()).isEqualTo(View.GONE);
+        assertThat(mView.findViewById(R.id.unlock_prompt_footer).getVisibility())
+                .isEqualTo(View.VISIBLE);
     }
 }
 

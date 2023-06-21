@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.ACTIVITY_DEFAULT
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

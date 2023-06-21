@@ -21,7 +21,7 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
+import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -31,8 +31,10 @@ import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -54,9 +56,7 @@ constructor(
 
     private fun listenForDreamingToLockscreen() {
         scope.launch {
-            // Using isDreamingWithOverlay provides an optimized path to LOCKSCREEN state, which
-            // otherwise would have gone through OCCLUDED first
-            keyguardInteractor.isDreamingWithOverlay
+            keyguardInteractor.isAbleToDream
                 .sample(
                     combine(
                         keyguardInteractor.dozeTransitionModel,
@@ -65,8 +65,7 @@ constructor(
                     ),
                     ::toTriple
                 )
-                .collect { triple ->
-                    val (isDreaming, dozeTransitionModel, lastStartedTransition) = triple
+                .collect { (isDreaming, dozeTransitionModel, lastStartedTransition) ->
                     if (
                         !isDreaming &&
                             isDozeOff(dozeTransitionModel.to) &&
@@ -88,6 +87,9 @@ constructor(
     private fun listenForDreamingToOccluded() {
         scope.launch {
             keyguardInteractor.isDreaming
+                // Add a slight delay, as dreaming and occluded events will arrive with a small gap
+                // in time. This prevents a transition to OCCLUSION happening prematurely.
+                .onEach { delay(50) }
                 .sample(
                     combine(
                         keyguardInteractor.isKeyguardOccluded,
@@ -96,8 +98,7 @@ constructor(
                     ),
                     ::toTriple
                 )
-                .collect { triple ->
-                    val (isDreaming, isOccluded, lastStartedTransition) = triple
+                .collect { (isDreaming, isOccluded, lastStartedTransition) ->
                     if (
                         isOccluded &&
                             !isDreaming &&
@@ -123,24 +124,18 @@ constructor(
 
     private fun listenForDreamingToGone() {
         scope.launch {
-            keyguardInteractor.biometricUnlockState
-                .sample(keyguardTransitionInteractor.finishedKeyguardState, ::Pair)
-                .collect { pair ->
-                    val (biometricUnlockState, keyguardState) = pair
-                    if (
-                        keyguardState == KeyguardState.DREAMING &&
-                            isWakeAndUnlock(biometricUnlockState)
-                    ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.DREAMING,
-                                KeyguardState.GONE,
-                                getAnimator(),
-                            )
+            keyguardInteractor.biometricUnlockState.collect { biometricUnlockState ->
+                if (biometricUnlockState == BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM) {
+                    keyguardTransitionRepository.startTransition(
+                        TransitionInfo(
+                            name,
+                            KeyguardState.DREAMING,
+                            KeyguardState.GONE,
+                            getAnimator(),
                         )
-                    }
+                    )
                 }
+            }
         }
     }
 
@@ -151,8 +146,7 @@ constructor(
                     keyguardTransitionInteractor.finishedKeyguardState,
                     ::Pair
                 )
-                .collect { pair ->
-                    val (dozeTransitionModel, keyguardState) = pair
+                .collect { (dozeTransitionModel, keyguardState) ->
                     if (
                         dozeTransitionModel.to == DozeStateModel.DOZE &&
                             keyguardState == KeyguardState.DREAMING

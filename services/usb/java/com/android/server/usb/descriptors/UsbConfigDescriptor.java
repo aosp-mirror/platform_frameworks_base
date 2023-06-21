@@ -79,6 +79,10 @@ public final class UsbConfigDescriptor extends UsbDescriptor {
         mInterfaceDescriptors.add(interfaceDesc);
     }
 
+    ArrayList<UsbInterfaceDescriptor> getInterfaceDescriptors() {
+        return mInterfaceDescriptors;
+    }
+
     private boolean isAudioInterface(UsbInterfaceDescriptor descriptor) {
         return descriptor.getUsbClass() == UsbDescriptor.CLASSID_AUDIO
                 && descriptor.getUsbSubclass() == UsbDescriptor.AUDIO_AUDIOSTREAMING;

@@ -29,8 +29,9 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.AutoAddTracker;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.external.CustomTile;
@@ -47,6 +48,7 @@ import com.android.systemui.util.UserAwareController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 import javax.inject.Named;
@@ -73,7 +75,7 @@ public class AutoTileManager implements UserAwareController {
     private final String mSafetySpec;
 
     protected final Context mContext;
-    protected final QSTileHost mHost;
+    protected final QSHost mHost;
     protected final Handler mHandler;
     protected final SecureSettings mSecureSettings;
     protected final AutoAddTracker mAutoTracker;
@@ -90,7 +92,7 @@ public class AutoTileManager implements UserAwareController {
     private final ArrayList<AutoAddSetting> mAutoAddSettingList = new ArrayList<>();
 
     public AutoTileManager(Context context, AutoAddTracker.Builder autoAddTrackerBuilder,
-            QSTileHost host,
+            QSHost host,
             @Background Handler handler,
             SecureSettings secureSettings,
             HotspotController hotspotController,
@@ -165,9 +167,10 @@ public class AutoTileManager implements UserAwareController {
         if (!mAutoTracker.isAdded(BRIGHTNESS) && mIsReduceBrightColorsAvailable) {
             mReduceBrightColorsController.addCallback(mReduceBrightColorsCallback);
         }
-        if (!mAutoTracker.isAdded(DEVICE_CONTROLS)) {
-            mDeviceControlsController.setCallback(mDeviceControlsCallback);
-        }
+        // We always want this callback, because if the feature stops being supported,
+        // we want to remove the tile from AutoAddTracker. That way it will be re-added when the
+        // feature is reenabled (similar to work tile).
+        mDeviceControlsController.setCallback(mDeviceControlsCallback);
         if (!mAutoTracker.isAdded(WALLET)) {
             initWalletController();
         }
@@ -279,7 +282,8 @@ public class AutoTileManager implements UserAwareController {
                 public void onManagedProfileChanged() {
                     if (mManagedProfileController.hasActiveProfile()) {
                         if (mAutoTracker.isAdded(WORK)) return;
-                        mHost.addTile(WORK);
+                        final int position = mAutoTracker.getRestoredTilePosition(WORK);
+                        mHost.addTile(WORK, position);
                         mAutoTracker.setTileAdded(WORK);
                     } else {
                         if (!mAutoTracker.isAdded(WORK)) return;
@@ -322,13 +326,29 @@ public class AutoTileManager implements UserAwareController {
         @Override
         public void onControlsUpdate(@Nullable Integer position) {
             if (mAutoTracker.isAdded(DEVICE_CONTROLS)) return;
-            if (position != null) {
+            if (position != null && !hasTile(DEVICE_CONTROLS)) {
                 mHost.addTile(DEVICE_CONTROLS, position);
+                mAutoTracker.setTileAdded(DEVICE_CONTROLS);
             }
-            mAutoTracker.setTileAdded(DEVICE_CONTROLS);
             mHandler.post(() -> mDeviceControlsController.removeCallback());
         }
+
+        @Override
+        public void removeControlsAutoTracker() {
+            mAutoTracker.setTileRemoved(DEVICE_CONTROLS);
+        }
     };
+
+    private boolean hasTile(String tileSpec) {
+        if (tileSpec == null) return false;
+        Collection<QSTile> tiles = mHost.getTiles();
+        for (QSTile tile : tiles) {
+            if (tileSpec.equals(tile.getTileSpec())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void initWalletController() {
         if (mAutoTracker.isAdded(WALLET)) return;

@@ -43,6 +43,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.AssociationState.SourceKey;
 import com.android.internal.app.procstats.AssociationState.SourceState;
+import com.android.internal.util.function.QuintConsumer;
 
 import dalvik.system.VMRuntime;
 
@@ -56,6 +57,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,21 +81,21 @@ public final class ProcessStats implements Parcelable {
     public static final int STATE_NOTHING = -1;
     public static final int STATE_PERSISTENT = 0;
     public static final int STATE_TOP = 1;
-    public static final int STATE_BOUND_TOP_OR_FGS = 2;
+    public static final int STATE_BOUND_TOP = 2;
     public static final int STATE_FGS = 3;
-    public static final int STATE_IMPORTANT_FOREGROUND = 4;
-    public static final int STATE_IMPORTANT_BACKGROUND = 5;
-    public static final int STATE_BACKUP = 6;
-    public static final int STATE_SERVICE = 7;
-    public static final int STATE_SERVICE_RESTARTING = 8;
-    public static final int STATE_RECEIVER = 9;
-    public static final int STATE_HEAVY_WEIGHT = 10;
-    public static final int STATE_HOME = 11;
-    public static final int STATE_LAST_ACTIVITY = 12;
-    public static final int STATE_CACHED_ACTIVITY = 13;
-    public static final int STATE_CACHED_ACTIVITY_CLIENT = 14;
-    public static final int STATE_CACHED_EMPTY = 15;
-    public static final int STATE_COUNT = STATE_CACHED_EMPTY+1;
+    public static final int STATE_BOUND_FGS = 4;
+    public static final int STATE_IMPORTANT_FOREGROUND = 5;
+    public static final int STATE_IMPORTANT_BACKGROUND = 6;
+    public static final int STATE_BACKUP = 7;
+    public static final int STATE_SERVICE = 8;
+    public static final int STATE_SERVICE_RESTARTING = 9;
+    public static final int STATE_RECEIVER = 10;
+    public static final int STATE_HEAVY_WEIGHT = 11;
+    public static final int STATE_HOME = 12;
+    public static final int STATE_LAST_ACTIVITY = 13;
+    public static final int STATE_CACHED = 14;
+    public static final int STATE_FROZEN = 15;
+    public static final int STATE_COUNT = STATE_FROZEN + 1;
 
     public static final int PSS_SAMPLE_COUNT = 0;
     public static final int PSS_MINIMUM = 1;
@@ -151,9 +154,10 @@ public final class ProcessStats implements Parcelable {
     public static final int[] ALL_SCREEN_ADJ = new int[] { ADJ_SCREEN_OFF, ADJ_SCREEN_ON };
 
     public static final int[] NON_CACHED_PROC_STATES = new int[] {
-            STATE_PERSISTENT, STATE_TOP, STATE_BOUND_TOP_OR_FGS, STATE_FGS,
+            STATE_PERSISTENT, STATE_TOP, STATE_FGS,
             STATE_IMPORTANT_FOREGROUND, STATE_IMPORTANT_BACKGROUND, STATE_BACKUP,
-            STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER, STATE_HEAVY_WEIGHT
+            STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER, STATE_HEAVY_WEIGHT,
+            STATE_BOUND_TOP, STATE_BOUND_FGS
     };
 
     public static final int[] BACKGROUND_PROC_STATES = new int[] {
@@ -162,11 +166,11 @@ public final class ProcessStats implements Parcelable {
     };
 
     public static final int[] ALL_PROC_STATES = new int[] { STATE_PERSISTENT,
-            STATE_TOP, STATE_BOUND_TOP_OR_FGS, STATE_FGS, STATE_IMPORTANT_FOREGROUND,
+            STATE_TOP, STATE_FGS, STATE_IMPORTANT_FOREGROUND,
             STATE_IMPORTANT_BACKGROUND, STATE_BACKUP,
             STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER,
-            STATE_HEAVY_WEIGHT, STATE_HOME, STATE_LAST_ACTIVITY, STATE_CACHED_ACTIVITY,
-            STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_EMPTY
+            STATE_HEAVY_WEIGHT, STATE_HOME, STATE_LAST_ACTIVITY, STATE_CACHED,
+            STATE_BOUND_TOP, STATE_BOUND_FGS, STATE_FROZEN
     };
 
     // Should report process stats.
@@ -2387,6 +2391,79 @@ public final class ProcessStats implements Parcelable {
         for (int i = 0; i <= shardIndex; i++) {
             protoStreams[i].flush();
         }
+    }
+
+    void forEachProcess(Consumer<ProcessState> consumer) {
+        final ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+        for (int ip = 0, size = procMap.size(); ip < size; ip++) {
+            final SparseArray<ProcessState> uids = procMap.valueAt(ip);
+            for (int iu = 0, uidsSize = uids.size(); iu < uidsSize; iu++) {
+                final ProcessState processState = uids.valueAt(iu);
+                consumer.accept(processState);
+            }
+        }
+    }
+
+    void forEachAssociation(
+            QuintConsumer<AssociationState, Integer, String, SourceKey, SourceState> consumer) {
+        final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
+                mPackages.getMap();
+        for (int ip = 0, size = pkgMap.size(); ip < size; ip++) {
+            final SparseArray<LongSparseArray<PackageState>> uids = pkgMap.valueAt(ip);
+            for (int iu = 0, uidsSize = uids.size(); iu < uidsSize; iu++) {
+                final int uid = uids.keyAt(iu);
+                final LongSparseArray<PackageState> versions = uids.valueAt(iu);
+                for (int iv = 0, versionsSize = versions.size(); iv < versionsSize; iv++) {
+                    final PackageState state = versions.valueAt(iv);
+                    for (int iasc = 0, ascSize = state.mAssociations.size();
+                            iasc < ascSize;
+                            iasc++) {
+                        final String serviceName = state.mAssociations.keyAt(iasc);
+                        final AssociationState asc = state.mAssociations.valueAt(iasc);
+                        for (int is = 0, sourcesSize = asc.mSources.size();
+                                is < sourcesSize;
+                                is++) {
+                            final SourceState src = asc.mSources.valueAt(is);
+                            final SourceKey key = asc.mSources.keyAt(is);
+                            consumer.accept(asc, uid, serviceName, key, src);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** Dumps the stats of all processes to statsEventOutput. */
+    public void dumpProcessState(int atomTag, StatsEventOutput statsEventOutput) {
+        forEachProcess(
+                (processState) -> {
+                    if (processState.isMultiPackage()
+                            && processState.getCommonProcess() != processState) {
+                        return;
+                    }
+                    processState.dumpStateDurationToStatsd(atomTag, this, statsEventOutput);
+                });
+    }
+
+    /** Dumps all process association data to statsEventOutput. */
+    public void dumpProcessAssociation(int atomTag, StatsEventOutput statsEventOutput) {
+        forEachAssociation(
+                (asc, serviceUid, serviceName, key, src) -> {
+                    statsEventOutput.write(
+                            atomTag,
+                            key.mUid,
+                            key.mProcess,
+                            serviceUid,
+                            serviceName,
+                            (int) TimeUnit.MILLISECONDS.toSeconds(mTimePeriodStartUptime),
+                            (int) TimeUnit.MILLISECONDS.toSeconds(mTimePeriodEndUptime),
+                            (int)
+                                    TimeUnit.MILLISECONDS.toSeconds(
+                                            mTimePeriodEndUptime - mTimePeriodStartUptime),
+                            (int) TimeUnit.MILLISECONDS.toSeconds(src.mDuration),
+                            src.mActiveCount,
+                            asc.getProcessName());
+                });
     }
 
     private void dumpProtoPreamble(ProtoOutputStream proto) {

@@ -32,73 +32,61 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.File
+import java.io.FilenameFilter
 import javax.inject.Inject
 
 /**
- * Implementation for retrieving file paths for file storage of system and secondary users. Files
- * lie in {File Directory}/UserFileManager/{User Id} for secondary user. For system user, we use the
- * conventional {File Directory}
+ * Implementation for retrieving file paths for file storage of system and secondary users. For
+ * non-system users, files will be prepended by a special prefix containing the user id.
  */
 @SysUISingleton
 class UserFileManagerImpl
 @Inject
 constructor(
-    // Context of system process and system user.
     private val context: Context,
     val userManager: UserManager,
     val broadcastDispatcher: BroadcastDispatcher,
     @Background val backgroundExecutor: DelayableExecutor
 ) : UserFileManager, CoreStartable {
     companion object {
-        private const val FILES = "files"
+        private const val PREFIX = "__USER_"
+        private const val TAG = "UserFileManagerImpl"
+        const val ROOT_DIR = "UserFileManager"
+        const val FILES = "files"
         const val SHARED_PREFS = "shared_prefs"
-        @VisibleForTesting internal const val ID = "UserFileManager"
-
-        /** Returns `true` if the given user ID is that for the primary/system user. */
-        fun isPrimaryUser(userId: Int): Boolean {
-            return UserHandle(userId).isSystem
-        }
 
         /**
-         * Returns a [File] pointing to the correct path for a secondary user ID.
-         *
-         * Note that there is no check for the type of user. This should only be called for
-         * secondary users, never for the system user. For that, make sure to call [isPrimaryUser].
-         *
-         * Note also that there is no guarantee that the parent directory structure for the file
-         * exists on disk. For that, call [ensureParentDirExists].
-         *
-         * @param context The context
-         * @param fileName The name of the file
-         * @param directoryName The name of the directory that would contain the file
-         * @param userId The ID of the user to build a file path for
+         * Returns a File object with a relative path, built from the userId for non-system users
          */
-        fun secondaryUserFile(
-            context: Context,
-            fileName: String,
-            directoryName: String,
-            userId: Int,
-        ): File {
-            return Environment.buildPath(
-                context.filesDir,
-                ID,
-                userId.toString(),
-                directoryName,
-                fileName,
-            )
-        }
-
-        /**
-         * Checks to see if parent dir of the file exists. If it does not, we create the parent dirs
-         * recursively.
-         */
-        fun ensureParentDirExists(file: File) {
-            val parent = file.parentFile
-            if (!parent.exists()) {
-                if (!parent.mkdirs()) {
-                    Log.e(ID, "Could not create parent directory for file: ${file.absolutePath}")
-                }
+        fun createFile(fileName: String, userId: Int): File {
+            return if (isSystemUser(userId)) {
+                File(fileName)
+            } else {
+                File(getFilePrefix(userId) + fileName)
             }
+        }
+
+        fun createLegacyFile(context: Context, dir: String, fileName: String, userId: Int): File? {
+            return if (isSystemUser(userId)) {
+                null
+            } else {
+                return Environment.buildPath(
+                    context.filesDir,
+                    ROOT_DIR,
+                    userId.toString(),
+                    dir,
+                    fileName
+                )
+            }
+        }
+
+        fun getFilePrefix(userId: Int): String {
+            return PREFIX + userId.toString() + "_"
+        }
+
+        /** Returns `true` if the given user ID is that for the system user. */
+        private fun isSystemUser(userId: Int): Boolean {
+            return UserHandle(userId).isSystem
         }
     }
 
@@ -119,64 +107,87 @@ constructor(
         broadcastDispatcher.registerReceiver(broadcastReceiver, filter, backgroundExecutor)
     }
 
-    /** Return the file based on current user. */
+    /**
+     * Return the file based on current user. Files for all users will exist in [context.filesDir],
+     * but non system user files will be prepended with [getFilePrefix].
+     */
     override fun getFile(fileName: String, userId: Int): File {
-        return if (isPrimaryUser(userId)) {
-            Environment.buildPath(context.filesDir, fileName)
-        } else {
-            val secondaryFile =
-                secondaryUserFile(
-                    context = context,
-                    userId = userId,
-                    directoryName = FILES,
-                    fileName = fileName,
-                )
-            ensureParentDirExists(secondaryFile)
-            secondaryFile
-        }
+        val file = File(context.filesDir, createFile(fileName, userId).path)
+        createLegacyFile(context, FILES, fileName, userId)?.run { migrate(file, this) }
+        return file
     }
 
-    /** Get shared preferences from user. */
+    /**
+     * Get shared preferences from user. Files for all users will exist in the shared_prefs dir, but
+     * non system user files will be prepended with [getFilePrefix].
+     */
     override fun getSharedPreferences(
         fileName: String,
         @Context.PreferencesMode mode: Int,
         userId: Int
     ): SharedPreferences {
-        if (isPrimaryUser(userId)) {
-            return context.getSharedPreferences(fileName, mode)
+        val file = createFile(fileName, userId)
+        createLegacyFile(context, SHARED_PREFS, "$fileName.xml", userId)?.run {
+            val path = Environment.buildPath(context.dataDir, SHARED_PREFS, "${file.path}.xml")
+            migrate(path, this)
         }
-
-        val secondaryUserDir =
-            secondaryUserFile(
-                context = context,
-                fileName = fileName,
-                directoryName = SHARED_PREFS,
-                userId = userId,
-            )
-
-        ensureParentDirExists(secondaryUserDir)
-        return context.getSharedPreferences(secondaryUserDir, mode)
+        return context.getSharedPreferences(file.path, mode)
     }
 
-    /** Remove dirs for deleted users. */
+    /** Remove files for deleted users. */
     @VisibleForTesting
     internal fun clearDeletedUserData() {
         backgroundExecutor.execute {
-            val file = Environment.buildPath(context.filesDir, ID)
-            if (!file.exists()) return@execute
-            val aliveUsers = userManager.aliveUsers.map { it.id.toString() }
-            val dirsToDelete = file.list().filter { !aliveUsers.contains(it) }
+            deleteFiles(context.filesDir)
+            deleteFiles(File(context.dataDir, SHARED_PREFS))
+        }
+    }
 
-            dirsToDelete.forEach { dir ->
+    private fun migrate(dest: File, source: File) {
+        if (source.exists()) {
+            try {
+                val parent = source.getParentFile()
+                source.renameTo(dest)
+
+                deleteParentDirsIfEmpty(parent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to rename and delete ${source.path}", e)
+            }
+        }
+    }
+
+    private fun deleteParentDirsIfEmpty(dir: File?) {
+        if (dir != null && dir.listFiles().size == 0) {
+            val priorParent = dir.parentFile
+            val isRoot = dir.name == ROOT_DIR
+            dir.delete()
+
+            if (!isRoot) {
+                deleteParentDirsIfEmpty(priorParent)
+            }
+        }
+    }
+
+    private fun deleteFiles(parent: File) {
+        val aliveUserFilePrefix = userManager.aliveUsers.map { getFilePrefix(it.id) }
+        val filesToDelete =
+            parent.listFiles(
+                FilenameFilter { _, name ->
+                    name.startsWith(PREFIX) &&
+                        aliveUserFilePrefix.filter { name.startsWith(it) }.isEmpty()
+                }
+            )
+
+        // This can happen in test environments
+        if (filesToDelete == null) {
+            Log.i(TAG, "Empty directory: ${parent.path}")
+        } else {
+            filesToDelete.forEach { file ->
+                Log.i(TAG, "Deleting file: ${file.path}")
                 try {
-                    val dirToDelete =
-                        Environment.buildPath(
-                            file,
-                            dir,
-                        )
-                    dirToDelete.deleteRecursively()
+                    file.delete()
                 } catch (e: Exception) {
-                    Log.e(ID, "Deletion failed.", e)
+                    Log.e(TAG, "Deletion failed.", e)
                 }
             }
         }

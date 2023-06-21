@@ -421,7 +421,7 @@ public final class OutputConfiguration implements Parcelable {
      *         call, or no non-negative group ID has been set.
      * @hide
      */
-    void setMultiResolutionOutput() {
+    public void setMultiResolutionOutput() {
         if (mIsShared) {
             throw new IllegalStateException("Multi-resolution output flag must not be set for " +
                     "configuration with surface sharing");

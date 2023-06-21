@@ -27,6 +27,7 @@ import android.provider.Settings;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.settings.UserTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ import java.util.Objects;
 public abstract class SecureSettingsContentObserver<T> {
 
     private final ContentResolver mContentResolver;
+    private final UserTracker mUserTracker;
     @VisibleForTesting
     final ContentObserver mContentObserver;
 
@@ -52,9 +54,11 @@ public abstract class SecureSettingsContentObserver<T> {
     @VisibleForTesting
     final List<T> mListeners = new ArrayList<>();
 
-    protected SecureSettingsContentObserver(Context context, String secureSettingsKey) {
+    protected SecureSettingsContentObserver(Context context, UserTracker userTracker,
+            String secureSettingsKey) {
         mKey = secureSettingsKey;
         mContentResolver = context.getContentResolver();
+        mUserTracker = userTracker;
         mContentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
             @Override
             public void onChange(boolean selfChange) {
@@ -103,7 +107,7 @@ public abstract class SecureSettingsContentObserver<T> {
      * See {@link Settings.Secure}.
      */
     public final String getSettingsValue() {
-        return Settings.Secure.getStringForUser(mContentResolver, mKey, UserHandle.USER_CURRENT);
+        return Settings.Secure.getStringForUser(mContentResolver, mKey, mUserTracker.getUserId());
     }
 
     private void updateValueChanged() {

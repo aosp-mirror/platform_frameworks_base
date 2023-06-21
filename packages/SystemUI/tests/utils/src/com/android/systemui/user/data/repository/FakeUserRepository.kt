@@ -39,6 +39,10 @@ class FakeUserRepository : UserRepository {
     private val _selectedUserInfo = MutableStateFlow<UserInfo?>(null)
     override val selectedUserInfo: Flow<UserInfo> = _selectedUserInfo.filterNotNull()
 
+    private val _userSwitchingInProgress = MutableStateFlow(false)
+    override val userSwitchingInProgress: Flow<Boolean>
+        get() = _userSwitchingInProgress
+
     override var lastSelectedNonGuestUserId: Int = UserHandle.USER_SYSTEM
 
     private var _isGuestUserAutoCreated: Boolean = false

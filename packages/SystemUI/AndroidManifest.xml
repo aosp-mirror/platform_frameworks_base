@@ -68,6 +68,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG" />
@@ -292,7 +293,7 @@
 
     <queries>
         <intent>
-            <action android:name="android.intent.action.NOTES" />
+            <action android:name="android.intent.action.CREATE_NOTE" />
         </intent>
     </queries>
 
@@ -411,7 +412,6 @@
 
         <service android:name=".screenshot.ScreenshotCrossProfileService"
                  android:permission="com.android.systemui.permission.SELF"
-                 android:process=":screenshot_cross_profile"
                  android:exported="false" />
 
         <service android:name=".screenrecord.RecordingService" />
@@ -664,6 +664,21 @@
             android:excludeFromRecents="true"
             android:exported="true" />
 
+        <!-- started from Telecomm(CallsManager) -->
+        <activity
+            android:name=".telephony.ui.activity.SwitchToManagedProfileForCallActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:permission="android.permission.MODIFY_PHONE_STATE"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert">
+            <intent-filter>
+                <action android:name="android.telecom.action.SHOW_SWITCH_TO_WORK_PROFILE_FOR_CALL_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="tel" />
+            </intent-filter>
+        </activity>
+
         <!-- platform logo easter egg activity -->
         <activity
             android:name=".DessertCase"
@@ -863,7 +878,7 @@
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|orientation"
                   android:visibleToInstantApps="true">
         </activity>
 
@@ -873,18 +888,6 @@
                   android:excludeFromRecents="true"
                   android:showWhenLocked="true"
                   android:showForAllUsers="true"
-                  android:launchMode="singleInstance"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                  android:visibleToInstantApps="true">
-        </activity>
-
-        <activity android:name=".user.UserSwitcherActivity"
-                  android:label="@string/accessibility_multi_user_switch_switcher"
-                  android:theme="@style/Theme.UserSwitcherActivity"
-                  android:excludeFromRecents="true"
-                  android:showWhenLocked="true"
-                  android:showForAllUsers="true"
-                  android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
@@ -908,7 +911,7 @@
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.NoDisplay"
             android:label="@string/note_task_button_label"
-            android:icon="@drawable/ic_note_task_button">
+            android:icon="@drawable/ic_note_task_shortcut_widget">
 
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />

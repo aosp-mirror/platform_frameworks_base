@@ -168,6 +168,7 @@ public final class ContentCaptureManagerService extends
     @GuardedBy("mLock") int mDevCfgTextChangeFlushingFrequencyMs;
     @GuardedBy("mLock") int mDevCfgLogHistorySize;
     @GuardedBy("mLock") int mDevCfgIdleUnbindTimeoutMs;
+    @GuardedBy("mLock") boolean mDevCfgDisableFlushForViewTreeAppearing;
 
     private final Executor mDataShareExecutor = Executors.newCachedThreadPool();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -358,6 +359,8 @@ public final class ContentCaptureManagerService extends
                 case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE:
                 case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY:
                 case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT:
+                case ContentCaptureManager
+                        .DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING:
                     setFineTuneParamsFromDeviceConfig();
                     return;
                 default:
@@ -387,13 +390,20 @@ public final class ContentCaptureManagerService extends
                     DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                     ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT,
                     (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
+            mDevCfgDisableFlushForViewTreeAppearing = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                    ContentCaptureManager
+                        .DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
+                    false);
             if (verbose) {
                 Slog.v(TAG, "setFineTuneParamsFromDeviceConfig(): "
                         + "bufferSize=" + mDevCfgMaxBufferSize
                         + ", idleFlush=" + mDevCfgIdleFlushingFrequencyMs
                         + ", textFluxh=" + mDevCfgTextChangeFlushingFrequencyMs
                         + ", logHistory=" + mDevCfgLogHistorySize
-                        + ", idleUnbindTimeoutMs=" + mDevCfgIdleUnbindTimeoutMs);
+                        + ", idleUnbindTimeoutMs=" + mDevCfgIdleUnbindTimeoutMs
+                        + ", disableFlushForViewTreeAppearing="
+                        + mDevCfgDisableFlushForViewTreeAppearing);
             }
         }
     }
@@ -628,6 +638,7 @@ public final class ContentCaptureManagerService extends
     }
 
     @Override // from AbstractMasterSystemService
+    @GuardedBy("mLock")
     protected void dumpLocked(String prefix, PrintWriter pw) {
         super.dumpLocked(prefix, pw);
 
@@ -645,6 +656,8 @@ public final class ContentCaptureManagerService extends
         pw.print(prefix2); pw.print("logHistorySize: "); pw.println(mDevCfgLogHistorySize);
         pw.print(prefix2); pw.print("idleUnbindTimeoutMs: ");
         pw.println(mDevCfgIdleUnbindTimeoutMs);
+        pw.print(prefix2); pw.print("disableFlushForViewTreeAppearing: ");
+        pw.println(mDevCfgDisableFlushForViewTreeAppearing);
         pw.print(prefix); pw.println("Global Options:");
         mGlobalContentCaptureOptions.dump(prefix2, pw);
     }
@@ -1001,12 +1014,15 @@ public final class ContentCaptureManagerService extends
                 return null;
             }
 
-            final ContentCaptureOptions options = new ContentCaptureOptions(mDevCfgLoggingLevel,
-                    mDevCfgMaxBufferSize, mDevCfgIdleFlushingFrequencyMs,
-                    mDevCfgTextChangeFlushingFrequencyMs, mDevCfgLogHistorySize,
-                    whitelistedComponents);
-            if (verbose) Slog.v(TAG, "getOptionsForPackage(" + packageName + "): " + options);
-            return options;
+            synchronized (mLock) {
+                final ContentCaptureOptions options = new ContentCaptureOptions(mDevCfgLoggingLevel,
+                        mDevCfgMaxBufferSize, mDevCfgIdleFlushingFrequencyMs,
+                        mDevCfgTextChangeFlushingFrequencyMs, mDevCfgLogHistorySize,
+                        mDevCfgDisableFlushForViewTreeAppearing,
+                        whitelistedComponents);
+                if (verbose) Slog.v(TAG, "getOptionsForPackage(" + packageName + "): " + options);
+                return options;
+            }
         }
 
         @Override

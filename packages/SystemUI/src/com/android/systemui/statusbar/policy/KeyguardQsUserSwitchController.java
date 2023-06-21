@@ -160,7 +160,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters,
-                screenOffAnimationController,  /* animateYPos= */ false);
+                screenOffAnimationController,  /* animateYPos= */ false, /* logBuffer= */ null);
         mUserSwitchDialogController = userSwitchDialogController;
         mUiEventLogger = uiEventLogger;
     }

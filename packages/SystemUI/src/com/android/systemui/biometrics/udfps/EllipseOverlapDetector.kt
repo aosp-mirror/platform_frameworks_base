@@ -18,6 +18,7 @@ package com.android.systemui.biometrics.udfps
 
 import android.graphics.Point
 import android.graphics.Rect
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import kotlin.math.cos
 import kotlin.math.pow
@@ -50,7 +51,8 @@ class EllipseOverlapDetector(private val neededPoints: Int = 2) : OverlapDetecto
         return result <= 1
     }
 
-    private fun calculateSensorPoints(sensorBounds: Rect): List<Point> {
+    @VisibleForTesting
+    fun calculateSensorPoints(sensorBounds: Rect): List<Point> {
         val sensorX = sensorBounds.centerX()
         val sensorY = sensorBounds.centerY()
         val cornerOffset: Int = sensorBounds.width() / 4

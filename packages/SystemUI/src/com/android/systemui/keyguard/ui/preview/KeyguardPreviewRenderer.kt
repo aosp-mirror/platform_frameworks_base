@@ -24,7 +24,6 @@ import android.content.IntentFilter
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.IBinder
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.SurfaceControlViewHost
 import android.view.View
@@ -39,6 +38,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.shared.clocks.ClockRegistry
+import com.android.systemui.shared.clocks.shared.model.ClockPreviewConstants
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardQuickAffordancePreviewConstants
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import dagger.assisted.Assisted
@@ -65,6 +65,13 @@ constructor(
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
     private val height: Int = bundle.getInt(KEY_VIEW_HEIGHT)
+    private val shouldHighlightSelectedAffordance: Boolean =
+        bundle.getBoolean(
+            KeyguardQuickAffordancePreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES,
+            false,
+        )
+    private val shouldHideClock: Boolean =
+        bundle.getBoolean(ClockPreviewConstants.KEY_HIDE_CLOCK, false)
 
     private var host: SurfaceControlViewHost
 
@@ -82,6 +89,7 @@ constructor(
                 bundle.getString(
                     KeyguardQuickAffordancePreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
                 ),
+            shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
         )
         runBlocking(mainDispatcher) {
             host =
@@ -99,7 +107,9 @@ constructor(
             val rootView = FrameLayout(context)
 
             setUpBottomArea(rootView)
-            setUpClock(rootView)
+            if (!shouldHideClock) {
+                setUpClock(rootView)
+            }
 
             rootView.measure(
                 View.MeasureSpec.makeMeasureSpec(
@@ -154,14 +164,18 @@ constructor(
             bottomAreaView,
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                Gravity.BOTTOM,
+                FrameLayout.LayoutParams.MATCH_PARENT,
             ),
         )
     }
 
     private fun setUpClock(parentView: ViewGroup) {
-        val clockChangeListener = ClockRegistry.ClockChangeListener { onClockChanged(parentView) }
+        val clockChangeListener =
+            object : ClockRegistry.ClockChangeListener {
+                override fun onCurrentClockChanged() {
+                    onClockChanged(parentView)
+                }
+            }
         clockRegistry.registerClockChangeListener(clockChangeListener)
         disposables.add(
             DisposableHandle { clockRegistry.unregisterClockChangeListener(clockChangeListener) }
@@ -173,7 +187,8 @@ constructor(
         val receiver =
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    clockController.clock?.events?.onTimeTick()
+                    clockController.clock?.smallClock?.events?.onTimeTick()
+                    clockController.clock?.largeClock?.events?.onTimeTick()
                 }
             }
         broadcastDispatcher.registerReceiver(
@@ -195,7 +210,13 @@ constructor(
             ?.events
             ?.onTargetRegionChanged(KeyguardClockSwitch.getLargeClockRegion(parentView))
         clockView?.let { parentView.removeView(it) }
-        clockView = clockController.clock?.largeClock?.view?.apply { parentView.addView(this) }
+        clockView =
+            clockController.clock?.largeClock?.view?.apply {
+                if (shouldHighlightSelectedAffordance) {
+                    alpha = DIM_ALPHA
+                }
+                parentView.addView(this)
+            }
     }
 
     companion object {
@@ -203,5 +224,7 @@ constructor(
         private const val KEY_VIEW_WIDTH = "width"
         private const val KEY_VIEW_HEIGHT = "height"
         private const val KEY_DISPLAY_ID = "display_id"
+
+        private const val DIM_ALPHA = 0.3f
     }
 }

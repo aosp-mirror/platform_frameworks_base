@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"மேலே 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"மேலே 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"கீழ்ப்புறம் முழுத் திரை"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"இடதுபுறமாகப் பிரிக்கும்"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"வலதுபுறமாகப் பிரிக்கும்"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"மேற்புறமாகப் பிரிக்கும்"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"கீழ்புறமாகப் பிரிக்கும்"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ஒற்றைக் கைப் பயன்முறையைப் பயன்படுத்துதல்"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"வெளியேற, திரையின் கீழிருந்து மேல்நோக்கி ஸ்வைப் செய்யவும் அல்லது ஆப்ஸுக்கு மேலே ஏதேனும் ஓர் இடத்தில் தட்டவும்"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ஒற்றைக் கைப் பயன்முறையைத் தொடங்கும்"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ஆப்ஸை இடம் மாற்ற அதன் வெளியில் இருமுறை தட்டலாம்"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"சரி"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"கூடுதல் தகவல்களுக்கு விரிவாக்கலாம்."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"சரியான விதத்தில் காட்டப்பட மீண்டும் தொடங்கவா?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"ஆப்ஸை மீண்டும் தொடங்குவதன் மூலம் திரையில் அது சரியான விதத்தில் தோற்றமளிக்கும். ஆனால் செயல்நிலையையோ சேமிக்கப்படாமல் இருக்கும் மாற்றங்களையோ நீங்கள் இழக்கக்கூடும்."</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ரத்துசெய்"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"மீண்டும் தொடங்கு"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"மீண்டும் காட்டாதே"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"இந்த ஆப்ஸை நகர்த்த\nஇருமுறை தட்டவும்"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"பெரிதாக்கும்"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"சிறிதாக்கும்"</string>
     <string name="close_button_text" msgid="2913281996024033299">"மூடும்"</string>
     <string name="back_button_text" msgid="1469718707134137085">"பின்செல்லும்"</string>
     <string name="handle_text" msgid="1766582106752184456">"ஹேண்டில்"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"ஆப்ஸ் ஐகான்"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"முழுத்திரை"</string>
     <string name="desktop_text" msgid="1077633567027630454">"டெஸ்க்டாப் பயன்முறை"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"திரையைப் பிரிக்கும்"</string>
     <string name="more_button_text" msgid="3655388105592893530">"கூடுதல் விருப்பத்தேர்வுகள்"</string>
     <string name="float_button_text" msgid="9221657008391364581">"மிதக்கும் சாளரம்"</string>
+    <string name="select_text" msgid="5139083974039906583">"தேர்ந்தெடுக்கும்"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"ஸ்கிரீன்ஷாட்"</string>
+    <string name="close_text" msgid="4986518933445178928">"மூடும்"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"மெனுவை மூடும்"</string>
 </resources>

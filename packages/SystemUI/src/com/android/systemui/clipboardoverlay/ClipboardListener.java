@@ -18,10 +18,10 @@ package com.android.systemui.clipboardoverlay;
 
 import static android.content.ClipDescription.CLASSIFICATION_COMPLETE;
 
-import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_ENABLED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_UPDATED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN;
+import static com.android.systemui.flags.Flags.CLIPBOARD_MINIMIZED_LAYOUT;
 
 import static com.google.android.setupcompat.util.WizardManagerHelper.SETTINGS_SECURE_USER_SETUP_COMPLETE;
 
@@ -29,7 +29,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.SystemProperties;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -38,8 +37,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
-import com.android.systemui.util.DeviceConfigProxy;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -59,42 +56,31 @@ public class ClipboardListener implements
             "com.android.systemui.SUPPRESS_CLIPBOARD_OVERLAY";
 
     private final Context mContext;
-    private final DeviceConfigProxy mDeviceConfig;
     private final Provider<ClipboardOverlayController> mOverlayProvider;
-    private final ClipboardOverlayControllerLegacyFactory mOverlayFactory;
     private final ClipboardToast mClipboardToast;
     private final ClipboardManager mClipboardManager;
-    private final UiEventLogger mUiEventLogger;
     private final FeatureFlags mFeatureFlags;
-    private boolean mUsingNewOverlay;
+    private final UiEventLogger mUiEventLogger;
     private ClipboardOverlay mClipboardOverlay;
 
     @Inject
-    public ClipboardListener(Context context, DeviceConfigProxy deviceConfigProxy,
+    public ClipboardListener(Context context,
             Provider<ClipboardOverlayController> clipboardOverlayControllerProvider,
-            ClipboardOverlayControllerLegacyFactory overlayFactory,
             ClipboardToast clipboardToast,
             ClipboardManager clipboardManager,
-            UiEventLogger uiEventLogger,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            UiEventLogger uiEventLogger) {
         mContext = context;
-        mDeviceConfig = deviceConfigProxy;
         mOverlayProvider = clipboardOverlayControllerProvider;
-        mOverlayFactory = overlayFactory;
         mClipboardToast = clipboardToast;
         mClipboardManager = clipboardManager;
-        mUiEventLogger = uiEventLogger;
         mFeatureFlags = featureFlags;
-
-        mUsingNewOverlay = mFeatureFlags.isEnabled(Flags.CLIPBOARD_OVERLAY_REFACTOR);
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
     public void start() {
-        if (mDeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED, true)) {
-            mClipboardManager.addPrimaryClipChangedListener(this);
-        }
+        mClipboardManager.addPrimaryClipChangedListener(this);
     }
 
     @Override
@@ -111,8 +97,9 @@ public class ClipboardListener implements
             return;
         }
 
-        if (!isUserSetupComplete()) {
-            // just show a toast, user should not access intents from this state
+        if (!isUserSetupComplete() // user should not access intents from this state
+                || clipData == null // shouldn't happen, but just in case
+                || clipData.getItemCount() == 0) {
             if (shouldShowToast(clipData)) {
                 mUiEventLogger.log(CLIPBOARD_TOAST_SHOWN, 0, clipSource);
                 mClipboardToast.showCopiedToast();
@@ -120,19 +107,17 @@ public class ClipboardListener implements
             return;
         }
 
-        boolean enabled = mFeatureFlags.isEnabled(Flags.CLIPBOARD_OVERLAY_REFACTOR);
-        if (mClipboardOverlay == null || enabled != mUsingNewOverlay) {
-            mUsingNewOverlay = enabled;
-            if (enabled) {
-                mClipboardOverlay = mOverlayProvider.get();
-            } else {
-                mClipboardOverlay = mOverlayFactory.create(mContext);
-            }
+        if (mClipboardOverlay == null) {
+            mClipboardOverlay = mOverlayProvider.get();
             mUiEventLogger.log(CLIPBOARD_OVERLAY_ENTERED, 0, clipSource);
         } else {
             mUiEventLogger.log(CLIPBOARD_OVERLAY_UPDATED, 0, clipSource);
         }
-        mClipboardOverlay.setClipData(clipData, clipSource);
+        if (mFeatureFlags.isEnabled(CLIPBOARD_MINIMIZED_LAYOUT)) {
+            mClipboardOverlay.setClipData(clipData, clipSource);
+        } else {
+            mClipboardOverlay.setClipDataLegacy(clipData, clipSource);
+        }
         mClipboardOverlay.setOnSessionCompleteListener(() -> {
             // Session is complete, free memory until it's needed again.
             mClipboardOverlay = null;
@@ -175,6 +160,8 @@ public class ClipboardListener implements
     }
 
     interface ClipboardOverlay {
+        void setClipDataLegacy(ClipData clipData, String clipSource);
+
         void setClipData(ClipData clipData, String clipSource);
 
         void setOnSessionCompleteListener(Runnable runnable);

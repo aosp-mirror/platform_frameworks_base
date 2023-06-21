@@ -25,9 +25,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -39,6 +37,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.settings.FakeDisplayTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,12 +57,12 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     @Mock
     private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     @Mock
-    private DisplayManager mDisplayManager;
-    @Mock
     private KeyguardDisplayManager.KeyguardPresentation mKeyguardPresentation;
 
+    private Executor mMainExecutor = Runnable::run;
     private Executor mBackgroundExecutor = Runnable::run;
     private KeyguardDisplayManager mManager;
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     // The default and secondary displays are both in the default group
     private Display mDefaultDisplay;
@@ -75,9 +74,9 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
         mManager = spy(new KeyguardDisplayManager(mContext, () -> mNavigationBarController,
-                mKeyguardStatusViewComponentFactory, mBackgroundExecutor));
+                mKeyguardStatusViewComponentFactory, mDisplayTracker, mMainExecutor,
+                mBackgroundExecutor));
         doReturn(mKeyguardPresentation).when(mManager).createPresentation(any());
 
         mDefaultDisplay = new Display(DisplayManagerGlobal.getInstance(), Display.DEFAULT_DISPLAY,
@@ -96,23 +95,21 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
 
     @Test
     public void testShow_defaultDisplayOnly() {
-        when(mDisplayManager.getDisplays()).thenReturn(new Display[]{mDefaultDisplay});
+        mDisplayTracker.setAllDisplays(new Display[]{mDefaultDisplay});
         mManager.show();
         verify(mManager, never()).createPresentation(any());
     }
 
     @Test
     public void testShow_includeSecondaryDisplay() {
-        when(mDisplayManager.getDisplays()).thenReturn(
-                new Display[]{mDefaultDisplay, mSecondaryDisplay});
+        mDisplayTracker.setAllDisplays(new Display[]{mDefaultDisplay, mSecondaryDisplay});
         mManager.show();
         verify(mManager, times(1)).createPresentation(eq(mSecondaryDisplay));
     }
 
     @Test
     public void testShow_includeAlwaysUnlockedDisplay() {
-        when(mDisplayManager.getDisplays()).thenReturn(
-                new Display[]{mDefaultDisplay, mAlwaysUnlockedDisplay});
+        mDisplayTracker.setAllDisplays(new Display[]{mDefaultDisplay, mAlwaysUnlockedDisplay});
 
         mManager.show();
         verify(mManager, never()).createPresentation(any());
@@ -120,9 +117,8 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
 
     @Test
     public void testShow_includeSecondaryAndAlwaysUnlockedDisplays() {
-        when(mDisplayManager.getDisplays()).thenReturn(
+        mDisplayTracker.setAllDisplays(
                 new Display[]{mDefaultDisplay, mSecondaryDisplay, mAlwaysUnlockedDisplay});
-
         mManager.show();
         verify(mManager, times(1)).createPresentation(eq(mSecondaryDisplay));
     }

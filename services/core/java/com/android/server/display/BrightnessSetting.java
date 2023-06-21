@@ -117,6 +117,23 @@ public class BrightnessSetting {
         }
     }
 
+    /**
+     * @return The brightness for the default display in nits. Used when the underlying display
+     * device has changed but we want to persist the nit value.
+     */
+    float getBrightnessNitsForDefaultDisplay() {
+        return mPersistentDataStore.getBrightnessNitsForDefaultDisplay();
+    }
+
+    /**
+     * Set brightness in nits for the default display. Used when we want to persist the nit value
+     * even if the underlying display device changes.
+     * @param nits The brightness value in nits
+     */
+    void setBrightnessNitsForDefaultDisplay(float nits) {
+        mPersistentDataStore.setBrightnessNitsForDefaultDisplay(nits);
+    }
+
     private void notifyListeners(float brightness) {
         for (BrightnessSettingListener l : mListeners) {
             l.onBrightnessChanged(brightness);

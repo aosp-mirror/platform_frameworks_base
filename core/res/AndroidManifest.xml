@@ -315,6 +315,7 @@
     <protected-broadcast android:name="android.media.MASTER_BALANCE_CHANGED_ACTION" />
     <protected-broadcast android:name="android.media.SCO_AUDIO_STATE_CHANGED" />
     <protected-broadcast android:name="android.media.ACTION_SCO_AUDIO_STATE_UPDATED" />
+    <protected-broadcast android:name="com.android.server.audio.action.CHECK_MUSIC_ACTIVE" />
 
     <protected-broadcast android:name="android.intent.action.MEDIA_REMOVED" />
     <protected-broadcast android:name="android.intent.action.MEDIA_UNMOUNTED" />
@@ -3156,7 +3157,11 @@
         android:protectionLevel="normal" />
 
     <!-- Allows an application to call
-        {@link android.app.ActivityManager#killBackgroundProcesses}.
+         {@link android.app.ActivityManager#killBackgroundProcesses}.
+
+         <p class="note">Third party applications can only use this API to kill their own
+         processes.</p>
+
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"
@@ -3891,7 +3896,7 @@
          <p>Should only be requested by the System, should be required by
          TileService declarations.-->
     <permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|recents" />
 
     <!-- Allows SystemUI to request third party controls.
          <p>Should only be requested by the System and required by

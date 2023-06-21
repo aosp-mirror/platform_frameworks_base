@@ -16,11 +16,12 @@
 
 package com.android.systemui.statusbar.notification.row.wrapper;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
-import android.content.Context;
+import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
@@ -28,11 +29,11 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.R;
+import com.android.internal.widget.BigPictureNotificationImageView;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -72,5 +73,39 @@ public class NotificationBigPictureTemplateViewWrapperTest extends SysuiTestCase
         mRow.getEntry().getSbn().getNotification().extras.putParcelable(
                 Notification.EXTRA_LARGE_ICON_BIG, new Bundle());
         wrapper.onContentUpdated(mRow);
+    }
+
+    @Test
+    public void setAnimationsRunning_Run() {
+        BigPictureNotificationImageView imageView = mView.findViewById(R.id.big_picture);
+        AnimatedImageDrawable mockDrawable = mock(AnimatedImageDrawable.class);
+
+        assertNotNull(imageView);
+        imageView.setImageDrawable(mockDrawable);
+
+        NotificationViewWrapper wrapper = new NotificationBigPictureTemplateViewWrapper(mContext,
+                mView, mRow);
+        // Required to re-initialize the imageView to the imageView created above.
+        wrapper.onContentUpdated(mRow);
+
+        wrapper.setAnimationsRunning(true);
+        verify(mockDrawable).start();
+    }
+
+    @Test
+    public void setAnimationsRunning_Stop() {
+        BigPictureNotificationImageView imageView = mView.findViewById(R.id.big_picture);
+        AnimatedImageDrawable mockDrawable = mock(AnimatedImageDrawable.class);
+
+        assertNotNull(imageView);
+        imageView.setImageDrawable(mockDrawable);
+
+        NotificationViewWrapper wrapper = new NotificationBigPictureTemplateViewWrapper(mContext,
+                mView, mRow);
+        // Required to re-initialize the imageView to the imageView created above.
+        wrapper.onContentUpdated(mRow);
+
+        wrapper.setAnimationsRunning(false);
+        verify(mockDrawable).stop();
     }
 }

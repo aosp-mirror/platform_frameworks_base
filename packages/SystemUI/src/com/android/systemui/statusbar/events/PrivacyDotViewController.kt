@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.events
 
-import android.animation.Animator
+import androidx.core.animation.Animator
 import android.annotation.UiThread
 import android.graphics.Point
 import android.graphics.Rect
@@ -62,7 +62,7 @@ import javax.inject.Inject
  */
 
 @SysUISingleton
-class PrivacyDotViewController @Inject constructor(
+open class PrivacyDotViewController @Inject constructor(
     @Main private val mainExecutor: Executor,
     private val stateController: StatusBarStateController,
     private val configurationController: ConfigurationController,
@@ -176,7 +176,7 @@ class PrivacyDotViewController @Inject constructor(
     }
 
     @UiThread
-    private fun hideDotView(dot: View, animate: Boolean) {
+    open fun hideDotView(dot: View, animate: Boolean) {
         dot.clearAnimation()
         if (animate) {
             dot.animate()
@@ -195,7 +195,7 @@ class PrivacyDotViewController @Inject constructor(
     }
 
     @UiThread
-    private fun showDotView(dot: View, animate: Boolean) {
+    open fun showDotView(dot: View, animate: Boolean) {
         dot.clearAnimation()
         if (animate) {
             dot.visibility = View.VISIBLE

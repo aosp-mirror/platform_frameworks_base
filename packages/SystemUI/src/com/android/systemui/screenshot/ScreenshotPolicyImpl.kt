@@ -32,12 +32,12 @@ import android.os.RemoteException
 import android.os.UserHandle
 import android.os.UserManager
 import android.util.Log
-import android.view.Display.DEFAULT_DISPLAY
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.infra.ServiceConnector
 import com.android.systemui.SystemUIService
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.screenshot.ScreenshotPolicy.DisplayContentInfo
 import java.util.Arrays
 import javax.inject.Inject
@@ -52,6 +52,7 @@ internal open class ScreenshotPolicyImpl @Inject constructor(
     private val userMgr: UserManager,
     private val atmService: IActivityTaskManager,
     @Background val bgDispatcher: CoroutineDispatcher,
+    private val displayTracker: DisplayTracker
 ) : ScreenshotPolicy {
 
     private val proxyConnector: ServiceConnector<IScreenshotProxy> =
@@ -64,7 +65,7 @@ internal open class ScreenshotPolicyImpl @Inject constructor(
         )
 
     override fun getDefaultDisplayId(): Int {
-        return DEFAULT_DISPLAY
+        return displayTracker.defaultDisplayId
     }
 
     override suspend fun isManagedProfile(@UserIdInt userId: Int): Boolean {

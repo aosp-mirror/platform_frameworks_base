@@ -50,9 +50,9 @@ class SdfShaderLibrary {
 
             float roundedBoxRing(vec2 p, vec2 size, float cornerRadius,
                 float borderThickness) {
-                float outerRoundBox = sdRoundedBox(p, size, cornerRadius);
-                float innerRoundBox = sdRoundedBox(p, size - vec2(borderThickness),
-                    cornerRadius - borderThickness);
+                float outerRoundBox = sdRoundedBox(p, size + vec2(borderThickness),
+                    cornerRadius + borderThickness);
+                float innerRoundBox = sdRoundedBox(p, size, cornerRadius);
                 return subtract(outerRoundBox, innerRoundBox);
             }
         """
@@ -69,10 +69,13 @@ class SdfShaderLibrary {
 
             vec2 u = wh*p, v = wh*wh;
 
-            float U1 = u.y/2.0;  float U5 = 4.0*U1;
-            float U2 = v.y-v.x;  float U6 = 6.0*U1;
-            float U3 = u.x-U2;   float U7 = 3.0*U3;
+            float U1 = u.y/2.0;
+            float U2 = v.y-v.x;
+            float U3 = u.x-U2;
             float U4 = u.x+U2;
+            float U5 = 4.0*U1;
+            float U6 = 6.0*U1;
+            float U7 = 3.0*U3;
 
             float t = 0.5;
             for (int i = 0; i < 3; i ++) {

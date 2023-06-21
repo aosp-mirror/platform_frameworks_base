@@ -110,6 +110,8 @@ public final class CachedAppOptimizer {
 
     private static final String ATRACE_COMPACTION_TRACK = "Compaction";
 
+    @VisibleForTesting static final boolean ENABLE_FILE_COMPACT = false;
+
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = false;
     @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = true;
@@ -515,9 +517,11 @@ public final class CachedAppOptimizer {
 
     @GuardedBy("mProcLock")
     void compactAppSome(ProcessRecord app, boolean force) {
-        app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_SOME);
-        ++mSomeCompactRequest;
-        compactApp(app, force, "some");
+        if (ENABLE_FILE_COMPACT) {
+            app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_SOME);
+            ++mSomeCompactRequest;
+            compactApp(app, force, "some");
+        }
     }
 
     // This method returns true only if requirements are met. Note, that requirements are different
@@ -1278,6 +1282,15 @@ public final class CachedAppOptimizer {
             }
         }
 
+        if (!ENABLE_FILE_COMPACT) {
+            // Turn off file compaction
+            if (resolvedAction == COMPACT_ACTION_FULL) {
+                resolvedAction = COMPACT_ACTION_ANON;
+            } else if (resolvedAction == COMPACT_ACTION_FILE) {
+                resolvedAction = COMPACT_ACTION_NONE;
+            }
+        }
+
         return resolvedAction;
     }
 
@@ -1545,6 +1558,9 @@ public final class CachedAppOptimizer {
                     }
 
                     int resolvedAction = resolveCompactionAction(requestedAction);
+                    if (resolvedAction == COMPACT_ACTION_NONE) {
+                        return;
+                    }
                     action = compactActionIntToString(resolvedAction);
 
                     try {

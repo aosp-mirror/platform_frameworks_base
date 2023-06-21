@@ -576,6 +576,40 @@ public class LocalDisplayAdapterTest {
     }
 
     @Test
+    public void testAfterDisplayStateChanges_committedSetAfterState() throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        DisplayDevice displayDevice = mListener.addedDisplays.get(0);
+
+        // Turn off.
+        Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_OFF, 0,
+                0);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+        mListener.changedDisplays.clear();
+        assertThat(displayDevice.getDisplayDeviceInfoLocked().state).isEqualTo(Display.STATE_OFF);
+        assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState).isNotEqualTo(
+                Display.STATE_OFF);
+        verify(mSurfaceControlProxy, never()).setDisplayPowerMode(display.token, Display.STATE_OFF);
+
+        // Execute powerstate change.
+        changeStateRunnable.run();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+
+        // Verify that committed triggered a new change event and is set correctly.
+        verify(mSurfaceControlProxy, never()).setDisplayPowerMode(display.token, Display.STATE_OFF);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+        assertThat(displayDevice.getDisplayDeviceInfoLocked().state).isEqualTo(Display.STATE_OFF);
+        assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState).isEqualTo(
+                Display.STATE_OFF);
+    }
+
+    @Test
     public void testAfterDisplayChange_GameContentTypeSupportIsUpdated() throws Exception {
         FakeDisplay display = new FakeDisplay(PORT_A);
         display.dynamicInfo.gameContentTypeSupported = true;

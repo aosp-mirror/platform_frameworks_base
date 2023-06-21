@@ -77,14 +77,14 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    void setForcedDensity(DisplayContent displayContent, int density, int userId) {
-        if (displayContent.isDefaultDisplay) {
+    void setForcedDensity(DisplayInfo info, int density, int userId) {
+        if (info.displayId == Display.DEFAULT_DISPLAY) {
             final String densityString = density == 0 ? "" : Integer.toString(density);
             Settings.Secure.putStringForUser(mService.mContext.getContentResolver(),
                     Settings.Secure.DISPLAY_DENSITY_FORCED, densityString, userId);
         }
 
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final DisplayInfo displayInfo = info;
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mForcedDensity = density;

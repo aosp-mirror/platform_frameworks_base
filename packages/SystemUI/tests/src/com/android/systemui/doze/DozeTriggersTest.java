@@ -395,6 +395,14 @@ public class DozeTriggersTest extends SysuiTestCase {
         verify(mAuthController).onAodInterrupt(anyInt(), anyInt(), anyFloat(), anyFloat());
     }
 
+
+    @Test
+    public void udfpsLongPress_dozeState_notRegistered() {
+        // GIVEN device is DOZE_AOD_PAUSED
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+        // beverlyt
+    }
+
     private void waitForSensorManager() {
         mExecutor.runAllReady();
     }

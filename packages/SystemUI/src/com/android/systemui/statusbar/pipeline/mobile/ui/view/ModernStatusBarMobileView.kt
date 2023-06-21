@@ -20,6 +20,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import com.android.systemui.R
+import com.android.systemui.statusbar.StatusBarIconView.getVisibleStateString
+import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconBinder
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarView
@@ -31,6 +33,15 @@ class ModernStatusBarMobileView(
 
     var subId: Int = -1
 
+    override fun toString(): String {
+        return "ModernStatusBarMobileView(" +
+            "slot='$slot', " +
+            "subId=$subId, " +
+            "isCollecting=${binding.isCollecting()}, " +
+            "visibleState=${getVisibleStateString(visibleState)}); " +
+            "viewString=${super.toString()}"
+    }
+
     companion object {
 
         /**
@@ -40,6 +51,7 @@ class ModernStatusBarMobileView(
         @JvmStatic
         fun constructAndBind(
             context: Context,
+            logger: MobileViewLogger,
             slot: String,
             viewModel: LocationBasedMobileViewModel,
         ): ModernStatusBarMobileView {
@@ -48,7 +60,8 @@ class ModernStatusBarMobileView(
                     as ModernStatusBarMobileView)
                 .also {
                     it.subId = viewModel.subscriptionId
-                    it.initView(slot) { MobileIconBinder.bind(it, viewModel) }
+                    it.initView(slot) { MobileIconBinder.bind(it, viewModel, logger) }
+                    logger.logNewViewBinding(it, viewModel)
                 }
         }
     }

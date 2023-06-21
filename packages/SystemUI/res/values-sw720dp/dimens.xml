@@ -19,8 +19,12 @@
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">1dp</dimen>
 
-    <dimen name="controls_padding_horizontal">75dp</dimen>
+    <dimen name="controls_header_horizontal_padding">28dp</dimen>
+    <dimen name="controls_content_margin_horizontal">40dp</dimen>
 
     <dimen name="large_screen_shade_header_height">56dp</dimen>
+
+    <!-- Biometric Auth pattern view size, better to align keyguard_security_width -->
+    <dimen name="biometric_auth_pattern_view_size">348dp</dimen>
 </resources>
 

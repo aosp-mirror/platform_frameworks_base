@@ -90,6 +90,8 @@ public:
 
     void forceDrawNextFrame() { mForceDrawFrame = true; }
 
+    void createHintSession(pid_t uiThreadId, pid_t renderThreadId);
+
 private:
     class HintSessionWrapper {
     public:

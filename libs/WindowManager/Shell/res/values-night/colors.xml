@@ -15,6 +15,7 @@
   -->
 
 <resources>
+    <color name="docked_divider_handle">#ffffff</color>
     <!-- Bubbles -->
     <color name="bubbles_icon_tint">@color/GM2_grey_200</color>
     <!-- Splash screen-->

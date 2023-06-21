@@ -21,10 +21,13 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.RemoteException;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
@@ -39,6 +42,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -129,6 +133,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     private Runnable mExpandedVisibleListener;
     private PeopleNotificationIdentifier mPeopleIdentifier;
     private RemoteInputViewSubcomponent.Factory mRemoteInputSubcomponentFactory;
+    private IStatusBarService mStatusBarService;
 
     /**
      * List of listeners for when content views become inactive (i.e. not the showing view).
@@ -184,6 +189,8 @@ public class NotificationContentView extends FrameLayout implements Notification
     private boolean mRemoteInputVisible;
     private int mUnrestrictedContentHeight;
 
+    private boolean mContentAnimating;
+
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mHybridGroupManager = new HybridGroupManager(getContext());
@@ -194,11 +201,13 @@ public class NotificationContentView extends FrameLayout implements Notification
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
             SmartReplyConstants smartReplyConstants,
-            SmartReplyController smartReplyController) {
+            SmartReplyController smartReplyController,
+            IStatusBarService statusBarService) {
         mPeopleIdentifier = peopleNotificationIdentifier;
         mRemoteInputSubcomponentFactory = rivSubcomponentFactory;
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
+        mStatusBarService = statusBarService;
     }
 
     public void reinflate() {
@@ -2129,8 +2138,81 @@ public class NotificationContentView extends FrameLayout implements Notification
         return false;
     }
 
+    /**
+     * Starts and stops animations in the underlying views.
+     * Avoids restarting the animations by checking whether they're already running first.
+     * Return value is used for testing.
+     *
+     * @param running whether to start animations running, or stop them.
+     * @return true if the state of animations changed.
+     */
+    public boolean setContentAnimationRunning(boolean running) {
+        boolean stateChangeRequired = (running != mContentAnimating);
+        if (stateChangeRequired) {
+            // Starts or stops the animations in the potential views.
+            if (mContractedWrapper != null) {
+                mContractedWrapper.setAnimationsRunning(running);
+            }
+            if (mExpandedWrapper != null) {
+                mExpandedWrapper.setAnimationsRunning(running);
+            }
+            if (mHeadsUpWrapper != null) {
+                mHeadsUpWrapper.setAnimationsRunning(running);
+            }
+            // Updates the state tracker.
+            mContentAnimating = running;
+            return true;
+        }
+        return false;
+    }
+
     private static class RemoteInputViewData {
         @Nullable RemoteInputView mView;
         @Nullable RemoteInputViewController mController;
+    }
+
+    @VisibleForTesting
+    protected void setContractedWrapper(NotificationViewWrapper contractedWrapper) {
+        mContractedWrapper = contractedWrapper;
+    }
+    @VisibleForTesting
+    protected void setExpandedWrapper(NotificationViewWrapper expandedWrapper) {
+        mExpandedWrapper = expandedWrapper;
+    }
+    @VisibleForTesting
+    protected void setHeadsUpWrapper(NotificationViewWrapper headsUpWrapper) {
+        mHeadsUpWrapper = headsUpWrapper;
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        try {
+            super.dispatchDraw(canvas);
+        } catch (Exception e) {
+            // Catch draw exceptions that may be caused by RemoteViews
+            Log.e(TAG, "Drawing view failed: " + e);
+            cancelNotification(e);
+        }
+    }
+
+    private void cancelNotification(Exception exception) {
+        try {
+            setVisibility(GONE);
+            final StatusBarNotification sbn = mNotificationEntry.getSbn();
+            if (mStatusBarService != null) {
+                // report notification inflation errors back up
+                // to notification delegates
+                mStatusBarService.onNotificationError(
+                        sbn.getPackageName(),
+                        sbn.getTag(),
+                        sbn.getId(),
+                        sbn.getUid(),
+                        sbn.getInitialPid(),
+                        exception.getMessage(),
+                        sbn.getUser().getIdentifier());
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "cancelNotification failed: " + ex);
+        }
     }
 }

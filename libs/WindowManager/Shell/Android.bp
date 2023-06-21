@@ -47,7 +47,9 @@ filegroup {
         "src/com/android/wm/shell/sysui/ShellSharedConstants.java",
         "src/com/android/wm/shell/common/TransactionPool.java",
         "src/com/android/wm/shell/animation/Interpolators.java",
+        "src/com/android/wm/shell/pip/PipContentOverlay.java",
         "src/com/android/wm/shell/startingsurface/SplashScreenExitAnimationUtils.java",
+        "src/com/android/wm/shell/draganddrop/DragAndDropConstants.java",
     ],
     path: "src",
 }

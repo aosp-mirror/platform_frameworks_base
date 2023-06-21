@@ -78,9 +78,9 @@ public class BatteryUsageStatsProviderTest {
                 batteryUsageStats.getUidBatteryConsumers();
         final UidBatteryConsumer uidBatteryConsumer = uidBatteryConsumers.get(0);
         assertThat(uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND))
-                .isEqualTo(60 * MINUTE_IN_MS);
+                .isEqualTo(20 * MINUTE_IN_MS);
         assertThat(uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND))
-                .isEqualTo(10 * MINUTE_IN_MS);
+                .isEqualTo(40 * MINUTE_IN_MS);
         assertThat(uidBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AUDIO))
                 .isWithin(PRECISION).of(2.0);
         assertThat(
@@ -121,22 +121,44 @@ public class BatteryUsageStatsProviderTest {
     private BatteryStatsImpl prepareBatteryStats() {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
-        batteryStats.noteActivityResumedLocked(APP_UID,
-                10 * MINUTE_IN_MS, 10 * MINUTE_IN_MS);
-        batteryStats.noteUidProcessStateLocked(APP_UID, ActivityManager.PROCESS_STATE_TOP,
-                10 * MINUTE_IN_MS, 10 * MINUTE_IN_MS);
-        batteryStats.noteActivityPausedLocked(APP_UID,
-                30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
-        batteryStats.noteUidProcessStateLocked(APP_UID, ActivityManager.PROCESS_STATE_SERVICE,
-                30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
-        batteryStats.noteUidProcessStateLocked(APP_UID,
-                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE,
-                40 * MINUTE_IN_MS, 40 * MINUTE_IN_MS);
-        batteryStats.noteUidProcessStateLocked(APP_UID,
-                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE,
-                50 * MINUTE_IN_MS, 50 * MINUTE_IN_MS);
-        batteryStats.noteUidProcessStateLocked(APP_UID, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
-                80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
+        mStatsRule.setTime(10 * MINUTE_IN_MS, 10 * MINUTE_IN_MS);
+        synchronized (batteryStats) {
+            batteryStats.noteActivityResumedLocked(APP_UID);
+        }
+
+        mStatsRule.setTime(10 * MINUTE_IN_MS, 10 * MINUTE_IN_MS);
+        synchronized (batteryStats) {
+            batteryStats.noteUidProcessStateLocked(APP_UID, ActivityManager.PROCESS_STATE_TOP);
+        }
+        mStatsRule.setTime(30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
+        synchronized (batteryStats) {
+            batteryStats.noteActivityPausedLocked(APP_UID);
+        }
+        mStatsRule.setTime(30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
+        synchronized (batteryStats) {
+            batteryStats.noteUidProcessStateLocked(APP_UID,
+                    ActivityManager.PROCESS_STATE_SERVICE);
+        }
+        mStatsRule.setTime(40 * MINUTE_IN_MS, 40 * MINUTE_IN_MS);
+        synchronized (batteryStats) {
+            batteryStats.noteUidProcessStateLocked(APP_UID,
+                    ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        }
+        mStatsRule.setTime(50 * MINUTE_IN_MS, 50 * MINUTE_IN_MS);
+        synchronized (batteryStats) {
+            batteryStats.noteUidProcessStateLocked(APP_UID,
+                    ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+        }
+        mStatsRule.setTime(60 * MINUTE_IN_MS, 60 * MINUTE_IN_MS);
+        synchronized (batteryStats) {
+            batteryStats.noteUidProcessStateLocked(APP_UID,
+                    ActivityManager.PROCESS_STATE_BOUND_TOP);
+        }
+        mStatsRule.setTime(70 * MINUTE_IN_MS, 70 * MINUTE_IN_MS);
+        synchronized (batteryStats) {
+            batteryStats.noteUidProcessStateLocked(APP_UID,
+                    ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        }
 
         batteryStats.noteFlashlightOnLocked(APP_UID, 1000, 1000);
         batteryStats.noteFlashlightOffLocked(APP_UID, 5000, 5000);

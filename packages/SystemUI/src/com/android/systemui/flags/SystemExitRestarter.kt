@@ -16,6 +16,7 @@
 
 package com.android.systemui.flags
 
+import android.util.Log
 import com.android.internal.statusbar.IStatusBarService
 import javax.inject.Inject
 
@@ -24,11 +25,13 @@ class SystemExitRestarter
 constructor(
     private val barService: IStatusBarService,
 ) : Restarter {
-    override fun restartAndroid() {
+    override fun restartAndroid(reason: String) {
+        Log.d(FeatureFlagsDebug.TAG, "Restarting Android: " + reason)
         barService.restart()
     }
 
-    override fun restartSystemUI() {
+    override fun restartSystemUI(reason: String) {
+        Log.d(FeatureFlagsDebug.TAG, "Restarting SystemUI: " + reason)
         System.exit(0)
     }
 }

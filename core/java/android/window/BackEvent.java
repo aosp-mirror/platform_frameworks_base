@@ -18,10 +18,8 @@ package android.window;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.RemoteAnimationTarget;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -52,8 +50,6 @@ public class BackEvent implements Parcelable {
 
     @SwipeEdge
     private final int mSwipeEdge;
-    @Nullable
-    private final RemoteAnimationTarget mDepartingAnimationTarget;
 
     /**
      * Creates a new {@link BackEvent} instance.
@@ -62,16 +58,12 @@ public class BackEvent implements Parcelable {
      * @param touchY Absolute Y location of the touch point of this event.
      * @param progress Value between 0 and 1 on how far along the back gesture is.
      * @param swipeEdge Indicates which edge the swipe starts from.
-     * @param departingAnimationTarget The remote animation target of the departing application
-     *                                 window.
      */
-    public BackEvent(float touchX, float touchY, float progress, @SwipeEdge int swipeEdge,
-            @Nullable RemoteAnimationTarget departingAnimationTarget) {
+    public BackEvent(float touchX, float touchY, float progress, @SwipeEdge int swipeEdge) {
         mTouchX = touchX;
         mTouchY = touchY;
         mProgress = progress;
         mSwipeEdge = swipeEdge;
-        mDepartingAnimationTarget = departingAnimationTarget;
     }
 
     private BackEvent(@NonNull Parcel in) {
@@ -79,7 +71,6 @@ public class BackEvent implements Parcelable {
         mTouchY = in.readFloat();
         mProgress = in.readFloat();
         mSwipeEdge = in.readInt();
-        mDepartingAnimationTarget = in.readTypedObject(RemoteAnimationTarget.CREATOR);
     }
 
     public static final Creator<BackEvent> CREATOR = new Creator<BackEvent>() {
@@ -105,11 +96,24 @@ public class BackEvent implements Parcelable {
         dest.writeFloat(mTouchY);
         dest.writeFloat(mProgress);
         dest.writeInt(mSwipeEdge);
-        dest.writeTypedObject(mDepartingAnimationTarget, flags);
     }
 
     /**
-     * Returns a value between 0 and 1 on how far along the back gesture is.
+     * Returns a value between 0 and 1 on how far along the back gesture is. This value is
+     * driven by the horizontal location of the touch point, and should be used as the fraction to
+     * seek the predictive back animation with. Specifically,
+     * <ol>
+     * <li>The progress is 0 when the touch is at the starting edge of the screen (left or right),
+     * and animation should seek to its start state.
+     * <li>The progress is approximately 1 when the touch is at the opposite side of the screen,
+     * and animation should seek to its end state. Exact end value may vary depending on
+     * screen size.
+     * </ol>
+     * <li> After the gesture finishes in cancel state, this method keeps getting invoked until the
+     * progress value animates back to 0.
+     * </ol>
+     * In-between locations are linearly interpolated based on horizontal distance from the starting
+     * edge and smooth clamped to 1 when the distance exceeds a system-wide threshold.
      */
     public float getProgress() {
         return mProgress;
@@ -136,16 +140,6 @@ public class BackEvent implements Parcelable {
         return mSwipeEdge;
     }
 
-    /**
-     * Returns the {@link RemoteAnimationTarget} of the top departing application window,
-     * or {@code null} if the top window should not be moved for the current type of back
-     * destination.
-     */
-    @Nullable
-    public RemoteAnimationTarget getDepartingAnimationTarget() {
-        return mDepartingAnimationTarget;
-    }
-
     @Override
     public String toString() {
         return "BackEvent{"
@@ -153,7 +147,6 @@ public class BackEvent implements Parcelable {
                 + ", mTouchY=" + mTouchY
                 + ", mProgress=" + mProgress
                 + ", mSwipeEdge" + mSwipeEdge
-                + ", mDepartingAnimationTarget" + mDepartingAnimationTarget
                 + "}";
     }
 }

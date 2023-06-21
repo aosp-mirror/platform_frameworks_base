@@ -15,19 +15,11 @@
      limitations under the License.
 -->
 
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/control_detail_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-
-    <LinearLayout
-        android:id="@+id/global_actions_controls"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingHorizontal="@dimen/controls_padding_horizontal" />
-
-</FrameLayout>
+</LinearLayout>

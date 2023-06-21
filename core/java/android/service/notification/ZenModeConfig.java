@@ -953,7 +953,7 @@ public class ZenModeConfig implements Parcelable {
 
     private static Uri safeUri(TypedXmlPullParser parser, String att) {
         final String val = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(val)) return null;
+        if (val == null) return null;
         return Uri.parse(val);
     }
 
@@ -1008,9 +1008,8 @@ public class ZenModeConfig implements Parcelable {
                 .allowAlarms(allowAlarms)
                 .allowMedia(allowMedia)
                 .allowSystem(allowSystem)
-                .allowConversations(allowConversations
-                        ? ZenModeConfig.getZenPolicySenders(allowConversationsFrom)
-                        : ZenPolicy.PEOPLE_TYPE_NONE);
+                .allowConversations(allowConversations ? allowConversationsFrom
+                        : ZenPolicy.CONVERSATION_SENDERS_NONE);
         if (suppressedVisualEffects == 0) {
             builder.showAllVisualEffects();
         } else {

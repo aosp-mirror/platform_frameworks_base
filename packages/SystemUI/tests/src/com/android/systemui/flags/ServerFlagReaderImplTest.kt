@@ -21,11 +21,14 @@ import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.anyString
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -45,17 +48,29 @@ class ServerFlagReaderImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        serverFlagReader = ServerFlagReaderImpl(NAMESPACE, deviceConfig, executor)
+        serverFlagReader = ServerFlagReaderImpl(NAMESPACE, deviceConfig, executor, false)
     }
 
     @Test
     fun testChange_alertsListener() {
-        val flag = ReleasedFlag(1, "1", "test")
+        val flag = ReleasedFlag(1, "flag_1", "test")
+        serverFlagReader.listenForChanges(listOf(flag), changeListener)
+
+        deviceConfig.setProperty(NAMESPACE, "flag_1", "1", false)
+        executor.runAllReady()
+
+        verify(changeListener).onChange(flag, "1")
+    }
+
+    @Test
+    fun testChange_ignoresListenersDuringTest() {
+        val serverFlagReader = ServerFlagReaderImpl(NAMESPACE, deviceConfig, executor, true)
+        val flag = ReleasedFlag(1, "1", "   test")
         serverFlagReader.listenForChanges(listOf(flag), changeListener)
 
         deviceConfig.setProperty(NAMESPACE, "flag_override_1", "1", false)
         executor.runAllReady()
 
-        verify(changeListener).onChange()
+        verify(changeListener, never()).onChange(any(), anyString())
     }
 }

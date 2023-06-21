@@ -16,8 +16,6 @@
 
 package com.android.systemui.wmshell;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED;
@@ -50,6 +48,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.notetask.NoteTaskInitializer;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.CommandQueue;
@@ -124,6 +123,7 @@ public final class WMShell implements
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final ProtoTracer mProtoTracer;
     private final UserTracker mUserTracker;
+    private final DisplayTracker mDisplayTracker;
     private final NoteTaskInitializer mNoteTaskInitializer;
     private final Executor mSysUiMainExecutor;
 
@@ -186,6 +186,7 @@ public final class WMShell implements
             ProtoTracer protoTracer,
             WakefulnessLifecycle wakefulnessLifecycle,
             UserTracker userTracker,
+            DisplayTracker displayTracker,
             NoteTaskInitializer noteTaskInitializer,
             @Main Executor sysUiMainExecutor) {
         mContext = context;
@@ -203,6 +204,7 @@ public final class WMShell implements
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mUserTracker = userTracker;
+        mDisplayTracker = displayTracker;
         mNoteTaskInitializer = noteTaskInitializer;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
@@ -268,7 +270,7 @@ public final class WMShell implements
             public void onStartTransition(boolean isEntering) {
                 mSysUiMainExecutor.execute(() -> {
                     mSysUiState.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
-                            true).commitUpdate(DEFAULT_DISPLAY);
+                            true).commitUpdate(mDisplayTracker.getDefaultDisplayId());
                 });
             }
 
@@ -276,7 +278,7 @@ public final class WMShell implements
             public void onStartFinished(Rect bounds) {
                 mSysUiMainExecutor.execute(() -> {
                     mSysUiState.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
-                            true).commitUpdate(DEFAULT_DISPLAY);
+                            true).commitUpdate(mDisplayTracker.getDefaultDisplayId());
                 });
             }
 
@@ -284,7 +286,7 @@ public final class WMShell implements
             public void onStopFinished(Rect bounds) {
                 mSysUiMainExecutor.execute(() -> {
                     mSysUiState.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
-                            false).commitUpdate(DEFAULT_DISPLAY);
+                            false).commitUpdate(mDisplayTracker.getDefaultDisplayId());
                 });
             }
         });
@@ -333,7 +335,8 @@ public final class WMShell implements
             @Override
             public void setImeWindowStatus(int displayId, IBinder token, int vis,
                     int backDisposition, boolean showImeSwitcher) {
-                if (displayId == DEFAULT_DISPLAY && (vis & InputMethodService.IME_VISIBLE) != 0) {
+                if (displayId == mDisplayTracker.getDefaultDisplayId()
+                        && (vis & InputMethodService.IME_VISIBLE) != 0) {
                     oneHanded.stopOneHanded(
                             OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT);
                 }
@@ -346,7 +349,7 @@ public final class WMShell implements
             @Override
             public void onVisibilityChanged(boolean hasFreeformTasks) {
                 mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE, hasFreeformTasks)
-                        .commitUpdate(DEFAULT_DISPLAY);
+                        .commitUpdate(mDisplayTracker.getDefaultDisplayId());
             }
         }, mSysUiMainExecutor);
     }

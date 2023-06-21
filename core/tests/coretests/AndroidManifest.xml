@@ -1414,6 +1414,7 @@
         <activity android:name="com.android.internal.app.ChooserWrapperActivity"/>
         <activity android:name="com.android.internal.app.ResolverWrapperActivity"/>
         <activity android:name="com.android.internal.app.IntentForwarderActivityTest$IntentForwarderWrapperActivity"/>
+        <activity android:name="com.android.internal.accessibility.AccessibilityShortcutChooserActivityTest$TestAccessibilityShortcutChooserActivity"/>
 
         <receiver android:name="android.app.activity.AbortReceiver"
             android:exported="true">

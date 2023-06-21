@@ -146,7 +146,7 @@ constructor(
      * Returns a snapshot of the [KeyguardQuickAffordanceConfig] instances of the affordances at the
      * slot with the given ID. The configs are sorted in descending priority order.
      */
-    fun getSelections(slotId: String): List<KeyguardQuickAffordanceConfig> {
+    fun getCurrentSelections(slotId: String): List<KeyguardQuickAffordanceConfig> {
         val selections = selectionManager.value.getSelections().getOrDefault(slotId, emptyList())
         return configs.filter { selections.contains(it.key) }
     }
@@ -155,7 +155,7 @@ constructor(
      * Returns a snapshot of the IDs of the selected affordances, indexed by slot ID. The configs
      * are sorted in descending priority order.
      */
-    fun getSelections(): Map<String, List<String>> {
+    fun getCurrentSelections(): Map<String, List<String>> {
         return selectionManager.value.getSelections()
     }
 
@@ -187,6 +187,8 @@ constructor(
                 pickerState is KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
             }
             .map { (config, pickerState) ->
+                val defaultPickerState =
+                    pickerState as? KeyguardQuickAffordanceConfig.PickerScreenState.Default
                 val disabledPickerState =
                     pickerState as? KeyguardQuickAffordanceConfig.PickerScreenState.Disabled
                 KeyguardQuickAffordancePickerRepresentation(
@@ -198,6 +200,7 @@ constructor(
                     instructions = disabledPickerState?.instructions,
                     actionText = disabledPickerState?.actionText,
                     actionComponentName = disabledPickerState?.actionComponentName,
+                    configureIntent = defaultPickerState?.configureIntent,
                 )
             }
     }
@@ -214,7 +217,7 @@ constructor(
     private inner class Dumpster : Dumpable {
         override fun dump(pw: PrintWriter, args: Array<out String>) {
             val slotPickerRepresentations = getSlotPickerRepresentations()
-            val selectionsBySlotId = getSelections()
+            val selectionsBySlotId = getCurrentSelections()
             pw.println("Slots & selections:")
             slotPickerRepresentations.forEach { slotPickerRepresentation ->
                 val slotId = slotPickerRepresentation.id

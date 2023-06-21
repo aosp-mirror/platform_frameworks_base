@@ -28,6 +28,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -69,6 +70,8 @@ class CameraGestureHelperTest : SysuiTestCase() {
     lateinit var cameraIntents: CameraIntentsWrapper
     @Mock
     lateinit var contentResolver: ContentResolver
+    @Mock
+    lateinit var userTracker: UserTracker
 
     private lateinit var underTest: CameraGestureHelper
 
@@ -96,6 +99,7 @@ class CameraGestureHelperTest : SysuiTestCase() {
             cameraIntents = cameraIntents,
             contentResolver = contentResolver,
             uiExecutor = MoreExecutors.directExecutor(),
+            userTracker = userTracker,
         )
     }
 

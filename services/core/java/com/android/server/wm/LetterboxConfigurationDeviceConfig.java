@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 
-
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Map;
@@ -33,16 +32,51 @@ import java.util.concurrent.Executor;
 final class LetterboxConfigurationDeviceConfig
         implements DeviceConfig.OnPropertiesChangedListener {
 
+    static final String KEY_ENABLE_CAMERA_COMPAT_TREATMENT = "enable_compat_camera_treatment";
+    private static final boolean DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT = true;
+
     static final String KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY =
             "enable_display_rotation_immersive_app_compat_policy";
     private static final boolean DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY =
             true;
 
+    static final String KEY_ALLOW_IGNORE_ORIENTATION_REQUEST =
+            "allow_ignore_orientation_request";
+    private static final boolean DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST = true;
+
+    static final String KEY_ENABLE_COMPAT_FAKE_FOCUS = "enable_compat_fake_focus";
+    private static final boolean DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS = true;
+
+    static final String KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY =
+            "enable_letterbox_translucent_activity";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY = true;
+
+    static final String KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP =
+            "disable_size_compat_mode_after_orientation_change_from_app";
+    private static final boolean
+            DEFAULT_VALUE_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP = true;
+
     @VisibleForTesting
     static final Map<String, Boolean> sKeyToDefaultValueMap = Map.of(
+            KEY_ENABLE_CAMERA_COMPAT_TREATMENT,
+            DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT,
             KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
-            DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY
+            DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
+            KEY_ALLOW_IGNORE_ORIENTATION_REQUEST,
+            DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST,
+            KEY_ENABLE_COMPAT_FAKE_FOCUS,
+            DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS,
+            KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
+            DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
+            KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP,
+            DEFAULT_VALUE_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP
     );
+
+    // Whether camera compatibility treatment is enabled.
+    // See DisplayRotationCompatPolicy for context.
+    private boolean mIsCameraCompatTreatmentEnabled =
+            DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT;
 
     // Whether enabling rotation compat policy for immersive apps that prevents auto rotation
     // into non-optimal screen orientation while in fullscreen. This is needed because immersive
@@ -51,6 +85,23 @@ final class LetterboxConfigurationDeviceConfig
     // such rotations accidentally when auto rotation is on.
     private boolean mIsDisplayRotationImmersiveAppCompatPolicyEnabled =
             DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
+
+    // Whether enabling ignoreOrientationRequest is allowed on the device.
+    private boolean mIsAllowIgnoreOrientationRequest =
+            DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST;
+
+    // Whether sending compat fake focus for split screen resumed activities is enabled. This is
+    // needed because some game engines wait to get focus before drawing the content of the app
+    // which isn't guaranteed by default in multi-window modes.
+    private boolean mIsCompatFakeFocusAllowed = DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS;
+
+    // Whether the letterbox strategy for transparent activities is allowed
+    private boolean mIsTranslucentLetterboxingAllowed =
+            DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY;
+
+    // Whether size compat mode is disabled after an orientation change request comes from the app
+    private boolean mIsSizeCompatModeDisabledAfterOrientationChangeFromApp =
+            DEFAULT_VALUE_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP;
 
     // Set of active device configs that need to be updated in
     // DeviceConfig.OnPropertiesChangedListener#onPropertiesChanged.
@@ -91,8 +142,18 @@ final class LetterboxConfigurationDeviceConfig
      */
     boolean getFlag(String key) {
         switch (key) {
+            case KEY_ENABLE_CAMERA_COMPAT_TREATMENT:
+                return mIsCameraCompatTreatmentEnabled;
             case KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY:
                 return mIsDisplayRotationImmersiveAppCompatPolicyEnabled;
+            case KEY_ALLOW_IGNORE_ORIENTATION_REQUEST:
+                return mIsAllowIgnoreOrientationRequest;
+            case KEY_ENABLE_COMPAT_FAKE_FOCUS:
+                return mIsCompatFakeFocusAllowed;
+            case KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY:
+                return mIsTranslucentLetterboxingAllowed;
+            case KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP:
+                return mIsSizeCompatModeDisabledAfterOrientationChangeFromApp;
             default:
                 throw new AssertionError("Unexpected flag name: " + key);
         }
@@ -104,8 +165,24 @@ final class LetterboxConfigurationDeviceConfig
             throw new AssertionError("Haven't found default value for flag: " + key);
         }
         switch (key) {
+            case KEY_ENABLE_CAMERA_COMPAT_TREATMENT:
+                mIsCameraCompatTreatmentEnabled = getDeviceConfig(key, defaultValue);
+                break;
             case KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY:
                 mIsDisplayRotationImmersiveAppCompatPolicyEnabled =
+                        getDeviceConfig(key, defaultValue);
+                break;
+            case KEY_ALLOW_IGNORE_ORIENTATION_REQUEST:
+                mIsAllowIgnoreOrientationRequest = getDeviceConfig(key, defaultValue);
+                break;
+            case KEY_ENABLE_COMPAT_FAKE_FOCUS:
+                mIsCompatFakeFocusAllowed = getDeviceConfig(key, defaultValue);
+                break;
+            case KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY:
+                mIsTranslucentLetterboxingAllowed = getDeviceConfig(key, defaultValue);
+                break;
+            case KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP:
+                mIsSizeCompatModeDisabledAfterOrientationChangeFromApp =
                         getDeviceConfig(key, defaultValue);
                 break;
             default:

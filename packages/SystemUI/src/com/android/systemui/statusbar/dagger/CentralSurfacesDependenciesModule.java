@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.dagger;
 
 import android.app.IActivityManager;
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
@@ -25,16 +26,21 @@ import android.util.Log;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.MediaArtworkProcessor;
@@ -61,7 +67,6 @@ import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconList;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
@@ -135,7 +140,8 @@ public interface CentralSurfacesDependenciesModule {
             StatusBarStateController statusBarStateController,
             SysuiColorExtractor colorExtractor,
             KeyguardStateController keyguardStateController,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            DisplayManager displayManager) {
         return new NotificationMediaManager(
                 context,
                 centralSurfacesOptionalLazy,
@@ -150,7 +156,8 @@ public interface CentralSurfacesDependenciesModule {
                 statusBarStateController,
                 colorExtractor,
                 keyguardStateController,
-                dumpManager);
+                dumpManager,
+                displayManager);
     }
 
     /** */
@@ -181,11 +188,12 @@ public interface CentralSurfacesDependenciesModule {
     @SysUISingleton
     static CommandQueue provideCommandQueue(
             Context context,
+            DisplayTracker displayTracker,
             ProtoTracer protoTracer,
             CommandRegistry registry,
             DumpHandler dumpHandler
     ) {
-        return new CommandQueue(context, protoTracer, registry, dumpHandler);
+        return new CommandQueue(context, displayTracker, protoTracer, registry, dumpHandler);
     }
 
     /**
@@ -280,8 +288,9 @@ public interface CentralSurfacesDependenciesModule {
     @SysUISingleton
     static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
             KeyguardStateController keyguardStateController,
-            Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManager,
-            InteractionJankMonitor interactionJankMonitor) {
+            Lazy<AlternateBouncerInteractor> alternateBouncerInteractor,
+            InteractionJankMonitor interactionJankMonitor,
+            AnimationFeatureFlags animationFeatureFlags) {
         DialogLaunchAnimator.Callback callback = new DialogLaunchAnimator.Callback() {
             @Override
             public boolean isDreaming() {
@@ -300,9 +309,22 @@ public interface CentralSurfacesDependenciesModule {
 
             @Override
             public boolean isShowingAlternateAuthOnUnlock() {
-                return statusBarKeyguardViewManager.get().canShowAlternateBouncer();
+                return alternateBouncerInteractor.get().canShowAlternateBouncerForFingerprint();
             }
         };
-        return new DialogLaunchAnimator(callback, interactionJankMonitor);
+        return new DialogLaunchAnimator(callback, interactionJankMonitor, animationFeatureFlags);
+    }
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static AnimationFeatureFlags provideAnimationFeatureFlags(FeatureFlags featureFlags) {
+        return new AnimationFeatureFlags() {
+            @Override
+            public boolean isPredictiveBackQsDialogAnim() {
+                return featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM);
+            }
+        };
     }
 }

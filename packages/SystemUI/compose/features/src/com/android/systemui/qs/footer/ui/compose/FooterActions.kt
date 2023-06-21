@@ -73,6 +73,7 @@ import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
@@ -180,9 +181,9 @@ fun FooterActions(
 
             security?.let { SecurityButton(it, Modifier.weight(1f)) }
             foregroundServices?.let { ForegroundServicesButton(it) }
-            userSwitcher?.let { IconButton(it) }
-            IconButton(viewModel.settings)
-            viewModel.power?.let { IconButton(it) }
+            userSwitcher?.let { IconButton(it, Modifier.sysuiResTag("multi_user_switch")) }
+            IconButton(viewModel.settings, Modifier.sysuiResTag("settings_button_container"))
+            viewModel.power?.let { IconButton(it, Modifier.sysuiResTag("pm_lite")) }
         }
     }
 }

@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
@@ -279,7 +280,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testShowDesktopApps_appsAlreadyVisible_doesNothing() {
+    public void testShowDesktopApps_appsAlreadyVisible_bringsToFront() {
         final RunningTaskInfo task1 = createFreeformTask();
         mDesktopModeTaskRepository.addActiveTask(task1.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
@@ -294,8 +295,17 @@ public class DesktopModeControllerTest extends ShellTestCase {
         mController.showDesktopApps();
 
         final WindowContainerTransaction wct = getBringAppsToFrontTransaction();
-        // No reordering needed.
-        assertThat(wct.getHierarchyOps()).isEmpty();
+        // Check wct has reorder calls
+        assertThat(wct.getHierarchyOps()).hasSize(2);
+        // Task 1 appeared first, must be first reorder to top.
+        HierarchyOp op1 = wct.getHierarchyOps().get(0);
+        assertThat(op1.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
+        assertThat(op1.getContainer()).isEqualTo(task1.token.asBinder());
+
+        // Task 2 appeared last, must be last reorder to top.
+        HierarchyOp op2 = wct.getHierarchyOps().get(1);
+        assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
+        assertThat(op2.getContainer()).isEqualTo(task2.token.asBinder());
     }
 
     @Test
@@ -322,6 +332,41 @@ public class DesktopModeControllerTest extends ShellTestCase {
         final HierarchyOp op2 = wct.getHierarchyOps().get(1);
         assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
         assertThat(op2.getContainer()).isEqualTo(task2.token.asBinder());
+    }
+
+    @Test
+    public void testGetVisibleTaskCount_noTasks_returnsZero() {
+        assertThat(mController.getVisibleTaskCount()).isEqualTo(0);
+    }
+
+    @Test
+    public void testGetVisibleTaskCount_twoTasks_bothVisible_returnsTwo() {
+        RunningTaskInfo task1 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, true /* visible */);
+
+        RunningTaskInfo task2 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, true /* visible */);
+
+        assertThat(mController.getVisibleTaskCount()).isEqualTo(2);
+    }
+
+    @Test
+    public void testGetVisibleTaskCount_twoTasks_oneVisible_returnsOne() {
+        RunningTaskInfo task1 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, true /* visible */);
+
+        RunningTaskInfo task2 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, false /* visible */);
+
+        assertThat(mController.getVisibleTaskCount()).isEqualTo(1);
     }
 
     @Test
@@ -402,7 +447,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
         final ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
                 WindowContainerTransaction.class);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            verify(mTransitions).startTransition(eq(TRANSIT_TO_FRONT), arg.capture(), any());
+            verify(mTransitions).startTransition(eq(TRANSIT_NONE), arg.capture(), any());
         } else {
             verify(mShellTaskOrganizer).applyTransaction(arg.capture());
         }

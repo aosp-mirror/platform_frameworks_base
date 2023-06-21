@@ -7,6 +7,9 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.LegacySourceType
@@ -21,7 +24,9 @@ import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
 /**
@@ -31,6 +36,9 @@ import org.mockito.Mockito.`when` as whenever
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class NotificationShelfTest : SysuiTestCase() {
+
+    @Mock private lateinit var largeScreenShadeInterpolator: LargeScreenShadeInterpolator
+    @Mock private lateinit var flags: FeatureFlags
 
     private val shelf = NotificationShelf(
             context,
@@ -50,8 +58,12 @@ class NotificationShelfTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
+        whenever(ambientState.largeScreenShadeInterpolator).thenReturn(largeScreenShadeInterpolator)
+        whenever(ambientState.featureFlags).thenReturn(flags)
         shelf.bind(ambientState, /* hostLayoutController */ hostLayoutController)
         shelf.layout(/* left */ 0, /* top */ 0, /* right */ 30, /* bottom */5)
+        whenever(ambientState.isSmallScreen).thenReturn(true)
     }
 
     @Test
@@ -295,7 +307,35 @@ class NotificationShelfTest : SysuiTestCase() {
     fun updateState_expansionChanging_shelfAlphaUpdated() {
         updateState_expansionChanging_shelfAlphaUpdated(
                 expansionFraction = 0.6f,
-                expectedAlpha = ShadeInterpolation.getContentAlpha(0.6f)
+                expectedAlpha = ShadeInterpolation.getContentAlpha(0.6f),
+        )
+    }
+
+    @Test
+    fun updateState_flagTrue_largeScreen_expansionChanging_shelfAlphaUpdated_largeScreenValue() {
+        val expansionFraction = 0.6f
+        whenever(flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)).thenReturn(true)
+        whenever(ambientState.isSmallScreen).thenReturn(false)
+        whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
+            .thenReturn(0.123f)
+
+        updateState_expansionChanging_shelfAlphaUpdated(
+            expansionFraction = expansionFraction,
+            expectedAlpha = 0.123f
+        )
+    }
+
+    @Test
+    fun updateState_flagFalse_largeScreen_expansionChanging_shelfAlphaUpdated_standardValue() {
+        val expansionFraction = 0.6f
+        whenever(flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)).thenReturn(false)
+        whenever(ambientState.isSmallScreen).thenReturn(false)
+        whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
+            .thenReturn(0.123f)
+
+        updateState_expansionChanging_shelfAlphaUpdated(
+            expansionFraction = expansionFraction,
+            expectedAlpha = ShadeInterpolation.getContentAlpha(expansionFraction)
         )
     }
 
@@ -305,7 +345,17 @@ class NotificationShelfTest : SysuiTestCase() {
 
         updateState_expansionChanging_shelfAlphaUpdated(
                 expansionFraction = 0.95f,
-                expectedAlpha = aboutToShowBouncerProgress(0.95f)
+                expectedAlpha = aboutToShowBouncerProgress(0.95f),
+        )
+    }
+
+    @Test
+    fun updateState_largeScreen_expansionChangingWhileBouncerInTransit_bouncerInterpolatorUsed() {
+        whenever(ambientState.isBouncerInTransit).thenReturn(true)
+
+        updateState_expansionChanging_shelfAlphaUpdated(
+                expansionFraction = 0.95f,
+                expectedAlpha = aboutToShowBouncerProgress(0.95f),
         )
     }
 

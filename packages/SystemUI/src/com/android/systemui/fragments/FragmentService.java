@@ -53,6 +53,7 @@ public class FragmentService implements Dumpable {
      */
     private final ArrayMap<String, FragmentInstantiationInfo> mInjectionMap = new ArrayMap<>();
     private final Handler mHandler = new Handler();
+    private final FragmentHostManager.Factory mFragmentHostManagerFactory;
 
     private ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -67,8 +68,10 @@ public class FragmentService implements Dumpable {
     @Inject
     public FragmentService(
             FragmentCreator.Factory fragmentCreatorFactory,
+            FragmentHostManager.Factory fragmentHostManagerFactory,
             ConfigurationController configurationController,
             DumpManager dumpManager) {
+        mFragmentHostManagerFactory = fragmentHostManagerFactory;
         addFragmentInstantiationProvider(fragmentCreatorFactory.build());
         configurationController.addCallback(mConfigurationListener);
 
@@ -152,7 +155,7 @@ public class FragmentService implements Dumpable {
 
         public FragmentHostState(View view) {
             mView = view;
-            mFragmentHostManager = new FragmentHostManager(FragmentService.this, mView);
+            mFragmentHostManager = mFragmentHostManagerFactory.create(mView);
         }
 
         public void sendConfigurationChange(Configuration newConfig) {

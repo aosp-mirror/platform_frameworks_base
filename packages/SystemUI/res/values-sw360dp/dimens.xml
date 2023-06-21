@@ -25,5 +25,8 @@
 
     <!-- Home Controls -->
     <dimen name="global_actions_side_margin">12dp</dimen>
+
+    <!-- Biometric Auth pattern view size, better to align keyguard_security_width -->
+    <dimen name="biometric_auth_pattern_view_size">298dp</dimen>
 </resources>
 

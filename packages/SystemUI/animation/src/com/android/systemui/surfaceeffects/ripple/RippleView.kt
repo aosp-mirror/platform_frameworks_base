@@ -45,12 +45,8 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
 
     var duration: Long = 1750
 
-    private var maxWidth: Float = 0.0f
-    private var maxHeight: Float = 0.0f
     fun setMaxSize(maxWidth: Float, maxHeight: Float) {
-        this.maxWidth = maxWidth
-        this.maxHeight = maxHeight
-        rippleShader.setMaxSize(maxWidth, maxHeight)
+        rippleShader.rippleSize.setMaxSize(maxWidth, maxHeight)
     }
 
     private var centerX: Float = 0.0f
@@ -77,11 +73,111 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         rippleShader = RippleShader(rippleShape)
 
         rippleShader.color = RippleAnimationConfig.RIPPLE_DEFAULT_COLOR
-        rippleShader.progress = 0f
+        rippleShader.rawProgress = 0f
         rippleShader.sparkleStrength = RippleAnimationConfig.RIPPLE_SPARKLE_STRENGTH
         rippleShader.pixelDensity = resources.displayMetrics.density
 
         ripplePaint.shader = rippleShader
+    }
+
+    /**
+     * Sets the fade parameters for the base ring.
+     *
+     * <p>Base ring indicates a blurred ring below the sparkle ring. See
+     * [RippleShader.baseRingFadeParams].
+     */
+    @JvmOverloads
+    fun setBaseRingFadeParams(
+        fadeInStart: Float = rippleShader.baseRingFadeParams.fadeInStart,
+        fadeInEnd: Float = rippleShader.baseRingFadeParams.fadeInEnd,
+        fadeOutStart: Float = rippleShader.baseRingFadeParams.fadeOutStart,
+        fadeOutEnd: Float = rippleShader.baseRingFadeParams.fadeOutEnd
+    ) {
+        setFadeParams(
+            rippleShader.baseRingFadeParams,
+            fadeInStart,
+            fadeInEnd,
+            fadeOutStart,
+            fadeOutEnd
+        )
+    }
+
+    /**
+     * Sets the fade parameters for the sparkle ring.
+     *
+     * <p>Sparkle ring refers to the ring that's drawn on top of the base ring. See
+     * [RippleShader.sparkleRingFadeParams].
+     */
+    @JvmOverloads
+    fun setSparkleRingFadeParams(
+        fadeInStart: Float = rippleShader.sparkleRingFadeParams.fadeInStart,
+        fadeInEnd: Float = rippleShader.sparkleRingFadeParams.fadeInEnd,
+        fadeOutStart: Float = rippleShader.sparkleRingFadeParams.fadeOutStart,
+        fadeOutEnd: Float = rippleShader.sparkleRingFadeParams.fadeOutEnd
+    ) {
+        setFadeParams(
+            rippleShader.sparkleRingFadeParams,
+            fadeInStart,
+            fadeInEnd,
+            fadeOutStart,
+            fadeOutEnd
+        )
+    }
+
+    /**
+     * Sets the fade parameters for the center fill.
+     *
+     * <p>One common use case is set all the params to 1, which completely removes the center fill.
+     * See [RippleShader.centerFillFadeParams].
+     */
+    @JvmOverloads
+    fun setCenterFillFadeParams(
+        fadeInStart: Float = rippleShader.centerFillFadeParams.fadeInStart,
+        fadeInEnd: Float = rippleShader.centerFillFadeParams.fadeInEnd,
+        fadeOutStart: Float = rippleShader.centerFillFadeParams.fadeOutStart,
+        fadeOutEnd: Float = rippleShader.centerFillFadeParams.fadeOutEnd
+    ) {
+        setFadeParams(
+            rippleShader.centerFillFadeParams,
+            fadeInStart,
+            fadeInEnd,
+            fadeOutStart,
+            fadeOutEnd
+        )
+    }
+
+    private fun setFadeParams(
+        fadeParams: RippleShader.FadeParams,
+        fadeInStart: Float,
+        fadeInEnd: Float,
+        fadeOutStart: Float,
+        fadeOutEnd: Float
+    ) {
+        with(fadeParams) {
+            this.fadeInStart = fadeInStart
+            this.fadeInEnd = fadeInEnd
+            this.fadeOutStart = fadeOutStart
+            this.fadeOutEnd = fadeOutEnd
+        }
+    }
+
+    /**
+     * Sets blur multiplier at start and end of the progress.
+     *
+     * <p>It interpolates between [start] and [end]. No need to set it if using default blur.
+     */
+    fun setBlur(start: Float, end: Float) {
+        rippleShader.blurStart = start
+        rippleShader.blurEnd = end
+    }
+
+    /**
+     * Sets the list of [RippleShader.SizeAtProgress].
+     *
+     * <p>Note that this clears the list before it sets with the new data.
+     */
+    fun setSizeAtProgresses(vararg targetSizes: RippleShader.SizeAtProgress) {
+        rippleShader.rippleSize.setSizeAtProgresses(*targetSizes)
     }
 
     @JvmOverloads
@@ -93,7 +189,7 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         animator.addUpdateListener { updateListener ->
             val now = updateListener.currentPlayTime
             val progress = updateListener.animatedValue as Float
-            rippleShader.progress = progress
+            rippleShader.rawProgress = progress
             rippleShader.distortionStrength = 1 - progress
             rippleShader.time = now.toFloat()
             invalidate()
@@ -117,15 +213,6 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         rippleShader.color = ColorUtils.setAlphaComponent(color, alpha)
     }
 
-    /**
-     * Set whether the ripple should remain filled as the ripple expands.
-     *
-     * See [RippleShader.rippleFill].
-     */
-    fun setRippleFill(rippleFill: Boolean) {
-        rippleShader.rippleFill = rippleFill
-    }
-
     /** Set the intensity of the sparkles. */
     fun setSparkleStrength(strength: Float) {
         rippleShader.sparkleStrength = strength
@@ -144,23 +231,11 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         // active effect area. Values here should be kept in sync with the animation implementation
         // in the ripple shader.
         if (rippleShape == RippleShape.CIRCLE) {
-            val maskRadius =
-                (1 -
-                    (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress)) * maxWidth
+            val maskRadius = rippleShader.rippleSize.currentWidth
             canvas.drawCircle(centerX, centerY, maskRadius, ripplePaint)
-        } else {
-            val maskWidth =
-                (1 -
-                    (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress)) * maxWidth * 2
-            val maskHeight =
-                (1 -
-                    (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress)) * maxHeight * 2
+        } else if (rippleShape == RippleShape.ELLIPSE) {
+            val maskWidth = rippleShader.rippleSize.currentWidth * 2
+            val maskHeight = rippleShader.rippleSize.currentHeight * 2
             canvas.drawRect(
                 /* left= */ centerX - maskWidth,
                 /* top= */ centerY - maskHeight,
@@ -168,6 +243,10 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
                 /* bottom= */ centerY + maskHeight,
                 ripplePaint
             )
+        } else { // RippleShape.RoundedBox
+            // No masking for the rounded box, as it has more blur which requires larger bounds.
+            // Masking creates sharp bounds even when the masking is 4 times bigger.
+            canvas.drawPaint(ripplePaint)
         }
     }
 }

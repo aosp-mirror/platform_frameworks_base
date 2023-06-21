@@ -562,22 +562,15 @@ public final class SystemUiDeviceConfigFlags {
             "task_manager_show_user_visible_jobs";
 
     /**
-     * (boolean) Whether the clipboard overlay is enabled.
+     * (boolean) Whether to show notification volume control slider separate from ring.
      */
-    public static final String CLIPBOARD_OVERLAY_ENABLED = "clipboard_overlay_enabled";
+    public static final String VOLUME_SEPARATE_NOTIFICATION = "volume_separate_notification";
 
     /**
      * (boolean) Whether widget provider info would be saved to / loaded from system persistence
      * layer as opposed to individual manifests in respective apps.
      */
     public static final String PERSISTS_WIDGET_PROVIDER_INFO = "persists_widget_provider_info";
-
-    /**
-     * (boolean) Whether the clipboard overlay shows an edit button (as opposed to requiring tapping
-     * the preview to send an edit intent).
-     */
-    public static final String CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON =
-            "clipboard_overlay_show_edit_button";
 
     /**
      * (boolean) Whether to show smart chips (based on TextClassifier) in the clipboard overlay.

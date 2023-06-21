@@ -1,49 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <!--
-      ~ Copyright (C) 2022 The Android Open Source Project
-      ~
-      ~ Licensed under the Apache License, Version 2.0 (the "License");
-      ~ you may not use this file except in compliance with the License.
-      ~ You may obtain a copy of the License at
-      ~
-      ~      http://www.apache.org/licenses/LICENSE-2.0
-      ~
-      ~ Unless required by applicable law or agreed to in writing, software
-      ~ distributed under the License is distributed on an "AS IS" BASIS,
-      ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-      ~ See the License for the specific language governing permissions and
-      ~ limitations under the License.
-      -->
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 <com.android.wm.shell.windowdecor.WindowDecorLinearLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-android:id="@+id/handle_menu"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:gravity="center_horizontal"
-android:background="@drawable/desktop_mode_decor_menu_background">
-    <Button
-        style="@style/CaptionButtonStyle"
-        android:id="@+id/fullscreen_button"
-        android:contentDescription="@string/fullscreen_text"
-        android:background="@drawable/caption_fullscreen_button"/>
-    <Button
-        style="@style/CaptionButtonStyle"
-        android:id="@+id/split_screen_button"
-        android:contentDescription="@string/split_screen_text"
-        android:background="@drawable/caption_split_screen_button"/>
-    <Button
-        style="@style/CaptionButtonStyle"
-        android:id="@+id/floating_button"
-        android:contentDescription="@string/float_button_text"
-        android:background="@drawable/caption_floating_button"/>
-    <Button
-        style="@style/CaptionButtonStyle"
-        android:id="@+id/desktop_button"
-        android:contentDescription="@string/desktop_text"
-        android:background="@drawable/caption_desktop_button"/>
-    <Button
-        style="@style/CaptionButtonStyle"
-        android:id="@+id/more_button"
-        android:contentDescription="@string/more_button_text"
-        android:background="@drawable/caption_more_button"/>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/handle_menu"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/desktop_mode_decor_menu_background"
+    android:divider="?android:attr/dividerHorizontal"
+    android:showDividers="middle"
+    android:dividerPadding="18dip">
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/application_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="12dp"
+            android:contentDescription="@string/app_icon_text"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"/>
+        <TextView
+            android:id="@+id/application_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/application_icon"
+            android:layout_toStartOf="@+id/collapse_menu_button"
+            android:textColor="#FF000000"
+            android:layout_centerVertical="true"/>
+        <Button
+            android:id="@+id/collapse_menu_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/collapse_menu_text"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/caption_collapse_menu_button"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
+    <LinearLayout
+        android:id="@+id/windowing_mode_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="0.5" />
+        <ImageButton
+            style="@style/CaptionWindowingButtonStyle"
+            android:id="@+id/fullscreen_button"
+            android:contentDescription="@string/fullscreen_text"
+            android:src="@drawable/caption_fullscreen_button"
+            android:scaleType="fitCenter"
+            android:background="?android:selectableItemBackgroundBorderless"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+        <ImageButton
+            style="@style/CaptionWindowingButtonStyle"
+            android:id="@+id/split_screen_button"
+            android:contentDescription="@string/split_screen_text"
+            android:src="@drawable/caption_split_screen_button"
+            android:scaleType="fitCenter"
+            android:background="?android:selectableItemBackgroundBorderless"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+        <ImageButton
+            style="@style/CaptionWindowingButtonStyle"
+            android:id="@+id/floating_button"
+            android:contentDescription="@string/float_button_text"
+            android:src="@drawable/caption_floating_button"
+            android:scaleType="fitCenter"
+            android:background="?android:selectableItemBackgroundBorderless"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+        <ImageButton
+            style="@style/CaptionWindowingButtonStyle"
+            android:id="@+id/desktop_button"
+            android:contentDescription="@string/desktop_text"
+            android:src="@drawable/caption_desktop_button"
+            android:scaleType="fitCenter"
+            android:background="?android:selectableItemBackgroundBorderless"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="0.5" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/menu_buttons_misc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <Button
+            style="@style/CaptionMenuButtonStyle"
+            android:id="@+id/screenshot_button"
+            android:contentDescription="@string/screenshot_text"
+            android:text="@string/screenshot_text"
+            android:drawableStart="@drawable/caption_screenshot_button"/>
+        <Button
+            style="@style/CaptionMenuButtonStyle"
+            android:id="@+id/select_button"
+            android:contentDescription="@string/select_text"
+            android:text="@string/select_text"
+            android:drawableStart="@drawable/caption_select_button"/>
+        <Button
+            style="@style/CaptionMenuButtonStyle"
+            android:id="@+id/close_button"
+            android:contentDescription="@string/close_text"
+            android:text="@string/close_text"
+            android:drawableStart="@drawable/caption_close_button"
+            android:textColor="#FFFF0000"/>
+    </LinearLayout>
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>

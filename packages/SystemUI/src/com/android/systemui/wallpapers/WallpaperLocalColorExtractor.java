@@ -29,7 +29,7 @@ import android.util.MathUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.util.Assert;
 
 import java.io.FileDescriptor;
@@ -66,8 +66,8 @@ public class WallpaperLocalColorExtractor {
     private final List<RectF> mPendingRegions = new ArrayList<>();
     private final Set<RectF> mProcessedRegions = new ArraySet<>();
 
-    @Background
-    private final Executor mBackgroundExecutor;
+    @LongRunning
+    private final Executor mLongExecutor;
 
     private final WallpaperLocalColorExtractorCallback mWallpaperLocalColorExtractorCallback;
 
@@ -101,13 +101,13 @@ public class WallpaperLocalColorExtractor {
 
     /**
      * Creates a new color extractor.
-     * @param backgroundExecutor the executor on which the color extraction will be performed
+     * @param longExecutor the executor on which the color extraction will be performed
      * @param wallpaperLocalColorExtractorCallback an interface to handle the callbacks from
      *                                        the color extractor.
      */
-    public WallpaperLocalColorExtractor(@Background Executor backgroundExecutor,
+    public WallpaperLocalColorExtractor(@LongRunning Executor longExecutor,
             WallpaperLocalColorExtractorCallback wallpaperLocalColorExtractorCallback) {
-        mBackgroundExecutor = backgroundExecutor;
+        mLongExecutor = longExecutor;
         mWallpaperLocalColorExtractorCallback = wallpaperLocalColorExtractorCallback;
     }
 
@@ -117,7 +117,7 @@ public class WallpaperLocalColorExtractor {
      * not recomputed.
      */
     public void setDisplayDimensions(int displayWidth, int displayHeight) {
-        mBackgroundExecutor.execute(() ->
+        mLongExecutor.execute(() ->
                 setDisplayDimensionsSynchronized(displayWidth, displayHeight));
     }
 
@@ -144,7 +144,7 @@ public class WallpaperLocalColorExtractor {
      * @param bitmap the new wallpaper
      */
     public void onBitmapChanged(@NonNull Bitmap bitmap) {
-        mBackgroundExecutor.execute(() -> onBitmapChangedSynchronized(bitmap));
+        mLongExecutor.execute(() -> onBitmapChangedSynchronized(bitmap));
     }
 
     private void onBitmapChangedSynchronized(@NonNull Bitmap bitmap) {
@@ -167,7 +167,7 @@ public class WallpaperLocalColorExtractor {
      * @param pages the total number of pages of the launcher
      */
     public void onPageChanged(int pages) {
-        mBackgroundExecutor.execute(() -> onPageChangedSynchronized(pages));
+        mLongExecutor.execute(() -> onPageChangedSynchronized(pages));
     }
 
     private void onPageChangedSynchronized(int pages) {
@@ -194,7 +194,7 @@ public class WallpaperLocalColorExtractor {
      */
     public void addLocalColorsAreas(@NonNull List<RectF> regions) {
         if (regions.size() > 0) {
-            mBackgroundExecutor.execute(() -> addLocalColorsAreasSynchronized(regions));
+            mLongExecutor.execute(() -> addLocalColorsAreasSynchronized(regions));
         } else {
             Log.w(TAG, "Attempt to add colors with an empty list");
         }
@@ -218,7 +218,7 @@ public class WallpaperLocalColorExtractor {
      * @param regions The areas of interest in our wallpaper (in screen pixel coordinates)
      */
     public void removeLocalColorAreas(@NonNull List<RectF> regions) {
-        mBackgroundExecutor.execute(() -> removeLocalColorAreasSynchronized(regions));
+        mLongExecutor.execute(() -> removeLocalColorAreasSynchronized(regions));
     }
 
     private void removeLocalColorAreasSynchronized(@NonNull List<RectF> regions) {
@@ -236,7 +236,7 @@ public class WallpaperLocalColorExtractor {
      * Clean up the memory (in particular, the mini bitmap) used by this class.
      */
     public void cleanUp() {
-        mBackgroundExecutor.execute(this::cleanUpSynchronized);
+        mLongExecutor.execute(this::cleanUpSynchronized);
     }
 
     private void cleanUpSynchronized() {

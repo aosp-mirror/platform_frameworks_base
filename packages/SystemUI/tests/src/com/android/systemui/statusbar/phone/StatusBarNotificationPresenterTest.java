@@ -40,8 +40,10 @@ import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -92,7 +94,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mMetricsLogger = new FakeMetricsLogger();
         LockscreenGestureLogger lockscreenGestureLogger = new LockscreenGestureLogger(
                 mMetricsLogger);
-        mCommandQueue = new CommandQueue(mContext);
+        mCommandQueue = new CommandQueue(mContext, new FakeDisplayTracker(mContext));
         mDependency.injectTestDependency(StatusBarStateController.class,
                 mock(SysuiStatusBarStateController.class));
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
@@ -111,6 +113,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(
                 mContext,
                 mock(NotificationPanelViewController.class),
+                mock(QuickSettingsController.class),
                 mock(HeadsUpManagerPhone.class),
                 notificationShadeWindowView,
                 mock(ActivityStarter.class),

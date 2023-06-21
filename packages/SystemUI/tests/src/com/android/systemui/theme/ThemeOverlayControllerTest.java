@@ -172,7 +172,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         verify(mDumpManager).registerDumpable(any(), any());
         verify(mDeviceProvisionedController).addCallback(mDeviceProvisionedListener.capture());
         verify(mSecureSettings).registerContentObserverForUser(
-                eq(Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES)),
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES),
                 eq(false), mSettingsObserver.capture(), eq(UserHandle.USER_ALL)
         );
     }
@@ -790,15 +790,15 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         reset(mResources);
         when(mResources.getColor(eq(android.R.color.system_accent1_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getAccent1().get(6));
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent1().getS500());
         when(mResources.getColor(eq(android.R.color.system_accent2_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getAccent2().get(6));
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent2().getS500());
         when(mResources.getColor(eq(android.R.color.system_accent3_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getAccent3().get(6));
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent3().getS500());
         when(mResources.getColor(eq(android.R.color.system_neutral1_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral1().get(6));
+                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral1().getS500());
         when(mResources.getColor(eq(android.R.color.system_neutral2_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral2().get(6));
+                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral2().getS500());
 
         // Defers event because we already have initial colors.
         verify(mThemeOverlayApplier, never())

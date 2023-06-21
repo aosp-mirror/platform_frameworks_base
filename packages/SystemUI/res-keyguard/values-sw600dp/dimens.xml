@@ -25,9 +25,6 @@
     <!-- Margin around the various security views -->
     <dimen name="keyguard_security_view_top_margin">12dp</dimen>
 
-    <!-- Padding for the lock icon on the keyguard -->
-    <dimen name="lock_icon_padding">16dp</dimen>
-
     <!-- Overload default clock widget parameters -->
     <dimen name="widget_big_font_size">100dp</dimen>
     <dimen name="widget_label_font_size">18sp</dimen>

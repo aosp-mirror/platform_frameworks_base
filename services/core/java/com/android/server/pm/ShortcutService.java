@@ -1641,7 +1641,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return false;
         }
         int uid = injectGetPackageUid(systemChooser.getPackageName(), UserHandle.USER_SYSTEM);
-        return uid == callingUid;
+        return UserHandle.getAppId(uid) == UserHandle.getAppId(callingUid);
     }
 
     private void enforceSystemOrShell() {
@@ -2535,11 +2535,17 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS,
                 "getShareTargets");
+        final ComponentName chooser = injectChooserActivity();
+        final String pkg = (chooser != null
+                && mPackageManagerInternal.getComponentEnabledSetting(chooser,
+                injectBinderCallingUid(), userId) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+                ? chooser.getPackageName() : mContext.getPackageName();
         synchronized (mLock) {
             throwIfUserLockedL(userId);
             final List<ShortcutManager.ShareShortcutInfo> shortcutInfoList = new ArrayList<>();
             final ShortcutUser user = getUserShortcutsLocked(userId);
-            user.forAllPackages(p -> shortcutInfoList.addAll(p.getMatchingShareTargets(filter)));
+            user.forAllPackages(p -> shortcutInfoList.addAll(
+                    p.getMatchingShareTargets(filter, pkg)));
             return new ParceledListSlice<>(shortcutInfoList);
         }
     }

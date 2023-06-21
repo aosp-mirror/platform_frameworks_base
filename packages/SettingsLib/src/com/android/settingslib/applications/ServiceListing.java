@@ -35,6 +35,7 @@ import android.util.Slog;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Class for managing services matching a given intent and requesting a given permission.
@@ -51,12 +52,13 @@ public class ServiceListing {
     private final HashSet<ComponentName> mEnabledServices = new HashSet<>();
     private final List<ServiceInfo> mServices = new ArrayList<>();
     private final List<Callback> mCallbacks = new ArrayList<>();
+    private final Predicate mValidator;
 
     private boolean mListening;
 
     private ServiceListing(Context context, String tag,
             String setting, String intentAction, String permission, String noun,
-            boolean addDeviceLockedFlags) {
+            boolean addDeviceLockedFlags, Predicate validator) {
         mContentResolver = context.getContentResolver();
         mContext = context;
         mTag = tag;
@@ -65,6 +67,7 @@ public class ServiceListing {
         mPermission = permission;
         mNoun = noun;
         mAddDeviceLockedFlags = addDeviceLockedFlags;
+        mValidator = validator;
     }
 
     public void addCallback(Callback callback) {
@@ -137,7 +140,6 @@ public class ServiceListing {
         final PackageManager pmWrapper = mContext.getPackageManager();
         List<ResolveInfo> installedServices = pmWrapper.queryIntentServicesAsUser(
                 new Intent(mIntentAction), flags, user);
-
         for (ResolveInfo resolveInfo : installedServices) {
             ServiceInfo info = resolveInfo.serviceInfo;
 
@@ -146,6 +148,9 @@ public class ServiceListing {
                         + info.packageName + "/" + info.name
                         + ": it does not require the permission "
                         + mPermission);
+                continue;
+            }
+            if (mValidator != null && !mValidator.test(info)) {
                 continue;
             }
             mServices.add(info);
@@ -194,6 +199,7 @@ public class ServiceListing {
         private String mPermission;
         private String mNoun;
         private boolean mAddDeviceLockedFlags = false;
+        private Predicate mValidator;
 
         public Builder(Context context) {
             mContext = context;
@@ -224,6 +230,11 @@ public class ServiceListing {
             return this;
         }
 
+        public Builder setValidator(Predicate<ServiceInfo> validator) {
+            mValidator = validator;
+            return this;
+        }
+
         /**
          * Set to true to add support for both MATCH_DIRECT_BOOT_AWARE and
          * MATCH_DIRECT_BOOT_UNAWARE flags when querying PackageManager. Required to get results
@@ -236,7 +247,7 @@ public class ServiceListing {
 
         public ServiceListing build() {
             return new ServiceListing(mContext, mTag, mSetting, mIntentAction, mPermission, mNoun,
-                    mAddDeviceLockedFlags);
+                    mAddDeviceLockedFlags, mValidator);
         }
     }
 }

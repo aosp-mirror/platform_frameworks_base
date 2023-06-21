@@ -15,6 +15,7 @@ import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -26,6 +27,7 @@ import junit.framework.Assert.assertTrue
 import junit.framework.AssertionFailedError
 import kotlin.concurrent.thread
 import org.junit.After
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -193,6 +195,13 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         waitForIdleSync()
         verify(listener).onLaunchAnimationStart()
         verify(controller).onLaunchAnimationStart(anyBoolean())
+    }
+
+    @Test
+    fun creatingControllerFromNormalViewThrows() {
+        assertThrows(IllegalArgumentException::class.java) {
+            ActivityLaunchAnimator.Controller.fromView(FrameLayout(mContext))
+        }
     }
 
     private fun fakeWindow(): RemoteAnimationTarget {

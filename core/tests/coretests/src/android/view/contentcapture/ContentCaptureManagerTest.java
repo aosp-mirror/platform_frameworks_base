@@ -15,6 +15,8 @@
  */
 package android.view.contentcapture;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertThrows;
 
@@ -53,5 +55,20 @@ public class ContentCaptureManagerTest {
                 new ContentCaptureManager(mMockContext, mockService, options);
 
         assertThrows(NullPointerException.class, () -> manager.removeData(null));
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testFlushViewTreeAppearingEventDisabled_setAndGet() {
+        final IContentCaptureManager mockService = mock(IContentCaptureManager.class);
+        final ContentCaptureOptions options = new ContentCaptureOptions(null);
+        final ContentCaptureManager manager =
+                new ContentCaptureManager(mMockContext, mockService, options);
+
+        assertThat(manager.getFlushViewTreeAppearingEventDisabled()).isFalse();
+        manager.setFlushViewTreeAppearingEventDisabled(true);
+        assertThat(manager.getFlushViewTreeAppearingEventDisabled()).isTrue();
+        manager.setFlushViewTreeAppearingEventDisabled(false);
+        assertThat(manager.getFlushViewTreeAppearingEventDisabled()).isFalse();
     }
 }

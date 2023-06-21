@@ -142,6 +142,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.internal.util.ScreenshotRequest;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.view.AppearanceRegion;
 import com.android.internal.widget.PointerLocationView;
@@ -199,6 +200,7 @@ public class DisplayPolicy {
 
     private final boolean mCarDockEnablesAccelerometer;
     private final boolean mDeskDockEnablesAccelerometer;
+    private final boolean mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer;
     private final AccessibilityManager mAccessibilityManager;
     private final ImmersiveModeConfirmation mImmersiveModeConfirmation;
     private final ScreenshotHelper mScreenshotHelper;
@@ -434,6 +436,8 @@ public class DisplayPolicy {
         final Resources r = mContext.getResources();
         mCarDockEnablesAccelerometer = r.getBoolean(R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = r.getBoolean(R.bool.config_deskDockEnablesAccelerometer);
+        mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer =
+                r.getBoolean(R.bool.config_deskRespectsNoSensorAndLockedWithoutAccelerometer);
         mCanSystemBarsBeShownByUser = !r.getBoolean(
                 R.bool.config_remoteInsetsControllerControlsSystemBars) || r.getBoolean(
                 R.bool.config_remoteInsetsControllerSystemBarsCanBeShownByUserAction);
@@ -752,6 +756,10 @@ public class DisplayPolicy {
 
     boolean isDeskDockEnablesAccelerometer() {
         return mDeskDockEnablesAccelerometer;
+    }
+
+    boolean isDeskDockRespectsNoSensorAndLockedWithoutAccelerometer() {
+        return mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer;
     }
 
     public void setPersistentVrModeEnabled(boolean persistentVrModeEnabled) {
@@ -1576,9 +1584,8 @@ public class DisplayPolicy {
         applyKeyguardPolicy(win, imeTarget);
 
         // Check if the freeform window overlaps with the navigation bar area.
-        final boolean isOverlappingWithNavBar = isOverlappingWithNavBar(win);
-        if (isOverlappingWithNavBar && !mIsFreeformWindowOverlappingWithNavBar
-                && win.inFreeformWindowingMode()) {
+        if (!mIsFreeformWindowOverlappingWithNavBar && win.inFreeformWindowingMode()
+                && win.mActivityRecord != null && isOverlappingWithNavBar(win)) {
             mIsFreeformWindowOverlappingWithNavBar = true;
         }
 
@@ -1636,7 +1643,7 @@ public class DisplayPolicy {
             // mode; if it's in gesture navigation mode, the navigation bar will be
             // NAV_BAR_FORCE_TRANSPARENT and its appearance won't be decided by overlapping
             // windows.
-            if (isOverlappingWithNavBar) {
+            if (isOverlappingWithNavBar(win)) {
                 if (mNavBarColorWindowCandidate == null) {
                     mNavBarColorWindowCandidate = win;
                     addSystemBarColorApp(win);
@@ -1664,7 +1671,7 @@ public class DisplayPolicy {
                     addSystemBarColorApp(win);
                 }
             }
-            if (isOverlappingWithNavBar && mNavBarColorWindowCandidate == null) {
+            if (isOverlappingWithNavBar(win) && mNavBarColorWindowCandidate == null) {
                 mNavBarColorWindowCandidate = win;
             }
         }
@@ -2006,7 +2013,8 @@ public class DisplayPolicy {
                 dc.getDisplayPolicy().simulateLayoutDisplay(df);
                 final InsetsState insetsState = df.mInsetsState;
                 final Rect displayFrame = insetsState.getDisplayFrame();
-                final Insets decor = calculateDecorInsetsWithInternalTypes(insetsState);
+                final Insets decor = insetsState.calculateInsets(displayFrame, DECOR_TYPES,
+                        true /* ignoreVisibility */);
                 final Insets statusBar = insetsState.calculateInsets(displayFrame,
                         Type.statusBars(), true /* ignoreVisibility */);
                 mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
@@ -2038,17 +2046,8 @@ public class DisplayPolicy {
             }
         }
 
-        // TODO (b/235842600): Use public type once we can treat task bar as navigation bar.
-        static final int[] INTERNAL_DECOR_TYPES;
-        static {
-            final ArraySet<Integer> decorTypes = InsetsState.toInternalType(
-                    Type.displayCutout() | Type.navigationBars());
-            decorTypes.remove(ITYPE_EXTRA_NAVIGATION_BAR);
-            INTERNAL_DECOR_TYPES = new int[decorTypes.size()];
-            for (int i = 0; i < INTERNAL_DECOR_TYPES.length; i++) {
-                INTERNAL_DECOR_TYPES[i] = decorTypes.valueAt(i);
-            }
-        }
+
+        static final int DECOR_TYPES = Type.displayCutout() | Type.navigationBars();
 
         private final DisplayContent mDisplayContent;
         private final Info[] mInfoForRotation = new Info[4];
@@ -2074,20 +2073,6 @@ public class DisplayPolicy {
             for (Info info : mInfoForRotation) {
                 info.mNeedUpdate = true;
             }
-        }
-
-        // TODO (b/235842600): Remove this method once we can treat task bar as navigation bar.
-        private static Insets calculateDecorInsetsWithInternalTypes(InsetsState state) {
-            final Rect frame = state.getDisplayFrame();
-            Insets insets = Insets.NONE;
-            for (int i = INTERNAL_DECOR_TYPES.length - 1; i >= 0; i--) {
-                final InsetsSource source = state.peekSource(INTERNAL_DECOR_TYPES[i]);
-                if (source != null) {
-                    insets = Insets.max(source.calculateInsets(frame, true /* ignoreVisibility */),
-                            insets);
-                }
-            }
-            return insets;
         }
     }
 
@@ -2163,6 +2148,14 @@ public class DisplayPolicy {
             return;
         }
 
+        if (controlTarget != null) {
+            final WindowState win = controlTarget.getWindow();
+
+            if (win != null && win.isActivityTypeDream()) {
+                return;
+            }
+        }
+
         final @InsetsType int restorePositionTypes =
                 (controlTarget.getRequestedVisibility(ITYPE_NAVIGATION_BAR)
                         ? Type.navigationBars() : 0)
@@ -2221,7 +2214,7 @@ public class DisplayPolicy {
      * Called when an app has started replacing its main window.
      */
     void addRelaunchingApp(ActivityRecord app) {
-        if (mSystemBarColorApps.contains(app)) {
+        if (mSystemBarColorApps.contains(app) && !app.hasStartingWindow()) {
             mRelaunchingSystemBarColorApps.add(app);
         }
     }
@@ -2666,8 +2659,9 @@ public class DisplayPolicy {
      */
     public void takeScreenshot(int screenshotType, int source) {
         if (mScreenshotHelper != null) {
-            mScreenshotHelper.takeScreenshot(screenshotType,
-                    source, mHandler, null /* completionConsumer */);
+            ScreenshotRequest request =
+                    new ScreenshotRequest.Builder(screenshotType, source).build();
+            mScreenshotHelper.takeScreenshot(request, mHandler, null /* completionConsumer */);
         }
     }
 
@@ -2683,6 +2677,8 @@ public class DisplayPolicy {
         pw.print("mCarDockEnablesAccelerometer="); pw.print(mCarDockEnablesAccelerometer);
         pw.print(" mDeskDockEnablesAccelerometer=");
         pw.println(mDeskDockEnablesAccelerometer);
+        pw.print(" mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer=");
+        pw.println(mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer);
         pw.print(prefix); pw.print("mDockMode="); pw.print(Intent.dockStateToString(mDockMode));
         pw.print(" mLidState="); pw.println(WindowManagerFuncs.lidStateToString(mLidState));
         pw.print(prefix); pw.print("mAwake="); pw.print(mAwake);
@@ -2879,7 +2875,7 @@ public class DisplayPolicy {
 
     @VisibleForTesting
     static boolean isOverlappingWithNavBar(@NonNull WindowState win) {
-        if (win.mActivityRecord == null || !win.isVisible()) {
+        if (!win.isVisible()) {
             return false;
         }
 

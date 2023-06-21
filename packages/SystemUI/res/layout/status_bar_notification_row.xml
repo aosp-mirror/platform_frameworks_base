@@ -39,8 +39,11 @@
 
     <com.android.systemui.statusbar.notification.row.NotificationContentView
         android:id="@+id/expanded"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/notification_content_min_height"
+        android:gravity="center_vertical"
+        />
 
     <com.android.systemui.statusbar.notification.row.NotificationContentView
         android:id="@+id/expandedPublic"

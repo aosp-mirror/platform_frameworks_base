@@ -89,7 +89,7 @@ constructor(
                             ),
                         ),
                 )
-            else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default
+            else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default()
         }
     }
 

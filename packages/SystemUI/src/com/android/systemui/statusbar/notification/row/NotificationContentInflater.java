@@ -28,8 +28,11 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.CancellationSignal;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -38,6 +41,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageMessageConsumer;
+import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
@@ -439,6 +443,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         CancellationSignal cancellationSignal = new CancellationSignal();
         cancellationSignal.setOnCancelListener(
                 () -> runningInflations.values().forEach(CancellationSignal::cancel));
+
         return cancellationSignal;
     }
 
@@ -468,6 +473,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                             result.packageContext,
                             parentLayout,
                             remoteViewClickHandler);
+                    validateView(v, entry, row.getResources());
                     v.setIsRootNamespace(true);
                     applyCallback.setResultView(v);
                 } else {
@@ -475,6 +481,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                             result.packageContext,
                             existingView,
                             remoteViewClickHandler);
+                    validateView(existingView, entry, row.getResources());
                     existingWrapper.onReinflated();
                 }
             } catch (Exception e) {
@@ -496,6 +503,13 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
             @Override
             public void onViewApplied(View v) {
+                String invalidReason = isValidView(v, entry, row.getResources());
+                if (invalidReason != null) {
+                    handleInflationError(runningInflations, new InflationException(invalidReason),
+                            row.getEntry(), callback);
+                    runningInflations.remove(inflationId);
+                    return;
+                }
                 if (isNewView) {
                     v.setIsRootNamespace(true);
                     applyCallback.setResultView(v);
@@ -551,6 +565,65 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     remoteViewClickHandler);
         }
         runningInflations.put(inflationId, cancellationSignal);
+    }
+
+    /**
+     * Checks if the given View is a valid notification View.
+     *
+     * @return null == valid, non-null == invalid, String represents reason for rejection.
+     */
+    @VisibleForTesting
+    @Nullable
+    static String isValidView(View view,
+            NotificationEntry entry,
+            Resources resources) {
+        if (!satisfiesMinHeightRequirement(view, entry, resources)) {
+            return "inflated notification does not meet minimum height requirement";
+        }
+        return null;
+    }
+
+    private static boolean satisfiesMinHeightRequirement(View view,
+            NotificationEntry entry,
+            Resources resources) {
+        if (!requiresHeightCheck(entry)) {
+            return true;
+        }
+        Trace.beginSection("NotificationContentInflater#satisfiesMinHeightRequirement");
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        int referenceWidth = resources.getDimensionPixelSize(
+                R.dimen.notification_validation_reference_width);
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(referenceWidth, View.MeasureSpec.EXACTLY);
+        view.measure(widthSpec, heightSpec);
+        int minHeight = resources.getDimensionPixelSize(
+                R.dimen.notification_validation_minimum_allowed_height);
+        boolean result = view.getMeasuredHeight() >= minHeight;
+        Trace.endSection();
+        return result;
+    }
+
+    private static boolean requiresHeightCheck(NotificationEntry entry) {
+        // Undecorated custom views are disallowed from S onwards
+        if (entry.targetSdk >= Build.VERSION_CODES.S) {
+            return false;
+        }
+        // No need to check if the app isn't using any custom views
+        Notification notification = entry.getSbn().getNotification();
+        if (notification.contentView == null
+                && notification.bigContentView == null
+                && notification.headsUpContentView == null) {
+            return false;
+        }
+        return true;
+    }
+
+    private static void validateView(View view,
+            NotificationEntry entry,
+            Resources resources) throws InflationException {
+        String invalidReason = isValidView(view, entry, resources);
+        if (invalidReason != null) {
+            throw new InflationException(invalidReason);
+        }
     }
 
     private static void handleInflationError(
@@ -711,6 +784,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     public static class AsyncInflationTask extends AsyncTask<Void, Void, InflationProgress>
             implements InflationCallback, InflationTask {
 
+        private static final long IMG_PRELOAD_TIMEOUT_MS = 1000L;
         private final NotificationEntry mEntry;
         private final Context mContext;
         private final boolean mInflateSynchronously;
@@ -804,7 +878,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         recoveredBuilder, mIsLowPriority, mUsesIncreasedHeight,
                         mUsesIncreasedHeadsUpHeight, packageContext);
                 InflatedSmartReplyState previousSmartReplyState = mRow.getExistingSmartReplyState();
-                return inflateSmartReplyViews(
+                InflationProgress result = inflateSmartReplyViews(
                         inflationProgress,
                         mReInflateFlags,
                         mEntry,
@@ -812,6 +886,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         packageContext,
                         previousSmartReplyState,
                         mSmartRepliesInflater);
+
+                // wait for image resolver to finish preloading
+                mRow.getImageResolver().waitForPreloadedImages(IMG_PRELOAD_TIMEOUT_MS);
+
+                return result;
             } catch (Exception e) {
                 mError = e;
                 return null;
@@ -846,6 +925,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 mCallback.handleInflationException(mRow.getEntry(),
                         new InflationException("Couldn't inflate contentViews" + e));
             }
+
+            // Cancel any image loading tasks, not useful any more
+            mRow.getImageResolver().cancelRunningTasks();
         }
 
         @Override
@@ -872,6 +954,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             // Notify the resolver that the inflation task has finished,
             // try to purge unnecessary cached entries.
             mRow.getImageResolver().purgeCache();
+
+            // Cancel any image loading tasks that have not completed at this point
+            mRow.getImageResolver().cancelRunningTasks();
         }
 
         private static class RtlEnabledContext extends ContextWrapper {

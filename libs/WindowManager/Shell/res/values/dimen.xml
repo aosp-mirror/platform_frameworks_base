@@ -228,7 +228,7 @@
     <dimen name="bubble_user_education_stack_padding">16dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
-    <dimen name="compat_button_margin">16dp</dimen>
+    <dimen name="compat_button_margin">24dp</dimen>
 
     <!-- The radius of the corners of the compat hint bubble. -->
     <dimen name="compat_hint_corner_radius">28dp</dimen>
@@ -273,6 +273,66 @@
     <!-- The space between two actions in the letterbox education dialog -->
     <dimen name="letterbox_education_dialog_space_between_actions">24dp</dimen>
 
+    <!-- The corner radius of the buttons in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_button_radius">12dp</dimen>
+
+    <!-- The horizontal padding for the buttons in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_horizontal_padding">16dp</dimen>
+
+    <!-- The vertical padding for the buttons in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_vertical_padding">8dp</dimen>
+
+    <!-- The insets for the buttons in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_vertical_inset">6dp</dimen>
+
+    <!-- The margin between the dialog container and its parent. -->
+    <dimen name="letterbox_restart_dialog_margin">24dp</dimen>
+
+    <!-- The corner radius of the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_corner_radius">28dp</dimen>
+
+    <!-- The fixed width of the dialog if there is enough space in the parent. -->
+    <dimen name="letterbox_restart_dialog_width">348dp</dimen>
+
+    <!-- The width of the top icon in the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_title_icon_width">32dp</dimen>
+
+    <!-- The height of the top icon in the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_title_icon_height">32dp</dimen>
+
+    <!-- The width of an icon in the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_icon_width">40dp</dimen>
+
+    <!-- The height of an icon in the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_icon_height">32dp</dimen>
+
+    <!-- The space between two actions in the restart confirmation dialog -->
+    <dimen name="letterbox_restart_dialog_space_between_actions">24dp</dimen>
+
+    <!-- The width of the buttons in the restart dialog -->
+    <dimen name="letterbox_restart_dialog_button_width">82dp</dimen>
+
+    <!-- The width of the buttons in the restart dialog -->
+    <dimen name="letterbox_restart_dialog_button_height">36dp</dimen>
+
+    <!-- The corner radius of the buttons in the restart dialog -->
+    <dimen name="letterbox_restart_dialog_button_radius">18dp</dimen>
+
+    <!-- The insets for the buttons in the letterbox restart dialog -->
+    <dimen name="letterbox_restart_dialog_vertical_inset">6dp</dimen>
+
+    <!-- The horizontal padding for the buttons in the letterbox restart dialog -->
+    <dimen name="letterbox_restart_dialog_horizontal_padding">16dp</dimen>
+
+    <!-- The vertical padding for the buttons in the letterbox restart dialog -->
+    <dimen name="letterbox_restart_dialog_vertical_padding">8dp</dimen>
+
+    <!-- The margin between the reachability dialog container and its parent. -->
+    <dimen name="letterbox_reachability_education_dialog_margin">16dp</dimen>
+
+    <!-- The size of the icon in the item of reachability education -->
+    <dimen name="letterbox_reachability_education_item_image_size">24dp</dimen>
+
     <!-- The width of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_width">200dp</dimen>
 
@@ -298,30 +358,6 @@
     -->
     <dimen name="overridable_minimal_size_pip_resizable_task">48dp</dimen>
 
-    <!-- The size of the drag handle / menu shown along with a floating task. -->
-    <dimen name="floating_task_menu_size">32dp</dimen>
-
-    <!-- The size of menu items in the floating task menu. -->
-    <dimen name="floating_task_menu_item_size">24dp</dimen>
-
-    <!-- The horizontal margin of menu items in the floating task menu. -->
-    <dimen name="floating_task_menu_item_padding">5dp</dimen>
-
-    <!-- The width of visible floating view region when stashed. -->
-    <dimen name="floating_task_stash_offset">32dp</dimen>
-
-    <!-- The amount of elevation for a floating task. -->
-    <dimen name="floating_task_elevation">8dp</dimen>
-
-    <!-- The amount of padding around the bottom and top of the task. -->
-    <dimen name="floating_task_vertical_padding">8dp</dimen>
-
-    <!-- The normal size of the dismiss target. -->
-    <dimen name="floating_task_dismiss_circle_size">150dp</dimen>
-
-    <!-- The smaller size of the dismiss target (shrinks when something is in the target). -->
-    <dimen name="floating_dismiss_circle_small">120dp</dimen>
-
     <!-- The thickness of shadows of a window that has focus in DIP. -->
     <dimen name="freeform_decor_shadow_focused_thickness">20dp</dimen>
 
@@ -331,11 +367,19 @@
     <!-- Height of button (32dp)  + 2 * margin (5dp each). -->
     <dimen name="freeform_decor_caption_height">42dp</dimen>
 
-    <!-- Width of buttons (64dp) + handle (128dp) + padding (24dp total). -->
-    <dimen name="freeform_decor_caption_width">216dp</dimen>
+    <!-- Width of buttons (32dp each) + padding (128dp total). -->
+    <dimen name="freeform_decor_caption_menu_width">256dp</dimen>
+
+    <dimen name="freeform_decor_caption_menu_height">250dp</dimen>
 
     <dimen name="freeform_resize_handle">30dp</dimen>
 
     <dimen name="freeform_resize_corner">44dp</dimen>
+
+    <!-- The radius of the caption menu shadow. -->
+    <dimen name="caption_menu_shadow_radius">4dp</dimen>
+
+    <!-- The radius of the caption menu corners. -->
+    <dimen name="caption_menu_corner_radius">20dp</dimen>
 
 </resources>
