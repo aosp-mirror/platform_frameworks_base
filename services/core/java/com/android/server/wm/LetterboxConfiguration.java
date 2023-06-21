@@ -249,6 +249,9 @@ final class LetterboxConfiguration {
     // Allows to enable letterboxing strategy for translucent activities ignoring flags.
     private boolean mTranslucentLetterboxingOverrideEnabled;
 
+    // Allows to enable user aspect ratio settings ignoring flags.
+    private boolean mUserAppAspectRatioSettingsOverrideEnabled;
+
     // Whether we should use split screen aspect ratio for the activity when camera compat treatment
     // is enabled and activity is connected to the camera in fullscreen.
     private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
@@ -1223,6 +1226,19 @@ final class LetterboxConfiguration {
      * Whether per-app user aspect ratio override settings is enabled
      */
     boolean isUserAppAspectRatioSettingsEnabled() {
-        return mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS);
+        return mUserAppAspectRatioSettingsOverrideEnabled
+                || mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS);
+    }
+
+    void setUserAppAspectRatioSettingsOverrideEnabled(boolean enabled) {
+        mUserAppAspectRatioSettingsOverrideEnabled = enabled;
+    }
+
+    /**
+     * Resets whether per-app user aspect ratio override settings is enabled
+     * {@code mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS)}.
+     */
+    void resetUserAppAspectRatioSettingsEnabled() {
+        setUserAppAspectRatioSettingsOverrideEnabled(false);
     }
 }
