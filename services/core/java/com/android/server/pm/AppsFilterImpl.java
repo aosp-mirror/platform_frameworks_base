@@ -1225,6 +1225,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                                 setting.getPackageName(), siblingSetting, settings,
                                 users, USER_ALL, settings.size());
                     }
+                    break;
                 }
             }
 
