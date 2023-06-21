@@ -87,6 +87,14 @@ public class WindowInfosListenerForTest {
             this.isTrustedOverlay = (inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
             this.isVisible = (inputConfig & InputConfig.NOT_VISIBLE) == 0;
         }
+
+        @Override
+        public String toString() {
+            return name + ", frame=" + bounds
+                    + ", isVisible=" + isVisible
+                    + ", isTrustedOverlay=" + isTrustedOverlay
+                    + ", token=" + windowToken;
+        }
     }
 
     private static final String TAG = "WindowInfosListenerForTest";
