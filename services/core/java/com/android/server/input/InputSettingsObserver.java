@@ -67,6 +67,8 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateTouchpadRightClickZoneEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
                         (reason) -> updateShowTouches()),
+                Map.entry(Settings.System.getUriFor(Settings.System.POINTER_LOCATION),
+                        (reason) -> updatePointerLocation()),
                 Map.entry(
                         Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON),
                         (reason) -> updateAccessibilityLargePointer()),
@@ -147,6 +149,11 @@ class InputSettingsObserver extends ContentObserver {
 
     private void updateShowTouches() {
         mNative.setShowTouches(getBoolean(Settings.System.SHOW_TOUCHES, false));
+    }
+
+    private void updatePointerLocation() {
+        mService.updatePointerLocationEnabled(
+                getBoolean(Settings.System.POINTER_LOCATION, false));
     }
 
     private void updateShowKeyPresses() {

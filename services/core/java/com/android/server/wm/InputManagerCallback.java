@@ -128,6 +128,21 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         }
     }
 
+    /** Notifies that the pointer location configuration has changed. */
+    @Override
+    public void notifyPointerLocationChanged(boolean pointerLocationEnabled) {
+        if (mService.mPointerLocationEnabled == pointerLocationEnabled) {
+            return;
+        }
+
+        synchronized (mService.mGlobalLock) {
+            mService.mPointerLocationEnabled = pointerLocationEnabled;
+            mService.mRoot.forAllDisplayPolicies(
+                    p -> p.setPointerLocationEnabled(mService.mPointerLocationEnabled)
+            );
+        }
+    }
+
     /** Notifies that the lid switch changed state. */
     @Override
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
