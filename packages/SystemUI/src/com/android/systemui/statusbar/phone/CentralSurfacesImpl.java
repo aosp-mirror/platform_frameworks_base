@@ -1582,7 +1582,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
         mShadeController.setNotificationPresenter(mPresenter);
         mNotificationsController.initialize(
-                this,
                 mPresenter,
                 mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),
@@ -1772,11 +1771,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
         mReportRejectedTouch.setVisibility(mState == StatusBarState.KEYGUARD && !mDozing
                 && mFalsingCollector.isReportingEnabled() ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    @Override
-    public boolean areNotificationAlertsDisabled() {
-        return (mDisabled1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
     }
 
     /**

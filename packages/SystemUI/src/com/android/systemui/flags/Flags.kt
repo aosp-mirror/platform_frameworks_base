@@ -252,7 +252,7 @@ object Flags {
     /** Migrate the indication area to the new keyguard root view. */
     // TODO(b/280067944): Tracking bug.
     @JvmField
-    val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area")
+    val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area", teamfood = true)
 
     /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
     // TODO(b/283260512): Tracking bug.
@@ -744,6 +744,11 @@ object Flags {
     @JvmField
     val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
             unreleasedFlag(283447257, "bigpicture_notification_lazy_loading")
+
+    // TODO(b/283740863): Tracking Bug
+    @JvmField
+    val ENABLE_NEW_PRIVACY_DIALOG =
+            unreleasedFlag(283740863, "enable_new_privacy_dialog", teamfood = false)
 
     // 2900 - CentralSurfaces-related flags
 

@@ -56,7 +56,6 @@ import com.android.internal.view.BaseIWindow;
  */
 class DragResizeInputListener implements AutoCloseable {
     private static final String TAG = "DragResizeInputListener";
-    private static final float TOP_CORNER_PADDING = 1.5f;
     private final IWindowSession mWindowSession = WindowManagerGlobal.getWindowSession();
     private final Handler mHandler;
     private final Choreographer mChoreographer;
@@ -435,10 +434,7 @@ class DragResizeInputListener implements AutoCloseable {
             }
             double distanceFromCenter = Math.hypot(x - centerX, y - centerY);
 
-            // TODO(b/286461778): Remove this when input in top corner gap no longer goes to header
-            float cornerPadding = (ctrlType & CTRL_TYPE_TOP) != 0 ? TOP_CORNER_PADDING : 1;
-
-            if (distanceFromCenter < mTaskCornerRadius + mResizeHandleThickness * cornerPadding
+            if (distanceFromCenter < mTaskCornerRadius + mResizeHandleThickness
                     && distanceFromCenter >= mTaskCornerRadius) {
                 return ctrlType;
             }

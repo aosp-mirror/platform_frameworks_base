@@ -1213,7 +1213,8 @@ public abstract class CameraMetadata<TKey> {
      * <ul>
      * <li>Profile {@link android.hardware.camera2.params.DynamicRangeProfiles#HLG10 }</li>
      * <li>All mandatory stream combinations for this specific capability as per
-     *   documentation {@link android.hardware.camera2.CameraDevice#createCaptureSession }</li>
+     *   documentation
+     *   {@link android.hardware.camera2.CameraDevice#10-bit-output-additional-guaranteed-configurations }</li>
      * <li>In case the device is not able to capture some combination of supported
      *   standard 8-bit and/or 10-bit dynamic range profiles within the same capture request,
      *   then those constraints must be listed in
@@ -1252,9 +1253,10 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * <p>{@link android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES }
      * lists all of the supported stream use cases.</p>
-     * <p>Refer to {@link android.hardware.camera2.CameraDevice#createCaptureSession } for the
-     * mandatory stream combinations involving stream use cases, which can also be queried
-     * via {@link android.hardware.camera2.params.MandatoryStreamCombination }.</p>
+     * <p>Refer to
+     * {@link android.hardware.camera2.CameraDevice#stream-use-case-capability-additional-guaranteed-configurations }
+     * for the mandatory stream combinations involving stream use cases, which can also be
+     * queried via {@link android.hardware.camera2.params.MandatoryStreamCombination }.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE = 19;
@@ -1752,7 +1754,8 @@ public abstract class CameraMetadata<TKey> {
      * <p>This camera device does not have enough capabilities to qualify as a <code>FULL</code> device or
      * better.</p>
      * <p>Only the stream configurations listed in the <code>LEGACY</code> and <code>LIMITED</code> tables in the
-     * {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are guaranteed to be supported.</p>
+     * {@link android.hardware.camera2.CameraDevice#limited-level-additional-guaranteed-configurations }
+     * documentation are guaranteed to be supported.</p>
      * <p>All <code>LIMITED</code> devices support the <code>BACKWARDS_COMPATIBLE</code> capability, indicating basic
      * support for color image capture. The only exception is that the device may
      * alternatively support only the <code>DEPTH_OUTPUT</code> capability, if it can only output depth
@@ -1779,7 +1782,8 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>This camera device is capable of supporting advanced imaging applications.</p>
      * <p>The stream configurations listed in the <code>FULL</code>, <code>LEGACY</code> and <code>LIMITED</code> tables in the
-     * {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are guaranteed to be supported.</p>
+     * {@link android.hardware.camera2.CameraDevice#full-level-additional-guaranteed-configurations }
+     * documentation are guaranteed to be supported.</p>
      * <p>A <code>FULL</code> device will support below capabilities:</p>
      * <ul>
      * <li><code>BURST_CAPTURE</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
@@ -1807,7 +1811,9 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>This camera device is running in backward compatibility mode.</p>
-     * <p>Only the stream configurations listed in the <code>LEGACY</code> table in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are supported.</p>
+     * <p>Only the stream configurations listed in the <code>LEGACY</code> table in the
+     * {@link android.hardware.camera2.CameraDevice#legacy-level-guaranteed-configurations }
+     * documentation are supported.</p>
      * <p>A <code>LEGACY</code> device does not support per-frame control, manual sensor control, manual
      * post-processing, arbitrary cropping regions, and has relaxed performance constraints.
      * No additional capabilities beyond <code>BACKWARD_COMPATIBLE</code> will ever be listed by a
@@ -1830,7 +1836,9 @@ public abstract class CameraMetadata<TKey> {
      * <p>This camera device is capable of YUV reprocessing and RAW data capture, in addition to
      * FULL-level capabilities.</p>
      * <p>The stream configurations listed in the <code>LEVEL_3</code>, <code>RAW</code>, <code>FULL</code>, <code>LEGACY</code> and
-     * <code>LIMITED</code> tables in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are guaranteed to be supported.</p>
+     * <code>LIMITED</code> tables in the
+     * {@link android.hardware.camera2.CameraDevice#level-3-additional-guaranteed-configurations }
+     * documentation are guaranteed to be supported.</p>
      * <p>The following additional capabilities are guaranteed to be supported:</p>
      * <ul>
      * <li><code>YUV_REPROCESSING</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
