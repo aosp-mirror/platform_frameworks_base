@@ -21,6 +21,8 @@ import android.graphics.drawable.Drawable
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.TRANSIT_CLOCK
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
@@ -68,6 +70,7 @@ class ClockRegistryTest : SysuiTestCase() {
     private lateinit var fakeDefaultProvider: FakeClockPlugin
     private lateinit var pluginListener: PluginListener<ClockProviderPlugin>
     private lateinit var registry: ClockRegistry
+    private val featureFlags = FakeFeatureFlags()
 
     companion object {
         private fun failFactory(clockId: ClockId): ClockController {
@@ -447,5 +450,45 @@ class ClockRegistryTest : SysuiTestCase() {
         val expected = "{\"clockId\":\"ID\",\"metadata\":{}}"
         val actual = ClockSettings.serialize(ClockSettings("ID", null))
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testTransitClockEnabled_hasTransitClock() {
+        testTransitClockFlag(true)
+    }
+
+    @Test
+    fun testTransitClockDisabled_noTransitClock() {
+        testTransitClockFlag(false)
+    }
+
+    private fun testTransitClockFlag(flag: Boolean) {
+        featureFlags.set(TRANSIT_CLOCK, flag)
+        registry.isTransitClockEnabled = featureFlags.isEnabled(TRANSIT_CLOCK)
+        val mockPluginLifecycle = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        val plugin = FakeClockPlugin()
+                .addClock("clock_1", "clock 1")
+                .addClock("DIGITAL_CLOCK_METRO", "metro clock")
+        pluginListener.onPluginLoaded(plugin, mockContext, mockPluginLifecycle)
+
+        val list = registry.getClocks()
+        if (flag) {
+            assertEquals(
+                    setOf(
+                            ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
+                            ClockMetadata("clock_1", "clock 1"),
+                            ClockMetadata("DIGITAL_CLOCK_METRO", "metro clock")
+                    ),
+                    list.toSet()
+            )
+        } else {
+            assertEquals(
+                    setOf(
+                            ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
+                            ClockMetadata("clock_1", "clock 1")
+                    ),
+                    list.toSet()
+            )
+        }
     }
 }

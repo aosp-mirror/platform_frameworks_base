@@ -264,6 +264,10 @@ object Flags {
     @JvmField
     val KEYGUARD_TALKBACK_FIX = releasedFlag(238, "keyguard_talkback_fix")
 
+    // TODO(b/287268101): Tracking bug.
+    @JvmField
+    val TRANSIT_CLOCK = unreleasedFlag(239, "lockscreen_custom_transit_clock")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")

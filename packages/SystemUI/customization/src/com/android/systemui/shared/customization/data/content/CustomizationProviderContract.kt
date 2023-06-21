@@ -184,6 +184,9 @@ object CustomizationProviderContract {
         /** Flag denoting AI Wallpapers are enabled in wallpaper picker. */
         const val FLAG_NAME_WALLPAPER_PICKER_UI_FOR_AIWP = "wallpaper_picker_ui_for_aiwp"
 
+        /** Flag denoting transit clock are enabled in wallpaper picker. */
+        const val FLAG_NAME_TRANSIT_CLOCK = "lockscreen_custom_transit_clock"
+
         object Columns {
             /** String. Unique ID for the flag. */
             const val NAME = "name"
