@@ -147,8 +147,12 @@ public class A11yMenuViewPager {
     /** The container layout for a11y menu. */
     private ViewGroup mA11yMenuLayout;
 
-    public A11yMenuViewPager(AccessibilityMenuService service) {
+    /** Display context for inflating views. */
+    private Context mDisplayContext;
+
+    public A11yMenuViewPager(AccessibilityMenuService service, Context displayContext) {
         this.mService = service;
+        this.mDisplayContext = displayContext;
     }
 
     /**
@@ -213,10 +217,11 @@ public class A11yMenuViewPager {
     }
 
     private void addGridPage(List<A11yMenuShortcut> shortcutDataListInPage) {
-        LayoutInflater inflater = LayoutInflater.from(mService);
+        LayoutInflater inflater = LayoutInflater.from(mDisplayContext);
         View view = inflater.inflate(R.layout.grid_view, null);
         GridView gridView = view.findViewById(R.id.gridview);
-        A11yMenuAdapter adapter = new A11yMenuAdapter(mService, shortcutDataListInPage);
+        A11yMenuAdapter adapter = new A11yMenuAdapter(
+                mService, mDisplayContext, shortcutDataListInPage);
         gridView.setNumColumns(GridViewParams.getGridColumnCount(mService));
         gridView.setAdapter(adapter);
         mGridPageList.add(gridView);
