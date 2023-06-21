@@ -16,16 +16,27 @@
 
 package com.android.internal.widget;
 
-
 import static com.google.common.truth.Truth.assertThat;
 
-import android.test.AndroidTestCase;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 
+@RunWith(AndroidJUnit4.class)
+public class LockscreenCredentialTest {
 
-public class LockscreenCredentialTest extends AndroidTestCase {
-
+    @Test
     public void testEmptyCredential() {
         LockscreenCredential empty = LockscreenCredential.createNone();
 
@@ -38,30 +49,33 @@ public class LockscreenCredentialTest extends AndroidTestCase {
         assertFalse(empty.isPattern());
     }
 
+    @Test
     public void testPinCredential() {
         LockscreenCredential pin = LockscreenCredential.createPin("3456");
 
         assertTrue(pin.isPin());
         assertEquals(4, pin.size());
-        assertTrue(Arrays.equals("3456".getBytes(), pin.getCredential()));
+        assertArrayEquals("3456".getBytes(), pin.getCredential());
 
         assertFalse(pin.isNone());
         assertFalse(pin.isPassword());
         assertFalse(pin.isPattern());
     }
 
+    @Test
     public void testPasswordCredential() {
         LockscreenCredential password = LockscreenCredential.createPassword("password");
 
         assertTrue(password.isPassword());
         assertEquals(8, password.size());
-        assertTrue(Arrays.equals("password".getBytes(), password.getCredential()));
+        assertArrayEquals("password".getBytes(), password.getCredential());
 
         assertFalse(password.isNone());
         assertFalse(password.isPin());
         assertFalse(password.isPattern());
     }
 
+    @Test
     public void testPatternCredential() {
         LockscreenCredential pattern = LockscreenCredential.createPattern(Arrays.asList(
                 LockPatternView.Cell.of(0, 0),
@@ -73,13 +87,14 @@ public class LockscreenCredentialTest extends AndroidTestCase {
 
         assertTrue(pattern.isPattern());
         assertEquals(5, pattern.size());
-        assertTrue(Arrays.equals("12369".getBytes(), pattern.getCredential()));
+        assertArrayEquals("12369".getBytes(), pattern.getCredential());
 
         assertFalse(pattern.isNone());
         assertFalse(pattern.isPin());
         assertFalse(pattern.isPassword());
     }
 
+    @Test
     public void testPasswordOrNoneCredential() {
         assertEquals(LockscreenCredential.createNone(),
                 LockscreenCredential.createPasswordOrNone(null));
@@ -89,6 +104,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 LockscreenCredential.createPasswordOrNone("abcd"));
     }
 
+    @Test
     public void testPinOrNoneCredential() {
         assertEquals(LockscreenCredential.createNone(),
                 LockscreenCredential.createPinOrNone(null));
@@ -98,6 +114,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 LockscreenCredential.createPinOrNone("1357"));
     }
 
+    @Test
     public void testSanitize() {
         LockscreenCredential password = LockscreenCredential.createPassword("password");
         password.zeroize();
@@ -128,6 +145,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
         } catch (IllegalStateException expected) { }
     }
 
+    @Test
     public void testEquals() {
         assertEquals(LockscreenCredential.createNone(), LockscreenCredential.createNone());
         assertEquals(LockscreenCredential.createPassword("1234"),
@@ -164,6 +182,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 LockscreenCredential.createPin("5678"));
     }
 
+    @Test
     public void testDuplicate() {
         LockscreenCredential credential;
 
@@ -177,6 +196,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
         assertEquals(credential, credential.duplicate());
     }
 
+    @Test
     public void testPasswordToHistoryHash() {
         String password = "1234";
         LockscreenCredential credential = LockscreenCredential.createPassword(password);
@@ -193,6 +213,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 .isEqualTo(expectedHash);
     }
 
+    @Test
     public void testPasswordToHistoryHashInvalidInput() {
         String password = "1234";
         LockscreenCredential credential = LockscreenCredential.createPassword(password);
@@ -221,6 +242,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 .isNull();
     }
 
+    @Test
     public void testLegacyPasswordToHash() {
         String password = "1234";
         String salt = "6d5331dd120077a0";
@@ -233,6 +255,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 .isEqualTo(expectedHash);
     }
 
+    @Test
     public void testLegacyPasswordToHashInvalidInput() {
         String password = "1234";
         String salt = "6d5331dd120077a0";
